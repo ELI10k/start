@@ -1,96 +1,55 @@
 import Header from "@/components/Header";
-import ProgressCard from "@/components/ProgressCard";
-import QuickAction from "@/components/QuickAction";
 import StatCard from "@/components/StatCard";
+import ProgressCard from "@/components/ProgressCard";
 import BottomNav from "@/components/BottomNav";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0A0A0A] text-white pb-32">
+    <main className="min-h-screen bg-[#0A0A0A] text-white pb-28">
+      <Header />
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-md mx-auto px-4 space-y-6">
 
-        <Header name="אלי" />
+        <ProgressCard
+          calories={1650}
+          caloriesGoal={2200}
+          protein={145}
+          proteinGoal={180}
+          steps={8400}
+          stepsGoal={10000}
+        />
 
-        <div className="mt-10">
-
-          <ProgressCard
-            calories={1620}
-            caloriesGoal={2100}
-            protein={142}
-            proteinGoal={170}
-            steps={8420}
-            stepsGoal={10000}
-          />
-
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+        <div className="grid grid-cols-2 gap-4">
 
           <StatCard
             title="משקל"
-            value="83.6"
-            unit='ק"ג'
-            icon="⚖"
-            progress={82}
+            value="82.4 ק״ג"
+            subtitle="-0.8 השבוע"
           />
 
           <StatCard
-            title="קלוריות"
-            value="1620"
-            unit='קק"ל'
-            icon="🔥"
-            progress={77}
+            title="שתייה"
+            value="2.6 ל׳"
+            subtitle="יעד 3.5"
           />
 
           <StatCard
-            title="חלבון"
-            value="142"
-            unit="גרם"
-            icon="💪"
-            progress={84}
+            title="שינה"
+            value="7:48"
+            subtitle="מצוין"
           />
 
           <StatCard
-            title="צעדים"
-            value="8420"
-            unit="צעדים"
-            icon="👟"
-            progress={84}
-          />
-
-        </div>
-
-        <h2 className="mt-12 mb-5 text-2xl font-bold text-[#D4AF37]">
-          פעולות מהירות
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-
-          <QuickAction
-            title="דיווח ארוחה"
-            subtitle="הוסף ארוחה"
-            icon="🍽"
-          />
-
-          <QuickAction
-            title="שקילה"
-            subtitle="עדכן משקל"
-            icon="⚖"
-          />
-
-          <QuickAction
             title="אימון"
-            subtitle="התחל אימון"
-            icon="🏋"
+            value="בוצע"
+            subtitle="גב + יד קדמית"
           />
 
         </div>
 
       </div>
 
-      <BottomNav active="home" />
-
+      <BottomNav />
     </main>
   );
 }
