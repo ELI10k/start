@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function FoodNotFound() { return <main className="min-h-screen bg-[#090909] px-4 py-24 text-center text-white"><p className="text-sm font-bold text-[#D4AF37]">404</p><h1 className="mt-3 text-3xl font-black">המזון לא נמצא</h1><p className="mt-2 text-zinc-500">המזהה אינו קיים במאגר המזונות הרשמי.</p><Link href="/foods" className="mt-6 inline-flex rounded-2xl bg-[#D4AF37] px-5 py-3 font-black text-black">חזרה למאגר</Link></main>; }

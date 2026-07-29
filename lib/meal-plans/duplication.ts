@@ -1,0 +1,2 @@
+import type { MealPlan } from "./types.ts";
+export function duplicateMealPlan(source: MealPlan, newId: string, date: string): MealPlan { return { ...source, id: newId, name: `${source.name} — עותק`, status: "draft", assignedClientId: undefined, updatedAt: date, meals: source.meals.map((meal, index) => ({ ...meal, id: `${newId}-meal-${index}`, items: meal.items.map((item, itemIndex) => ({ ...item, id: `${newId}-item-${index}-${itemIndex}` })) })) }; }

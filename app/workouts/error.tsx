@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorState({reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="grid min-h-[60vh] place-items-center px-4 text-center text-white"><section className="max-w-md rounded-[24px] border border-red-400/20 bg-[#151515] p-7"><h1 className="text-2xl font-black">לא ניתן לטעון את נתוני האימון</h1><p className="mt-3 text-sm text-zinc-400">המידע ב-Supabase נשמר. אפשר לנסות לטעון שוב.</p><button onClick={reset} className="mt-5 min-h-12 rounded-xl bg-[#D4AF37] px-5 font-black text-black">ניסיון נוסף</button></section></main>}

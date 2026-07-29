@@ -1,0 +1,2644 @@
+[
+  {
+    "id": "workout-program-14h9163",
+    "name": "A-B-C",
+    "programType": "A-B-C",
+    "trainingFrequency": 4,
+    "equipment": [],
+    "sourceWorkbook": " A-B-C.xlsx",
+    "sourceSheet": " A-B-C",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-pqhh05",
+        "name": "אימון  A לחדר כושר",
+        "order": 0,
+        "sourceSheet": " A-B-C",
+        "exercises": [
+          {
+            "id": "workout-exercise-18y6698",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 5
+          },
+          {
+            "id": "workout-exercise-ijsl82",
+            "exerciseId": "exercise-thb870",
+            "order": 1,
+            "sets": "3",
+            "reps": "8",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-1njaece",
+                "order": 0,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-1nta01d",
+                "order": 1,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-1mzb6yg",
+                "order": 2,
+                "repetitions": "8"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-15kwl9r",
+            "exerciseId": "exercise-1nidil8",
+            "order": 2,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-1lc02yf",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1l20h9g",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1lvzacd",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1bsrrwz",
+            "exerciseId": "exercise-19qm0t4",
+            "order": 3,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-d8335x",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-cy3hgy",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-co3vrz",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1r5to7p",
+            "exerciseId": "exercise-yspcn",
+            "order": 4,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-1y5eggc",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1yfe25b",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1ypdnua",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1qles3d",
+            "exerciseId": "exercise-cw8lzv",
+            "order": 5,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 10,
+            "setPrescriptions": [
+              {
+                "id": "set-nsjglx",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-nijuwy",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-n8k97z",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-5prmgd",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 6,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 11,
+            "setPrescriptions": [
+              {
+                "id": "set-fb5qx3",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-f16584",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-fv4yb1",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-qoi1v4",
+            "exerciseId": "exercise-pn4ire",
+            "order": 7,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 12,
+            "setPrescriptions": [
+              {
+                "id": "set-u7lcb8",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-uhky07",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-urkjp6",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workout-day-pghvb6",
+        "name": "אימון  B לחדר כושר",
+        "order": 1,
+        "sourceSheet": " A-B-C",
+        "exercises": [
+          {
+            "id": "workout-exercise-5840rf",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 17
+          },
+          {
+            "id": "workout-exercise-17w282s",
+            "exerciseId": "exercise-1ly3xqh",
+            "order": 1,
+            "sets": "3",
+            "reps": "8",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 18,
+            "setPrescriptions": [
+              {
+                "id": "set-l23st8",
+                "order": 0,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-lc3ei7",
+                "order": 1,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-lm3076",
+                "order": 2,
+                "repetitions": "8"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-6g46b9",
+            "exerciseId": "exercise-mk9vfe",
+            "order": 2,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 19,
+            "setPrescriptions": [
+              {
+                "id": "set-19olmi0",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-19yl86z",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1a8ktvy",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1wx2rdi",
+            "exerciseId": "exercise-1u5j1lv",
+            "order": 3,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 20,
+            "setPrescriptions": [
+              {
+                "id": "set-gg6pir",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-g673ts",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-h05wwp",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-nscg9e",
+            "exerciseId": "exercise-f2juxe",
+            "order": 4,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 21,
+            "setPrescriptions": [
+              {
+                "id": "set-gk9yq7",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-gaad18",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-h49645",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-12qtlyk",
+            "exerciseId": "exercise-1l24vb0",
+            "order": 5,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 22,
+            "setPrescriptions": [
+              {
+                "id": "set-1tyem6e",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1u8e7vd",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1tefesg",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-o6q520",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 6,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 23,
+            "setPrescriptions": [
+              {
+                "id": "set-9dy6cx",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-93ykny",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-8tyyyz",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ld04lx",
+            "exerciseId": "exercise-pn4ire",
+            "order": 7,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 24,
+            "setPrescriptions": [
+              {
+                "id": "set-16t3053",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-16j3eg4",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-17d27j1",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workout-day-p6i9m7",
+        "name": "אימון C לחדר כושר",
+        "order": 2,
+        "sourceSheet": " A-B-C",
+        "exercises": [
+          {
+            "id": "workout-exercise-1bel3tk",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 29
+          },
+          {
+            "id": "workout-exercise-1wc1gg5",
+            "exerciseId": "exercise-1fdd4gb",
+            "order": 1,
+            "sets": "3",
+            "reps": "8",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 30,
+            "setPrescriptions": [
+              {
+                "id": "set-1ep0kd5",
+                "order": 0,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-1ef0yo6",
+                "order": 1,
+                "repetitions": "8"
+              },
+              {
+                "id": "set-1e51cz7",
+                "order": 2,
+                "repetitions": "8"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1y3ft6x",
+            "exerciseId": "exercise-igalw2",
+            "order": 2,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 31,
+            "setPrescriptions": [
+              {
+                "id": "set-1c4s06v",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1busehw",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1cor7kt",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-a17ol0",
+            "exerciseId": "exercise-1lrrpsj",
+            "order": 3,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 32,
+            "setPrescriptions": [
+              {
+                "id": "set-sq3vl0",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-t03h9z",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-ta32yy",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1uu1w4f",
+            "exerciseId": "exercise-14tz34b",
+            "order": 4,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 33,
+            "setPrescriptions": [
+              {
+                "id": "set-s0vx8v",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-rqwbjw",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-skv4mt",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ceje89",
+            "exerciseId": "exercise-mx59uy",
+            "order": 5,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 34,
+            "setPrescriptions": [
+              {
+                "id": "set-s6nnat",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-rwo1lu",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-rmofwv",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1v98du6",
+            "exerciseId": "exercise-yjtm56",
+            "order": 6,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 35,
+            "setPrescriptions": [
+              {
+                "id": "set-1m5kuqp",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1lvl91q",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1lllncr",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1g67l9q",
+            "exerciseId": "exercise-pn4ire",
+            "order": 7,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -2 דקות",
+            "sourceRow": 36,
+            "setPrescriptions": [
+              {
+                "id": "set-1nwq3fv",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1nmqhqw",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1ogpatt",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-1cd8cf7",
+    "name": "A-B",
+    "programType": "A-B",
+    "trainingFrequency": 4,
+    "equipment": [],
+    "sourceWorkbook": " A-B.xlsx",
+    "sourceSheet": " A-B",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-1grqz8p",
+        "name": "אימון  A לחדר כושר",
+        "order": 0,
+        "sourceSheet": " A-B",
+        "exercises": [
+          {
+            "id": "workout-exercise-59jfrs",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 5
+          },
+          {
+            "id": "workout-exercise-yonuxi",
+            "exerciseId": "exercise-thb870",
+            "order": 1,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-qjvz1e",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-qtvkqd",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-pzwrng",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-i49z4u",
+            "exerciseId": "exercise-1e2u7l0",
+            "order": 2,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-zlx0td",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-zbxf4e",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-z1xtff",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-wie37e",
+            "exerciseId": "exercise-1f01l0c",
+            "order": 3,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-yw4ie4",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-z64433",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-zg3ps2",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1vz19ja",
+            "exerciseId": "exercise-14tz34b",
+            "order": 4,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-18pla4k",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-18zkvtj",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-199khii",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1are2vu",
+            "exerciseId": "exercise-mx59uy",
+            "order": 5,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 10,
+            "setPrescriptions": [
+              {
+                "id": "set-1yj5322",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1yt4or1",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1xz5vo4",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-6lffdo",
+            "exerciseId": "exercise-yjtm56",
+            "order": 6,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 11,
+            "setPrescriptions": [
+              {
+                "id": "set-ekoze7",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-eapdp8",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-f4o6s5",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-zagg9p",
+            "exerciseId": "exercise-yspcn",
+            "order": 7,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 12,
+            "setPrescriptions": [
+              {
+                "id": "set-qfqr0e",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-qpqcpd",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-pvrjmg",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ruh2rr",
+            "exerciseId": "exercise-cw8lzv",
+            "order": 8,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 13,
+            "setPrescriptions": [
+              {
+                "id": "set-rkulv0",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-ruu7jz",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-s4tt8y",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1iyo67k",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 9,
+            "sets": "3",
+            "reps": "MAX",
+            "rest": "30 שניות",
+            "sourceRow": 14,
+            "setPrescriptions": [
+              {
+                "id": "set-1p09qcu",
+                "order": 0,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1pa9c1t",
+                "order": 1,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1ogaiyw",
+                "order": 2,
+                "repetitions": "MAX"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-zarplv",
+            "exerciseId": "exercise-pn4ire",
+            "order": 10,
+            "sets": "3",
+            "reps": "MAX",
+            "rest": "30 שניות",
+            "sourceRow": 15,
+            "setPrescriptions": [
+              {
+                "id": "set-1g324vl",
+                "order": 0,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1ft2j6m",
+                "order": 1,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1fj2xhn",
+                "order": 2,
+                "repetitions": "MAX"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workout-day-1ghrdjq",
+        "name": "אימון  B לחדר כושר",
+        "order": 1,
+        "sourceSheet": " A-B",
+        "exercises": [
+          {
+            "id": "workout-exercise-1m13qj4",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 20
+          },
+          {
+            "id": "workout-exercise-1rowoik",
+            "exerciseId": "exercise-1fdd4gb",
+            "order": 1,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 21,
+            "setPrescriptions": [
+              {
+                "id": "set-v50n82",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-vf08x1",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-ul1fu4",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-v8xn1b",
+            "exerciseId": "exercise-1lrrpsj",
+            "order": 2,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 22,
+            "setPrescriptions": [
+              {
+                "id": "set-wac6qr",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-w0cl1s",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-wube4p",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-61cjfa",
+            "exerciseId": "exercise-igalw2",
+            "order": 3,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 23,
+            "setPrescriptions": [
+              {
+                "id": "set-1gnbiyx",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1gdbx9y",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1g3cbkz",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-rjjkn9",
+            "exerciseId": "exercise-1ly3xqh",
+            "order": 4,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 24,
+            "setPrescriptions": [
+              {
+                "id": "set-1rf16zq",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1rp0sop",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1qv1zls",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-2si9kv",
+            "exerciseId": "exercise-5aj1cu",
+            "order": 5,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 25,
+            "setPrescriptions": [
+              {
+                "id": "set-km6y84",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-kw6jx3",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-l665m2",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-8ca3an",
+            "exerciseId": "exercise-1u5j1lv",
+            "order": 6,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 26,
+            "setPrescriptions": [
+              {
+                "id": "set-1wq8r26",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1x08cr5",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1w69jo8",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-rxarxg",
+            "exerciseId": "exercise-f2juxe",
+            "order": 7,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 27,
+            "setPrescriptions": [
+              {
+                "id": "set-1yp1otc",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1yz1aib",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-7wu86",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-p76b2y",
+            "exerciseId": "exercise-1l24vb0",
+            "order": 8,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 28,
+            "setPrescriptions": [
+              {
+                "id": "set-1kfpiik",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1kpp47j",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1kzopwi",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-tyqz9e",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 9,
+            "sets": "3",
+            "reps": "MAX",
+            "rest": "30 שניות",
+            "sourceRow": 29,
+            "setPrescriptions": [
+              {
+                "id": "set-21yrl2",
+                "order": 0,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-2byda1",
+                "order": 1,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1hzk74",
+                "order": 2,
+                "repetitions": "MAX"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-177tdqj",
+            "exerciseId": "exercise-pn4ire",
+            "order": 10,
+            "sets": "3",
+            "reps": "MAX",
+            "rest": "30 שניות",
+            "sourceRow": 30,
+            "setPrescriptions": [
+              {
+                "id": "set-1dgbug2",
+                "order": 0,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1dqbg51",
+                "order": 1,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1cwcn24",
+                "order": 2,
+                "repetitions": "MAX"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-1i1xv7q",
+    "name": "FBW משקולות חופשי מתחילים",
+    "programType": "FBW Beginners",
+    "difficulty": "מתחילים",
+    "trainingFrequency": 3,
+    "equipment": [],
+    "sourceWorkbook": " FBW משקולות חופשי מתחילים.xlsx",
+    "sourceSheet": " FBW משקולות חופשי מתחילים",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-18c3k17",
+        "name": " FBW משקולות חופשי מתחילים",
+        "order": 0,
+        "sourceSheet": " FBW משקולות חופשי מתחילים",
+        "exercises": [
+          {
+            "id": "workout-exercise-1q3mmx0",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 3
+          },
+          {
+            "id": "workout-exercise-14fslqf",
+            "exerciseId": "exercise-1ly3xqh",
+            "order": 1,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 דקות",
+            "sourceRow": 4,
+            "setPrescriptions": [
+              {
+                "id": "set-wh9f7h",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-w79tii",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-vxa7tj",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1woflo0",
+            "exerciseId": "exercise-mhdxgx",
+            "order": 2,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 דקות",
+            "sourceRow": 5,
+            "setPrescriptions": [
+              {
+                "id": "set-1r2bpog",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1rcbbdf",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1rmax2e",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1eqq6fu",
+            "exerciseId": "exercise-139gtlw",
+            "order": 3,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 דקות",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-feuhzr",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-f4uwas",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-fytpdp",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1eg2gvd",
+            "exerciseId": "exercise-mx59uy",
+            "order": 4,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 דקות",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-126n01q",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-12gmlqp",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-11mnsns",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1p2yyl2",
+            "exerciseId": "exercise-1759fj3",
+            "order": 5,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 דקות",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-10bqtqh",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-101r81i",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-zrrmcj",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ftkhaw",
+            "exerciseId": "exercise-f2juxe",
+            "order": 6,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 דקות",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-1wfo82e",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1wpntrd",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-1vvp0og",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-le8z1t",
+            "exerciseId": "exercise-pn4ire",
+            "order": 7,
+            "sets": "3",
+            "reps": "MAX",
+            "rest": "60 שניות",
+            "sourceRow": 10,
+            "setPrescriptions": [
+              {
+                "id": "set-15y8cf4",
+                "order": 0,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-1687y43",
+                "order": 1,
+                "repetitions": "MAX"
+              },
+              {
+                "id": "set-16i7jt2",
+                "order": 2,
+                "repetitions": "MAX"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-18nf8g8",
+    "name": "אימון FBW מלא לחדר כושר",
+    "programType": "Full Gym FBW",
+    "trainingFrequency": 3,
+    "equipment": [],
+    "sourceWorkbook": "אימון FBW מלא לחדר כושר.xlsx",
+    "sourceSheet": "אימון FBW מלא לחדר כושר",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-e1x8zr",
+        "name": "אימון FBW מלא לחדר כושר",
+        "order": 0,
+        "sourceSheet": "אימון FBW מלא לחדר כושר",
+        "exercises": [
+          {
+            "id": "workout-exercise-qpsegw",
+            "exerciseId": "exercise-155pu7s",
+            "order": 0,
+            "sourceRow": 3
+          },
+          {
+            "id": "workout-exercise-1un2fg1",
+            "exerciseId": "exercise-mhdxgx",
+            "order": 1,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 4,
+            "setPrescriptions": [
+              {
+                "id": "set-14mliu4",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-14wl4j3",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-156kq82",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-tg0f0g",
+            "exerciseId": "exercise-1lrrpsj",
+            "order": 2,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 5,
+            "setPrescriptions": [
+              {
+                "id": "set-1xrsxxe",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1y1sjmd",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1x7tqjg",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-b2zctp",
+            "exerciseId": "exercise-1ly3xqh",
+            "order": 3,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-1byf9h7",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1bofns8",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-1ciegv5",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-4noxp2",
+            "exerciseId": "exercise-1u5j1lv",
+            "order": 4,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-z7rtr3",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-yxs824",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-zrr151",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-neo1ka",
+            "exerciseId": "exercise-thb870",
+            "order": 5,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-atm8dx",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-ajmmoy",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-a9n0zz",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1vluh4u",
+            "exerciseId": "exercise-1e2u7l0",
+            "order": 6,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-15ryy6z",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-15hzci0",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-16by5kx",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-5fquj0",
+            "exerciseId": "exercise-1fr384u",
+            "order": 7,
+            "sets": "3",
+            "reps": "12",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 10,
+            "setPrescriptions": [
+              {
+                "id": "set-hapjqf",
+                "order": 0,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-h0py1g",
+                "order": 1,
+                "repetitions": "12"
+              },
+              {
+                "id": "set-huor4d",
+                "order": 2,
+                "repetitions": "12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-14vscgm",
+            "exerciseId": "exercise-yspcn",
+            "order": 8,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 11,
+            "setPrescriptions": [
+              {
+                "id": "set-h1kuw3",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-grl974",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-hlk2a1",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-ki7h6c",
+            "exerciseId": "exercise-f2juxe",
+            "order": 9,
+            "sets": "3",
+            "reps": "10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 12,
+            "setPrescriptions": [
+              {
+                "id": "set-z9ml7o",
+                "order": 0,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-zjm6wn",
+                "order": 1,
+                "repetitions": "10"
+              },
+              {
+                "id": "set-ztlslm",
+                "order": 2,
+                "repetitions": "10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1s1vqrz",
+            "exerciseId": "exercise-pn4ire",
+            "order": 10,
+            "sets": "3",
+            "reps": "15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 13,
+            "setPrescriptions": [
+              {
+                "id": "set-1rvg76i",
+                "order": 0,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1s5fsvh",
+                "order": 1,
+                "repetitions": "15"
+              },
+              {
+                "id": "set-1rbgzsk",
+                "order": 2,
+                "repetitions": "15"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-1a64sfb",
+    "name": "משקל גוף מתחילים",
+    "programType": "Bodyweight Beginner",
+    "difficulty": "מתחילים",
+    "trainingFrequency": 3,
+    "equipment": [],
+    "sourceWorkbook": "משקל גוף מתחילים.xlsx",
+    "sourceSheet": "משקל גוף מתחילים",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-1dolitj",
+        "name": "משקל גוף מתחילים",
+        "order": 0,
+        "sourceSheet": "משקל גוף מתחילים",
+        "exercises": [
+          {
+            "id": "workout-exercise-1atpi51",
+            "exerciseId": "exercise-n1izh5",
+            "order": 0,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 3,
+            "setPrescriptions": [
+              {
+                "id": "set-ruqwo3",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-rkraz4",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-seq421",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-gn9er7",
+            "exerciseId": "exercise-1igvlte",
+            "order": 1,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 4,
+            "setPrescriptions": [
+              {
+                "id": "set-16cjhbo",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-16mj30n",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-16wiopm",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1nr3n8b",
+            "exerciseId": "exercise-hdg3yz",
+            "order": 2,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 5,
+            "setPrescriptions": [
+              {
+                "id": "set-1mewtpo",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1mowfen",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1myw13m",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ws33c7",
+            "exerciseId": "exercise-1wwie67",
+            "order": 3,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-1n1ard",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1d1p2e",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1323df",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-17c5cjp",
+            "exerciseId": "exercise-8q99c1",
+            "order": 4,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-1ovivzr",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1oljaas",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1pfi3dp",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-h4iuw4",
+            "exerciseId": "exercise-1fo5t9c",
+            "order": 5,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-1me13gx",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1m41hry",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1lu1w2z",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1enwuya",
+            "exerciseId": "exercise-pn4ire",
+            "order": 6,
+            "sets": "3",
+            "reps": "max",
+            "rest": "30 שניות",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-1h0lqgu",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1halc5t",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1ggmj2w",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-1m96ys7",
+    "name": "משקל גוף מתקדמים",
+    "programType": "Bodyweight Advanced",
+    "difficulty": "מתקדמים",
+    "trainingFrequency": 3,
+    "equipment": [],
+    "sourceWorkbook": "משקל גוף מתקדמים.xlsx",
+    "sourceSheet": "משקל גוף מתקדמים",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-90nrs7",
+        "name": "משקל גוף מתקדמים",
+        "order": 0,
+        "sourceSheet": "משקל גוף מתקדמים",
+        "exercises": [
+          {
+            "id": "workout-exercise-7gki5x",
+            "exerciseId": "exercise-n1izh5",
+            "order": 0,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 3,
+            "setPrescriptions": [
+              {
+                "id": "set-if9eiz",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-i59su0",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-iz8lwx",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-aqgen0",
+            "exerciseId": "exercise-2ez0zf",
+            "order": 1,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 4,
+            "setPrescriptions": [
+              {
+                "id": "set-1n3u8gw",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1ndtu5v",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1nntfuu",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-16pwi3g",
+            "exerciseId": "exercise-1igvlte",
+            "order": 2,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 5,
+            "setPrescriptions": [
+              {
+                "id": "set-189hjmj",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-17zhxxk",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-18tgr0h",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1o1buw3",
+            "exerciseId": "exercise-1ba2nb8",
+            "order": 3,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-1lta8do",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1m39u2n",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1md9frm",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1w6skld",
+            "exerciseId": "exercise-hdg3yz",
+            "order": 4,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 7,
+            "setPrescriptions": [
+              {
+                "id": "set-m4xkoo",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-mex6dn",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-mows2m",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-11i7l2c",
+            "exerciseId": "exercise-dhk3wr",
+            "order": 5,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-xy3fll",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-xo3twm",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-xe487n",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-16zqgha",
+            "exerciseId": "exercise-1wwie67",
+            "order": 6,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-yurbuw",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-z4qxjv",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-zeqj8u",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-lyhlfs",
+            "exerciseId": "exercise-8q99c1",
+            "order": 7,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 10,
+            "setPrescriptions": [
+              {
+                "id": "set-46yqg",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-e6kff",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-o664e",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-lts0oe",
+            "exerciseId": "exercise-1fo5t9c",
+            "order": 8,
+            "sets": "3",
+            "reps": "max",
+            "rest": "1 דק",
+            "sourceRow": 11,
+            "setPrescriptions": [
+              {
+                "id": "set-185ycvj",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-17vyr6k",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-18pxk9h",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-13s0fzk",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 9,
+            "sets": "3",
+            "reps": "max",
+            "rest": "30 שניות",
+            "sourceRow": 12,
+            "setPrescriptions": [
+              {
+                "id": "set-1uhx9oo",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1urwvdn",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1v1wh2m",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-6kyygf",
+            "exerciseId": "exercise-pn4ire",
+            "order": 10,
+            "sets": "3",
+            "reps": "max",
+            "rest": "30 שניות",
+            "sourceRow": 13,
+            "setPrescriptions": [
+              {
+                "id": "set-11v705g",
+                "order": 0,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-1256luf",
+                "order": 1,
+                "repetitions": "max"
+              },
+              {
+                "id": "set-12f67je",
+                "order": 2,
+                "repetitions": "max"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "workout-program-b647w4",
+    "name": "A-B קצר",
+    "programType": "A-B Short",
+    "trainingFrequency": 4,
+    "equipment": [],
+    "sourceWorkbook": "A-B קצר.xlsx",
+    "sourceSheet": "A-B קצר",
+    "status": "active",
+    "official": true,
+    "days": [
+      {
+        "id": "workout-day-1g4p45j",
+        "name": "אימון  A לחדר כושר",
+        "order": 0,
+        "sourceSheet": "A-B קצר",
+        "exercises": [
+          {
+            "id": "workout-exercise-6pibym",
+            "exerciseId": "exercise-rr4mtu",
+            "order": 0,
+            "sets": "3",
+            "reps": "8 - 10",
+            "rest": "דקה",
+            "sourceRow": 5,
+            "setPrescriptions": [
+              {
+                "id": "set-9vp25j",
+                "order": 0,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-9lpggk",
+                "order": 1,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-afo9jh",
+                "order": 2,
+                "repetitions": "8 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-5ua3ru",
+            "exerciseId": "exercise-ptjiss",
+            "order": 1,
+            "sets": "3",
+            "reps": "12 - 15",
+            "rest": "דקה",
+            "sourceRow": 6,
+            "setPrescriptions": [
+              {
+                "id": "set-1iddt77",
+                "order": 0,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-1i3e7i8",
+                "order": 1,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-1ixd0l5",
+                "order": 2,
+                "repetitions": "12 - 15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1cp3v3v",
+            "exerciseId": "exercise-14tz34b",
+            "order": 2,
+            "sets": "3",
+            "reps": "8 - 10",
+            "rest": "דקה",
+            "sourceRow": 8,
+            "setPrescriptions": [
+              {
+                "id": "set-1rc9fig",
+                "order": 0,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-1rm917f",
+                "order": 1,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-1rw8mwe",
+                "order": 2,
+                "repetitions": "8 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1ur8e33",
+            "exerciseId": "exercise-mx59uy",
+            "order": 3,
+            "sets": "3",
+            "reps": "12 - 10",
+            "rest": "דקה",
+            "sourceRow": 9,
+            "setPrescriptions": [
+              {
+                "id": "set-p47xm1",
+                "order": 0,
+                "repetitions": "12 - 10"
+              },
+              {
+                "id": "set-ou8bx2",
+                "order": 1,
+                "repetitions": "12 - 10"
+              },
+              {
+                "id": "set-ok8q83",
+                "order": 2,
+                "repetitions": "12 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-166xz12",
+            "exerciseId": "exercise-yspcn",
+            "order": 4,
+            "sets": "3",
+            "reps": "8 - 10",
+            "rest": "דקה",
+            "sourceRow": 11,
+            "setPrescriptions": [
+              {
+                "id": "set-qso36",
+                "order": 0,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-10s9s5",
+                "order": 1,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-6tgp8",
+                "order": 2,
+                "repetitions": "8 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-wij6ye",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 5,
+            "sets": "3",
+            "reps": "20",
+            "rest": "דקה",
+            "sourceRow": 14,
+            "setPrescriptions": [
+              {
+                "id": "set-72gfii",
+                "order": 0,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-7cg17h",
+                "order": 1,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-6ih84k",
+                "order": 2,
+                "repetitions": "20"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-183l5gx",
+            "exerciseId": "exercise-pn4ire",
+            "order": 6,
+            "sets": "3",
+            "reps": "20",
+            "rest": "דקה",
+            "sourceRow": 15,
+            "setPrescriptions": [
+              {
+                "id": "set-tsz6pe",
+                "order": 0,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-u2ysed",
+                "order": 1,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-t8zzbg",
+                "order": 2,
+                "repetitions": "20"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "workout-day-1fupigk",
+        "name": "אימון  B לחדר כושר",
+        "order": 1,
+        "sourceSheet": "A-B קצר",
+        "exercises": [
+          {
+            "id": "workout-exercise-oyy2vf",
+            "exerciseId": "exercise-1fdd4gb",
+            "order": 0,
+            "sets": "3",
+            "reps": "12 - 15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 19,
+            "setPrescriptions": [
+              {
+                "id": "set-w99azf",
+                "order": 0,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-vz9pag",
+                "order": 1,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-wt8idd",
+                "order": 2,
+                "repetitions": "12 - 15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-17jha6s",
+            "exerciseId": "exercise-1lrrpsj",
+            "order": 1,
+            "sets": "3",
+            "reps": "8 - 10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 20,
+            "setPrescriptions": [
+              {
+                "id": "set-1vaz3sq",
+                "order": 0,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-1vkyphp",
+                "order": 1,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-1uqzwes",
+                "order": 2,
+                "repetitions": "8 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-96w1yi",
+            "exerciseId": "exercise-igalw2",
+            "order": 2,
+            "sets": "3",
+            "reps": "15 - 20",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 21,
+            "setPrescriptions": [
+              {
+                "id": "set-fyv3fl",
+                "order": 0,
+                "repetitions": "15 - 20"
+              },
+              {
+                "id": "set-fovhqm",
+                "order": 1,
+                "repetitions": "15 - 20"
+              },
+              {
+                "id": "set-fevw1n",
+                "order": 2,
+                "repetitions": "15 - 20"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-729aq6",
+            "exerciseId": "exercise-1ly3xqh",
+            "order": 3,
+            "sets": "3",
+            "reps": "12 - 15",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 23,
+            "setPrescriptions": [
+              {
+                "id": "set-oofn5k",
+                "order": 0,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-oyf8uj",
+                "order": 1,
+                "repetitions": "12 - 15"
+              },
+              {
+                "id": "set-p8euji",
+                "order": 2,
+                "repetitions": "12 - 15"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-94o8x4",
+            "exerciseId": "exercise-5aj1cu",
+            "order": 4,
+            "sets": "3",
+            "reps": "8 - 10",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 24,
+            "setPrescriptions": [
+              {
+                "id": "set-nigua2",
+                "order": 0,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-nsgfz1",
+                "order": 1,
+                "repetitions": "8 - 10"
+              },
+              {
+                "id": "set-myhmw4",
+                "order": 2,
+                "repetitions": "8 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-uqp8ps",
+            "exerciseId": "exercise-1u5j1lv",
+            "order": 5,
+            "sets": "3",
+            "reps": "15 - 20",
+            "rest": "1.5 -1 דקות",
+            "sourceRow": 25,
+            "setPrescriptions": [
+              {
+                "id": "set-zpzgiz",
+                "order": 0,
+                "repetitions": "15 - 20"
+              },
+              {
+                "id": "set-zfzuu0",
+                "order": 1,
+                "repetitions": "15 - 20"
+              },
+              {
+                "id": "set-109ynwx",
+                "order": 2,
+                "repetitions": "15 - 20"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-px6ol",
+            "exerciseId": "exercise-f2juxe",
+            "order": 6,
+            "sets": "3",
+            "reps": "12 - 10",
+            "rest": "דקה",
+            "sourceRow": 28,
+            "setPrescriptions": [
+              {
+                "id": "set-1bhpxgd",
+                "order": 0,
+                "repetitions": "12 - 10"
+              },
+              {
+                "id": "set-1b7qbre",
+                "order": 1,
+                "repetitions": "12 - 10"
+              },
+              {
+                "id": "set-1axqq2f",
+                "order": 2,
+                "repetitions": "12 - 10"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1gf0k8j",
+            "exerciseId": "exercise-1l24vb0",
+            "order": 7,
+            "sets": "3",
+            "reps": "15 - 12",
+            "rest": "דקה",
+            "sourceRow": 29,
+            "setPrescriptions": [
+              {
+                "id": "set-15ng2th",
+                "order": 0,
+                "repetitions": "15 - 12"
+              },
+              {
+                "id": "set-15dgh4i",
+                "order": 1,
+                "repetitions": "15 - 12"
+              },
+              {
+                "id": "set-153gvfj",
+                "order": 2,
+                "repetitions": "15 - 12"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-1oy5pzp",
+            "exerciseId": "exercise-p2ohuv",
+            "order": 8,
+            "sets": "3",
+            "reps": "20",
+            "rest": "דקה",
+            "sourceRow": 31,
+            "setPrescriptions": [
+              {
+                "id": "set-op8x7o",
+                "order": 0,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-oz8iwn",
+                "order": 1,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-p984lm",
+                "order": 2,
+                "repetitions": "20"
+              }
+            ]
+          },
+          {
+            "id": "workout-exercise-ngncns",
+            "exerciseId": "exercise-pn4ire",
+            "order": 9,
+            "sets": "3",
+            "reps": "20",
+            "rest": "דקה",
+            "sourceRow": 32,
+            "setPrescriptions": [
+              {
+                "id": "set-1uakp3",
+                "order": 0,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-1kaz04",
+                "order": 1,
+                "repetitions": "20"
+              },
+              {
+                "id": "set-2e9s31",
+                "order": 2,
+                "repetitions": "20"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

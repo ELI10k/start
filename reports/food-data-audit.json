@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-07-20",
+  "source": "data/foods.json",
+  "recordCount": 336,
+  "uniqueIdCount": 336,
+  "stableIdPolicy": "Existing string IDs are preserved; import rejects duplicate or missing IDs.",
+  "duplicateIds": [],
+  "duplicateNames": [
+    { "name": "בורקס גבינה", "count": 2, "note": "Separate records retained; name equality alone does not establish identical nutrition data." },
+    { "name": "ג׳חנון", "count": 2, "note": "Separate records retained; name equality alone does not establish identical nutrition data." }
+  ],
+  "invalidNumericRecords": [],
+  "negativeNumericRecords": [],
+  "missingValues": {
+    "brand": 0,
+    "protein": 15,
+    "carbs": 17,
+    "fat": 23,
+    "barcode": 220
+  },
+  "categoryCount": 63,
+  "normalization": {
+    "brand": "Whitespace normalized during import; all records have a brand.",
+    "category": "Whitespace normalized during import; source taxonomy preserved because merging categories would be a product/content decision.",
+    "hebrewSearch": "NFKC, Hebrew locale lowercase, quote/geresh removal, and whitespace collapse.",
+    "missingMacros": "Displayed as unavailable; calculations safely treat unavailable values as zero without mutating source data."
+  },
+  "suspiciousRecords": [],
+  "nutritionValuesChanged": false,
+  "result": "pass_with_source_missing_values"
+}

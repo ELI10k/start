@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { foods } from "../lib/foods.ts";
+import { clients } from "../lib/clients.ts";
+import { calculateFoodNutrition, calculateMealTotals, calculatePlanSummary, calculatePlanTotals, calculateProgressPercentages, calculateTargetDifferences, ZERO_MACROS } from "../lib/meal-plans/calculations.ts";
+import { filterAndSortFoods } from "../lib/meal-plans/food-search.ts";
+import { getAssignedMealPlan } from "../lib/meal-plans/mock-data.ts";
+import type { MealPlan } from "../lib/meal-plans/types.ts";
+
+const map = new Map(foods.map((food) => [food.id, food]));
+test("calculates decimal gram quantities from imported values per 100g", () => assert.deepEqual(calculateFoodNutrition(foods[0], 125.5), { calories: 77.8, protein: 14.4, carbs: 2.3, fat: 1.3 }));
+test("invalid and zero quantities never produce NaN", () => { assert.deepEqual(calculateFoodNutrition(foods[0], -1), ZERO_MACROS); assert.deepEqual(calculateFoodNutrition(foods[0], Number.NaN), ZERO_MACROS); });
+test("calculates meal and plan totals from repository foods", () => { const plan: MealPlan = { id: "t", name: "t", status: "draft", updatedAt: "2026-01-01", targets: {}, meals: [{ id: "m", name: "m", order: 0, items: [{ id: "i", foodId: "1", quantityGrams: 200 }] }] }; assert.equal(calculateMealTotals(plan.meals[0], map).protein, 23); assert.equal(calculatePlanTotals(plan, map).calories, 124); });
+test("empty plans return safe zero summary", () => { const plan: MealPlan = { id: "e", name: "e", status: "draft", updatedAt: "", targets: {}, meals: [] }; assert.deepEqual(calculatePlanSummary(plan, map).totals, ZERO_MACROS); assert.equal(calculatePlanSummary(plan, map).calorieProgressPercent, 0); });
+test("target differences report remaining and overage", () => assert.deepEqual(calculateTargetDifferences({ calories: 2100, protein: 90, carbs: 210, fat: 50 }, { calories: 2000, protein: 100, carbs: 200, fat: 50 }), { calories: -100, protein: 10, carbs: -10, fat: 0 }));
+test("assignment resolves only known client", () => { const plan = getAssignedMealPlan("noam-levi"); assert.equal(plan?.assignedClientId, clients[0].id); assert.equal(getAssignedMealPlan("missing"), undefined); });
+test("food picker filtering and sorting is deterministic", () => { const result = filterAndSortFoods(foods, "קוטג", "גבינות וקוטג׳", "protein-high"); assert.deepEqual(result.map((food) => food.id), ["1", "2", "3", "4", "5", "10"]); });
+test("official repository contains every imported food and supports barcode search", () => { assert.equal(foods.length, 336); assert.equal(filterAndSortFoods(foods, "7290014758681")[0]?.id, "1"); });
+test("missing food macros and infinite values are sanitized", () => assert.deepEqual(calculateFoodNutrition({ calories: Number.POSITIVE_INFINITY, protein: 10 }, 50), { calories: 0, protein: 5, carbs: 0, fat: 0 }));
+test("progress percentages cover every macro without infinity", () => assert.deepEqual(calculateProgressPercentages({ calories: 1000, protein: 75, carbs: 0, fat: 50 }, { calories: 2000, protein: 100, carbs: 0 }), { calories: 50, protein: 75, carbs: 0, fat: 0 }));

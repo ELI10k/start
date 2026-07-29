@@ -1,0 +1,5 @@
+export const DEVICE_COOKIE = "start-device-id";
+export type DeviceSession = Readonly<{ deviceId: string; deviceName: string }>;
+export function replaceActiveDevice<T extends { deviceId: string; revokedAt?: string }>(sessions: readonly T[], nextDeviceId: string, now: string): T[] { return sessions.map((session) => session.deviceId !== nextDeviceId && !session.revokedAt ? { ...session, revokedAt: now } : session); }
+export function activateDevice<T extends { deviceId: string; revokedAt?: string }>(sessions: readonly T[], next: T, role: "coach" | "client", now: string): T[] { const prepared = role === "client" ? replaceActiveDevice(sessions, next.deviceId, now) : [...sessions]; const existing = prepared.findIndex((session) => session.deviceId === next.deviceId); if (existing < 0) return [...prepared, { ...next, revokedAt: undefined }]; return prepared.map((session, index) => index === existing ? { ...next, revokedAt: undefined } : session); }
+export function isActiveDevice(sessions: readonly { deviceId: string; revokedAt?: string | null }[], deviceId: string): boolean { return sessions.some((session) => session.deviceId === deviceId && !session.revokedAt); }

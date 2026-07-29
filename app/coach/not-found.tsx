@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function CoachNotFound() { return <main className="px-4 py-24 text-center"><p className="text-sm font-bold text-[#D4AF37]">404</p><h1 className="mt-3 text-3xl font-black">העמוד לא נמצא</h1><p className="mt-2 text-zinc-500">הקישור אינו תקין או שהתוכן כבר לא זמין.</p><Link href="/coach" className="mt-6 inline-flex rounded-2xl bg-[#D4AF37] px-5 py-3 font-black text-black">חזרה ללוח הבקרה</Link></main>; }

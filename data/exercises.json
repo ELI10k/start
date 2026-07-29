@@ -1,0 +1,2195 @@
+[
+  {
+    "id": "exercise-p2ohuv",
+    "name": "אופניים",
+    "normalizedName": "אופניים",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "בטן",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=USQ74EMxCew",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתקדמים.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B11",
+        "name": "אופניים"
+      },
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B23",
+        "name": "אופניים"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B14",
+        "name": "אופניים"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B29",
+        "name": "אופניים"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G3",
+        "name": "אופניים"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G4",
+        "name": "אופניים"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B12",
+        "name": "אופניים"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B14",
+        "name": "אופניים"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B31",
+        "name": "אופניים"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-yspcn",
+    "name": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+    "normalizedName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=4uRtwr48fXs",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B9",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B12",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B11",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E4",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B11",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-h4hp4e",
+    "name": "דד ליפט",
+    "normalizedName": "דד ליפט",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=yMWV6hcAsj8",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A4",
+        "name": "דד ליפט"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1fr384u",
+    "name": "הרחקה אופקית במשקולות בודדות",
+    "normalizedName": "הרחקה אופקית במשקולות בודדות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=BykZ5q2ve9U",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B10",
+        "name": "הרחקה אופקית במשקולות בודדות"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D5",
+        "name": "הרחקה אופקית במשקולות בודדות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1oc1t8h",
+    "name": "הרחקת ירך לצד בפולי תחתון",
+    "normalizedName": "הרחקת ירך לצד בפולי תחתון",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=Hr6xkFod8Vs",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A11",
+        "name": "הרחקת ירך לצד בפולי תחתון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-mx59uy",
+    "name": "הרחקת כתפיים במשקולות בודדות בעמידה",
+    "normalizedName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=kjBIFcvAf_c",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B34",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B10",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      },
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B7",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D4",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B9",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-19zx08z",
+    "name": "הרחקת רגל לאחור  בכבל תחתון (בעיטות סוס)",
+    "normalizedName": "הרחקת רגל לאחור בכבל תחתון בעיטות סוס",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A10",
+        "name": "הרחקת רגל לאחור  בכבל תחתון (בעיטות סוס)"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1urdov4",
+    "name": "הרמת רגליים",
+    "normalizedName": "הרמת רגליים",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "בטן",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=-VvsbjR_tgs",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G4",
+        "name": "הרמת רגליים"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G6",
+        "name": "הרמת רגליים"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G5",
+        "name": "הרמת רגליים"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G7",
+        "name": "הרמת רגליים"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-155pu7s",
+    "name": "חימום דינאמי לפי אימון",
+    "normalizedName": "חימום דינאמי לפי אימון",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חימום",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ame_QBc8ozs",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B5",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B17",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B29",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B5",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B20",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G2",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "C3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "D3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "F3",
+        "name": "חימום דינאמי לפי אימון"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-lp8zrd",
+    "name": "חתירה בהטיית גב במשקולות בודדות",
+    "normalizedName": "חתירה בהטיית גב במשקולות בודדות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=dQZyHijKTh0",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B8",
+        "name": "חתירה בהטיית גב במשקולות בודדות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-126wehi",
+    "name": "חתירה במכונה",
+    "normalizedName": "חתירה במכונה",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B6",
+        "name": "חתירה במכונה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1u5j1lv",
+    "name": "חתירה בפולי תחתון",
+    "normalizedName": "חתירה בפולי תחתון",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=0tTllEC5Gvg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B20",
+        "name": "חתירה בפולי תחתון"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B26",
+        "name": "חתירה בפולי תחתון"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B7",
+        "name": "חתירה בפולי תחתון"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B9",
+        "name": "חתירה בפולי תחתון"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B25",
+        "name": "חתירה בפולי תחתון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1h0qzj6",
+    "name": "חתירה מעל הספה",
+    "normalizedName": "חתירה מעל הספה",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B5",
+        "name": "חתירה מעל הספה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1k0kcxw",
+    "name": "יד אחורית",
+    "normalizedName": "יד אחורית",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/shorts/TwyQqJqknXg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "E3",
+        "name": "יד אחורית"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-f2juxe",
+    "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+    "normalizedName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=4MlxEtI9vWI",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B21",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B27",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B9",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B12",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F5",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B28",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-pn4ire",
+    "name": "כפיפות בטן משקל גוף",
+    "normalizedName": "כפיפות בטן משקל גוף",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "בטן",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/pDnbj5WR4Dc",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B12",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B24",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B36",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B15",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B30",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B10",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B13",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G5",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G6",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B9",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B13",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B15",
+        "name": "כפיפות בטן משקל גוף"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B32",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1nk9ffl",
+    "name": "כפיפת מרפקים בכסא כומר",
+    "normalizedName": "כפיפת מרפקים בכסא כומר",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=taDSGL4DWfk",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F3",
+        "name": "כפיפת מרפקים בכסא כומר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1fo5t9c",
+    "name": "כפיפת מרפקים משקל גוף",
+    "normalizedName": "כפיפת מרפקים משקל גוף",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=uny2Klu-cwo",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "F4",
+        "name": "כפיפת מרפקים משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B8",
+        "name": "כפיפת מרפקים משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B11",
+        "name": "כפיפת מרפקים משקל גוף"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1l24vb0",
+    "name": "כפיפת מרפקים פטישים",
+    "normalizedName": "כפיפת מרפקים פטישים",
+    "aliases": [],
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=kRiqKj9ZGlA",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B22",
+        "name": "כפיפת מרפקים פטישים"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B28",
+        "name": "כפיפת מרפקים פטישים"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B29",
+        "name": "כפיפת מרפקים פטישים"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1lrrpsj",
+    "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+    "normalizedName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=l1ih5IBxCLw",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B32",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B22",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B5",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A9",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B20",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1mo876e",
+    "name": "כפיפת רגליים במכונה בישיבה | תרגיל רגליים להמטסרינג",
+    "normalizedName": "כפיפת רגליים במכונה בישיבה | תרגיל רגליים להמטסרינג",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/P8lAQ9uxkZU",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A12",
+        "name": "כפיפת רגליים במכונה בישיבה | תרגיל רגליים להמטסרינג"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-yjtm56",
+    "name": "כתף אחורית בפולי עליון כנגד כבל",
+    "normalizedName": "כתף אחורית בפולי עליון כנגד כבל",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/y6GJbApcvOQ?si=s-NafWyqByw5--cg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B35",
+        "name": "כתף אחורית בפולי עליון כנגד כבל"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B11",
+        "name": "כתף אחורית בפולי עליון כנגד כבל"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D6",
+        "name": "כתף אחורית בפולי עליון כנגד כבל"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-2ez0zf",
+    "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+    "normalizedName": "לאנג סטטי | לאנג דינמאי | לאנג עם משקולות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=8u2wOtbiKMg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A6",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות"
+      },
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A6",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B4",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-cw8lzv",
+    "name": "לחיצה צרפתית במוט W",
+    "normalizedName": "לחיצה צרפתית במוט w",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=emrmcYi-tJc",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B10",
+        "name": "לחיצה צרפתית במוט W"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B13",
+        "name": "לחיצה צרפתית במוט W"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E5",
+        "name": "לחיצה צרפתית במוט W"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1rpyv0f",
+    "name": "לחיצות כתף על הריצפה",
+    "normalizedName": "לחיצות כתף על הריצפה",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ytljvBIaoyo",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "D4",
+        "name": "לחיצות כתף על הריצפה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1wwie67",
+    "name": "לחיצות כתפיים מצב רחב",
+    "normalizedName": "לחיצות כתפיים מצב רחב",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/AwVz7app59s",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "D5",
+        "name": "לחיצות כתפיים מצב רחב"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B6",
+        "name": "לחיצות כתפיים מצב רחב"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B9",
+        "name": "לחיצות כתפיים מצב רחב"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-ptjiss",
+    "name": "לחיצת חזה  במשקולות בודדות",
+    "normalizedName": "לחיצת חזה במשקולות בודדות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=BGo-Tn_pdfI",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C4",
+        "name": "לחיצת חזה  במשקולות בודדות"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B6",
+        "name": "לחיצת חזה  במשקולות בודדות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-rr4mtu",
+    "name": "לחיצת חזה במוט",
+    "normalizedName": "לחיצת חזה במוט",
+    "aliases": [],
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=BGo-Tn_pdfI",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B5",
+        "name": "לחיצת חזה במוט"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-thb870",
+    "name": "לחיצת חזה במוט ישר",
+    "normalizedName": "לחיצת חזה במוט ישר",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/n8aS77Ls7QU",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B6",
+        "name": "לחיצת חזה במוט ישר"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B6",
+        "name": "לחיצת חזה במוט ישר"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B8",
+        "name": "לחיצת חזה במוט ישר"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C6",
+        "name": "לחיצת חזה במוט ישר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1nidil8",
+    "name": "לחיצת חזה במשקולות בודדות / מוט ישר 30 מעלות",
+    "normalizedName": "לחיצת חזה במשקולות בודדות / מוט ישר 30 מעלות",
+    "aliases": [],
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=IYoXsD87W2I",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B7",
+        "name": "לחיצת חזה במשקולות בודדות / מוט ישר 30 מעלות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-139gtlw",
+    "name": "לחיצת חזה במשקולות בודדות 30 מעלות",
+    "normalizedName": "לחיצת חזה במשקולות בודדות 30 מעלות",
+    "aliases": [],
+    "primaryMuscleGroup": "חזה אמצעי",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=IYoXsD87W2I",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " FBW משקולות חופשי מתחילים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B6",
+        "name": "לחיצת חזה במשקולות בודדות 30 מעלות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1e2u7l0",
+    "name": "לחיצת חזה במשקולות בודדות 45 מעלות",
+    "normalizedName": "לחיצת חזה במשקולות בודדות 45 מעלות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=IYoXsD87W2I",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B7",
+        "name": "לחיצת חזה במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B9",
+        "name": "לחיצת חזה במשקולות בודדות 45 מעלות"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C3",
+        "name": "לחיצת חזה במשקולות בודדות 45 מעלות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-14tz34b",
+    "name": "לחיצת כתפיים כנגד משקולות",
+    "normalizedName": "לחיצת כתפיים כנגד משקולות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ryysjIVZFdQ",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B33",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B9",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D3",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B8",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-mhdxgx",
+    "name": "לחיצת רגליים במכונה",
+    "normalizedName": "לחיצת רגליים במכונה",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=Ol83kSzb4G0",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B5",
+        "name": "לחיצת רגליים במכונה"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B4",
+        "name": "לחיצת רגליים במכונה"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A7",
+        "name": "לחיצת רגליים במכונה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1ly3xqh",
+    "name": "משיכה בפולי עליון מוט רחב",
+    "normalizedName": "משיכה בפולי עליון מוט רחב",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ELNEVYEHwFA",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B18",
+        "name": "משיכה בפולי עליון מוט רחב"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B24",
+        "name": "משיכה בפולי עליון מוט רחב"
+      },
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B4",
+        "name": "משיכה בפולי עליון מוט רחב"
+      },
+      {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B6",
+        "name": "משיכה בפולי עליון מוט רחב"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B3",
+        "name": "משיכה בפולי עליון מוט רחב"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B23",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-5aj1cu",
+    "name": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+    "normalizedName": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=d-b-LdOqRfQ",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B25",
+        "name": "משיכה הפולי עליון באחיזה צרה מוט משולש"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B7",
+        "name": "משיכה הפולי עליון באחיזה צרה מוט משולש"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B24",
+        "name": "משיכה הפולי עליון באחיזה צרה מוט משולש"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-mk9vfe",
+    "name": "משיכה פולי עליון באחיזה צרה מוט משולש",
+    "normalizedName": "משיכה פולי עליון באחיזה צרה מוט משולש",
+    "aliases": [],
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=d-b-LdOqRfQ",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B19",
+        "name": "משיכה פולי עליון באחיזה צרה מוט משולש"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1ba2nb8",
+    "name": "מתח לפנים | תרגיל לגב + יד קדמית",
+    "normalizedName": "מתח לפנים | תרגיל לגב + יד קדמית",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=vwalzcQMejI",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "B6",
+        "name": "מתח לפנים | תרגיל לגב + יד קדמית"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B6",
+        "name": "מתח לפנים | תרגיל לגב + יד קדמית"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-say88l",
+    "name": "מתח מצב צר",
+    "normalizedName": "מתח מצב צר",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=MN8fI9ZTm5w",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "B5",
+        "name": "מתח מצב צר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1igvlte",
+    "name": "מתח רחב",
+    "normalizedName": "מתח רחב",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=hpVXkmF9-W8",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "B4",
+        "name": "מתח רחב"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B4",
+        "name": "מתח רחב"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B5",
+        "name": "מתח רחב"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1oguz0o",
+    "name": "סומו סקוואט",
+    "normalizedName": "סומו סקוואט",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=8WjHLWyGCYM",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A5",
+        "name": "סומו סקוואט"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-12xg42y",
+    "name": "סקוואט בהמר",
+    "normalizedName": "סקוואט בהמר",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/E-0J5Z1qNMQ",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A13",
+        "name": "סקוואט בהמר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-n1izh5",
+    "name": "סקוואט משקל גוף",
+    "normalizedName": "סקוואט משקל גוף",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=P6cK6B2indM",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A4",
+        "name": "סקוואט משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B3",
+        "name": "סקוואט משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B3",
+        "name": "סקוואט משקל גוף"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1fdd4gb",
+    "name": "סקוואט עם מוט",
+    "normalizedName": "סקוואט עם מוט",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/xI-2HNrENG8",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B30",
+        "name": "סקוואט עם מוט"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B21",
+        "name": "סקוואט עם מוט"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A3",
+        "name": "סקוואט עם מוט"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B19",
+        "name": "סקוואט עם מוט"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1w08fkm",
+    "name": "סקוואט עם משקולות חופשי",
+    "normalizedName": "סקוואט עם משקולות חופשי",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=dngTrzKZkOw",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A5",
+        "name": "סקוואט עם משקולות חופשי"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-150kpke",
+    "name": "פול אובר במשקולת בודדת",
+    "normalizedName": "פול אובר במשקולת בודדת",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=m8cOwJ9Dl7I",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B4",
+        "name": "פול אובר במשקולת בודדת"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-vba4vh",
+    "name": "פטישים במשקולות בודדות",
+    "normalizedName": "פטישים במשקולות בודדות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=kRiqKj9ZGlA",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F4",
+        "name": "פטישים במשקולות בודדות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-19qm0t4",
+    "name": "פרפר בכבלים",
+    "normalizedName": "פרפר בכבלים",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/ddyiewT1BWs?si=V-Ok4eWOSw7Z3G0l",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B8",
+        "name": "פרפר בכבלים"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C7",
+        "name": "פרפר בכבלים"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1f01l0c",
+    "name": "פרפר במכונה",
+    "normalizedName": "פרפר במכונה",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=x8U9RDpbFhI&t=21s",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B8",
+        "name": "פרפר במכונה"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C5",
+        "name": "פרפר במכונה"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1b7p0zl",
+    "name": "פשיטת ידיים הפוכות במוט",
+    "normalizedName": "פשיטת ידיים הפוכות במוט",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/mucuMOaBI5c",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E8",
+        "name": "פשיטת ידיים הפוכות במוט"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-8q99c1",
+    "name": "פשיטת ידיים מצב צר",
+    "normalizedName": "פשיטת ידיים מצב צר",
+    "aliases": [],
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/shorts/TwyQqJqknXg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B7",
+        "name": "פשיטת ידיים מצב צר"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B10",
+        "name": "פשיטת ידיים מצב צר"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1759fj3",
+    "name": "פשיטת מרפקים כנגד משקולות בודדות",
+    "normalizedName": "פשיטת מרפקים כנגד משקולות בודדות",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=Ir5GDRgJmBg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " FBW משקולות חופשי מתחילים.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B8",
+        "name": "פשיטת מרפקים כנגד משקולות בודדות"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E3",
+        "name": "פשיטת מרפקים כנגד משקולות בודדות"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-igalw2",
+    "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+    "normalizedName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ejydhxmj0bc",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      " A-B-C.xlsx",
+      " A-B.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "A-B קצר.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B31",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      },
+      {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B23",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      },
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A8",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      },
+      {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B21",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-yt2erg",
+    "name": "קיק בק במשקולת בודדת",
+    "normalizedName": "קיק בק במשקולת בודדת",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=bZkmvx2pBl4",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E6",
+        "name": "קיק בק במשקולת בודדת"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-1actjvi",
+    "name": "קיק בק בפולי תחתון",
+    "normalizedName": "קיק בק בפולי תחתון",
+    "aliases": [],
+    "category": "משקולות ומכונות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://youtu.be/s-J5TJs-aNg",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E7",
+        "name": "קיק בק בפולי תחתון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-150pt7l",
+    "name": "שכיבות סמיכה לחזה עליון",
+    "normalizedName": "שכיבות סמיכה לחזה עליון",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=oRdYyHa-7BY",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "C5",
+        "name": "שכיבות סמיכה לחזה עליון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-dhk3wr",
+    "name": "שכיבות סמיכה לחזה תחתון",
+    "normalizedName": "שכיבות סמיכה לחזה תחתון",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=GFuk4IlRedQ",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "C6",
+        "name": "שכיבות סמיכה לחזה תחתון"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B8",
+        "name": "שכיבות סמיכה לחזה תחתון"
+      }
+    ],
+    "status": "active"
+  },
+  {
+    "id": "exercise-hdg3yz",
+    "name": "שכיבות סמיכה משקל גוף",
+    "normalizedName": "שכיבות סמיכה משקל גוף",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "video": {
+      "url": "https://www.youtube.com/watch?v=f8vDeIyfkSw",
+      "provider": "youtube"
+    },
+    "sourceWorkbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "sourceReferences": [
+      {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "C4",
+        "name": "שכיבות סמיכה משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B5",
+        "name": "שכיבות סמיכה משקל גוף"
+      },
+      {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B7",
+        "name": "שכיבות סמיכה משקל גוף"
+      }
+    ],
+    "status": "active"
+  }
+]

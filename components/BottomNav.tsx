@@ -1,92 +1,31 @@
 "use client";
+import { Dumbbell, Home, LineChart, Salad, UserRound } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+const items = [
+  { href: "/", label: "בית", icon: Home },
+  { href: "/progress", label: "התקדמות", icon: LineChart },
+  { href: "/workouts", label: "אימונים", icon: Dumbbell },
+  { href: "/nutrition", label: "תזונה", icon: Salad },
+  { href: "/profile", label: "פרופיל", icon: UserRound },
+];
 
-type BottomNavProps = {
-  active?: "home" | "nutrition" | "workouts" | "progress" | "profile";
-};
-
-export default function BottomNav({
-  active = "home",
-}: BottomNavProps) {
-  const items = [
-    {
-      key: "home",
-      icon: "⌂",
-      label: "בית",
-    },
-    {
-      key: "nutrition",
-      icon: "🍽",
-      label: "תזונה",
-    },
-    {
-      key: "workouts",
-      icon: "🏋",
-      label: "אימונים",
-    },
-    {
-      key: "progress",
-      icon: "📈",
-      label: "התקדמות",
-    },
-    {
-      key: "profile",
-      icon: "👤",
-      label: "פרופיל",
-    },
-  ];
-
+export default function BottomNav(props: { unreadCount?: number }) {
+  void props.unreadCount;
+  const pathname = usePathname();
+  if (pathname.startsWith("/coach") || pathname.startsWith("/foods") || pathname.startsWith("/import")) return null;
   return (
-    <nav
-      className="
-      fixed
-      bottom-0
-      left-0
-      right-0
-      bg-[#0A0A0A]
-      border-t
-      border-[#2B2B2B]
-      px-3
-      py-3"
-    >
-      <div className="max-w-xl mx-auto flex justify-between">
-
-        {items.map((item) => {
-
-          const isActive = item.key === active;
-
+    <nav aria-label="ניווט לקוח" className="bottom-app-nav">
+      <div>
+        {items.map(({ href, label, icon: Icon }) => {
+          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
-            <button
-              key={item.key}
-              className="
-              flex
-              flex-col
-              items-center
-              gap-2
-              transition-all"
-            >
-              <span
-                className={`text-2xl ${
-                  isActive
-                    ? "text-[#D4AF37]"
-                    : "text-gray-500"
-                }`}
-              >
-                {item.icon}
-              </span>
-
-              <span
-                className={`text-xs font-medium ${
-                  isActive
-                    ? "text-[#D4AF37]"
-                    : "text-gray-500"
-                }`}
-              >
-                {item.label}
-              </span>
-            </button>
+            <Link key={href} href={href} aria-current={active ? "page" : undefined}>
+              <span className="bottom-app-nav__icon"><Icon aria-hidden="true" size={22} /></span>
+              <span>{label}</span>
+            </Link>
           );
         })}
-
       </div>
     </nav>
   );

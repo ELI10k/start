@@ -1,0 +1,8 @@
+"use client";
+import { Utensils } from "lucide-react";
+import Link from "next/link";
+import { useMealPlans } from "./MealPlansProvider";
+import { foods } from "@/lib/foods";
+import { calculatePlanSummary } from "@/lib/meal-plans/calculations";
+const foodMap = new Map(foods.map((food) => [food.id, food]));
+export default function AssignedMealPlanCard({ clientId }: { clientId: string }) { const { plans } = useMealPlans(); const plan = plans.find((item) => item.assignedClientId === clientId); const summary = plan ? calculatePlanSummary(plan, foodMap) : undefined; return <section className="mt-4 rounded-[24px] border border-[#4A3915] bg-gradient-to-br from-[#1A1810] to-[#131313] p-5"><div className="flex flex-wrap items-start justify-between gap-4"><div><Utensils size={20} className="text-[#D4AF37]"/><p className="mt-3 text-xs text-zinc-500">תפריט משויך</p>{plan && summary ? <><h2 className="mt-1 text-xl font-black">{plan.name}</h2><p className="mt-2 text-sm text-zinc-400">{summary.totals.calories} קל׳ · {summary.totals.protein} ג׳ חלבון · {summary.mealCount} ארוחות · {plan.status === "active" ? "פעיל" : "טיוטה"}</p></> : <><h2 className="mt-1 font-bold">אין תפריט משויך</h2><p className="mt-1 text-sm text-zinc-500">אפשר לשייך תפריט מתוך מודול התפריטים.</p></>}</div>{plan && <div className="flex gap-2"><Link href={`/coach/menus/${plan.id}/preview`} className="rounded-2xl border border-[#333] px-4 py-2 text-sm font-bold">תצוגה</Link><Link href={`/coach/menus/${plan.id}`} className="rounded-2xl border border-[#D4AF37]/40 px-4 py-2 text-sm font-bold text-[#E7C85D]">עריכה</Link></div>}</div></section>; }
