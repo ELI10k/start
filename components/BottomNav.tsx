@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 const items = [
   { href: "/", label: "בית", icon: Home },
-  { href: "/progress", label: "התקדמות", icon: LineChart },
-  { href: "/workouts", label: "אימונים", icon: Dumbbell },
   { href: "/nutrition", label: "תזונה", icon: Salad },
+  { href: "/workouts", label: "אימונים", icon: Dumbbell },
+  { href: "/progress", label: "התקדמות", icon: LineChart },
   { href: "/profile", label: "פרופיל", icon: UserRound },
 ];
 

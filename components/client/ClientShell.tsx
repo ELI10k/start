@@ -5,10 +5,10 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
-  { href: "/", label: "היום" },
-  { href: "/progress", label: "התקדמות" },
-  { href: "/workouts", label: "אימונים" },
+  { href: "/", label: "בית" },
   { href: "/nutrition", label: "תזונה" },
+  { href: "/workouts", label: "אימונים" },
+  { href: "/progress", label: "התקדמות" },
   { href: "/content", label: "תוכן" },
   { href: "/profile", label: "פרופיל" },
 ];

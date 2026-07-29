@@ -1,3 +1,4 @@
 import WorkoutRouteReady from "@/components/workouts/WorkoutRouteReady";
 import ExerciseProgress from "@/components/workouts/client/ExerciseProgress";
-export default function Page(){return <WorkoutRouteReady><ExerciseProgress/></WorkoutRouteReady>}
+import ClientShell from "@/components/client/ClientShell";
+export default function Page(){return <ClientShell><WorkoutRouteReady><ExerciseProgress/></WorkoutRouteReady></ClientShell>}

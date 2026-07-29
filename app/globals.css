@@ -904,3 +904,284 @@ button:active:not(:disabled), a:active { transform: scale(.985); }
   .quick-action-card:hover, .premium-card:hover { border-color: rgba(212, 175, 55, .38); transform: translateY(-2px); }
   .quick-action-card > svg { display: block; position: absolute; margin-inline-start: 8rem; color: #555; }
 }
+
+/* START Health — unified white and green client design system */
+.client-app-shell {
+  --start-bg: #f4f7f5;
+  --start-card: #ffffff;
+  --start-card-raised: #ffffff;
+  --start-border: #e2ebe6;
+  --start-gold: #168a57;
+  --start-gold-dark: #0f6a43;
+  --start-gold-classic: #168a57;
+  --start-gold-soft: #45b77d;
+  --start-gold-highlight: #e8f7ef;
+  --start-text-muted: #66756d;
+  --start-success: #168a57;
+  --shadow-card: 0 10px 30px rgba(26, 72, 49, .07);
+  --shadow-gold: 0 10px 24px rgba(22, 138, 87, .2);
+  background:
+    radial-gradient(circle at 88% -4rem, rgba(71, 183, 126, .13), transparent 22rem),
+    #f4f7f5;
+  color: #17231d;
+}
+
+.client-app-content {
+  width: min(100%, 68rem);
+  padding-block-start: 1rem;
+}
+
+.client-app-shell .start-wordmark { color: #168a57; }
+
+.client-app-shell .mobile-app-header,
+.client-app-shell .desktop-app-nav {
+  border-color: rgba(23, 35, 29, .07);
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 8px 28px rgba(26, 72, 49, .04);
+}
+
+.client-app-shell .avatar-button {
+  border-color: #d8e9df;
+  background: #edf8f2;
+  color: #168a57;
+}
+
+.client-app-shell .bottom-app-nav {
+  border-color: rgba(23, 35, 29, .08);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 -10px 30px rgba(26, 72, 49, .08);
+}
+
+.client-app-shell .bottom-app-nav a { color: #829087; }
+.client-app-shell .bottom-app-nav a[aria-current="page"] { color: #168a57; }
+.client-app-shell .bottom-app-nav a[aria-current="page"]::before {
+  height: 3px;
+  background: #168a57;
+  box-shadow: none;
+}
+.client-app-shell .bottom-app-nav a[aria-current="page"] .bottom-app-nav__icon {
+  border-radius: .75rem;
+  background: #e8f7ef;
+}
+
+.client-app-shell .desktop-app-nav__links a,
+.client-app-shell .desktop-app-nav__actions button { color: #66756d; }
+.client-app-shell .desktop-app-nav__links a:hover {
+  background: #edf8f2;
+  color: #0f6a43;
+}
+
+.client-app-shell .premium-card,
+.client-app-shell .start-surface,
+.client-app-shell :where(section, article, div)[class*="border-[#292929]"],
+.client-app-shell :where(section, article, div)[class*="border-[#333]"],
+.client-app-shell :where(section, article, div)[class*="border-[#3A321B]"] {
+  border-color: #e2ebe6 !important;
+  background: #fff !important;
+  box-shadow: var(--shadow-card);
+  color: #17231d;
+}
+
+.client-app-shell .premium-card,
+.client-app-shell :where(section, article)[class*="rounded-"] {
+  border-radius: 1.35rem;
+}
+
+.client-app-shell .premium-page-header {
+  align-items: center;
+  margin-bottom: 1.1rem;
+  padding-bottom: .85rem;
+  border-color: #e5ece8;
+}
+.client-app-shell .premium-page-header p,
+.client-app-shell .section-heading span,
+.client-app-shell .active-menu-card > div > span { color: #168a57; }
+.client-app-shell .premium-page-header h1 { color: #17231d; }
+.client-app-shell .premium-page-header div > span { color: #68766e; }
+
+.client-app-shell .premium-primary-button,
+.client-app-shell button[class*="bg-[#D4AF37]"],
+.client-app-shell a[class*="bg-[#D4AF37]"] {
+  background: #168a57 !important;
+  box-shadow: var(--shadow-gold);
+  color: #fff !important;
+}
+.client-app-shell .premium-secondary-button,
+.client-app-shell a[class*="text-[#D4AF37]"],
+.client-app-shell button[class*="text-[#D4AF37]"] {
+  border-color: #cce5d8 !important;
+  background: #edf8f2 !important;
+  color: #0f7549 !important;
+}
+
+.client-app-shell .dashboard-greeting {
+  align-items: center;
+  padding-block: .4rem 1rem;
+}
+.client-app-shell .dashboard-greeting p { color: #168a57; }
+.client-app-shell .dashboard-greeting h1 { color: #17231d; font-size: clamp(1.65rem, 7vw, 2.4rem); }
+.client-app-shell .dashboard-greeting div > span,
+.client-app-shell .dashboard-greeting time { color: #718078; }
+
+.client-app-shell .daily-progress-card {
+  min-height: 11rem;
+  border: 0;
+  background: linear-gradient(135deg, #147c4e, #1ca76a) !important;
+  box-shadow: 0 18px 36px rgba(22, 138, 87, .2);
+  color: #fff;
+}
+.client-app-shell .daily-progress-card__copy span,
+.client-app-shell .daily-progress-card__copy p { color: rgba(255,255,255,.78); }
+.client-app-shell .progress-ring {
+  background: conic-gradient(#fff var(--progress), rgba(255,255,255,.22) 0);
+  box-shadow: none;
+}
+.client-app-shell .progress-ring::before {
+  background: #168a57;
+  box-shadow: none;
+}
+.client-app-shell .progress-ring__inner strong { color: #fff; }
+.client-app-shell .progress-ring__inner span,
+.client-app-shell .progress-ring__inner small { color: rgba(255,255,255,.75); }
+
+.client-app-shell .dashboard-metrics {
+  display: flex;
+  gap: .7rem;
+  overflow-x: auto;
+  padding-bottom: .35rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.client-app-shell .metric-tile {
+  min-width: 9.5rem;
+  min-height: 6.4rem;
+  flex: 1 0 9.5rem;
+  scroll-snap-align: start;
+  border-color: #e2ebe6;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+}
+.client-app-shell .metric-tile__head,
+.client-app-shell .metric-tile small { color: #718078; }
+.client-app-shell .metric-tile__icon,
+.client-app-shell .metric-tile--neutral .metric-tile__icon { color: #168a57; }
+
+.client-app-shell .quick-action-card {
+  min-height: 5.75rem;
+  border-color: #e2ebe6;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  color: #243029;
+}
+.client-app-shell .quick-action-card > span {
+  background: #e8f7ef;
+  color: #168a57;
+}
+
+.client-app-shell .premium-card__description,
+.client-app-shell .premium-progress__meta span,
+.client-app-shell .compact-data-list span,
+.client-app-shell .active-menu-card p { color: #718078; }
+.client-app-shell .premium-progress__meta small { color: #87948d; }
+.client-app-shell .premium-progress__track { background: #e7eee9; }
+.client-app-shell .premium-progress__track span {
+  background: linear-gradient(90deg, #0f7549, #45b77d);
+  box-shadow: none;
+}
+.client-app-shell .compact-data-list > div { border-color: #e8eeea; }
+
+.client-app-shell :where(p, span)[class*="text-zinc-"],
+.client-app-shell :where(p, span, div)[class*="text-[#8"],
+.client-app-shell :where(p, span, div)[class*="text-[#9"] { color: #718078 !important; }
+.client-app-shell :where(h1, h2, h3, strong, p, span, label, td, th)[class*="text-white"] {
+  color: #17231d !important;
+}
+.client-app-shell :where(div, section, article)[class*="bg-[#0"],
+.client-app-shell :where(div, section, article)[class*="bg-[#1"],
+.client-app-shell :where(div, section, article)[class*="bg-zinc-9"] {
+  background: #fff !important;
+}
+
+.client-app-shell input,
+.client-app-shell textarea,
+.client-app-shell select,
+.client-app-shell .nutrition-input,
+.client-app-shell .input {
+  min-height: 3rem;
+  border-color: #dbe5df !important;
+  border-radius: .9rem;
+  background: #fff !important;
+  color: #17231d !important;
+  box-shadow: 0 1px 0 rgba(26, 72, 49, .02);
+}
+.client-app-shell input:focus,
+.client-app-shell textarea:focus,
+.client-app-shell select:focus {
+  border-color: #45b77d !important;
+  outline: 3px solid rgba(69, 183, 125, .13);
+}
+.client-app-shell input[type="checkbox"] { accent-color: #168a57; }
+.client-app-shell table { overflow: hidden; border-radius: 1rem; background: #fff; }
+.client-app-shell table thead { background: #edf8f2; }
+.client-app-shell table tr { border-color: #e8eeea !important; }
+
+.client-app-shell [class*="border-dashed"] {
+  border-color: #bdd9ca !important;
+  background: #f8fbf9;
+  color: #718078 !important;
+}
+
+.client-app-shell .text-white { color: #17231d !important; }
+.client-app-shell [class*="bg-black"] { background: #f5f8f6 !important; }
+.client-app-shell [class*="bg-[#D4AF37]"] { background: #168a57 !important; color: #fff !important; }
+.client-app-shell [class*="border-[#D4AF37]"] { border-color: #8dd0ad !important; }
+
+.checkin-flow {
+  counter-reset: checkin-step;
+}
+.checkin-flow > :where(section, fieldset, label.block) {
+  position: relative;
+  padding-block-start: 3.1rem;
+}
+.checkin-flow > :where(section, fieldset, label.block)::before {
+  position: absolute;
+  inset-block-start: 1rem;
+  inset-inline-start: 1rem;
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #e8f7ef;
+  color: #0f7549;
+  content: counter(checkin-step);
+  counter-increment: checkin-step;
+  font-size: .72rem;
+  font-weight: 900;
+}
+.checkin-flow fieldset label:has(input:checked) {
+  border-color: #168a57 !important;
+  background: #168a57 !important;
+  color: #fff !important;
+}
+
+@media (min-width: 768px) {
+  .client-app-shell { padding-bottom: 0; }
+  .client-app-shell .desktop-app-nav { background: rgba(255,255,255,.9); }
+  .client-app-shell .client-app-content {
+    min-height: calc(100vh - 4.5rem);
+    padding-block-start: 2rem;
+  }
+  .client-app-shell .dashboard-metrics {
+    display: grid;
+    overflow: visible;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .client-app-shell .client-app-content {
+    border-inline: 1px solid rgba(23,35,29,.04);
+    background: rgba(255,255,255,.38);
+  }
+}
