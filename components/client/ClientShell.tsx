@@ -1,6 +1,47 @@
 import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
+import { UserRound } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
-const links=[{href:"/",label:"היום"},{href:"/nutrition",label:"תזונה"},{href:"/workouts",label:"אימונים"},{href:"/progress",label:"התקדמות"},{href:"/content",label:"תוכן"},{href:"/profile",label:"פרופיל"}];
-export default async function ClientShell({children}:{children:React.ReactNode}){const unreadCount=await getUnreadNotificationCount();return <main className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top_right,rgba(212,175,55,.09),transparent_30%),#090909] pb-28 text-white md:pb-0"><nav aria-label="ניווט ראשי ללקוח" className="hidden border-b border-[#292929] bg-[#0B0B0B]/95 md:block"><div className="mx-auto flex min-h-[4.5rem] max-w-6xl items-center justify-between px-6"><Link href="/" className="rounded-xl py-3 font-black tracking-[.16em] text-[#D4AF37]">START</Link><div className="flex items-center gap-1">{links.map((item)=><Link key={item.href} href={item.href} className="rounded-xl px-4 py-3 text-sm font-bold text-zinc-400 hover:bg-white/5 hover:text-white">{item.label}</Link>)}<NotificationBell unreadCount={unreadCount}/><form action="/auth/logout" method="post"><button className="rounded-xl px-4 py-3 text-sm font-bold text-zinc-500 hover:bg-white/5 hover:text-white">התנתקות</button></form></div></div></nav><div className="mx-auto max-w-6xl px-4 pb-10 pt-7 sm:px-6 lg:px-8">{children}</div><BottomNav unreadCount={unreadCount}/></main>}
+
+const links = [
+  { href: "/", label: "בית" },
+  { href: "/nutrition", label: "תזונה" },
+  { href: "/workouts", label: "אימונים" },
+  { href: "/progress", label: "התקדמות" },
+  { href: "/content", label: "תוכן" },
+  { href: "/profile", label: "פרופיל" },
+];
+
+export default async function ClientShell({ children }: { children: React.ReactNode }) {
+  const unreadCount = await getUnreadNotificationCount();
+  return (
+    <main className="client-app-shell">
+      <header className="mobile-app-header">
+        <Link href="/" className="start-wordmark" aria-label="START — מסך הבית">START</Link>
+        <div className="mobile-app-header__actions">
+          <NotificationBell unreadCount={unreadCount} />
+          <Link href="/profile" className="avatar-button" aria-label="פתיחת הפרופיל">
+            <UserRound aria-hidden="true" size={18} />
+          </Link>
+        </div>
+      </header>
+      <nav aria-label="ניווט ראשי ללקוח" className="desktop-app-nav">
+        <div className="desktop-app-nav__inner">
+          <Link href="/" className="start-wordmark">START</Link>
+          <div className="desktop-app-nav__links">
+            {links.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+          </div>
+          <div className="desktop-app-nav__actions">
+            <NotificationBell unreadCount={unreadCount} />
+            <form action="/auth/logout" method="post">
+              <button>התנתקות</button>
+            </form>
+          </div>
+        </div>
+      </nav>
+      <div className="client-app-content">{children}</div>
+      <BottomNav unreadCount={unreadCount} />
+    </main>
+  );
+}
