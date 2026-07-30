@@ -1,0 +1,3 @@
+export function normalizeExerciseName(value: string): string { return value.normalize("NFKC").toLocaleLowerCase("he").replace(/[־–—-]/g," ").replace(/[\u0591-\u05BD\u05BF-\u05C7׳'״"(),.]/g,"").replace(/\s+/g," ").trim(); }
+export function stableWorkoutId(prefix: string, value: string): string { let hash=2166136261; for(const char of value){hash^=char.codePointAt(0)??0;hash=Math.imul(hash,16777619)}return `${prefix}-${(hash>>>0).toString(36)}`; }
+export function isYouTubeUrl(value?: string): boolean { if(!value)return false; try{const url=new URL(value);return ["youtube.com","www.youtube.com","youtu.be","www.youtu.be"].includes(url.hostname)}catch{return false} }

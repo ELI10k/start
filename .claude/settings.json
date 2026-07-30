@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(git show*)",
+      "Bash(git rev-parse*)",
+      "Bash(node --version*)",
+      "Bash(npm --version*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run typecheck*)",
+      "Bash(npm run test*)",
+      "Bash(npm test*)",
+      "Bash(npm run build*)",
+      "Bash(npx tsc*)",
+      "Bash(npx eslint*)",
+      "Bash(ls*)",
+      "Bash(find . -maxdepth*)",
+      "Bash(pwd*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(vercel --prod*)",
+      "Bash(vercel deploy --prod*)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(supabase db reset*)",
+      "Bash(supabase db push*)",
+      "Bash(supabase migration repair*)",
+      "Bash(rm -rf*)"
+    ]
+  }
+}

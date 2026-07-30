@@ -1,36 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# START
 
-## Getting Started
+RTL Hebrew frontend demonstration for nutrition coaching, built with Next.js 16, React 19, TypeScript, and Tailwind CSS 4.
 
-First, run the development server:
+## Local development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Validation:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What exists
 
-## Learn More
+Client dashboard, daily meal completion and macro progress, measurement history, weekly check-in UI, profile/preferences, support shell, unpublished content-library shell, and searchable food details. Coach routes cover client directories/details/progress/check-ins and meal-plan creation, editing, duplication, preview, and assignment.
 
-To learn more about Next.js, take a look at the following resources:
+The only approved food source is `data/foods.json` (336 records), generated from `data/source/foods.xlsx` by `npm run foods:import`. Search and nutrition logic live under `lib/foods` and `lib/meal-plans`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Data boundaries
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+All people, plans, check-ins, and measurements are clearly demo/mock records. `lib/storage` provides a typed adapter contract; the browser adapter persists supported client preferences and meal completions in localStorage. Coach editing remains session-memory only. There is no real authentication, authorization, backend persistence, server validation, notifications, payments, or external messaging.
 
-## Deploy on Vercel
+Do not treat this repository as production-ready. Start with [project architecture](docs/project-architecture.md), [route map](docs/route-map.md), [demo limitations](docs/demo-limitations.md), and [authentication design](docs/authentication-and-single-device-plan.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Workout navigation and programs are intentionally absent until authoritative programs are supplied.

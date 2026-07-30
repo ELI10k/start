@@ -1,0 +1,3 @@
+import FoodDatabase from "@/components/FoodDatabase";
+import { listDatabaseFoods } from "@/lib/data/product-repository";
+export default async function FoodsPage(){const rows=await listDatabaseFoods();const foods=rows.map((food)=>({id:food.id,name:food.name,brand:food.brand??undefined,category:food.category,calories:Number(food.calories),protein:food.protein===null?undefined:Number(food.protein),carbs:food.carbs===null?undefined:Number(food.carbs),fat:food.fat===null?undefined:Number(food.fat),servingLabel:food.serving_label}));return <main className="foods-page"><FoodDatabase foods={foods}/></main>}

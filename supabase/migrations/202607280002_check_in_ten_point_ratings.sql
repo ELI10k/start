@@ -1,0 +1,11 @@
+begin;
+alter table public.check_ins drop constraint if exists check_ins_adherence_check;
+alter table public.check_ins drop constraint if exists check_ins_hunger_check;
+alter table public.check_ins drop constraint if exists check_ins_energy_check;
+alter table public.check_ins drop constraint if exists check_ins_sleep_check;
+alter table public.check_ins add constraint check_ins_adherence_check check (adherence between 1 and 10);
+alter table public.check_ins add constraint check_ins_hunger_check check (hunger between 1 and 10);
+alter table public.check_ins add constraint check_ins_energy_check check (energy between 1 and 10);
+alter table public.check_ins add constraint check_ins_sleep_check check (sleep between 1 and 10);
+notify pgrst, 'reload schema';
+commit;

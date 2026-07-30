@@ -1,55 +1,7 @@
-import Header from "@/components/Header";
-import StatCard from "@/components/StatCard";
-import ProgressCard from "@/components/ProgressCard";
-import BottomNav from "@/components/BottomNav";
-
-export default function Home() {
-  return (
-    <main className="min-h-screen bg-[#0A0A0A] text-white pb-28">
-      <Header />
-
-      <div className="max-w-md mx-auto px-4 space-y-6">
-
-        <ProgressCard
-          calories={1650}
-          caloriesGoal={2200}
-          protein={145}
-          proteinGoal={180}
-          steps={8400}
-          stepsGoal={10000}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-
-          <StatCard
-            title="משקל"
-            value="82.4 ק״ג"
-            subtitle="-0.8 השבוע"
-          />
-
-          <StatCard
-            title="שתייה"
-            value="2.6 ל׳"
-            subtitle="יעד 3.5"
-          />
-
-          <StatCard
-            title="שינה"
-            value="7:48"
-            subtitle="מצוין"
-          />
-
-          <StatCard
-            title="אימון"
-            value="בוצע"
-            subtitle="גב + יד קדמית"
-          />
-
-        </div>
-
-      </div>
-
-      <BottomNav />
-    </main>
-  );
-}
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import ClientShell from "@/components/client/ClientShell";
+import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
+import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
+export default async function Home() { const auth = await getAuthContext(); if (!auth) redirect("/login"); if (auth.role !== "client") redirect("/unauthorized"); const today = new Date().toISOString().slice(0,10); const data = await getClientOverview(auth.id, today); const completed = data.menu?.meals.filter((meal) => meal.completed) ?? []; const eatenItems = data.menu?.meals.flatMap((meal) => meal.items).filter((item) => item.eaten) ?? []; const totals = eatenItems.reduce((sum,item)=>({ calories:sum.calories+item.calories, protein:sum.protein+item.protein }),{calories:0,protein:0}); const latest = data.progress[0]; const remainingMeals=Math.max(0,(data.menu?.meals.length??0)-completed.length); return <ClientShell><header className="border-b border-white/5 pb-6"><p className="text-xs font-black tracking-[.18em] text-[#D4AF37]">START</p><h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">שלום, {auth.fullName.split(" ")[0]}</h1><p className="mt-2 text-zinc-400">כל מה שחשוב לך להיום, במקום אחד.</p></header><section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric label="משקל אחרון" value={latest ? `${latest.weight} ק״ג` : "אין נתון"}/><Metric label="ארוחות היום" value={`${completed.length}/${data.menu?.meals.length ?? 0}`}/><Metric label="קלוריות" value={`${Math.round(totals.calories)}/${data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? "—"}`}/><Metric label="חלבון" value={`${Math.round(totals.protein)}/${data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? "—"} ג׳`}/></section><section className="start-surface mt-6 rounded-[26px] p-5 sm:p-6"><h2 className="text-xl font-black">המשימות שלי להיום</h2>{remainingMeals?<Link href="/nutrition" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>🍽️ נשארו {remainingMeals} ארוחות לסמן</span><span className="text-[#E7C85D]">למעבר</span></Link>:<p className="mt-3 rounded-xl bg-emerald-400/10 p-4 text-emerald-300">סגרת את כל משימות התזונה להיום ✅</p>}<Link href="/workouts" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>💪 אימון ומשימות אימון</span><span className="text-[#E7C85D]">למעבר</span></Link><Link href="/check-in" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>📝 צ׳ק-אין</span><span className="text-[#E7C85D]">למעבר</span></Link></section><DashboardWorkoutWidget/><section className="start-surface mt-6 rounded-[26px] p-5 sm:p-6"><h2 className="text-xl font-black">התפריט הפעיל</h2>{data.menu ? <><p className="mt-2 text-zinc-400">{data.menu.title}</p><Link href="/nutrition" className="start-gold-button mt-4 inline-flex min-h-12 items-center rounded-2xl bg-[#D4AF37] px-5 font-black text-black">לארוחות היום</Link></> : <p className="start-empty mt-3 rounded-2xl p-5 text-sm text-zinc-400">המאמן עדיין לא שייך תפריט פעיל. הוא יופיע כאן מיד כשהוא מוכן.</p>}</section></ClientShell>; }
+function Metric({label,value}:{label:string;value:string}) { return <div className="start-surface min-h-28 rounded-[22px] p-4"><span className="text-xs text-zinc-500">{label}</span><strong className="mt-2 block text-lg">{value}</strong></div>; }

@@ -1,0 +1,2678 @@
+{
+  "generatedAt": "2026-07-20T13:32:45.739Z",
+  "sourceDirectory": "data/workouts-source",
+  "filesDiscovered": [
+    {
+      "filename": " A-B-C.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/ A-B-C.xlsx",
+      "copiedPath": "data/workouts-source/ A-B-C.xlsx",
+      "sizeBytes": 330239,
+      "modifiedAt": "2026-07-20T09:38:30.488Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי מתחילים",
+        " A-B",
+        "A-B קצר",
+        " A-B-C"
+      ]
+    },
+    {
+      "filename": " A-B.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/ A-B.xlsx",
+      "copiedPath": "data/workouts-source/ A-B.xlsx",
+      "sizeBytes": 330242,
+      "modifiedAt": "2026-07-20T09:37:33.240Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי מתחילים",
+        " A-B",
+        "אימון A-B קצר",
+        " אימון A-B-C"
+      ]
+    },
+    {
+      "filename": " FBW משקולות חופשי מתחילים.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/ FBW משקולות חופשי מתחילים.xlsx",
+      "copiedPath": "data/workouts-source/ FBW משקולות חופשי מתחילים.xlsx",
+      "sizeBytes": 330337,
+      "modifiedAt": "2026-07-20T09:35:26.091Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי מתחילים",
+        " A-B",
+        "אימון A-B קצר",
+        " אימון A-B-C"
+      ]
+    },
+    {
+      "filename": "אימון FBW מלא לחדר כושר.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/אימון FBW מלא לחדר כושר.xlsx",
+      "copiedPath": "data/workouts-source/אימון FBW מלא לחדר כושר.xlsx",
+      "sizeBytes": 330242,
+      "modifiedAt": "2026-07-20T09:37:08.741Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי מתחילים",
+        " A-B",
+        "אימון A-B קצר",
+        " אימון A-B-C"
+      ]
+    },
+    {
+      "filename": "בנק תרגילים משקולות ומכונות.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/בנק תרגילים משקולות ומכונות.xlsx",
+      "copiedPath": "data/workouts-source/בנק תרגילים משקולות ומכונות.xlsx",
+      "sizeBytes": 353741,
+      "modifiedAt": "2026-07-20T09:31:41.700Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "בנק תרגילים משקולות ומכונות",
+        "בנק תרגילים משקל גוף",
+        "בלוק אימונים",
+        "A-B",
+        " אימון A-B-C",
+        "משקל גוף",
+        "אימון FBW גבר",
+        "  FBW משקולות חופשי",
+        " אימון FBW נשים",
+        "2 אימונים בשבוע  FBW ",
+        " אימון חדש A-B-C"
+      ]
+    },
+    {
+      "filename": "בנק תרגילים משקל גוף.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/בנק תרגילים משקל גוף.xlsx",
+      "copiedPath": "data/workouts-source/בנק תרגילים משקל גוף.xlsx",
+      "sizeBytes": 353741,
+      "modifiedAt": "2026-07-20T09:31:20.700Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "בנק תרגילים משקולות ומכונות",
+        "בנק תרגילים משקל גוף",
+        "בלוק אימונים",
+        "A-B",
+        " אימון A-B-C",
+        "משקל גוף",
+        "אימון FBW גבר",
+        "  FBW משקולות חופשי",
+        " אימון FBW נשים",
+        "2 אימונים בשבוע  FBW ",
+        " אימון חדש A-B-C"
+      ]
+    },
+    {
+      "filename": "משקל גוף מתחילים.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/משקל גוף מתחילים.xlsx",
+      "copiedPath": "data/workouts-source/משקל גוף מתחילים.xlsx",
+      "sizeBytes": 330316,
+      "modifiedAt": "2026-07-20T09:33:48.665Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף ארוך",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי",
+        " A-B",
+        "אימון A-B קצר",
+        " אימון A-B-C"
+      ]
+    },
+    {
+      "filename": "משקל גוף מתקדמים.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/משקל גוף מתקדמים.xlsx",
+      "copiedPath": "data/workouts-source/משקל גוף מתקדמים.xlsx",
+      "sizeBytes": 330314,
+      "modifiedAt": "2026-07-20T09:34:21.757Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי",
+        " A-B",
+        "אימון A-B קצר",
+        " אימון A-B-C"
+      ]
+    },
+    {
+      "filename": "A-B קצר.xlsx",
+      "originalSourcePath": "/Users/lykhn/Downloads/A-B קצר.xlsx",
+      "copiedPath": "data/workouts-source/A-B קצר.xlsx",
+      "sizeBytes": 330242,
+      "modifiedAt": "2026-07-20T09:37:56.019Z",
+      "validWorkbook": true,
+      "selectedReason": "exact or unambiguous approved filename variant; newest non-empty copy in searched locations",
+      "availableSheets": [
+        "שקילות ומדידות",
+        "משקל גוף מתחילים",
+        "משקל גוף מתקדמים",
+        "אימון FBW מלא לחדר כושר",
+        " FBW משקולות חופשי מתחילים",
+        " A-B",
+        "A-B קצר",
+        " אימון A-B-C"
+      ]
+    }
+  ],
+  "filesCopied": [
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/ A-B-C.xlsx",
+      "copiedPath": "data/workouts-source/ A-B-C.xlsx",
+      "sizeBytes": 330239,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/ A-B.xlsx",
+      "copiedPath": "data/workouts-source/ A-B.xlsx",
+      "sizeBytes": 330242,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/ FBW משקולות חופשי מתחילים.xlsx",
+      "copiedPath": "data/workouts-source/ FBW משקולות חופשי מתחילים.xlsx",
+      "sizeBytes": 330337,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/אימון FBW מלא לחדר כושר.xlsx",
+      "copiedPath": "data/workouts-source/אימון FBW מלא לחדר כושר.xlsx",
+      "sizeBytes": 330242,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/בנק תרגילים משקולות ומכונות.xlsx",
+      "copiedPath": "data/workouts-source/בנק תרגילים משקולות ומכונות.xlsx",
+      "sizeBytes": 353741,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/בנק תרגילים משקל גוף.xlsx",
+      "copiedPath": "data/workouts-source/בנק תרגילים משקל גוף.xlsx",
+      "sizeBytes": 353741,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/משקל גוף מתחילים.xlsx",
+      "copiedPath": "data/workouts-source/משקל גוף מתחילים.xlsx",
+      "sizeBytes": 330316,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/משקל גוף מתקדמים.xlsx",
+      "copiedPath": "data/workouts-source/משקל גוף מתקדמים.xlsx",
+      "sizeBytes": 330314,
+      "validWorkbook": true
+    },
+    {
+      "originalSourcePath": "/Users/lykhn/Downloads/A-B קצר.xlsx",
+      "copiedPath": "data/workouts-source/A-B קצר.xlsx",
+      "sizeBytes": 330242,
+      "validWorkbook": true
+    }
+  ],
+  "sheetsProcessed": [
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "type": "program",
+      "headerRows": [
+        4,
+        16,
+        28
+      ]
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "type": "program",
+      "headerRows": [
+        4,
+        19
+      ]
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "type": "program",
+      "headerRows": [
+        2
+      ]
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "type": "program",
+      "headerRows": [
+        2
+      ]
+    },
+    {
+      "file": "בנק תרגילים משקולות ומכונות.xlsx",
+      "sheet": "בנק תרגילים משקולות ומכונות",
+      "type": "exercise_bank",
+      "headerRows": [
+        1
+      ]
+    },
+    {
+      "file": "בנק תרגילים משקל גוף.xlsx",
+      "sheet": "בנק תרגילים משקל גוף",
+      "type": "exercise_bank",
+      "headerRows": [
+        2
+      ]
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "type": "program",
+      "headerRows": [
+        2
+      ]
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "type": "program",
+      "headerRows": [
+        2
+      ]
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "type": "program",
+      "headerRows": [
+        4,
+        18
+      ]
+    }
+  ],
+  "programsImported": 7,
+  "workoutDaysImported": 11,
+  "programExerciseEntriesImported": 100,
+  "uniqueExercisesImported": 58,
+  "exercisesImported": 58,
+  "videoLinksPreserved": 166,
+  "duplicatesMerged": [
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B17",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B23",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B24",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B29",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": " A-B-C.xlsx",
+        "sheet": " A-B-C",
+        "cell": "B36",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B5",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-thb870",
+      "normalizedIdentity": "לחיצת חזה במוט ישר",
+      "canonicalName": "לחיצת חזה במוט ישר",
+      "duplicateName": "לחיצת חזה במוט ישר",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B6",
+        "name": "לחיצת חזה במוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-14tz34b",
+      "normalizedIdentity": "לחיצת כתפיים כנגד משקולות",
+      "canonicalName": "לחיצת כתפיים כנגד משקולות",
+      "duplicateName": "לחיצת כתפיים כנגד משקולות",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B9",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      }
+    },
+    {
+      "exerciseId": "exercise-mx59uy",
+      "normalizedIdentity": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "canonicalName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "duplicateName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B10",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      }
+    },
+    {
+      "exerciseId": "exercise-yjtm56",
+      "normalizedIdentity": "כתף אחורית בפולי עליון כנגד כבל",
+      "canonicalName": "כתף אחורית בפולי עליון כנגד כבל",
+      "duplicateName": "כתף אחורית בפולי עליון כנגד כבל",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B11",
+        "name": "כתף אחורית בפולי עליון כנגד כבל"
+      }
+    },
+    {
+      "exerciseId": "exercise-yspcn",
+      "normalizedIdentity": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "canonicalName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "duplicateName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B12",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-cw8lzv",
+      "normalizedIdentity": "לחיצה צרפתית במוט w",
+      "canonicalName": "לחיצה צרפתית במוט W",
+      "duplicateName": "לחיצה צרפתית במוט W",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B13",
+        "name": "לחיצה צרפתית במוט W"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B14",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B15",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B20",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fdd4gb",
+      "normalizedIdentity": "סקוואט עם מוט",
+      "canonicalName": "סקוואט עם מוט",
+      "duplicateName": "סקוואט עם מוט",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B21",
+        "name": "סקוואט עם מוט"
+      }
+    },
+    {
+      "exerciseId": "exercise-1lrrpsj",
+      "normalizedIdentity": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "canonicalName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "duplicateName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B22",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      }
+    },
+    {
+      "exerciseId": "exercise-igalw2",
+      "normalizedIdentity": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "canonicalName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "duplicateName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B23",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ly3xqh",
+      "normalizedIdentity": "משיכה בפולי עליון מוט רחב",
+      "canonicalName": "משיכה בפולי עליון מוט רחב",
+      "duplicateName": "משיכה בפולי עליון מוט רחב",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B24",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-1u5j1lv",
+      "normalizedIdentity": "חתירה בפולי תחתון",
+      "canonicalName": "חתירה בפולי תחתון",
+      "duplicateName": "חתירה בפולי תחתון",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B26",
+        "name": "חתירה בפולי תחתון"
+      }
+    },
+    {
+      "exerciseId": "exercise-f2juxe",
+      "normalizedIdentity": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "canonicalName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "duplicateName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B27",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-1l24vb0",
+      "normalizedIdentity": "כפיפת מרפקים פטישים",
+      "canonicalName": "כפיפת מרפקים פטישים",
+      "duplicateName": "כפיפת מרפקים פטישים",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B28",
+        "name": "כפיפת מרפקים פטישים"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B29",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": " A-B.xlsx",
+        "sheet": " A-B",
+        "cell": "B30",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ly3xqh",
+      "normalizedIdentity": "משיכה בפולי עליון מוט רחב",
+      "canonicalName": "משיכה בפולי עליון מוט רחב",
+      "duplicateName": "משיכה בפולי עליון מוט רחב",
+      "source": {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B4",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-mx59uy",
+      "normalizedIdentity": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "canonicalName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "duplicateName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "source": {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B7",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      }
+    },
+    {
+      "exerciseId": "exercise-f2juxe",
+      "normalizedIdentity": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "canonicalName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "duplicateName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B9",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": " FBW משקולות חופשי מתחילים.xlsx",
+        "sheet": " FBW משקולות חופשי מתחילים",
+        "cell": "B10",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-mhdxgx",
+      "normalizedIdentity": "לחיצת רגליים במכונה",
+      "canonicalName": "לחיצת רגליים במכונה",
+      "duplicateName": "לחיצת רגליים במכונה",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B4",
+        "name": "לחיצת רגליים במכונה"
+      }
+    },
+    {
+      "exerciseId": "exercise-1lrrpsj",
+      "normalizedIdentity": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "canonicalName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "duplicateName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B5",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ly3xqh",
+      "normalizedIdentity": "משיכה בפולי עליון מוט רחב",
+      "canonicalName": "משיכה בפולי עליון מוט רחב",
+      "duplicateName": "משיכה בפולי עליון מוט רחב",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B6",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-1u5j1lv",
+      "normalizedIdentity": "חתירה בפולי תחתון",
+      "canonicalName": "חתירה בפולי תחתון",
+      "duplicateName": "חתירה בפולי תחתון",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B7",
+        "name": "חתירה בפולי תחתון"
+      }
+    },
+    {
+      "exerciseId": "exercise-thb870",
+      "normalizedIdentity": "לחיצת חזה במוט ישר",
+      "canonicalName": "לחיצת חזה במוט ישר",
+      "duplicateName": "לחיצת חזה במוט ישר",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B8",
+        "name": "לחיצת חזה במוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-1e2u7l0",
+      "normalizedIdentity": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "canonicalName": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "duplicateName": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B9",
+        "name": "לחיצת חזה במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-yspcn",
+      "normalizedIdentity": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "canonicalName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "duplicateName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B11",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-f2juxe",
+      "normalizedIdentity": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "canonicalName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "duplicateName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B12",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "cell": "B13",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fdd4gb",
+      "normalizedIdentity": "סקוואט עם מוט",
+      "canonicalName": "סקוואט עם מוט",
+      "duplicateName": "סקוואט עם מוט",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A3",
+        "name": "סקוואט עם מוט"
+      }
+    },
+    {
+      "exerciseId": "exercise-mhdxgx",
+      "normalizedIdentity": "לחיצת רגליים במכונה",
+      "canonicalName": "לחיצת רגליים במכונה",
+      "duplicateName": "לחיצת רגליים במכונה",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A7",
+        "name": "לחיצת רגליים במכונה"
+      }
+    },
+    {
+      "exerciseId": "exercise-igalw2",
+      "normalizedIdentity": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "canonicalName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "duplicateName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A8",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      }
+    },
+    {
+      "exerciseId": "exercise-1lrrpsj",
+      "normalizedIdentity": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "canonicalName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "duplicateName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "A9",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ly3xqh",
+      "normalizedIdentity": "משיכה בפולי עליון מוט רחב",
+      "canonicalName": "משיכה בפולי עליון מוט רחב",
+      "duplicateName": "משיכה בפולי עליון מוט רחב",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B3",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-5aj1cu",
+      "normalizedIdentity": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "canonicalName": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "duplicateName": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B7",
+        "name": "משיכה הפולי עליון באחיזה צרה מוט משולש"
+      }
+    },
+    {
+      "exerciseId": "exercise-1u5j1lv",
+      "normalizedIdentity": "חתירה בפולי תחתון",
+      "canonicalName": "חתירה בפולי תחתון",
+      "duplicateName": "חתירה בפולי תחתון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "B9",
+        "name": "חתירה בפולי תחתון"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1e2u7l0",
+      "normalizedIdentity": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "canonicalName": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "duplicateName": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C3",
+        "name": "לחיצת חזה במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-1f01l0c",
+      "normalizedIdentity": "פרפר במכונה",
+      "canonicalName": "פרפר במכונה",
+      "duplicateName": "פרפר במכונה",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C5",
+        "name": "פרפר במכונה"
+      }
+    },
+    {
+      "exerciseId": "exercise-thb870",
+      "normalizedIdentity": "לחיצת חזה במוט ישר",
+      "canonicalName": "לחיצת חזה במוט ישר",
+      "duplicateName": "לחיצת חזה במוט ישר",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C6",
+        "name": "לחיצת חזה במוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-19qm0t4",
+      "normalizedIdentity": "פרפר בכבלים",
+      "canonicalName": "פרפר בכבלים",
+      "duplicateName": "פרפר בכבלים",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "C7",
+        "name": "פרפר בכבלים"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-14tz34b",
+      "normalizedIdentity": "לחיצת כתפיים כנגד משקולות",
+      "canonicalName": "לחיצת כתפיים כנגד משקולות",
+      "duplicateName": "לחיצת כתפיים כנגד משקולות",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D3",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      }
+    },
+    {
+      "exerciseId": "exercise-mx59uy",
+      "normalizedIdentity": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "canonicalName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "duplicateName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D4",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fr384u",
+      "normalizedIdentity": "הרחקה אופקית במשקולות בודדות",
+      "canonicalName": "הרחקה אופקית במשקולות בודדות",
+      "duplicateName": "הרחקה אופקית במשקולות בודדות",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D5",
+        "name": "הרחקה אופקית במשקולות בודדות"
+      }
+    },
+    {
+      "exerciseId": "exercise-yjtm56",
+      "normalizedIdentity": "כתף אחורית בפולי עליון כנגד כבל",
+      "canonicalName": "כתף אחורית בפולי עליון כנגד כבל",
+      "duplicateName": "כתף אחורית בפולי עליון כנגד כבל",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "D6",
+        "name": "כתף אחורית בפולי עליון כנגד כבל"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1759fj3",
+      "normalizedIdentity": "פשיטת מרפקים כנגד משקולות בודדות",
+      "canonicalName": "פשיטת מרפקים כנגד משקולות בודדות",
+      "duplicateName": "פשיטת מרפקים כנגד משקולות בודדות",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E3",
+        "name": "פשיטת מרפקים כנגד משקולות בודדות"
+      }
+    },
+    {
+      "exerciseId": "exercise-yspcn",
+      "normalizedIdentity": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "canonicalName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "duplicateName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E4",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-cw8lzv",
+      "normalizedIdentity": "לחיצה צרפתית במוט w",
+      "canonicalName": "לחיצה צרפתית במוט W",
+      "duplicateName": "לחיצה צרפתית במוט W",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "E5",
+        "name": "לחיצה צרפתית במוט W"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-f2juxe",
+      "normalizedIdentity": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "canonicalName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "duplicateName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "F5",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G2",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G3",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G5",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-1urdov4",
+      "normalizedIdentity": "הרמת רגליים",
+      "canonicalName": "הרמת רגליים",
+      "duplicateName": "הרמת רגליים",
+      "source": {
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "cell": "G6",
+        "name": "הרמת רגליים"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-2ez0zf",
+      "normalizedIdentity": "לאנג סטטי | לאנג דינמאי | לאנג עם משקולות",
+      "canonicalName": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+      "duplicateName": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "A6",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "B3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "C3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "D3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "F3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-155pu7s",
+      "normalizedIdentity": "חימום דינאמי לפי אימון",
+      "canonicalName": "חימום דינאמי לפי אימון",
+      "duplicateName": "חימום דינאמי לפי אימון",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G3",
+        "name": "חימום דינאמי לפי אימון"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G4",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-1urdov4",
+      "normalizedIdentity": "הרמת רגליים",
+      "canonicalName": "הרמת רגליים",
+      "duplicateName": "הרמת רגליים",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G5",
+        "name": "הרמת רגליים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G6",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-1urdov4",
+      "normalizedIdentity": "הרמת רגליים",
+      "canonicalName": "הרמת רגליים",
+      "duplicateName": "הרמת רגליים",
+      "source": {
+        "workbook": "בנק תרגילים משקל גוף.xlsx",
+        "sheet": "בנק תרגילים משקל גוף",
+        "cell": "G7",
+        "name": "הרמת רגליים"
+      }
+    },
+    {
+      "exerciseId": "exercise-n1izh5",
+      "normalizedIdentity": "סקוואט משקל גוף",
+      "canonicalName": "סקוואט משקל גוף",
+      "duplicateName": "סקוואט משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B3",
+        "name": "סקוואט משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-1igvlte",
+      "normalizedIdentity": "מתח רחב",
+      "canonicalName": "מתח רחב",
+      "duplicateName": "מתח רחב",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B4",
+        "name": "מתח רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-hdg3yz",
+      "normalizedIdentity": "שכיבות סמיכה משקל גוף",
+      "canonicalName": "שכיבות סמיכה משקל גוף",
+      "duplicateName": "שכיבות סמיכה משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B5",
+        "name": "שכיבות סמיכה משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-1wwie67",
+      "normalizedIdentity": "לחיצות כתפיים מצב רחב",
+      "canonicalName": "לחיצות כתפיים מצב רחב",
+      "duplicateName": "לחיצות כתפיים מצב רחב",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B6",
+        "name": "לחיצות כתפיים מצב רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fo5t9c",
+      "normalizedIdentity": "כפיפת מרפקים משקל גוף",
+      "canonicalName": "כפיפת מרפקים משקל גוף",
+      "duplicateName": "כפיפת מרפקים משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B8",
+        "name": "כפיפת מרפקים משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתחילים.xlsx",
+        "sheet": "משקל גוף מתחילים",
+        "cell": "B9",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-n1izh5",
+      "normalizedIdentity": "סקוואט משקל גוף",
+      "canonicalName": "סקוואט משקל גוף",
+      "duplicateName": "סקוואט משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B3",
+        "name": "סקוואט משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-2ez0zf",
+      "normalizedIdentity": "לאנג סטטי | לאנג דינמאי | לאנג עם משקולות",
+      "canonicalName": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+      "duplicateName": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B4",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות"
+      }
+    },
+    {
+      "exerciseId": "exercise-1igvlte",
+      "normalizedIdentity": "מתח רחב",
+      "canonicalName": "מתח רחב",
+      "duplicateName": "מתח רחב",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B5",
+        "name": "מתח רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ba2nb8",
+      "normalizedIdentity": "מתח לפנים | תרגיל לגב + יד קדמית",
+      "canonicalName": "מתח לפנים | תרגיל לגב + יד קדמית",
+      "duplicateName": "מתח לפנים | תרגיל לגב + יד קדמית",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B6",
+        "name": "מתח לפנים | תרגיל לגב + יד קדמית"
+      }
+    },
+    {
+      "exerciseId": "exercise-hdg3yz",
+      "normalizedIdentity": "שכיבות סמיכה משקל גוף",
+      "canonicalName": "שכיבות סמיכה משקל גוף",
+      "duplicateName": "שכיבות סמיכה משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B7",
+        "name": "שכיבות סמיכה משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-dhk3wr",
+      "normalizedIdentity": "שכיבות סמיכה לחזה תחתון",
+      "canonicalName": "שכיבות סמיכה לחזה תחתון",
+      "duplicateName": "שכיבות סמיכה לחזה תחתון",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B8",
+        "name": "שכיבות סמיכה לחזה תחתון"
+      }
+    },
+    {
+      "exerciseId": "exercise-1wwie67",
+      "normalizedIdentity": "לחיצות כתפיים מצב רחב",
+      "canonicalName": "לחיצות כתפיים מצב רחב",
+      "duplicateName": "לחיצות כתפיים מצב רחב",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B9",
+        "name": "לחיצות כתפיים מצב רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-8q99c1",
+      "normalizedIdentity": "פשיטת ידיים מצב צר",
+      "canonicalName": "פשיטת ידיים מצב צר",
+      "duplicateName": "פשיטת ידיים מצב צר",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B10",
+        "name": "פשיטת ידיים מצב צר"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fo5t9c",
+      "normalizedIdentity": "כפיפת מרפקים משקל גוף",
+      "canonicalName": "כפיפת מרפקים משקל גוף",
+      "duplicateName": "כפיפת מרפקים משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B11",
+        "name": "כפיפת מרפקים משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B12",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "משקל גוף מתקדמים.xlsx",
+        "sheet": "משקל גוף מתקדמים",
+        "cell": "B13",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-ptjiss",
+      "normalizedIdentity": "לחיצת חזה במשקולות בודדות",
+      "canonicalName": "לחיצת חזה  במשקולות בודדות",
+      "duplicateName": "לחיצת חזה  במשקולות בודדות",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B6",
+        "name": "לחיצת חזה  במשקולות בודדות"
+      }
+    },
+    {
+      "exerciseId": "exercise-14tz34b",
+      "normalizedIdentity": "לחיצת כתפיים כנגד משקולות",
+      "canonicalName": "לחיצת כתפיים כנגד משקולות",
+      "duplicateName": "לחיצת כתפיים כנגד משקולות",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B8",
+        "name": "לחיצת כתפיים כנגד משקולות"
+      }
+    },
+    {
+      "exerciseId": "exercise-mx59uy",
+      "normalizedIdentity": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "canonicalName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "duplicateName": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B9",
+        "name": "הרחקת כתפיים במשקולות בודדות בעמידה"
+      }
+    },
+    {
+      "exerciseId": "exercise-yspcn",
+      "normalizedIdentity": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "canonicalName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "duplicateName": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B11",
+        "name": "בעמידה פשיטת מרפקים בפולי מוט ישר"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B14",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B15",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    },
+    {
+      "exerciseId": "exercise-1fdd4gb",
+      "normalizedIdentity": "סקוואט עם מוט",
+      "canonicalName": "סקוואט עם מוט",
+      "duplicateName": "סקוואט עם מוט",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B19",
+        "name": "סקוואט עם מוט"
+      }
+    },
+    {
+      "exerciseId": "exercise-1lrrpsj",
+      "normalizedIdentity": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "canonicalName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "duplicateName": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B20",
+        "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג"
+      }
+    },
+    {
+      "exerciseId": "exercise-igalw2",
+      "normalizedIdentity": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "canonicalName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "duplicateName": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B21",
+        "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי"
+      }
+    },
+    {
+      "exerciseId": "exercise-1ly3xqh",
+      "normalizedIdentity": "משיכה בפולי עליון מוט רחב",
+      "canonicalName": "משיכה בפולי עליון מוט רחב",
+      "duplicateName": "משיכה בפולי עליון מוט רחב",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B23",
+        "name": "משיכה בפולי עליון מוט רחב"
+      }
+    },
+    {
+      "exerciseId": "exercise-5aj1cu",
+      "normalizedIdentity": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "canonicalName": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "duplicateName": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B24",
+        "name": "משיכה הפולי עליון באחיזה צרה מוט משולש"
+      }
+    },
+    {
+      "exerciseId": "exercise-1u5j1lv",
+      "normalizedIdentity": "חתירה בפולי תחתון",
+      "canonicalName": "חתירה בפולי תחתון",
+      "duplicateName": "חתירה בפולי תחתון",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B25",
+        "name": "חתירה בפולי תחתון"
+      }
+    },
+    {
+      "exerciseId": "exercise-f2juxe",
+      "normalizedIdentity": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "canonicalName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "duplicateName": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B28",
+        "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות"
+      }
+    },
+    {
+      "exerciseId": "exercise-1l24vb0",
+      "normalizedIdentity": "כפיפת מרפקים פטישים",
+      "canonicalName": "כפיפת מרפקים פטישים",
+      "duplicateName": "כפיפת מרפקים פטישים",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B29",
+        "name": "כפיפת מרפקים פטישים"
+      }
+    },
+    {
+      "exerciseId": "exercise-p2ohuv",
+      "normalizedIdentity": "אופניים",
+      "canonicalName": "אופניים",
+      "duplicateName": "אופניים",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B31",
+        "name": "אופניים"
+      }
+    },
+    {
+      "exerciseId": "exercise-pn4ire",
+      "normalizedIdentity": "כפיפות בטן משקל גוף",
+      "canonicalName": "כפיפות בטן משקל גוף",
+      "duplicateName": "כפיפות בטן משקל גוף",
+      "source": {
+        "workbook": "A-B קצר.xlsx",
+        "sheet": "A-B קצר",
+        "cell": "B32",
+        "name": "כפיפות בטן משקל גוף"
+      }
+    }
+  ],
+  "duplicatesMergedCount": 112,
+  "aliasesCreated": [],
+  "rowsSkipped": [
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 13,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 15,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 25,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 27,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 37,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 38,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 39,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 40,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 41,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 42,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 43,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 44,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 45,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 46,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 47,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 16,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 18,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 31,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 33,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 35,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "cell": "B36",
+      "value": "ראשון שני - רביעי חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "cell": "B37",
+      "value": "ראשון שני שישי שבת",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "cell": "B38",
+      "value": "ראשון - שני - שלישי - רביעי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "cell": "B39",
+      "value": "ראשון A שלישי B חמישי FBW",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 40,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 41,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 42,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 43,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 44,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 45,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 46,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 47,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 48,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 49,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 12,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 13,
+      "value": "הליכה 20 דקות הליכה קצב 5-6 = יכולת דיבור תוך כדי הליכה",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 14,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "cell": "B15",
+      "value": "ראשון - שלישי - חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "cell": "B16",
+      "value": "ראשון - רביעי - שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "cell": "B17",
+      "value": "ראשון - שלישי/ רביעי - שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 18,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 19,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 20,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 21,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 22,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 23,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 24,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 25,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 26,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 27,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 15,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 16,
+      "value": "הליכה 20 דקות הליכה קצב 5-6 = יכולת דיבור תוך כדי הליכה",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 17,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "cell": "B18",
+      "value": "ראשון - שלישי - חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "cell": "B19",
+      "value": "ראשון - רביעי -שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "cell": "B20",
+      "value": "ראשון - שלישי/ רביעי - שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 21,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 22,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 23,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 24,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 25,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 26,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 27,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 28,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 29,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 30,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 11,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 12,
+      "value": "הליכה 20 דקות הליכה קצב 5-6 = יכולת דיבור תוך כדי הליכה",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 13,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "cell": "B14",
+      "value": "ראשון - שלישי - חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "cell": "B15",
+      "value": "ראשון - רביעי -שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "cell": "B16",
+      "value": "ראשון - שלישי/ רביעי - שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 17,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 18,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 19,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 20,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 21,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 22,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 23,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 24,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 25,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתחילים.xlsx",
+      "sheet": "משקל גוף מתחילים",
+      "row": 26,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 15,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 16,
+      "value": "הליכה 20 דקות הליכה קצב 5-6 = יכולת דיבור תוך כדי הליכה",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 17,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "cell": "B18",
+      "value": "ראשון - שלישי - חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "cell": "B19",
+      "value": "ראשון - רביעי -שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "cell": "B20",
+      "value": "ראשון - שלישי/ רביעי - שישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 21,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 22,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 23,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 24,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 25,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 26,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 27,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 28,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 29,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "משקל גוף מתקדמים.xlsx",
+      "sheet": "משקל גוף מתקדמים",
+      "row": 30,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 17,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 27,
+      "reason": "row_has_prescription_but_no_exercise_name"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 34,
+      "value": "ממוצע צעדים יומי היום: - יעד יומי",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 35,
+      "value": "הליכה 20 דקות הליכה קצב 5-6 = יכולת דיבור תוך כדי הליכה",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 36,
+      "value": "ימי אימון",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "cell": "B37",
+      "value": "ראשון שני - רביעי חמישי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "cell": "B38",
+      "value": "ראשון שני שישי שבת",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "cell": "B39",
+      "value": "ראשון - שני - שלישי - רביעי",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "cell": "B40",
+      "value": "ראשון A שלישי B חמישי FBW",
+      "reason": "weekly_schedule_row_not_exercise"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 41,
+      "value": "דגשים לאימון:",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 42,
+      "value": "·יש לאכול שעה וחצי לפני אימון ארוחה קלה ללא שומנים וסיבים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 43,
+      "value": "· לשתות לפני אימון חצי ליטר מים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 44,
+      "value": "· כל אימון חייב לכלול חימום של 5 ד' על מכשיר אירובי לבחירתך/ריצה קלילה עד שיעלה קצת דופק מהרגיל.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 45,
+      "value": "· מתיחות ושחרור יעשו בסוף כל אימון.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 46,
+      "value": "· עבודה על חזרות איטיות ומבוקרות ולא מתפרצות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 47,
+      "value": "· עבודה בכל טווח התנועה המלא של התרגיל,  כדי להגדיל טווח תנועה ולמנוע קיצור שרירים.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 48,
+      "value": "· כל סוף סט אתה צריך להרגיש שיש לך אפשרות לעוד 2 חזרות נוספות לא מעבר.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 49,
+      "value": "· מנוחה: בין סט לסט ותרגיל בין 60/90 שניות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    },
+    {
+      "file": "A-B קצר.xlsx",
+      "sheet": "A-B קצר",
+      "row": 50,
+      "value": "· אחת לשבוע יש לעלות משקלים בקפיצות של חצי קילו עד קילו לתרגיל/חזרות.",
+      "reason": "non_exercise_instruction_or_tracking_row"
+    }
+  ],
+  "rowsSkippedCount": 117,
+  "missingFields": [
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 5,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 5,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 5,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 17,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 17,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 17,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 29,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 29,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B-C.xlsx",
+      "sheet": " A-B-C",
+      "row": 29,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 5,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 5,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 5,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 20,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 20,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " A-B.xlsx",
+      "sheet": " A-B",
+      "row": 20,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 3,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 3,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": " FBW משקולות חופשי מתחילים.xlsx",
+      "sheet": " FBW משקולות חופשי מתחילים",
+      "row": 3,
+      "field": "rest"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 3,
+      "field": "sets"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 3,
+      "field": "reps"
+    },
+    {
+      "entity": "workout_exercise",
+      "exerciseId": "exercise-155pu7s",
+      "file": "אימון FBW מלא לחדר כושר.xlsx",
+      "sheet": "אימון FBW מלא לחדר כושר",
+      "row": 3,
+      "field": "rest"
+    },
+    {
+      "entity": "exercise",
+      "exerciseId": "exercise-19zx08z",
+      "file": "בנק תרגילים משקולות ומכונות.xlsx",
+      "sheet": "בנק תרגילים משקולות ומכונות",
+      "cell": "A10",
+      "field": "video"
+    },
+    {
+      "entity": "exercise",
+      "exerciseId": "exercise-1h0qzj6",
+      "file": "בנק תרגילים משקולות ומכונות.xlsx",
+      "sheet": "בנק תרגילים משקולות ומכונות",
+      "cell": "B5",
+      "field": "video"
+    },
+    {
+      "entity": "exercise",
+      "exerciseId": "exercise-126wehi",
+      "file": "בנק תרגילים משקולות ומכונות.xlsx",
+      "sheet": "בנק תרגילים משקולות ומכונות",
+      "cell": "B6",
+      "field": "video"
+    }
+  ],
+  "unresolvedReferences": []
+}

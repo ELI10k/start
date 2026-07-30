@@ -1,0 +1,35 @@
+{
+  "source": "data/source/foods.xlsx",
+  "sheets": [
+    "בלוק 1 - מוצרי חלב"
+  ],
+  "sourceRows": 336,
+  "importedFoods": 336,
+  "ignoredRows": 0,
+  "categoryCount": 63,
+  "duplicateNames": [
+    {
+      "name": "בורקס גבינה",
+      "ids": [
+        "196",
+        "319"
+      ]
+    },
+    {
+      "name": "ג׳חנון",
+      "ids": [
+        "321",
+        "322"
+      ]
+    }
+  ],
+  "missingOptionalNutrition": {
+    "protein": 15,
+    "carbs": 17,
+    "fat": 23,
+    "sugars": 82,
+    "sodiumMg": 85,
+    "calciumMg": 279
+  },
+  "issues": []
+}

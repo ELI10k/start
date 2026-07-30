@@ -1,0 +1,3 @@
+"use client";
+import { useEffect } from "react";
+export default function FoodsError({ error, unstable_retry }: { error: Error & { digest?: string }; unstable_retry: () => void }) { useEffect(() => { console.error(error); }, [error]); return <main className="min-h-screen bg-[#090909] px-4 py-24 text-center text-white"><h1 className="text-3xl font-black">לא הצלחנו לטעון את מאגר המזונות</h1><p className="mt-3 text-zinc-500">אפשר לנסות לטעון את הנתונים מחדש.</p><button type="button" onClick={() => unstable_retry()} className="mt-6 rounded-2xl bg-[#D4AF37] px-5 py-3 font-black text-black">ניסיון נוסף</button></main>; }

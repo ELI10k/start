@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #090909;
+  --foreground: #f5f5f5;
+  --start-gold: #d4af37;
+  --start-gold-soft: #e7c85d;
 }
 
 @theme inline {
@@ -20,9 +22,51 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at 88% -8%, rgba(212, 175, 55, .11), transparent 30rem),
+    var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-width: 320px;
+  text-rendering: optimizeLegibility;
+}
+
+main { width: 100%; }
+:where(a, button, input, select, textarea) { -webkit-tap-highlight-color: transparent; }
+:where(a, button) { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease; }
+:where(a[href]):hover { text-decoration-thickness: 1px; }
+:where(main) > div[class*="max-w-"] { max-width: 72rem; }
+:where(.rounded-\[24px\], .rounded-\[26px\], .rounded-\[22px\]) { box-shadow: 0 12px 36px rgba(0,0,0,.16); }
+@media (min-width: 1280px) { :where(main) > div[class*="max-w-"] { max-width: 80rem; } }
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #d4af37;
+  outline-offset: 3px;
+}
+
+button:not(:disabled), select:not(:disabled) { cursor: pointer; }
+button:active:not(:disabled), a:active { transform: scale(.985); }
+
+.start-surface {
+  border: 1px solid rgba(255,255,255,.10);
+  background: linear-gradient(145deg, rgba(255,255,255,.035), transparent 62%), #151515;
+  box-shadow: 0 12px 36px rgba(0,0,0,.16);
+}
+
+.start-empty {
+  border: 1px dashed rgba(212,175,55,.32);
+  background: linear-gradient(145deg, rgba(212,175,55,.06), transparent 58%);
+}
+
+.start-action:hover { border-color: rgba(212,175,55,.65); box-shadow: 0 8px 24px rgba(212,175,55,.10); transform: translateY(-1px); }
+
+.start-gold-button:hover { background: var(--start-gold-soft); box-shadow: 0 8px 24px rgba(212,175,55,.20); transform: translateY(-1px); }
+
+@media (min-width: 768px) {
+  :where(main) > div[class*="max-w-"] { padding-left: 2rem; padding-right: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 .input {
   width: 100%;
@@ -58,4 +102,354 @@ body {
 .nutrition-input option {
   background: #161616;
   color: white;
+}.foods-page {
+  min-height: 100vh;
+  direction: rtl;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(212, 175, 55, 0.08),
+      transparent 30%
+    ),
+    #0a0a0a;
+  color: #f4f4f4;
+  padding: 32px 20px 120px;
+}
+
+.food-database {
+  width: min(100%, 900px);
+  margin: 0 auto;
+}
+
+.food-database__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.food-database__eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #d4af37;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+}
+
+.food-database__title {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.food-database__description {
+  margin: 10px 0 0;
+  color: #a8a8a8;
+  font-size: 15px;
+}
+
+.food-database__count {
+  min-width: 90px;
+  padding: 13px 18px;
+  border: 1px solid #2b2b2b;
+  border-radius: 18px;
+  background: rgba(22, 22, 22, 0.82);
+  text-align: center;
+}
+
+.food-database__count strong {
+  display: block;
+  color: #f3d27a;
+  font-size: 22px;
+}
+
+.food-database__count span {
+  color: #8e8e8e;
+  font-size: 12px;
+}
+
+.food-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.food-search__icon {
+  position: absolute;
+  right: 18px;
+  z-index: 1;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.food-search__input {
+  width: 100%;
+  min-height: 58px;
+  padding: 0 52px 0 52px;
+  border: 1px solid #2b2b2b;
+  border-radius: 18px;
+  outline: none;
+  background: #161616;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.food-search__input::placeholder {
+  color: #707070;
+}
+
+.food-search__input:focus {
+  border-color: #b8891e;
+  background: #191919;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.09);
+}
+
+.food-search__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.food-search__clear {
+  position: absolute;
+  left: 15px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid #363636;
+  border-radius: 50%;
+  background: #202020;
+  color: #d7d7d7;
+  font-family: inherit;
+  font-size: 23px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.food-search__clear:hover {
+  border-color: #d4af37;
+  color: #f3d27a;
+  transform: scale(1.05);
+}
+
+.food-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.food-card {
+  overflow: hidden;
+  border: 1px solid #2b2b2b;
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.025),
+      transparent
+    ),
+    #161616;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.food-card:hover {
+  border-color: rgba(212, 175, 55, 0.55);
+  transform: translateY(-2px);
+}
+
+.food-card__top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+}
+
+.food-card__category {
+  display: inline-flex;
+  margin-bottom: 9px;
+  padding: 5px 10px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.07);
+  color: #d4af37;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.food-card__name {
+  margin: 0;
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.food-card__brand {
+  margin: 5px 0 0;
+  color: #8e8e8e;
+  font-size: 13px;
+}
+
+.food-card__calories {
+  min-width: 75px;
+  text-align: left;
+}
+
+.food-card__calories strong {
+  display: block;
+  color: #f3d27a;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.food-card__calories span {
+  color: #777777;
+  font-size: 11px;
+}
+
+.food-card__macros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #262626;
+  border-bottom: 1px solid #262626;
+}
+
+.food-macro {
+  padding: 13px 10px;
+  text-align: center;
+}
+
+.food-macro:not(:last-child) {
+  border-left: 1px solid #262626;
+}
+
+.food-macro span {
+  display: block;
+  margin-bottom: 4px;
+  color: #787878;
+  font-size: 11px;
+}
+
+.food-macro strong {
+  color: #dddddd;
+  font-size: 13px;
+}
+
+.food-card__footer {
+  padding: 11px 20px 13px;
+  color: #696969;
+  font-size: 11px;
+}
+
+.food-empty-state {
+  padding: 64px 20px;
+  border: 1px dashed #343434;
+  border-radius: 24px;
+  background: rgba(22, 22, 22, 0.65);
+  text-align: center;
+}
+
+.food-empty-state__icon {
+  margin-bottom: 13px;
+  font-size: 38px;
+  filter: grayscale(1);
+}
+
+.food-empty-state h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 23px;
+}
+
+.food-empty-state p {
+  margin: 8px 0 22px;
+  color: #858585;
+}
+
+.food-empty-state button {
+  min-height: 43px;
+  padding: 0 20px;
+  border: 1px solid #b8891e;
+  border-radius: 13px;
+  background: rgba(212, 175, 55, 0.08);
+  color: #f3d27a;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .foods-page {
+    padding: 24px 15px 110px;
+  }
+
+  .food-database__header {
+    align-items: center;
+  }
+
+  .food-database__description {
+    max-width: 230px;
+  }
+
+  .food-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .food-database__count {
+    min-width: 76px;
+    padding: 11px 12px;
+  }
+
+  .food-database__count strong {
+    font-size: 19px;
+  }
+
+  .food-card__top {
+    padding: 18px;
+  }
+}.food-categories {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-bottom: 22px;
+  padding-bottom: 4px;
+}
+
+.food-category {
+  border: 1px solid #2b2b2b;
+  background: #161616;
+  color: #bfbfbf;
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.food-category:hover {
+  border-color: #d4af37;
+}
+
+.food-category.active {
+  background: #d4af37;
+  color: #0a0a0a;
+  border-color: #d4af37;
+  font-weight: 700;
 }
