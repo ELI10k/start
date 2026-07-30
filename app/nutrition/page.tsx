@@ -88,7 +88,7 @@ export default async function NutritionPage() {
                 </form>
               </div>
               {meal.notes?<p className="mt-3 text-sm text-zinc-400">{meal.notes}</p>:null}
-              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#D4AF37]/20 p-4 text-sm text-[#E7C85D]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 space-y-4">
+              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#D4AF37]/20 p-4 text-sm text-[#E7C85D]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
                 {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-white/10 p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-zinc-500">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
                     <MealOptionButton
