@@ -14,7 +14,7 @@ import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor 
 
 type FoodOption={id:string;name:string;brand:string|null;category?:string;calories:number;protein:number|null;carbs:number|null;fat:number|null;packageUnit:string|null;unitWeightGrams:number|null;isMaster?:boolean;masterGroup?:GroupType|null};
 type FoodUsage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
-type ClientOption={id:string;full_name:string;weight:number|null};
+type ClientOption={id:string;full_name:string;weight:number|null;calorieTarget:number|null};
 type Item={foodId:string;amount:number;amountSource?:"auto"|"manual"};
 type GroupType="protein"|"carbohydrate"|"fat"|"vegetables";
 type Group={type:GroupType;items:Item[]};
@@ -87,7 +87,14 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       return next.menu;
     });
   };
-  const selectClient=(clientId:string)=>applyAutomatic(clientId,menu.calorieTarget);
+  // The client profile already carries a calorie target from onboarding. Reuse it
+  // instead of making the coach retype a number the system already knows, but never
+  // overwrite a target the coach has already typed for this menu.
+  const selectClient=(clientId:string)=>{
+    const client=clients.find(candidate=>candidate.id===clientId);
+    const calorieTarget=menu.calorieTarget||(client?.calorieTarget?String(Math.round(client.calorieTarget)):"");
+    applyAutomatic(clientId,calorieTarget);
+  };
   const changeCalories=(calorieTarget:string)=>applyAutomatic(menu.clientId,calorieTarget);
   const selectFood=(mealIndex:number,groupIndex:number,itemIndex:number,foodId:string)=>{
     const meal=menu.meals[mealIndex];

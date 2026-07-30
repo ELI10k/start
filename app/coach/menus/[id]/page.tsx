@@ -90,10 +90,14 @@ export default async function EditMenuPage({
     <PersistentMenuEditor
       initial={initial}
       foods={foods}
-      clients={clientResult.items.map(({ id, full_name, latestWeight }) => ({
+      clients={clientResult.items.map(({ id, full_name, latestWeight, clientProfile }) => ({
         id,
         full_name,
         weight: latestWeight,
+        calorieTarget:
+          clientProfile?.calorie_target === null || clientProfile?.calorie_target === undefined
+            ? null
+            : Number(clientProfile.calorie_target),
       }))}
       initialUsage={usageRows.map((row) => ({
         foodId: String(row.food_id),
