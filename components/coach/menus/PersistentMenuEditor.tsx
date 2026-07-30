@@ -71,9 +71,19 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const applyAutomatic=(clientId:string,calorieTarget:string,force=false)=>{
     setMenu(current=>{
       const next=withAutomaticTargets(current,clientId,calorieTarget,force);
+      // Name the input that is actually missing. Blaming the weight when the
+      // calorie target is the empty one sends the coach hunting for the wrong thing.
+      const client=clients.find(candidate=>candidate.id===clientId);
+      const missingInput=!clientId
+        ?"יש לבחור לקוח כדי לחשב מאקרו אוטומטית."
+        :!client?.weight
+          ?"ללקוח אין שקילה אחרונה, ולכן אין משקל לחישוב. אפשר להזין את היעדים ידנית."
+          :!Number(calorieTarget)
+            ?"יש להזין יעד קלוריות כדי לחשב מאקרו אוטומטית."
+            :"לא ניתן לחשב מאקרו אוטומטית מהנתונים הקיימים.";
       setMacroMessage(next.result.ok
         ?force?"יעדי המאקרו חושבו מחדש.":"יעדי המאקרו עודכנו לפי המשקל ויעד הקלוריות."
-        :next.result.reason==="negative_carbohydrates"?"יעד הקלוריות נמוך מדי ביחס למשקל: חישוב הפחמימות שלילי.":"לא ניתן לחשב מאקרו אוטומטית ללא משקל לקוח.");
+        :next.result.reason==="negative_carbohydrates"?"יעד הקלוריות נמוך מדי ביחס למשקל: חישוב הפחמימות שלילי.":missingInput);
       return next.menu;
     });
   };
