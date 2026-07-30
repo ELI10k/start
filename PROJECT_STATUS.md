@@ -57,7 +57,7 @@ The validator throws on it, so **every later migration is left unvalidated**.
 - Next.js 16.2.10, React 19.2.4, App Router, TypeScript, Tailwind v4.
 - Supabase `@supabase/ssr`; session/role routing in `proxy.ts` (middleware).
 - 55 routes, all server-rendered on demand.
-- 45 SQL migrations in `supabase/migrations/`, all with RLS enabled.
+- 41 SQL migrations in `supabase/migrations/`, all with RLS enabled.
 - 18 test files, `node --test` with `--experimental-strip-types`.
 - Storage: private bucket `check-in-photos`, `upsert: false` (`lib/check-ins/photo-storage.ts`).
 - No `vercel.json`, no `pg_cron`, no `pg_net` — **there is no scheduler**.
