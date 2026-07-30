@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import SubmitButton from "@/components/forms/SubmitButton";
+import MealOptionButton from "@/components/client/MealOptionButton";
 import {
   setMealCompletion,
   selectMealGroupAlternative,
@@ -88,17 +89,15 @@ export default async function NutritionPage() {
               </div>
               {meal.notes?<p className="mt-3 text-sm text-zinc-400">{meal.notes}</p>:null}
               {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#D4AF37]/20 p-4 text-sm text-[#E7C85D]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 space-y-4">
-                {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-white/10 p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><div className="mt-2 space-y-2">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative} className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3 text-sm ${group.selectedItemId===item.id?"border-[#D4AF37] bg-[#D4AF37]/5":"border-white/5"}`}>
+                {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-white/10 p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-zinc-500">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
-                    <div>
-                      <span className={group.selectedItemId===item.id ? "text-[#E7C85D]" : ""}>
-                        {item.itemRole==="primary"?"מאכל ראשי: ":"חלופה: "}{item.name}
-                      </span>
-                      <span className="mr-2 text-zinc-500">
-                        {item.displayQuantity} {item.measurementUnit} · {item.calories} קל׳
-                      </span>
-                    </div>
-                    <SubmitButton idle={group.selectedItemId===item.id?"נבחר":"בחירה"} pending="שומרים…" className="min-h-10 rounded-xl border border-[#4A3915] px-3 text-xs font-bold text-[#E7C85D] disabled:opacity-50"/>
+                    <MealOptionButton
+                      selected={group.selectedItemId===item.id}
+                      name={item.name}
+                      quantity={String(item.displayQuantity)}
+                      unit={item.measurementUnit}
+                      calories={String(item.calories)}
+                    />
                   </form>)}</div></fieldset>)}
               </div>}
             </article>
