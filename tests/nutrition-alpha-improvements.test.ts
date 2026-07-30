@@ -4,7 +4,7 @@ import test from "node:test";
 import { calculateMacroTargets } from "../lib/nutrition/macro-targets.ts";
 import foodData from "../data/foods.json" with { type: "json" };
 import { foodSearchRelevance,normalizeFoodText,queryFoods } from "../lib/foods/repository.ts";
-import { calculateAlternativePortion,defaultPortionQuantity,portionFor } from "../lib/nutrition/meal-alternatives.ts";
+import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor } from "../lib/nutrition/meal-alternatives.ts";
 
 test("macro targets match the approved 90kg and 2100 calorie example",()=>{
   assert.deepEqual(calculateMacroTargets(90,2100),{
@@ -115,4 +115,26 @@ test("unit-based foods use workbook unit weight without treating units as grams"
   const egg={calories:150,protein:13,carbs:1,fat:10,packageUnit:"יחידה",unitWeightGrams:50};
   assert.deepEqual(portionFor(egg,2),{quantity:2,unit:"יחידות",grams:100,calories:150,protein:13,carbs:1,fat:10});
   assert.equal(defaultPortionQuantity(egg),2);
+});
+
+test("natural units come from the source unit and its weight",()=>{
+  const slice={calories:240,protein:9.2,carbs:45.1,fat:1.7,packageUnit:"פרוסה",unitWeightGrams:30};
+  assert.deepEqual(foodUnit(slice),{unit:"פרוסות",gramsPerUnit:30});
+  const twoSlices=portionFor(slice,2);
+  assert.equal(twoSlices?.unit,"פרוסות");
+  assert.equal(twoSlices?.grams,60);
+  assert.equal(twoSlices?.calories,144);
+});
+
+test("a source unit without a weight stays in grams",()=>{
+  const noWeight={calories:240,protein:9.2,carbs:45.1,fat:1.7,packageUnit:"פרוסה",unitWeightGrams:null};
+  assert.deepEqual(foodUnit(noWeight),{unit:"גרם",gramsPerUnit:1});
+});
+
+test("an alternative measured in slices is rounded to halves",()=>{
+  const pita={calories:236,protein:9.3,carbs:45,fat:1.4,packageUnit:"פיתה",unitWeightGrams:70};
+  const bread={calories:240,protein:9.2,carbs:45.1,fat:1.7,packageUnit:"פרוסה",unitWeightGrams:30};
+  const portion=calculateAlternativePortion(pita,1,bread,"carbohydrate");
+  assert.equal(portion?.unit,"פרוסות");
+  assert.equal((portion?.quantity??0)*2%1,0);
 });

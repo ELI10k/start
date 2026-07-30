@@ -17,10 +17,32 @@ export type Portion=Readonly<{
   fat:number;
 }>;
 
+export const GRAM_UNIT="גרם";
+
+// Natural units come from the food source. A unit is only offered when the
+// source also carries the weight of one - never guessed from the product name.
+const UNIT_PLURALS:Readonly<Record<string,string>>={
+  "יחידה":"יחידות",
+  "פרוסה":"פרוסות",
+  "פיתה":"פיתות",
+  "לחמנייה":"לחמניות",
+  "לחמניה":"לחמניות",
+  "פרכית":"פרכיות",
+  "טורטייה":"טורטיות",
+  "טורטיה":"טורטיות",
+  "כוס":"כוסות",
+  "גביע":"גביעים",
+  "קופסה":"קופסאות",
+  "בקבוק":"בקבוקים",
+  "כף":"כפות",
+  "כפית":"כפיות",
+};
+
 export function foodUnit(food:AlternativeFood):Readonly<{unit:string;gramsPerUnit:number}>{
-  if(food.packageUnit==="יחידה"&&food.unitWeightGrams&&food.unitWeightGrams>0)
-    return{unit:"יחידות",gramsPerUnit:food.unitWeightGrams};
-  return{unit:"גרם",gramsPerUnit:1};
+  const source=food.packageUnit?.trim();
+  if(source&&food.unitWeightGrams&&food.unitWeightGrams>0)
+    return{unit:UNIT_PLURALS[source]??source,gramsPerUnit:food.unitWeightGrams};
+  return{unit:GRAM_UNIT,gramsPerUnit:1};
 }
 
 export function portionFor(food:AlternativeFood,quantity:number):Portion|null{
@@ -65,7 +87,8 @@ export function calculateAlternativePortion(
 }
 
 function roundQuantity(value:number,unit:string){
-  if(unit==="יחידות")return Math.max(1,Math.round(value*2)/2);
+  // Countable units round to a half so "2.5 פרוסות" stays sayable; grams round to 5.
+  if(unit!==GRAM_UNIT)return Math.max(1,Math.round(value*2)/2);
   return Math.max(1,Math.round(value/5)*5);
 }
 function round(value:number){return Math.round(value*10)/10}
