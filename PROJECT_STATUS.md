@@ -25,12 +25,21 @@ migrations `202607290002`–`202607290007`, `lib/check-ins/photo-cycle.ts`) exis
 **only as uncommitted files on disk**. It is not on any branch and not on the remote.
 
 ## Production
-Previously reported URL: `https://start-snowy-eight.vercel.app` — **not verified**
-(requires Vercel dashboard access).
+`https://start-snowy-eight.vercel.app` — verified live and serving
+`integration/start-unified` @ `b854499`, deployed 2026-08-02 with Eli's explicit
+approval. Vercel team `httpselicohenfitnesscoil`, project `start`.
 Supabase project ref: `bacxfweisncnpjgiqxcp`.
 
-## Preview
-Unknown — not verified.
+**Preview and Production share one Supabase database** (verified: identical
+`NEXT_PUBLIC_SUPABASE_URL`). There is no data isolation — any write from a
+Preview deployment hits real client data. This must be split before paying
+customers exist.
+
+## Applied migrations beyond the repo baseline
+- `202608020001_curated_master_foods.sql` — applied 2026-08-02 via the Supabase
+  SQL editor. Inserts 53 curated master foods (28 protein, 18 carbohydrate,
+  7 fat) from Eli's own portion table. Idempotent; rollback at
+  `supabase/seeds/curated-master-foods-rollback.sql`.
 
 ## Baseline validation — re-run 2026-07-30 on `/Users/lykhn/start`
 | Check | Command | Result | Notes |
@@ -96,8 +105,21 @@ types including `קלוריות חופשיות`. **Not verified in a live browse
 - Migration validation is silently short-circuiting.
 - Preview-only work has previously reached Production.
 
+## Open items for beta
+1. `E2E_TEST_LOGIN_ENABLED=true` is set for Production. Test-account password
+   login is exposed to real clients. Disable before beta.
+2. Preview and Production share one database (see above).
+3. Notifications are pull-based only — `ensure_in_app_reminders` runs when the
+   notifications page loads. No cron, no push, nothing fires while the app is closed.
+4. Nine master foods from Eli's list still have no branded catalog equivalent
+   (בטטה, תפוח אדמה, אורז לבן, פרכיות and others) — the curated master rows now
+   cover the coaching use, but the branded catalog remains incomplete.
+5. `main` is still at the pre-audit commit. `integration/start-unified` is what
+   Production runs; `main` has not been fast-forwarded.
+
 ## Next recommended task
-Commit the uncommitted `main` work onto a dedicated branch and push it, so it is
-recoverable, then decide how to reconcile it with
-`codex/start-premium-client-experience`. Only after that: fix the migration-wrapping
-failure and the `rg` test, then run the live nutrition acceptance scenario in a browser.
+Run the full nutrition acceptance scenario in Production with the new master
+foods: pick a client, build a five-meal menu with alternatives, save, refresh,
+edit, clone, and view as the client. Time it against the two-minute target.
+Then the coach-speed work: pre-create all six meals on a new menu, and add a
+one-click "suggested alternatives" action.
