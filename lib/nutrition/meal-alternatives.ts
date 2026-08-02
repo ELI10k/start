@@ -38,9 +38,14 @@ const UNIT_PLURALS:Readonly<Record<string,string>>={
   "כפית":"כפיות",
 };
 
+// A mass or volume is already the measurement - it is never a countable unit.
+// Catalog rows carry things like package_unit "גרם" alongside a unit weight,
+// and treating those as countable multiplies every value by that weight.
+const MEASURE_UNITS=new Set(["גרם","גר","ג","גרמים","מ\"ל","מל","מיליליטר","ליטר","ק\"ג","קג","קילו","קילוגרם","g","gr","gram","grams","ml","l","kg"]);
+
 export function foodUnit(food:AlternativeFood):Readonly<{unit:string;gramsPerUnit:number}>{
   const source=food.packageUnit?.trim();
-  if(source&&food.unitWeightGrams&&food.unitWeightGrams>0)
+  if(source&&!MEASURE_UNITS.has(source.toLowerCase())&&food.unitWeightGrams&&food.unitWeightGrams>0)
     return{unit:UNIT_PLURALS[source]??source,gramsPerUnit:food.unitWeightGrams};
   return{unit:GRAM_UNIT,gramsPerUnit:1};
 }

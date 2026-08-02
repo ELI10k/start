@@ -138,3 +138,16 @@ test("an alternative measured in slices is rounded to halves",()=>{
   assert.equal(portion?.unit,"פרוסות");
   assert.equal((portion?.quantity??0)*2%1,0);
 });
+
+test("a mass unit in the source never becomes a countable unit",()=>{
+  // Regression: catalog rows carry package_unit "גרם" with a unit weight, and
+  // treating that as countable multiplied every value by the weight - 100 g of
+  // egg white came out as 1716 kcal instead of 52.
+  const eggWhite={calories:52,protein:10.9,carbs:0.73,fat:0.17,packageUnit:"גרם",unitWeightGrams:33};
+  assert.deepEqual(foodUnit(eggWhite),{unit:"גרם",gramsPerUnit:1});
+  const portion=portionFor(eggWhite,100);
+  assert.equal(portion?.grams,100);
+  assert.equal(portion?.calories,52);
+  for(const unit of ["מ\"ל","ML","kg","ליטר","gram"])
+    assert.equal(foodUnit({...eggWhite,packageUnit:unit}).gramsPerUnit,1,unit);
+});
