@@ -186,3 +186,17 @@ test("meals can be collapsed to a one-line summary",()=>{
   assert.match(source,/function mealSummary/);
   assert.match(source,/עדיין ריקה/);
 });
+
+test("untouched meals from the skeleton do not block saving",()=>{
+  const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
+  assert.match(source,/const savedMeals=\(\)=>menu\.meals/);
+  assert.match(source,/group\.items\.some\(item=>item\.foodId\)/);
+  assert.match(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
+  assert.match(source,/sticky top-0/);
+});
+
+test("the empty-group message names a food, not an alternative",()=>{
+  const source=readFileSync(new URL("../lib/nutrition/menu-validation.ts",import.meta.url),"utf8");
+  assert.match(source,/יש לבחור לפחות מאכל אחד בכל קבוצת מזון/);
+  assert.doesNotMatch(source,/לפחות חלופה אחת לכל קבוצת מזון/);
+});

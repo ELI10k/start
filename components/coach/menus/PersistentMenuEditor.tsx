@@ -142,14 +142,20 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     for(const suggestion of suggestions)void recordCoachFoodSelection(suggestion.foodId);
   };
   const toggleFavorite=(...args:[string,boolean])=>void args;
+  // The six-meal skeleton is a starting point. Meals the coach left untouched are
+  // dropped on save rather than blocking it, and groups without a food go with them.
+  const savedMeals=()=>menu.meals
+    .map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:meal.groups.filter(group=>group.items.some(item=>item.foodId))})
+    .filter(meal=>meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget)>0:meal.groups.length>0);
   const submit=()=>startTransition(async()=>{
     setMessage("");
-    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?new Date().toISOString().slice(0,10):"",days:[{dayIndex:0,title:"יום רגיל",sortOrder:0,meals:menu.meals.map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",itemRole:itemIndex===0?"primary":"alternative",sortOrder:itemIndex}})}))}))}]});
+    if(!savedMeals().length){setMessage("יש למלא לפחות ארוחה אחת לפני שמירה.");return}
+    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?new Date().toISOString().slice(0,10):"",days:[{dayIndex:0,title:"יום רגיל",sortOrder:0,meals:savedMeals().map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",itemRole:itemIndex===0?"primary":"alternative",sortOrder:itemIndex}})}))}))}]});
     setMessage(result.message??"");
     if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
   });
   return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-6xl">
-    <div className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs font-black tracking-widest text-[#D4AF37]">תפריט שמור</p><h1 className="mt-2 text-3xl font-black">{menu.id?"עריכת תפריט":"תפריט חדש"}</h1></div><button type="button" onClick={submit} disabled={pending||!menu.title.trim()} className="flex min-h-12 items-center gap-2 rounded-2xl bg-[#D4AF37] px-5 font-black text-black disabled:opacity-50"><Save size={18}/>{pending?"שומרים…":"שמירה"}</button></div>
+    <div className="sticky top-0 z-30 -mx-4 mb-1 flex flex-wrap items-center justify-between gap-4 bg-[#0A0A0A]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6"><div><p className="text-xs font-black tracking-widest text-[#D4AF37]">תפריט שמור</p><h1 className="mt-2 text-3xl font-black">{menu.id?"עריכת תפריט":"תפריט חדש"}</h1></div><button type="button" onClick={submit} disabled={pending||!menu.title.trim()} className="flex min-h-12 items-center gap-2 rounded-2xl bg-[#D4AF37] px-5 font-black text-black disabled:opacity-50"><Save size={18}/>{pending?"שומרים…":"שמירה"}</button></div>
     {message&&<p role="status" className="mt-4 rounded-2xl border border-[#333] p-3 text-sm">{message}</p>}
     <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1fr_300px]"><div className="space-y-4">
       <section className="grid gap-4 rounded-[24px] border border-[#292929] bg-[#151515] p-5 sm:grid-cols-2">

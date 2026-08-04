@@ -70,7 +70,7 @@ export function validateMealPlanPayload(payload: unknown): MenuValidationResult 
         return{ok:false,message:"קבוצות המזון בארוחה אינן תקינות."};
       seen.add(group.type);
       if(!Array.isArray(group.items)||group.items.length===0)
-        return{ok:false,message:"יש להוסיף לפחות חלופה אחת לכל קבוצת מזון."};
+        return{ok:false,message:"יש לבחור לפחות מאכל אחד בכל קבוצת מזון."};
       for (const item of group.items as MenuItemInput[]) {
         if (typeof item.foodId !== "string" || !item.foodId) {
           return { ok: false, message: "יש לבחור מזון בכל חלופה." };
