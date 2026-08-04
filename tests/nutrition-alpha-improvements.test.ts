@@ -162,3 +162,27 @@ test("a single portion reads as a singular unit",()=>{
   assert.equal(unitLabel("גרם",1),"גרם");
   assert.equal(unitLabel("פרוסות",2.5),"פרוסות");
 });
+
+test("a new menu opens with the full six-meal skeleton",()=>{
+  const source=readFileSync(new URL("../app/coach/menus/new/page.tsx",import.meta.url),"utf8");
+  assert.match(source,/FIXED_MEAL_TITLES\.map/);
+  assert.match(source,/קלוריות חופשיות/);
+  assert.doesNotMatch(source,/meals:\[\{title:"ארוחת בוקר"/);
+});
+
+test("the editor offers one-click suggested alternatives from master foods",()=>{
+  const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
+  assert.match(source,/suggestAlternatives/);
+  assert.match(source,/הוסף 3 חלופות מומלצות/);
+  assert.match(source,/food\.masterGroup===group\.type/);
+  assert.match(source,/amountSource:"auto" as const/);
+  assert.match(source,/Math\.abs\(a\.portion\.calories-target\.calories\)/);
+});
+
+test("meals can be collapsed to a one-line summary",()=>{
+  const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
+  assert.match(source,/toggleCollapsed/);
+  assert.match(source,/aria-expanded=\{!collapsed\.has\(index\)\}/);
+  assert.match(source,/function mealSummary/);
+  assert.match(source,/עדיין ריקה/);
+});
