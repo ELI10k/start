@@ -1,125 +1,93 @@
 # START - Project Status
 
-Last handoff date: 2026-07-30
-Last audit: 2026-07-30 (Claude Code, initial repository audit — no code changed)
+Last updated: 2026-08-02 (Claude Code, autonomous session)
 
 ## Repository
 - Root: `/Users/lykhn/start`
 - Remote: `https://github.com/ELI10k/start.git`
-- Second worktree: `/Users/lykhn/start-premium-client-experience` on branch `codex/start-premium-client-experience`
+- Second worktree: `/Users/lykhn/start-premium-client-experience` on `codex/start-premium-client-experience`
 
-## Current branch
-`main` — **working tree is dirty: 92 changed/untracked paths.**
-`main` is 0 ahead / 2 behind `codex/start-premium-client-experience`.
+## Branches
+| Branch | Purpose | State |
+|---|---|---|
+| `main` | canonical | `a3f7cf3` — synced with integration, pushed |
+| `integration/start-unified` | working branch | `a3f7cf3` — same commit as main |
+| `backup/start-full-state-2026-07-30` | snapshot of the rescued uncommitted work | keep until beta ends |
+| `codex/start-premium-client-experience` | the dark/gold redesign source | keep until beta ends |
 
-## Latest commits
-- `2395b12` 2026-07-17 "Add new client nutrition calculator" (`main`, `origin/main`)
-- `352f5a8` 2026-07-29 "Redesign client experience with light health UI" (`codex/...`)
-- `02e33ee` 2026-07-29 "Build premium client app experience"
+Production runs `main` @ `a3f7cf3`.
 
-**Critical:** almost the entire application (all `app/coach/*`, `app/workouts/*`,
-`app/api/*`, `components/client/*`, most `lib/*` modules, 40+ migrations, 18 test
-files) is **untracked on `main`** and therefore not pushed. The newest nutrition
-work (`lib/nutrition/master-foods.ts`, `lib/nutrition/meal-alternatives.ts`,
-migrations `202607290002`–`202607290007`, `lib/check-ins/photo-cycle.ts`) exists
-**only as uncommitted files on disk**. It is not on any branch and not on the remote.
+## Baseline validation — all green
+| Check | Command | Result |
+|---|---|---|
+| TypeScript | `npx tsc --noEmit` | pass |
+| ESLint | `npm run lint` | pass |
+| Tests | `npm test` | **131 / 131** |
+| Build | `npm run build` | pass |
+| Migration validation | `npm run supabase:migrations:validate` | pass, 42 migrations |
 
-## Production
-`https://start-snowy-eight.vercel.app` — verified live and serving
-`integration/start-unified` @ `b854499`, deployed 2026-08-02 with Eli's explicit
-approval. Vercel team `httpselicohenfitnesscoil`, project `start`.
-Supabase project ref: `bacxfweisncnpjgiqxcp`.
+## Environments
+- Production: `https://start-snowy-eight.vercel.app`, Vercel team `httpselicohenfitnesscoil`, project `start`.
+- Supabase project ref: `bacxfweisncnpjgiqxcp`.
+- **Preview and Production still share one Supabase database.** Verified by comparing
+  `NEXT_PUBLIC_SUPABASE_URL` across both environments. Splitting them needs a second
+  Supabase project, which requires account-level access this session does not have.
 
-**Preview and Production share one Supabase database** (verified: identical
-`NEXT_PUBLIC_SUPABASE_URL`). There is no data isolation — any write from a
-Preview deployment hits real client data. This must be split before paying
-customers exist.
+### Environment variables
+| Variable | Production | Preview |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | yes |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | yes |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | yes |
+| `NEXT_PUBLIC_SITE_URL` | yes | **missing** — magic links from Preview resolve to the Production URL |
+| `E2E_TEST_LOGIN_ENABLED` | **removed** | `true` |
+| `E2E_TEST_EMAILS` | **removed** | **removed — must be re-added for Preview** |
+
+Test-account password login is now off in Production, verified against the live
+`/login` markup. To restore it in Preview, re-add `E2E_TEST_EMAILS` with the two
+dedicated addresses; find them with:
+`select u.email from auth.users u join public.profiles p on p.id = u.id where p.is_test_account;`
 
 ## Applied migrations beyond the repo baseline
-- `202608020001_curated_master_foods.sql` — applied 2026-08-02 via the Supabase
-  SQL editor. Inserts 53 curated master foods (28 protein, 18 carbohydrate,
-  7 fat) from Eli's own portion table. Idempotent; rollback at
-  `supabase/seeds/curated-master-foods-rollback.sql`.
+- `202608020001_curated_master_foods.sql` — applied 2026-08-02 via the Supabase SQL
+  editor. 53 curated master foods (28 protein, 18 carbohydrate, 7 fat) from Eli's own
+  portion table. Idempotent; rollback at `supabase/seeds/curated-master-foods-rollback.sql`.
 
-## Baseline validation — re-run 2026-07-30 on `/Users/lykhn/start`
-| Check | Command | Result | Notes |
-|---|---|---|---|
-| TypeScript | `npx tsc --noEmit` | PASS | exit 0 |
-| ESLint | `npm run lint` | PASS | no output |
-| Tests | `npm test` | **118 pass / 1 fail** | see below |
-| Build | `npm run build` | PASS | 55 routes, all dynamic |
-| Migration validation | `npm run supabase:migrations:validate` | **FAIL** | see below |
-| E2E | — | not run | no E2E runner exists in `package.json` |
+## Nutrition engine — current behaviour
+- Macro targets: protein 1.8 g/kg, fat 25% of calories, carbohydrate the remainder.
+  Grams and percentages both shown; manual override respected; explicit recalculate.
+- Calorie target prefills from `client_profiles.calorie_target` on client selection.
+- Plan totals count primaries only (`items.slice(0,1)`); free calories are added into
+  the daily total on the client screen.
+- Alternatives are scaled by `calculateAlternativePortion` — calories weighted 0.9,
+  the group macro 0.1 — and marked auto or manual.
+- Natural units come from the food source and are rejected for mass and volume units.
+  Singular rendering when the quantity is one.
+- New menus open with all six fixed meals; untouched meals are dropped on save.
+- One-click "3 suggested alternatives" per group, drawn from master foods.
+- Meals collapse to a one-line summary.
+- Duplicating a plan clears the client, drops to draft and resets macro sources to auto.
 
-### Failing test
-`tests/date-time.test.ts:24` — "date and time displays declare the Israel timezone".
-It shells out to `rg` via `spawnSync`; `result.status` is `null`, meaning the
-process never spawned. **Ripgrep is not installed as a binary on this machine**
-(only a shell function exists). This is an environment/test-design defect, not a
-product defect — but as written the test cannot detect real violations either.
+## Open items
+### Blocked — need something this session cannot obtain
+1. **Separate Supabase project for Preview** — needs account-level provisioning.
+2. **Payments, subscriptions, App Store** — need Stripe and Apple accounts.
+3. **IAP commission structure** — a legal question, explicitly out of scope.
+4. **`E2E_TEST_EMAILS`** — the removed value was encrypted and could not be read back.
 
-### Failing migration validation
-`202607210002_daily_tasks_and_reminders.sql` is not wrapped in `begin;`/`commit;`.
-The validator throws on it, so **every later migration is left unvalidated**.
-
-## Architecture (verified)
-- Next.js 16.2.10, React 19.2.4, App Router, TypeScript, Tailwind v4.
-- Supabase `@supabase/ssr`; session/role routing in `proxy.ts` (middleware).
-- 55 routes, all server-rendered on demand.
-- 41 SQL migrations in `supabase/migrations/`, all with RLS enabled.
-- 18 test files, `node --test` with `--experimental-strip-types`.
-- Storage: private bucket `check-in-photos`, `upsert: false` (`lib/check-ins/photo-storage.ts`).
-- No `vercel.json`, no `pg_cron`, no `pg_net` — **there is no scheduler**.
-
-## Confirmed gaps vs the handoff document
-1. **The "premium client experience" branch is dark/gold, not white/green.**
-   Commit `352f5a8` is titled "light health UI" but `app/globals.css` at that
-   commit defines `--background: #0a0a0a`, `--start-card: #161616`,
-   `--start-gold: #d4af37`. It contradicts the UI direction in `CLAUDE.md`
-   (white/light-gray base, green accent). Another report-vs-reality mismatch.
-2. **Two divergent lines of work, neither merged.** `main`'s dirty worktree holds
-   the newest nutrition engine; the codex branch holds the client visual redesign
-   and lacks the nutrition work entirely. 49 paths differ on disk between the
-   two worktrees.
-3. **Coach menu builder is still black/gold.** `components/coach/menus/PersistentMenuEditor.tsx`
-   uses `#17150F`, `#3A321B`, `#D4AF37` inline. 98 files under `app/` and
-   `components/` still reference the gold palette.
-4. **Notifications are pull-based only.** `lib/notifications/repository.ts:55`
-   calls the `ensure_in_app_reminders` RPC when the notifications page loads.
-   Nothing generates reminders while the app is closed — no cron, no push.
-5. **Master foods are hardcoded numeric string IDs.** `lib/nutrition/master-foods.ts`
-   is 19 lines of literal `"1","2","3",...` sets. It will silently break if food
-   IDs change on re-import, and it is not traceable to Eli's curated list.
-
-## Items reported fixed since the last handoff (need Eli's manual confirmation)
-`reports/food-catalog-audit-2026-07-29.md` claims 336/336 foods present in
-Production, 28 results for `גבינה`, and master foods first in the picker.
-The code is consistent with this: `lib/nutrition/macro-targets.ts` uses 1.8 g/kg
-protein and 25% fat; `lib/nutrition/menu-validation.ts` defines the six fixed meal
-types including `קלוריות חופשיות`. **Not verified in a live browser during this audit.**
-
-## Known risks
-- Uncommitted, unpushed work is the single largest risk: a `git checkout`,
-  `git stash` or `git clean` would destroy the newest nutrition engine.
-- Completion reports have repeatedly contradicted reality (see gap #1).
-- Migration validation is silently short-circuiting.
-- Preview-only work has previously reached Production.
-
-## Open items for beta
-1. `E2E_TEST_LOGIN_ENABLED=true` is set for Production. Test-account password
-   login is exposed to real clients. Disable before beta.
-2. Preview and Production share one database (see above).
-3. Notifications are pull-based only — `ensure_in_app_reminders` runs when the
-   notifications page loads. No cron, no push, nothing fires while the app is closed.
-4. Nine master foods from Eli's list still have no branded catalog equivalent
-   (בטטה, תפוח אדמה, אורז לבן, פרכיות and others) — the curated master rows now
-   cover the coaching use, but the branded catalog remains incomplete.
-5. `main` is still at the pre-audit commit. `integration/start-unified` is what
-   Production runs; `main` has not been fast-forwarded.
+### Not started
+5. Notifications still have no background scheduler. `ensure_in_app_reminders` runs
+   only when the notifications page loads — nothing fires while the app is closed.
+   No `vercel.json`, no `pg_cron`, no `pg_net`.
+6. Workouts, check-ins and photo security have not been re-tested since the merge.
+7. Nine of Eli's master foods have no branded catalog equivalent (בטטה, תפוח אדמה,
+   אורז לבן, פרכיות and others). The curated master rows cover the coaching use.
+8. Self-signup is off — `shouldCreateUser: false`. No free-tier entry path.
+9. No product analytics.
+10. Client UI redesign is partial: shared shell, tokens and the nutrition screen are
+    done; the other client routes still carry the older layout.
 
 ## Next recommended task
-Run the full nutrition acceptance scenario in Production with the new master
-foods: pick a client, build a five-meal menu with alternatives, save, refresh,
-edit, clone, and view as the client. Time it against the two-minute target.
-Then the coach-speed work: pre-create all six meals on a new menu, and add a
-one-click "suggested alternatives" action.
+Time a full five-meal menu build against the two-minute target now that the
+skeleton, suggested alternatives and collapse are in. Then the notification
+scheduler, which is the single largest functional gap for a consumer product.
