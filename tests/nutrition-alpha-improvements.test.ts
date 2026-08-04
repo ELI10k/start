@@ -200,3 +200,20 @@ test("the empty-group message names a food, not an alternative",()=>{
   assert.match(source,/יש לבחור לפחות מאכל אחד בכל קבוצת מזון/);
   assert.doesNotMatch(source,/לפחות חלופה אחת לכל קבוצת מזון/);
 });
+
+test("a duplicated plan is unassigned and recalculates for the next client",()=>{
+  const source=readFileSync(new URL("../app/actions/product.ts",import.meta.url),"utf8");
+  const start=source.indexOf("export async function duplicateCoachMealPlan");
+  const body=source.slice(start,start+4000);
+  assert.match(body,/clientId: ""/);
+  assert.match(body,/status: "draft"/);
+  for(const key of ["proteinTargetSource","carbohydrateTargetSource","fatTargetSource"])
+    assert.match(body,new RegExp(`${key}:"auto"`));
+});
+
+test("selecting a client fills the calorie target from their profile",()=>{
+  const editor=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
+  assert.match(editor,/menu\.calorieTarget\|\|\(client\?\.calorieTarget/);
+  for(const page of ["../app/coach/menus/new/page.tsx","../app/coach/menus/[id]/page.tsx"])
+    assert.match(readFileSync(new URL(page,import.meta.url),"utf8"),/calorie_target/);
+});
