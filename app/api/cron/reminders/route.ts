@@ -1,0 +1,45 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+// Vercel Cron calls this on a schedule so reminders exist whether or not the
+// client ever opens the app. The heavy lifting is public.run_scheduled_reminders,
+// which is idempotent: every notification carries a dedupe key, so re-running the
+// job - or a client visiting the notifications page in between - collapses into
+// the same row rather than producing duplicates.
+export async function GET(request: Request) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
+  }
+  // Vercel Cron sends the secret as a bearer token. Reject anything else so the
+  // route cannot be triggered from the open internet.
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    return NextResponse.json({ ok: false, message: "Supabase is not configured." }, { status: 500 });
+  }
+
+  const startedAt = Date.now();
+  try {
+    const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
+    const { data, error } = await supabase.rpc("run_scheduled_reminders");
+    if (error) {
+      console.error("reminder scheduler failed", { code: error.code, message: error.message });
+      return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+    }
+    const clients = typeof data === "number" ? data : 0;
+    console.info("reminder scheduler ran", { clients, ms: Date.now() - startedAt });
+    return NextResponse.json({ ok: true, clients, ms: Date.now() - startedAt });
+  } catch (cause) {
+    const message = cause instanceof Error ? cause.message : "unknown error";
+    console.error("reminder scheduler threw", { message });
+    return NextResponse.json({ ok: false, message }, { status: 500 });
+  }
+}
