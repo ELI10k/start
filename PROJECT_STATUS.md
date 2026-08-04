@@ -48,10 +48,23 @@ Test-account password login is now off in Production, verified against the live
 dedicated addresses; find them with:
 `select u.email from auth.users u join public.profiles p on p.id = u.id where p.is_test_account;`
 
-## Applied migrations beyond the repo baseline
-- `202608020001_curated_master_foods.sql` — applied 2026-08-02 via the Supabase SQL
+## Migrations beyond the repo baseline
+- `202608020001_curated_master_foods.sql` — **applied** 2026-08-02 via the Supabase SQL
   editor. 53 curated master foods (28 protein, 18 carbohydrate, 7 fat) from Eli's own
   portion table. Idempotent; rollback at `supabase/seeds/curated-master-foods-rollback.sql`.
+- `202608020002_background_reminder_scheduler.sql` — **written, NOT applied.** Splits the
+  reminder rules into `_for_client(uuid)` functions, keeps the originals as wrappers, and
+  adds `run_scheduled_reminders()` for the cron. Until it is run, `/api/cron/reminders`
+  returns 500 because the RPC does not exist. Additive and idempotent.
+
+## Scheduler
+`/api/cron/reminders` is live and verified: an unauthenticated or wrongly-tokened call
+returns 401 with an empty body. `vercel.json` registers one daily run at 05:00 UTC
+(08:00 Israel in summer), matching the 08:00 morning workout reminder default.
+
+**Vercel is on the Hobby plan, which permits exactly one cron run per day.** A
+three-a-day schedule was rejected and failed the deploy. The 19:30 evening workout
+reminder therefore cannot fire; restoring it needs a paid plan, which is Eli's call.
 
 ## Nutrition engine — current behaviour
 - Macro targets: protein 1.8 g/kg, fat 25% of calories, carbohydrate the remainder.
@@ -76,9 +89,8 @@ dedicated addresses; find them with:
 4. **`E2E_TEST_EMAILS`** — the removed value was encrypted and could not be read back.
 
 ### Not started
-5. Notifications still have no background scheduler. `ensure_in_app_reminders` runs
-   only when the notifications page loads — nothing fires while the app is closed.
-   No `vercel.json`, no `pg_cron`, no `pg_net`.
+5. **E2E suite.** No browser driver is installed and no test-account credentials are
+   available since `E2E_TEST_EMAILS` was removed, so nothing can drive a real session.
 6. Workouts, check-ins and photo security have not been re-tested since the merge.
 7. Nine of Eli's master foods have no branded catalog equivalent (בטטה, תפוח אדמה,
    אורז לבן, פרכיות and others). The curated master rows cover the coaching use.
@@ -88,6 +100,8 @@ dedicated addresses; find them with:
     done; the other client routes still carry the older layout.
 
 ## Next recommended task
-Time a full five-meal menu build against the two-minute target now that the
-skeleton, suggested alternatives and collapse are in. Then the notification
-scheduler, which is the single largest functional gap for a consumer product.
+Run `202608020002_background_reminder_scheduler.sql` in the Supabase SQL editor so
+the cron has something to call, then confirm the daily run by checking the Vercel
+function logs the following morning. After that: time a full five-meal menu build
+against the two-minute target, and continue the client redesign across the routes
+that still carry the older layout.
