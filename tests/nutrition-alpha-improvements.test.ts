@@ -4,7 +4,7 @@ import test from "node:test";
 import { calculateMacroTargets } from "../lib/nutrition/macro-targets.ts";
 import foodData from "../data/foods.json" with { type: "json" };
 import { foodSearchRelevance,normalizeFoodText,queryFoods } from "../lib/foods/repository.ts";
-import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor } from "../lib/nutrition/meal-alternatives.ts";
+import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor,unitLabel } from "../lib/nutrition/meal-alternatives.ts";
 
 test("macro targets match the approved 90kg and 2100 calorie example",()=>{
   assert.deepEqual(calculateMacroTargets(90,2100),{
@@ -150,4 +150,15 @@ test("a mass unit in the source never becomes a countable unit",()=>{
   assert.equal(portion?.calories,52);
   for(const unit of ["מ\"ל","ML","kg","ליטר","gram"])
     assert.equal(foodUnit({...eggWhite,packageUnit:unit}).gramsPerUnit,1,unit);
+});
+
+test("a single portion reads as a singular unit",()=>{
+  assert.equal(unitLabel("פיתות",1),"פיתה");
+  assert.equal(unitLabel("פיתות",2),"פיתות");
+  assert.equal(unitLabel("פרוסות",1),"פרוסה");
+  assert.equal(unitLabel("פרוסות",3),"פרוסות");
+  assert.equal(unitLabel("יחידות",1),"יחידה");
+  assert.equal(unitLabel("קופסאות",1),"קופסה");
+  assert.equal(unitLabel("גרם",1),"גרם");
+  assert.equal(unitLabel("פרוסות",2.5),"פרוסות");
 });

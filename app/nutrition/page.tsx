@@ -14,6 +14,7 @@ import {
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
+import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 
 export default async function NutritionPage() {
   const auth = await getAuthContext();
@@ -95,7 +96,7 @@ export default async function NutritionPage() {
                       selected={group.selectedItemId===item.id}
                       name={item.name}
                       quantity={String(item.displayQuantity)}
-                      unit={item.measurementUnit}
+                      unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
                       calories={String(item.calories)}
                     />
                   </form>)}</div></fieldset>)}

@@ -21,22 +21,33 @@ export const GRAM_UNIT="גרם";
 
 // Natural units come from the food source. A unit is only offered when the
 // source also carries the weight of one - never guessed from the product name.
-const UNIT_PLURALS:Readonly<Record<string,string>>={
-  "יחידה":"יחידות",
-  "פרוסה":"פרוסות",
-  "פיתה":"פיתות",
-  "לחמנייה":"לחמניות",
-  "לחמניה":"לחמניות",
-  "פרכית":"פרכיות",
-  "טורטייה":"טורטיות",
-  "טורטיה":"טורטיות",
-  "כוס":"כוסות",
-  "גביע":"גביעים",
-  "קופסה":"קופסאות",
-  "בקבוק":"בקבוקים",
-  "כף":"כפות",
-  "כפית":"כפיות",
-};
+const UNIT_FORMS:ReadonlyArray<readonly[string,string]>=[
+  ["יחידה","יחידות"],
+  ["פרוסה","פרוסות"],
+  ["פיתה","פיתות"],
+  ["לחמנייה","לחמניות"],
+  ["לחמניה","לחמניות"],
+  ["פרכית","פרכיות"],
+  ["טורטייה","טורטיות"],
+  ["טורטיה","טורטיות"],
+  ["כוס","כוסות"],
+  ["גביע","גביעים"],
+  ["קופסה","קופסאות"],
+  ["בקבוק","בקבוקים"],
+  ["כף","כפות"],
+  ["כפית","כפיות"],
+  ["ביצה","ביצים"],
+  ["תמר","תמרים"],
+  ["מנה","מנות"],
+];
+const UNIT_PLURALS=new Map(UNIT_FORMS);
+const UNIT_SINGULARS=new Map(UNIT_FORMS.map(([singular,plural])=>[plural,singular]));
+
+// Quantities are stored against the plural form. Read it back as a singular when
+// there is exactly one, so a row says "1 פיתה" rather than "1 פיתות".
+export function unitLabel(unit:string,quantity:number):string{
+  return quantity===1?UNIT_SINGULARS.get(unit)??unit:unit;
+}
 
 // A mass or volume is already the measurement - it is never a countable unit.
 // Catalog rows carry things like package_unit "גרם" alongside a unit weight,
@@ -46,7 +57,7 @@ const MEASURE_UNITS=new Set(["גרם","גר","ג","גרמים","מ\"ל","מל","
 export function foodUnit(food:AlternativeFood):Readonly<{unit:string;gramsPerUnit:number}>{
   const source=food.packageUnit?.trim();
   if(source&&!MEASURE_UNITS.has(source.toLowerCase())&&food.unitWeightGrams&&food.unitWeightGrams>0)
-    return{unit:UNIT_PLURALS[source]??source,gramsPerUnit:food.unitWeightGrams};
+    return{unit:UNIT_PLURALS.get(source)??source,gramsPerUnit:food.unitWeightGrams};
   return{unit:GRAM_UNIT,gramsPerUnit:1};
 }
 
