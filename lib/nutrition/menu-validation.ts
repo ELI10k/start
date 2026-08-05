@@ -81,8 +81,12 @@ export function validateMealPlanPayload(payload: unknown): MenuValidationResult 
         }
       }
     }
-    if(!seen.has("protein")||!seen.has("carbohydrate"))
-      return{ok:false,message:"בכל ארוחה רגילה נדרשות קבוצת חלבון וקבוצת פחמימה."};
+    // A meal needs at least one filled group, not both. Demanding both made a
+    // perfectly ordinary plan unsaveable - eggs for breakfast with no carbohydrate,
+    // or a protein-only snack - and the editor drops groups the coach left empty,
+    // so the rejection surfaced as a missing group rather than as a real problem.
+    if(!seen.has("protein")&&!seen.has("carbohydrate"))
+      return{ok:false,message:"בכל ארוחה רגילה נדרשת לפחות קבוצת חלבון או קבוצת פחמימה."};
   }
   return { ok: true };
 }

@@ -12,14 +12,14 @@ export default function WorkoutRouteReady({
   if (loading) return <WorkoutLoadingState />;
   if (persistenceError)
     return (
-      <main className="px-4 py-8 text-white">
+      <div className="px-4 py-8 text-white">
         <p
           role="alert"
           className="mx-auto max-w-3xl rounded-[24px] border border-red-400/20 bg-red-400/[.05] p-8 text-center text-sm text-red-200"
         >
           {persistenceError}
         </p>
-      </main>
+      </div>
     );
   return children;
 }

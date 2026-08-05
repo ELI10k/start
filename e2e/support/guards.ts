@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { activateDevice, applySession, cachedPasswordGrant } from "./session";
+import { activateDevice, applySession, cachedPasswordGrant, invalidateSession } from "./session";
 
 // Hostnames that serve real clients. A spec that writes must never point here.
 const PRODUCTION_HOSTS = ["start.elicohenfitness.co.il", "start-snowy-eight.vercel.app"];
@@ -96,7 +96,17 @@ export async function signInThroughForm(page: Page, who: TestIdentity): Promise<
   }
 }
 
+// Drops the browser's session without touching the server one. The run shares a
+// single token per identity, so calling the app's logout route here would revoke it
+// for every later test - which is exactly what happened before this split.
 export async function signOut(page: Page): Promise<void> {
-  await page.request.post("/auth/logout");
   await page.context().clearCookies();
+}
+
+// The real thing, for specs that assert what logging out does. It revokes the shared
+// token, so the cache entry is dropped and the next sign-in fetches a fresh one.
+export async function signOutThroughApp(page: Page, who: TestIdentity): Promise<void> {
+  await page.request.post("/auth/logout").catch(() => {});
+  await page.context().clearCookies();
+  invalidateSession(who.email);
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { calculateMacroTargets } from "../lib/nutrition/macro-targets.ts";
+import { validateMealPlanPayload } from "../lib/nutrition/menu-validation.ts";
 import foodData from "../data/foods.json" with { type: "json" };
 import { foodSearchRelevance,normalizeFoodText,queryFoods } from "../lib/foods/repository.ts";
 import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor,unitLabel } from "../lib/nutrition/meal-alternatives.ts";
@@ -216,4 +217,19 @@ test("selecting a client fills the calorie target from their profile",()=>{
   assert.match(editor,/menu\.calorieTarget\|\|\(client\?\.calorieTarget/);
   for(const page of ["../app/coach/menus/new/page.tsx","../app/coach/menus/[id]/page.tsx"])
     assert.match(readFileSync(new URL(page,import.meta.url),"utf8"),/calorie_target/);
+});
+
+test("a meal with only one filled group can be saved",()=>{
+  const plan={title:"בדיקה",status:"draft",clientId:"",days:[{meals:[
+    {title:"ארוחת בוקר",groups:[{type:"protein",items:[{foodId:"1",amount:100}]}]},
+  ]}]};
+  assert.deepEqual(validateMealPlanPayload(plan),{ok:true});
+});
+
+test("a meal with no filled group at all is still refused",()=>{
+  const plan={title:"בדיקה",status:"draft",clientId:"",days:[{meals:[
+    {title:"ארוחת בוקר",groups:[]},
+  ]}]};
+  const result=validateMealPlanPayload(plan);
+  assert.equal(result.ok,false);
 });

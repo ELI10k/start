@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { assertNotProduction, identity, requireIdentity, signIn, signOut } from "./support/guards";
+import { assertNotProduction, identity, requireIdentity, signIn, signOut, signOutThroughApp } from "./support/guards";
 
 test.describe("auth and permissions", () => {
   test.skip(!identity("coach") || !identity("client"), "set the coach and client E2E credentials to run");
@@ -55,14 +55,14 @@ test.describe("auth and permissions", () => {
 
   test("logging out ends the session and protects the routes again", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
-    await signOut(page);
+    await signOutThroughApp(page, requireIdentity("client"));
     await page.goto("/nutrition");
     await expect(page).toHaveURL(/\/login/);
   });
 
   test("signing in again after logout works", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
-    await signOut(page);
+    await signOutThroughApp(page, requireIdentity("client"));
     await signIn(page, requireIdentity("client"));
     await expect(page).not.toHaveURL(/\/login/);
     await signOut(page);
@@ -78,8 +78,9 @@ test.describe("auth and permissions", () => {
 
   test("the magic-link form rejects a malformed address", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("אימייל").fill("not-an-email");
+    await page.getByLabel("אימייל").first().fill("not-an-email");
     await page.getByRole("button", { name: "שליחת קישור התחברות" }).click();
-    await expect(page.getByRole("alert")).toBeVisible();
+    // Scope to the form: Next's dev tools mount their own always-present alert region.
+    await expect(page.locator("main").getByRole("alert")).toBeVisible();
   });
 });

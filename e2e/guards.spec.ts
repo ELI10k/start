@@ -13,7 +13,7 @@ test("the login screen renders in Hebrew RTL", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "כניסה מאובטחת" })).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.locator("html")).toHaveAttribute("lang", "he");
-  await expect(page.getByLabel("אימייל")).toBeVisible();
+  await expect(page.getByLabel("אימייל").first()).toBeVisible();
 });
 
 // The test-account path needs E2E_TEST_LOGIN_ENABLED and E2E_TEST_EMAILS on the

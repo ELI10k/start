@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { BrowserContext } from "@playwright/test";
 
 // Signing in through the form types the password into the page, and Playwright records
@@ -29,6 +30,21 @@ function projectRef(supabaseUrl: string): string {
 // Supabase for a fresh token trips its auth rate limit, which surfaced as random
 // sign-in timeouts rather than as an obvious 429.
 const sessions = new Map<string, Promise<Session>>();
+const devices = new Map<string, string>();
+
+function deviceFor(session: Session): string {
+  const key = JSON.stringify((session.user as { id?: string } | null)?.id ?? session.access_token.slice(0, 32));
+  const existing = devices.get(key);
+  if (existing) return existing;
+  // activate_current_device rejects anything shorter than 16 characters.
+  const created = `e2e-${randomUUID()}`;
+  devices.set(key, created);
+  return created;
+}
+
+export function invalidateSession(email: string): void {
+  sessions.delete(email);
+}
 
 export function cachedPasswordGrant(email: string, password: string): Promise<Session> {
   const existing = sessions.get(email);
@@ -94,9 +110,10 @@ export async function applySession(context: BrowserContext, baseURL: string, ses
     }
   }
 
-  // The app identifies the device by its own cookie; the middleware reads it on
-  // every request, so it must exist alongside the session.
-  const deviceId = `e2e-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  // One stable device per identity for the whole run. A client is locked to a single
+  // device, so a fresh id per test would have each activation revoke the previous
+  // one and leave earlier contexts signed out.
+  const deviceId = deviceFor(session);
   chunks.push({ name: "start-device-id", value: deviceId });
 
   await context.addCookies(

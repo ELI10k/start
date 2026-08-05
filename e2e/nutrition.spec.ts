@@ -82,19 +82,19 @@ test.describe("nutrition", () => {
     await page.goto("/coach/menus/new");
     const search = await openFirstPicker(page);
     await search.fill("גבינה");
-    await expect(page.getByRole("option").first()).toBeVisible();
-    const hebrewCount = await page.getByRole("option").count();
+    await expect(foodOptions(page).first()).toBeVisible();
+    const hebrewCount = await foodOptions(page).count();
     expect(hebrewCount).toBeGreaterThan(0);
     await search.fill("");
     await search.fill("PRO");
-    await expect(page.getByRole("option").first()).toBeVisible();
+    await expect(foodOptions(page).first()).toBeVisible();
   });
 
   test("a natural unit is shown where the source carries one", async ({ page }) => {
     await page.goto("/coach/menus/new");
     const search = await openFirstPicker(page);
     await search.fill("פיתה");
-    const option = page.getByRole("option").first();
+    const option = foodOptions(page).first();
     await expect(option).toBeVisible();
     await option.click();
     // The amount input's suffix carries the unit for the chosen food.
@@ -105,7 +105,7 @@ test.describe("nutrition", () => {
     await page.goto("/coach/menus/new");
     const search = await openFirstPicker(page);
     await search.fill("ביצה");
-    await page.getByRole("option").first().click();
+    await foodOptions(page).first().click();
 
     const suggest = page.getByRole("button", { name: "הוסף 3 חלופות מומלצות" }).first();
     await expect(suggest).toBeVisible();
@@ -140,7 +140,7 @@ test.describe("nutrition", () => {
 
     const search = await openFirstPicker(page);
     await search.fill("ביצה");
-    await page.getByRole("option").first().click();
+    await foodOptions(page).first().click();
 
     await page.getByRole("button", { name: /שמירה/ }).click();
     await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 30_000 });
@@ -151,6 +151,10 @@ test.describe("nutrition", () => {
 
     await page.getByLabel("שם התפריט").fill(`${title} ערוך`);
     await page.getByRole("button", { name: /שמירה/ }).click();
+    // Wait for the server to confirm before navigating away, otherwise the reload
+    // races the save and reads the previous title back.
+    await expect(page.getByRole("button", { name: "שמירה" })).toBeEnabled({ timeout: 30_000 });
+    await page.waitForTimeout(500);
     await page.goto(savedUrl);
     await expect(page.getByLabel("שם התפריט")).toHaveValue(`${title} ערוך`);
   });
@@ -166,26 +170,36 @@ test.describe("nutrition", () => {
       const picker = page.getByRole("button", { name: "בחירת מאכל ראשי" }).first();
       if (!(await picker.isVisible().catch(() => false))) break;
       await picker.click();
-      const search = page.getByRole("textbox", { name: "חיפוש מזון" }).last();
+      const search = page.getByRole("combobox", { name: "חיפוש מזון" }).last();
+      await search.click();
       await search.fill("ביצה");
-      const option = page.getByRole("option").first();
+      const option = foodOptions(page).first();
       if (await option.isVisible().catch(() => false)) await option.click();
       const suggest = page.getByRole("button", { name: "הוסף 3 חלופות מומלצות" }).first();
       if (await suggest.isVisible().catch(() => false)) await suggest.click();
     }
 
     await page.getByRole("button", { name: /שמירה/ }).click();
-    await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 30_000 });
+    await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 60_000 });
     const seconds = (Date.now() - started) / 1000;
     console.info(`menu build took ${seconds.toFixed(1)}s`);
     expect(seconds).toBeLessThan(120);
   });
 });
 
-// Opens the first food picker on the page and returns its search box.
+// "בחירת מאכל ראשי" only adds an empty row; the combobox inside it still has to be
+// opened before its list exists. Returns the search box with the list already open.
 async function openFirstPicker(page: Page) {
   await page.getByRole("button", { name: "בחירת מאכל ראשי" }).first().click();
-  const search = page.getByRole("textbox", { name: "חיפוש מזון" }).first();
+  const search = page.getByRole("combobox", { name: "חיפוש מזון" }).first();
   await search.waitFor({ state: "visible" });
+  await search.click();
+  await page.getByRole("listbox").first().waitFor({ state: "visible" });
   return search;
+}
+
+// The client picker is a native <select>, whose <option> elements also carry the
+// option role. Always scope to the food listbox.
+function foodOptions(page: Page) {
+  return page.getByRole("listbox").getByRole("option");
 }
