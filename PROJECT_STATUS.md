@@ -41,25 +41,34 @@ Production runs `main` @ `a3f7cf3`.
 | `SUPABASE_SERVICE_ROLE_KEY` | yes | yes |
 | `NEXT_PUBLIC_SITE_URL` | yes | **missing** — magic links from Preview resolve to the Production URL |
 | `E2E_TEST_LOGIN_ENABLED` | **removed** | `true` |
-| `E2E_TEST_EMAILS` | **removed** | **removed — must be re-added for Preview** |
+| `E2E_TEST_EMAILS` | **removed** | set 2026-08-05, Preview only |
+| `CRON_SECRET` | yes | yes |
 
-Test-account password login is now off in Production, verified against the live
-`/login` markup. To restore it in Preview, re-add `E2E_TEST_EMAILS` with the two
-dedicated addresses; find them with:
-`select u.email from auth.users u join public.profiles p on p.id = u.id where p.is_test_account;`
+Test-account password login verified 2026-08-05 against live markup: present on the
+Preview deployment, absent on both `start-snowy-eight.vercel.app` and the custom domain
+`start.elicohenfitness.co.il`. Production is closed by two independent conditions —
+neither the flag nor the address list is set there.
+
+Canonical production URL is **https://start.elicohenfitness.co.il**.
 
 ## Migrations beyond the repo baseline
 - `202608020001_curated_master_foods.sql` — **applied** 2026-08-02 via the Supabase SQL
   editor. 53 curated master foods (28 protein, 18 carbohydrate, 7 fat) from Eli's own
   portion table. Idempotent; rollback at `supabase/seeds/curated-master-foods-rollback.sql`.
-- `202608020002_background_reminder_scheduler.sql` — **written, NOT applied.** Splits the
+- `202608020002_background_reminder_scheduler.sql` — **applied** 2026-08-05. Splits the
   reminder rules into `_for_client(uuid)` functions, keeps the originals as wrappers, and
-  adds `run_scheduled_reminders()` for the cron. Until it is run, `/api/cron/reminders`
-  returns 500 because the RPC does not exist. Additive and idempotent.
+  adds `run_scheduled_reminders()` for the cron. Additive and idempotent; rollback at
+  `supabase/seeds/background-reminder-scheduler-rollback.sql`.
 
-## Scheduler
-`/api/cron/reminders` is live and verified: an unauthenticated or wrongly-tokened call
-returns 401 with an empty body. `vercel.json` registers one daily run at 05:00 UTC
+## Scheduler — verified end to end 2026-08-05
+| Case | Result |
+|---|---|
+| no token | 401 |
+| wrong token | 401 |
+| correct token | 200, `{"ok":true,"clients":9,"ms":1300}` |
+| immediate re-run | 200, `{"ok":true,"clients":9,"ms":160}` — dedupe keys held, no duplicates |
+
+Reminders now exist whether or not the client opens the app. `vercel.json` registers one daily run at 05:00 UTC
 (08:00 Israel in summer), matching the 08:00 morning workout reminder default.
 
 **Vercel is on the Hobby plan, which permits exactly one cron run per day.** A
