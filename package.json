@@ -16,9 +16,10 @@
     "supabase:seed": "node scripts/seed-development.mjs",
     "supabase:migrations:validate": "node scripts/validate-migrations.mjs",
     "workouts:import": "node scripts/import-workouts.mjs",
-    "e2e": "playwright test",
+    "e2e": "playwright test; node scripts/scan-e2e-artifacts.mjs",
     "e2e:ui": "playwright test --ui",
-    "e2e:report": "playwright show-report reports/e2e-html"
+    "e2e:report": "playwright show-report reports/e2e-html",
+    "e2e:scan": "node scripts/scan-e2e-artifacts.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

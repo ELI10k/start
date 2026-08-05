@@ -1,4 +1,6 @@
+import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { applySession, passwordGrant } from "./session";
 
 // Hostnames that serve real clients. A spec that writes must never point here.
 const PRODUCTION_HOSTS = ["start.elicohenfitness.co.il", "start-snowy-eight.vercel.app"];
@@ -42,15 +44,55 @@ export function requireIdentity(role: "coach" | "client" | "clientTwo"): TestIde
 // The app's test-account path: tick "כניסה לחשבון בדיקה", then email plus password.
 // It only exists where E2E_TEST_LOGIN_ENABLED and E2E_TEST_EMAILS are both set, which
 // is Preview and local development - never Production.
+// Preferred path: exchange the credential for a session in Node and inject the cookie.
+// The password never enters the browser, so it can never reach a trace or a snapshot.
 export async function signIn(page: Page, who: TestIdentity): Promise<void> {
+  const baseURL = (page.context() as unknown as { _options?: { baseURL?: string } })._options?.baseURL
+    ?? process.env.E2E_BASE_URL
+    ?? "http://127.0.0.1:3100";
+  const session = await passwordGrant(who.email, who.password);
+  await applySession(page.context(), baseURL, session);
+  await page.goto(who.role === "coach" ? "/coach" : "/");
+  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 });
+}
+
+// Kept for the spec that exercises the login form itself. Everything else uses signIn.
+export async function signInThroughForm(page: Page, who: TestIdentity): Promise<void> {
   await page.goto("/login");
   const toggle = page.getByRole("checkbox", { name: /כניסה לחשבון בדיקה/ });
   await toggle.waitFor({ state: "visible" });
-  await toggle.check();
+
+  // The checkbox is server-rendered but only becomes functional once the client
+  // component hydrates, which the dev server can take a moment to do. A click that
+  // lands first is swallowed silently, so retry until the password field appears.
+  await expect(async () => {
+    if (!(await toggle.isChecked())) await toggle.check();
+    await expect(page.getByLabel("סיסמת בדיקה")).toBeVisible({ timeout: 1_500 });
+  }).toPass({ timeout: 30_000, intervals: [250, 500, 1_000] });
+
+  const passwordField = page.getByLabel("סיסמת בדיקה");
   await page.getByLabel("אימייל").fill(who.email);
-  await page.getByLabel("סיסמת בדיקה").fill(who.password);
+  await passwordField.fill(who.password);
   await page.getByRole("button", { name: "כניסת בדיקה" }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 });
+
+  // Playwright's failure snapshots record input values verbatim, so a failed run
+  // would otherwise write the password into reports/e2e in clear text. The form has
+  // already captured it by now; blank the field so nothing captured later holds it.
+  await passwordField.fill("").catch(() => {});
+
+  // Scope the error lookup to the form. Next's dev tools mount their own always-present
+  // alert region, and matching that made every sign-in look instantly rejected.
+  const formError = page.locator("main").getByRole("alert");
+  const landed = page
+    .waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 })
+    .then(() => "ok" as const);
+  const rejected = formError
+    .waitFor({ state: "visible", timeout: 30_000 })
+    .then(() => "error" as const);
+  const outcome = await Promise.race([landed, rejected]).catch(() => "ok" as const);
+  if (outcome === "error") {
+    throw new Error(`Test-account sign-in was rejected: ${await formError.innerText()}`);
+  }
 }
 
 export async function signOut(page: Page): Promise<void> {
