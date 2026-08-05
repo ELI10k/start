@@ -25,9 +25,19 @@ test.describe("nutrition", () => {
 
   test("a new menu opens with all six fixed meals", async ({ page }) => {
     await page.goto("/coach/menus/new");
-    for (const title of ["ארוחת בוקר", "ארוחת ביניים 1", "ארוחת צהריים", "ארוחת ביניים 2", "ארוחת ערב", "קלוריות חופשיות"]) {
-      await expect(page.getByRole("combobox", { name: /סוג ארוחה/ }).filter({ hasText: title }).or(page.getByText(title, { exact: true }).first())).toBeVisible();
-    }
+    const mealSelectors = page.getByRole("combobox", { name: /סוג ארוחה/ });
+    await expect(mealSelectors).toHaveCount(6);
+    const chosen = await mealSelectors.evaluateAll((nodes) =>
+      nodes.map((node) => (node as HTMLSelectElement).value),
+    );
+    expect(chosen).toEqual([
+      "ארוחת בוקר",
+      "ארוחת ביניים 1",
+      "ארוחת צהריים",
+      "ארוחת ביניים 2",
+      "ארוחת ערב",
+      "קלוריות חופשיות",
+    ]);
   });
 
   test("choosing a client fills the calorie target and every macro", async ({ page }) => {

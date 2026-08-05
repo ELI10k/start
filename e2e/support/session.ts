@@ -25,6 +25,22 @@ function projectRef(supabaseUrl: string): string {
   return new URL(supabaseUrl).hostname.split(".")[0];
 }
 
+// One password grant per identity for the whole run. Sixty-odd tests each asking
+// Supabase for a fresh token trips its auth rate limit, which surfaced as random
+// sign-in timeouts rather than as an obvious 429.
+const sessions = new Map<string, Promise<Session>>();
+
+export function cachedPasswordGrant(email: string, password: string): Promise<Session> {
+  const existing = sessions.get(email);
+  if (existing) return existing;
+  const pending = passwordGrant(email, password).catch((cause) => {
+    sessions.delete(email);
+    throw cause;
+  });
+  sessions.set(email, pending);
+  return pending;
+}
+
 export async function passwordGrant(email: string, password: string): Promise<Session> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -44,7 +60,26 @@ export async function passwordGrant(email: string, password: string): Promise<Se
   return { ...session, expires_at: session.expires_at ?? Math.floor(Date.now() / 1000) + session.expires_in };
 }
 
-export async function applySession(context: BrowserContext, baseURL: string, session: Session): Promise<void> {
+// Clients are locked to one device. The form login path activates the current device
+// after signing in; injecting a session skips that, and the middleware then bounces the
+// client straight back to /login. Do the same activation over the API.
+export async function activateDevice(session: Session, deviceId: string): Promise<void> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) throw new Error("Supabase is not configured for E2E.");
+  const response = await fetch(`${url}/rest/v1/rpc/activate_current_device`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      apikey: anonKey,
+      authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ p_device_id: deviceId, p_device_name: "Playwright E2E" }),
+  });
+  if (!response.ok) throw new Error(`Device activation failed (HTTP ${response.status}).`);
+}
+
+export async function applySession(context: BrowserContext, baseURL: string, session: Session): Promise<string> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const name = `sb-${projectRef(supabaseUrl)}-auth-token`;
   const encoded = `base64-${Buffer.from(JSON.stringify(session), "utf8").toString("base64")}`;
@@ -59,6 +94,11 @@ export async function applySession(context: BrowserContext, baseURL: string, ses
     }
   }
 
+  // The app identifies the device by its own cookie; the middleware reads it on
+  // every request, so it must exist alongside the session.
+  const deviceId = `e2e-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  chunks.push({ name: "start-device-id", value: deviceId });
+
   await context.addCookies(
     chunks.map((chunk) => ({
       name: chunk.name,
@@ -71,4 +111,5 @@ export async function applySession(context: BrowserContext, baseURL: string, ses
       expires: session.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
     })),
   );
+  return deviceId;
 }

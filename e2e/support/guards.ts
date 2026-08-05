@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { applySession, passwordGrant } from "./session";
+import { activateDevice, applySession, cachedPasswordGrant } from "./session";
 
 // Hostnames that serve real clients. A spec that writes must never point here.
 const PRODUCTION_HOSTS = ["start.elicohenfitness.co.il", "start-snowy-eight.vercel.app"];
@@ -50,8 +50,9 @@ export async function signIn(page: Page, who: TestIdentity): Promise<void> {
   const baseURL = (page.context() as unknown as { _options?: { baseURL?: string } })._options?.baseURL
     ?? process.env.E2E_BASE_URL
     ?? "http://127.0.0.1:3100";
-  const session = await passwordGrant(who.email, who.password);
-  await applySession(page.context(), baseURL, session);
+  const session = await cachedPasswordGrant(who.email, who.password);
+  const deviceId = await applySession(page.context(), baseURL, session);
+  if (who.role === "client") await activateDevice(session, deviceId);
   await page.goto(who.role === "coach" ? "/coach" : "/");
   await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 });
 }
