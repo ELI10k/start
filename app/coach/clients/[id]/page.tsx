@@ -1,7 +1,9 @@
 /* eslint-disable @next/next/no-img-element -- profile URLs are coach-provided and may use arbitrary approved storage hosts. */
 import { notFound, redirect } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import SubmitButton from "@/components/forms/SubmitButton";
 import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
+import { MetricTile } from "@/components/client/PremiumUI";
 import { resetClientDevice } from "@/app/actions/product";
 import { getAuthContext, getCoachClientDashboard } from "@/lib/data/product-repository";
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
@@ -35,19 +37,128 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const invitationExpired=latestInvitation?.effective_status==="expired";
   const invitationStatus=intake?.onboarding_completed ? "לקוח פעיל" : !latestInvitation ? "טרם נשלחה הזמנה" : invitationExpired ? "ההזמנה פגה" : latestInvitation.effective_status==="opened" ? "ההזמנה נפתחה" : "הזמנה נשלחה";
   const preferences=intake?.preferences && typeof intake.preferences==="object" && !Array.isArray(intake.preferences) ? Object.entries(intake.preferences).filter(([, item]) => item !== null && item !== "") : [];
-  return <main className="px-4 py-8 sm:px-6"><div className="mx-auto max-w-6xl"><div className="flex flex-wrap items-start justify-between gap-4"><div className="flex items-center gap-4">{data.profile.avatar_url ? <img src={data.profile.avatar_url} alt="" className="size-16 rounded-3xl object-cover"/> : <span className="grid size-16 place-items-center rounded-3xl bg-[#16A34A]/10 text-2xl font-black text-[#16A34A]">{data.profile.full_name.slice(0, 1)}</span>}<div><p className="text-xs text-[#16A34A]">לקוח משויך</p><h1 className="mt-1 text-3xl font-black">{data.profile.full_name}</h1><p className="mt-1 text-sm text-[#5B5F5B]">{data.profile.email} · כניסה אחרונה: {date(data.lastLoginAt)}</p></div></div><form action={resetClientDevice}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="איפוס מכשיר" pending="מאפסים…" className="min-h-12 rounded-2xl border border-[#DC2626]/30 px-5 font-bold text-[#DC2626] disabled:opacity-50"/></form></div>
-    {(query.created==="1" || query.invite==="resent" || query.login) && <p role="status" className="mt-5 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-sm text-[#16A34A]">{query.invite==="resent" ? "נשלחה הזמנה חדשה ללקוח." : query.login==="access-link-sent" ? "נשלח קישור כניסה מאובטח ללקוח." : query.login==="password-reset-sent" ? "קישור לאיפוס סיסמה נשלח ללקוח." : "הלקוח נוצר והוזמן להשלמת הקליטה."}</p>}
-    <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Card label="יעד" value={data.profile.clientProfile?.goal ?? "לא הוגדר"}/><Card label="משקל אחרון" value={data.progress[0] ? `${data.progress[0].weight} ק״ג` : "אין מדידה"}/><Card label="צ׳ק־אין אחרון" value={lastCheckIn ? date(lastCheckIn.submitted_at) : "ממתין"}/><Card label="היקף טבור" value={latestNavelMeasurement ? `${latestNavelMeasurement.navel_circumference} ס״מ` : "אין עדיין מדידת היקף טבור"}/></section>
-    <section className="mt-6"><Panel title="סטטוס הזמנה" description={invitationStatus}><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Metric label="נשלחה לאחרונה" value={latestInvitation ? date(latestInvitation.sent_at) : "טרם נשלחה"}/><Metric label="בתוקף עד" value={latestInvitation && !invitationExpired ? date(latestInvitation.expires_at) : "לא בתוקף"}/><Metric label="נפתחה" value={latestInvitation?.opened_at ? date(latestInvitation.opened_at) : "טרם נפתחה"}/><Metric label="Onboarding" value={intake?.onboarding_completed_at ? date(intake.onboarding_completed_at) : "ממתין"}/></div><p className="mt-4 text-sm text-[#5B5F5B]">סה״כ הזמנות שנשלחו: {invitations?.length ?? 0}</p><div className="mt-4 flex flex-wrap gap-2">{intake?.onboarding_completed ? <><form action={sendClientMagicLink}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שליחת Magic Link" pending="שולחים…" className="min-h-12 rounded-2xl border border-[#16A34A]/40 px-5 font-bold text-[#16A34A] disabled:opacity-50"/></form><form action={sendClientPasswordReset}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="איפוס סיסמה" pending="שולחים…" className="min-h-12 rounded-2xl border border-[#16A34A]/40 px-5 font-bold text-[#16A34A] disabled:opacity-50"/></form></> : accountActivated ? <form action={sendClientMagicLink}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שלח קישור כניסה להשלמת הקליטה" pending="שולחים…" className="min-h-12 rounded-2xl border border-[#16A34A]/40 px-5 font-bold text-[#16A34A] disabled:opacity-50"/></form> : <form action={resendClientInvite}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שלח הזמנה מחדש" pending="שולחים…" className="min-h-12 rounded-2xl border border-[#16A34A]/40 px-5 font-bold text-[#16A34A] disabled:opacity-50"/></form>}</div>{accountActivated&&!intake?.onboarding_completed&&<p className="mt-3 text-sm text-[#5B5F5B]">החשבון כבר אומת. נשלח ללקוח קישור כניסה מאובטח להמשך הקליטה, במקום הזמנה נוספת.</p>}</Panel></section>
-    <section className="mt-6"><Panel title="נתוני קליטה" description={intake?.onboarding_completed ? `הקליטה הושלמה ב-${date(intake.onboarding_completed_at ?? null)}` : "ממתין להשלמת קליטה מצד הלקוח"}>{intake ? <div className="grid gap-3 sm:grid-cols-2"><Metric label="רמת פעילות" value={intake.activity_level ?? "לא הוגדר"}/><Metric label="יעד משקל" value={intake.target_weight ? `${intake.target_weight} ק״ג` : "לא הוגדר"}/>{preferences.map(([key,item])=><Metric key={key} label={key.replaceAll("_"," ")} value={Array.isArray(item) ? item.join(", ") : String(item)}/>)}</div> : <Empty text="אין נתוני קליטה זמינים."/>}</Panel></section>
-    {alertRows.length > 0 && <section className="mt-5 rounded-[22px] border border-[#E5E7E5] bg-[#F7F8F7] p-4"><h2 className="font-black text-[#0B0B0B]">דורש תשומת לב</h2><ul className="mt-2 list-inside list-disc text-sm text-[#0B0B0B]">{alertRows.map((alert) => <li key={alert}>{alert}</li>)}</ul></section>}
-    <section className="mt-6 grid gap-5 lg:grid-cols-2"><Panel title="תזונה" description={data.menu ? data.menu.title : "אין תפריט פעיל"}>{data.menu ? <><div className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric label="השלמת היום" value={`${data.nutrition.completionPercent}%`}/><Metric label="קלוריות" value={number(data.nutrition.totals.calories)}/><Metric label="חלבון" value={`${number(data.nutrition.totals.protein)} ג׳`}/><Metric label="פחמימות / שומן" value={`${number(data.nutrition.totals.carbs)} / ${number(data.nutrition.totals.fat)} ג׳`}/></div><p className="mt-4 text-sm text-[#5B5F5B]">{data.nutrition.completedItems} מתוך {data.nutrition.plannedItems} פריטים סומנו היום.</p></> : <Empty text="ללקוח עדיין לא שויך תפריט פעיל."/>}</Panel><Panel title="אימונים" description={data.workouts.program?.name ?? "אין תוכנית פעילה"}>{data.workouts.assignment ? <div className="grid grid-cols-2 gap-3"><Metric label="השלמת השבוע" value={`${data.workouts.weeklyCompletionPercent}%`}/><Metric label="אימון אחרון" value={date(data.workouts.lastCompletedAt)}/><Metric label="אימון הבא" value={data.workouts.nextDayName ?? "לא הוגדר"}/><Metric label="תדירות" value={`${data.workouts.assignment.weekly_frequency} בשבוע`}/></div> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}</Panel></section>
-    <section className="mt-6 grid gap-5 lg:grid-cols-2"><Panel title="התקדמות" description="משקל והיקף טבור"><div className="space-y-2">{data.progress.slice(0, 6).map((entry) => <p key={entry.id} className="rounded-xl bg-[#F7F8F7] p-3 text-sm">{entry.date} · {entry.weight} ק״ג · היקף טבור {entry.navel_circumference ?? "—"}</p>)}</div>{!data.progress.length && <Empty text="אין מדידות שמורות."/>}</Panel><Panel title="צ׳ק־אין" description="עדכון אחרון, הערות ותגובה"><div className="space-y-3">{data.checkIns.slice(0, 4).map((entry) => <article key={entry.id} className="rounded-xl bg-[#F7F8F7] p-4"><p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/5 · אנרגיה {entry.energy}/5 · שינה {entry.sleep}/5</p>{entry.notes && <p className="mt-2 text-sm">{entry.notes}</p>}{entry.coach_response ? <p className="mt-3 border-r-2 border-[#16A34A] pr-3 text-sm text-[#16A34A]">{entry.coach_response}</p> : <ReviewCheckInForm checkInId={entry.id} clientId={id}/>}<p className="mt-3 text-xs text-[#3F433F]">תמונות: אין תמונות זמינות בצ׳ק־אין זה.</p></article>)}</div>{!data.checkIns.length && <Empty text="אין צ׳ק־אין שמור."/>}</Panel></section>
-    <EnableFreeMenu clientId={id}/>
-    <ClientDetailExtras clientId={id} content={(contentRows??[]).map((item)=>({...item,assigned:(contentAssignments??[]).some((assignment)=>assignment.content_item_id===item.id)}))} notifications={clientNotifications??[]} notes={coachNotes??[]}/>
-  </div></main>;
+
+  return <main className="client-app-content">
+    <header className="flex items-center gap-4 pb-4">
+      {data.profile.avatar_url
+        ? <img src={data.profile.avatar_url} alt="" className="size-14 shrink-0 rounded-2xl object-cover"/>
+        : <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#ECFDF3] text-xl font-black text-[#16A34A]">{data.profile.full_name.slice(0, 1)}</span>}
+      <div className="min-w-0">
+        <p className="text-xs font-black tracking-widest text-[#16A34A]">לקוח משויך</p>
+        <h1 className="mt-1 truncate text-2xl font-black">{data.profile.full_name}</h1>
+        <p className="mt-1 truncate text-xs text-[#5B5F5B]">{data.profile.email}</p>
+      </div>
+    </header>
+    <p className="pill">{invitationStatus}</p>
+
+    {(query.created==="1" || query.invite==="resent" || query.login) && <p role="status" className="mt-4 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-sm font-bold text-[#15803D]">{query.invite==="resent" ? "נשלחה הזמנה חדשה ללקוח." : query.login==="access-link-sent" ? "נשלח קישור כניסה מאובטח ללקוח." : query.login==="password-reset-sent" ? "קישור לאיפוס סיסמה נשלח ללקוח." : "הלקוח נוצר והוזמן להשלמת הקליטה."}</p>}
+
+    {/* What a coach checks first, before any section is opened. */}
+    <section className="dashboard-metrics mt-4" aria-label="מדדי הלקוח">
+      <MetricTile label="יעד" value={data.profile.clientProfile?.goal ?? "לא הוגדר"}/>
+      <MetricTile label="משקל אחרון" value={data.progress[0] ? `${data.progress[0].weight} ק״ג` : "אין מדידה"}/>
+      <MetricTile label="צ׳ק־אין אחרון" value={lastCheckIn ? date(lastCheckIn.submitted_at) : "ממתין"}/>
+      <MetricTile label="היקף טבור" value={latestNavelMeasurement ? `${latestNavelMeasurement.navel_circumference} ס״מ` : "אין עדיין מדידת היקף טבור"}/>
+    </section>
+
+    {alertRows.length > 0 && <section className="mt-4 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-4" aria-labelledby="client-alerts">
+      <h2 id="client-alerts" className="flex items-center gap-2 font-black text-[#DC2626]"><AlertTriangle aria-hidden="true" size={17}/>דורש תשומת לב</h2>
+      <ul className="mt-2 grid gap-1 text-sm">{alertRows.map((alert) => <li key={alert}>{alert}</li>)}</ul>
+    </section>}
+
+    {/* Everything else is a section a coach opens on purpose. The card used to be
+        one continuous scroll of nine panels, and the thing you came for was
+        never the thing at the top. */}
+    <div className="mt-5">
+      <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
+        {data.menu ? <>
+          <dl className="compact-data-list">
+            <div><span>השלמת היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
+            <div><span>קלוריות</span><strong>{number(data.nutrition.totals.calories)}</strong></div>
+            <div><span>חלבון</span><strong>{number(data.nutrition.totals.protein)} ג׳</strong></div>
+            <div><span>פחמימות / שומן</span><strong>{number(data.nutrition.totals.carbs)} / {number(data.nutrition.totals.fat)} ג׳</strong></div>
+          </dl>
+          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.completedItems} מתוך {data.nutrition.plannedItems} פריטים סומנו היום.</p>
+        </> : <Empty text="ללקוח עדיין לא שויך תפריט פעיל."/>}
+      </Section>
+
+      <Section title="אימונים" summary={data.workouts.program?.name ?? "אין תוכנית פעילה"} open>
+        {data.workouts.assignment ? <dl className="compact-data-list">
+          <div><span>השלמת השבוע</span><strong>{data.workouts.weeklyCompletionPercent}%</strong></div>
+          <div><span>אימון אחרון</span><strong>{date(data.workouts.lastCompletedAt)}</strong></div>
+          <div><span>אימון הבא</span><strong>{data.workouts.nextDayName ?? "לא הוגדר"}</strong></div>
+          <div><span>תדירות</span><strong>{data.workouts.assignment.weekly_frequency} בשבוע</strong></div>
+        </dl> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}
+      </Section>
+
+      <Section title="צ׳ק־אין" summary="עדכון אחרון, הערות ותגובה">
+        <div className="grid gap-3">{data.checkIns.slice(0, 4).map((entry) => <article key={entry.id} className="rounded-2xl border border-[#E5E7E5] p-4">
+          <p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/5 · אנרגיה {entry.energy}/5 · שינה {entry.sleep}/5</p>
+          {entry.notes && <p className="mt-2 text-sm">{entry.notes}</p>}
+          {entry.coach_response ? <p className="mt-3 border-r-2 border-[#16A34A] pr-3 text-sm text-[#15803D]">{entry.coach_response}</p> : <ReviewCheckInForm checkInId={entry.id} clientId={id}/>}
+          <p className="mt-3 text-xs text-[#5B5F5B]">תמונות: אין תמונות זמינות בצ׳ק־אין זה.</p>
+        </article>)}</div>
+        {!data.checkIns.length && <Empty text="אין צ׳ק־אין שמור."/>}
+      </Section>
+
+      <Section title="התקדמות" summary="משקל והיקף טבור">
+        {data.progress.length ? <div className="app-list">{data.progress.slice(0, 6).map((entry) => <div key={entry.id}>
+          <span className="app-list__main"><strong>{entry.weight} ק״ג</strong><span>{entry.date}</span></span>
+          <span className="app-list__meta"><strong>{entry.navel_circumference ?? "—"}</strong>היקף טבור</span>
+        </div>)}</div> : <Empty text="אין מדידות שמורות."/>}
+      </Section>
+
+      <Section title="סטטוס הזמנה" summary={invitationStatus}>
+        <dl className="compact-data-list">
+          <div><span>נשלחה לאחרונה</span><strong>{latestInvitation ? date(latestInvitation.sent_at) : "טרם נשלחה"}</strong></div>
+          <div><span>בתוקף עד</span><strong>{latestInvitation && !invitationExpired ? date(latestInvitation.expires_at) : "לא בתוקף"}</strong></div>
+          <div><span>נפתחה</span><strong>{latestInvitation?.opened_at ? date(latestInvitation.opened_at) : "טרם נפתחה"}</strong></div>
+          <div><span>Onboarding</span><strong>{intake?.onboarding_completed_at ? date(intake.onboarding_completed_at) : "ממתין"}</strong></div>
+          <div><span>סה״כ הזמנות שנשלחו</span><strong>{invitations?.length ?? 0}</strong></div>
+        </dl>
+        {accountActivated&&!intake?.onboarding_completed&&<p className="mt-3 text-sm text-[#5B5F5B]">החשבון כבר אומת. נשלח ללקוח קישור כניסה מאובטח להמשך הקליטה, במקום הזמנה נוספת.</p>}
+      </Section>
+
+      <Section title="נתוני קליטה" summary={intake?.onboarding_completed ? `הקליטה הושלמה ב-${date(intake.onboarding_completed_at ?? null)}` : "ממתין להשלמת קליטה מצד הלקוח"}>
+        {intake ? <dl className="compact-data-list">
+          <div><span>רמת פעילות</span><strong>{intake.activity_level ?? "לא הוגדר"}</strong></div>
+          <div><span>יעד משקל</span><strong>{intake.target_weight ? `${intake.target_weight} ק״ג` : "לא הוגדר"}</strong></div>
+          {preferences.map(([key,item])=><div key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Array.isArray(item) ? item.join(", ") : String(item)}</strong></div>)}
+        </dl> : <Empty text="אין נתוני קליטה זמינים."/>}
+      </Section>
+
+      {/* Account actions, including the destructive one, live behind a heading
+          rather than beside the client's name. */}
+      <Section title="פעולות חשבון" summary="כניסה, הזמנה ומכשיר">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {intake?.onboarding_completed ? <>
+            <form action={sendClientMagicLink}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שליחת Magic Link" pending="שולחים…" className="premium-secondary-button w-full"/></form>
+            <form action={sendClientPasswordReset}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="איפוס סיסמה" pending="שולחים…" className="premium-secondary-button w-full"/></form>
+          </> : accountActivated
+            ? <form action={sendClientMagicLink}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שלח קישור כניסה להשלמת הקליטה" pending="שולחים…" className="premium-secondary-button w-full"/></form>
+            : <form action={resendClientInvite}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שלח הזמנה מחדש" pending="שולחים…" className="premium-secondary-button w-full"/></form>}
+          <form action={resetClientDevice} className="sm:col-span-2"><input type="hidden" name="clientId" value={id}/><SubmitButton idle="איפוס מכשיר" pending="מאפסים…" className="premium-secondary-button w-full border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]"/></form>
+        </div>
+      </Section>
+    </div>
+
+    <div className="mt-5 grid gap-3">
+      <EnableFreeMenu clientId={id}/>
+      <ClientDetailExtras clientId={id} content={(contentRows??[]).map((item)=>({...item,assigned:(contentAssignments??[]).some((assignment)=>assignment.content_item_id===item.id)}))} notifications={clientNotifications??[]} notes={coachNotes??[]}/>
+    </div>
+  </main>;
 }
-function Card({ label, value }: { label: string; value: string }) { return <div className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-4"><p className="text-xs text-[#5B5F5B]">{label}</p><strong className="mt-2 block">{value}</strong></div>; }
-function Metric({ label, value }: { label: string; value: string }) { return <div className="rounded-xl bg-[#F7F8F7] p-3"><p className="text-xs text-[#5B5F5B]">{label}</p><strong className="mt-1 block text-sm">{value}</strong></div>; }
-function Panel({ title, description, children }: { title: string; description: string; children: React.ReactNode }) { return <section className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><h2 className="text-xl font-black">{title}</h2><p className="mt-1 text-sm text-[#5B5F5B]">{description}</p><div className="mt-4">{children}</div></section>; }
-function Empty({ text }: { text: string }) { return <p className="rounded-xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">{text}</p>; }
+
+function Section({ title, summary, open = false, children }: { title: string; summary: string; open?: boolean; children: React.ReactNode }) {
+  return <details className="collapse" open={open}>
+    <summary>
+      <span className="min-w-0">
+        <strong className="block">{title}</strong>
+        <span className="block truncate text-xs font-normal text-[#5B5F5B]">{summary}</span>
+      </span>
+    </summary>
+    <div className="collapse__body">{children}</div>
+  </details>;
+}
+
+function Empty({ text }: { text: string }) { return <p className="rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">{text}</p>; }
