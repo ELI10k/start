@@ -684,6 +684,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .fab:hover { background: var(--green-press); }
 .fab:active { transform: scale(.96); }
+/* Coach screens have no bottom bar, so the FAB only has to clear the home
+   indicator. */
+.fab--bare { inset-block-end: max(var(--space-5), calc(var(--space-4) + env(safe-area-inset-bottom))); }
 @media (min-width: 768px) { .fab { inset-block-end: var(--space-6); } }
 
 /* List rows: the pattern behind history, notifications, clients and content.
