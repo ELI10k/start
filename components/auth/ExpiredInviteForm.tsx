@@ -33,7 +33,7 @@ export default function ExpiredInviteForm() {
         {pending ? "שולחים…" : "שליחת הזמנה חדשה"}
       </button>
       {state.message && (
-        <p role="status" className="text-sm text-amber-100">
+        <p role="status" className="text-sm text-[#0B0B0B]">
           {state.message}
         </p>
       )}

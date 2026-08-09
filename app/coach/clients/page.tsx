@@ -6,7 +6,7 @@ import { getAuthContext, listCoachDashboardClients } from "@/lib/data/product-re
 
 type Search = { q?: string; sort?: "name" | "checkin" | "weight"; page?: string };
 const labels = { active: "פעיל", waiting: "ממתין", inactive: "לא פעיל" } as const;
-const styles = { active: "border-emerald-400/30 bg-emerald-400/10 text-emerald-300", waiting: "border-amber-400/30 bg-amber-400/10 text-amber-200", inactive: "border-zinc-500/30 bg-zinc-500/10 text-[#3F433F]" } as const;
+const styles = { active: "border-[#16A34A]/30 bg-[#ECFDF3] text-[#16A34A]", waiting: "border-[#E5E7E5] bg-[#F7F8F7] text-[#0B0B0B]", inactive: "border-[#E5E7E5] bg-[#F7F8F7] text-[#3F433F]" } as const;
 const date = (value: string | null) => value ? new Intl.DateTimeFormat("he-IL", { dateStyle: "medium", timeZone: "Asia/Jerusalem" }).format(new Date(value)) : "אין נתון";
 
 export default async function CoachClientsPage({ searchParams }: { searchParams: Promise<Search> }) {

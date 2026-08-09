@@ -33,7 +33,7 @@ function Preview({
       )}
       <button
         type="button"
-        className="mt-2 text-xs text-red-300 underline"
+        className="mt-2 text-xs text-[#DC2626] underline"
         onClick={onRemove}
       >
         הסרת תמונה
@@ -102,7 +102,7 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
         })}
       </div>
       {error && (
-        <p role="alert" className="mt-3 text-sm text-red-300">
+        <p role="alert" className="mt-3 text-sm text-[#DC2626]">
           {error}
         </p>
       )}

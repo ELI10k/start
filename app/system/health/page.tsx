@@ -12,9 +12,9 @@ export default async function SystemHealthPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center px-4 py-12">
       <section
         aria-labelledby="backend-health-title"
-        className="w-full rounded-2xl border border-amber-400/30 bg-black p-6 text-[#0B0B0B] shadow-xl"
+        className="w-full rounded-2xl border border-[#E5E7E5] bg-[#FFFFFF] p-6 text-[#0B0B0B] shadow-xl"
       >
-        <h1 id="backend-health-title" className="text-2xl font-bold text-amber-400">
+        <h1 id="backend-health-title" className="text-2xl font-bold text-[#0B0B0B]">
           START Backend
         </h1>
         {health.connected ? (

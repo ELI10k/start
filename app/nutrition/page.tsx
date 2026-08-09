@@ -82,7 +82,7 @@ export default async function NutritionPage() {
                     pending="שומרים…"
                     className={
                       meal.completed
-                        ? "min-h-11 rounded-xl border border-emerald-400/30 px-4 text-sm font-bold text-emerald-300 disabled:opacity-50"
+                        ? "min-h-11 rounded-xl border border-[#16A34A]/30 px-4 text-sm font-bold text-[#16A34A] disabled:opacity-50"
                         : "min-h-11 rounded-xl bg-[#16A34A] px-4 text-sm font-black text-[#FFFFFF] disabled:opacity-50"
                     }
                   />

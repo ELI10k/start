@@ -8,9 +8,9 @@ import { summarizeProgress } from "@/lib/progress/calculations";
 import { mockWeighIns } from "@/lib/progress/mock-data";
 
 const statusStyles: Record<Client["status"], string> = {
-  active: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
-  "needs-attention": "border-amber-500/25 bg-amber-500/10 text-amber-300",
-  paused: "border-zinc-500/25 bg-zinc-500/10 text-[#3F433F]",
+  active: "border-[#16A34A]/30 bg-[#ECFDF3] text-[#16A34A]",
+  "needs-attention": "border-[#E5E7E5] bg-[#F7F8F7] text-[#0B0B0B]",
+  paused: "border-[#E5E7E5] bg-[#F7F8F7] text-[#3F433F]",
 };
 
 export function formatCheckIn(date: string) {
@@ -26,7 +26,7 @@ export default function ClientCard({ client }: { client: Client }) {
   const progress = Math.max(0, Math.min(100, 100 - Math.abs(client.currentWeight - client.targetWeight) * 8));
 
   return (
-    <article className="group overflow-hidden rounded-[26px] border border-[#E5E7E5] bg-gradient-to-br from-[#191919] to-[#111] p-5 transition hover:-translate-y-0.5 hover:border-[#16A34A]/50">
+    <article className="group overflow-hidden rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 transition hover:-translate-y-0.5 hover:border-[#16A34A]/50">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="grid size-12 shrink-0 place-items-center rounded-2xl border border-[#16A34A]/25 bg-[#16A34A]/10 text-lg font-black text-[#16A34A]">
@@ -52,12 +52,12 @@ export default function ClientCard({ client }: { client: Client }) {
 
       <div className="mb-4">
         <div className="mb-2 flex justify-between text-xs text-[#5B5F5B]"><span>התקדמות ליעד</span><span>{Math.round(progress)}%</span></div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-[#F1F3F1]"><div className="h-full rounded-full bg-gradient-to-l from-[#16A34A] to-[#8B6B1F]" style={{ width: `${progress}%` }} /></div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-[#F1F3F1]"><div className="h-full rounded-full bg-[#16A34A]" style={{ width: `${progress}%` }} /></div>
       </div>
 
       <div className="flex items-center justify-between border-t border-[#E5E7E5] pt-4">
         <div className="flex items-center gap-2 text-xs text-[#5B5F5B]">
-          {isUpdated ? <CheckCircle2 size={15} className="text-emerald-400" /> : <CalendarDays size={15} />}
+          {isUpdated ? <CheckCircle2 size={15} className="text-[#16A34A]" /> : <CalendarDays size={15} />}
           <span>{isUpdated ? "עודכן השבוע" : latestCheckIn ? `צ׳ק-אין ${formatCheckIn(latestCheckIn.date)}` : "חסר עדכון שבועי"}{needsAttention ? " · דורש תשומת לב" : ""}</span>
         </div>
         <Link href={`/coach/clients/${client.id}`} aria-label={`פתיחת הכרטיס של ${client.fullName}`} className="flex items-center gap-1 text-sm font-bold text-[#16A34A] transition group-hover:gap-2">
@@ -69,5 +69,5 @@ export default function ClientCard({ client }: { client: Client }) {
 }
 
 function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return <div className="rounded-2xl bg-white/[0.035] px-3 py-3"><div className="flex items-center gap-1.5 text-[11px] text-[#5B5F5B]">{icon}{label}</div><strong className="mt-1.5 block text-sm text-zinc-100">{value}</strong></div>;
+  return <div className="rounded-2xl bg-[#F7F8F7] px-3 py-3"><div className="flex items-center gap-1.5 text-[11px] text-[#5B5F5B]">{icon}{label}</div><strong className="mt-1.5 block text-sm text-[#5B5F5B]">{value}</strong></div>;
 }

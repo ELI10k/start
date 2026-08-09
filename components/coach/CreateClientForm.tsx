@@ -18,7 +18,7 @@ export default function CreateClientForm(){
     <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START COACH</p>
     <h1 className="mt-2 text-3xl font-black">לקוח חדש</h1>
     <p className="mt-2 text-[#5B5F5B]">הלקוח יקבל הזמנה מאובטחת להשלמת הכניסה והקליטה.</p>
-    {state.status==="error"&&<p role="alert" className="mt-5 rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">{state.message}</p>}
+    {state.status==="error"&&<p role="alert" className="mt-5 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-4 text-sm text-[#DC2626]">{state.message}</p>}
     <section className="mt-6 grid gap-4 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
       <Field label="שם מלא" name="fullName" required/>
       <Field label="אימייל" name="email" type="email" required dir="ltr"/>

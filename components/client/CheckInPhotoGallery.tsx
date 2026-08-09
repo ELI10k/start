@@ -24,7 +24,7 @@ function Photo({ photo }: { photo: CheckInPhoto }) {
         </div>
       )}
       {state === "error" ? (
-        <div role="alert" className="grid h-40 place-items-center p-4 text-center text-xs text-red-300">
+        <div role="alert" className="grid h-40 place-items-center p-4 text-center text-xs text-[#DC2626]">
           לא ניתן לטעון את התמונה.
         </div>
       ) : (
@@ -54,7 +54,7 @@ export default function CheckInPhotoGallery({
 }) {
   if (error)
     return (
-      <p role="alert" className="mt-4 rounded-xl border border-red-900/50 p-4 text-sm text-red-300">
+      <p role="alert" className="mt-4 rounded-xl border border-[#DC2626]/30 p-4 text-sm text-[#DC2626]">
         לא ניתן לטעון את תמונות הצ׳ק־אין כרגע.
       </p>
     );

@@ -17,13 +17,15 @@ export function MetricTile({
   value,
   detail,
   icon,
-  accent = "gold",
+  accent = "green",
 }: {
   label: string;
   value: ReactNode;
   detail?: ReactNode;
   icon?: ReactNode;
-  accent?: "gold" | "green" | "neutral";
+  // "down" is the only tile that ever leaves the green: a number moving the
+  // wrong way is the one thing the palette says in red.
+  accent?: "green" | "neutral" | "down";
 }) {
   return (
     <div className={`metric-tile metric-tile--${accent}`}>

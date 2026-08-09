@@ -201,7 +201,7 @@ const pageStyle: CSSProperties = {
   direction: "rtl",
   background:
     "radial-gradient(circle at top right, rgba(212, 175, 55, 0.08), transparent 32%), #FFFFFF",
-  color: "#F4F4F4",
+  color: "#0B0B0B",
   padding: "32px 20px 100px",
   fontFamily: "Assistant, sans-serif",
 };
@@ -237,7 +237,7 @@ const titleStyle: CSSProperties = {
 
 const descriptionStyle: CSSProperties = {
   margin: "10px 0 0",
-  color: "#969696",
+  color: "#5B5F5B",
   fontSize: "15px",
 };
 
@@ -252,12 +252,12 @@ const countCardStyle: CSSProperties = {
 
 const countNumberStyle: CSSProperties = {
   display: "block",
-  color: "#22C55E",
+  color: "#16A34A",
   fontSize: "24px",
 };
 
 const countLabelStyle: CSSProperties = {
-  color: "#858585",
+  color: "#5B5F5B",
   fontSize: "12px",
 };
 
@@ -268,7 +268,7 @@ const uploadBoxStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   padding: "32px",
-  border: "1px dashed #8B6B1F",
+  border: "1px dashed #16A34A",
   borderRadius: "24px",
   background: "#FFFFFF",
   cursor: "pointer",
@@ -287,7 +287,7 @@ const uploadIconStyle: CSSProperties = {
   marginBottom: "16px",
   borderRadius: "50%",
   background: "rgba(212, 175, 55, 0.12)",
-  color: "#22C55E",
+  color: "#16A34A",
   fontSize: "30px",
 };
 
@@ -298,7 +298,7 @@ const uploadTitleStyle: CSSProperties = {
 
 const uploadDescriptionStyle: CSSProperties = {
   marginTop: "6px",
-  color: "#8B8B8B",
+  color: "#5B5F5B",
   fontSize: "14px",
 };
 
@@ -307,7 +307,7 @@ const fileNameStyle: CSSProperties = {
   padding: "7px 13px",
   borderRadius: "999px",
   background: "rgba(212, 175, 55, 0.09)",
-  color: "#22C55E",
+  color: "#16A34A",
   fontSize: "13px",
 };
 
@@ -320,10 +320,10 @@ const actionsStyle: CSSProperties = {
 const secondaryButtonStyle: CSSProperties = {
   minHeight: "48px",
   padding: "0 24px",
-  border: "1px solid #353535",
+  border: "1px solid #E5E7E5",
   borderRadius: "14px",
   background: "#FFFFFF",
-  color: "#D0D0D0",
+  color: "#5B5F5B",
   fontFamily: "inherit",
   fontSize: "15px",
   fontWeight: 700,
@@ -335,7 +335,7 @@ const messageStyle: CSSProperties = {
   padding: "15px",
   borderRadius: "14px",
   background: "#FFFFFF",
-  color: "#22C55E",
+  color: "#16A34A",
   textAlign: "center",
 };
 
@@ -345,7 +345,7 @@ const errorStyle: CSSProperties = {
   border: "1px solid rgba(255, 80, 80, 0.35)",
   borderRadius: "14px",
   background: "rgba(255, 80, 80, 0.08)",
-  color: "#FF9C9C",
+  color: "#DC2626",
 };
 
 const previewHeaderStyle: CSSProperties = {
@@ -362,7 +362,7 @@ const previewTitleStyle: CSSProperties = {
 };
 
 const previewSubtitleStyle: CSSProperties = {
-  color: "#777777",
+  color: "#5B5F5B",
   fontSize: "13px",
 };
 
@@ -381,7 +381,7 @@ const tableStyle: CSSProperties = {
 
 const tableHeaderStyle: CSSProperties = {
   padding: "15px",
-  borderBottom: "1px solid #303030",
+  borderBottom: "1px solid #E5E7E5",
   color: "#16A34A",
   fontSize: "13px",
   textAlign: "right",
@@ -389,8 +389,8 @@ const tableHeaderStyle: CSSProperties = {
 
 const tableCellStyle: CSSProperties = {
   padding: "14px 15px",
-  borderBottom: "1px solid #242424",
-  color: "#AFAFAF",
+  borderBottom: "1px solid #F7F8F7",
+  color: "#5B5F5B",
   fontSize: "14px",
 };
 

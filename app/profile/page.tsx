@@ -27,7 +27,7 @@ export default async function ProfilePage() {
       </section>
       <p className="start-empty mt-5 rounded-2xl p-4 text-sm leading-6 text-[#5B5F5B]">לעדכון פרטים או יעדים, פנו למאמן. כך נשמרת התאמה אחת ומאושרת של התוכנית האישית שלך.</p>
       <form action="/auth/logout" method="post" className="mt-5 md:hidden">
-        <button className="min-h-12 w-full rounded-2xl border border-red-400/20 bg-red-400/5 px-5 text-sm font-bold text-red-200">
+        <button className="min-h-12 w-full rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] px-5 text-sm font-bold text-[#DC2626]">
           התנתקות מהחשבון
         </button>
       </form>

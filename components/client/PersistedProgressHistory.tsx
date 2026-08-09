@@ -44,8 +44,8 @@ function TrendChart({ title, unit, points }: { title: string; unit: string; poin
         <span className="text-xs text-[#3F433F]">{points.length} מדידות</span>
       </div>
       <svg className="mt-5 h-36 w-full overflow-visible" viewBox="0 0 100 100" role="img" aria-label={title} preserveAspectRatio="none">
-        <line x1="0" x2="100" y1="90" y2="90" stroke="#3f3f46" strokeWidth="1" />
-        <line x1="0" x2="100" y1="55" y2="55" stroke="#27272a" strokeWidth="1" />
+        <line x1="0" x2="100" y1="90" y2="90" stroke="#E5E7E5" strokeWidth="1" />
+        <line x1="0" x2="100" y1="55" y2="55" stroke="#E5E7E5" strokeWidth="1" />
         <polyline fill="none" points={linePoints(points)} stroke="#16A34A" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
       </svg>
       <div className="mt-2 flex justify-between text-xs text-[#3F433F]"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>

@@ -28,7 +28,7 @@ export default function CheckInHandledForm({
       {state.message && (
         <p
           role={state.ok ? "status" : "alert"}
-          className={state.ok ? "text-xs text-emerald-400" : "text-xs text-red-400"}
+          className={state.ok ? "text-xs text-[#16A34A]" : "text-xs text-[#DC2626]"}
         >
           {state.message}
         </p>

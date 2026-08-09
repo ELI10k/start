@@ -15,7 +15,7 @@ export default function WorkoutRouteReady({
       <div className="px-4 py-8 text-[#0B0B0B]">
         <p
           role="alert"
-          className="mx-auto max-w-3xl rounded-[24px] border border-red-400/20 bg-red-400/[.05] p-8 text-center text-sm text-red-200"
+          className="mx-auto max-w-3xl rounded-[24px] border border-[#DC2626]/30 bg-[#FEF2F2] p-8 text-center text-sm text-[#DC2626]"
         >
           {persistenceError}
         </p>

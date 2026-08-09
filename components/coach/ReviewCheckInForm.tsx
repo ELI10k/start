@@ -13,7 +13,7 @@ export default function ReviewCheckInForm({ checkInId, clientId }: { checkInId: 
       <input type="hidden" name="checkInId" value={checkInId} />
       <input type="hidden" name="clientId" value={clientId} />
       <label className="block text-sm font-bold">תגובת מאמן<textarea name="response" required maxLength={4000} className="nutrition-input mt-2 min-h-24" placeholder="כתבו משוב מעשי ללקוח" /></label>
-      <div className="flex items-center gap-3"><SubmitButton idle="שמירת תגובה" pending="שומרים…" />{state.message && <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm text-emerald-400" : "text-sm text-red-400"}>{state.message}</p>}</div>
+      <div className="flex items-center gap-3"><SubmitButton idle="שמירת תגובה" pending="שומרים…" />{state.message && <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm text-[#16A34A]" : "text-sm text-[#DC2626]"}>{state.message}</p>}</div>
     </form>
   );
 }

@@ -24,7 +24,7 @@ export default async function SupportPage() {
           מסך זה הוא מעטפת דמו בלבד. לא הוגדרו במאגר פרטי קשר מאושרים, ולכן אין כאן טופס ששולח הודעה או קישור חיצוני.
         </p>
         <div
-          className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/[.06] p-4 text-sm text-amber-200"
+          className="mt-5 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-4 text-sm text-[#0B0B0B]"
           role="status"
         >
           במקרה דחוף יש להשתמש בערוץ הקשר שסוכם ישירות עם צוות הליווי.

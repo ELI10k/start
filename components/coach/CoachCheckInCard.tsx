@@ -35,10 +35,10 @@ const date = (value: string) =>
 export function checkInStatus(item: CheckInItem) {
   const status = coachCheckInStatus(item);
   if (status === "handled")
-    return { label: "טופל", className: "text-emerald-300" };
+    return { label: "טופל", className: "text-[#16A34A]" };
   if (status === "responded")
-    return { label: "נענתה", className: "text-sky-300" };
-  return { label: "חדש", className: "text-amber-300" };
+    return { label: "נענתה", className: "text-[#0B0B0B]" };
+  return { label: "חדש", className: "text-[#0B0B0B]" };
 }
 
 export default function CoachCheckInCard({
@@ -63,7 +63,7 @@ export default function CoachCheckInCard({
           <p className="text-xs text-[#3F433F]">{item.client?.email}</p>
         </div>
         <span
-          className={`rounded-full border border-current/20 bg-white/[.03] px-3 py-1 text-xs font-black ${status.className}`}
+          className={`rounded-full border border-current/20 bg-[#F7F8F7] px-3 py-1 text-xs font-black ${status.className}`}
         >
           {status.label}
         </span>
@@ -119,7 +119,7 @@ export default function CoachCheckInCard({
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white/[.04] p-3 text-center">
+    <div className="rounded-xl bg-[#F7F8F7] p-3 text-center">
       <span className="block text-xs text-[#5B5F5B]">{label}</span>
       <strong className="mt-1 block">{value}</strong>
     </div>

@@ -100,7 +100,7 @@ function StatusForm({
         pending="שומרים…"
         className={`min-h-10 rounded-xl border px-3 text-xs font-bold disabled:opacity-50 ${
           danger
-            ? "border-red-400/25 text-red-300"
+            ? "border-[#DC2626]/30 text-[#DC2626]"
             : "border-[#BBF7D0] text-[#16A34A]"
         }`}
       />

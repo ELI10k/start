@@ -33,7 +33,7 @@ export default function ProgressPhotoGallery({
     [sessions],
   );
   if (error)
-    return <p role="alert" className="rounded-[24px] border border-red-900/50 p-5 text-red-300">לא ניתן לטעון את גלריית התמונות כרגע.</p>;
+    return <p role="alert" className="rounded-[24px] border border-[#DC2626]/30 p-5 text-[#DC2626]">לא ניתן לטעון את גלריית התמונות כרגע.</p>;
   if (!sessions.length)
     return <p className="rounded-[24px] border border-dashed border-[#E5E7E5] p-8 text-center text-[#5B5F5B]">עדיין אין תמונות התקדמות.</p>;
   const first = byId.get(firstId) ?? sessions[0];
