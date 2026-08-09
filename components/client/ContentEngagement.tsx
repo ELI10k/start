@@ -27,7 +27,7 @@ export default function ContentEngagement({
     });
   }, [contentItemId]);
   return (
-    <section className="mt-5 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
+    <section className="premium-card mt-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-black">המעקב שלי</h2>
@@ -43,7 +43,7 @@ export default function ContentEngagement({
           <SubmitButton
             idle={favorite ? "הסרה מהמועדפים" : "הוספה למועדפים"}
             pending="שומרים…"
-            className="min-h-11 rounded-xl border border-[#16A34A]/40 px-4 text-sm font-bold text-[#16A34A] disabled:opacity-50"
+            className="premium-secondary-button"
           />
         </form>
       </div>
@@ -66,7 +66,7 @@ export default function ContentEngagement({
         <SubmitButton
           idle="שמירת התקדמות"
           pending="שומרים…"
-          className="mt-4 min-h-11 rounded-xl bg-[#16A34A] px-4 text-sm font-black text-[#FFFFFF] disabled:opacity-50"
+          className="premium-primary-button mt-4 w-full"
         />
       </form>
     </section>

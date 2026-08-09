@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation";
+import { BookOpen } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
+import { StateBlock } from "@/components/client/AppPatterns";
 import ContentEngagement from "@/components/client/ContentEngagement";
 import PageHeader from "@/components/client/PageHeader";
 import { getAuthContext } from "@/lib/data/product-repository";
@@ -24,7 +26,7 @@ export default async function ContentDetailPage({
         description={item.description ?? ""}
       />
       {item.body ? (
-        <article className="whitespace-pre-wrap rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-6 leading-8">
+        <article className="premium-card whitespace-pre-wrap leading-8">
           {item.body}
         </article>
       ) : item.mediaUrl ? (
@@ -32,14 +34,16 @@ export default async function ContentDetailPage({
           href={item.mediaUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-h-12 items-center rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF]"
+          className="premium-primary-button w-full"
         >
           פתיחת המדיה
         </a>
       ) : (
-        <p className="rounded-[24px] border border-dashed border-[#E5E7E5] p-12 text-center text-[#5B5F5B]">
-          התוכן עדיין אינו זמין.
-        </p>
+        <StateBlock
+          icon={<BookOpen aria-hidden="true" size={22}/>}
+          title="התוכן עדיין אינו זמין"
+          description="הפריט פורסם אך לא צורף לו גוף או מדיה."
+        />
       )}
       <ContentEngagement
         contentItemId={item.id}
