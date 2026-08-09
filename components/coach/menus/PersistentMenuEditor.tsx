@@ -7,6 +7,7 @@ import {
   recordCoachFoodSelection,
   saveMenuTree,
 } from "@/app/actions/product";
+import BottomSheet from "@/components/client/BottomSheet";
 import FoodCombobox from "@/components/coach/menus/FoodCombobox";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { FIXED_MEAL_TITLES } from "@/lib/nutrition/menu-validation";
@@ -42,6 +43,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const toggleCollapsed=(index:number)=>setCollapsed(current=>{const next=new Set(current);if(next.has(index))next.delete(index);else next.add(index);return next});
   const[message,setMessage]=useState("");
   const[macroMessage,setMacroMessage]=useState("");
+  // Which food slot the picker sheet is currently editing, if any.
+  const[picker,setPicker]=useState<{mealIndex:number;groupIndex:number;itemIndex:number}|null>(null);
   const[pending,startTransition]=useTransition();
   const router=useRouter();
   const foodMap=useMemo(()=>new Map(foods.map(food=>[food.id,food])),[foods]);
@@ -155,8 +158,19 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
   });
   return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-6xl">
-    <div className="sticky top-0 z-30 -mx-4 mb-1 flex flex-wrap items-center justify-between gap-4 bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6"><div><p className="text-xs font-black tracking-widest text-[#16A34A]">תפריט שמור</p><h1 className="mt-2 text-3xl font-black">{menu.id?"עריכת תפריט":"תפריט חדש"}</h1></div><button type="button" onClick={submit} disabled={pending||!menu.title.trim()} className="flex min-h-12 items-center gap-2 rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF] disabled:opacity-50"><Save size={18}/>{pending?"שומרים…":"שמירה"}</button></div>
-    {message&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] p-3 text-sm">{message}</p>}
+    {/* The running calorie total lives in the sticky bar: on a phone the summary
+        sits below six meals, which is exactly where it is no use. */}
+    <div className="sticky top-0 z-30 -mx-4 mb-1 flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7E5] bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+      <div className="min-w-0">
+        <p className="text-xs font-black tracking-widest text-[#16A34A]">תפריט שמור</p>
+        <h1 className="mt-1 truncate text-2xl font-black">{menu.id?"עריכת תפריט":"תפריט חדש"}</h1>
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="pill">{Math.round(totals.calories+menu.meals.reduce((sum,meal)=>sum+(meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget||0):0),0))}{menu.calorieTarget?` / ${menu.calorieTarget}`:""} קל׳</span>
+        <button type="button" onClick={submit} disabled={pending||!menu.title.trim()} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{pending?"שומרים…":"שמירה"}</button>
+      </div>
+    </div>
+    {message&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">{message}</p>}
     <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1fr_300px]"><div className="space-y-4">
       <section className="grid gap-4 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <Field label="שם התפריט" value={menu.title} onChange={title=>setMenu({...menu,title})}/><Field label="תיאור" value={menu.description} onChange={description=>setMenu({...menu,description})}/>
@@ -171,10 +185,52 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       {menu.meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><button type="button" aria-label="שכפול ארוחה" onClick={()=>setMenu({...menu,meals:[...menu.meals.slice(0,index+1),structuredClone(meal),...menu.meals.slice(index+1)]})} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMenu({...menu,meals:menu.meals.filter((_,i)=>i!==index)})} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button></div>
       {collapsed.has(index)?<p className="mt-3 text-xs text-[#5B5F5B]">{mealSummary(meal,foodMap)}</p>:<>
       {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:<>
-      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=><div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4"><h3 className="font-black">{groupLabels[group.type]}</h3><p className="mt-1 text-xs text-[#5B5F5B]">מאכל ראשי אחד, ומתחתיו חלופות בכמות מחושבת.</p><div className="mt-3 space-y-2">{group.items.map((item,itemIndex)=>{const selectedFood=foodMap.get(item.foodId);const portion=selectedFood?portionFor(selectedFood,item.amount):null;return <div key={itemIndex} className={`flex flex-wrap items-center gap-2 rounded-xl border px-2.5 py-2 ${itemIndex===0?"border-[#16A34A]/40 bg-[#16A34A]/5":"border-[#E5E7E5]"}`}><span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${itemIndex===0?"bg-[#16A34A] text-[#FFFFFF]":item.amountSource==="auto"?"border border-[#16A34A]/30 text-[#16A34A]":"border border-[#D4D7D4] text-[#5B5F5B]"}`}>{itemIndex===0?"ראשי":item.amountSource==="auto"?"אוטו׳":"ידני"}</span><div className="min-w-[150px] flex-1"><FoodCombobox foods={foods.filter(food=>!food.masterGroup||food.masterGroup===group.type)} value={item.foodId} usage={usage} onSelect={foodId=>selectFood(index,groupIndex,itemIndex,foodId)} onToggleFavorite={toggleFavorite}/></div><label className="relative w-[116px] shrink-0"><span className="sr-only">כמות</span><input aria-label="כמות" className="nutrition-input pl-14" type="number" min="0.1" step="0.1" value={item.amount} onChange={event=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,amount:Number(event.target.value),amountSource:"manual"}:food)}:value)})}/><span className="absolute left-3 top-3 text-xs text-[#5B5F5B]">{selectedFood?unitLabel(foodUnit(selectedFood).unit,item.amount):"גרם"}</span></label>{portion?<span className="shrink-0 text-[11px] tabular-nums text-[#5B5F5B]">{portion.calories} קל׳ · ח {portion.protein} · פ {portion.carbs} · ש {portion.fat}</span>:null}<button type="button" aria-label="הסרת חלופה" disabled={itemIndex===0&&group.items.length===1} onClick={()=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.filter((_,i)=>i!==itemIndex)}:value)})} className="shrink-0 rounded-xl border border-[#E5E7E5] p-2 disabled:opacity-30"><Trash2 size={16}/></button></div>})}</div><div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={()=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto"}]}:value)})} className="flex min-h-10 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-xs font-bold text-[#16A34A]"><Plus size={15}/>{group.items.length?"הוספת חלופה":"בחירת מאכל ראשי"}</button>{group.items[0]?.foodId?<button type="button" onClick={()=>suggestAlternatives(index,groupIndex)} className="flex min-h-10 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-xs font-bold text-[#16A34A]"><Sparkles size={15}/>הוסף 3 חלופות מומלצות</button>:null}</div></div>)}</div>
+      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=>
+        <div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4">
+          <h3 className="font-black">{groupLabels[group.type]}</h3>
+          <p className="mt-1 text-xs text-[#5B5F5B]">מאכל ראשי אחד, ומתחתיו חלופות בכמות מחושבת.</p>
+          <div className="mt-3">{group.items.map((item,itemIndex)=>{
+            const selectedFood=foodMap.get(item.foodId);
+            const portion=selectedFood?portionFor(selectedFood,item.amount):null;
+            return <div key={itemIndex} className="food-row" data-primary={itemIndex===0||undefined}>
+              <span className={`pill${itemIndex===0?" pill--green":""}`}>{itemIndex===0?"ראשי":item.amountSource==="auto"?"אוטו׳":"ידני"}</span>
+              <button type="button" className="food-row__pick" data-empty={selectedFood?undefined:true} onClick={()=>setPicker({mealIndex:index,groupIndex,itemIndex})}>
+                {selectedFood?`${selectedFood.name}${selectedFood.brand?` — ${selectedFood.brand}`:""}`:"בחירת מזון"}
+              </button>
+              <label className="food-row__amount"><span className="sr-only">כמות</span>
+                <input aria-label="כמות" className="nutrition-input" type="number" min="0.1" step="0.1" value={item.amount} onChange={event=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,amount:Number(event.target.value),amountSource:"manual"}:food)}:value)})}/>
+                <span>{selectedFood?unitLabel(foodUnit(selectedFood).unit,item.amount):"גרם"}</span>
+              </label>
+              <button type="button" aria-label="הסרת חלופה" disabled={itemIndex===0&&group.items.length===1} onClick={()=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.filter((_,i)=>i!==itemIndex)}:value)})} className="rounded-xl border border-[#E5E7E5] p-2 disabled:opacity-30"><Trash2 size={16}/></button>
+              {portion?<span className="food-row__meta">{portion.calories} קל׳ · ח {portion.protein} · פ {portion.carbs} · ש {portion.fat}</span>:null}
+            </div>})}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" onClick={()=>{updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto"}]}:value)});setPicker({mealIndex:index,groupIndex,itemIndex:group.items.length})}} className="chip"><Plus aria-hidden="true" size={15}/>{group.items.length?"הוספת חלופה":"בחירת מאכל ראשי"}</button>
+            {group.items[0]?.foodId?<button type="button" onClick={()=>suggestAlternatives(index,groupIndex)} className="chip"><Sparkles aria-hidden="true" size={15}/>הוסף 3 חלופות מומלצות</button>:null}
+          </div>
+        </div>)}
+      </div>
       </>}</>}</section>)}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-[#16A34A]/30 p-3">{FIXED_MEAL_TITLES.filter(title=>!menu.meals.some(meal=>meal.title===title)).map(title=><button key={title} type="button" onClick={()=>setMenu({...menu,meals:[...menu.meals,title==="קלוריות חופשיות"?{title,notes:"",freeCalorieTarget:"",groups:[]}:{...emptyMeal(),title}]})} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4 text-sm font-bold text-[#16A34A]"><Plus size={15} className="inline"/> {title}</button>)}</div>
     </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">סיכום המזונות</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><Total label="קלוריות" value={totals.calories+menu.meals.reduce((sum,meal)=>sum+(meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget||0):0),0)}/><Total label="חלבון (גרם)" value={totals.protein}/><Total label="פחמימה (גרם)" value={totals.carbs}/><Total label="שומן (גרם)" value={totals.fat}/></dl><h2 className="mt-6 border-t border-[#E5E7E5] pt-5 font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
+
+    {/* One picker for the whole editor. It fills a sheet rather than hanging off
+        the row it belongs to, so the search and the results have room. */}
+    <BottomSheet
+      open={Boolean(picker)}
+      title={picker?groupLabels[menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.type??"protein"]:"בחירת מזון"}
+      onClose={()=>setPicker(null)}
+    >
+      {picker&&<FoodCombobox
+        foods={foods.filter(food=>!food.masterGroup||food.masterGroup===menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.type)}
+        value={menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.items[picker.itemIndex]?.foodId??""}
+        usage={usage}
+        onSelect={foodId=>{selectFood(picker.mealIndex,picker.groupIndex,picker.itemIndex,foodId);setPicker(null)}}
+        onToggleFavorite={toggleFavorite}
+        onClose={()=>setPicker(null)}
+      />}
+    </BottomSheet>
   </div></main>
 }
 

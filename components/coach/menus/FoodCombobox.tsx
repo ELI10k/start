@@ -1,15 +1,18 @@
 "use client";
 import { useMemo,useRef,useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { Search } from "lucide-react";
 import { foodSearchRelevance,normalizeFoodText } from "@/lib/foods/repository";
 
 export type ComboboxFood={id:string;name:string;brand:string|null;category?:string;isMaster?:boolean};
 type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
 
-export default function FoodCombobox({foods,value,usage,onSelect}:{foods:ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void}){
-  const[open,setOpen]=useState(false);const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
+// The picker is a panel, not a dropdown. It used to be an absolutely positioned
+// list hanging off a 150px input inside a wrapping row - on a phone that put the
+// results over the row they belonged to. It now fills a bottom sheet, so the
+// search field is at the top and the whole list is scrollable.
+export default function FoodCombobox({foods,value,usage,onSelect,onClose}:{foods:ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
+  const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
-  const selected=foods.find(food=>food.id===value);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
@@ -29,6 +32,46 @@ export default function FoodCombobox({foods,value,usage,onSelect}:{foods:Combobo
     const rest=candidates.filter(item=>!included.has(item.food.id)).sort((a,b)=>a.food.name.localeCompare(b.food.name,"he")).slice(0,Math.max(0,100-masters.length-recent.length)).map(item=>({...item,group:"כל המזונות"}));
     return[...masters,...recent,...rest];
   },[foods,query,usageMap]);
-  const choose=(id:string)=>{onSelect(id);setOpen(false);setQuery("");setActive(0)};
-  return <div className="relative"><label className="sr-only">מזון</label><div className="relative"><input ref={input} aria-label="חיפוש מזון" role="combobox" aria-expanded={open} aria-controls="food-options" aria-autocomplete="list" className="nutrition-input pl-10" value={open?query:(selected?`${selected.name}${selected.brand?` — ${selected.brand}`:""}`:"")} placeholder="חיפוש מזון בעברית או באנגלית" onFocus={()=>setOpen(true)} onChange={event=>{setQuery(event.target.value);setOpen(true);setActive(0)}} onKeyDown={event=>{if(event.key==="ArrowDown"){event.preventDefault();setOpen(true);setActive(index=>Math.min(results.length-1,index+1))}else if(event.key==="ArrowUp"){event.preventDefault();setActive(index=>Math.max(0,index-1))}else if(event.key==="Enter"&&open&&results[active]){event.preventDefault();choose(results[active].food.id)}else if(event.key==="Escape"){setOpen(false);setQuery("")}}}/><button type="button" aria-label="פתיחת רשימת מזונות" className="absolute left-2 top-2 p-2 text-[#5B5F5B]" onClick={()=>{setOpen(value=>!value);input.current?.focus()}}><ChevronDown size={16}/></button></div>{open&&<div id="food-options" role="listbox" className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-2xl border border-[#E5E7E5] bg-[#FFFFFF] p-2 shadow-2xl">{results.length?results.map((item,index)=><div key={item.food.id}>{(index===0||results[index-1]?.group!==item.group)&&<p className="px-3 pb-1 pt-2 text-[10px] font-black text-[#16A34A]">{item.group}</p>}<div role="option" aria-selected={item.food.id===value} className={`flex items-center rounded-xl ${index===active?"bg-[#16A34A]/15":"hover:bg-[#F7F8F7]"}`}><button type="button" className="min-h-11 flex-1 px-3 text-right text-sm" onMouseDown={event=>event.preventDefault()} onClick={()=>choose(item.food.id)}>{item.food.name}{item.food.brand&&<span className="mr-2 text-xs text-[#5B5F5B]">{item.food.brand}</span>}{item.u&&<span className="mr-2 text-[10px] text-[#3F433F]">נבחר {item.u.count} פעמים</span>}</button></div></div>):<p className="p-4 text-center text-sm text-[#5B5F5B]">לא נמצאו מזונות.</p>}</div>}</div>
+  const choose=(id:string)=>{onSelect(id);setQuery("");setActive(0)};
+
+  return <div className="food-picker">
+    <label className="sr-only" htmlFor="food-search">מזון</label>
+    <div className="food-picker__search">
+      <Search aria-hidden="true" size={17}/>
+      <input
+        id="food-search"
+        ref={input}
+        aria-label="חיפוש מזון"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="food-options"
+        aria-autocomplete="list"
+        className="nutrition-input"
+        autoFocus
+        value={query}
+        placeholder="חיפוש מזון בעברית או באנגלית"
+        onChange={event=>{setQuery(event.target.value);setActive(0)}}
+        onKeyDown={event=>{
+          if(event.key==="ArrowDown"){event.preventDefault();setActive(index=>Math.min(results.length-1,index+1))}
+          else if(event.key==="ArrowUp"){event.preventDefault();setActive(index=>Math.max(0,index-1))}
+          else if(event.key==="Enter"&&results[active]){event.preventDefault();choose(results[active].food.id)}
+          else if(event.key==="Escape"){setQuery("");onClose?.()}
+        }}
+      />
+    </div>
+    <div id="food-options" role="listbox" aria-label="תוצאות חיפוש מזון" className="food-picker__list">
+      {results.length?results.map((item,index)=>
+        <div key={item.food.id}>
+          {(index===0||results[index-1]?.group!==item.group)&&<p className="food-picker__group">{item.group}</p>}
+          <div role="option" aria-selected={item.food.id===value} className="food-picker__option" data-active={index===active||undefined}>
+            <button type="button" onMouseDown={event=>event.preventDefault()} onClick={()=>choose(item.food.id)}>
+              <strong>{item.food.name}</strong>
+              {item.food.brand&&<span>{item.food.brand}</span>}
+              {item.u&&<small>נבחר {item.u.count} פעמים</small>}
+            </button>
+          </div>
+        </div>
+      ):<p className="p-6 text-center text-sm text-[#5B5F5B]">לא נמצאו מזונות.</p>}
+    </div>
+  </div>;
 }

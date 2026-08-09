@@ -899,6 +899,64 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .collapse > summary:hover { background: var(--surface-raised); }
 .collapse__body { padding: 0 var(--space-4) var(--space-4); }
 
+/* ── Menu builder ──────────────────────────────────────────────────────── */
+
+.food-picker { display: grid; gap: .75rem; }
+.food-picker__search { position: relative; display: flex; align-items: center; }
+.food-picker__search svg { position: absolute; inset-inline-start: .85rem; color: var(--ink-faint); pointer-events: none; }
+.food-picker__search input { padding-inline-start: 2.5rem; }
+.food-picker__list { max-height: 55dvh; overflow-y: auto; margin-inline: calc(var(--space-5) * -1); }
+.food-picker__group {
+  position: sticky; inset-block-start: 0;
+  padding: .5rem var(--space-5) .25rem;
+  background: var(--surface); color: var(--green);
+  font-size: .7rem; font-weight: 900;
+}
+.food-picker__option > button {
+  display: grid; width: 100%; gap: .1rem;
+  min-height: 3.25rem; padding: .5rem var(--space-5);
+  text-align: start; font: inherit;
+}
+.food-picker__option > button strong { font-size: .9rem; font-weight: 700; }
+.food-picker__option > button span { color: var(--ink-muted); font-size: .75rem; }
+.food-picker__option > button small { color: var(--ink-faint); font-size: .68rem; }
+.food-picker__option:hover, .food-picker__option[data-active] { background: var(--green-tint); }
+.food-picker__option[aria-selected="true"] > button strong { color: var(--green-press); }
+
+/* One food in a group: what it is, how much, and what that comes to. Three lines
+   on a phone rather than one row that wrapped into five. */
+.food-row {
+  display: grid; align-items: center; gap: .5rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  padding: .6rem;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.food-row + .food-row { margin-top: .5rem; }
+.food-row[data-primary="true"] { border-color: rgba(22, 163, 74, .4); background: var(--green-tint); }
+.food-row__pick {
+  min-height: 2.75rem; padding-inline: .6rem;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface);
+  overflow: hidden; text-align: start; text-overflow: ellipsis; white-space: nowrap;
+  font: inherit; font-weight: 700;
+}
+.food-row__pick[data-empty] { color: var(--ink-muted); font-weight: 500; }
+.food-row__amount { position: relative; width: 6.5rem; }
+.food-row__amount input { padding-inline-end: 3rem; text-align: start; }
+.food-row__amount span {
+  position: absolute; inset-inline-end: .6rem; inset-block-start: 50%;
+  color: var(--ink-muted); font-size: .7rem; transform: translateY(-50%); pointer-events: none;
+}
+.food-row__meta {
+  grid-column: 1 / -1;
+  color: var(--ink-muted); font-size: .7rem; font-variant-numeric: tabular-nums;
+}
+@media (min-width: 640px) {
+  .food-row { grid-template-columns: auto minmax(0, 1fr) auto auto auto; }
+  .food-row__meta { grid-column: auto; }
+}
+
 /* ── Login ─────────────────────────────────────────────────────────────── */
 
 .auth-screen {
