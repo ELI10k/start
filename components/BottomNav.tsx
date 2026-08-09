@@ -17,7 +17,10 @@ export default function BottomNav({ unreadCount = 0 }: { unreadCount?: number })
   const pathname = usePathname();
   if (pathname.startsWith("/coach") || pathname.startsWith("/foods") || pathname.startsWith("/import")) return null;
   return (
-    <nav aria-label="ניווט לקוח" className="bottom-app-nav">
+    // The bottom bar and the desktop bar are one navigation in two presentations,
+    // and exactly one of them is ever rendered, so they carry the same name. On a
+    // phone this is the client's main navigation - it has to be reachable by name.
+    <nav aria-label="ניווט ראשי ללקוח" className="bottom-app-nav">
       <div>
         {items.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);

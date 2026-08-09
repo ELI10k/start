@@ -1,8 +1,60 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Dumbbell } from "lucide-react";
+import { ChevronLeft, Dumbbell, SlidersHorizontal } from "lucide-react";
+import BottomSheet from "@/components/client/BottomSheet";
+import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 
-export default function WorkoutHistory(){const{snapshot,currentClientId}=useWorkouts();const[sort,setSort]=useState<"newest"|"oldest">("newest");const[date,setDate]=useState("");const[programId,setProgramId]=useState("");const[dayId,setDayId]=useState("");const programs=snapshot.programs.filter((program)=>snapshot.completedWorkouts.some((item)=>item.clientId===currentClientId&&item.programId===program.id));const entries=useMemo(()=>snapshot.completedWorkouts.filter((item)=>item.clientId===currentClientId&&(!date||item.completedAt.startsWith(date))&&(!programId||item.programId===programId)&&(!dayId||item.dayId===dayId)).sort((a,b)=>sort==="newest"?b.completedAt.localeCompare(a.completedAt):a.completedAt.localeCompare(b.completedAt)),[currentClientId,date,dayId,programId,snapshot.completedWorkouts,sort]);return <><div className="mb-5 grid gap-3 sm:grid-cols-4"><Select label="מיון" value={sort} onChange={(value)=>setSort(value as "newest"|"oldest")} options={[['newest','החדש ביותר'],['oldest','הישן ביותר']]}/><label className="text-sm font-bold">תאריך<input type="date" className="nutrition-input mt-2" value={date} onChange={(event)=>setDate(event.target.value)}/></label><Select label="תוכנית" value={programId} onChange={(value)=>{setProgramId(value);setDayId("")}} options={[["","הכול"],...programs.map((item)=>[item.id,item.name])]}/><Select label="יום אימון" value={dayId} onChange={setDayId} options={[["","הכול"],...programs.filter((item)=>!programId||item.id===programId).flatMap((item)=>item.days.map((day)=>[day.id,day.name]))]}/></div>{entries.length?<div className="space-y-3">{entries.map((entry)=>{const program=snapshot.programs.find((item)=>item.id===entry.programId);const day=program?.days.find((item)=>item.id===entry.dayId);const exercises=entry.exerciseResults.filter((item)=>item.completed).length;const skipped=entry.exerciseResults.filter((item)=>item.skipped).length;return <Link href={`/workouts/history/${entry.id}`} key={entry.id} className="block rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 transition hover:border-[#16A34A]/40"><span className="text-xs text-[#16A34A]">{new Date(entry.completedAt).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</span><h2 className="mt-2 text-xl font-black">{day?.name??"אימון"}</h2><p className="mt-2 text-sm text-[#5B5F5B]">{program?.name??"תוכנית לא זמינה"} · {Math.round(entry.durationSeconds/60)} דקות · {exercises} תרגילים</p><p className="mt-2 text-xs text-[#3F433F]">נפח {entry.totalVolume} ק״ג{skipped?` · ${skipped} דולגו`:""}</p>{entry.workoutNote&&<p className="mt-3 line-clamp-2 text-sm text-[#5B5F5B]">{entry.workoutNote}</p>}</Link>})}</div>:<div className="rounded-[26px] border border-dashed border-[#E5E7E5] p-14 text-center"><Dumbbell className="mx-auto text-[#3F433F]"/><h2 className="mt-4 font-black">אין אימונים התואמים לסינון</h2><p className="mt-2 text-sm text-[#5B5F5B]">אימונים שהושלמו ונשמרו יופיעו כאן.</p></div>}</>}
+export default function WorkoutHistory(){const{snapshot,currentClientId}=useWorkouts();const[sort,setSort]=useState<"newest"|"oldest">("newest");const[date,setDate]=useState("");const[programId,setProgramId]=useState("");const[dayId,setDayId]=useState("");const[filters,setFilters]=useState(false);const programs=snapshot.programs.filter((program)=>snapshot.completedWorkouts.some((item)=>item.clientId===currentClientId&&item.programId===program.id));const entries=useMemo(()=>snapshot.completedWorkouts.filter((item)=>item.clientId===currentClientId&&(!date||item.completedAt.startsWith(date))&&(!programId||item.programId===programId)&&(!dayId||item.dayId===dayId)).sort((a,b)=>sort==="newest"?b.completedAt.localeCompare(a.completedAt):a.completedAt.localeCompare(b.completedAt)),[currentClientId,date,dayId,programId,snapshot.completedWorkouts,sort]);
+  // Four dropdowns stacked would be the whole first screen on a phone, so the
+  // filters live in a sheet and the list gets the space.
+  const active=[date&&"תאריך",programId&&"תוכנית",dayId&&"יום"].filter(Boolean).length;
+  const clear=()=>{setDate("");setProgramId("");setDayId("")};
+
+  return <>
+    <div className="chip-row">
+      <button type="button" className="chip" aria-pressed={active>0} onClick={()=>setFilters(true)}>
+        <SlidersHorizontal aria-hidden="true" size={15}/>סינון{active?` (${active})`:""}
+      </button>
+      <button type="button" className="chip" aria-pressed={sort==="newest"} onClick={()=>setSort("newest")}>החדש ביותר</button>
+      <button type="button" className="chip" aria-pressed={sort==="oldest"} onClick={()=>setSort("oldest")}>הישן ביותר</button>
+    </div>
+
+    {entries.length?
+      <div className="app-list">
+        {entries.map((entry)=>{const program=snapshot.programs.find((item)=>item.id===entry.programId);const day=program?.days.find((item)=>item.id===entry.dayId);const exercises=entry.exerciseResults.filter((item)=>item.completed).length;const skipped=entry.exerciseResults.filter((item)=>item.skipped).length;
+          return <Link href={`/workouts/history/${entry.id}`} key={entry.id}>
+            <span className="app-list__icon"><Dumbbell aria-hidden="true" size={17}/></span>
+            <span className="app-list__main">
+              <strong>{day?.name??"אימון"}</strong>
+              <span>{program?.name??"תוכנית לא זמינה"} · {Math.round(entry.durationSeconds/60)} דק׳ · {exercises} תרגילים{skipped?` · ${skipped} דולגו`:""}</span>
+            </span>
+            <span className="app-list__meta">
+              <strong>{entry.totalVolume}</strong>
+              {new Date(entry.completedAt).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
+            </span>
+            <ChevronLeft aria-hidden="true" size={18}/>
+          </Link>})}
+      </div>
+      :<StateBlock
+        icon={<Dumbbell aria-hidden="true" size={22}/>}
+        title={active?"אין אימונים התואמים לסינון":"עדיין אין אימונים שהושלמו"}
+        description={active?"אפשר לנקות את הסינון ולראות את כל ההיסטוריה.":"אימונים שהושלמו ונשמרו יופיעו כאן."}
+        action={active?<button type="button" onClick={clear} className="premium-secondary-button">ניקוי סינון</button>:undefined}
+      />}
+
+    <BottomSheet open={filters} title="סינון היסטוריה" onClose={()=>setFilters(false)}>
+      <div className="grid gap-3">
+        <label className="text-sm font-bold">תאריך<input type="date" className="nutrition-input mt-2" value={date} onChange={(event)=>setDate(event.target.value)}/></label>
+        <Select label="תוכנית" value={programId} onChange={(value)=>{setProgramId(value);setDayId("")}} options={[["","הכול"],...programs.map((item)=>[item.id,item.name])]}/>
+        <Select label="יום אימון" value={dayId} onChange={setDayId} options={[["","הכול"],...programs.filter((item)=>!programId||item.id===programId).flatMap((item)=>item.days.map((day)=>[day.id,day.name]))]}/>
+      </div>
+      <div className="sheet__actions">
+        <button type="button" onClick={()=>setFilters(false)} className="premium-primary-button">הצגת {entries.length} תוצאות</button>
+        <button type="button" onClick={clear} className="premium-secondary-button">ניקוי סינון</button>
+      </div>
+    </BottomSheet>
+  </>;
+}
 function Select({label,value,onChange,options}:{label:string;value:string;onChange:(value:string)=>void;options:string[][]}){return <label className="text-sm font-bold">{label}<select className="nutrition-input mt-2" value={value} onChange={(event)=>onChange(event.target.value)}>{options.map(([id,name])=><option key={`${id}-${name}`} value={id}>{name}</option>)}</select></label>}

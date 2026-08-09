@@ -2,9 +2,87 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Play } from "lucide-react";
+import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { exercisePerformance } from "@/lib/workouts/progress";
 
-export default function AssignedProgram({programId}:{programId:string}){const{snapshot,currentClientId,getProgram,getExercise}=useWorkouts();const program=getProgram(programId);const assignment=snapshot.assignments.find((item)=>item.clientId===currentClientId&&item.programId===programId&&item.status!=="archived");const[dayId,setDayId]=useState(program?.days[0]?.id??"");if(!program)notFound();const day=program.days.find((item)=>item.id===dayId)??program.days[0];return <main className="px-4 py-8 text-[#0B0B0B] sm:px-6"><div className="mx-auto max-w-5xl"><p className="text-xs font-bold text-[#16A34A]">התוכנית שלי</p><h1 className="mt-2 text-4xl font-black">{program.name}</h1>{program.description&&<p className="mt-3 max-w-2xl text-[#5B5F5B]">{program.description}</p>}<dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><Info label="רמה" value={program.difficulty}/><Info label="תדירות" value={assignment?`${assignment.weeklyFrequency} בשבוע`:program.trainingFrequency?`${program.trainingFrequency} בשבוע`:undefined}/><Info label="התחלה" value={assignment?.startDate}/><Info label="סיום" value={assignment?.endDate}/></dl>{!assignment&&<p role="alert" className="mt-4 rounded-xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">התוכנית זמינה לצפייה אך אינה מוקצית לך כעת.</p>}<div className="mt-6 flex gap-2 overflow-x-auto pb-2">{program.days.map((item)=><button key={item.id} onClick={()=>setDayId(item.id)} aria-pressed={item.id===day?.id} className={`min-h-11 shrink-0 rounded-xl px-4 font-bold ${item.id===day?.id?"bg-[#16A34A] text-[#FFFFFF]":"border border-[#E5E7E5]"}`}>{item.name}</button>)}</div>{day?<section className="mt-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-2xl font-black">{day.name}</h2><p className="text-sm text-[#5B5F5B]">{day.exercises.length} תרגילים לפי סדר המקור</p></div>{assignment?.status==="active"&&<Link href={`/workouts/${program.id}/${day.id}`} className="rounded-2xl bg-[#16A34A] px-5 py-3 font-black text-[#FFFFFF]">התחלת האימון</Link>}</div><div className="mt-4 space-y-3">{[...day.exercises].sort((a,b)=>a.order-b.order).map((entry)=>{const exercise=getExercise(entry.exerciseId);const previous=exercisePerformance(snapshot.completedWorkouts,currentClientId,entry.exerciseId).sessions[0];const completed=snapshot.completedWorkouts.some((item)=>item.clientId===currentClientId&&item.dayId===day.id);return <article key={entry.id} className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex items-start justify-between gap-3"><div><span className="text-xs text-[#5B5F5B]">{entry.order+1}{completed?" · בוצע בעבר":""}</span><h3 className="mt-1 text-xl font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3><p className="mt-1 text-xs text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"מטא־דאטה לא סופק בקובץ המקור"}</p></div>{exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm text-[#16A34A]">וידאו<ExternalLink size={14}/></a>}</div><dl className="mt-4 grid grid-cols-3 gap-3"><Info label="סטים" value={entry.sets}/><Info label="חזרות" value={entry.reps}/><Info label="מנוחה" value={entry.rest}/></dl>{entry.notes&&<p className="mt-3 text-sm text-[#5B5F5B]">{entry.notes}</p>}<div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[#5B5F5B]"><span>{previous?`ביצוע קודם: ${new Date(previous.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})} · נפח ${previous.volume}`:"אין ביצוע קודם"}</span><Link href={`/workouts/exercises/${entry.exerciseId}?programId=${program.id}&dayId=${day.id}`} className="min-h-11 content-center text-[#16A34A]">פרטי תרגיל</Link></div></article>})}</div></section>:<p className="mt-8 text-center text-[#5B5F5B]">לא נמצאו ימי אימון בתוכנית.</p>}</div></main>}
-function Info({label,value}:{label:string;value?:string}){return <div className="rounded-xl bg-[#F7F8F7] p-3"><dt className="text-xs text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value||"—"}</dd></div>}
+export default function AssignedProgram({programId}:{programId:string}){
+  const{snapshot,currentClientId,getProgram,getExercise}=useWorkouts();const program=getProgram(programId);const assignment=snapshot.assignments.find((item)=>item.clientId===currentClientId&&item.programId===programId&&item.status!=="archived");const[dayId,setDayId]=useState(program?.days[0]?.id??"");
+  if(!program)notFound();
+  const day=program.days.find((item)=>item.id===dayId)??program.days[0];
+
+  return <main className="client-app-content">
+    <header className="premium-page-header">
+      <div>
+        <p>התוכנית שלי</p>
+        <h1>{program.name}</h1>
+        {program.description&&<span>{program.description}</span>}
+      </div>
+    </header>
+
+    <dl className="dashboard-metrics" aria-label="פרטי התוכנית">
+      <Info label="רמה" value={program.difficulty}/>
+      <Info label="תדירות" value={assignment?`${assignment.weeklyFrequency} בשבוע`:program.trainingFrequency?`${program.trainingFrequency} בשבוע`:undefined}/>
+      <Info label="התחלה" value={assignment?.startDate}/>
+      <Info label="סיום" value={assignment?.endDate}/>
+    </dl>
+
+    {!assignment&&<p role="alert" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">התוכנית זמינה לצפייה אך אינה מוקצית לך כעת.</p>}
+
+    {/* Days scroll horizontally: a programme with six days must not wrap into a
+        block of buttons that pushes the exercises off the screen. */}
+    <div className="chip-row mt-5">
+      {program.days.map((item)=>
+        <button key={item.id} type="button" onClick={()=>setDayId(item.id)} aria-pressed={item.id===day?.id} className="chip">{item.name}</button>
+      )}
+    </div>
+
+    {day?<section aria-labelledby="program-day">
+      <div className="section-heading">
+        <div>
+          <h2 id="program-day">{day.name}</h2>
+          <span>{day.exercises.length} תרגילים לפי סדר המקור</span>
+        </div>
+      </div>
+
+      <div className="grid gap-3">
+        {[...day.exercises].sort((a,b)=>a.order-b.order).map((entry)=>{
+          const exercise=getExercise(entry.exerciseId);
+          const previous=exercisePerformance(snapshot.completedWorkouts,currentClientId,entry.exerciseId).sessions[0];
+          const completed=snapshot.completedWorkouts.some((item)=>item.clientId===currentClientId&&item.dayId===day.id);
+          return <article key={entry.id} className="premium-card">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-xs text-[#5B5F5B]">{entry.order+1}{completed?" · בוצע בעבר":""}</span>
+                <h3 className="mt-1 text-lg font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3>
+                <p className="mt-1 text-xs text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"מטא־דאטה לא סופק בקובץ המקור"}</p>
+              </div>
+              {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
+            </div>
+            <dl className="compact-data-list mt-3">
+              <div><span>סטים</span><strong>{entry.sets||"—"}</strong></div>
+              <div><span>חזרות</span><strong>{entry.reps||"—"}</strong></div>
+              <div><span>מנוחה</span><strong>{entry.rest||"—"}</strong></div>
+            </dl>
+            {entry.notes&&<p className="mt-3 text-sm text-[#5B5F5B]">{entry.notes}</p>}
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[#5B5F5B]">
+              <span>{previous?`ביצוע קודם: ${new Date(previous.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})} · נפח ${previous.volume}`:"אין ביצוע קודם"}</span>
+              <Link href={`/workouts/exercises/${entry.exerciseId}?programId=${program.id}&dayId=${day.id}`} className="chip">פרטי תרגיל</Link>
+            </div>
+          </article>;
+        })}
+      </div>
+
+      {assignment?.status==="active"&&
+        <Link href={`/workouts/${program.id}/${day.id}`} className="fab" aria-label="התחלת האימון">
+          <Play aria-hidden="true" size={18}/>התחלת האימון
+        </Link>}
+    </section>
+    :<StateBlock title="לא נמצאו ימי אימון בתוכנית" description="מקור התוכנית אינו כולל ימי אימון."/>}
+  </main>;
+}
+
+function Info({label,value}:{label:string;value?:string}){
+  return <div className="metric-tile"><dt className="metric-tile__head"><span>{label}</span></dt><dd><strong>{value||"—"}</strong></dd></div>;
+}

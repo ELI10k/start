@@ -1,1 +1,18 @@
-export default function Loading(){return <main className="px-4 py-8 text-[#0B0B0B]"><div className="mx-auto max-w-5xl animate-pulse"><div className="h-4 w-28 rounded bg-[#F1F3F1]"/><div className="mt-3 h-10 w-64 rounded bg-[#F1F3F1]"/><div className="mt-6 h-48 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF]"/><div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">{Array.from({length:4},(_,index)=><div key={index} className="h-24 rounded-[22px] bg-[#FFFFFF]"/>)}</div></div></main>}
+import { Skeleton, SkeletonCard, SkeletonList } from "@/components/client/AppPatterns";
+
+// The placeholder mirrors the real screen - header, hero, four tiles, two lists -
+// so the layout holds still when the workout data lands.
+export default function Loading(){
+  return <main className="client-app-content" role="status" aria-label="טוענים את האימון…">
+    <Skeleton className="w-28"/>
+    <Skeleton variant="title" className="mt-3"/>
+    <div className="mt-6 grid gap-4">
+      <SkeletonCard/>
+      <div className="dashboard-metrics">
+        {Array.from({length:4},(_,index)=><Skeleton key={index} variant="tile" className="min-w-38 flex-1"/>)}
+      </div>
+      <SkeletonList rows={3}/>
+    </div>
+    <span className="sr-only">טוענים את האימון…</span>
+  </main>;
+}

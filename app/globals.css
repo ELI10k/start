@@ -437,9 +437,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .daily-progress-card {
   display: flex;
   min-height: 10rem;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: center;
-  gap: 1.25rem;
+  gap: 1rem;
   padding: 1.25rem;
   border: 0;
   border-radius: var(--radius-lg);
@@ -486,6 +487,19 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .daily-progress-card .progress-ring__inner strong { color: #FFFFFF; }
 .daily-progress-card .progress-ring__inner span,
 .daily-progress-card .progress-ring__inner small { color: rgba(255, 255, 255, .8); }
+/* A green button on a green card would disappear, so the call to action inverts. */
+.daily-progress-card .premium-primary-button,
+.daily-progress-card .premium-secondary-button {
+  margin-top: 1rem;
+  background: #FFFFFF; border-color: #FFFFFF; color: var(--green-press);
+  box-shadow: none;
+}
+.daily-progress-card .premium-primary-button:hover,
+.daily-progress-card .premium-secondary-button:hover { background: var(--green-tint); border-color: var(--green-tint); }
+@media (min-width: 480px) {
+  .daily-progress-card { flex-direction: row; align-items: center; gap: 1.25rem; }
+  .daily-progress-card .premium-progress { flex: 0 0 auto; min-width: 9rem; margin-top: 0; }
+}
 
 /* Metric tiles scroll on a phone and grid out on a tablet. */
 .dashboard-metrics {

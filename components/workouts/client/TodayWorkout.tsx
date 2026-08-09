@@ -1,18 +1,116 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { CheckCircle2, Clock3, Dumbbell, Flame } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, Flame, Play, Repeat, Target } from "lucide-react";
+import BottomSheet from "@/components/client/BottomSheet";
+import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
+import { MetricTile } from "@/components/client/PremiumUI";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { activeAssignmentFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
 
+const hebrewDate = (value: string) =>
+  new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
+
 export default function TodayWorkout(){
   const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout}=useWorkouts();const today=new Date().toISOString().slice(0,10);const assignment=activeAssignmentFor(snapshot.assignments,currentClientId,today);const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
-  if(loading)return <div role="status" className="rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-12 text-center text-[#5B5F5B]">טוענים את תוכנית האימון…</div>;
-  if(persistenceError)return <div role="alert" className="rounded-[28px] border border-[#DC2626]/30 bg-[#FEF2F2] p-8 text-center text-sm text-[#DC2626]">{persistenceError}</div>;
-  if(!assignment||!program)return <Empty title="אין תוכנית אימון משויכת" body="לא נמצאה תוכנית מאושרת ששויכה אליך."/>;const state=assignmentState(assignment,today);if(state!=="active")return <Empty title="התוכנית אינה פעילה כרגע" body="לא ניתן להזיז אימון מתוכנית שאינה פעילה."/>;
-  const day=getTodayWorkoutDay(program,snapshot.completedWorkouts,currentClientId);if(!day)return <Empty title="לתוכנית אין ימי אימון" body="מקור התוכנית אינו כולל יום אימון תקין."/>;const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&item.completedAt.startsWith(today));const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
+
+  // While the snapshot loads the page keeps its shape, so nothing jumps when the
+  // real programme arrives.
+  if(loading)return <div className="grid gap-4"><SkeletonCard/><SkeletonList rows={2}/></div>;
+  if(persistenceError)return <StateBlock tone="error" title="לא הצלחנו לטעון את תוכנית האימון" description={persistenceError} action={<Link href="/workouts" className="premium-primary-button">ניסיון נוסף</Link>}/>;
+  if(!assignment||!program)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="אין תוכנית אימון משויכת" description="לא נמצאה תוכנית מאושרת ששויכה אליך. המאמן ישייך תוכנית והיא תופיע כאן."/>;
+  const state=assignmentState(assignment,today);
+  if(state!=="active")return <StateBlock icon={<CalendarDays aria-hidden="true" size={22}/>} title="התוכנית אינה פעילה כרגע" description="לא ניתן להזיז אימון מתוכנית שאינה פעילה."/>;
+  const day=getTodayWorkoutDay(program,snapshot.completedWorkouts,currentClientId);
+  if(!day)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="לתוכנית אין ימי אימון" description="מקור התוכנית אינו כולל יום אימון תקין."/>;
+  const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&item.completedAt.startsWith(today));const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
   const submit=async(confirmConflict:boolean)=>{if(completed||activeSession||pending)return;setPending(true);try{const result=await moveScheduledWorkout(assignment.id,day.id,today,date,confirmConflict);if(result.conflict&&!confirmConflict){setConflict(true);return}if(result.ok){setMessage(`האימון הועבר בהצלחה ל-${new Date(`${date}T00:00:00`).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}`);setConfirm(false);setConflict(false)}else setMessage("לא ניתן היה להעביר את האימון. נסה שוב.")}finally{setPending(false)}};
-  return <div className="space-y-5"><section className="rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-6"><p className="text-xs font-bold text-[#16A34A]">שבוע {currentTrainingWeek(assignment.startDate,today)} · {program.name}</p><h2 className="mt-2 text-3xl font-black">{activeSession?"אימון בתהליך":day.name}</h2><p className="mt-2 text-[#5B5F5B]">{activeSession?"ההתקדמות נשמרת ב-Supabase ואפשר להמשיך מאותה נקודה.":`${day.exercises.length} תרגילים לפי הסדר המאושר.`}</p>{moved&&<p className="mt-3 text-sm text-[#16A34A]">הועבר מיום {new Date(`${moved.originalDate}T00:00:00`).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})} ליום {new Date(`${moved.scheduledDate}T00:00:00`).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</p>}<div className="mt-6 flex flex-wrap gap-3"><Link href={`/workouts/${program.id}/${activeSession?.dayId??day.id}`} className="inline-flex min-h-12 items-center rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF]">{activeSession?"המשך אימון":"התחלת אימון"}</Link><Link href={`/workouts/program/${program.id}`} className="inline-flex min-h-12 items-center rounded-2xl border border-[#E5E7E5] px-5 font-bold">צפייה בתוכנית</Link>{!completed&&!activeSession&&<button onClick={()=>setConfirm(true)} className="min-h-12 rounded-2xl border border-[#16A34A]/40 px-5 font-bold text-[#16A34A]">העבר ליום אחר</button>}</div>{completed&&<p className="mt-3 text-sm text-[#16A34A]">האימון הושלם ולכן אינו ניתן להעברה.</p>}{confirm&&<section className="mt-5 rounded-2xl border border-[#16A34A]/30 bg-[#F7F8F7] p-4"><label className="block text-sm font-bold">תאריך חדש<input type="date" min={today} value={date} onChange={(event)=>{setDate(event.target.value);setConflict(false)}} className="nutrition-input mt-2"/></label>{conflict&&<p role="alert" className="mt-3 text-sm text-[#0B0B0B]">כבר קיים אימון אחר ביום הזה. אפשר להשאיר את שני האימונים באותו יום או לבחור יום אחר.</p>}<div className="mt-4 flex flex-wrap gap-3"><button onClick={()=>submit(conflict)} disabled={pending||!date||date===today} className="min-h-11 rounded-xl bg-[#16A34A] px-4 font-black text-[#FFFFFF] disabled:opacity-40">{pending?"שומרים…":conflict?"השאר את שני האימונים":"אישור העברה"}</button><button onClick={()=>{setConfirm(false);setConflict(false)}} disabled={pending} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4">ביטול</button></div></section>}{message&&<p role="status" className="mt-3 text-sm text-[#16A34A]">{message}</p>}</section><section className="grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric label="הושלמו" value={`${adherence.completed}/${adherence.expected}`}/><Metric label="התמדה" value={`${adherence.percent}%`}/><Metric label="הוחמצו" value={String(adherence.missed)}/><Metric label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame size={16}/>}/></section><section className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex justify-between gap-3"><h2 className="text-xl font-black">השבוע</h2><span className="text-xs text-[#5B5F5B]">{assignment.weeklyFrequency} אימונים</span></div><div className="mt-4 grid gap-3 sm:grid-cols-2">{schedule.map(({day:item,completed:itemCompleted})=><div key={item.id} className="flex items-center justify-between rounded-2xl border border-[#E5E7E5] p-4"><span className="font-bold">{item.name}</span>{itemCompleted?<CheckCircle2 className="text-[#16A34A]" size={18}/>:<Clock3 className="text-[#3F433F]" size={18}/>}</div>)}</div></section><section className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><h2 className="text-xl font-black">אימונים אחרונים</h2>{recent.length?<div className="mt-3 divide-y divide-[#E5E7E5]">{recent.map((item)=><Link key={item.id} href={`/workouts/history/${item.id}`} className="flex justify-between gap-3 py-3 text-sm"><span>{program.days.find((entry)=>entry.id===item.dayId)?.name??"אימון"}</span><span className="text-[#5B5F5B]">{new Date(item.completedAt).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</span></Link>)}</div>:<p className="mt-3 text-sm text-[#5B5F5B]">עדיין אין אימונים שהושלמו.</p>}</section></div>;
+
+  const sessionHref=`/workouts/${program.id}/${activeSession?.dayId??day.id}`;
+  const startLabel=activeSession?"המשך אימון":"התחלת אימון";
+
+  return <div className="grid gap-4">
+    {/* The one inverted surface on the screen: what to do today, and nothing else. */}
+    <section className="daily-progress-card" aria-labelledby="today-workout">
+      <div className="daily-progress-card__copy">
+        <span>שבוע {currentTrainingWeek(assignment.startDate,today)} · {program.name}</span>
+        <h2 id="today-workout">{activeSession?"אימון בתהליך":day.name}</h2>
+        <p>{activeSession?"ההתקדמות נשמרת ואפשר להמשיך מאותה נקודה.":`${day.exercises.length} תרגילים לפי הסדר המאושר.`}</p>
+        {moved&&<p>הועבר מ־{hebrewDate(`${moved.originalDate}T00:00:00`)} ל־{hebrewDate(`${moved.scheduledDate}T00:00:00`)}</p>}
+        {completed&&<p>האימון הושלם ולכן אינו ניתן להעברה</p>}
+        <Link href={sessionHref} className="premium-primary-button">
+          <Play aria-hidden="true" size={17}/>{startLabel}
+        </Link>
+      </div>
+      <div className="premium-progress" role="img" aria-label={`${adherence.percent} אחוז התמדה`}>
+        <div className="premium-progress__meta"><span>התמדה</span><strong>{adherence.percent}%</strong></div>
+        <div className="premium-progress__track"><span style={{width:`${Math.min(100,Math.max(0,adherence.percent))}%`}}/></div>
+      </div>
+    </section>
+
+    <section className="dashboard-metrics" aria-label="מדדי אימון">
+      <MetricTile label="הושלמו" value={`${adherence.completed}/${adherence.expected}`} icon={<CheckCircle2 aria-hidden="true" size={18}/>}/>
+      <MetricTile label="התמדה" value={`${adherence.percent}%`} icon={<Target aria-hidden="true" size={18}/>}/>
+      <MetricTile label="הוחמצו" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
+      <MetricTile label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
+    </section>
+
+    <section aria-labelledby="week-plan">
+      <div className="section-heading section-heading--compact">
+        <h2 id="week-plan">השבוע</h2>
+        <span>{assignment.weeklyFrequency} אימונים</span>
+      </div>
+      <div className="app-list">
+        {schedule.map(({day:item,completed:itemCompleted})=>
+          <div key={item.id}>
+            <span className="app-list__icon">{itemCompleted?<CheckCircle2 aria-hidden="true" size={17}/>:<Circle aria-hidden="true" size={17}/>}</span>
+            <span className="app-list__main"><strong>{item.name}</strong><span>{item.exercises.length} תרגילים</span></span>
+            <span className={`pill${itemCompleted?" pill--green":""}`}>{itemCompleted?"הושלם":"מתוכנן"}</span>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <section aria-labelledby="recent-workouts">
+      <div className="section-heading section-heading--compact">
+        <h2 id="recent-workouts">אימונים אחרונים</h2>
+        <Link href="/workouts/history" className="chip">הכול</Link>
+      </div>
+      {recent.length?
+        <div className="app-list">
+          {recent.map((item)=>
+            <Link key={item.id} href={`/workouts/history/${item.id}`}>
+              <span className="app-list__icon"><Dumbbell aria-hidden="true" size={17}/></span>
+              <span className="app-list__main"><strong>{program.days.find((entry)=>entry.id===item.dayId)?.name??"אימון"}</strong><span>{hebrewDate(item.completedAt)}</span></span>
+              <ChevronLeft aria-hidden="true" size={18}/>
+            </Link>
+          )}
+        </div>
+        :<StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="עדיין אין אימונים שהושלמו" description="האימון הראשון שתסיים יופיע כאן."/>}
+    </section>
+
+    {!completed&&!activeSession&&
+      <button type="button" onClick={()=>setConfirm(true)} className="premium-secondary-button w-full">
+        <Repeat aria-hidden="true" size={17}/>העבר ליום אחר
+      </button>}
+
+    {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
+
+    {/* Start is the screen's single primary action, so it lives within thumb reach. */}
+    <Link href={sessionHref} className="fab" aria-label={startLabel}>
+      <Play aria-hidden="true" size={18}/>{startLabel}
+    </Link>
+
+    <BottomSheet open={confirm} title="העברת האימון ליום אחר" onClose={()=>{setConfirm(false);setConflict(false)}}>
+      <label className="block text-sm font-bold">תאריך חדש
+        <input type="date" min={today} value={date} onChange={(event)=>{setDate(event.target.value);setConflict(false)}} className="nutrition-input mt-2"/>
+      </label>
+      {conflict&&<p role="alert" className="mt-3 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">כבר קיים אימון אחר ביום הזה. אפשר להשאיר את שני האימונים באותו יום או לבחור יום אחר.</p>}
+      <div className="sheet__actions">
+        <button onClick={()=>submit(conflict)} disabled={pending||!date||date===today} className="premium-primary-button">{pending?"שומרים…":conflict?"השאר את שני האימונים":"אישור העברה"}</button>
+        <button onClick={()=>{setConfirm(false);setConflict(false)}} disabled={pending} className="premium-secondary-button">ביטול</button>
+      </div>
+    </BottomSheet>
+  </div>;
 }
-function Empty({title,body}:{title:string;body:string}){return <div className="rounded-[28px] border border-dashed border-[#E5E7E5] bg-[#FFFFFF] p-12 text-center"><Dumbbell className="mx-auto text-[#3F433F]" size={42}/><h2 className="mt-4 text-xl font-black">{title}</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#5B5F5B]">{body}</p></div>};function Metric({label,value,icon}:{label:string;value:string;icon?:React.ReactNode}){return <div className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-4"><span className="flex items-center gap-1 text-xs text-[#5B5F5B]">{icon}{label}</span><strong className="mt-2 block text-lg">{value}</strong></div>}
