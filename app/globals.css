@@ -800,9 +800,12 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 
 /* Active workout — one exercise at a time, logging within thumb reach. */
+/* The session runs outside the app shell - no header, no bottom bar - so it sticks
+   to the very top and carries the safe area itself. */
 .session-sticky {
-  position: sticky; inset-block-start: calc(3.5rem + env(safe-area-inset-top));
-  z-index: 30; margin-inline: -1rem; padding: .75rem 1rem;
+  position: sticky; inset-block-start: 0;
+  z-index: 30; margin-inline: -1rem;
+  padding: calc(.75rem + env(safe-area-inset-top)) 1rem .75rem;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .96);
   backdrop-filter: blur(18px);
@@ -835,6 +838,26 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   backdrop-filter: blur(18px);
 }
 .session-actions > * { width: 100%; }
+.session-actions--stack { grid-auto-flow: row; }
+
+/* The rest timer is the one thing on the screen that must be readable from arm's
+   length, so it takes the green surface while it is counting. */
+.rest-timer {
+  display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+  margin-top: 1rem; padding: .9rem 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--green); color: #FFFFFF;
+  box-shadow: 0 10px 24px rgba(22, 163, 74, .22);
+}
+.rest-timer span { display: block; font-size: .72rem; font-weight: 700; color: rgba(255, 255, 255, .82); }
+.rest-timer strong { font-size: 2rem; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.rest-timer__actions { display: flex; flex: 0 0 auto; gap: .5rem; }
+.rest-timer__actions button {
+  min-height: 2.75rem; padding-inline: .9rem;
+  border: 1px solid rgba(255, 255, 255, .55); border-radius: var(--radius-md);
+  background: transparent; color: #FFFFFF; font: inherit; font-weight: 700;
+}
+.rest-timer__actions button[data-primary] { border-color: #FFFFFF; background: #FFFFFF; color: var(--green-press); }
 
 /* Photo strip — progress and check-in galleries scroll rather than wrap. */
 .photo-strip { display: flex; gap: .6rem; overflow-x: auto; padding-bottom: .35rem; scrollbar-width: none; }
