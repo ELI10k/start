@@ -52,15 +52,15 @@ export default function CoachCheckInCard({
   return (
     <article
       id={`check-in-${item.id}`}
-      className="rounded-[26px] border border-[#292929] bg-[#151515] p-5"
+      className="rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"
     >
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs text-zinc-500">{date(item.submitted_at)}</p>
+          <p className="text-xs text-[#5B5F5B]">{date(item.submitted_at)}</p>
           <h2 className="mt-1 text-xl font-black">
             {item.client?.full_name ?? "לקוח"}
           </h2>
-          <p className="text-xs text-zinc-600">{item.client?.email}</p>
+          <p className="text-xs text-[#3F433F]">{item.client?.email}</p>
         </div>
         <span
           className={`rounded-full border border-current/20 bg-white/[.03] px-3 py-1 text-xs font-black ${status.className}`}
@@ -88,22 +88,22 @@ export default function CoachCheckInCard({
       </div>
 
       {item.notes && (
-        <div className="mt-4 rounded-2xl bg-black/25 p-4 text-sm">
-          <strong className="text-zinc-500">הערת הלקוח</strong>
+        <div className="mt-4 rounded-2xl bg-[#F7F8F7] p-4 text-sm">
+          <strong className="text-[#5B5F5B]">הערת הלקוח</strong>
           <p className="mt-2 whitespace-pre-wrap">{item.notes}</p>
         </div>
       )}
       <CheckInPhotoGallery photos={item.photos} error={photoError} />
 
       {item.coach_response && (
-        <div className="mt-4 rounded-2xl border border-[#D4AF37]/20 bg-[#D4AF37]/[.05] p-4">
-          <strong className="text-sm text-[#D4AF37]">תגובת המאמן</strong>
+        <div className="mt-4 rounded-2xl border border-[#16A34A]/20 bg-[#16A34A]/[.05] p-4">
+          <strong className="text-sm text-[#16A34A]">תגובת המאמן</strong>
           <p className="mt-2 whitespace-pre-wrap text-sm">{item.coach_response}</p>
         </div>
       )}
-      <div className="mt-5 flex flex-wrap items-start justify-between gap-4 border-t border-white/5 pt-5">
+      <div className="mt-5 flex flex-wrap items-start justify-between gap-4 border-t border-[#E5E7E5] pt-5">
         <details className="min-w-[min(100%,28rem)] flex-1">
-          <summary className="cursor-pointer text-sm font-black text-[#D4AF37]">
+          <summary className="cursor-pointer text-sm font-black text-[#16A34A]">
             {item.coach_response ? "עדכון תגובה" : "כתיבת תגובה"}
           </summary>
           <ReviewCheckInForm checkInId={item.id} clientId={item.client_id} />
@@ -120,7 +120,7 @@ export default function CoachCheckInCard({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-white/[.04] p-3 text-center">
-      <span className="block text-xs text-zinc-500">{label}</span>
+      <span className="block text-xs text-[#5B5F5B]">{label}</span>
       <strong className="mt-1 block">{value}</strong>
     </div>
   );
@@ -134,8 +134,8 @@ function Value({
   value: string | number;
 }) {
   return (
-    <div className="rounded-xl border border-white/5 p-3">
-      <span className="block text-xs text-zinc-600">{label}</span>
+    <div className="rounded-xl border border-[#E5E7E5] p-3">
+      <span className="block text-xs text-[#3F433F]">{label}</span>
       <strong className="mt-1 block">{value}</strong>
     </div>
   );

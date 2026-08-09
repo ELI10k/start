@@ -61,14 +61,14 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
     setFiles((current) => ({ ...current, [key]: file }));
   };
   return (
-    <section className="rounded-[22px] border border-[#292929] bg-[#151515] p-5">
+    <section className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
       <h2 className="font-black">תמונות התקדמות</h2>
       {required ? (
-        <p className="mt-2 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 p-3 text-sm font-bold text-[#E7C85D]">
+        <p className="mt-2 rounded-xl border border-[#16A34A]/40 bg-[#16A34A]/10 p-3 text-sm font-bold text-[#16A34A]">
           הגיע הזמן לעדכן תמונות התקדמות
         </p>
       ) : (
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-[#5B5F5B]">
           אופציונלי · JPG, PNG או WebP עד 5MB.
         </p>
       )}
@@ -78,7 +78,7 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
           return (
             <label
               key={slot.key}
-              className="rounded-xl border border-[#333] p-3 text-sm font-bold"
+              className="rounded-xl border border-[#E5E7E5] p-3 text-sm font-bold"
             >
               {slot.label}
               <input

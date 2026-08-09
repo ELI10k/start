@@ -9,7 +9,7 @@ const initial: SaveState = { ok: false };
 export default function ReviewCheckInForm({ checkInId, clientId }: { checkInId: string; clientId: string }) {
   const [state, action] = useActionState(reviewCheckIn, initial);
   return (
-    <form action={action} className="mt-4 space-y-3 rounded-2xl border border-[#D4AF37]/20 bg-[#D4AF37]/[.04] p-4">
+    <form action={action} className="mt-4 space-y-3 rounded-2xl border border-[#16A34A]/20 bg-[#16A34A]/[.04] p-4">
       <input type="hidden" name="checkInId" value={checkInId} />
       <input type="hidden" name="clientId" value={clientId} />
       <label className="block text-sm font-bold">תגובת מאמן<textarea name="response" required maxLength={4000} className="nutrition-input mt-2 min-h-24" placeholder="כתבו משוב מעשי ללקוח" /></label>

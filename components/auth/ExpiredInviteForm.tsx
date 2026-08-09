@@ -28,7 +28,7 @@ export default function ExpiredInviteForm() {
       </label>
       <button
         disabled={pending}
-        className="min-h-12 w-full rounded-2xl bg-[#D4AF37] px-5 font-black text-black disabled:opacity-50"
+        className="min-h-12 w-full rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF] disabled:opacity-50"
       >
         {pending ? "שולחים…" : "שליחת הזמנה חדשה"}
       </button>

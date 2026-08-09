@@ -25,7 +25,7 @@ export default async function ProfilePage() {
         <Field label="יעד קלוריות" value={profile.calorie_target ? `${profile.calorie_target} קל׳` : "טרם הוגדר"} />
         <Field label="יעד חלבון" value={profile.protein_target ? `${profile.protein_target} ג׳` : "טרם הוגדר"} />
       </section>
-      <p className="start-empty mt-5 rounded-2xl p-4 text-sm leading-6 text-zinc-400">לעדכון פרטים או יעדים, פנו למאמן. כך נשמרת התאמה אחת ומאושרת של התוכנית האישית שלך.</p>
+      <p className="start-empty mt-5 rounded-2xl p-4 text-sm leading-6 text-[#5B5F5B]">לעדכון פרטים או יעדים, פנו למאמן. כך נשמרת התאמה אחת ומאושרת של התוכנית האישית שלך.</p>
       <form action="/auth/logout" method="post" className="mt-5 md:hidden">
         <button className="min-h-12 w-full rounded-2xl border border-red-400/20 bg-red-400/5 px-5 text-sm font-bold text-red-200">
           התנתקות מהחשבון
@@ -36,5 +36,5 @@ export default async function ProfilePage() {
 }
 
 function Field({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl bg-black/20 p-4"><p className="text-xs text-zinc-500">{label}</p><p className="mt-2 font-bold">{value}</p></div>;
+  return <div className="rounded-2xl bg-[#F7F8F7] p-4"><p className="text-xs text-[#5B5F5B]">{label}</p><p className="mt-2 font-bold">{value}</p></div>;
 }

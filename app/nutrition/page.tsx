@@ -67,7 +67,7 @@ export default async function NutritionPage() {
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
                   <h2 className="text-xl font-black">{meal.title}</h2>
-                  {meal.freeCalorieTarget?<p className="mt-1 text-xs text-zinc-500">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-zinc-500">יש לבחור חלופה אחת מכל קבוצה</p>}
+                  {meal.freeCalorieTarget?<p className="mt-1 text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
                 </div>
                 <form action={setMealCompletion}>
                   <input type="hidden" name="id" value={meal.id} />
@@ -83,14 +83,14 @@ export default async function NutritionPage() {
                     className={
                       meal.completed
                         ? "min-h-11 rounded-xl border border-emerald-400/30 px-4 text-sm font-bold text-emerald-300 disabled:opacity-50"
-                        : "min-h-11 rounded-xl bg-[#D4AF37] px-4 text-sm font-black text-black disabled:opacity-50"
+                        : "min-h-11 rounded-xl bg-[#16A34A] px-4 text-sm font-black text-[#FFFFFF] disabled:opacity-50"
                     }
                   />
                 </form>
               </div>
-              {meal.notes?<p className="mt-3 text-sm text-zinc-400">{meal.notes}</p>:null}
-              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#D4AF37]/20 p-4 text-sm text-[#E7C85D]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
-                {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-white/10 p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-zinc-500">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
+              {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
+              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
+                {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-[#E5E7E5] p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
                     <MealOptionButton
                       selected={group.selectedItemId===item.id}
@@ -107,7 +107,7 @@ export default async function NutritionPage() {
       ) : (
         <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
           <h2 className="font-black">עדיין אין תפריט פעיל</h2>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 text-sm text-[#5B5F5B]">
             לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן.
           </p>
         </div>
@@ -130,13 +130,13 @@ function MacroTotal({
   unit: string;
 }) {
   return (
-    <div className="rounded-2xl border border-white/5 bg-black/20 p-3">
-      <dt className="text-xs text-zinc-500">{label}</dt>
+    <div className="rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3">
+      <dt className="text-xs text-[#5B5F5B]">{label}</dt>
       <dd className="mt-1 font-black">
         {value.toFixed(1)} {unit}
       </dd>
       {target ? (
-        <p className="mt-1 text-xs text-zinc-500">
+        <p className="mt-1 text-xs text-[#5B5F5B]">
           יעד: {Number(target).toFixed(1)} {unit}
         </p>
       ) : null}

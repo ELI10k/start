@@ -16,7 +16,7 @@ export default function ContentForm({
     <form action={saveContentItem} className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
       <input type="hidden" name="id" value={item?.id ?? ""} />
       <div className="space-y-5">
-        <section className="grid gap-4 rounded-[24px] border border-[#292929] bg-[#151515] p-5 sm:grid-cols-2">
+        <section className="grid gap-4 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
           <Field name="title" label="כותרת" defaultValue={item?.title} required />
           <Field
             name="description"
@@ -94,7 +94,7 @@ export default function ContentForm({
             defaultValue={item?.mediaUrl ?? ""}
           />
         </section>
-        <label className="block rounded-[24px] border border-[#292929] bg-[#151515] p-5 text-sm font-bold">
+        <label className="block rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 text-sm font-bold">
           גוף התוכן
           <textarea
             name="body"
@@ -104,15 +104,15 @@ export default function ContentForm({
           />
         </label>
       </div>
-      <aside className="rounded-[24px] border border-[#3A321B] bg-[#17150F] p-5 lg:sticky lg:top-20">
+      <aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-20">
         <h2 className="text-xl font-black">שמירה ב־Supabase</h2>
-        <p className="mt-3 text-sm leading-6 text-zinc-400">
+        <p className="mt-3 text-sm leading-6 text-[#5B5F5B]">
           טיוטות והסרות זמינות למאמן בלבד. רק תוכן בסטטוס “פורסם” מופיע ללקוחות.
         </p>
         <SubmitButton
           idle={item ? "שמירת שינויים" : "יצירת תוכן"}
           pending="שומרים…"
-          className="mt-5 min-h-12 w-full rounded-2xl bg-[#D4AF37] px-5 font-black text-black disabled:opacity-50"
+          className="mt-5 min-h-12 w-full rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF] disabled:opacity-50"
         />
       </aside>
     </form>

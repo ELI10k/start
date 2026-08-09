@@ -200,7 +200,7 @@ const pageStyle: CSSProperties = {
   minHeight: "100vh",
   direction: "rtl",
   background:
-    "radial-gradient(circle at top right, rgba(212, 175, 55, 0.08), transparent 32%), #0A0A0A",
+    "radial-gradient(circle at top right, rgba(212, 175, 55, 0.08), transparent 32%), #FFFFFF",
   color: "#F4F4F4",
   padding: "32px 20px 100px",
   fontFamily: "Assistant, sans-serif",
@@ -222,7 +222,7 @@ const headerStyle: CSSProperties = {
 const eyebrowStyle: CSSProperties = {
   display: "block",
   marginBottom: "8px",
-  color: "#D4AF37",
+  color: "#16A34A",
   fontSize: "12px",
   fontWeight: 700,
   letterSpacing: "1.5px",
@@ -244,15 +244,15 @@ const descriptionStyle: CSSProperties = {
 const countCardStyle: CSSProperties = {
   minWidth: "100px",
   padding: "14px 18px",
-  border: "1px solid #2B2B2B",
+  border: "1px solid #E5E7E5",
   borderRadius: "18px",
-  background: "#161616",
+  background: "#FFFFFF",
   textAlign: "center",
 };
 
 const countNumberStyle: CSSProperties = {
   display: "block",
-  color: "#F3D27A",
+  color: "#22C55E",
   fontSize: "24px",
 };
 
@@ -270,7 +270,7 @@ const uploadBoxStyle: CSSProperties = {
   padding: "32px",
   border: "1px dashed #8B6B1F",
   borderRadius: "24px",
-  background: "#161616",
+  background: "#FFFFFF",
   cursor: "pointer",
   textAlign: "center",
 };
@@ -287,7 +287,7 @@ const uploadIconStyle: CSSProperties = {
   marginBottom: "16px",
   borderRadius: "50%",
   background: "rgba(212, 175, 55, 0.12)",
-  color: "#F3D27A",
+  color: "#22C55E",
   fontSize: "30px",
 };
 
@@ -307,7 +307,7 @@ const fileNameStyle: CSSProperties = {
   padding: "7px 13px",
   borderRadius: "999px",
   background: "rgba(212, 175, 55, 0.09)",
-  color: "#F3D27A",
+  color: "#22C55E",
   fontSize: "13px",
 };
 
@@ -322,7 +322,7 @@ const secondaryButtonStyle: CSSProperties = {
   padding: "0 24px",
   border: "1px solid #353535",
   borderRadius: "14px",
-  background: "#161616",
+  background: "#FFFFFF",
   color: "#D0D0D0",
   fontFamily: "inherit",
   fontSize: "15px",
@@ -334,8 +334,8 @@ const messageStyle: CSSProperties = {
   marginTop: "18px",
   padding: "15px",
   borderRadius: "14px",
-  background: "#161616",
-  color: "#F3D27A",
+  background: "#FFFFFF",
+  color: "#22C55E",
   textAlign: "center",
 };
 
@@ -368,9 +368,9 @@ const previewSubtitleStyle: CSSProperties = {
 
 const tableWrapperStyle: CSSProperties = {
   overflowX: "auto",
-  border: "1px solid #2B2B2B",
+  border: "1px solid #E5E7E5",
   borderRadius: "20px",
-  background: "#161616",
+  background: "#FFFFFF",
 };
 
 const tableStyle: CSSProperties = {
@@ -382,7 +382,7 @@ const tableStyle: CSSProperties = {
 const tableHeaderStyle: CSSProperties = {
   padding: "15px",
   borderBottom: "1px solid #303030",
-  color: "#D4AF37",
+  color: "#16A34A",
   fontSize: "13px",
   textAlign: "right",
 };

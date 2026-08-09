@@ -12,7 +12,7 @@ export default async function SystemHealthPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center justify-center px-4 py-12">
       <section
         aria-labelledby="backend-health-title"
-        className="w-full rounded-2xl border border-amber-400/30 bg-black p-6 text-white shadow-xl"
+        className="w-full rounded-2xl border border-amber-400/30 bg-black p-6 text-[#0B0B0B] shadow-xl"
       >
         <h1 id="backend-health-title" className="text-2xl font-bold text-amber-400">
           START Backend
@@ -24,9 +24,9 @@ export default async function SystemHealthPage() {
         ) : (
           <div className="mt-4" role="alert">
             <p className="text-lg">Supabase: Connection failed</p>
-            <p className="mt-2 text-sm text-zinc-300">{health.message}</p>
+            <p className="mt-2 text-sm text-[#3F433F]">{health.message}</p>
             {health.detail ? (
-              <p className="mt-2 text-sm text-zinc-400">{health.detail}</p>
+              <p className="mt-2 text-sm text-[#5B5F5B]">{health.detail}</p>
             ) : null}
           </div>
         )}

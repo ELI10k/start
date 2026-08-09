@@ -21,13 +21,13 @@ export default async function CoachContentPage() {
       <div className="mx-auto max-w-6xl">
         <header className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-black tracking-widest text-[#D4AF37]">ספריית תוכן</p>
+            <p className="text-xs font-black tracking-widest text-[#16A34A]">ספריית תוכן</p>
             <h1 className="mt-2 text-3xl font-black">ניהול תוכן</h1>
-            <p className="mt-2 text-zinc-500">טיוטות, פרסום והסרה נשמרים ב־Supabase.</p>
+            <p className="mt-2 text-[#5B5F5B]">טיוטות, פרסום והסרה נשמרים ב־Supabase.</p>
           </div>
           <Link
             href="/coach/content/new"
-            className="flex min-h-12 items-center rounded-2xl bg-[#D4AF37] px-5 font-black text-black"
+            className="flex min-h-12 items-center rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF]"
           >
             תוכן חדש
           </Link>
@@ -37,26 +37,26 @@ export default async function CoachContentPage() {
             {items.map((item) => (
               <article
                 key={item.id}
-                className="rounded-[24px] border border-[#292929] bg-[#151515] p-5"
+                className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="text-xs font-bold text-[#D4AF37]">
+                    <span className="text-xs font-bold text-[#16A34A]">
                       {item.categoryName} · {statusLabel[item.status]}
                     </span>
                     <h2 className="mt-2 text-xl font-black">{item.title}</h2>
-                    <p className="mt-2 text-sm text-zinc-500">
+                    <p className="mt-2 text-sm text-[#5B5F5B]">
                       {item.description || "ללא תיאור"}
                     </p>
                   </div>
                   <Link
                     href={`/coach/content/${item.id}`}
-                    className="shrink-0 rounded-xl border border-[#333] px-3 py-2 text-xs font-bold"
+                    className="shrink-0 rounded-xl border border-[#E5E7E5] px-3 py-2 text-xs font-bold"
                   >
                     עריכה
                   </Link>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-white/5 pt-4">
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-[#E5E7E5] pt-4">
                   {item.status !== "published" && (
                     <StatusForm id={item.id} status="published" label="פרסום" />
                   )}
@@ -71,7 +71,7 @@ export default async function CoachContentPage() {
             ))}
           </div>
         ) : (
-          <p className="mt-6 rounded-[24px] border border-dashed border-[#333] p-12 text-center text-zinc-500">
+          <p className="mt-6 rounded-[24px] border border-dashed border-[#E5E7E5] p-12 text-center text-[#5B5F5B]">
             עדיין אין תוכן. אפשר ליצור את הרשומה הראשונה.
           </p>
         )}
@@ -101,7 +101,7 @@ function StatusForm({
         className={`min-h-10 rounded-xl border px-3 text-xs font-bold disabled:opacity-50 ${
           danger
             ? "border-red-400/25 text-red-300"
-            : "border-[#4A3915] text-[#E7C85D]"
+            : "border-[#BBF7D0] text-[#16A34A]"
         }`}
       />
     </form>

@@ -22,29 +22,29 @@ export default async function MenuPreviewPage({
   if (!menu) notFound();
   const names = new Map(foods.map((food) => [food.id, food.name]));
   return (
-    <main className="px-4 py-8 text-white sm:px-6">
+    <main className="px-4 py-8 text-[#0B0B0B] sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <p className="text-xs text-[#D4AF37]">תצוגה מקדימה · {menu.status}</p>
+        <p className="text-xs text-[#16A34A]">תצוגה מקדימה · {menu.status}</p>
         <h1 className="mt-2 text-3xl font-black">{menu.title}</h1>
-        <p className="mt-2 text-zinc-500">{menu.description}</p>
+        <p className="mt-2 text-[#5B5F5B]">{menu.description}</p>
         <div className="mt-6 space-y-4">
           {(menu.days as PreviewDay[])
             .flatMap((day) => day.meals)
             .map((meal) => (
               <article
                 key={meal.id}
-                className="rounded-[22px] border border-[#292929] bg-[#151515] p-5"
+                className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"
               >
                 <h2 className="text-xl font-black">{meal.title}</h2>
-                {meal.notes?<p className="mt-2 text-sm text-zinc-400">{meal.notes}</p>:null}
-                {meal.free_calorie_target?<p className="mt-3 rounded-xl border border-[#D4AF37]/20 p-3 text-[#E7C85D]">מסגרת: {meal.free_calorie_target} קלוריות חופשיות</p>:<div className="mt-3 space-y-3">
-                  {(meal.groups??[]).map(group=><section key={group.id} className="rounded-xl border border-white/10 p-3"><h3 className="font-bold">{groupName(group.group_type)}</h3><p className="mt-1 text-xs text-zinc-500">יש לבחור אפשרות אחת מהקבוצה</p><ul className="mt-2 divide-y divide-white/5">{group.items.map((item,index) => (
+                {meal.notes?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
+                {meal.free_calorie_target?<p className="mt-3 rounded-xl border border-[#16A34A]/20 p-3 text-[#16A34A]">מסגרת: {meal.free_calorie_target} קלוריות חופשיות</p>:<div className="mt-3 space-y-3">
+                  {(meal.groups??[]).map(group=><section key={group.id} className="rounded-xl border border-[#E5E7E5] p-3"><h3 className="font-bold">{groupName(group.group_type)}</h3><p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור אפשרות אחת מהקבוצה</p><ul className="mt-2 divide-y divide-[#E5E7E5]">{group.items.map((item,index) => (
                     <li
                       key={item.id}
-                      className={`flex justify-between gap-4 py-3 text-sm ${index===0?"font-bold text-[#E7C85D]":""}`}
+                      className={`flex justify-between gap-4 py-3 text-sm ${index===0?"font-bold text-[#16A34A]":""}`}
                     >
                       <span>{index===0?"מאכל ראשי · ":"חלופה · "}{names.get(item.food_id) ?? "מזון לא זמין"}</span>
-                      <span className="text-zinc-500">
+                      <span className="text-[#5B5F5B]">
                         {item.display_quantity??item.amount} {item.measurement_unit==="יחידות"?"יחידות":"גרם"} · {item.calculated_calories} קל׳
                       </span>
                     </li>

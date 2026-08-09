@@ -15,11 +15,11 @@ const initialState:CreateClientState={status:"idle",message:""};
 export default function CreateClientForm(){
   const[state,action,pending]=useActionState(createClientFromCoach,initialState);
   return <form action={action} className="mx-auto max-w-3xl">
-    <p className="text-xs font-black tracking-[.2em] text-[#D4AF37]">START COACH</p>
+    <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START COACH</p>
     <h1 className="mt-2 text-3xl font-black">לקוח חדש</h1>
-    <p className="mt-2 text-zinc-400">הלקוח יקבל הזמנה מאובטחת להשלמת הכניסה והקליטה.</p>
+    <p className="mt-2 text-[#5B5F5B]">הלקוח יקבל הזמנה מאובטחת להשלמת הכניסה והקליטה.</p>
     {state.status==="error"&&<p role="alert" className="mt-5 rounded-2xl border border-red-400/30 bg-red-400/10 p-4 text-sm text-red-100">{state.message}</p>}
-    <section className="mt-6 grid gap-4 rounded-[28px] border border-[#292929] bg-[#151515] p-5 sm:grid-cols-2">
+    <section className="mt-6 grid gap-4 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
       <Field label="שם מלא" name="fullName" required/>
       <Field label="אימייל" name="email" type="email" required dir="ltr"/>
       <Field label="טלפון" name="phone"/>
@@ -44,7 +44,7 @@ export default function CreateClientForm(){
       <Field label="מאכלים שלא אוהב" name="foodDislikes"/>
       <label className="sm:col-span-2">מגבלות רפואיות או הערות<textarea name="medicalNotes" className="nutrition-input mt-2 min-h-24"/></label>
     </section>
-    <button disabled={pending} className="mt-6 min-h-14 w-full rounded-2xl bg-[#D4AF37] px-6 font-black text-black disabled:cursor-wait disabled:opacity-50">{pending?"יוצרים לקוח ושולחים הזמנה…":"יצירת לקוח ושליחת הזמנה"}</button>
+    <button disabled={pending} className="mt-6 min-h-14 w-full rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF] disabled:cursor-wait disabled:opacity-50">{pending?"יוצרים לקוח ושולחים הזמנה…":"יצירת לקוח ושליחת הזמנה"}</button>
   </form>;
 }
 

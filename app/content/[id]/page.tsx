@@ -24,7 +24,7 @@ export default async function ContentDetailPage({
         description={item.description ?? ""}
       />
       {item.body ? (
-        <article className="whitespace-pre-wrap rounded-[24px] border border-[#292929] bg-[#151515] p-6 leading-8">
+        <article className="whitespace-pre-wrap rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-6 leading-8">
           {item.body}
         </article>
       ) : item.mediaUrl ? (
@@ -32,12 +32,12 @@ export default async function ContentDetailPage({
           href={item.mediaUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex min-h-12 items-center rounded-2xl bg-[#D4AF37] px-5 font-black text-black"
+          className="inline-flex min-h-12 items-center rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF]"
         >
           פתיחת המדיה
         </a>
       ) : (
-        <p className="rounded-[24px] border border-dashed border-[#333] p-12 text-center text-zinc-500">
+        <p className="rounded-[24px] border border-dashed border-[#E5E7E5] p-12 text-center text-[#5B5F5B]">
           התוכן עדיין אינו זמין.
         </p>
       )}

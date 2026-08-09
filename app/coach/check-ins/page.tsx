@@ -41,22 +41,22 @@ export default async function CoachCheckInsPage({
   return (
     <main className="px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/5 pb-7">
+        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E5E7E5] pb-7">
           <div>
-            <p className="text-xs font-black tracking-[.2em] text-[#D4AF37]">
+            <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">
               START COACH
             </p>
             <h1 className="mt-2 text-3xl font-black">צ׳ק־אינים</h1>
-            <p className="mt-2 text-sm text-zinc-400">
+            <p className="mt-2 text-sm text-[#5B5F5B]">
               כל העדכונים השבועיים, התמונות, התגובות וסטטוס הטיפול.
             </p>
           </div>
-          <Link href="/coach" className="text-sm font-bold text-[#D4AF37]">
+          <Link href="/coach" className="text-sm font-bold text-[#16A34A]">
             חזרה ל־Dashboard
           </Link>
         </header>
 
-        <form className="mt-6 grid gap-3 rounded-[24px] border border-[#292929] bg-[#151515] p-4 sm:grid-cols-2 lg:grid-cols-5">
+        <form className="mt-6 grid gap-3 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-4 sm:grid-cols-2 lg:grid-cols-5">
           <Filter label="לקוח" name="client" defaultValue={filters.client}>
             <option value="">כל הלקוחות</option>
             {data.clients.map((client) => (
@@ -74,10 +74,10 @@ export default async function CoachCheckInsPage({
           <DateFilter label="מתאריך" name="from" defaultValue={filters.from} />
           <DateFilter label="עד תאריך" name="to" defaultValue={filters.to} />
           <div className="flex items-end gap-2">
-            <button className="min-h-11 flex-1 rounded-xl bg-[#D4AF37] px-4 font-black text-black">
+            <button className="min-h-11 flex-1 rounded-xl bg-[#16A34A] px-4 font-black text-[#FFFFFF]">
               סינון
             </button>
-            <Link href="/coach/check-ins" className="px-2 py-3 text-xs text-zinc-500">
+            <Link href="/coach/check-ins" className="px-2 py-3 text-xs text-[#5B5F5B]">
               איפוס
             </Link>
           </div>
@@ -98,7 +98,7 @@ export default async function CoachCheckInsPage({
               </option>
             ))}
           </Filter>
-          <button className="min-h-11 self-end rounded-xl border border-[#4A3915] px-4 font-bold text-[#D4AF37]">
+          <button className="min-h-11 self-end rounded-xl border border-[#BBF7D0] px-4 font-bold text-[#16A34A]">
             השוואה
           </button>
         </form>
@@ -111,7 +111,7 @@ export default async function CoachCheckInsPage({
         <section className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-black">רשימת צ׳ק־אינים</h2>
-            <span className="text-sm text-zinc-500">{data.items.length} תוצאות</span>
+            <span className="text-sm text-[#5B5F5B]">{data.items.length} תוצאות</span>
           </div>
           {data.items.length ? (
             <div className="space-y-5">
@@ -124,7 +124,7 @@ export default async function CoachCheckInsPage({
               ))}
             </div>
           ) : (
-            <p className="rounded-[24px] border border-dashed border-[#333] p-12 text-center text-zinc-500">
+            <p className="rounded-[24px] border border-dashed border-[#E5E7E5] p-12 text-center text-[#5B5F5B]">
               אין צ׳ק־אינים התואמים לסינון.
             </p>
           )}
@@ -146,7 +146,7 @@ function Filter({
   children: React.ReactNode;
 }) {
   return (
-    <label className="text-xs font-bold text-zinc-400">
+    <label className="text-xs font-bold text-[#5B5F5B]">
       {label}
       <select
         name={name}
@@ -169,7 +169,7 @@ function DateFilter({
   defaultValue?: string;
 }) {
   return (
-    <label className="text-xs font-bold text-zinc-400">
+    <label className="text-xs font-bold text-[#5B5F5B]">
       {label}
       <input
         type="date"

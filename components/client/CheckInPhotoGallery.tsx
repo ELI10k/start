@@ -17,9 +17,9 @@ const labels: Record<string, string> = {
 function Photo({ photo }: { photo: CheckInPhoto }) {
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   return (
-    <figure className="relative overflow-hidden rounded-xl border border-[#333] bg-black/30">
+    <figure className="relative overflow-hidden rounded-xl border border-[#E5E7E5] bg-[#F7F8F7]">
       {state === "loading" && (
-        <div role="status" className="grid h-40 place-items-center text-xs text-zinc-500">
+        <div role="status" className="grid h-40 place-items-center text-xs text-[#5B5F5B]">
           טוענים תמונה…
         </div>
       )}
@@ -60,7 +60,7 @@ export default function CheckInPhotoGallery({
     );
   if (!photos.length)
     return (
-      <p className="mt-4 rounded-xl border border-dashed border-[#333] p-4 text-center text-xs text-zinc-500">
+      <p className="mt-4 rounded-xl border border-dashed border-[#E5E7E5] p-4 text-center text-xs text-[#5B5F5B]">
         לא צורפו תמונות לצ׳ק־אין זה.
       </p>
     );

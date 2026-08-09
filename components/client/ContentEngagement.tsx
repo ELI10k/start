@@ -27,11 +27,11 @@ export default function ContentEngagement({
     });
   }, [contentItemId]);
   return (
-    <section className="mt-5 rounded-[24px] border border-[#3A321B] bg-[#17150F] p-5">
+    <section className="mt-5 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-black">המעקב שלי</h2>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-[#5B5F5B]">
             {lastViewedLabel
               ? `צפייה אחרונה: ${lastViewedLabel}`
               : "הצפייה הראשונה תישמר כעת"}
@@ -43,7 +43,7 @@ export default function ContentEngagement({
           <SubmitButton
             idle={favorite ? "הסרה מהמועדפים" : "הוספה למועדפים"}
             pending="שומרים…"
-            className="min-h-11 rounded-xl border border-[#D4AF37]/40 px-4 text-sm font-bold text-[#E7C85D] disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-[#16A34A]/40 px-4 text-sm font-bold text-[#16A34A] disabled:opacity-50"
           />
         </form>
       </div>
@@ -59,14 +59,14 @@ export default function ContentEngagement({
             step="5"
             value={progress}
             onChange={(event) => setProgress(Number(event.target.value))}
-            className="w-full accent-[#D4AF37]"
+            className="w-full accent-[#16A34A]"
           />
           <strong className="w-14 text-left">{progress}%</strong>
         </div>
         <SubmitButton
           idle="שמירת התקדמות"
           pending="שומרים…"
-          className="mt-4 min-h-11 rounded-xl bg-[#D4AF37] px-4 text-sm font-black text-black disabled:opacity-50"
+          className="mt-4 min-h-11 rounded-xl bg-[#16A34A] px-4 text-sm font-black text-[#FFFFFF] disabled:opacity-50"
         />
       </form>
     </section>

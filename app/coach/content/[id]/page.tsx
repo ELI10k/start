@@ -23,7 +23,7 @@ export default async function EditContentPage({
   return (
     <main className="px-4 py-8 sm:px-6">
       <div className="mx-auto max-w-6xl">
-        <p className="text-xs font-black tracking-widest text-[#D4AF37]">ניהול תוכן</p>
+        <p className="text-xs font-black tracking-widest text-[#16A34A]">ניהול תוכן</p>
         <h1 className="mt-2 text-3xl font-black">עריכת תוכן</h1>
         <ContentForm categories={categories} item={item} />
       </div>

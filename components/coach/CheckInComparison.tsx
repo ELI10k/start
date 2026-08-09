@@ -36,14 +36,14 @@ export default function CheckInComparison({
 }) {
   if (!left || !right)
     return (
-      <p className="rounded-2xl border border-dashed border-[#3A321B] p-6 text-center text-sm text-zinc-500">
+      <p className="rounded-2xl border border-dashed border-[#E5E7E5] p-6 text-center text-sm text-[#5B5F5B]">
         בחרו שני צ׳ק־אינים בפילטר ההשוואה כדי לראות שינוי בין תקופות.
       </p>
     );
   return (
-    <div className="overflow-x-auto rounded-2xl border border-[#3A321B]">
+    <div className="overflow-x-auto rounded-2xl border border-[#E5E7E5]">
       <table className="w-full min-w-[34rem] text-sm">
-        <thead className="bg-[#17150F]">
+        <thead className="bg-[#FFFFFF]">
           <tr>
             <th className="p-3 text-right">מדד</th>
             <th className="p-3 text-right">
@@ -61,8 +61,8 @@ export default function CheckInComparison({
             const b = right[key];
             const delta = comparisonDelta(a, b);
             return (
-              <tr key={key} className="border-t border-white/5">
-                <th className="p-3 text-right text-zinc-500">{label}</th>
+              <tr key={key} className="border-t border-[#E5E7E5]">
+                <th className="p-3 text-right text-[#5B5F5B]">{label}</th>
                 <td className="p-3">{a ?? "—"}{a !== null ? unit : ""}</td>
                 <td className="p-3">{b ?? "—"}{b !== null ? unit : ""}</td>
                 <td className="p-3 font-bold">
