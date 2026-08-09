@@ -1286,3 +1286,101 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Nothing may push the page sideways on a narrow phone. */
 html, body { overflow-x: hidden; }
 .client-app-content { padding-bottom: max(6rem, calc(5rem + env(safe-area-inset-bottom))); }
+
+/* ── App patterns ──────────────────────────────────────────────────────────
+   The building blocks every remaining screen needs. Defined once here so the
+   per-screen work is composition rather than fresh CSS each time. */
+
+/* Skeletons: a shaped placeholder that matches the content it replaces, so the
+   layout does not jump when data lands. */
+.skeleton {
+  background: linear-gradient(90deg, var(--start-card) 25%, var(--start-card-raised) 50%, var(--start-card) 75%);
+  background-size: 200% 100%;
+  border-radius: var(--radius-md);
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.skeleton--text { height: .875rem; border-radius: 999px; }
+.skeleton--title { height: 1.375rem; width: 60%; border-radius: 999px; }
+.skeleton--card { height: 6.5rem; border-radius: var(--radius-lg); }
+.skeleton--tile { height: 4.75rem; border-radius: var(--radius-md); }
+@keyframes skeleton-sweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+/* State blocks: empty, error and success share one shape so a screen never
+   invents its own way of saying nothing is here. */
+.state-block {
+  display: grid; justify-items: center; gap: var(--space-3);
+  padding: var(--space-8) var(--space-5);
+  text-align: center;
+  background: var(--start-card);
+  border: 1px dashed var(--start-border);
+  border-radius: var(--radius-lg);
+}
+.state-block__icon {
+  display: grid; place-items: center;
+  width: 3rem; height: 3rem; border-radius: 999px;
+  background: rgba(212, 175, 55, .12); color: var(--start-gold);
+}
+.state-block h2 { font-size: 1.0625rem; font-weight: 500; }
+.state-block p { color: var(--start-text-muted); font-size: .875rem; line-height: 1.6; max-width: 26rem; }
+.state-block--error { border-style: solid; border-color: rgba(239, 68, 68, .35); }
+.state-block--error .state-block__icon { background: rgba(239, 68, 68, .12); color: var(--start-error); }
+.state-block--success { border-style: solid; border-color: rgba(34, 197, 94, .35); }
+.state-block--success .state-block__icon { background: rgba(34, 197, 94, .12); color: var(--start-success); }
+
+/* Bottom sheet: the mobile answer to a modal. Slides from the bottom, keeps a
+   drag handle, and respects the home indicator. */
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0, 0, 0, .6);
+  animation: sheet-fade var(--duration-base) ease;
+}
+.sheet {
+  position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 61;
+  max-height: 85dvh; overflow-y: auto;
+  padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom));
+  background: var(--start-card);
+  border-start-start-radius: var(--radius-xl);
+  border-start-end-radius: var(--radius-xl);
+  border-top: 1px solid var(--start-border);
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, .45);
+  animation: sheet-rise var(--duration-base) var(--ease-out, ease);
+}
+.sheet__handle {
+  width: 2.5rem; height: .25rem; margin: 0 auto var(--space-4);
+  border-radius: 999px; background: #3a3a3a;
+}
+.sheet__title { font-size: 1.0625rem; font-weight: 500; margin-bottom: var(--space-3); }
+@keyframes sheet-rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .sheet-backdrop { animation: none; }
+}
+
+/* Floating action button: one primary action per screen, clear of the bottom nav
+   and the home indicator. */
+.fab {
+  position: fixed; z-index: 45;
+  inset-inline-end: var(--space-5);
+  inset-block-end: calc(5.5rem + env(safe-area-inset-bottom));
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  min-height: 3.25rem; padding-inline: var(--space-5);
+  background: var(--start-gold); color: #1a1400;
+  border-radius: 999px; font-weight: 700;
+  box-shadow: var(--shadow-gold), 0 10px 28px rgba(0, 0, 0, .4);
+  transition: transform var(--duration-fast) ease;
+}
+.fab:hover { background: var(--start-gold-soft); }
+.fab:active { transform: scale(.96); }
+@media (min-width: 768px) { .fab { inset-block-end: var(--space-6); } }
+
+/* List rows: the pattern behind history, notifications and content. Full-width
+   tap target, no card-per-row noise. */
+.app-list { display: grid; gap: 1px; background: var(--start-border); border-radius: var(--radius-lg); overflow: hidden; }
+.app-list > * {
+  display: flex; align-items: center; gap: var(--space-3);
+  min-height: 3.5rem; padding: var(--space-3) var(--space-4);
+  background: var(--start-card);
+  transition: background-color var(--duration-fast) ease;
+}
+.app-list > a:hover, .app-list > button:hover { background: var(--start-card-raised); }
