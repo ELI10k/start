@@ -17,5 +17,12 @@ export default async function ProgressPage() {
     const photos=checkInHistory.photosByCheckIn[checkIn.id]??[];
     return photos.length?[{checkInId:checkIn.id,submittedAt:checkIn.submitted_at,photos}]:[];
   });
-  return <ClientShell><PageHeader eyebrow="התקדמות" title="משקל ומדידות" description="המדידות נשמרות בחשבון שלך ומוצגות לאורך זמן."/><div className="space-y-5"><PersistedProgressForm today={today}/><PersistedProgressHistory entries={data.progress}/><ProgressPhotoGallery sessions={photoSessions} error={checkInHistory.photoError}/></div></ClientShell>;
+  return <ClientShell>
+    <PageHeader eyebrow="התקדמות" title="משקל ומדידות" description="המדידות נשמרות בחשבון שלך ומוצגות לאורך זמן." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
+    <div className="grid gap-4">
+      <PersistedProgressHistory entries={data.progress}/>
+      <ProgressPhotoGallery sessions={photoSessions} error={checkInHistory.photoError}/>
+    </div>
+    <PersistedProgressForm today={today}/>
+  </ClientShell>;
 }
