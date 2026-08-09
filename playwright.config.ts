@@ -33,7 +33,9 @@ export default defineConfig({
   },
   projects: [
     { name: "chromium-desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
-    { name: "chromium-mobile", use: { ...devices["iPhone 13"] } },
+    // The iPhone descriptor defaults to WebKit, which is not installed; only the
+    // viewport, touch and user-agent parts matter here, so run it on Chromium.
+    { name: "chromium-mobile", use: { ...devices["iPhone 13"], browserName: "chromium", defaultBrowserType: "chromium" } },
   ],
   webServer: usingLocalServer
     ? {
