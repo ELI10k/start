@@ -1,6 +1,42 @@
 "use client";
-import { Bell, BookOpen, Dumbbell, Home, LineChart, Salad, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-const items = [{ href: "/", label: "בית", icon: Home }, { href: "/nutrition", label: "תזונה", icon: Salad }, { href: "/workouts", label: "אימונים", icon: Dumbbell }, { href: "/progress", label: "התקדמות", icon: LineChart }, { href: "/content", label: "תוכן", icon: BookOpen }, { href: "/notifications", label: "התראות", icon: Bell }, { href: "/profile", label: "פרופיל", icon: UserRound }];
-export default function BottomNav({unreadCount=0}:{unreadCount?:number}) { const pathname = usePathname(); if (pathname.startsWith("/coach") || pathname.startsWith("/foods") || pathname.startsWith("/import")) return null; return <nav aria-label="ניווט לקוח" className="fixed inset-x-0 bottom-0 z-50 border-t border-[#2B2B2B] bg-[#0A0A0A]/95 px-2 pb-[max(.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur md:hidden"><div className="mx-auto flex max-w-xl justify-around overflow-x-auto">{items.map(({ href, label, icon: Icon }) => { const active = href === "/" ? pathname === "/" : pathname.startsWith(href); const isNotifications=href==="/notifications"; return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={`relative flex min-h-14 min-w-14 shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[11px] font-bold transition ${active ? "bg-[#D4AF37]/10 text-[#E7C85D]" : "text-zinc-500 hover:text-white"}`}><Icon aria-hidden="true" size={21}/>{isNotifications&&unreadCount>0&&<span className="absolute right-2 top-1 grid min-w-4 place-items-center rounded-full bg-[#D4AF37] px-1 text-[9px] leading-4 text-black">{unreadCount>99?"99+":unreadCount}</span>}<span>{label}</span></Link>; })}</div></nav>; }
+import { Bell, BookOpen, Dumbbell, Home, LineChart, Salad, UserRound } from "lucide-react";
+
+const items = [
+  { href: "/", label: "בית", icon: Home },
+  { href: "/nutrition", label: "תזונה", icon: Salad },
+  { href: "/workouts", label: "אימונים", icon: Dumbbell },
+  { href: "/progress", label: "התקדמות", icon: LineChart },
+  { href: "/content", label: "תוכן", icon: BookOpen },
+  { href: "/notifications", label: "התראות", icon: Bell },
+  { href: "/profile", label: "פרופיל", icon: UserRound },
+];
+
+export default function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
+  const pathname = usePathname();
+  if (pathname.startsWith("/coach") || pathname.startsWith("/foods") || pathname.startsWith("/import")) return null;
+  return (
+    <nav aria-label="ניווט לקוח" className="bottom-app-nav">
+      <div>
+        {items.map(({ href, label, icon: Icon }) => {
+          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const isNotifications = href === "/notifications";
+          return (
+            <Link key={href} href={href} aria-current={active ? "page" : undefined} data-active={active || undefined}>
+              <span className="bottom-app-nav__icon">
+                <Icon aria-hidden="true" size={21} />
+                {isNotifications && unreadCount > 0 && (
+                  <span className="bottom-app-nav__badge" aria-label={`${unreadCount} התראות שלא נקראו`}>
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </span>
+              <span>{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

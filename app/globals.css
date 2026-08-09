@@ -1185,3 +1185,39 @@ button:active:not(:disabled), a:active { transform: scale(.985); }
     background: rgba(255,255,255,.38);
   }
 }
+
+/* Bottom navigation: seven destinations have to fit a 320px phone, so the row
+   scrolls horizontally rather than squeezing labels into two lines. The active
+   item is marked with data-active so the styling does not depend on class order. */
+.bottom-app-nav > div { overflow-x: auto; scrollbar-width: none; }
+.bottom-app-nav > div::-webkit-scrollbar { display: none; }
+.bottom-app-nav a { min-width: 3.75rem; flex: 0 0 auto; }
+.bottom-app-nav a[data-active] { color: var(--start-gold-soft); }
+.bottom-app-nav a[data-active] .bottom-app-nav__icon { background: rgba(212, 175, 55, .14); }
+.bottom-app-nav__icon { position: relative; }
+.bottom-app-nav__badge {
+  position: absolute; inset-block-start: -.25rem; inset-inline-end: -.35rem;
+  min-width: 1rem; padding: 0 .25rem; border-radius: 999px;
+  background: var(--start-gold); color: #1a1400;
+  font-size: .625rem; line-height: 1rem; font-weight: 700; text-align: center;
+}
+
+/* Login: the first screen anyone sees, so it carries the app's weight rather than
+   looking like a form on a page. Centred card, generous tap targets, safe areas. */
+.auth-screen {
+  min-height: 100dvh; display: grid; place-items: center;
+  padding: max(1.5rem, env(safe-area-inset-top)) 1rem max(1.5rem, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% -10%, rgba(212, 175, 55, .10), transparent 22rem),
+    var(--start-bg);
+}
+.auth-card {
+  width: 100%; max-width: 26rem;
+  background: var(--start-card); border: 1px solid var(--start-border);
+  border-radius: var(--radius-xl); padding: var(--space-8) var(--space-6);
+  box-shadow: var(--shadow-card);
+}
+.auth-card__mark { font-weight: 700; letter-spacing: .2em; color: var(--start-gold); font-size: .75rem; }
+.auth-card h1 { margin-top: var(--space-3); font-size: 1.75rem; font-weight: 700; }
+.auth-card__lead { margin-top: var(--space-2); color: var(--start-text-muted); line-height: 1.6; font-size: .9375rem; }
+.auth-card__note { margin-top: var(--space-5); text-align: center; font-size: .75rem; color: #8a8a8a; }

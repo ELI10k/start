@@ -1,7 +1,125 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { CalendarCheck, ClipboardCheck, Dumbbell, Scale, UtensilsCrossed } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
+import { MetricTile, PremiumCard } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
-export default async function Home() { const auth = await getAuthContext(); if (!auth) redirect("/login"); if (auth.role !== "client") redirect("/unauthorized"); const today = new Date().toISOString().slice(0,10); const data = await getClientOverview(auth.id, today); const completed = data.menu?.meals.filter((meal) => meal.completed) ?? []; const eatenItems = data.menu?.meals.flatMap((meal) => meal.items).filter((item) => item.eaten) ?? []; const totals = eatenItems.reduce((sum,item)=>({ calories:sum.calories+item.calories, protein:sum.protein+item.protein }),{calories:0,protein:0}); const latest = data.progress[0]; const remainingMeals=Math.max(0,(data.menu?.meals.length??0)-completed.length); return <ClientShell><header className="border-b border-white/5 pb-6"><p className="text-xs font-black tracking-[.18em] text-[#D4AF37]">START</p><h1 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">שלום, {auth.fullName.split(" ")[0]}</h1><p className="mt-2 text-zinc-400">כל מה שחשוב לך להיום, במקום אחד.</p></header><section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4"><Metric label="משקל אחרון" value={latest ? `${latest.weight} ק״ג` : "אין נתון"}/><Metric label="ארוחות היום" value={`${completed.length}/${data.menu?.meals.length ?? 0}`}/><Metric label="קלוריות" value={`${Math.round(totals.calories)}/${data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? "—"}`}/><Metric label="חלבון" value={`${Math.round(totals.protein)}/${data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? "—"} ג׳`}/></section><section className="start-surface mt-6 rounded-[26px] p-5 sm:p-6"><h2 className="text-xl font-black">המשימות שלי להיום</h2>{remainingMeals?<Link href="/nutrition" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>🍽️ נשארו {remainingMeals} ארוחות לסמן</span><span className="text-[#E7C85D]">למעבר</span></Link>:<p className="mt-3 rounded-xl bg-emerald-400/10 p-4 text-emerald-300">סגרת את כל משימות התזונה להיום ✅</p>}<Link href="/workouts" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>💪 אימון ומשימות אימון</span><span className="text-[#E7C85D]">למעבר</span></Link><Link href="/check-in" className="start-action mt-3 flex min-h-12 items-center justify-between rounded-xl border border-[#333] px-4"><span>📝 צ׳ק-אין</span><span className="text-[#E7C85D]">למעבר</span></Link></section><DashboardWorkoutWidget/><section className="start-surface mt-6 rounded-[26px] p-5 sm:p-6"><h2 className="text-xl font-black">התפריט הפעיל</h2>{data.menu ? <><p className="mt-2 text-zinc-400">{data.menu.title}</p><Link href="/nutrition" className="start-gold-button mt-4 inline-flex min-h-12 items-center rounded-2xl bg-[#D4AF37] px-5 font-black text-black">לארוחות היום</Link></> : <p className="start-empty mt-3 rounded-2xl p-5 text-sm text-zinc-400">המאמן עדיין לא שייך תפריט פעיל. הוא יופיע כאן מיד כשהוא מוכן.</p>}</section></ClientShell>; }
-function Metric({label,value}:{label:string;value:string}) { return <div className="start-surface min-h-28 rounded-[22px] p-4"><span className="text-xs text-zinc-500">{label}</span><strong className="mt-2 block text-lg">{value}</strong></div>; }
+
+export default async function Home() {
+  const auth = await getAuthContext();
+  if (!auth) redirect("/login");
+  if (auth.role !== "client") redirect("/unauthorized");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const data = await getClientOverview(auth.id, today);
+  const meals = data.menu?.meals ?? [];
+  const completed = meals.filter((meal) => meal.completed);
+  const eaten = meals.flatMap((meal) => meal.items).filter((item) => item.eaten);
+  const totals = eaten.reduce(
+    (sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein }),
+    { calories: 0, protein: 0 },
+  );
+  const latest = data.progress[0];
+  const remainingMeals = Math.max(0, meals.length - completed.length);
+  const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
+  const proteinTarget = data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? null;
+  const dayPercent = meals.length ? Math.round((completed.length / meals.length) * 100) : 0;
+
+  return (
+    <ClientShell>
+      <header className="dashboard-greeting">
+        <p>שלום, {auth.fullName.split(" ")[0]}</p>
+        <h1>מה חשוב לך היום</h1>
+      </header>
+
+      {meals.length ? (
+        <section className="daily-progress-card" aria-labelledby="daily-progress">
+          <div className="daily-progress-card__copy">
+            <h2 id="daily-progress">היום שלך</h2>
+            <p>
+              {remainingMeals
+                ? `נשארו ${remainingMeals} ארוחות לסמן`
+                : "סגרת את כל משימות התזונה להיום"}
+            </p>
+          </div>
+          <div className="premium-progress" role="img" aria-label={`${dayPercent} אחוז מהיום הושלם`}>
+            <div className="premium-progress__meta">
+              <span>{dayPercent}%</span>
+              <span>
+                {completed.length}/{meals.length}
+              </span>
+            </div>
+            <div className="premium-progress__track">
+              <span style={{ width: `${dayPercent}%` }} />
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="dashboard-metrics" aria-label="מדדים להיום">
+        <MetricTile
+          label="קלוריות"
+          value={`${Math.round(totals.calories)}${calorieTarget ? ` / ${calorieTarget}` : ""}`}
+          icon={<UtensilsCrossed aria-hidden="true" size={18} />}
+        />
+        <MetricTile
+          label="חלבון"
+          value={`${Math.round(totals.protein)}${proteinTarget ? ` / ${proteinTarget}` : ""} ג׳`}
+          accent="green"
+          icon={<ClipboardCheck aria-hidden="true" size={18} />}
+        />
+        <MetricTile
+          label="משקל אחרון"
+          value={latest ? `${latest.weight} ק״ג` : "אין נתון"}
+          accent="neutral"
+          icon={<Scale aria-hidden="true" size={18} />}
+        />
+        <MetricTile
+          label="ארוחות היום"
+          value={`${completed.length}/${meals.length}`}
+          accent="neutral"
+          icon={<CalendarCheck aria-hidden="true" size={18} />}
+        />
+      </section>
+
+      <h2 className="section-heading section-heading--compact">פעולות מהירות</h2>
+      <nav className="quick-actions-grid" aria-label="פעולות מהירות">
+        <Link href="/nutrition" className="quick-action-card">
+          <UtensilsCrossed aria-hidden="true" size={20} />
+          <span>הארוחות שלי</span>
+        </Link>
+        <Link href="/workouts" className="quick-action-card">
+          <Dumbbell aria-hidden="true" size={20} />
+          <span>אימון</span>
+        </Link>
+        <Link href="/progress" className="quick-action-card">
+          <Scale aria-hidden="true" size={20} />
+          <span>שקילה</span>
+        </Link>
+        <Link href="/check-in" className="quick-action-card">
+          <ClipboardCheck aria-hidden="true" size={20} />
+          <span>צ׳ק־אין</span>
+        </Link>
+      </nav>
+
+      <DashboardWorkoutWidget />
+
+      <PremiumCard className="dashboard-section">
+        <h2 className="section-heading section-heading--compact">התפריט הפעיל</h2>
+        {data.menu ? (
+          <>
+            <p className="premium-card__description">{data.menu.title}</p>
+            <Link href="/nutrition" className="premium-primary-button premium-card__link">
+              לארוחות היום
+            </Link>
+          </>
+        ) : (
+          <p className="premium-card__description">
+            המאמן עדיין לא שייך תפריט פעיל. הוא יופיע כאן מיד כשהוא מוכן.
+          </p>
+        )}
+      </PremiumCard>
+    </ClientShell>
+  );
+}
