@@ -22,23 +22,15 @@ function Preview({
     return () => URL.revokeObjectURL(url);
   }, [url]);
   return (
-    <div className="mt-3">
+    <>
       {url && (
         // eslint-disable-next-line @next/next/no-img-element
-        <img
-          alt={`תצוגה מקדימה ${label}`}
-          src={url}
-          className="h-28 w-full rounded-lg object-cover"
-        />
+        <img alt={`תצוגה מקדימה ${label}`} src={url} />
       )}
-      <button
-        type="button"
-        className="mt-2 text-xs text-[#DC2626] underline"
-        onClick={onRemove}
-      >
+      <button type="button" className="pill pill--red" onClick={onRemove}>
         הסרת תמונה
       </button>
-    </div>
+    </>
   );
 }
 
@@ -61,14 +53,13 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
     setFiles((current) => ({ ...current, [key]: file }));
   };
   return (
-    <section className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
-      <h2 className="font-black">תמונות התקדמות</h2>
+    <div>
       {required ? (
-        <p className="mt-2 rounded-xl border border-[#16A34A]/40 bg-[#16A34A]/10 p-3 text-sm font-bold text-[#16A34A]">
+        <p className="rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-3 text-sm font-bold text-[#15803D]">
           הגיע הזמן לעדכן תמונות התקדמות
         </p>
       ) : (
-        <p className="mt-1 text-xs text-[#5B5F5B]">
+        <p className="text-xs text-[#5B5F5B]">
           אופציונלי · JPG, PNG או WebP עד 5MB.
         </p>
       )}
@@ -76,13 +67,9 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
         {slots.map((slot) => {
           const file = files[slot.key];
           return (
-            <label
-              key={slot.key}
-              className="rounded-xl border border-[#E5E7E5] p-3 text-sm font-bold"
-            >
+            <label key={slot.key} className="photo-slot">
               {slot.label}
               <input
-                className="mt-2 block w-full text-xs"
                 name={`photo_${slot.key}`}
                 type="file"
                 required={required}
@@ -102,10 +89,10 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
         })}
       </div>
       {error && (
-        <p role="alert" className="mt-3 text-sm text-[#DC2626]">
+        <p role="alert" className="mt-3 rounded-2xl bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">
           {error}
         </p>
       )}
-    </section>
+    </div>
   );
 }

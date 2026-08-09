@@ -772,32 +772,44 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .step-progress__dot[data-current="true"] { background: var(--green); opacity: .55; }
 .step-caption { color: var(--ink-muted); font-size: .75rem; font-weight: 700; }
 
-.checkin-flow { counter-reset: checkin-step; }
-.checkin-flow > :where(section, fieldset, label.block) {
-  position: relative;
-  padding-block-start: 3.1rem;
+/* A numbered step. The check-in is one form - every field has to stay in the
+   document so the server action receives it - but it reads as a sequence, and a
+   step turns green the moment it is satisfied. */
+.step + .step { margin-top: .75rem; }
+.step__head { display: flex; align-items: center; gap: .6rem; margin-bottom: .85rem; }
+.step__number {
+  display: grid; flex: 0 0 auto; place-items: center;
+  width: 1.75rem; height: 1.75rem; border-radius: 999px;
+  background: var(--surface-raised); color: var(--ink-muted);
+  font-size: .75rem; font-weight: 900;
 }
-.checkin-flow > :where(section, fieldset, label.block)::before {
-  position: absolute;
-  inset-block-start: 1rem;
-  inset-inline-start: 1rem;
-  display: grid;
-  width: 1.7rem;
-  height: 1.7rem;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--green-tint);
-  color: var(--green-press);
-  content: counter(checkin-step);
-  counter-increment: checkin-step;
-  font-size: .72rem;
-  font-weight: 900;
+.step[data-done="true"] .step__number { background: var(--green); color: #FFFFFF; }
+.step__title { font-size: 1rem; font-weight: 800; }
+.step__hint { margin-inline-start: auto; color: var(--ink-muted); font-size: .72rem; font-weight: 700; }
+
+/* Rating scales: ten targets on a 320px phone means two rows of five, each at
+   least a fingertip square. */
+.rating-scale { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .5rem; }
+.rating-scale label {
+  display: grid; min-height: 2.75rem; place-items: center;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  font-weight: 800; cursor: pointer;
 }
-.checkin-flow fieldset label:has(input:checked) {
-  border-color: var(--green) !important;
-  background: var(--green) !important;
-  color: #FFFFFF !important;
+.rating-scale label:has(input:checked) { border-color: var(--green); background: var(--green); color: #FFFFFF; }
+.rating-scale label:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* Photo slots: a file input is unreadable on a phone, so the whole tile is the
+   target and the preview replaces it once a file is chosen. */
+.photo-slot {
+  display: grid; gap: .5rem; align-content: start;
+  min-height: 7rem; padding: .75rem;
+  border: 1px dashed var(--line-strong); border-radius: var(--radius-md);
+  background: var(--surface); font-size: .8rem; font-weight: 700; cursor: pointer;
 }
+.photo-slot:hover { border-color: var(--green); }
+.photo-slot:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 2px; }
+.photo-slot img { width: 100%; height: 6.5rem; border-radius: var(--radius-sm); object-fit: cover; }
+.photo-slot input[type="file"] { width: 100%; font-size: .7rem; }
 
 /* Active workout — one exercise at a time, logging within thumb reach. */
 /* The session runs outside the app shell - no header, no bottom bar - so it sticks
