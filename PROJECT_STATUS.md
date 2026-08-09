@@ -1,6 +1,6 @@
 # START - Project Status
 
-Last updated: 2026-08-02 (Claude Code, autonomous session)
+Last updated: 2026-08-09 — **FEATURE FREEZE**. See FEATURE_COMPLETE.md.
 
 ## Repository
 - Root: `/Users/lykhn/start`
@@ -22,7 +22,9 @@ Production runs `main` @ `a3f7cf3`.
 |---|---|---|
 | TypeScript | `npx tsc --noEmit` | pass |
 | ESLint | `npm run lint` | pass |
-| Tests | `npm test` | **131 / 131** |
+| Tests | `npm test` | **142 / 142** |
+| E2E | `npm run e2e` | **69 passed, 0 failed, 1 skipped** |
+| Credential scan | `npm run e2e:scan` | clean |
 | Build | `npm run build` | pass |
 | Migration validation | `npm run supabase:migrations:validate` | pass, 42 migrations |
 
@@ -98,9 +100,8 @@ reminder therefore cannot fire; restoring it needs a paid plan, which is Eli's c
 4. **`E2E_TEST_EMAILS`** — the removed value was encrypted and could not be read back.
 
 ### Not started
-5. **E2E suite.** No browser driver is installed and no test-account credentials are
-   available since `E2E_TEST_EMAILS` was removed, so nothing can drive a real session.
-6. Workouts, check-ins and photo security have not been re-tested since the merge.
+5. ~~E2E suite~~ — done. Playwright, 69 specs green, artifact credential scan wired in.
+6. ~~Workouts, check-ins and photo security untested~~ — covered by E2E.
 7. Nine of Eli's master foods have no branded catalog equivalent (בטטה, תפוח אדמה,
    אורז לבן, פרכיות and others). The curated master rows cover the coaching use.
 8. Self-signup is off — `shouldCreateUser: false`. No free-tier entry path.

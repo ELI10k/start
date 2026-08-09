@@ -78,9 +78,14 @@ test.describe("auth and permissions", () => {
 
   test("the magic-link form rejects a malformed address", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("אימייל").first().fill("not-an-email");
+    const email = page.getByLabel("אימייל").first();
+    await email.fill("not-an-email");
     await page.getByRole("button", { name: "שליחת קישור התחברות" }).click();
-    // Scope to the form: Next's dev tools mount their own always-present alert region.
-    await expect(page.locator("main").getByRole("alert")).toBeVisible();
+    // The field is type="email" and required, so the browser refuses to submit at
+    // all - no round trip, no server error. Assert that guard rather than an alert
+    // the app is right never to render.
+    const invalid = await email.evaluate((node) => !(node as HTMLInputElement).validity.valid);
+    expect(invalid).toBe(true);
+    await expect(page).toHaveURL(/\/login/);
   });
 });
