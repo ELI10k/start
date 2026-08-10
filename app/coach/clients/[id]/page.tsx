@@ -12,6 +12,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatIsraelDateTime } from "@/lib/date-time";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras from "@/components/coach/ClientDetailExtras";
+import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
+import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
 const date = (value: string | null) => value ? formatIsraelDateTime(value) : "אין נתון";
 const number = (value: number) => Math.round(value).toLocaleString("he-IL");
@@ -31,6 +33,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
     supabase.from("notifications").select("id,title,body,href,created_at,read_at").eq("recipient_id",id).order("created_at",{ascending:false}).limit(20),
     supabase.from("coach_client_notes").select("id,body,created_at,updated_at").eq("client_id",id).eq("coach_id",auth.id).order("created_at",{ascending:false}),
   ]);
+  const weeklySummaries = await getWeeklySummaries(id);
   const { data: { user: authUser } } = await createSupabaseAdminClient().auth.admin.getUserById(id);
   const accountActivated=Boolean(authUser?.email_confirmed_at);
   const latestInvitation=invitations?.[0] ?? null;
@@ -150,6 +153,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
 
     <div className="mt-5 grid gap-3">
       <EnableFreeMenu clientId={id}/>
+      <WeeklySummaryPanel summaries={weeklySummaries}/>
       <ClientDetailExtras clientId={id} content={(contentRows??[]).map((item)=>({...item,assigned:(contentAssignments??[]).some((assignment)=>assignment.content_item_id===item.id)}))} notifications={clientNotifications??[]} notes={coachNotes??[]}/>
     </div>
   </main>;

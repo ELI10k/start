@@ -5,6 +5,8 @@ import ClientShell from "@/components/client/ClientShell";
 import { MetricTile, PremiumCard } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
+import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
+import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
 export default async function Home() {
   const auth = await getAuthContext();
@@ -13,6 +15,8 @@ export default async function Home() {
 
   const today = new Date().toISOString().slice(0, 10);
   const data = await getClientOverview(auth.id, today);
+  // RLS returns sent summaries only, so the newest row is the newest release.
+  const [latestSummary] = await getWeeklySummaries(auth.id, 1);
   const meals = data.menu?.meals ?? [];
   const completed = meals.filter((meal) => meal.completed);
   const eaten = meals.flatMap((meal) => meal.items).filter((item) => item.eaten);
@@ -32,6 +36,8 @@ export default async function Home() {
         <p>שלום, {auth.fullName.split(" ")[0]}</p>
         <h1>מה חשוב לך היום</h1>
       </header>
+
+      <WeeklySummaryCard summary={latestSummary}/>
 
       {meals.length ? (
         <section className="daily-progress-card" aria-labelledby="daily-progress">

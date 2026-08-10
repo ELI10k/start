@@ -21,6 +21,9 @@ const credentialsFor = (provider: string) =>
       ? Boolean(process.env.FCM_SERVICE_ACCOUNT_JSON)
       : false;
 
+// Vercel Cron issues a GET; a manual drain is a POST. Both do the same work.
+export const GET = (request: Request) => POST(request);
+
 export async function POST(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
