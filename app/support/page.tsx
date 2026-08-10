@@ -18,15 +18,12 @@ export default async function SupportPage() {
         title="תמיכה ויצירת קשר"
         description="ערוצי התמיכה יחוברו לאחר אישור פרטי הקשר."
       />
-      <section className="rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-6">
+      <section className="premium-card">
         <h2 className="text-xl font-black">צריכים עזרה?</h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-[#5B5F5B]">
           מסך זה הוא מעטפת דמו בלבד. לא הוגדרו במאגר פרטי קשר מאושרים, ולכן אין כאן טופס ששולח הודעה או קישור חיצוני.
         </p>
-        <div
-          className="mt-5 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-4 text-sm text-[#0B0B0B]"
-          role="status"
-        >
+        <div className="start-empty mt-5 rounded-2xl p-4 text-sm" role="status">
           במקרה דחוף יש להשתמש בערוץ הקשר שסוכם ישירות עם צוות הליווי.
         </div>
       </section>

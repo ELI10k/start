@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Bell, BookOpen, ChevronLeft, ClipboardCheck, LifeBuoy, LogOut, Scale } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
@@ -17,24 +19,66 @@ export default async function ProfilePage() {
         title="פרטים ויעדים"
         description="הפרטים שמוצגים כאן נטענים מהחשבון המאובטח שלך."
       />
-      <section className="start-surface grid gap-4 rounded-[26px] p-5 sm:grid-cols-2 sm:p-6">
-        <Field label="שם מלא" value={auth.fullName} />
-        <Field label="סטטוס חשבון" value={auth.status === "active" ? "פעיל" : auth.status} />
-        <Field label="יעד" value={profile.goal ?? "טרם הוגדר"} />
-        <Field label="משקל יעד" value={profile.target_weight ? `${profile.target_weight} ק״ג` : "טרם הוגדר"} />
-        <Field label="יעד קלוריות" value={profile.calorie_target ? `${profile.calorie_target} קל׳` : "טרם הוגדר"} />
-        <Field label="יעד חלבון" value={profile.protein_target ? `${profile.protein_target} ג׳` : "טרם הוגדר"} />
-      </section>
-      <p className="start-empty mt-5 rounded-2xl p-4 text-sm leading-6 text-[#5B5F5B]">לעדכון פרטים או יעדים, פנו למאמן. כך נשמרת התאמה אחת ומאושרת של התוכנית האישית שלך.</p>
-      <form action="/auth/logout" method="post" className="mt-5 md:hidden">
-        <button className="min-h-12 w-full rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] px-5 text-sm font-bold text-[#DC2626]">
-          התנתקות מהחשבון
+
+      <header className="premium-card flex items-center gap-4">
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#ECFDF3] text-xl font-black text-[#16A34A]">
+          {auth.fullName.slice(0, 1)}
+        </span>
+        <div className="min-w-0">
+          <strong className="block truncate text-lg">{auth.fullName}</strong>
+          <span className={`pill${auth.status === "active" ? " pill--green" : ""}`}>
+            {auth.status === "active" ? "פעיל" : auth.status}
+          </span>
+        </div>
+      </header>
+
+      {/* Six boxes in a grid read as six equal facts. As rows, the label sits on
+          one side and the number on the other, which is what a client scans. */}
+      <h2 className="section-heading section-heading--compact mt-5">היעדים שלי</h2>
+      <div className="settings-group">
+        <Row label="יעד" value={profile.goal ?? "טרם הוגדר"} />
+        <Row label="משקל יעד" value={profile.target_weight ? `${profile.target_weight} ק״ג` : "טרם הוגדר"} />
+        <Row label="יעד קלוריות" value={profile.calorie_target ? `${profile.calorie_target} קל׳` : "טרם הוגדר"} />
+        <Row label="יעד חלבון" value={profile.protein_target ? `${profile.protein_target} ג׳` : "טרם הוגדר"} />
+      </div>
+      <p className="start-empty mt-3 rounded-2xl p-4 text-sm leading-6">
+        לעדכון פרטים או יעדים, פנו למאמן. כך נשמרת התאמה אחת ומאושרת של התוכנית האישית שלך.
+      </p>
+
+      <h2 className="section-heading section-heading--compact mt-6">האפליקציה</h2>
+      <div className="settings-group">
+        <Link href="/notifications">
+          <span className="settings-group__label"><Bell aria-hidden="true" size={18} />התראות והעדפות</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+        <Link href="/progress">
+          <span className="settings-group__label"><Scale aria-hidden="true" size={18} />משקל ומדידות</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+        <Link href="/check-in/history">
+          <span className="settings-group__label"><ClipboardCheck aria-hidden="true" size={18} />היסטוריית צ׳ק־אין</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+        <Link href="/content">
+          <span className="settings-group__label"><BookOpen aria-hidden="true" size={18} />ספריית התוכן</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+        <Link href="/support">
+          <span className="settings-group__label"><LifeBuoy aria-hidden="true" size={18} />תמיכה</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+      </div>
+
+      <h2 className="section-heading section-heading--compact mt-6">חשבון</h2>
+      <form action="/auth/logout" method="post" className="settings-group settings-group--danger">
+        <button>
+          <span className="settings-group__label"><LogOut aria-hidden="true" size={18} />התנתקות מהחשבון</span>
         </button>
       </form>
     </ClientShell>
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl bg-[#F7F8F7] p-4"><p className="text-xs text-[#5B5F5B]">{label}</p><p className="mt-2 font-bold">{value}</p></div>;
+function Row({ label, value }: { label: string; value: string }) {
+  return <div><span className="settings-group__label">{label}</span><span className="settings-group__value">{value}</span></div>;
 }
