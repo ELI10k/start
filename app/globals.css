@@ -237,6 +237,20 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   text-decoration: none;
 }
 
+/* Offline notice: sticky under the header, never over the content. */
+.offline-banner {
+  position: sticky;
+  inset-block-start: calc(3.5rem + env(safe-area-inset-top));
+  z-index: 39;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .5rem 1rem;
+  border-bottom: 1px solid rgba(220, 38, 38, .25);
+  background: var(--red-tint);
+  color: var(--red);
+  font-size: .8125rem; font-weight: 700;
+}
+@media (min-width: 768px) { .offline-banner { inset-block-start: 0; } }
+
 .mobile-app-header {
   position: sticky;
   inset-block-start: 0;

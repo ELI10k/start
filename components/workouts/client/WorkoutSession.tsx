@@ -16,7 +16,7 @@ const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);retur
 const clock=(seconds:number)=>`${Math.floor(seconds/60).toString().padStart(2,"0")}:${(seconds%60).toString().padStart(2,"0")}`;
 
 export default function WorkoutSession({programId,dayId}:{programId:string;dayId:string}){
-  const{getProgram,getExercise,currentClientId,snapshot,loading,persistenceError,startSession,saveSession,cancelSession,completeSession}=useWorkouts();
+  const{getProgram,getExercise,currentClientId,snapshot,loading,persistenceError,pendingSync,startSession,saveSession,cancelSession,completeSession}=useWorkouts();
   const program=getProgram(programId);const day=program?.days.find((item)=>item.id===dayId);
   const assignment=snapshot.assignments.find((item)=>item.clientId===currentClientId&&item.programId===programId&&item.status==="active");
   const anySession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);
@@ -115,6 +115,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     </article>
 
     {(warning||persistenceError)&&<p role="alert" className="mt-4 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">{warning||persistenceError}</p>}
+    {/* Not an error: the sets are recorded, they are just still on the phone. */}
+    {pendingSync&&!warning&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">הסטים נשמרו במכשיר. הסנכרון יושלם כשהחיבור יחזור.</p>}
 
     <button onClick={finish} className="premium-primary-button mt-4 w-full">סיום אימון</button>
     <button onClick={()=>setAbandon(true)} className="mt-2 flex w-full items-center justify-center gap-2 text-sm text-[#DC2626]"><X aria-hidden="true" size={16}/>ביטול האימון</button>

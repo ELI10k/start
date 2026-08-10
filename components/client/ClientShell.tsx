@@ -2,6 +2,7 @@ import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
 import { UserRound } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import OfflineBanner from "@/components/client/OfflineBanner";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
@@ -40,6 +41,7 @@ export default async function ClientShell({ children }: { children: React.ReactN
           </div>
         </div>
       </nav>
+      <OfflineBanner />
       <div className="client-app-content">{children}</div>
       <BottomNav unreadCount={unreadCount} />
     </main>
