@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated test output. Playwright's HTML report ships a bundled app, and
+    // linting it drowns the real findings in thousands of vendor warnings.
+    "reports/**",
   ]),
 ]);
 

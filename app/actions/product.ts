@@ -203,6 +203,19 @@ function revalidateNutrition() {
   revalidatePath("/nutrition");
 }
 
+// The nutrition rules live in the database and are raised as named exceptions.
+// Rethrowing the raw Postgres object put a client on the generic error screen
+// with no idea what was wrong; the rule is unchanged, only how it reads.
+const NUTRITION_RULES: Record<string, string> = {
+  select_one_alternative_per_group: "יש לבחור חלופה אחת בכל קבוצה לפני סימון הארוחה.",
+};
+
+function nutritionRule(error: { message?: string } | null): Error | null {
+  if (!error) return null;
+  const known = error.message ? NUTRITION_RULES[error.message] : undefined;
+  return known ? new Error(known) : null;
+}
+
 export async function setMealCompletion(form: FormData): Promise<void> {
   const supabase = await requireClient();
   const { id, eaten, date } = nutritionMutation(form);
@@ -211,7 +224,7 @@ export async function setMealCompletion(form: FormData): Promise<void> {
     p_date: date,
     p_eaten: eaten,
   });
-  if (error) throw error;
+  if (error) throw nutritionRule(error) ?? error;
   revalidateNutrition();
 }
 

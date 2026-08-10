@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ImagePlus } from "lucide-react";
 
 const slots = [
   { key: "front", label: "קדימה" },
@@ -76,13 +77,18 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(event) => choose(slot.key, event.target.files?.[0])}
               />
-              {file && (
+              {file ? (
                 <Preview
                   key={`${file.name}-${file.lastModified}`}
                   file={file}
                   label={slot.label}
                   onRemove={() => choose(slot.key)}
                 />
+              ) : (
+                <span className="photo-slot__hint">
+                  <ImagePlus aria-hidden="true" size={20} />
+                  בחירת תמונה
+                </span>
               )}
             </label>
           );

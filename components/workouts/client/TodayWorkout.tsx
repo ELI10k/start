@@ -39,9 +39,6 @@ export default function TodayWorkout(){
         <p>{activeSession?"ההתקדמות נשמרת ואפשר להמשיך מאותה נקודה.":`${day.exercises.length} תרגילים לפי הסדר המאושר.`}</p>
         {moved&&<p>הועבר מ־{hebrewDate(`${moved.originalDate}T00:00:00`)} ל־{hebrewDate(`${moved.scheduledDate}T00:00:00`)}</p>}
         {completed&&<p>האימון הושלם ולכן אינו ניתן להעברה</p>}
-        <Link href={sessionHref} className="premium-primary-button">
-          <Play aria-hidden="true" size={17}/>{startLabel}
-        </Link>
       </div>
       <div className="premium-progress" role="img" aria-label={`${adherence.percent} אחוז התמדה`}>
         <div className="premium-progress__meta"><span>התמדה</span><strong>{adherence.percent}%</strong></div>
@@ -97,7 +94,9 @@ export default function TodayWorkout(){
 
     {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
 
-    {/* Start is the screen's single primary action, so it lives within thumb reach. */}
+    {/* Start is the screen's single primary action and appears exactly once, in
+        the FAB, within thumb reach. The hero states what today is; it does not
+        repeat the button. */}
     <Link href={sessionHref} className="fab" aria-label={startLabel}>
       <Play aria-hidden="true" size={18}/>{startLabel}
     </Link>

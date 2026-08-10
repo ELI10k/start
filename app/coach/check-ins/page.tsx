@@ -77,7 +77,7 @@ export default async function CoachCheckInsPage({
             <button className="min-h-11 flex-1 rounded-xl bg-[#16A34A] px-4 font-black text-[#FFFFFF]">
               סינון
             </button>
-            <Link href="/coach/check-ins" className="px-2 py-3 text-xs text-[#5B5F5B]">
+            <Link href="/coach/check-ins" className="chip">
               איפוס
             </Link>
           </div>

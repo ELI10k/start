@@ -53,12 +53,16 @@ function TrendChart({ title, unit, points }: { title: string; unit: string; poin
         </div>
         <span className="pill">{points.length} מדידות</span>
       </div>
-      <svg className="mt-5 h-36 w-full overflow-visible" viewBox="0 0 100 100" role="img" aria-label={title} preserveAspectRatio="none">
-        <line x1="0" x2="100" y1="90" y2="90" stroke="#E5E7E5" strokeWidth="1" />
-        <line x1="0" x2="100" y1="55" y2="55" stroke="#E5E7E5" strokeWidth="1" />
-        <polyline fill="none" points={linePoints(points)} stroke="#16A34A" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <div className="mt-2 flex justify-between text-xs text-[#5B5F5B]"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
+      {/* One measurement is a dot, not a trend. An empty chart frame reads as a
+          broken chart, so say what is missing instead of drawing nothing. */}
+      {points.length > 1 ? <>
+        <svg className="mt-5 h-36 w-full overflow-visible" viewBox="0 0 100 100" role="img" aria-label={title} preserveAspectRatio="none">
+          <line x1="0" x2="100" y1="90" y2="90" stroke="#E5E7E5" strokeWidth="1" />
+          <line x1="0" x2="100" y1="55" y2="55" stroke="#E5E7E5" strokeWidth="1" />
+          <polyline fill="none" points={linePoints(points)} stroke="#16A34A" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div className="mt-2 flex justify-between text-xs text-[#5B5F5B]"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
+      </> : <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשת מדידה נוספת כדי להציג מגמה.</p>}
     </section>
   );
 }

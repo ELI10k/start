@@ -501,15 +501,20 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .daily-progress-card .premium-progress { flex: 0 0 auto; min-width: 9rem; margin-top: 0; }
 }
 
-/* Metric tiles scroll on a phone and grid out on a tablet. */
+/* Metric tiles scroll on a phone and grid out on a tablet. The row bleeds to the
+   screen edge and pads itself back, so the tile peeking off the side reads as
+   "there is more" rather than as a card clipped by the page margin. */
 .dashboard-metrics {
   display: flex;
   gap: .7rem;
   overflow-x: auto;
-  padding-bottom: .35rem;
+  margin-inline: -1rem;
+  padding: 0 1rem .35rem;
   scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
   scrollbar-width: none;
 }
+@media (max-width: 374px) { .dashboard-metrics { margin-inline: -.75rem; padding-inline: .75rem; scroll-padding-inline: .75rem; } }
 .dashboard-metrics::-webkit-scrollbar { display: none; }
 
 .metric-tile {
@@ -536,7 +541,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .metric-tile--down strong { color: var(--red); }
 
 @media (min-width: 768px) {
-  .dashboard-metrics { display: grid; overflow: visible; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dashboard-metrics {
+    display: grid; overflow: visible;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-inline: 0; padding-inline: 0;
+  }
 }
 
 .quick-actions-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
@@ -722,6 +731,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .app-list > [data-unread="true"],
 .app-list > *[data-unread="true"] { background: var(--green-tint); }
 
+/* A square icon-only control. The workout builder referenced this class before it
+   existed, which left reorder and delete as 18px-wide targets. */
+.icon-button {
+  display: grid; flex: 0 0 auto; place-items: center;
+  width: 2.75rem; height: 2.75rem;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+}
+.icon-button:hover:not(:disabled) { border-color: var(--green); color: var(--green-press); }
+.icon-button:disabled { opacity: .35; }
+
 /* Status pills. Green says fine, red says wrong, black says neutral fact. */
 .pill {
   display: inline-flex; align-items: center; gap: .3rem;
@@ -804,15 +824,33 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Photo slots: a file input is unreadable on a phone, so the whole tile is the
    target and the preview replaces it once a file is chosen. */
 .photo-slot {
-  display: grid; gap: .5rem; align-content: start;
+  position: relative;
+  display: grid; gap: .5rem; align-content: start; justify-items: center;
   min-height: 7rem; padding: .75rem;
   border: 1px dashed var(--line-strong); border-radius: var(--radius-md);
   background: var(--surface); font-size: .8rem; font-weight: 700; cursor: pointer;
+  text-align: center;
 }
 .photo-slot:hover { border-color: var(--green); }
 .photo-slot:has(input:focus-visible) { outline: 2px solid var(--green); outline-offset: 2px; }
+.photo-slot:has(img) { border-style: solid; border-color: var(--green); }
 .photo-slot img { width: 100%; height: 6.5rem; border-radius: var(--radius-sm); object-fit: cover; }
-.photo-slot input[type="file"] { width: 100%; font-size: .7rem; }
+/* The native file input renders "Choose File / No file chosen" in English, in an
+   RTL Hebrew app. It stays in the layout - a hidden required control cannot be
+   focused, which silently blocks the submit - but covers the tile invisibly, so
+   the tile itself is the picker and the label below is ours. */
+.photo-slot input[type="file"] {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+}
+.photo-slot__hint {
+  display: grid; place-items: center; gap: .35rem;
+  color: var(--ink-muted); font-size: .72rem; font-weight: 600;
+}
+.photo-slot__hint svg { color: var(--green); }
+/* The remove button has to sit above the invisible input to be clickable. */
+.photo-slot > button { position: relative; z-index: 1; }
 
 /* Active workout — one exercise at a time, logging within thumb reach. */
 /* The session runs outside the app shell - no header, no bottom bar - so it sticks

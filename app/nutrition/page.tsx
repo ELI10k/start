@@ -59,7 +59,13 @@ export default async function NutritionPage() {
               </dl>
             </section>
           ) : null}
-          {menu.meals.map((meal) => (
+          {menu.meals.map((meal) => {
+            // The database refuses to mark a meal eaten until every group has a
+            // chosen alternative. That rule was only discoverable by pressing the
+            // button and landing on the error screen, so the button now states the
+            // condition and waits for it.
+            const missingChoice = !meal.freeCalorieTarget && meal.groups.some((group) => !group.selectedItemId);
+            return (
             <article
               key={meal.id}
               className="start-surface rounded-[24px] p-5 sm:p-6"
@@ -69,6 +75,9 @@ export default async function NutritionPage() {
                   <h2 className="text-xl font-black">{meal.title}</h2>
                   {meal.freeCalorieTarget?<p className="mt-1 text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
                 </div>
+                {missingChoice ? (
+                  <p className="pill">בחרו חלופה בכל קבוצה</p>
+                ) : (
                 <form action={setMealCompletion}>
                   <input type="hidden" name="id" value={meal.id} />
                   <input type="hidden" name="date" value={today} />
@@ -82,11 +91,12 @@ export default async function NutritionPage() {
                     pending="שומרים…"
                     className={
                       meal.completed
-                        ? "min-h-11 rounded-xl border border-[#16A34A]/30 px-4 text-sm font-bold text-[#16A34A] disabled:opacity-50"
-                        : "min-h-11 rounded-xl bg-[#16A34A] px-4 text-sm font-black text-[#FFFFFF] disabled:opacity-50"
+                        ? "premium-secondary-button"
+                        : "premium-primary-button"
                     }
                   />
                 </form>
+                )}
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
@@ -102,7 +112,7 @@ export default async function NutritionPage() {
                   </form>)}</div></fieldset>)}
               </div>}
             </article>
-          ))}
+          );})}
         </div>
       ) : (
         <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
