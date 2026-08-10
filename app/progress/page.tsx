@@ -4,6 +4,7 @@ import PageHeader from "@/components/client/PageHeader";
 import PersistedProgressForm from "@/components/client/PersistedProgressForm";
 import PersistedProgressHistory from "@/components/client/PersistedProgressHistory";
 import ProgressPhotoGallery from "@/components/client/ProgressPhotoGallery";
+import StepsCard from "@/components/client/StepsCard";
 import { getAuthContext, getClientCheckInHistory, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/progress/measurements";
 
@@ -20,6 +21,7 @@ export default async function ProgressPage() {
   return <ClientShell>
     <PageHeader eyebrow="התקדמות" title="משקל ומדידות" description="המדידות נשמרות בחשבון שלך ומוצגות לאורך זמן." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
     <div className="grid gap-4">
+      <StepsCard/>
       <PersistedProgressHistory entries={data.progress}/>
       <ProgressPhotoGallery sessions={photoSessions} error={checkInHistory.photoError}/>
     </div>
