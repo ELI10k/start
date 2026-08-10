@@ -69,6 +69,7 @@ export function createSupabaseWorkoutRepository(){
     load,
     assign:async(input:AssignmentInput)=>rpc("assign_workout_program",{p_program_id:input.programId,p_client_id:input.clientId,p_start_date:input.startDate,p_end_date:input.endDate??null,p_weekly_frequency:input.weeklyFrequency,p_coach_note:input.coachNote??""}),
     setAssignmentStatus:async(id:string,status:AssignmentStatus)=>rpc("set_workout_assignment_status",{p_assignment_id:id,p_status:status}),
+    setAssignmentFrequency:async(id:string,weeklyFrequency:number)=>rpc("set_workout_assignment_frequency",{p_assignment_id:id,p_weekly_frequency:weeklyFrequency}),
     saveProgram:async(program:WorkoutProgram)=>rpc("save_workout_program_tree",{p_program:program}),
     archiveProgram:async(id:string)=>{const{error}=await supabase.from("workout_programs").update({status:"archived"}).eq("id",id);if(error)throw error},
     deleteProgram:async(id:string)=>rpc("delete_workout_program",{p_program_id:id}),

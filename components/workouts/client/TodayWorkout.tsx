@@ -59,8 +59,8 @@ export default function TodayWorkout(){
         <span>{assignment.weeklyFrequency} אימונים בשבוע</span>
       </div>
       <div className="app-list">
-        {schedule.map(({day:item,completed:itemCompleted})=>
-          <div key={item.id}>
+        {schedule.map(({day:item,occurrence,completed:itemCompleted})=>
+          <div key={`${item.id}-${occurrence}`}>
             <span className="app-list__icon">{itemCompleted?<CheckCircle2 aria-hidden="true" size={17}/>:<Circle aria-hidden="true" size={17}/>}</span>
             <span className="app-list__main"><strong>{item.name}</strong><span>{item.exercises.length} תרגילים</span></span>
             <span className={`pill${itemCompleted?" pill--green":""}`}>{itemCompleted?"הושלם":"מתוכנן"}</span>

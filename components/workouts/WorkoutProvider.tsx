@@ -14,6 +14,7 @@ type ContextValue={
   persistenceError:string;
   assign:(input:AssignmentInput)=>Promise<boolean>;
   setAssignmentStatus:(id:string,status:AssignmentStatus)=>Promise<boolean>;
+  setAssignmentFrequency:(id:string,weeklyFrequency:number)=>Promise<boolean>;
   duplicate:(programId:string)=>Promise<string|undefined>;
   archive:(programId:string)=>Promise<boolean>;
   deleteProgram:(programId:string)=>Promise<boolean>;
@@ -51,6 +52,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     snapshot,currentClientId,role,loading:loading||loadedAuthScope!==authScope,persistenceError,
     assign:async(input)=>{if(input.endDate&&input.endDate<input.startDate)return false;if(snapshot.assignments.some((item)=>item.clientId===input.clientId&&item.programId===input.programId&&item.status==="active"))return false;const replaced=snapshot.assignments.find((item)=>item.clientId===input.clientId&&item.status==="active");if(replaced&&!window.confirm("כבר קיימת ללקוח תוכנית פעילה. להחליף אותה ולשמור אותה בהיסטוריה?"))return false;try{await repository.assign(input);await refresh();return true}catch{return fail()}},
     setAssignmentStatus:async(id,status)=>{try{await repository.setAssignmentStatus(id,status);setSnapshot((current)=>updateAssignmentStatus(current,id,status));return true}catch{return fail()}},
+    setAssignmentFrequency:async(id,weeklyFrequency)=>{if(!Number.isInteger(weeklyFrequency)||weeklyFrequency<1||weeklyFrequency>7)return false;try{await repository.setAssignmentFrequency(id,weeklyFrequency);setSnapshot((current)=>({...current,assignments:current.assignments.map((item)=>item.id===id?{...item,weeklyFrequency}:item)}));return true}catch{return fail()}},
     duplicate:async(programId)=>{const source=snapshot.programs.find((program)=>program.id===programId);if(!source)return undefined;const id=`${programId}-copy-${Date.now()}`;const program=duplicateWorkoutProgram(source,id);try{await repository.saveProgram(program);setSnapshot((current)=>({...current,programs:[...current.programs,program]}));return id}catch{fail();return undefined}},
     archive:async(programId)=>{try{await repository.archiveProgram(programId);setSnapshot((current)=>({...current,programs:archiveWorkoutProgram(current.programs,programId)}));return true}catch{return fail()}},
     deleteProgram:async(programId)=>{try{await repository.deleteProgram(programId);setSnapshot((current)=>({...current,programs:current.programs.filter((program)=>program.id!==programId)}));return true}catch{return fail()}},
