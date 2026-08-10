@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
+import BarcodeScanner from "@/components/client/BarcodeScanner";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
 import { selectMealGroupAlternative } from "@/app/actions/product";
@@ -38,6 +39,7 @@ export default async function NutritionPage() {
         title="הארוחות של היום"
         description={menu?.title ?? "התפריט האישי שלך"}
       />
+      <div className="mb-4"><BarcodeScanner date={today}/></div>
       {freeMenu ? <FreeMenu date={today} day={freeMenu} foods={foods}/> : menu ? (
         <div className="space-y-4">
           {menuTotals ? (
