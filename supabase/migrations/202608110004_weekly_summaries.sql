@@ -1,3 +1,5 @@
+begin;
+
 -- One weekly summary per client per week, generated on Saturday evening from
 -- data the client actually produced.
 --
@@ -9,8 +11,6 @@
 -- Rollback: drop function public.upsert_weekly_summary(uuid,date,text,text,jsonb,text[],text[],text[]);
 --           drop function public.mark_weekly_summary_sent(uuid);
 --           drop table public.weekly_summaries;
-
-begin;
 
 create table if not exists public.weekly_summaries (
   id uuid primary key default gen_random_uuid(),

@@ -1,3 +1,5 @@
+begin;
+
 -- Changing how often one client trains should not require re-assigning the
 -- programme. Re-assigning archives the running assignment, which throws away
 -- the adherence history and every scheduled move attached to it, so a coach who
@@ -7,8 +9,6 @@
 -- Additive: one new function, no schema change.
 --
 -- Rollback: drop function public.set_workout_assignment_frequency(uuid,smallint);
-
-begin;
 
 create or replace function public.set_workout_assignment_frequency(p_assignment_id uuid, p_weekly_frequency smallint)
 returns void language plpgsql security definer set search_path=public as $$

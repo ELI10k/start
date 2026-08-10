@@ -1,3 +1,5 @@
+begin;
+
 -- Exercise guidance: the coaching detail that belongs behind a "דגשים לתרגיל"
 -- button rather than on the workout screen itself.
 --
@@ -10,8 +12,6 @@
 --             drop column image_url, drop column how_to,
 --             drop column cues, drop column common_mistakes;
 --           drop function public.save_exercise_guidance(text,text,text,text[],text[]);
-
-begin;
 
 alter table public.workout_exercises
   add column if not exists image_url text,

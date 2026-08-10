@@ -37,9 +37,13 @@ test("nothing outside the bridge imports Capacitor", async () => {
     assert.doesNotMatch(text, /@capacitor/, `${path} should not know it is in a container`);
   }
   const bridge = await source("components/native/NativeBridge.tsx");
-  assert.match(bridge, /Capacitor\.isNativePlatform\(\)/);
-  // And it does nothing at all on the web.
-  assert.match(bridge, /if \(!Capacitor\.isNativePlatform\(\)\) return;/);
+  // Even the bridge imports Capacitor dynamically, and only after the native
+  // check: a static import ships the whole plugin set to every web visitor so it
+  // can no-op there. The container injects window.Capacitor, so the check needs
+  // no import at all.
+  assert.doesNotMatch(bridge, /^import .*@capacitor/m);
+  assert.match(bridge, /capacitor\?\.isNativePlatform\?\.\(\)/);
+  assert.match(bridge, /await Promise\.all\(\[\s*import\("@capacitor\/app"\)/);
 });
 
 test("the bridge satisfies the contracts the web layer already wrote against", async () => {

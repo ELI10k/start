@@ -1,3 +1,5 @@
+begin;
+
 -- Push, up to the point where a credential is needed.
 --
 -- Every in-app notification already carries a recipient, a category and an href.
@@ -18,8 +20,6 @@
 --           drop table public.push_deliveries;
 --           drop table public.push_devices;
 --           alter table public.notification_preferences drop column push;
-
-begin;
 
 alter table public.notification_preferences
   add column if not exists push boolean not null default true;

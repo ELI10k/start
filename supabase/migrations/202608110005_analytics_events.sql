@@ -1,3 +1,5 @@
+begin;
+
 -- A minimal event log: enough to answer "does anyone finish a workout" and "what
 -- broke", and deliberately not enough to reconstruct what a person ate, weighed
 -- or wrote.
@@ -9,8 +11,6 @@
 -- about another, and no path for the app to display an event back to anyone.
 --
 -- Rollback: drop table public.analytics_events;
-
-begin;
 
 create table if not exists public.analytics_events (
   id bigint generated always as identity primary key,

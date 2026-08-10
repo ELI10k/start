@@ -1,3 +1,5 @@
+begin;
+
 -- Steps arrive from Apple HealthKit on iOS and Health Connect on Android, both
 -- of which already merge whatever the user wears - phone, watch, ring - into one
 -- daily figure per source. START stores that figure; it never adds sources
@@ -12,8 +14,6 @@
 --           drop function public.set_daily_step_goal(integer);
 --           drop table public.health_steps;
 --           drop table public.health_preferences;
-
-begin;
 
 create table if not exists public.health_steps (
   client_id uuid not null references public.profiles(id) on delete cascade,
