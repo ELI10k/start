@@ -56,7 +56,7 @@ export default function TodayWorkout(){
     <section aria-labelledby="week-plan">
       <div className="section-heading section-heading--compact">
         <h2 id="week-plan">השבוע</h2>
-        <span>{assignment.weeklyFrequency} אימונים</span>
+        <span>{assignment.weeklyFrequency} אימונים בשבוע</span>
       </div>
       <div className="app-list">
         {schedule.map(({day:item,completed:itemCompleted})=>

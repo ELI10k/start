@@ -72,7 +72,11 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
           <h1 className="mt-1 text-2xl font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h1>
           <p className="mt-1 text-sm text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"פרטי ציוד לא סופקו במקור"}</p>
         </div>
-        {exercise?.video?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">וידאו<ExternalLink aria-hidden="true" size={15}/></a>:null}
+        {/* A missing link never blocks the set - it is stated and the workout
+            carries on. */}
+        {exercise?.video
+          ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">וידאו<ExternalLink aria-hidden="true" size={15}/></a>
+          :<span className="pill shrink-0">אין סרטון</span>}
       </div>
 
       <dl className="dashboard-metrics mt-3">

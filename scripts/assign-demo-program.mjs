@@ -68,7 +68,8 @@ const { data: days } = await supabase
   .order("sort_order");
 
 console.log(`client   ${demo.full_name} <${demo.email}>`);
-console.log(`program  ${program.name} (${(days ?? []).length} day(s))`);
+// Two separate numbers: distinct workouts in the programme, and sessions a week.
+console.log(`program  ${program.name} — ${(days ?? []).length} distinct workout(s), ${program.training_frequency ?? "?"} sessions/week`);
 
 for (const day of days ?? []) {
   const { data: entries } = await supabase

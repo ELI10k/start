@@ -22,8 +22,11 @@ export default function AssignedProgram({programId}:{programId:string}){
     </header>
 
     <dl className="dashboard-metrics" aria-label="פרטי התוכנית">
-      <Info label="רמה" value={program.difficulty}/>
-      <Info label="תדירות" value={assignment?`${assignment.weeklyFrequency} בשבוע`:program.trainingFrequency?`${program.trainingFrequency} בשבוע`:undefined}/>
+      {/* Two different numbers: how many distinct workouts the programme contains,
+          and how many sessions a week it is run at. A programme with one workout
+          is not a programme you train once a week. */}
+      <Info label="אימונים שונים" value={String(program.days.length)}/>
+      <Info label="אימונים בשבוע" value={assignment?`${assignment.weeklyFrequency}`:program.trainingFrequency?`${program.trainingFrequency}`:undefined}/>
       <Info label="התחלה" value={assignment?.startDate}/>
       <Info label="סיום" value={assignment?.endDate}/>
     </dl>

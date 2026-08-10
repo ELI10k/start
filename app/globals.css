@@ -940,6 +940,23 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .collapse > summary:hover { background: var(--surface-raised); }
 .collapse__body { padding: 0 var(--space-4) var(--space-4); }
 
+/* ── Workout builder ───────────────────────────────────────────────────── */
+
+/* A draggable exercise slot. Drag is the mouse path; the reorder buttons beside
+   the handle are what work on a phone, where HTML5 drag never fires. */
+.exercise-slot {
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface-raised); padding: 1rem;
+}
+.exercise-slot[data-dragging] { opacity: .45; border-color: var(--green); }
+.exercise-slot__handle {
+  display: grid; place-items: center;
+  width: 1.75rem; height: 2.75rem;
+  color: var(--ink-faint); cursor: grab;
+}
+.exercise-slot__handle:active { cursor: grabbing; }
+@media (pointer: coarse) { .exercise-slot__handle { display: none; } }
+
 /* ── Content library ───────────────────────────────────────────────────── */
 
 .content-card { display: grid; align-content: start; gap: .6rem; text-decoration: none; }
