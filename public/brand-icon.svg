@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#0B0B0B"/>
+  <text x="512" y="470" fill="#FFFFFF" font-family="Helvetica, Arial, sans-serif" font-size="228"
+        font-weight="700" letter-spacing="38" text-anchor="middle" dominant-baseline="central">START</text>
+  <rect x="332" y="626" width="360" height="30" rx="15" fill="#16A34A"/>
+</svg>
