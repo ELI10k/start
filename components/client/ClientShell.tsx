@@ -5,6 +5,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
+import NativeBridge from "@/components/native/NativeBridge";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
@@ -48,6 +49,8 @@ export default async function ClientShell({ children }: { children: React.ReactN
           notification to the screen the bell would have opened. */}
       <PushRegistration />
       <AnalyticsProvider />
+      {/* Hands the container's capabilities to the app. No-op on the web. */}
+      <NativeBridge />
       <div className="client-app-content">{children}</div>
       <BottomNav unreadCount={unreadCount} />
     </main>

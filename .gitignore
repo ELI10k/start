@@ -47,3 +47,13 @@ next-env.d.ts
 /reports/qa/
 /test-results/
 .env.e2e
+
+# native shells: the projects are committed, their build output is not
+/ios/App/App/public
+/ios/App/Pods
+/ios/App/build
+/android/app/build
+/android/build
+/android/.gradle
+/android/app/src/main/assets/public
+/android/local.properties

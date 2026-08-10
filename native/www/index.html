@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>START</title>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: max(2rem, env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
+        background: #ffffff;
+        color: #0b0b0b;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      strong { display: block; font-size: 1.75rem; font-weight: 900; letter-spacing: .2em; color: #16a34a; }
+      p { margin: 1rem 0 0; max-width: 22rem; line-height: 1.7; color: #5b5f5b; font-size: .9375rem; }
+    </style>
+  </head>
+  <body>
+    <!--
+      This page is only ever seen when the device cannot reach the START server
+      at all. Everything else is served by the deployed app; see
+      capacitor.config.ts for why the shell loads it rather than bundling it.
+    -->
+    <main>
+      <strong>START</strong>
+      <p>אין חיבור לאינטרנט כרגע. ברגע שהחיבור יחזור האפליקציה תיטען מעצמה.</p>
+    </main>
+  </body>
+</html>
