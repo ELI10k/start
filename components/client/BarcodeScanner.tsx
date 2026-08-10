@@ -6,6 +6,8 @@ import BottomSheet from "@/components/client/BottomSheet";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { saveScannedFood, type ScanState } from "@/app/actions/scanned-food";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
+import { track } from "@/lib/analytics/client";
+import { describeError } from "@/lib/analytics/events";
 
 type Found = Readonly<{
   barcode: string;
@@ -56,11 +58,14 @@ export default function BarcodeScanner({ date }: { date: string }) {
     try {
       const response = await fetch(`/api/foods/barcode/${barcode}`);
       const payload = await response.json();
+      // Whether the lookup hit, never which product it was.
+      track("barcode_scanned", { found: Boolean(payload.found), reason: String(payload.reason ?? "ok").slice(0, 32) });
       if (payload.found) setFound(payload.food as Found);
       else setMiss(payload.reason === "lookup_unavailable"
         ? "מאגר המוצרים אינו זמין כרגע. אפשר להוסיף את המזון ידנית."
         : "המוצר לא נמצא. אפשר להוסיף אותו ידנית — הוא יישמר לפעם הבאה.");
-    } catch {
+    } catch (error) {
+      track("error", describeError(error, "barcode-lookup"));
       setMiss("החיפוש נכשל. אפשר להוסיף את המזון ידנית.");
     } finally {
       setLooking(false);
@@ -244,7 +249,7 @@ function ManualForm({
         <label className="block text-sm font-bold">שומן<input name="fat" type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
       </div>
       {state.message && !state.ok && <p role="alert" className="rounded-2xl bg-[#FEF2F2] p-3 text-sm font-bold text-[#DC2626]">{state.message}</p>}
-      <SubmitButton idle="שמירת המזון" pending="שומרים…" className="premium-primary-button w-full" />
+      <SubmitButton idle="שמירת המזון" pending="שומרים…" className="premium-primary-button w-full" event="manual_food_added" eventProperties={{ fromBarcode: Boolean(barcode) }} />
     </form>
   );
 }

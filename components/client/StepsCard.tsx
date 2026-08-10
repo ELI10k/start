@@ -5,6 +5,8 @@ import { formatIsraelDateTime } from "@/lib/date-time";
 import { calendarDay, SOURCE_LABELS, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
 import { describeAvailability, resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
+import { track } from "@/lib/analytics/client";
+import { describeError } from "@/lib/analytics/events";
 import type { HealthPermissionState } from "@/lib/health/types";
 
 // Steps are read from the phone's health store and stored per day, so the card
@@ -55,7 +57,10 @@ export default function StepsCard() {
       const changed = stepsToPersist(incoming, snapshot.entries, today);
       if (changed.length) await repository.recordSteps(changed);
       await load();
-    } catch {
+      // How many days moved and from which store - never the step counts.
+      track("health_synced", { source: provider.source, daysWritten: changed.length, daysRead: incoming.length });
+    } catch (error) {
+      track("error", describeError(error, "health-sync"));
       setError("הסנכרון נכשל. אפשר לנסות שוב.");
     } finally {
       setSyncing(false);

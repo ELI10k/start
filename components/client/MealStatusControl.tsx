@@ -90,7 +90,8 @@ function Action({
       <input type="hidden" name="id" value={mealId} />
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="status" value={status} />
-      <SubmitButton idle={label} pending="שומרים…" className={className} icon={icon} />
+      {/* The status only - never which meal or what was in it. */}
+      <SubmitButton idle={label} pending="שומרים…" className={className} icon={icon} event="meal_marked" eventProperties={{ status }} />
     </form>
   );
 }

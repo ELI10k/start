@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { BellRing } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { pushReason, resolvePushProvider, safeDeepLink } from "@/lib/push/providers";
+import { track } from "@/lib/analytics/client";
 import type { PushPermissionState, PushRegistration as Registration } from "@/lib/push/types";
 
 // Registers the device, keeps the token current, and routes a tapped
@@ -45,7 +46,13 @@ export default function PushRegistration({ showPrompt = false }: { showPrompt?: 
 
   // Foreground, background or closed, the tap lands on the same screen the bell
   // would have opened.
-  useEffect(() => provider.onNotificationOpened((href) => router.push(safeDeepLink(href))), [provider, router]);
+  useEffect(() => provider.onNotificationOpened((href) => {
+    const target = safeDeepLink(href);
+    // The destination is an in-app path from a closed list of screens, so it is
+    // a category rather than anything about the client.
+    track("notification_opened", { target });
+    router.push(target);
+  }), [provider, router]);
 
   const ask = async () => {
     if (busy) return;

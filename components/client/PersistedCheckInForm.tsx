@@ -101,7 +101,7 @@ export default function PersistedCheckInForm({ photosRequired = false }: { photo
       {/* Submit stays under the thumb: the form is six steps long and the button
           used to be wherever the last one happened to end. */}
       <div className="session-actions session-actions--stack mt-5">
-        <SubmitButton idle="שליחת צ׳ק־אין" pending="שולחים…" />
+        <SubmitButton idle="שליחת צ׳ק־אין" pending="שולחים…" event="check_in_submitted" />
       </div>
     </form>
   );
