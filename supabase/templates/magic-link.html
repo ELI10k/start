@@ -1,14 +1,56 @@
 <!doctype html>
 <html lang="he" dir="rtl">
-  <body style="margin:0;background:#090909;color:#ffffff;font-family:Arial,sans-serif;direction:rtl">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px">
-      <table role="presentation" width="100%" style="max-width:560px;background:#151515;border:1px solid #3a321b;border-radius:24px"><tr><td style="padding:36px">
-        <p style="margin:0;color:#d4af37;font-weight:800;letter-spacing:3px">START</p>
-        <h1 style="margin:18px 0 12px;font-size:28px">קישור הכניסה שלך</h1>
-        <p style="margin:0 0 24px;color:#c7c7c7;line-height:1.7">הקישור נפתח תחילה במסך מאובטח. רק לחיצה יזומה על כפתור האישור במסך זה תאמת את הקישור ותכניס אותך לחשבון.</p>
-        <p style="margin:0"><a href="{{ .SiteURL }}/auth/confirm-link?token_hash={{ .TokenHash }}&amp;type=magiclink" style="display:inline-block;background:#d4af37;color:#090909;padding:15px 22px;border-radius:14px;text-decoration:none;font-weight:800">פתיחת קישור הכניסה</a></p>
-        <p style="margin:24px 0 0;color:#858585;font-size:12px;line-height:1.6">הקישור חד־פעמי. פתיחת המייל או סריקת הקישור אינה מאמתת אותו.</p>
-      </td></tr></table>
-    </td></tr></table>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <!-- Declaring light-only is what stops iOS Mail and Outlook from re-colouring
+         the message. Gmail's app ignores it and inverts anyway, which is handled
+         below by never using pure #FFFFFF for a large surface. -->
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>קישור הכניסה שלך</title>
+    <style>
+      :root { color-scheme: light; supported-color-schemes: light; }
+      /* Gmail and Outlook.com strip <style>, so nothing here may be load-bearing -
+         every colour is also inline. This block only re-asserts the palette for
+         the clients that do apply it under a forced dark theme. */
+      @media (prefers-color-scheme: dark) {
+        .start-body { background: #F1F3F1 !important; }
+        .start-card { background: #FFFFFE !important; border-color: #E5E7E5 !important; }
+        .start-ink { color: #0B0B0B !important; }
+        .start-muted { color: #5B5F5B !important; }
+        .start-brand { color: #16A34A !important; }
+        .start-cta { background: #16A34A !important; }
+        .start-cta a { color: #FFFFFE !important; }
+      }
+    </style>
+  </head>
+  <!-- #F1F3F1 rather than #FFFFFF: Gmail's forced inversion targets pure white
+       most aggressively, and a near-white page survives it intact. -->
+  <body class="start-body" bgcolor="#F1F3F1" style="margin:0;padding:0;background:#F1F3F1;color:#0B0B0B;font-family:Arial,Helvetica,sans-serif;direction:rtl">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#F1F3F1" style="background:#F1F3F1">
+      <tr>
+        <td align="center" style="padding:32px 16px">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" class="start-card" bgcolor="#FFFFFE" style="max-width:560px;background:#FFFFFE;border:1px solid #E5E7E5;border-radius:20px">
+            <tr>
+              <td style="padding:36px">
+                <p class="start-brand" style="margin:0;color:#16A34A;font-weight:bold;letter-spacing:3px;font-size:13px">START</p>
+                <h1 class="start-ink" style="margin:18px 0 12px;font-size:26px;color:#0B0B0B;font-weight:bold">קישור הכניסה שלך</h1>
+                <p class="start-muted" style="margin:0 0 24px;color:#5B5F5B;line-height:1.7;font-size:15px">הקישור נפתח תחילה במסך מאובטח. רק לחיצה יזומה על כפתור האישור במסך זה תאמת את הקישור ותכניס אותך לחשבון.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td class="start-cta" bgcolor="#16A34A" style="background:#16A34A;border-radius:12px">
+                      <a href="{{ .SiteURL }}/auth/confirm-link?token_hash={{ .TokenHash }}&amp;type=magiclink" style="display:inline-block;padding:15px 24px;color:#FFFFFE;text-decoration:none;font-weight:bold;font-size:15px">פתיחת קישור הכניסה</a>
+                    </td>
+                  </tr>
+                </table>
+                <p class="start-muted" style="margin:24px 0 0;color:#5B5F5B;font-size:12px;line-height:1.6">הקישור חד־פעמי. פתיחת המייל או סריקת הקישור אינה מאמתת אותו.</p>
+                <p class="start-muted" style="margin:16px 0 0;color:#5B5F5B;font-size:12px;line-height:1.6">אם לא ביקשת להתחבר, אפשר להתעלם מההודעה.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
