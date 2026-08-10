@@ -3,6 +3,7 @@ import Link from "next/link";
 import { UserRound } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import OfflineBanner from "@/components/client/OfflineBanner";
+import PushRegistration from "@/components/client/PushRegistration";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
@@ -42,6 +43,9 @@ export default async function ClientShell({ children }: { children: React.ReactN
         </div>
       </nav>
       <OfflineBanner />
+      {/* Draws nothing. It keeps the device token current and routes a tapped
+          notification to the screen the bell would have opened. */}
+      <PushRegistration />
       <div className="client-app-content">{children}</div>
       <BottomNav unreadCount={unreadCount} />
     </main>

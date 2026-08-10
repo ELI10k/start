@@ -4,6 +4,7 @@ import { markAllNotificationsRead, markNotificationRead, saveNotificationPrefere
 import type { InAppNotification, NotificationPreferences } from "@/lib/notifications/repository";
 import { StateBlock } from "@/components/client/AppPatterns";
 import SubmitButton from "@/components/forms/SubmitButton";
+import PushRegistration from "@/components/client/PushRegistration";
 
 const labels = [["nutrition", "תזונה"], ["workouts", "אימונים"], ["checkIns", "צ׳ק-אין והתקדמות"], ["content", "תוכן"], ["reminders", "תזכורות"]] as const;
 
@@ -47,7 +48,10 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
         <span className="flex items-center gap-2"><Settings2 aria-hidden="true" size={17} />העדפות התראות</span>
       </summary>
       <div className="collapse__body">
-        <p className="text-sm text-[#5B5F5B]">השליטה היא בהתראות בתוך האפליקציה בלבד.</p>
+        <p className="text-sm text-[#5B5F5B]">ההעדפות חלות גם על ההתראות בפעמון וגם על התראות במכשיר.</p>
+        {/* Asking here rather than on first launch: the client is already
+            looking at their notification settings, so the request has a reason. */}
+        <div className="mt-3"><PushRegistration showPrompt /></div>
         <form action={saveNotificationPreferences} className="mt-4 grid gap-3">
           <div className="settings-group">
             {labels.map(([key, label]) =>
