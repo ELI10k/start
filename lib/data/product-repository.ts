@@ -1,5 +1,4 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/supabase/database.types";
 import {
@@ -720,7 +719,12 @@ export async function listCoachMenus(coachId: string) {
   });
 }
 
-async function readDatabaseFoods() {
+// Not cached. The catalogue reads the same rows for every authenticated user, so
+// caching it looks free - but the read needs the caller's session to satisfy
+// `for select to authenticated`, and a Supabase server client reads cookies(),
+// which Next forbids inside unstable_cache. Measured at ~345ms for 389 rows, it
+// was never the slow leg here; correctness is worth more than the round trip.
+export async function listDatabaseFoods() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("foods")
@@ -729,17 +733,6 @@ async function readDatabaseFoods() {
   if (error) throw error;
   return data ?? [];
 }
-
-// The food catalogue is the same rows for every authenticated user - its policy
-// is `for select to authenticated using (true)` - and it only changes when an
-// import runs. Caching it per request removes a round trip from every screen
-// that needs the picker; the tag lets an import drop it immediately.
-export const FOOD_CATALOGUE_TAG = "food-catalogue";
-
-export const listDatabaseFoods = unstable_cache(readDatabaseFoods, ["database-foods"], {
-  tags: [FOOD_CATALOGUE_TAG],
-  revalidate: 300,
-});
 
 export async function listCoachFoodUsage(coachId:string){
   const supabase=await createSupabaseServerClient();

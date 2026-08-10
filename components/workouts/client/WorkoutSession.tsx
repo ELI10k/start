@@ -85,14 +85,19 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
 
       <PreviousPerformance previous={previous} bestWeight={bestWeight} recent={performance.sessions.slice(0,3)}/>
 
-      <section className="mt-4" aria-label="רישום סטים">
-        <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
-          <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
-        </div>
-        {result.sets.map((set,index)=>
-          <SetEditor key={set.id} set={set} index={index} target={current.setPrescriptions?.[index]?.repetitions??current.reps} onUpdate={(patch)=>updateSet(set,patch)}/>
-        )}
-      </section>
+      {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
+          instance. Rendering an empty table header for those left the client with
+          a column heading and nothing to fill in. */}
+      {result.sets.length?
+        <section className="mt-4" aria-label="רישום סטים">
+          <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
+            <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
+          </div>
+          {result.sets.map((set,index)=>
+            <SetEditor key={set.id} set={set} index={index} target={current.setPrescriptions?.[index]?.repetitions??current.reps} onUpdate={(patch)=>updateSet(set,patch)}/>
+          )}
+        </section>
+        :<p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-4 text-center text-sm text-[#5B5F5B]">לא הוגדרו סטים לתרגיל הזה במקור. אפשר לסמן אותו כהושלם ולהמשיך.</p>}
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="premium-secondary-button">{result.skipped?"החזרת התרגיל":"דילוג על התרגיל"}</button>

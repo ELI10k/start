@@ -61,11 +61,22 @@ test.describe("client flows", () => {
     // client component hydrates, and a click that lands first is swallowed - so
     // press until the session actually opens.
     const begin = page.getByRole("button", { name: "התחלת אימון" });
-    const weight = page.getByRole("spinbutton", { name: /משקל בסט 1/ });
+    const next = page.getByRole("button", { name: "הבא" });
     await expect(async () => {
       if (await begin.isVisible().catch(() => false)) await begin.click();
-      await expect(weight).toBeVisible({ timeout: 2_000 });
+      await expect(next).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] });
+
+    // A programme can open on a row with no prescribed sets - the source
+    // workbooks start several days with a dynamic warm-up. Step forward until
+    // there is something to log.
+    const weight = page.getByRole("spinbutton", { name: /משקל בסט 1/ });
+    await expect(async () => {
+      if (!(await weight.isVisible().catch(() => false))) {
+        await next.click();
+        throw new Error("no sets on this exercise yet");
+      }
+    }).toPass({ timeout: 60_000, intervals: [500, 1_000] });
     await weight.fill("40");
     await page.getByRole("spinbutton", { name: /חזרות בסט 1/ }).fill("10");
 
