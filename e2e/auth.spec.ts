@@ -53,6 +53,57 @@ test.describe("auth and permissions", () => {
     await signOut(page);
   });
 
+  test("a reload keeps the client signed in", async ({ page }) => {
+    await signIn(page, requireIdentity("client"));
+    await page.reload();
+    await expect(page).not.toHaveURL(/\/login/);
+    await page.goto("/workouts");
+    await page.reload();
+    await expect(page).not.toHaveURL(/\/login/);
+    await signOut(page);
+  });
+
+  test("the auth cookies outlive the browser window", async ({ page, context, browser }) => {
+    await signIn(page, requireIdentity("client"));
+    const state = await context.storageState();
+    const authCookies = state.cookies.filter((cookie) => cookie.name.startsWith("sb-"));
+    expect(authCookies.length).toBeGreaterThan(0);
+    // A session cookie has expires === -1 and would be gone the moment the
+    // browser closes - which is exactly the "I have to ask for a magic link
+    // every time" complaint. Each auth cookie must carry a real expiry.
+    for (const cookie of authCookies) {
+      expect(cookie.expires, `${cookie.name} is a session cookie`).toBeGreaterThan(Date.now() / 1000);
+    }
+
+    // A brand-new context is the browser having been quit and reopened.
+    const reopened = await browser.newContext({ storageState: state });
+    const restored = await reopened.newPage();
+    await restored.goto("/");
+    await expect(restored).not.toHaveURL(/\/login/);
+    await reopened.close();
+    await signOut(page);
+  });
+
+  test("a signed-in visitor is not asked for a magic link again", async ({ page }) => {
+    await signIn(page, requireIdentity("client"));
+    // Going back to the login screen with a valid session lands in the app
+    // rather than showing the form.
+    await page.goto("/login");
+    await expect(page).not.toHaveURL(/\/login/);
+    await signOut(page);
+  });
+
+  test("a coach session survives a reload and a second tab", async ({ page, context }) => {
+    await signIn(page, requireIdentity("coach"));
+    await page.reload();
+    await expect(page).toHaveURL(/\/coach/);
+    const second = await context.newPage();
+    await second.goto("/coach/clients");
+    await expect(second).not.toHaveURL(/\/login/);
+    await second.close();
+    await signOut(page);
+  });
+
   test("logging out ends the session and protects the routes again", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
     await signOutThroughApp(page, requireIdentity("client"));
