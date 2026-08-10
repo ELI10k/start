@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Copy, GripVertical, Plus, Repeat, Save, Search,
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
+import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import type { WorkoutDay, WorkoutExercise, WorkoutProgram, WorkoutSetPrescription } from "@/lib/workouts/types";
 
 const uid=(prefix:string)=>`${prefix}-${crypto.randomUUID()}`;
@@ -176,6 +177,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
                 <span className="exercise-slot__handle" aria-hidden="true"><GripVertical size={16}/></span>
                 <strong className="min-w-0 truncate">{exercise?.name??"תרגיל"}</strong>
                 <span className="text-xs text-[#5B5F5B]">{exercise?.primaryMuscleGroup??exercise?.category??""}</span>
+                <ExerciseGuidanceButton exercise={exercise} variant="link"/>
                 <button aria-label="הזזת תרגיל למעלה" className="icon-button mr-auto" disabled={index===0} onClick={()=>moveExercise(day.id,index,-1)}><ChevronUp aria-hidden="true" size={16}/></button>
                 <button aria-label="הזזת תרגיל למטה" className="icon-button" disabled={index===day.exercises.length-1} onClick={()=>moveExercise(day.id,index,1)}><ChevronDown aria-hidden="true" size={16}/></button>
                 <button aria-label={`החלפת ${exercise?.name??"תרגיל"}`} className="icon-button" onClick={()=>setReplacing(isReplacing?null:{dayId:day.id,exerciseId:entry.id})}><Repeat aria-hidden="true" size={16}/></button>

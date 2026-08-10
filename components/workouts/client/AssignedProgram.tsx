@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ExternalLink, Play } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
+import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import { exercisePerformance } from "@/lib/workouts/progress";
 
 export default function AssignedProgram({programId}:{programId:string}){
@@ -61,7 +62,10 @@ export default function AssignedProgram({programId}:{programId:string}){
                 <h3 className="mt-1 text-lg font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3>
                 <p className="mt-1 text-xs text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"מטא־דאטה לא סופק בקובץ המקור"}</p>
               </div>
-              {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
+                <ExerciseGuidanceButton exercise={exercise} variant="link"/>
+              </div>
             </div>
             <dl className="compact-data-list mt-3">
               <div><span>סטים</span><strong>{entry.sets||"—"}</strong></div>

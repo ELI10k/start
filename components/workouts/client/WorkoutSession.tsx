@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
+import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
@@ -74,9 +75,12 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         </div>
         {/* A missing link never blocks the set - it is stated and the workout
             carries on. */}
-        {exercise?.video
-          ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">וידאו<ExternalLink aria-hidden="true" size={15}/></a>
-          :<span className="pill shrink-0">אין סרטון</span>}
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {exercise?.video
+            ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">וידאו<ExternalLink aria-hidden="true" size={15}/></a>
+            :<span className="pill shrink-0">אין סרטון</span>}
+          <ExerciseGuidanceButton exercise={exercise}/>
+        </div>
       </div>
 
       <dl className="dashboard-metrics mt-3">

@@ -1,7 +1,7 @@
 "use client";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import type { ActiveExerciseResult, ActiveWorkoutSession, AssignmentStatus, ClientWorkoutAssignment, CoachWorkoutNote, CompletedWorkout, Exercise, ExerciseSetResult, WorkoutClient, WorkoutNotification, WorkoutPreferences, WorkoutProgram, WorkoutRepositorySnapshot, WorkoutScheduleChange } from "./types";
+import type { ActiveExerciseResult, ActiveWorkoutSession, AssignmentStatus, ClientWorkoutAssignment, CoachWorkoutNote, CompletedWorkout, Exercise, ExerciseGuidance, ExerciseSetResult, WorkoutClient, WorkoutNotification, WorkoutPreferences, WorkoutProgram, WorkoutRepositorySnapshot, WorkoutScheduleChange } from "./types";
 
 type Row = Record<string, unknown>;
 export type WorkoutLoadResult = Readonly<{ snapshot:WorkoutRepositorySnapshot; currentUserId:string; role:"coach"|"client" }>;
@@ -14,7 +14,7 @@ const numberValue=(value:unknown)=>value===null||value===undefined?undefined:Num
 const stringArray=(value:unknown)=>Array.isArray(value)?value.filter((item):item is string=>typeof item==="string"):[];
 const rows=(value:unknown)=>Array.isArray(value)?value as Row[]:[];
 
-function mapExercise(row:Row):Exercise{return{id:text(row.id),name:text(row.name),normalizedName:text(row.normalized_name),aliases:stringArray(row.aliases),category:optionalText(row.category),primaryMuscleGroup:optionalText(row.primary_muscle_group),secondaryMuscleGroups:stringArray(row.secondary_muscle_groups),equipment:optionalText(row.equipment),difficulty:optionalText(row.difficulty),video:row.video&&typeof row.video==="object"?row.video as Exercise["video"]:undefined,executionNotes:optionalText(row.execution_notes),sourceWorkbooks:stringArray(row.source_workbooks),sourceReferences:Array.isArray(row.source_references)?row.source_references as Exercise["sourceReferences"]:[],status:row.status==="archived"?"archived":"active"}}
+function mapExercise(row:Row):Exercise{return{id:text(row.id),name:text(row.name),normalizedName:text(row.normalized_name),aliases:stringArray(row.aliases),category:optionalText(row.category),primaryMuscleGroup:optionalText(row.primary_muscle_group),secondaryMuscleGroups:stringArray(row.secondary_muscle_groups),equipment:optionalText(row.equipment),difficulty:optionalText(row.difficulty),video:row.video&&typeof row.video==="object"?row.video as Exercise["video"]:undefined,executionNotes:optionalText(row.execution_notes),imageUrl:optionalText(row.image_url),howTo:optionalText(row.how_to),cues:stringArray(row.cues),commonMistakes:stringArray(row.common_mistakes),sourceWorkbooks:stringArray(row.source_workbooks),sourceReferences:Array.isArray(row.source_references)?row.source_references as Exercise["sourceReferences"]:[],status:row.status==="archived"?"archived":"active"}}
 function mapSet(row:Row):ExerciseSetResult{return{id:text(row.id),prescriptionId:optionalText(row.prescription_id),order:Number(row.sort_order),weightKg:numberValue(row.weight_kg),repetitions:numberValue(row.repetitions),notes:optionalText(row.notes),completed:Boolean(row.completed),completedAt:optionalText(row.completed_at)}}
 
 export function createSupabaseWorkoutRepository(){
@@ -75,6 +75,7 @@ export function createSupabaseWorkoutRepository(){
     saveActiveSession:async(session:ActiveWorkoutSession)=>rpc("save_active_workout",{p_session:session}),
     cancelActiveSession:async()=>rpc("cancel_active_workout",{}),
     completeSession:async(workout:CompletedWorkout)=>rpc("complete_workout",{p_workout:workout}),
+    saveExerciseGuidance:async(exerciseId:string,guidance:ExerciseGuidance)=>rpc("save_exercise_guidance",{p_exercise_id:exerciseId,p_image_url:guidance.imageUrl??"",p_how_to:guidance.howTo??"",p_cues:[...guidance.cues],p_common_mistakes:[...guidance.commonMistakes]}),
     saveCoachNote:async(note:CoachWorkoutNote)=>rpc("save_workout_coach_note",{p_id:note.id,p_client_id:note.clientId,p_exercise_id:note.exerciseId??"",p_session_id:note.workoutId??"",p_body:note.body}),
     savePreferences:async(preferences:WorkoutPreferences)=>{const{error}=await supabase.from("workout_preferences").upsert({client_id:preferences.clientId,training_types:preferences.trainingTypes,equipment:preferences.equipment,training_location:preferences.trainingLocation??null,preferred_days:preferences.preferredDays},{onConflict:"client_id"});if(error)throw error},
     moveScheduledWorkout:async(assignmentId:string,dayId:string,originalDate:string,newDate:string,confirmConflict:boolean)=>{const{data,error}=await supabase.rpc("move_scheduled_workout",{p_assignment_id:assignmentId,p_day_id:dayId,p_original_date:originalDate,p_new_date:newDate,p_confirm_conflict:confirmConflict});if(error)throw error;return data as {ok:boolean;conflict?:boolean}},

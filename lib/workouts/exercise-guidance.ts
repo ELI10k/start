@@ -1,0 +1,101 @@
+import type { Exercise, ExerciseGuidance } from "./types";
+
+// What the "דגשים לתרגיל" panel renders, section by section. Every section is
+// either present with real content or absent - there is no filler. The panel is
+// allowed to say "לא סופק מידע"; it is never allowed to make something up.
+export type GuidanceSection = Readonly<{ key: GuidanceSectionKey; title: string; kind: "text" | "list"; text?: string; items?: readonly string[] }>;
+export type GuidanceSectionKey = "how-to" | "cues" | "mistakes" | "muscles" | "equipment";
+export type ExerciseGuidanceView = Readonly<{
+  exerciseId: string;
+  name: string;
+  imageUrl?: string;
+  sections: readonly GuidanceSection[];
+  missing: readonly GuidanceSectionKey[];
+  hasAnyContent: boolean;
+  videoUrl?: string;
+}>;
+
+const MAX_POINTS = 6;
+const MAX_HOW_TO = 2000;
+const MAX_IMAGE_URL = 500;
+
+const clean = (value?: string) => {
+  const trimmed = (value ?? "").trim();
+  return trimmed ? trimmed : undefined;
+};
+
+const cleanList = (values: readonly string[] | undefined) =>
+  [...new Set((values ?? []).map((value) => value.trim()).filter(Boolean))].slice(0, MAX_POINTS);
+
+// An image is only rendered when it is an https URL. A http or data URL from a
+// stale import would either be blocked by the browser or be unverifiable, and a
+// broken image reads worse than an honest placeholder.
+export const isRenderableImageUrl = (value?: string) => {
+  const url = clean(value);
+  if (!url || url.length > MAX_IMAGE_URL) return false;
+  try {
+    return new URL(url).protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+export function normalizeGuidance(input: Partial<ExerciseGuidance>): ExerciseGuidance {
+  const imageUrl = clean(input.imageUrl);
+  return {
+    imageUrl: isRenderableImageUrl(imageUrl) ? imageUrl : undefined,
+    howTo: clean(input.howTo)?.slice(0, MAX_HOW_TO),
+    cues: cleanList(input.cues),
+    commonMistakes: cleanList(input.commonMistakes),
+  };
+}
+
+export type GuidanceValidation = Readonly<{ valid: boolean; message?: string; guidance: ExerciseGuidance }>;
+
+export function validateGuidance(input: Partial<ExerciseGuidance>): GuidanceValidation {
+  const guidance = normalizeGuidance(input);
+  const rawImage = clean(input.imageUrl);
+  if (rawImage && !guidance.imageUrl) return { valid: false, message: "כתובת התמונה חייבת להתחיל ב-https ולהיות קצרה מ-500 תווים.", guidance };
+  if ((input.cues ?? []).filter((value) => value.trim()).length > MAX_POINTS) return { valid: false, message: `עד ${MAX_POINTS} דגשים.`, guidance };
+  if ((input.commonMistakes ?? []).filter((value) => value.trim()).length > MAX_POINTS) return { valid: false, message: `עד ${MAX_POINTS} טעויות נפוצות.`, guidance };
+  if ((clean(input.howTo)?.length ?? 0) > MAX_HOW_TO) return { valid: false, message: "הסבר הביצוע ארוך מדי.", guidance };
+  return { valid: true, guidance };
+}
+
+// The catalogue import already carries execution notes copied verbatim from the
+// source workbooks. Those are real coach words, so they stand in for "how to
+// perform" until the coach writes a dedicated explanation.
+export function buildGuidanceView(exercise: Exercise): ExerciseGuidanceView {
+  const guidance = normalizeGuidance(exercise);
+  const howTo = guidance.howTo ?? clean(exercise.executionNotes);
+  const muscles = [exercise.primaryMuscleGroup, ...exercise.secondaryMuscleGroups].map((value) => clean(value)).filter((value): value is string => Boolean(value));
+  const equipment = clean(exercise.equipment);
+
+  const sections: GuidanceSection[] = [];
+  const missing: GuidanceSectionKey[] = [];
+
+  if (howTo) sections.push({ key: "how-to", title: "איך מבצעים", kind: "text", text: howTo });
+  else missing.push("how-to");
+
+  if (guidance.cues.length) sections.push({ key: "cues", title: "דגשים חשובים", kind: "list", items: guidance.cues });
+  else missing.push("cues");
+
+  if (guidance.commonMistakes.length) sections.push({ key: "mistakes", title: "טעויות נפוצות", kind: "list", items: guidance.commonMistakes });
+  else missing.push("mistakes");
+
+  if (muscles.length) sections.push({ key: "muscles", title: "שרירים עובדים", kind: "list", items: [...new Set(muscles)] });
+  else missing.push("muscles");
+
+  if (equipment) sections.push({ key: "equipment", title: "ציוד", kind: "text", text: equipment });
+  else missing.push("equipment");
+
+  return {
+    exerciseId: exercise.id,
+    name: exercise.name,
+    imageUrl: guidance.imageUrl,
+    sections,
+    missing,
+    hasAnyContent: sections.length > 0,
+    videoUrl: exercise.video?.url,
+  };
+}

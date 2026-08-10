@@ -1,7 +1,10 @@
 export type ExerciseVideo = Readonly<{ url: string; provider: "youtube"; title?: string }>;
 export type ExerciseStatus = "active" | "archived";
 export type ExerciseSourceReference = Readonly<{workbook:string;sheet:string;cell:string;name:string}>;
-export type Exercise = Readonly<{ id: string; name: string; normalizedName: string; aliases:readonly string[]; category?: string; primaryMuscleGroup?: string; secondaryMuscleGroups: readonly string[]; equipment?: string; difficulty?: string; video?: ExerciseVideo; executionNotes?: string; sourceWorkbooks: readonly string[]; sourceReferences:readonly ExerciseSourceReference[]; status: ExerciseStatus }>;
+// Guidance is coach-authored and always optional. Nothing is generated: an
+// exercise with no guidance renders as "not supplied", never as invented advice.
+export type ExerciseGuidance = Readonly<{ imageUrl?: string; howTo?: string; cues: readonly string[]; commonMistakes: readonly string[] }>;
+export type Exercise = Readonly<{ id: string; name: string; normalizedName: string; aliases:readonly string[]; category?: string; primaryMuscleGroup?: string; secondaryMuscleGroups: readonly string[]; equipment?: string; difficulty?: string; video?: ExerciseVideo; executionNotes?: string; imageUrl?: string; howTo?: string; cues: readonly string[]; commonMistakes: readonly string[]; sourceWorkbooks: readonly string[]; sourceReferences:readonly ExerciseSourceReference[]; status: ExerciseStatus }>;
 export type WorkoutSetPrescription = Readonly<{ id: string; order: number; repetitions?: string }>;
 export type WorkoutExercise = Readonly<{ id: string; exerciseId: string; order: number; sets?: string; reps?: string; rest?: string; notes?: string; sourceRow?:number; setPrescriptions?: readonly WorkoutSetPrescription[] }>;
 export type WorkoutDay = Readonly<{ id: string; name: string; order: number; sourceSheet?:string; exercises: readonly WorkoutExercise[] }>;
