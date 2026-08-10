@@ -79,6 +79,12 @@ export default async function CoachClientPage({ params, searchParams }: { params
             <div><span>פחמימות / שומן</span><strong>{number(data.nutrition.totals.carbs)} / {number(data.nutrition.totals.fat)} ג׳</strong></div>
           </dl>
           <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.completedItems} מתוך {data.nutrition.plannedItems} פריטים סומנו היום.</p>
+          {data.nutrition.skippedMeals.length > 0 && (
+            <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-[#5B5F5B]">סומנו כלא נאכלו:</span>
+              {data.nutrition.skippedMeals.map((title) => <span key={title} className="pill pill--red">{title}</span>)}
+            </p>
+          )}
         </> : <Empty text="ללקוח עדיין לא שויך תפריט פעיל."/>}
       </Section>
 

@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/supabase/database.types";
 import {
@@ -38,6 +39,9 @@ export type PersistedMeal = Readonly<{
   items: readonly PersistedMealItem[];
   groups: readonly Readonly<{id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string}>[];
   completed: boolean;
+  // Unmarked is null; the two marks are explicit.
+  status: "eaten" | "not_eaten" | null;
+  skipped: boolean;
 }>;
 
 export type PersistedMenu = Readonly<{
@@ -109,6 +113,65 @@ export async function listCoachClients(coachId: string) {
     clientProfile:
       (details ?? []).find((detail) => detail.user_id === profile.id) ?? null,
   }));
+}
+
+// What the menu editor needs from a client, and nothing else: a name to show in
+// the picker, a weight to derive macros from, and the calorie target to prefill.
+// It used to call listCoachDashboardClients, which additionally scans every
+// check-in and every device session the coach's clients have ever produced -
+// three unbounded queries for two fields. Under load those were what pushed the
+// route past the database statement timeout.
+export type CoachMenuClient = Readonly<{
+  id: string;
+  full_name: string;
+  weight: number | null;
+  calorieTarget: number | null;
+}>;
+
+export async function listCoachMenuClients(coachId: string): Promise<readonly CoachMenuClient[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data: relationships, error } = await supabase
+    .from("coach_client_relationships")
+    .select("client_id")
+    .eq("coach_id", coachId)
+    .eq("status", "active");
+  if (error) throw error;
+  const ids = (relationships ?? []).map((row) => row.client_id);
+  if (!ids.length) return [];
+
+  const [
+    { data: profiles, error: profileError },
+    { data: details, error: detailError },
+    { data: weights, error: weightError },
+  ] = await Promise.all([
+    supabase.from("profiles").select("id,full_name").in("id", ids),
+    supabase.from("client_profiles").select("user_id,calorie_target").in("user_id", ids),
+    // Newest first, and bounded: only the most recent weigh-in per client is
+    // read, so a client with years of history costs the same as a new one.
+    supabase
+      .from("progress_entries")
+      .select("client_id,weight,date")
+      .in("client_id", ids)
+      .order("date", { ascending: false })
+      .limit(Math.min(500, ids.length * 10)),
+  ]);
+  if (profileError) throw profileError;
+  if (detailError) throw detailError;
+  if (weightError) throw weightError;
+
+  return (profiles ?? []).map((profile) => {
+    const weight = (weights ?? []).find((row) => row.client_id === profile.id);
+    const detail = (details ?? []).find((row) => row.user_id === profile.id);
+    return {
+      id: profile.id,
+      full_name: profile.full_name,
+      weight: weight ? Number(weight.weight) : null,
+      calorieTarget:
+        detail?.calorie_target === null || detail?.calorie_target === undefined
+          ? null
+          : Number(detail.calorie_target),
+    };
+  });
 }
 
 export type CoachClientListItem = Awaited<ReturnType<typeof listCoachClients>>[number] & Readonly<{
@@ -239,7 +302,15 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   return {
     ...base,
     menu,
-    nutrition: { totals, plannedItems: plannedItems.length, completedItems, completionPercent: plannedItems.length ? Math.round(completedItems / plannedItems.length * 100) : 0 },
+    nutrition: {
+      totals,
+      plannedItems: plannedItems.length,
+      completedItems,
+      completionPercent: plannedItems.length ? Math.round(completedItems / plannedItems.length * 100) : 0,
+      // What the client actively skipped, so a coach can tell a deliberate skip
+      // from a meal that was simply never marked.
+      skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped).map((meal) => meal.title),
+    },
     lastLoginAt: deviceResult.data?.last_seen_at ?? null,
     workouts: { assignment, program: programResult.data, lastCompletedAt: latestCompleted?.completed_at ?? null, nextDayName: nextDay?.name ?? null, weeklyCompletionPercent: assignment ? Math.min(100, Math.round(completedThisWeek / assignment.weekly_frequency * 100)) : 0 },
   };
@@ -325,6 +396,7 @@ export async function getActiveClientMenu(
     :{data:[],error:null};
   if(selectionError)throw selectionError;
   const selectedByGroup=new Map((selections??[]).map(row=>[row.group_id,row.meal_item_id]));
+  const statusByMeal = await readMealDayStatus(clientId, date, meals.map((meal) => meal.id));
 
   return {
     id: plan.id,
@@ -364,15 +436,55 @@ export async function getActiveClientMenu(
           items:mealItems.filter(item=>(items??[]).find(row=>row.id===item.id)?.group_id===group.id),
           selectedItemId:selectedByGroup.get(group.id),
         })),
-        completed:(groups??[]).filter(group=>group.meal_id===meal.id).length>0&&
+        // An explicit mark wins. Without one, a meal that has groups is still
+        // considered eaten once every group's chosen item is logged - that is how
+        // the state behaved before the mark existed, and menus assigned before
+        // this change keep reading correctly.
+        status: statusByMeal.get(meal.id) ?? null,
+        completed: statusByMeal.get(meal.id) === "eaten" || (
+          statusByMeal.get(meal.id) !== "not_eaten" &&
+          (groups??[]).filter(group=>group.meal_id===meal.id).length>0&&
           (groups??[]).filter(group=>group.meal_id===meal.id).every(group=>{
             const selected=selectedByGroup.get(group.id);
             return Boolean(selected&&eatenIds.has(selected));
-          }),
+          })
+        ),
+        skipped: statusByMeal.get(meal.id) === "not_eaten",
         items: mealItems,
       };
     }),
   };
+}
+
+export type MealDayStatus = "eaten" | "not_eaten";
+
+// Reads the explicit per-meal marks for a day.
+//
+// The table arrives in 202608100001_meal_day_status.sql. Until that migration is
+// applied the relation does not exist, and a missing relation must not take the
+// nutrition screen down - every meal simply reads as unmarked, which is exactly
+// the behaviour that shipped before. Any other error is a real fault and is
+// rethrown.
+const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
+
+async function readMealDayStatus(
+  clientId: string,
+  date: string,
+  mealIds: readonly string[],
+): Promise<ReadonlyMap<string, MealDayStatus>> {
+  if (!mealIds.length) return new Map();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("meal_day_status")
+    .select("meal_id,status")
+    .eq("client_id", clientId)
+    .eq("status_date", date)
+    .in("meal_id", mealIds);
+  if (error) {
+    if (MISSING_RELATION.has(error.code ?? "")) return new Map();
+    throw error;
+  }
+  return new Map((data ?? []).map((row) => [row.meal_id as string, row.status as MealDayStatus]));
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {
@@ -608,7 +720,7 @@ export async function listCoachMenus(coachId: string) {
   });
 }
 
-export async function listDatabaseFoods() {
+async function readDatabaseFoods() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("foods")
@@ -617,6 +729,17 @@ export async function listDatabaseFoods() {
   if (error) throw error;
   return data ?? [];
 }
+
+// The food catalogue is the same rows for every authenticated user - its policy
+// is `for select to authenticated using (true)` - and it only changes when an
+// import runs. Caching it per request removes a round trip from every screen
+// that needs the picker; the tag lets an import drop it immediately.
+export const FOOD_CATALOGUE_TAG = "food-catalogue";
+
+export const listDatabaseFoods = unstable_cache(readDatabaseFoods, ["database-foods"], {
+  tags: [FOOD_CATALOGUE_TAG],
+  revalidate: 300,
+});
 
 export async function listCoachFoodUsage(coachId:string){
   const supabase=await createSupabaseServerClient();
@@ -655,18 +778,19 @@ export async function getCoachMenu(coachId: string, menuId: string) {
   if (assignmentError) throw assignmentError;
   if (mealsError) throw mealsError;
   const mealIds = (meals ?? []).map((meal) => meal.id);
-  const { data: items, error: itemsError } = mealIds.length
-    ? await supabase
-        .from("meal_items")
-        .select("*")
-        .in("meal_id", mealIds)
-        .order("sort_order")
-    : { data: [], error: null };
+  // Items and groups are both keyed by the same meal ids and neither depends on
+  // the other, so they go out together rather than one after the next.
+  const [
+    { data: items, error: itemsError },
+    { data: groups, error: groupsError },
+  ] = mealIds.length
+    ? await Promise.all([
+        supabase.from("meal_items").select("*").in("meal_id", mealIds).order("sort_order"),
+        supabase.from("meal_food_groups").select("*").in("meal_id", mealIds).order("sort_order"),
+      ])
+    : [{ data: [], error: null }, { data: [], error: null }];
   if (itemsError) throw itemsError;
-  const {data:groups,error:groupsError}=mealIds.length
-    ?await supabase.from("meal_food_groups").select("*").in("meal_id",mealIds).order("sort_order")
-    :{data:[],error:null};
-  if(groupsError)throw groupsError;
+  if (groupsError) throw groupsError;
   const dayIndexes = [...new Set((meals ?? []).map((meal) => meal.day_index))];
   return {
     ...plan,

@@ -228,6 +228,27 @@ export async function setMealCompletion(form: FormData): Promise<void> {
   revalidateNutrition();
 }
 
+const MEAL_STATUSES = new Set(["eaten", "not_eaten", "none"]);
+
+// One tap sets any of the three states. "not_eaten" clears any recorded intake
+// for that meal, so a skipped meal never contributes calories.
+export async function setMealStatus(form: FormData): Promise<void> {
+  const supabase = await requireClient();
+  const id = String(form.get("id") ?? "");
+  const date = String(form.get("date") ?? "");
+  const status = String(form.get("status") ?? "");
+  if (!id || !date) throw new Error("meal_and_date_required");
+  if (!MEAL_STATUSES.has(status)) throw new Error("invalid_meal_status");
+
+  const { error } = await supabase.rpc("set_meal_day_status", {
+    p_meal_id: id,
+    p_date: date,
+    p_status: status,
+  });
+  if (error) throw nutritionRule(error) ?? error;
+  revalidateNutrition();
+}
+
 export async function setMealItemCompletion(form: FormData): Promise<void> {
   const supabase = await requireClient();
   const { id, eaten, date } = nutritionMutation(form);

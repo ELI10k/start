@@ -1,12 +1,9 @@
 import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
-import SubmitButton from "@/components/forms/SubmitButton";
 import MealOptionButton from "@/components/client/MealOptionButton";
-import {
-  setMealCompletion,
-  selectMealGroupAlternative,
-} from "@/app/actions/product";
+import MealStatusControl from "@/components/client/MealStatusControl";
+import { selectMealGroupAlternative } from "@/app/actions/product";
 import {
   getActiveClientMenu,
   getAuthContext,
@@ -75,28 +72,13 @@ export default async function NutritionPage() {
                   <h2 className="text-xl font-black">{meal.title}</h2>
                   {meal.freeCalorieTarget?<p className="mt-1 text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
                 </div>
-                {missingChoice ? (
-                  <p className="pill">בחרו חלופה בכל קבוצה</p>
-                ) : (
-                <form action={setMealCompletion}>
-                  <input type="hidden" name="id" value={meal.id} />
-                  <input type="hidden" name="date" value={today} />
-                  <input
-                    type="hidden"
-                    name="eaten"
-                    value={meal.completed ? "false" : "true"}
-                  />
-                  <SubmitButton
-                    idle={meal.completed ? "ביטול השלמה" : "סימון הארוחה כנאכלה"}
-                    pending="שומרים…"
-                    className={
-                      meal.completed
-                        ? "premium-secondary-button"
-                        : "premium-primary-button"
-                    }
-                  />
-                </form>
-                )}
+                <MealStatusControl
+                  mealId={meal.id}
+                  date={today}
+                  status={meal.status}
+                  completed={meal.completed}
+                  blocked={missingChoice}
+                />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">

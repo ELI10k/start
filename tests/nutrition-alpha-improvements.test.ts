@@ -215,8 +215,15 @@ test("a duplicated plan is unassigned and recalculates for the next client",()=>
 test("selecting a client fills the calorie target from their profile",()=>{
   const editor=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
   assert.match(editor,/menu\.calorieTarget\|\|\(client\?\.calorieTarget/);
+  // The column is read once, in the repository, and both menu routes get it from
+  // there. Asserting on the repository keeps the guarantee attached to the code
+  // that actually reads client_profiles.calorie_target.
+  const repository=readFileSync(new URL("../lib/data/product-repository.ts",import.meta.url),"utf8");
+  assert.match(repository,/listCoachMenuClients/);
+  assert.match(repository,/from\("client_profiles"\)\.select\("user_id,calorie_target"\)/);
+  assert.match(repository,/calorieTarget:/);
   for(const page of ["../app/coach/menus/new/page.tsx","../app/coach/menus/[id]/page.tsx"])
-    assert.match(readFileSync(new URL(page,import.meta.url),"utf8"),/calorie_target/);
+    assert.match(readFileSync(new URL(page,import.meta.url),"utf8"),/listCoachMenuClients/);
 });
 
 test("a meal with only one filled group can be saved",()=>{

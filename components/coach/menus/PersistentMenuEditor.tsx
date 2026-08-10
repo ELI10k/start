@@ -16,7 +16,7 @@ import type { Portion } from "@/lib/nutrition/meal-alternatives";
 
 type FoodOption={id:string;name:string;brand:string|null;category?:string;calories:number;protein:number|null;carbs:number|null;fat:number|null;packageUnit:string|null;unitWeightGrams:number|null;isMaster?:boolean;masterGroup?:GroupType|null};
 type FoodUsage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
-type ClientOption={id:string;full_name:string;weight:number|null;calorieTarget:number|null};
+type ClientOption=Readonly<{id:string;full_name:string;weight:number|null;calorieTarget:number|null}>;
 type Item={foodId:string;amount:number;amountSource?:"auto"|"manual"};
 type GroupType="protein"|"carbohydrate"|"fat"|"vegetables";
 type Group={type:GroupType;items:Item[]};
@@ -27,7 +27,7 @@ export type EditableMenu={id?:string;title:string;description:string;clientId:st
 const emptyMeal=():Meal=>({title:"ארוחת בוקר",notes:"",freeCalorieTarget:"",groups:[{type:"protein",items:[]},{type:"carbohydrate",items:[]}]});
 const groupLabels:Record<GroupType,string>={protein:"קבוצת חלבון",carbohydrate:"קבוצת פחמימה",fat:"קבוצת שומן",vegetables:"קבוצת ירקות"};
 
-export default function PersistentMenuEditor({initial,foods,clients,initialUsage}:{initial:EditableMenu;foods:FoodOption[];clients:ClientOption[];initialUsage:FoodUsage[]}){
+export default function PersistentMenuEditor({initial,foods,clients,initialUsage}:{initial:EditableMenu;foods:FoodOption[];clients:readonly ClientOption[];initialUsage:FoodUsage[]}){
   const[menu,setMenu]=useState<EditableMenu>(()=>{
     const client=clients.find(item=>item.id===initial.clientId);
     const calculation=calculateMacroTargetResult(client?.weight??Number.NaN,Number(initial.calorieTarget));

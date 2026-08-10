@@ -5,8 +5,8 @@ import PersistentMenuEditor, {
 import {
   getAuthContext,
   getCoachMenu,
-  listCoachDashboardClients,
   listCoachFoodUsage,
+  listCoachMenuClients,
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
@@ -34,9 +34,9 @@ export default async function EditMenuPage({
   if (!auth) redirect("/login");
   if (auth.role !== "coach") redirect("/unauthorized");
   const { id } = await params;
-  const [menu, clientResult, rows, usageRows] = await Promise.all([
+  const [menu, clients, rows, usageRows] = await Promise.all([
     getCoachMenu(auth.id, id),
-    listCoachDashboardClients(auth.id, { pageSize: 50 }),
+    listCoachMenuClients(auth.id),
     listDatabaseFoods(),
     listCoachFoodUsage(auth.id),
   ]);
@@ -90,15 +90,7 @@ export default async function EditMenuPage({
     <PersistentMenuEditor
       initial={initial}
       foods={foods}
-      clients={clientResult.items.map(({ id, full_name, latestWeight, clientProfile }) => ({
-        id,
-        full_name,
-        weight: latestWeight,
-        calorieTarget:
-          clientProfile?.calorie_target === null || clientProfile?.calorie_target === undefined
-            ? null
-            : Number(clientProfile.calorie_target),
-      }))}
+      clients={clients}
       initialUsage={usageRows.map((row) => ({
         foodId: String(row.food_id),
         count: Number(row.selection_count),
