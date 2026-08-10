@@ -27,8 +27,15 @@ test.describe("meal status", () => {
     await signIn(page, requireIdentity("client"));
     await skipUnlessMigrated(page);
 
-    const meal = page.locator("article").filter({ has: page.getByRole("button", { name: "לא נאכל" }) }).first();
-    test.skip(!(await meal.count()), "no unmarked meal today");
+    const unmarked = page.locator("article").filter({ has: page.getByRole("button", { name: "לא נאכל" }) }).first();
+    test.skip(!(await unmarked.count()), "no unmarked meal today");
+
+    // Pin the meal by its own heading. Filtering by "has a לא נאכל button" stops
+    // matching the moment the meal is marked, and the locator would silently
+    // drift to whichever meal is still unmarked.
+    const title = (await unmarked.getByRole("heading").first().textContent())?.trim() ?? "";
+    expect(title, "could not read the meal title").not.toBe("");
+    const meal = page.locator("article").filter({ has: page.getByRole("heading", { name: title, exact: true }) }).first();
 
     // One tap, no dialog in between.
     await meal.getByRole("button", { name: "לא נאכל" }).click();
