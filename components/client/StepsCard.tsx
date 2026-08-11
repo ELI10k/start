@@ -109,10 +109,13 @@ export default function StepsCard() {
         ))}
       </ol>
 
-      <dl className="dashboard-metrics mt-4">
-        <div className="metric-tile"><dt className="metric-tile__head"><span>ממוצע שבועי</span></dt><dd><strong>{summary.weeklyAverage.toLocaleString("he-IL")}</strong></dd></div>
-        <div className="metric-tile"><dt className="metric-tile__head"><span>ימים ביעד</span></dt><dd><strong>{summary.daysMetGoal}/7</strong></dd></div>
-        <div className="metric-tile"><dt className="metric-tile__head"><span>סנכרון אחרון</span></dt><dd><strong>{summary.lastSyncAt ? formatIsraelDateTime(summary.lastSyncAt) : "—"}</strong></dd></div>
+      {/* Not .dashboard-metrics: that class bleeds past its container on purpose
+          and scrolls within the page padding, so nesting it inside a card pushes
+          the whole page wider than the screen. A plain wrapping grid stays put. */}
+      <dl className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <Stat label="ממוצע שבועי" value={summary.weeklyAverage.toLocaleString("he-IL")} />
+        <Stat label="ימים ביעד" value={`${summary.daysMetGoal}/7`} />
+        <Stat label="סנכרון אחרון" value={summary.lastSyncAt ? formatIsraelDateTime(summary.lastSyncAt) : "—"} />
       </dl>
 
       {summary.lastSyncSource && <p className="mt-2 text-xs text-[#5B5F5B]">מקור: {SOURCE_LABELS[summary.lastSyncSource]}</p>}
@@ -130,5 +133,14 @@ export default function StepsCard() {
       )}
       {error && <p role="alert" className="mt-3 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">{error}</p>}
     </section>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3">
+      <dt className="text-xs text-[#5B5F5B]">{label}</dt>
+      <dd className="mt-1 truncate text-sm font-black">{value}</dd>
+    </div>
   );
 }
