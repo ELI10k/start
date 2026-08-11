@@ -7,11 +7,7 @@
     },
     {
       "path": "/api/cron/weekly-summary",
-      "schedule": "0 16-19 * * 6"
-    },
-    {
-      "path": "/api/push/dispatch",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 17 * * 6"
     }
   ]
 }

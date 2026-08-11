@@ -17,10 +17,16 @@ test("the week runs Sunday to Saturday in Israel, and Saturday belongs to it", (
   assert.equal(israelWeek("2026-08-09T08:00:00.000Z").start, "2026-08-09");
 });
 
-test("the job only writes at 20:00 on a Saturday, Israel time", () => {
-  assert.equal(isSummaryHour("2026-08-15T17:30:00.000Z"), true);  // 20:30 IDT, Saturday
-  assert.equal(isSummaryHour("2026-08-15T16:30:00.000Z"), false); // 19:30 IDT
-  assert.equal(isSummaryHour("2026-08-14T17:30:00.000Z"), false); // Friday
+test("the job writes on a Saturday evening, in both halves of the year", () => {
+  // One weekly cron at 17:00 UTC, because the plan allows a cron at most daily.
+  // That lands at 20:00 in Israel in summer and 19:00 in winter, so the gate has
+  // to accept both - a single-hour check would stop writing for half the year.
+  assert.equal(isSummaryHour("2026-08-15T17:00:00.000Z"), true);  // 20:00 IDT, Saturday
+  assert.equal(isSummaryHour("2026-01-17T17:00:00.000Z"), true);  // 19:00 IST, Saturday
+  // And it is still narrow: a stray call in the middle of the night does nothing.
+  assert.equal(isSummaryHour("2026-08-15T01:00:00.000Z"), false); // 04:00 IDT
+  assert.equal(isSummaryHour("2026-08-15T09:00:00.000Z"), false); // 12:00 IDT
+  assert.equal(isSummaryHour("2026-08-14T17:00:00.000Z"), false); // Friday
 });
 
 test("a week with no data at all is said to have no data", async () => {
@@ -145,10 +151,17 @@ test("a sent summary is never rewritten underneath the client", async () => {
   assert.match(migration, /revoke all on function public\.upsert_weekly_summary\([^)]*\) from public, authenticated/);
 });
 
-test("the job is scheduled for every Saturday hour that could be 20:00 in Israel", async () => {
+test("the schedule stays inside what the hosting plan allows", async () => {
   const vercel = JSON.parse(await source("vercel.json")) as { crons: { path: string; schedule: string }[] };
   const cron = vercel.crons.find((entry) => entry.path === "/api/cron/weekly-summary");
-  assert.equal(cron?.schedule, "0 16-19 * * 6");
+  assert.equal(cron?.schedule, "0 17 * * 6");
+  // A cron that fires more than once a day is rejected at deploy time on the
+  // current plan - which means a bad schedule here breaks every deployment, not
+  // just the job. None of these may use a step or a range in the hour field.
+  for (const entry of vercel.crons) {
+    const hour = entry.schedule.split(" ")[1];
+    assert.doesNotMatch(hour, /[*/,-]/, `${entry.path} runs more than once a day: ${entry.schedule}`);
+  }
   const route = await source("app/api/cron/weekly-summary/route.ts");
   assert.match(route, /isSummaryHour/);
   assert.match(route, /Bearer \$\{secret\}/);

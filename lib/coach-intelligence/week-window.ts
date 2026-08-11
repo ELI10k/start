@@ -16,11 +16,20 @@ export function israelWeek(now: Date | string = new Date()): WeekWindow {
   return { start, end: shiftDay(start, 6), previousStart: shiftDay(start, -7) };
 }
 
-// Saturday, 20:00 Israel time. The cron fires hourly and this is the gate, so a
-// missed hour retries rather than skipping the week.
+// Saturday evening in Israel.
+//
+// The schedule is a single weekly cron at 17:00 UTC, because the Vercel plan
+// allows a cron to run at most once a day. 17:00 UTC is 20:00 in Israel through
+// the summer and 19:00 through the winter, so the gate accepts an evening window
+// rather than one exact hour - otherwise the summary would silently stop being
+// written for half the year, which is the kind of bug nobody notices until a
+// client asks where their summary went.
+//
+// The window is still narrow enough that a stray call at, say, three in the
+// morning does nothing.
 export function isSummaryHour(now: Date | string = new Date()): boolean {
   const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", weekday: "short", hour: "2-digit", hour12: false }).formatToParts(new Date(now));
   const weekday = parts.find((part) => part.type === "weekday")?.value;
   const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "-1");
-  return weekday === "Sat" && hour === 20;
+  return weekday === "Sat" && hour >= 18 && hour <= 21;
 }

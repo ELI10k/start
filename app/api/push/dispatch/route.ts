@@ -21,6 +21,15 @@ const credentialsFor = (provider: string) =>
       ? Boolean(process.env.FCM_SERVICE_ACCOUNT_JSON)
       : false;
 
+// Not on a schedule. The Vercel plan allows a cron to run at most once a day,
+// and a push queue drained once a day is worse than no push at all - a workout
+// reminder that arrives twenty hours late is noise.
+//
+// So this is called on demand for now, and gets a schedule when there is
+// something to send: either a Pro plan's every-few-minutes cron, or an external
+// scheduler hitting it with CRON_SECRET. Until APNs credentials exist it would
+// have nothing to do anyway.
+//
 // Vercel Cron issues a GET; a manual drain is a POST. Both do the same work.
 export const GET = (request: Request) => POST(request);
 
