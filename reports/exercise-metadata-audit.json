@@ -1,0 +1,796 @@
+{
+  "total": 73,
+  "exercises": [
+    {
+      "id": "exercise-p2ohuv",
+      "name": "אופניים",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-yspcn",
+      "name": "בעמידה פשיטת מרפקים בפולי מוט ישר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-h4hp4e",
+      "name": "דד ליפט",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-07",
+      "name": "דדליפט רומני",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1fr384u",
+      "name": "הרחקה אופקית במשקולות בודדות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1oc1t8h",
+      "name": "הרחקת ירך לצד בפולי תחתון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-15",
+      "name": "הרחקת כתף לצדדים",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-mx59uy",
+      "name": "הרחקת כתפיים במשקולות בודדות בעמידה",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-19zx08z",
+      "name": "הרחקת רגל לאחור  בכבל תחתון (בעיטות סוס)",
+      "missing": [
+        "equipment",
+        "video",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1urdov4",
+      "name": "הרמת רגליים",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-10",
+      "name": "הרמת תאומים",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-155pu7s",
+      "name": "חימום דינאמי לפי אימון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-lp8zrd",
+      "name": "חתירה בהטיית גב במשקולות בודדות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-02",
+      "name": "חתירה בישיבה",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-126wehi",
+      "name": "חתירה במכונה",
+      "missing": [
+        "equipment",
+        "video",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1u5j1lv",
+      "name": "חתירה בפולי תחתון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1h0qzj6",
+      "name": "חתירה מעל הספה",
+      "missing": [
+        "equipment",
+        "video",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1k0kcxw",
+      "name": "יד אחורית",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-f2juxe",
+      "name": "כפיפה מרפקים במשקולות בודדות 45 מעלות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-pn4ire",
+      "name": "כפיפות בטן משקל גוף",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-09",
+      "name": "כפיפת ברך במכונה",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-05",
+      "name": "כפיפת מרפקים",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1nk9ffl",
+      "name": "כפיפת מרפקים בכסא כומר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1fo5t9c",
+      "name": "כפיפת מרפקים משקל גוף",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1l24vb0",
+      "name": "כפיפת מרפקים פטישים",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1lrrpsj",
+      "name": "כפיפת רגליים במכונה | תרגיל רגליים להמטסרינג",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1mo876e",
+      "name": "כפיפת רגליים במכונה בישיבה | תרגיל רגליים להמטסרינג",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-yjtm56",
+      "name": "כתף אחורית בפולי עליון כנגד כבל",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-14",
+      "name": "לאנג׳ אחורי",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-2ez0zf",
+      "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-cw8lzv",
+      "name": "לחיצה צרפתית במוט W",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1rpyv0f",
+      "name": "לחיצות כתף על הריצפה",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1wwie67",
+      "name": "לחיצות כתפיים מצב רחב",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-ptjiss",
+      "name": "לחיצת חזה  במשקולות בודדות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-rr4mtu",
+      "name": "לחיצת חזה במוט",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-thb870",
+      "name": "לחיצת חזה במוט ישר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-01",
+      "name": "לחיצת חזה במכונה",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1nidil8",
+      "name": "לחיצת חזה במשקולות בודדות / מוט ישר 30 מעלות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-139gtlw",
+      "name": "לחיצת חזה במשקולות בודדות 30 מעלות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1e2u7l0",
+      "name": "לחיצת חזה במשקולות בודדות 45 מעלות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-03",
+      "name": "לחיצת כתפיים",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-14tz34b",
+      "name": "לחיצת כתפיים כנגד משקולות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-08",
+      "name": "לחיצת רגליים",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-mhdxgx",
+      "name": "לחיצת רגליים במכונה",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1ly3xqh",
+      "name": "משיכה בפולי עליון מוט רחב",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-5aj1cu",
+      "name": "משיכה הפולי עליון באחיזה צרה מוט משולש",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-mk9vfe",
+      "name": "משיכה פולי עליון באחיזה צרה מוט משולש",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1ba2nb8",
+      "name": "מתח לפנים | תרגיל לגב + יד קדמית",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-say88l",
+      "name": "מתח מצב צר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1igvlte",
+      "name": "מתח רחב",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1oguz0o",
+      "name": "סומו סקוואט",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-12xg42y",
+      "name": "סקוואט בהמר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-06",
+      "name": "סקוואט גביע",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-n1izh5",
+      "name": "סקוואט משקל גוף",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1fdd4gb",
+      "name": "סקוואט עם מוט",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1w08fkm",
+      "name": "סקוואט עם משקולות חופשי",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-150kpke",
+      "name": "פול אובר במשקולת בודדת",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-12",
+      "name": "פול דאון",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-vba4vh",
+      "name": "פטישים במשקולות בודדות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-11",
+      "name": "פלאנק",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-19qm0t4",
+      "name": "פרפר בכבלים",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1f01l0c",
+      "name": "פרפר במכונה",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1b7p0zl",
+      "name": "פשיטת ידיים הפוכות במוט",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-8q99c1",
+      "name": "פשיטת ידיים מצב צר",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-04",
+      "name": "פשיטת מרפקים בכבל",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1759fj3",
+      "name": "פשיטת מרפקים כנגד משקולות בודדות",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-igalw2",
+      "name": "פשיטת רגליים במכונה | תרגיל רגליים לארבע ראשי",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-yt2erg",
+      "name": "קיק בק במשקולת בודדת",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-1actjvi",
+      "name": "קיק בק בפולי תחתון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-150pt7l",
+      "name": "שכיבות סמיכה לחזה עליון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-dhk3wr",
+      "name": "שכיבות סמיכה לחזה תחתון",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "beta-test-exercise-13",
+      "name": "שכיבות סמיכה מוגבהות",
+      "missing": [
+        "video",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    },
+    {
+      "id": "exercise-hdg3yz",
+      "name": "שכיבות סמיכה משקל גוף",
+      "missing": [
+        "equipment",
+        "howTo",
+        "cues",
+        "mistakes",
+        "image"
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@ import { Assistant } from "next/font/google";
 import "./globals.css";
 import { WorkoutProvider } from "@/components/workouts/WorkoutProvider";
 import AuthSessionWatcher from "@/components/auth/AuthSessionWatcher";
+import ServiceWorker from "@/components/client/ServiceWorker";
 
 export const dynamic = "force-dynamic";
 const assistant = Assistant({ subsets: ["hebrew", "latin"], display: "swap", variable: "--font-assistant" });
@@ -36,6 +37,8 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={`${assistant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <AuthSessionWatcher />
+        {/* Installability only. The worker is network-only by design. */}
+        <ServiceWorker />
         <WorkoutProvider>{children}</WorkoutProvider>
       </body>
     </html>

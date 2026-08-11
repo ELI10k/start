@@ -14,8 +14,12 @@ import { assertNotProduction, identity, requireIdentity, signIn, signOut } from 
 // this keeps failing on it.
 async function menuTitle(page: Page) {
   const title = page.getByLabel("שם התפריט");
+  // Waits the transition out, and still fails on a duplicate that survives it.
   await expect(title).toHaveCount(1);
-  return title;
+  // Returned as .first() because the count above is a point-in-time check: the
+  // locator is re-resolved when it is used, and a later navigation can put the
+  // second tree back for a moment.
+  return title.first();
 }
 test.describe("nutrition", () => {
   test.skip(!identity("coach"), "set E2E_COACH_EMAIL and E2E_COACH_PASSWORD to run");

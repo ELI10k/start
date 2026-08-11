@@ -28,6 +28,15 @@ const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <rect x="332" y="626" width="360" height="30" rx="15" fill="${GREEN}"/>
 </svg>`;
 
+// The maskable web icon. Android crops to the launcher's shape, so the mark sits
+// inside the safe circle and only background is ever cut away.
+const maskable = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="${INK}"/>
+  <text x="512" y="486" fill="${SURFACE}" font-family="Helvetica, Arial, sans-serif" font-size="150"
+        font-weight="700" letter-spacing="25" text-anchor="middle" dominant-baseline="central">START</text>
+  <rect x="392" y="590" width="240" height="20" rx="10" fill="${GREEN}"/>
+</svg>`;
+
 // Android's adaptive foreground is masked to a shape and can be zoomed, so the
 // mark has to sit inside the middle two thirds or the launcher will crop it.
 const foreground = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
@@ -80,6 +89,7 @@ const targets = [
   { path: "public/icon-192.png", svg: icon, size: 192 },
   { path: "public/icon-512.png", svg: icon, size: 512 },
   { path: "public/apple-touch-icon.png", svg: icon, size: 180 },
+  { path: "public/icon-maskable-512.png", svg: maskable, size: 512 },
 ];
 
 for (const target of targets) {

@@ -291,10 +291,32 @@ export async function completeClientOnboarding(form:FormData) {
   const auth=await getAuthContext();if(!auth||auth.role!=="client") throw new Error("not_authorized");
   if(form.get("terms")!=="on") throw new Error("terms_required");
   const supabase=await createSupabaseServerClient();
-  const preferences={dietary_preferences:value(form,"dietaryPreferences"),food_dislikes:value(form,"foodDislikes"),allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),training_experience:value(form,"trainingExperience"),training_location:value(form,"trainingLocation"),equipment:value(form,"equipment"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),reminders:value(form,"reminders")};
-  const {error}=await supabase.from("client_profiles").update({goal:value(form,"goal")||null,target_weight:positive(form,"targetWeight"),height:positive(form,"height"),birth_date:value(form,"birthDate")||null,activity_level:value(form,"activityLevel")||null,preferences,notes:value(form,"medicalNotes")||null,onboarding_completed:true,onboarding_completed_at:new Date().toISOString(),terms_accepted_at:new Date().toISOString()}).eq("user_id",auth.id);
+  // The same columns the coach's intake writes. Two paths writing two shapes is
+  // how a client ends up with a calorie target the builder cannot compute: the
+  // fields it needs would exist for one kind of client and not the other.
+  const preferences={allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),training_location:value(form,"trainingLocation"),equipment:value(form,"equipment"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),training_type:value(form,"trainingType")};
+  const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal"):null;
+  const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel"):null;
+  const {error}=await supabase.from("client_profiles").update({
+    goal:nutritionGoal?GOAL_LABELS[nutritionGoal as NutritionGoal]:null,
+    nutrition_goal:nutritionGoal,
+    trainee_level:traineeLevel,
+    age_years:positive(form,"ageYears"),
+    sex:value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex"):null,
+    daily_steps:positive(form,"dailySteps"),
+    target_weight:positive(form,"targetWeight"),
+    height:positive(form,"height"),
+    preferences,
+    notes:value(form,"medicalNotes")||null,
+    onboarding_completed:true,
+    onboarding_completed_at:new Date().toISOString(),
+    terms_accepted_at:new Date().toISOString(),
+  }).eq("user_id",auth.id);
   if(error) throw new Error("onboarding_save_failed");
-  const weight=positive(form,"weight");if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:new Date().toISOString().slice(0,10),weight,waist:positive(form,"waist")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
+  // A client who told us their level gets the matching programmes, exactly as
+  // one created by the coach does.
+  if(traineeLevel)await assignLevelProgrammes(createSupabaseAdminClient(),auth.id,traineeLevel as TraineeLevel);
+  const weight=positive(form,"weight");if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:positive(form,"navelCircumference")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
   const admin=createSupabaseAdminClient();
   await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:new Date().toISOString()}).eq("client_id",auth.id).in("status",["sent","opened"]);
   revalidatePath("/");redirect("/");

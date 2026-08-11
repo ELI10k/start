@@ -1,4 +1,4 @@
-import { calculateMacroTargetResult } from "./macro-targets.ts";
+import { CALORIES_PER_GRAM, calculateMacroTargetResult, FAT_SHARE_OF_CALORIES, PROTEIN_GRAMS_PER_KG } from "./macro-targets.ts";
 
 // Which of the four numbers the coach typed, and which the system worked out.
 // Keeping that distinction explicit is what lets a recalculation know what it is
@@ -11,10 +11,10 @@ export const ALL_AUTOMATIC: MacroSources = { calories: "auto", protein: "auto", 
 
 export type MacroPlan = Readonly<{ calories: number; protein: number; carbohydrates: number; fat: number }>;
 
-export const FAT_SHARE_OF_CALORIES = 0.25;
-export const PROTEIN_GRAMS_PER_KG = 1.8;
-
-const CALORIES_PER_GRAM = { protein: 4, carbohydrates: 4, fat: 9 } as const;
+// Re-exported, not redefined: the split is stated once in ./macro-targets and
+// every consumer - the browser as the coach types, the server on save - reads
+// the same numbers.
+export { CALORIES_PER_GRAM, FAT_SHARE_OF_CALORIES, PROTEIN_GRAMS_PER_KG };
 
 /** calories = protein*4 + carbs*4 + fat*9, which is the only identity that must hold. */
 export function caloriesFromMacros(plan: Omit<MacroPlan, "calories">): number {
@@ -46,15 +46,22 @@ export function planMacros(
     return { ok: false, reason: "missing_input" };
   }
 
-  const protein = sources.protein === "manual" && Number.isFinite(current.protein ?? NaN)
-    ? Math.max(0, Math.round(current.protein as number))
-    : Math.round(weightKg * PROTEIN_GRAMS_PER_KG);
+  // A manual figure is exactly what the coach typed. An automatic one keeps its
+  // full precision for the remainder and is only rounded for display - which is
+  // the rounding order ./macro-targets uses, and what produces the approved
+  // numbers. Rounding first would put this a gram away from the server's own
+  // recomputation for the same client.
+  const manualProtein = sources.protein === "manual" && Number.isFinite(current.protein ?? NaN);
+  const manualFat = sources.fat === "manual" && Number.isFinite(current.fat ?? NaN);
+  const preciseProtein = manualProtein ? Math.max(0, Math.round(current.protein as number)) : weightKg * PROTEIN_GRAMS_PER_KG;
+  const preciseFatCalories = manualFat
+    ? Math.max(0, Math.round(current.fat as number)) * CALORIES_PER_GRAM.fat
+    : calories * FAT_SHARE_OF_CALORIES;
 
-  const fat = sources.fat === "manual" && Number.isFinite(current.fat ?? NaN)
-    ? Math.max(0, Math.round(current.fat as number))
-    : Math.round((calories * FAT_SHARE_OF_CALORIES) / CALORIES_PER_GRAM.fat);
+  const protein = Math.round(preciseProtein);
+  const fat = Math.round(preciseFatCalories / CALORIES_PER_GRAM.fat);
 
-  const remaining = calories - protein * CALORIES_PER_GRAM.protein - fat * CALORIES_PER_GRAM.fat;
+  const remaining = calories - preciseProtein * CALORIES_PER_GRAM.protein - preciseFatCalories;
   const carbohydrates = Math.round(remaining / CALORIES_PER_GRAM.carbohydrates);
 
   // A negative remainder means the protein and fat alone already exceed the
