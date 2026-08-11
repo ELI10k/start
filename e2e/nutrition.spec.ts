@@ -3,6 +3,20 @@ import { assertNotProduction, identity, requireIdentity, signIn, signOut } from 
 
 // The full coach nutrition journey. Every spec here writes, so it runs only against
 // the dedicated test accounts and never against a production host.
+
+// The menu title, once the page has settled.
+//
+// A client-side navigation briefly holds the outgoing and incoming trees in the
+// DOM at the same time, and page.goto resolves on load - which can land inside
+// that window and find two title inputs. Asserting the count first waits the
+// transition out. It is deliberately toHaveCount(1) rather than .first(): a
+// second input that is still there after the page settles is a real bug, and
+// this keeps failing on it.
+async function menuTitle(page: Page) {
+  const title = page.getByLabel("שם התפריט");
+  await expect(title).toHaveCount(1);
+  return title;
+}
 test.describe("nutrition", () => {
   test.skip(!identity("coach"), "set E2E_COACH_EMAIL and E2E_COACH_PASSWORD to run");
 
@@ -128,7 +142,7 @@ test.describe("nutrition", () => {
 
   test("an empty menu is refused with a readable message", async ({ page }) => {
     await page.goto("/coach/menus/new");
-    await page.getByLabel("שם התפריט").fill(`E2E ריק ${Date.now()}`);
+    await (await menuTitle(page)).fill(`E2E ריק ${Date.now()}`);
     await page.getByRole("button", { name: /שמירה/ }).click();
     await expect(page.getByText("יש למלא לפחות ארוחה אחת לפני שמירה.")).toBeVisible();
   });
@@ -136,7 +150,7 @@ test.describe("nutrition", () => {
   test("a menu survives save, reload and edit", async ({ page }) => {
     const title = `E2E תפריט ${Date.now()}`;
     await page.goto("/coach/menus/new");
-    await page.getByLabel("שם התפריט").fill(title);
+    await (await menuTitle(page)).fill(title);
 
     const search = await openFirstPicker(page);
     await search.fill("ביצה");
@@ -147,22 +161,22 @@ test.describe("nutrition", () => {
     const savedUrl = page.url();
 
     await page.reload();
-    await expect(page.getByLabel("שם התפריט")).toHaveValue(title);
+    await expect(await menuTitle(page)).toHaveValue(title);
 
-    await page.getByLabel("שם התפריט").fill(`${title} ערוך`);
+    await (await menuTitle(page)).fill(`${title} ערוך`);
     await page.getByRole("button", { name: /שמירה/ }).click();
     // Wait for the server to confirm before navigating away, otherwise the reload
     // races the save and reads the previous title back.
     await expect(page.getByRole("button", { name: "שמירה" })).toBeEnabled({ timeout: 30_000 });
     await page.waitForTimeout(500);
     await page.goto(savedUrl);
-    await expect(page.getByLabel("שם התפריט")).toHaveValue(`${title} ערוך`);
+    await expect(await menuTitle(page)).toHaveValue(`${title} ערוך`);
   });
 
   test("building a five-meal menu stays under two minutes", async ({ page }) => {
     const started = Date.now();
     await page.goto("/coach/menus/new");
-    await page.getByLabel("שם התפריט").fill(`E2E מדידת זמן ${Date.now()}`);
+    await (await menuTitle(page)).fill(`E2E מדידת זמן ${Date.now()}`);
 
     const groups = page.getByRole("button", { name: "בחירת מאכל ראשי" });
     const total = Math.min(await groups.count(), 10);
