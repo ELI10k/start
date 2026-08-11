@@ -14,6 +14,23 @@ test("a tapped notification can only land inside the app", () => {
   assert.equal(safeDeepLink("javascript:alert(1)"), "/notifications");
   assert.equal(safeDeepLink(undefined), "/notifications");
   assert.equal(safeDeepLink(42), "/notifications");
+
+  // The paths deep links are actually issued for. Hyphens matter here: the
+  // control-character guard once carried its range as raw bytes, which reads as
+  // "[ -]" and would reject every one of these if it were ever taken literally.
+  for (const path of ["/check-in", "/auth/confirm-link?token_hash=abc", "/workouts/history", "/progress/measurements"]) {
+    assert.equal(safeDeepLink(path), path, `${path} must survive the guard`);
+  }
+
+  // What the guard is actually for: a control character smuggled into a
+  // payload. Written as escapes so the source stays readable - which is the
+  // whole point of the change these assertions accompany.
+  assert.equal(safeDeepLink("/workouts\u0000/../evil"), "/notifications");
+  assert.equal(safeDeepLink("/work\u001fouts"), "/notifications");
+  assert.equal(safeDeepLink("/workouts\u007f"), "/notifications");
+  // A plain space is not a control character and is left alone; a path with
+  // one is merely unusual, not dangerous.
+  assert.equal(safeDeepLink("/a b"), "/a b");
 });
 
 test("a browser has no push transport, and says so", async () => {

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  The two capabilities START actually uses. Both are required for the feature
+	  to work at all: without aps-environment the push registration fails at
+	  runtime rather than at build time, and without the HealthKit entitlement
+	  the store returns no steps however the permission dialog is answered.
+
+	  With automatic signing, selecting the team in Xcode registers both against
+	  the App ID. Nothing here is a certificate or a profile - those cannot be
+	  created without the Apple Developer account.
+
+	  "development" is the right value for a TestFlight build too: Xcode rewrites
+	  it to "production" when it archives for distribution.
+	-->
+	<key>aps-environment</key>
+	<string>development</string>
+	<!--
+	  Universal Links. Without this a magic-link email opens in Safari, the
+	  session lands in Safari's cookie store, and the app is still signed out.
+	  Takes effect once /.well-known/apple-app-site-association serves a real
+	  Team ID; until then iOS simply finds no match and behaves as it does now.
+	-->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:start.elicohenfitness.co.il</string>
+	</array>
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array/>
+</dict>
+</plist>

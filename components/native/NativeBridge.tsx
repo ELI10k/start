@@ -63,14 +63,25 @@ export default function NativeBridge() {
 
       // A start:// link or a universal link arrives here. Only the path is used,
       // and only after the same check a tapped notification goes through.
-      void App.addListener("appUrlOpen", ({ url }) => {
+      const follow = (url: string | undefined) => {
+        if (!url) return;
         try {
           const parsed = new URL(url);
-          router.push(safeDeepLink(`${parsed.pathname}${parsed.search}`, "/"));
+          const target = safeDeepLink(`${parsed.pathname}${parsed.search}`, "/");
+          // The app is already showing the destination when it was launched
+          // straight into it; pushing again would stack a duplicate entry.
+          if (target !== window.location.pathname + window.location.search) router.push(target);
         } catch {
           router.push("/");
         }
-      }).then((handle) => track(() => void handle.remove()));
+      };
+
+      void App.addListener("appUrlOpen", ({ url }) => follow(url)).then((handle) => track(() => void handle.remove()));
+
+      // A cold start from a link does not fire appUrlOpen - the URL is already
+      // consumed by the time a listener exists. This is the magic-link case:
+      // tapping the email with the app closed is the most common way in.
+      void App.getLaunchUrl().then((launch) => follow(launch?.url)).catch(() => {});
 
       // Steps, through the custom plugin.
       (window as { StartHealth?: unknown }).StartHealth = {
