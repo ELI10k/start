@@ -176,7 +176,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
                     what actually work on a phone, where HTML5 drag does not fire. */}
                 <span className="exercise-slot__handle" aria-hidden="true"><GripVertical size={16}/></span>
                 <strong className="min-w-0 truncate">{exercise?.name??"תרגיל"}</strong>
-                <span className="text-xs text-[#5B5F5B]">{exercise?.primaryMuscleGroup??exercise?.category??""}</span>
+                <span className="pill pill--green">{exercise?.primaryMuscleGroup??exercise?.category??"לא סווג"}</span>
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>
                 <button aria-label="הזזת תרגיל למעלה" className="icon-button mr-auto" disabled={index===0} onClick={()=>moveExercise(day.id,index,-1)}><ChevronUp aria-hidden="true" size={16}/></button>
                 <button aria-label="הזזת תרגיל למטה" className="icon-button" disabled={index===day.exercises.length-1} onClick={()=>moveExercise(day.id,index,1)}><ChevronDown aria-hidden="true" size={16}/></button>

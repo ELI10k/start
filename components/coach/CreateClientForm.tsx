@@ -75,7 +75,11 @@ function Field({label,name,type="text",required=false,...props}:{label:string;na
 
 function Select({label,name,options}:{label:string;name:string;options:readonly (readonly [string,string])[]}){
   return <label className="block text-sm font-bold">{label}
-    <select name={name} className="nutrition-input mt-2" defaultValue="">
+    {/* The select carries its own aria-label. Wrapping a select in a label makes
+        its accessible name the label text concatenated with every option, so a
+        screen reader announces this as "מטרה לא נבחר שימור חיטוב עדין…" - and
+        anything looking the field up by name cannot find it. */}
+    <select name={name} aria-label={label} className="nutrition-input mt-2" defaultValue="">
       <option value="">לא נבחר</option>
       {options.map(([value,text])=><option key={value} value={value}>{text}</option>)}
     </select>

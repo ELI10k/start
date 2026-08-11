@@ -42,11 +42,15 @@ test.describe("client workout journey", () => {
     await start.click();
     await expect(page).toHaveURL(/\/workouts\/[^/]+\/[^/]+/, { timeout: 20_000 });
 
-    const begin = page.getByRole("button", { name: /התחלת אימון|מתחילים/ });
-    if (await begin.count()) await begin.first().click();
-
+    // The start gate is a client component, so a click landing before hydration
+    // does nothing - and the run then reads as "there is no guidance button"
+    // rather than "the workout never started".
     const guidance = page.getByRole("button", { name: "דגשים לתרגיל" });
-    await expect(guidance.first()).toBeVisible({ timeout: 20_000 });
+    await expect(async () => {
+      const begin = page.getByRole("button", { name: /^התחלת אימון$|מתחילים/ });
+      if (await begin.count()) await begin.first().click();
+      await expect(guidance.first()).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 45_000 });
     await guidance.first().click();
 
     // The sheet opens, and says something honest either way: real guidance, or

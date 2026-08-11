@@ -92,7 +92,10 @@ test("the coach can set the weekly frequency when assigning, not just accept the
 
 test("the workout shows what the source carries about an exercise", async () => {
   const session = await source("components/workouts/client/WorkoutSession.tsx");
-  // Muscle group and equipment, then the source's own notes.
-  assert.match(session, /exercise\?\.primaryMuscleGroup,exercise\?\.equipment/);
+  // Muscle group and equipment, then the source's own notes. They are tags now
+  // rather than one joined line - the muscle group is the thing a client scans
+  // for, so it reads as a label instead of grey text.
+  assert.match(session, /exercise\?\.primaryMuscleGroup\?\?"קבוצת שריר לא סווגה"/);
+  assert.match(session, /exercise\?\.equipment&&<span className="pill">/);
   assert.match(session, /current\.notes\|\|exercise\?\.executionNotes/);
 });

@@ -72,7 +72,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         <div className="min-w-0">
           <span className="text-xs font-bold text-[#16A34A]">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
           <h1 className="mt-1 text-2xl font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h1>
-          <p className="mt-1 text-sm text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"פרטי ציוד לא סופקו במקור"}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="pill pill--green">{exercise?.primaryMuscleGroup??"קבוצת שריר לא סווגה"}</span>
+            {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
+          </div>
         </div>
         {/* A missing link never blocks the set - it is stated and the workout
             carries on. */}

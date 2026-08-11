@@ -60,7 +60,12 @@ export default function AssignedProgram({programId}:{programId:string}){
               <div className="min-w-0">
                 <span className="text-xs text-[#5B5F5B]">{entry.order+1}{completed?" · בוצע בעבר":""}</span>
                 <h3 className="mt-1 text-lg font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3>
-                <p className="mt-1 text-xs text-[#5B5F5B]">{[exercise?.primaryMuscleGroup,exercise?.equipment].filter(Boolean).join(" · ")||"מטא־דאטה לא סופק בקובץ המקור"}</p>
+                {/* The muscle group is the thing a client scans for; it gets
+                    a tag rather than a line of grey text. */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="pill pill--green">{exercise?.primaryMuscleGroup??"קבוצת שריר לא סווגה"}</span>
+                  {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
+                </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
