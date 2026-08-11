@@ -10,20 +10,29 @@ type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
 // list hanging off a 150px input inside a wrapping row - on a phone that put the
 // results over the row they belonged to. It now fills a bottom sheet, so the
 // search field is at the top and the whole list is scrollable.
-export default function FoodCombobox({foods,value,usage,onSelect,onClose}:{foods:ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
+export default function FoodCombobox({foods,value,usage,onSelect,onClose}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
   const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
-    if(q)return candidates.filter(item=>item.relevance>=0).sort((a,b)=>{
+    // Searching narrows the list; it does not reorder it. Master foods used to
+    // fall in among the rest as soon as anything was typed, ranked purely by
+    // relevance - so the curated shortlist stopped being a shortlist exactly
+    // when the coach was looking for something.
+    const matching=q?candidates.filter(item=>item.relevance>=0):candidates;
+    const byRelevance=(a:typeof candidates[number],b:typeof candidates[number])=>{
       const relevance=b.relevance-a.relevance;
       if(relevance)return relevance;
-      const master=Number(Boolean(b.food.isMaster))-Number(Boolean(a.food.isMaster));
-      if(master)return master;
       const usageCount=(b.u?.count??0)-(a.u?.count??0);
       return usageCount||a.food.name.localeCompare(b.food.name,"he");
-    }).slice(0,100);
+    };
+    if(q){
+      const searchMasters=matching.filter(item=>item.food.isMaster).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלי מאסטר"}));
+      const searchMasterIds=new Set(searchMasters.map(item=>item.food.id));
+      const searchRest=matching.filter(item=>!searchMasterIds.has(item.food.id)).sort(byRelevance).map(item=>({...item,group:"תוצאות חיפוש"}));
+      return[...searchMasters,...searchRest].slice(0,100);
+    }
     const masters=candidates.filter(item=>item.food.isMaster).map(item=>({...item,group:"⭐ מאכלי מאסטר"}));
     const masterIds=new Set(masters.map(item=>item.food.id));
     const used=candidates.filter(item=>item.u);

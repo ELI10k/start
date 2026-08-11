@@ -9,6 +9,48 @@ import {
 } from "@/lib/progress/measurements";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
+import { assignmentsToAdd, isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
+
+/**
+ * Gives a client the programmes their trainee level starts with.
+ *
+ * Only ever adds. A programme the client already has is left alone, and nothing
+ * is ever removed - a completed workout belongs to the assignment it was
+ * performed under, so dropping an assignment would orphan that history. Removing
+ * a programme stays a deliberate act by the coach.
+ *
+ * Programmes are matched by exact name against what is already in the
+ * catalogue; this never imports or creates one. A name the catalogue does not
+ * have simply yields no assignment.
+ */
+async function assignLevelProgrammes(
+  admin:ReturnType<typeof createSupabaseAdminClient>,
+  clientId:string,
+  level:TraineeLevel,
+){
+  const[{data:catalogue},{data:existing}]=await Promise.all([
+    admin.from("workout_programs").select("id,name,training_frequency").eq("status","active"),
+    admin.from("workout_assignments").select("program_id").eq("client_id",clientId).in("status",["active","paused"]),
+  ]);
+  const programmes=(catalogue??[]).map(row=>({id:String(row.id),name:String(row.name),trainingFrequency:row.training_frequency?Number(row.training_frequency):undefined}));
+  const assigned=(existing??[]).map(row=>String(row.program_id));
+  const toAdd=assignmentsToAdd(level,programmes,assigned);
+  if(!toAdd.length)return;
+
+  // A client trains several programmes side by side here, so these go in as
+  // active rows directly rather than through assign_workout_program, which
+  // deliberately keeps exactly one active assignment.
+  const{error}=await admin.from("workout_assignments").insert(toAdd.map(programme=>({
+    client_id:clientId,
+    program_id:programme.id,
+    start_date:israelDateKey(),
+    weekly_frequency:programme.trainingFrequency??3,
+    status:"active",
+  })));
+  // A failure here must not undo a created client: the coach can assign by hand.
+  if(error)console.error("level programme assignment failed",{clientId,level,message:error.message});
+}
 
 const emailPattern=/^\S+@\S+\.\S+$/;
 const value=(form:FormData,key:string)=>String(form.get(key)??"").trim();
@@ -70,15 +112,37 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
       });
       if(testAuthError) throw new Error("client_test_isolation_failed");
     }
+    // Dietary preferences and food dislikes are no longer collected here: they
+    // were free text nothing read, and the menu is built from the approved
+    // catalogue rather than from a sentence.
     const preferences={
-      dietary_preferences:value(form,"dietaryPreferences"), medical_notes:value(form,"medicalNotes"), training_type:value(form,"trainingType"), weekly_workouts:positive(form,"weeklyWorkouts"), food_dislikes:value(form,"foodDislikes"),
+      medical_notes:value(form,"medicalNotes"), training_type:value(form,"trainingType"), weekly_workouts:positive(form,"weeklyWorkouts"),
     };
     const { error: profileError }=await admin.from("profiles").update({full_name:fullName,phone:phone||null,role:"client",status:"active",is_test_account:coachProfile.is_test_account}).eq("id",clientId);
     if(profileError) throw new Error("client_profile_failed");
     const { error: roleError }=await admin.from("user_roles").upsert({user_id:clientId,role:"client",assigned_by:coach.id});
     if(roleError) throw new Error("client_role_failed");
-    const { error: clientProfileError }=await admin.from("client_profiles").upsert({user_id:clientId,goal:value(form,"goal")||null,target_weight:positive(form,"targetWeight"),height:positive(form,"height"),birth_date:value(form,"birthDate")||null,activity_level:value(form,"activityLevel")||null,preferences,notes:value(form,"medicalNotes")||null,onboarding_completed:false});
+    const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal"):null;
+    const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel"):null;
+    const { error: clientProfileError }=await admin.from("client_profiles").upsert({
+      user_id:clientId,
+      goal:nutritionGoal?GOAL_LABELS[nutritionGoal as NutritionGoal]:null,
+      nutrition_goal:nutritionGoal,
+      trainee_level:traineeLevel,
+      age_years:positive(form,"ageYears"),
+      sex:value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex"):null,
+      daily_steps:positive(form,"dailySteps"),
+      target_weight:positive(form,"targetWeight"),
+      height:positive(form,"height"),
+      preferences,
+      notes:value(form,"medicalNotes")||null,
+      onboarding_completed:false,
+    });
     if(clientProfileError) throw new Error("client_intake_failed");
+    // A level gives the client the programmes that match it straight away, so a
+    // new client is not left with an empty workouts screen until the coach gets
+    // round to assigning one by hand.
+    if(traineeLevel)await assignLevelProgrammes(admin,clientId,traineeLevel as TraineeLevel);
     const { error: relationError }=await admin.from("coach_client_relationships").upsert({coach_id:coach.id,client_id:clientId,status:"active"},{onConflict:"coach_id,client_id"});
     if(relationError) throw new Error("client_relationship_failed");
     const { error: invitationHistoryError }=await admin.from("client_invitations").insert({client_id:clientId,coach_id:coach.id,status:"sent",expires_at:inviteExpiry()});

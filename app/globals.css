@@ -1011,21 +1011,33 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 
 /* One food in a group: what it is, how much, and what that comes to. Three lines
    on a phone rather than one row that wrapped into five. */
+/* Two rows, not one. The name used to share a single line with the amount, the
+   unit, four macros and two buttons, so it was always the thing that got an
+   ellipsis - and the name is the one part a coach cannot infer from the rest.
+   Nothing here scrolls sideways: both rows wrap instead. */
 .food-row {
-  display: grid; align-items: center; gap: .5rem;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: grid; gap: .5rem;
   padding: .6rem;
   border: 1px solid var(--line); border-radius: var(--radius-md);
   background: var(--surface);
 }
 .food-row + .food-row { margin-top: .5rem; }
 .food-row[data-primary="true"] { border-color: rgba(22, 163, 74, .4); background: var(--green-tint); }
+.food-row__head {
+  display: grid; align-items: center; gap: .5rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.food-row__body {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem;
+}
 .food-row__pick {
   min-height: 2.75rem; padding-inline: .6rem;
   border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
   background: var(--surface);
-  overflow: hidden; text-align: start; text-overflow: ellipsis; white-space: nowrap;
-  font: inherit; font-weight: 700;
+  /* The full name, wrapped over as many lines as it needs. */
+  text-align: start; overflow-wrap: anywhere;
+  font: inherit; font-weight: 700; line-height: 1.35;
+  padding-block: .4rem;
 }
 .food-row__pick[data-empty] { color: var(--ink-muted); font-weight: 500; }
 .food-row__amount { position: relative; width: 6.5rem; }

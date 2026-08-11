@@ -6,6 +6,8 @@ import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { resetClientDevice } from "@/app/actions/product";
 import { getAuthContext, getCoachClientDashboard } from "@/lib/data/product-repository";
+import { bodyMassIndex, GOAL_LABELS, isNutritionGoal } from "@/lib/nutrition/energy";
+import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-level";
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -130,8 +132,17 @@ export default async function CoachClientPage({ params, searchParams }: { params
 
       <Section title="נתוני קליטה" summary={intake?.onboarding_completed ? `הקליטה הושלמה ב-${date(intake.onboarding_completed_at ?? null)}` : "ממתין להשלמת קליטה מצד הלקוח"}>
         {intake ? <dl className="compact-data-list">
-          <div><span>רמת פעילות</span><strong>{intake.activity_level ?? "לא הוגדר"}</strong></div>
+          {/* The inputs the calorie target is computed from, so a coach can see
+              at a glance which one is missing when the builder says it cannot
+              compute. BMI is here as a reading and nothing more. */}
+          <div><span>גיל</span><strong>{intake.age_years ?? "לא הוגדר"}</strong></div>
+          <div><span>מין</span><strong>{intake.sex === "male" ? "זכר" : intake.sex === "female" ? "נקבה" : "לא הוגדר"}</strong></div>
+          <div><span>גובה</span><strong>{intake.height ? `${intake.height} ס״מ` : "לא הוגדר"}</strong></div>
+          <div><span>ממוצע צעדים יומי</span><strong>{intake.daily_steps ?? "לא הוגדר"}</strong></div>
+          <div><span>מטרה</span><strong>{isNutritionGoal(intake.nutrition_goal) ? GOAL_LABELS[intake.nutrition_goal] : "לא הוגדרה"}</strong></div>
+          <div><span>רמת מתאמן</span><strong>{isTraineeLevel(intake.trainee_level) ? TRAINEE_LEVEL_LABELS[intake.trainee_level] : "לא הוגדרה"}</strong></div>
           <div><span>יעד משקל</span><strong>{intake.target_weight ? `${intake.target_weight} ק״ג` : "לא הוגדר"}</strong></div>
+          <div><span>BMI (תצוגה בלבד)</span><strong>{bodyMassIndex(data.progress[0]?.weight ? Number(data.progress[0].weight) : undefined, intake.height ? Number(intake.height) : undefined) ?? "—"}</strong></div>
           {preferences.map(([key,item])=><div key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Array.isArray(item) ? item.join(", ") : String(item)}</strong></div>)}
         </dl> : <Empty text="אין נתוני קליטה זמינים."/>}
       </Section>

@@ -102,7 +102,7 @@ export async function listCoachClients(coachId: string) {
       .in("id", ids),
     supabase
       .from("client_profiles")
-      .select("user_id,goal,target_weight,height,birth_date,activity_level,calorie_target,protein_target,preferences,notes,onboarding_completed,onboarding_completed_at")
+      .select("user_id,goal,target_weight,height,birth_date,activity_level,calorie_target,protein_target,preferences,notes,onboarding_completed,onboarding_completed_at,age_years,sex,daily_steps,nutrition_goal,trainee_level")
       .in("user_id", ids),
   ]);
   if (profileError) throw profileError;
@@ -125,6 +125,14 @@ export type CoachMenuClient = Readonly<{
   full_name: string;
   weight: number | null;
   calorieTarget: number | null;
+  // The rest of what a calorie target is computed from. Any of them may be
+  // absent; the builder names the missing one rather than guessing at it.
+  ageYears: number | null;
+  sex: "male" | "female" | null;
+  heightCm: number | null;
+  dailySteps: number | null;
+  weeklyWorkouts: number | null;
+  nutritionGoal: string | null;
 }>;
 
 export async function listCoachMenuClients(coachId: string): Promise<readonly CoachMenuClient[]> {
@@ -144,7 +152,9 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
     { data: weights, error: weightError },
   ] = await Promise.all([
     supabase.from("profiles").select("id,full_name").in("id", ids),
-    supabase.from("client_profiles").select("user_id,calorie_target").in("user_id", ids),
+    // Everything the calorie target is computed from travels with the client, so
+    // the builder can work it out the moment one is chosen.
+    supabase.from("client_profiles").select("user_id,calorie_target,age_years,sex,height,daily_steps,nutrition_goal,preferences").in("user_id", ids),
     // Newest first, and bounded: only the most recent weigh-in per client is
     // read, so a client with years of history costs the same as a new one.
     supabase
@@ -161,6 +171,10 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
   return (profiles ?? []).map((profile) => {
     const weight = (weights ?? []).find((row) => row.client_id === profile.id);
     const detail = (details ?? []).find((row) => row.user_id === profile.id);
+    const preferences = detail?.preferences && typeof detail.preferences === "object" && !Array.isArray(detail.preferences)
+      ? (detail.preferences as Record<string, unknown>)
+      : {};
+    const weeklyWorkouts = Number(preferences.weekly_workouts);
     return {
       id: profile.id,
       full_name: profile.full_name,
@@ -169,6 +183,12 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
         detail?.calorie_target === null || detail?.calorie_target === undefined
           ? null
           : Number(detail.calorie_target),
+      ageYears: detail?.age_years ? Number(detail.age_years) : null,
+      sex: detail?.sex === "male" || detail?.sex === "female" ? detail.sex : null,
+      heightCm: detail?.height ? Number(detail.height) : null,
+      dailySteps: detail?.daily_steps === null || detail?.daily_steps === undefined ? null : Number(detail.daily_steps),
+      weeklyWorkouts: Number.isFinite(weeklyWorkouts) && weeklyWorkouts > 0 ? weeklyWorkouts : null,
+      nutritionGoal: typeof detail?.nutrition_goal === "string" ? detail.nutrition_goal : null,
     };
   });
 }
