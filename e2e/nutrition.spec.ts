@@ -56,6 +56,10 @@ test.describe("nutrition", () => {
 
   test("choosing a client fills the calorie target and every macro", async ({ page }) => {
     await page.goto("/coach/menus/new");
+    // Wait for the navigation to settle before touching a control: during a
+    // client-side transition both page trees are briefly in the DOM, and every
+    // label matches twice.
+    await menuTitle(page);
     const client = page.getByLabel("לקוח");
     const options = await client.locator("option").allTextContents();
     const named = options.find((option) => option && option !== "ללא שיוך");
@@ -106,7 +110,10 @@ test.describe("nutrition", () => {
 
   test("a natural unit is shown where the source carries one", async ({ page }) => {
     await page.goto("/coach/menus/new");
-    const search = await openFirstPicker(page);
+    // A pita is a carbohydrate, so it is offered in the carbohydrate group and
+    // nowhere else. This used to search the protein group and find it, which was
+    // the filtering bug rather than a feature.
+    const search = await openPicker(page, 1);
     await search.fill("פיתה");
     const option = foodOptions(page).first();
     await expect(option).toBeVisible();
@@ -143,8 +150,8 @@ test.describe("nutrition", () => {
   test("an empty menu is refused with a readable message", async ({ page }) => {
     await page.goto("/coach/menus/new");
     await (await menuTitle(page)).fill(`E2E ריק ${Date.now()}`);
-    await page.getByRole("button", { name: /שמירה/ }).click();
-    await expect(page.getByText("יש למלא לפחות ארוחה אחת לפני שמירה.")).toBeVisible();
+    await page.getByRole("button", { name: /שמירה/ }).first().click();
+    await expect(page.getByText("יש למלא לפחות ארוחה אחת לפני שמירה.").first()).toBeVisible();
   });
 
   test("a menu survives save, reload and edit", async ({ page }) => {
@@ -186,9 +193,13 @@ test.describe("nutrition", () => {
       await picker.click();
       const search = page.getByRole("combobox", { name: "חיפוש מזון" }).last();
       await search.click();
-      await search.fill("ביצה");
+      // Each group offers only the foods classified into it, so the query has to
+      // suit the group. The groups alternate protein, carbohydrate, and filling
+      // one removes its button - so the first remaining picker is the next group.
+      await search.fill(index % 2 === 0 ? "ביצה" : "אורז");
       const option = foodOptions(page).first();
       if (await option.isVisible().catch(() => false)) await option.click();
+      else await page.keyboard.press("Escape");
       const suggest = page.getByRole("button", { name: "הוסף 3 חלופות מומלצות" }).first();
       if (await suggest.isVisible().catch(() => false)) await suggest.click();
     }
@@ -204,7 +215,14 @@ test.describe("nutrition", () => {
 // "בחירת מאכל ראשי" only adds an empty row; the combobox inside it still has to be
 // opened before its list exists. Returns the search box with the list already open.
 async function openFirstPicker(page: Page) {
-  await page.getByRole("button", { name: "בחירת מאכל ראשי" }).first().click();
+  return openPicker(page, 0);
+}
+
+// The protein group is first and the carbohydrate group second. Which one is
+// open now matters: each offers only the foods classified into it, so a search
+// for a pita inside the protein group correctly finds nothing.
+async function openPicker(page: Page, groupIndex: number) {
+  await page.getByRole("button", { name: "בחירת מאכל ראשי" }).nth(groupIndex).click();
   const search = page.getByRole("combobox", { name: "חיפוש מזון" }).first();
   await search.waitFor({ state: "visible" });
   await search.click();

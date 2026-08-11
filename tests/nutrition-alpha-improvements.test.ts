@@ -66,9 +66,14 @@ test("combobox exposes keyboard controls and master-first 30-item recent limits"
 
 test("menu editor preserves manual targets until explicit recalculation",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
-  assert.match(source,/current\.macroSources\.protein==="auto"/);
+  // The guarantee, not the wording: a figure the coach typed is marked as
+  // theirs, is only recomputed when they ask, and asking puts everything back
+  // under the system's control. The calculation moved to lib/nutrition/macro-plan
+  // and is covered directly in tests/nutrition-engine.test.ts.
+  assert.match(source,/planMacros\(/);
   assert.match(source,/הוזן ידנית/);
-  assert.match(source,/חשב מחדש לפי משקל וקלוריות/);
+  assert.match(source,/מחושב אוטומטית/);
+  assert.match(source,/חשב מחדש/);
   assert.match(source,/force\?\{protein:"auto" as const,carbohydrates:"auto" as const,fat:"auto" as const\}/);
   assert.doesNotMatch(source,/queueMicrotask/);
   for(const label of ["סיכום המזונות","חלבון \\(גרם\\)","פחמימה \\(גרם\\)","שומן \\(גרם\\)"])assert.match(source,new RegExp(label));
@@ -214,13 +219,16 @@ test("a duplicated plan is unassigned and recalculates for the next client",()=>
 
 test("selecting a client fills the calorie target from their profile",()=>{
   const editor=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
-  assert.match(editor,/menu\.calorieTarget\|\|\(client\?\.calorieTarget/);
+  // The stored target is now the fallback rather than the first answer: the
+  // builder computes from the client's own data when it can, and falls back to
+  // whatever the intake recorded when an input is missing.
+  assert.match(editor,/computed\?\.ok[\s\S]*client\?\.calorieTarget/);
   // The column is read once, in the repository, and both menu routes get it from
   // there. Asserting on the repository keeps the guarantee attached to the code
   // that actually reads client_profiles.calorie_target.
   const repository=readFileSync(new URL("../lib/data/product-repository.ts",import.meta.url),"utf8");
   assert.match(repository,/listCoachMenuClients/);
-  assert.match(repository,/from\("client_profiles"\)\.select\("user_id,calorie_target"\)/);
+  assert.match(repository,/from\("client_profiles"\)\.select\("user_id,calorie_target,/);
   assert.match(repository,/calorieTarget:/);
   for(const page of ["../app/coach/menus/new/page.tsx","../app/coach/menus/[id]/page.tsx"])
     assert.match(readFileSync(new URL(page,import.meta.url),"utf8"),/listCoachMenuClients/);
