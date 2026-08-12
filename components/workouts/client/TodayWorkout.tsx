@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, Flame, Play, Repeat, Target } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, Target } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
+import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { activeAssignmentFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
@@ -13,7 +14,7 @@ const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout}=useWorkouts();const today=new Date().toISOString().slice(0,10);const assignment=activeAssignmentFor(snapshot.assignments,currentClientId,today);const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
+  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=new Date().toISOString().slice(0,10);const assignment=activeAssignmentFor(snapshot.assignments,currentClientId,today);const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -51,6 +52,45 @@ export default function TodayWorkout(){
       <MetricTile label="התמדה" value={`${adherence.percent}%`} icon={<Target aria-hidden="true" size={18}/>}/>
       <MetricTile label="הוחמצו" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
       <MetricTile label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
+    </section>
+
+    {/* What today actually contains. The screen used to name the day and jump
+        straight to the FAB, so a client could not see which exercises were
+        coming - or read the coach's דגשים - without starting the workout first.
+        Same card, same catalogue fields and the same guidance sheet the
+        programme and the live session already use. */}
+    <section aria-labelledby="today-exercises">
+      <div className="section-heading section-heading--compact">
+        <h2 id="today-exercises">תרגילי האימון</h2>
+        <span>{day.exercises.length} תרגילים</span>
+      </div>
+      <div className="grid gap-3">
+        {[...day.exercises].sort((a,b)=>a.order-b.order).map((entry)=>{
+          const exercise=getExercise(entry.exerciseId);
+          return <article key={entry.id} className="premium-card">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-xs text-[#5B5F5B]">תרגיל {entry.order+1}</span>
+                <h3 className="mt-1 text-lg font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <span className="pill pill--green">{exercise?.primaryMuscleGroup??"קבוצת שריר לא סווגה"}</span>
+                  {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
+                </div>
+              </div>
+              <div className="flex shrink-0 flex-col items-end gap-1">
+                {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
+                <ExerciseGuidanceButton exercise={exercise} variant="link"/>
+              </div>
+            </div>
+            <dl className="compact-data-list mt-3">
+              <div><span>סטים</span><strong>{entry.sets||"—"}</strong></div>
+              <div><span>חזרות</span><strong>{entry.reps||"—"}</strong></div>
+              <div><span>מנוחה</span><strong>{entry.rest||"—"}</strong></div>
+            </dl>
+            {entry.notes&&<p className="mt-3 text-sm text-[#5B5F5B]">{entry.notes}</p>}
+          </article>;
+        })}
+      </div>
     </section>
 
     <section aria-labelledby="week-plan">

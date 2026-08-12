@@ -20,8 +20,10 @@ export function NewProgramEditor(){
 
 export default function CustomProgramEditor({id}:{id:string}){
   const{getProgram,saveProgram}=useWorkouts(); const existing=getProgram(id); const[draft,setDraft]=useState<WorkoutProgram|undefined>(existing); const[saving,setSaving]=useState(false);const[message,setMessage]=useState("");
-  if(!draft||draft.official)return null;
-  return <ProgramEditor draft={draft} setDraft={setDraft} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?"השינויים נשמרו ב-Supabase.":"שמירת התוכנית נכשלה.")}} saving={saving} message={message}/>;
+  // The approved programmes used to be excluded here, which is what left a coach
+  // with no way to add, remove, reorder or replace an exercise in one of them.
+  if(!draft)return null;
+  return <ProgramEditor draft={draft} setDraft={setDraft} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?"השינויים נשמרו ב-Supabase.":"שמירת התוכנית נכשלה. אם הוסר תרגיל או יום שכבר בוצע על ידי לקוח, יש להחזיר אותו - היסטוריית האימונים מוצמדת אליו.")}} saving={saving} message={message}/>;
 }
 
 // Where a dragged exercise came from. Held in state rather than in the drag
@@ -109,6 +111,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
     <button type="button" disabled={saving||!draft.name.trim()||!draft.days.length} onClick={onSave} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{saving?"שומרים…":"שמירת תוכנית"}</button>
   </div>
   {message&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">{message}</p>}
+  {draft.official&&<p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">תוכנית רשמית המשותפת לכל הלקוחות המשויכים אליה. שינוי כאן משפיע על כולם, מהאימון הבא והלאה; אימונים שכבר בוצעו נשמרים כפי שהיו.</p>}
 
   <section className="premium-card mt-6 grid gap-3 sm:grid-cols-2">
     <Input label="שם התוכנית" value={draft.name} onChange={name=>patch({name})}/>

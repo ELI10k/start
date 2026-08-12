@@ -57,3 +57,6 @@ next-env.d.ts
 /android/.gradle
 /android/app/src/main/assets/public
 /android/local.properties
+
+# database restore points - client data, never committed
+/backups

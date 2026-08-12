@@ -6,6 +6,11 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import type { WorkoutExercise, WorkoutProgram } from "@/lib/workouts/types";
 
+// What this screen lets a coach change about one slot in one day. Everything else
+// about an exercise - its name, its muscle group, its video, its דגשים - belongs
+// to the catalogue entry and is edited in the exercise bank.
+type EditableField = "sets" | "reps" | "rest" | "notes";
+
 // The coach's view of one training day, and the place a prescription is actually
 // adjusted. It used to be read-only: sets, reps and rest were three grey tiles,
 // so changing "3×12" to "4×10" meant going back to the builder - and for the
@@ -19,25 +24,25 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
   // The edited prescription, keyed by slot. Nothing is written until the coach
   // saves, so a half-typed rep range never reaches a client mid-week.
   const [draft, setDraft] = useState<Record<string, Partial<WorkoutExercise>>>({});
+  const [copying, setCopying] = useState(false);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
   const ordered = useMemo(() => [...(day?.exercises ?? [])].sort((a, b) => a.order - b.order), [day]);
   if (!program || !day) notFound();
 
-  // The approved programmes are shared by every client, and the database refuses
-  // to rewrite one - save_workout_program_tree rejects anything flagged official.
-  // So the coach edits their own copy, and the screen says so rather than letting
-  // them type into fields that cannot be saved.
+  // An approved programme is editable in place now. It is still shared by every
+  // client on it, which is worth saying out loud, but saying it is all the screen
+  // does - it no longer sends the coach off to make a copy of eleven exercises to
+  // change one rep range.
   //
   // Not gated on the client-side role. This screen lives under /coach, which the
   // proxy already restricts to coaches, and save_workout_program_tree rejects a
   // non-coach regardless - so the role check added nothing except a race, since
   // it arrives with the snapshot and the fields rendered read-only until it did.
-  const readOnly = program.official;
-  const canEdit = !readOnly;
-  const value = (entry: WorkoutExercise, field: "sets" | "reps" | "rest") => draft[entry.id]?.[field] ?? entry[field] ?? "";
-  const edit = (entry: WorkoutExercise, field: "sets" | "reps" | "rest", next: string) => {
+  const shared = program.official;
+  const value = (entry: WorkoutExercise, field: EditableField) => draft[entry.id]?.[field] ?? entry[field] ?? "";
+  const edit = (entry: WorkoutExercise, field: EditableField, next: string) => {
     setStatus("");
     setDraft((current) => ({ ...current, [entry.id]: { ...current[entry.id], [field]: next } }));
   };
@@ -62,6 +67,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
             sets: sets || undefined,
             reps: (patch.reps ?? entry.reps ?? "").trim() || undefined,
             rest: (patch.rest ?? entry.rest ?? "").trim() || undefined,
+            notes: (patch.notes ?? entry.notes ?? "").trim() || undefined,
             // The per-set rows follow the set count, so a change from three sets
             // to four has somewhere to record the fourth.
             setPrescriptions: prescriptionsFor(entry, sets, (patch.reps ?? entry.reps ?? "").trim()),
@@ -83,9 +89,9 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
   };
 
   const makeCopy = async () => {
-    setSaving(true);
+    setCopying(true);
     const id = await duplicate(programId);
-    setSaving(false);
+    setCopying(false);
     if (id) router.push(`/coach/workouts/${id}`);
     else setStatus("לא ניתן היה ליצור עותק.");
   };
@@ -94,11 +100,11 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
     <p className="text-xs font-bold text-[#16A34A]">{program.name} · יום {day.order + 1}</p>
     <h1 className="mt-2 text-3xl font-black">{day.name}</h1>
 
-    {readOnly && (
+    {shared && (
       <div className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] bg-[#F7F8F7] p-4">
-        <p className="text-sm text-[#5B5F5B]">זו תוכנית מאושרת המשותפת לכל הלקוחות, ולכן היא לקריאה בלבד. אפשר ליצור עותק ולערוך בו סטים, חזרות ומנוחה.</p>
-        <button type="button" onClick={makeCopy} disabled={saving} className="premium-secondary-button mt-3">
-          <Copy aria-hidden="true" size={17} />{saving ? "יוצרים עותק…" : "יצירת עותק לעריכה"}
+        <p className="text-sm text-[#5B5F5B]">זו תוכנית רשמית המשותפת לכל הלקוחות המשויכים אליה. השינויים כאן יחולו על כולם, באימונים הבאים בלבד. אם השינוי מיועד ללקוח אחד, עדיף לערוך עותק.</p>
+        <button type="button" onClick={makeCopy} disabled={copying} className="premium-secondary-button mt-3">
+          <Copy aria-hidden="true" size={17} />{copying ? "יוצרים עותק…" : "עריכה בעותק נפרד"}
         </button>
       </div>
     )}
@@ -127,27 +133,30 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
             </div>
           </div>
 
-          {/* Editable in place. Three short fields beat a sheet here: a coach
-              adjusting a programme usually changes several exercises in a row. */}
+          {/* Editable in place. Short fields beat a sheet here: a coach adjusting
+              a programme usually changes several exercises in a row. */}
           <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Prescription label="סטים" name={`סטים ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "sets"))} editable={canEdit} onChange={(next) => edit(entry, "sets", next)} />
-            <Prescription label="חזרות" name={`חזרות ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "reps"))} editable={canEdit} onChange={(next) => edit(entry, "reps", next)} />
-            <Prescription label="מנוחה" name={`מנוחה ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "rest"))} editable={canEdit} onChange={(next) => edit(entry, "rest", next)} />
+            <Prescription label="סטים" name={`סטים ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "sets"))} onChange={(next) => edit(entry, "sets", next)} />
+            <Prescription label="חזרות" name={`חזרות ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "reps"))} onChange={(next) => edit(entry, "reps", next)} />
+            <Prescription label="מנוחה" name={`מנוחה ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "rest"))} onChange={(next) => edit(entry, "rest", next)} />
           </dl>
 
-          {entry.notes && <p className="mt-4 text-sm text-[#5B5F5B]">{entry.notes}</p>}
-          {exercise?.executionNotes && <p className="mt-2 text-sm text-[#5B5F5B]">{exercise.executionNotes}</p>}
+          <dl className="mt-3">
+            <Prescription label="טכניקה / הערה" name={`טכניקה או הערה ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "notes"))} onChange={(next) => edit(entry, "notes", next)} />
+          </dl>
+
+          {/* The catalogue's own execution notes, which the coach does not edit
+              here - they belong to the exercise, not to this slot in this day. */}
+          {exercise?.executionNotes && <p className="mt-3 text-sm text-[#5B5F5B]">{exercise.executionNotes}</p>}
         </article>;
       })}
     </div>
 
-    {canEdit && (
-      <div className="sticky bottom-4 mt-5">
-        <button type="button" onClick={save} disabled={!dirty || saving} className="premium-primary-button w-full">
-          <Save aria-hidden="true" size={18} />{saving ? "שומרים…" : dirty ? "שמירת השינויים" : "אין שינויים לשמירה"}
-        </button>
-      </div>
-    )}
+    <div className="sticky bottom-4 mt-5">
+      <button type="button" onClick={save} disabled={!dirty || saving} className="premium-primary-button w-full">
+        <Save aria-hidden="true" size={18} />{saving ? "שומרים…" : dirty ? "שמירת השינויים" : "אין שינויים לשמירה"}
+      </button>
+    </div>
     {status && <p role="status" className="mt-3 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">{status}</p>}
   </div></div>;
 }
@@ -165,13 +174,11 @@ function prescriptionsFor(entry: WorkoutExercise, sets: string, reps: string) {
   }));
 }
 
-function Prescription({ label, name, value, editable, onChange }: { label: string; name: string; value: string; editable: boolean; onChange: (value: string) => void }) {
+function Prescription({ label, name, value, onChange }: { label: string; name: string; value: string; onChange: (value: string) => void }) {
   return <div className="rounded-xl bg-[#F7F8F7] p-3">
     <dt className="text-xs text-[#5B5F5B]">{label}</dt>
     <dd className="mt-1">
-      {editable
-        ? <input aria-label={name} className="nutrition-input" value={value} placeholder="—" onChange={(event) => onChange(event.target.value)} />
-        : <span className="font-black">{value || "—"}</span>}
+      <input aria-label={name} className="nutrition-input" value={value} placeholder="—" onChange={(event) => onChange(event.target.value)} />
     </dd>
   </div>;
 }
