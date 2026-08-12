@@ -234,7 +234,7 @@ export const GUIDANCE = {
     commonMistakes: [
       "להתנדנד קדימה ואחורה עם הגו",
       "להתעגל בגב התחתון בשלב המתיחה",
-      "להרים כתפיים לכיוון האוזניים",
+      "לכווץ את הכתפיים למעלה במקום לאסוף שכמות אחורה",
     ],
   },
   "exercise-1igvlte": {
@@ -490,7 +490,7 @@ export const GUIDANCE = {
     cues: [
       "לכוון את ציר המכונה לגובה הברך",
       "עצירה קצרה ביישור מלא",
-      "ירידה איטית ומבוקרת",
+      "החזרה למטה נעשית בהתנגדות ולא בנפילה חופשית",
       "גב וישבן צמודים למושב",
     ],
     commonMistakes: [
@@ -515,7 +515,9 @@ export const GUIDANCE = {
     ],
   },
   "exercise-2ez0zf": {
-    equipment: "משקל גוף",
+    // The catalogue name covers three variants, one of them loaded, so the
+    // equipment says both rather than picking one and being wrong half the time.
+    equipment: "משקל גוף או משקולות יד",
     howTo: "לאנג׳ — צעד קדימה או ירידה במקום, עד שהברך האחורית קרובה לרצפה, וחזרה. בגרסה עם משקולות מחזיקים משקולת בכל יד.",
     cues: [
       "הגו זקוף, המבט קדימה",

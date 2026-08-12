@@ -126,7 +126,7 @@ where id = 'exercise-mk9vfe';
 update public.workout_exercises set
   how_to = coalesce(nullif(trim(how_to), ''), 'יושבים מול הפולי התחתון, ברכיים מעט כפופות, ומושכים את הידית לכיוון הבטן תוך אסיפת השכמות.'),
   cues = case when coalesce(array_length(cues, 1), 0) = 0 then array['גב ישר — לא מתעגל בשלב המתיחה','השכמות נאספות זו לזו בסוף המשיכה','המרפקים חולפים צמוד לגוף','החזרה קדימה בשליטה, בלי שהגו נמשך']::text[] else cues end,
-  common_mistakes = case when coalesce(array_length(common_mistakes, 1), 0) = 0 then array['להתנדנד קדימה ואחורה עם הגו','להתעגל בגב התחתון בשלב המתיחה','להרים כתפיים לכיוון האוזניים']::text[] else common_mistakes end,
+  common_mistakes = case when coalesce(array_length(common_mistakes, 1), 0) = 0 then array['להתנדנד קדימה ואחורה עם הגו','להתעגל בגב התחתון בשלב המתיחה','לכווץ את הכתפיים למעלה במקום לאסוף שכמות אחורה']::text[] else common_mistakes end,
   equipment = coalesce(nullif(trim(equipment), ''), 'פולי')
 where id = 'exercise-1u5j1lv';
 
@@ -251,7 +251,7 @@ where id = 'exercise-mhdxgx';
 
 update public.workout_exercises set
   how_to = coalesce(nullif(trim(how_to), ''), 'ישיבה במכונת פשיטת ברכיים, כרית על השוק מעל הקרסול, יישור הברכיים ועצירה קצרה למעלה.'),
-  cues = case when coalesce(array_length(cues, 1), 0) = 0 then array['לכוון את ציר המכונה לגובה הברך','עצירה קצרה ביישור מלא','ירידה איטית ומבוקרת','גב וישבן צמודים למושב']::text[] else cues end,
+  cues = case when coalesce(array_length(cues, 1), 0) = 0 then array['לכוון את ציר המכונה לגובה הברך','עצירה קצרה ביישור מלא','החזרה למטה נעשית בהתנגדות ולא בנפילה חופשית','גב וישבן צמודים למושב']::text[] else cues end,
   common_mistakes = case when coalesce(array_length(common_mistakes, 1), 0) = 0 then array['להקפיץ את המשקל למעלה','להרים את הישבן מהמושב','משקל גבוה שמייצר תנופה']::text[] else common_mistakes end,
   equipment = coalesce(nullif(trim(equipment), ''), 'מכונה')
 where id = 'exercise-igalw2';
@@ -267,7 +267,7 @@ update public.workout_exercises set
   how_to = coalesce(nullif(trim(how_to), ''), 'לאנג׳ — צעד קדימה או ירידה במקום, עד שהברך האחורית קרובה לרצפה, וחזרה. בגרסה עם משקולות מחזיקים משקולת בכל יד.'),
   cues = case when coalesce(array_length(cues, 1), 0) = 0 then array['הגו זקוף, המבט קדימה','הברך הקדמית בקו כף הרגל','יורדים למטה ולא קדימה','דוחפים מהעקב של הרגל הקדמית']::text[] else cues end,
   common_mistakes = case when coalesce(array_length(common_mistakes, 1), 0) = 0 then array['ברך קדמית שנכנסת פנימה','צעד קצר מדי שמעמיס על הברך','להיטות של הגו קדימה']::text[] else common_mistakes end,
-  equipment = coalesce(nullif(trim(equipment), ''), 'משקל גוף')
+  equipment = coalesce(nullif(trim(equipment), ''), 'משקל גוף או משקולות יד')
 where id = 'exercise-2ez0zf';
 
 update public.workout_exercises set
