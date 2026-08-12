@@ -22,7 +22,7 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.getByLabel("לקוח");
+    const clientSelect = page.locator('select[aria-label="לקוח"]');
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
 
@@ -56,7 +56,7 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.getByLabel("לקוח");
+    const clientSelect = page.locator('select[aria-label="לקוח"]');
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
     await clientSelect.selectOption((await options[1].getAttribute("value")) ?? "");
@@ -89,7 +89,7 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.getByLabel("לקוח");
+    const clientSelect = page.locator('select[aria-label="לקוח"]');
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
     await clientSelect.selectOption((await options[1].getAttribute("value")) ?? "");

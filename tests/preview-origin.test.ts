@@ -12,16 +12,16 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 // production domain, whenever NEXT_PUBLIC_SITE_URL was unset. It is set for
 // production only.
 
-// The module reads next/headers, which cannot be imported outside a request. The
+// The helper reads next/headers, which cannot be imported outside a request. The
 // branch that matters is which source it chooses, so that is what is pinned.
 test("a sign-in that started on a preview never points at production", async () => {
-  const module = await source("lib/auth/site-url.ts");
+  const helper = await source("lib/auth/site-url.ts");
   // Production keeps its configured address.
-  assert.match(module, /if \(process\.env\.VERCEL_ENV === "production"\)/);
-  assert.match(module, /return configured \|\| \(productionUrl \? `https:\/\/\$\{productionUrl\}` : ""\)/);
+  assert.match(helper, /if \(process\.env\.VERCEL_ENV === "production"\)/);
+  assert.match(helper, /return configured \|\| \(productionUrl \? `https:\/\/\$\{productionUrl\}` : ""\)/);
   // Everything else answers on the origin the request arrived on. The production
   // URL is not reachable from that branch at all.
-  const preview = module.slice(module.indexOf("return (await requestOrigin())"));
+  const preview = helper.slice(helper.indexOf("return (await requestOrigin())"));
   assert.match(preview, /return \(await requestOrigin\(\)\) \|\| configured;/);
   assert.doesNotMatch(preview, /VERCEL_PROJECT_PRODUCTION_URL/);
 });
@@ -41,11 +41,11 @@ test("no auth redirect is built from a fixed production address any more", async
 });
 
 test("the host header is only trusted away from production, and only as a host", async () => {
-  const module = await source("lib/auth/site-url.ts");
+  const helper = await source("lib/auth/site-url.ts");
   // No scheme, no path, no second host smuggled in behind a comma.
-  assert.match(module, /const HOST_ONLY = \/\^\[a-z0-9\.-\]\+\(:\\d\{2,5\}\)\?\$\/i/);
-  assert.ok(module.includes('.split(",")[0]'), "a comma-separated header must be reduced to its first value");
-  assert.match(module, /if \(protocol !== "http" && protocol !== "https"\) return "";/);
+  assert.match(helper, /const HOST_ONLY = \/\^\[a-z0-9\.-\]\+\(:\\d\{2,5\}\)\?\$\/i/);
+  assert.ok(helper.includes('.split(",")[0]'), "a comma-separated header must be reduced to its first value");
+  assert.match(helper, /if \(protocol !== "http" && protocol !== "https"\) return "";/);
 });
 
 test("the return path still refuses anything that leaves the site", () => {
@@ -60,8 +60,8 @@ test("the return path still refuses anything that leaves the site", () => {
 });
 
 test("the PREVIEW badge is decided on the server and cannot show in production", async () => {
-  const module = await source("lib/auth/site-url.ts");
-  assert.match(module, /export const isPreviewDeployment = \(\) => process\.env\.VERCEL_ENV === "preview"/);
+  const helper = await source("lib/auth/site-url.ts");
+  assert.match(helper, /export const isPreviewDeployment = \(\) => process\.env\.VERCEL_ENV === "preview"/);
   const layout = await source("app/coach/layout.tsx");
   assert.match(layout, /preview=\{isPreviewDeployment\(\)\}/);
   const nav = await source("components/coach/CoachNav.tsx");

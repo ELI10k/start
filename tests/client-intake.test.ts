@@ -42,6 +42,19 @@ test("every goal the form offers is one the engine knows how to price", async ()
   assert.equal(NUTRITION_GOALS.length, 5);
 });
 
+test("the new-client form works the target out while the coach is still typing", async () => {
+  const form = await source("components/coach/CreateClientForm.tsx");
+  // It used to be invisible until the client existed and a menu was opened, so a
+  // mistyped height was only caught much later, if at all.
+  assert.match(form, /calculateEnergy\(\{/);
+  assert.match(form, /calculateMacroTargetResult\(/);
+  // The shared functions, not a second copy of the arithmetic.
+  assert.doesNotMatch(form, /1\.8|0\.25|Mifflin/);
+  assert.match(form, /import \{ calculateMacroTargetResult \} from "@\/lib\/nutrition\/macro-targets"/);
+  // And it names what is missing rather than showing a zero.
+  assert.match(form, /energy\.missing\.map\(field=>MISSING_LABELS\[field\]\)/);
+});
+
 test("the update is coach-only, and only for that coach's own client", async () => {
   const actions = await source("app/actions/onboarding.ts");
   const fn = actions.slice(actions.indexOf("export async function updateClientIntake"));
