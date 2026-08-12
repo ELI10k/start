@@ -774,6 +774,15 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   scrollbar-width: none;
 }
 .chip-row::-webkit-scrollbar { display: none; }
+
+/* The client file's tab strip keeps its scrollbar, on purpose and against the
+   convention above. Seven Hebrew labels do not fit in 375px, and a strip that
+   simply clips reads as "these are all the tabs" - the coach never learns that
+   four more are a swipe away. A hairline is enough to say otherwise. */
+.client-tabs { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+.client-tabs::-webkit-scrollbar { height: 4px; }
+.client-tabs::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
+.client-tabs::-webkit-scrollbar-track { background: transparent; }
 .chip {
   display: inline-flex; align-items: center; flex: 0 0 auto;
   min-height: 2.75rem; padding-inline: 1rem;

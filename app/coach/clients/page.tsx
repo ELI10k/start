@@ -64,6 +64,10 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
               <span>{client.latestWeight ? `${client.latestWeight} ק״ג` : "אין מדידה"} · צ׳ק־אין {date(client.lastCheckInAt)}</span>
             </span>
             <span className={pills[client.dashboardStatus]}>{labels[client.dashboardStatus]}</span>
+            {/* The whole row is one link, so the name, this label and the chevron
+                are the same target rather than three competing ones - and a
+                nested button here would be invalid and unreachable by keyboard. */}
+            <span className="hidden shrink-0 text-sm font-bold text-[#16A34A] sm:inline">פתיחת תיק</span>
             <ChevronLeft aria-hidden="true" size={18}/>
           </Link>)}
       </div>

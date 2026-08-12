@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- profile URLs are coach-provided and may use arbitrary approved storage hosts. */
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -6,22 +7,25 @@ import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { resetClientDevice } from "@/app/actions/product";
 import { getAuthContext, getCoachClientDashboard } from "@/lib/data/product-repository";
-import { bodyMassIndex, GOAL_LABELS, isNutritionGoal } from "@/lib/nutrition/energy";
+import { bodyMassIndex, calculateEnergy, GOAL_LABELS, isNutritionGoal, MISSING_LABELS, type NutritionGoal, type Sex } from "@/lib/nutrition/energy";
+import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-level";
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatIsraelDateTime } from "@/lib/date-time";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import ClientDetailExtras from "@/components/coach/ClientDetailExtras";
+import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
+import ClientTabs from "@/components/coach/client-file/ClientTabs";
+import { isClientTab } from "@/lib/coach/client-tabs";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
 const date = (value: string | null) => value ? formatIsraelDateTime(value) : "אין נתון";
 const number = (value: number) => Math.round(value).toLocaleString("he-IL");
 
-export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string }> }) {
+export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string; tab?: string }> }) {
   const auth = await getAuthContext(); if (!auth) redirect("/login"); if (auth.role !== "coach") redirect("/unauthorized");
   const { id } = await params; const query=await searchParams; const data = await getCoachClientDashboard(auth.id, id); if (!data) notFound();
   const lastCheckIn = data.checkIns[0] ?? null;
@@ -37,7 +41,28 @@ export default async function CoachClientPage({ params, searchParams }: { params
     supabase.from("coach_client_notes").select("id,body,created_at,updated_at").eq("client_id",id).eq("coach_id",auth.id).order("created_at",{ascending:false}),
   ]);
   const weeklySummaries = await getWeeklySummaries(id);
-  const { data: { user: authUser } } = await createSupabaseAdminClient().auth.admin.getUserById(id);
+  const tab = isClientTab(query.tab) ? query.tab : "overview";
+  // The two most recent weigh-ins, so the card can say which way the client is
+  // going rather than only where they are. One measurement is a number, not a
+  // direction, and is reported as such.
+  const [latestWeighIn, previousWeighIn] = data.progress;
+  const weightChange = latestWeighIn && previousWeighIn
+    ? Number(latestWeighIn.weight) - Number(previousWeighIn.weight)
+    : null;
+  // Whether the account is verified is one line on one card. Reaching for the
+  // admin key to read it should not be able to take the whole client file down -
+  // it does exactly that on any deployment without the service role key, which
+  // includes the E2E dev server. Unknown is a fine answer here.
+  // The factory throws synchronously when the key is absent, so the guard has to
+  // wrap the call itself and not just the promise.
+  const authUser=await (async () => {
+    try {
+      const { data } = await createSupabaseAdminClient().auth.admin.getUserById(id);
+      return data.user;
+    } catch {
+      return null;
+    }
+  })();
   const accountActivated=Boolean(authUser?.email_confirmed_at);
   const latestInvitation=invitations?.[0] ?? null;
   const invitationExpired=latestInvitation?.effective_status==="expired";
@@ -48,6 +73,21 @@ export default async function CoachClientPage({ params, searchParams }: { params
   // reads it from too.
   const weeklyWorkoutsRaw=Number((intake?.preferences as Record<string,unknown> | null)?.weekly_workouts);
   const weeklyWorkouts=Number.isFinite(weeklyWorkoutsRaw) && weeklyWorkoutsRaw>0 ? weeklyWorkoutsRaw : null;
+  // The same engine the builder and the create form use. Read here, never
+  // recomputed - a second copy of the formula is how two screens start
+  // disagreeing about one client's target.
+  const energy=calculateEnergy({
+    ageYears: intake?.age_years ?? undefined,
+    weightKg: latestWeighIn?.weight ? Number(latestWeighIn.weight) : undefined,
+    heightCm: intake?.height ? Number(intake.height) : undefined,
+    sex: (intake?.sex as Sex | null) ?? undefined,
+    weeklyWorkouts: weeklyWorkouts ?? undefined,
+    dailySteps: intake?.daily_steps ?? undefined,
+    goal: (intake?.nutrition_goal as NutritionGoal | null) ?? undefined,
+  });
+  const macros=energy.ok && latestWeighIn?.weight
+    ? calculateMacroTargetResult(Number(latestWeighIn.weight), energy.calorieTarget)
+    : null;
 
   return <main className="client-app-content">
     <header className="flex items-center gap-4 pb-4">
@@ -77,10 +117,42 @@ export default async function CoachClientPage({ params, searchParams }: { params
       <ul className="mt-2 grid gap-1 text-sm">{alertRows.map((alert) => <li key={alert}>{alert}</li>)}</ul>
     </section>}
 
-    {/* Everything else is a section a coach opens on purpose. The card used to be
-        one continuous scroll of nine panels, and the thing you came for was
-        never the thing at the top. */}
+    {/* Seven sections, one at a time. The card used to be a single scroll of
+        nine panels and the thing you came for was never the thing at the top. */}
+    <ClientTabs clientId={id} active={tab}/>
+
+    {tab === "overview" && <div className="mt-5 grid gap-4">
+      <section className="premium-card">
+        <h2 className="font-black">מצב הלקוח</h2>
+        <dl className="compact-data-list mt-3">
+          <div><span>סטטוס</span><strong>{invitationStatus}</strong></div>
+          <div><span>מטרה</span><strong>{isNutritionGoal(intake?.nutrition_goal) ? GOAL_LABELS[intake.nutrition_goal] : intake?.goal ?? "לא הוגדרה"}</strong></div>
+          <div><span>טלפון</span><strong>{data.profile.phone ?? "לא הוזן"}</strong></div>
+          <div><span>כניסה אחרונה</span><strong>{data.lastLoginAt ? date(data.lastLoginAt) : "טרם נכנס"}</strong></div>
+          <div><span>משקל אחרון</span><strong>{latestWeighIn ? `${latestWeighIn.weight} ק״ג` : "אין מדידה"}</strong></div>
+          {/* One measurement is a number, not a direction. */}
+          <div><span>שינוי מהמדידה הקודמת</span><strong>{weightChange === null ? (latestWeighIn ? "יש מדידה אחת בלבד" : "אין מדידות") : `${weightChange > 0 ? "+" : ""}${weightChange.toFixed(1)} ק״ג`}</strong></div>
+          <div><span>צ׳ק־אין אחרון</span><strong>{lastCheckIn ? date(lastCheckIn.submitted_at) : "טרם הוגש"}</strong></div>
+          <div><span>תפריט פעיל</span><strong>{data.menu?.title ?? "אין תפריט פעיל"}</strong></div>
+          <div><span>תוכנית אימונים</span><strong>{data.workouts.program?.name ?? "לא שויכה תוכנית"}</strong></div>
+          <div><span>אימונים שהושלמו לאחרונה</span><strong>{data.workouts.lastCompletedAt ? `אחרון ב-${date(data.workouts.lastCompletedAt)}` : "אין אימון שהושלם"}</strong></div>
+        </dl>
+      </section>
+
+      <section className="premium-card">
+        <h2 className="font-black">פעולות מהירות</h2>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <Link href={`/coach/clients/${id}?tab=intake`} className="premium-secondary-button">עריכת נתוני קליטה</Link>
+          <Link href={data.menu ? `/coach/menus/${data.menu.id}` : "/coach/menus/new"} className="premium-secondary-button">{data.menu ? "פתיחת התפריט" : "יצירת תפריט"}</Link>
+          <Link href={data.workouts.program ? `/coach/workouts/${data.workouts.program.id}` : "/coach/workouts"} className="premium-secondary-button">{data.workouts.program ? "פתיחת תוכנית האימונים" : "שיוך תוכנית אימונים"}</Link>
+          <Link href={`/coach/clients/${id}?tab=notes`} className="premium-secondary-button">הוספת הערת מאמן</Link>
+          <Link href={`/coach/clients/${id}?tab=report`} className="premium-secondary-button sm:col-span-2">פתיחת דוח שיפור</Link>
+        </div>
+      </section>
+    </div>}
+
     <div className="mt-5">
+      {tab === "nutrition" && <>
       <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
         {data.menu ? <>
           <dl className="compact-data-list">
@@ -97,8 +169,37 @@ export default async function CoachClientPage({ params, searchParams }: { params
             </p>
           )}
         </> : <Empty text="ללקוח עדיין לא שויך תפריט פעיל."/>}
-      </Section>
 
+        {/* The target itself, from the same engine the builder uses. Adherence
+            is shown only where a menu exists to adhere to. */}
+        <div className="mt-4 border-t border-[#E5E7E5] pt-4">
+          <h3 className="text-sm font-black text-[#3F433F]">יעד קלורי ומאקרו</h3>
+          {energy.ok ? <dl className="compact-data-list mt-2">
+            <div><span>BMR</span><strong>{energy.bmr} קל׳</strong></div>
+            <div><span>מקדם פעילות</span><strong>×{energy.activityFactor}</strong></div>
+            <div><span>הוצאה יומית</span><strong>{energy.tdee} קל׳</strong></div>
+            <div><span>יעד קלורי</span><strong>{energy.calorieTarget} קל׳</strong></div>
+            {macros?.ok && <><div><span>חלבון</span><strong>{macros.targets.protein} ג׳</strong></div>
+            <div><span>שומן</span><strong>{macros.targets.fat} ג׳</strong></div>
+            <div><span>פחמימות</span><strong>{macros.targets.carbohydrates} ג׳</strong></div></>}
+          </dl> : <p className="mt-2 text-sm text-[#5B5F5B]">לא ניתן לחשב יעד. חסר בכרטיס הלקוח: {energy.missing.map((field) => MISSING_LABELS[field]).join(", ")}.</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link href={data.menu ? `/coach/menus/${data.menu.id}` : "/coach/menus/new"} className="chip">{data.menu ? "פתיחת התפריט" : "יצירת תפריט"}</Link>
+            <Link href={`/coach/clients/${id}?tab=intake`} className="chip">עריכת נתוני קליטה</Link>
+          </div>
+          <p className="mt-2 text-xs text-[#5B5F5B]">„חשב מחדש” והעריכה הידנית של המאקרו נמצאים בבונה התפריט, שם הם נשמרים.</p>
+        </div>
+
+        <div className="mt-4 border-t border-[#E5E7E5] pt-4">
+          <h3 className="text-sm font-black text-[#3F433F]">משקל ומגמה</h3>
+          {data.progress.length >= 2
+            ? <p className="mt-2 text-sm text-[#5B5F5B]">{data.progress.length} מדידות · אחרונה {latestWeighIn?.weight} ק״ג · שינוי מהקודמת {weightChange !== null && weightChange > 0 ? "+" : ""}{weightChange?.toFixed(1)} ק״ג</p>
+            : <p className="mt-2 text-sm text-[#5B5F5B]">{data.progress.length === 1 ? "יש מדידה אחת בלבד, ולכן אין עדיין מגמה." : "אין מדידות משקל."}</p>}
+        </div>
+      </Section>
+      </>}
+
+      {tab === "workouts" && <>
       <Section title="אימונים" summary={data.workouts.program?.name ?? "אין תוכנית פעילה"} open>
         {data.workouts.assignment ? <dl className="compact-data-list">
           <div><span>השלמת השבוע</span><strong>{data.workouts.weeklyCompletionPercent}%</strong></div>
@@ -106,9 +207,19 @@ export default async function CoachClientPage({ params, searchParams }: { params
           <div><span>אימון הבא</span><strong>{data.workouts.nextDayName ?? "לא הוגדר"}</strong></div>
           <div><span>תדירות</span><strong>{data.workouts.assignment.weekly_frequency} בשבוע</strong></div>
         </dl> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}
-      </Section>
 
-      <Section title="צ׳ק־אין" summary="עדכון אחרון, הערות ותגובה">
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-[#E5E7E5] pt-4">
+          {data.workouts.program && <Link href={`/coach/workouts/${data.workouts.program.id}`} className="chip">פתיחת התוכנית</Link>}
+          <Link href="/coach/workouts" className="chip">{data.workouts.program ? "החלפת תוכנית" : "שיוך תוכנית"}</Link>
+          <Link href={`/coach/clients/${id}/workouts`} className="chip">אימונים שהושלמו ונפח</Link>
+          <Link href={`/coach/clients/${id}?tab=notes`} className="chip">הוספת הערה</Link>
+        </div>
+        <p className="mt-2 text-xs text-[#5B5F5B]">משקלים, חזרות ונפח לאורך זמן נמצאים במסך האימונים של הלקוח. המסך הזה אינו משנה תוכנית או היסטוריה.</p>
+      </Section>
+      </>}
+
+      {tab === "progress" && <>
+      <Section title="צ׳ק־אין" summary="עדכון אחרון, הערות ותגובה" open>
         <div className="grid gap-3">{data.checkIns.slice(0, 4).map((entry) => <article key={entry.id} className="rounded-2xl border border-[#E5E7E5] p-4">
           <p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/5 · אנרגיה {entry.energy}/5 · שינה {entry.sleep}/5</p>
           {entry.notes && <p className="mt-2 text-sm">{entry.notes}</p>}
@@ -118,13 +229,50 @@ export default async function CoachClientPage({ params, searchParams }: { params
         {!data.checkIns.length && <Empty text="אין צ׳ק־אין שמור."/>}
       </Section>
 
-      <Section title="התקדמות" summary="משקל והיקף טבור">
-        {data.progress.length ? <div className="app-list">{data.progress.slice(0, 6).map((entry) => <div key={entry.id}>
-          <span className="app-list__main"><strong>{entry.weight} ק״ג</strong><span>{entry.date}</span></span>
-          <span className="app-list__meta"><strong>{entry.navel_circumference ?? "—"}</strong>היקף טבור</span>
-        </div>)}</div> : <Empty text="אין מדידות שמורות."/>}
+      <Section title="התקדמות" summary="משקל והיקף טבור" open>
+        {data.progress.length ? <>
+          <div className="app-list">{data.progress.slice(0, 8).map((entry) => <div key={entry.id}>
+            <span className="app-list__main"><strong>{entry.weight} ק״ג</strong><span>{entry.date}</span></span>
+            <span className="app-list__meta"><strong>{entry.navel_circumference ?? "—"}</strong>היקף טבור</span>
+          </div>)}</div>
+          {/* Two points is the minimum that can describe a direction. Below that
+              the screen says so rather than drawing a line through one dot. */}
+          <p className="mt-3 text-sm text-[#5B5F5B]">{data.progress.length >= 2
+            ? `${data.progress.length} מדידות · שינוי מהמדידה הקודמת ${weightChange !== null && weightChange > 0 ? "+" : ""}${weightChange?.toFixed(1)} ק״ג`
+            : "יש מדידה אחת בלבד, ולכן עדיין אין מגמה להציג."}</p>
+        </> : <Empty text="אין מדידות שמורות."/>}
+        <p className="mt-3 text-xs text-[#5B5F5B]">תמונות התקדמות נשמרות באחסון פרטי ונפתחות ממסך ההתקדמות של הלקוח, לפי ההרשאות.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href={`/coach/clients/${id}/progress`} className="chip">מסך ההתקדמות המלא</Link>
+          <Link href={`/coach/clients/${id}/check-ins`} className="chip">כל הצ׳ק־אינים</Link>
+        </div>
       </Section>
+      </>}
 
+      {tab === "report" && <div className="grid gap-4">
+        {/* The weekly summary that already exists, in the file rather than in a
+            second engine. What it may and may not say is enforced where it is
+            generated. */}
+        <WeeklySummaryPanel summaries={weeklySummaries}/>
+        <section className="premium-card">
+          <h2 className="font-black">על מה הדוח נשען</h2>
+          <p className="mt-2 text-sm text-[#5B5F5B]">הדוח נכתב מנתוני הלקוח בלבד: משקלים, צ׳ק־אינים, עמידה בתפריט ואימונים שהושלמו. כשאין מספיק נתונים הוא אומר מה חסר במקום להשלים.</p>
+          <dl className="compact-data-list mt-3">
+            <div><span>מדידות משקל</span><strong>{data.progress.length}</strong></div>
+            <div><span>צ׳ק־אינים</span><strong>{data.checkIns.length}</strong></div>
+            <div><span>תפריט פעיל</span><strong>{data.menu ? "קיים" : "אין"}</strong></div>
+            <div><span>תוכנית אימונים</span><strong>{data.workouts.program ? "קיימת" : "אין"}</strong></div>
+          </dl>
+          <p className="mt-3 text-xs text-[#5B5F5B]">הדוח אינו נשלח ללקוח אוטומטית.</p>
+        </section>
+      </div>}
+
+      {/* Only the notes. Content assignment and push notifications are coach
+          tools too, but they are not notes, and a tab named for one thing should
+          not carry three. */}
+      {tab === "notes" && <NotesPanel clientId={id} notes={coachNotes??[]} open/>}
+
+      {tab === "overview" && <>
       <Section title="סטטוס הזמנה" summary={invitationStatus}>
         <dl className="compact-data-list">
           <div><span>נשלחה לאחרונה</span><strong>{latestInvitation ? date(latestInvitation.sent_at) : "טרם נשלחה"}</strong></div>
@@ -135,8 +283,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
         </dl>
         {accountActivated&&!intake?.onboarding_completed&&<p className="mt-3 text-sm text-[#5B5F5B]">החשבון כבר אומת. נשלח ללקוח קישור כניסה מאובטח להמשך הקליטה, במקום הזמנה נוספת.</p>}
       </Section>
+      </>}
 
-      <Section title="נתוני קליטה" summary={intake?.onboarding_completed ? `הקליטה הושלמה ב-${date(intake.onboarding_completed_at ?? null)}` : "ממתין להשלמת קליטה מצד הלקוח"}>
+      {tab === "intake" && <>
+      <Section title="נתוני קליטה" summary={intake?.onboarding_completed ? `הקליטה הושלמה ב-${date(intake.onboarding_completed_at ?? null)}` : "ממתין להשלמת קליטה מצד הלקוח"} open>
         {intake ? <dl className="compact-data-list">
           {/* The inputs the calorie target is computed from, so a coach can see
               at a glance which one is missing when the builder says it cannot
@@ -170,10 +320,15 @@ export default async function CoachClientPage({ params, searchParams }: { params
           }}/>
         </div>
       </Section>
+      </>}
 
       {/* Account actions, including the destructive one, live behind a heading
           rather than beside the client's name. */}
-      <Section title="פעולות חשבון" summary="כניסה, הזמנה ומכשיר">
+      {/* Content assignment and notifications live with the account tools on the
+          overview, which is where a coach reaches for them. */}
+      {tab === "overview" && <ClientDetailExtras clientId={id} content={(contentRows??[]).map((item)=>({...item,assigned:(contentAssignments??[]).some((assignment)=>assignment.content_item_id===item.id)}))} notifications={clientNotifications??[]} notes={coachNotes??[]}/>}
+
+      {tab === "overview" && <Section title="פעולות חשבון" summary="כניסה, הזמנה ומכשיר">
         <div className="grid gap-2 sm:grid-cols-2">
           {intake?.onboarding_completed ? <>
             <form action={sendClientMagicLink}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שליחת Magic Link" pending="שולחים…" className="premium-secondary-button w-full"/></form>
@@ -183,14 +338,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
             : <form action={resendClientInvite}><input type="hidden" name="clientId" value={id}/><SubmitButton idle="שלח הזמנה מחדש" pending="שולחים…" className="premium-secondary-button w-full"/></form>}
           <form action={resetClientDevice} className="sm:col-span-2"><input type="hidden" name="clientId" value={id}/><SubmitButton idle="איפוס מכשיר" pending="מאפסים…" className="premium-secondary-button w-full border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]"/></form>
         </div>
-      </Section>
+      </Section>}
     </div>
 
-    <div className="mt-5 grid gap-3">
-      <EnableFreeMenu clientId={id}/>
-      <WeeklySummaryPanel summaries={weeklySummaries}/>
-      <ClientDetailExtras clientId={id} content={(contentRows??[]).map((item)=>({...item,assigned:(contentAssignments??[]).some((assignment)=>assignment.content_item_id===item.id)}))} notifications={clientNotifications??[]} notes={coachNotes??[]}/>
-    </div>
+    {tab === "nutrition" && <div className="mt-5"><EnableFreeMenu clientId={id}/></div>}
   </main>;
 }
 
