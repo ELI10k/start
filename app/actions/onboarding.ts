@@ -78,6 +78,75 @@ export type ReplacementInviteState = Readonly<{
   message: string;
 }>;
 
+export type IntakeState = Readonly<{
+  status: "idle" | "saved" | "error";
+  message: string;
+}>;
+
+/**
+ * Fills in the calorie inputs for a client who already exists.
+ *
+ * The intake form only runs once, at creation, so every client created before
+ * these columns existed has no age, sex, step count, goal or level - and the
+ * builder can only keep naming what is missing. This is the way to answer it,
+ * and it is the only writer of those columns outside the two intake paths.
+ *
+ * A blank field clears the column rather than being ignored: a coach correcting
+ * a wrong age to "unknown" has to be able to say so. Trainee level is stored and
+ * nothing else - it never touches an assignment here, so it cannot disturb a
+ * workout the client has already done.
+ */
+export async function updateClientIntake(_:IntakeState,form:FormData):Promise<IntakeState> {
+  const coach=await getAuthContext();
+  const clientId=value(form,"clientId");
+  if(!coach || coach.role!=="coach" || !clientId) return {status:"error",message:"אין הרשאה לעדכן את נתוני הלקוח."};
+
+  // Same authorization as every other coach action here: the dashboard query
+  // returns nothing unless this coach is actually this client's coach.
+  const { getCoachClientDashboard }=await import("@/lib/data/product-repository");
+  const client=await getCoachClientDashboard(coach.id,clientId);
+  if(!client) return {status:"error",message:"אין הרשאה לעדכן את נתוני הלקוח."};
+
+  const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal") as NutritionGoal:null;
+  const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel") as TraineeLevel:null;
+  const age=positive(form,"ageYears");
+  const sex=value(form,"sex");
+  if(age!==null && (age<12 || age>100)) return {status:"error",message:"גיל חייב להיות בין 12 ל־100."};
+  const steps=value(form,"dailySteps")?Number(value(form,"dailySteps")):null;
+  if(steps!==null && (!Number.isFinite(steps) || steps<0 || steps>60000)) return {status:"error",message:"ממוצע צעדים יומי חייב להיות בין 0 ל־60,000."};
+  const height=positive(form,"height");
+  const weeklyWorkouts=positive(form,"weeklyWorkouts");
+  if(weeklyWorkouts!==null && weeklyWorkouts>14) return {status:"error",message:"מספר האימונים בשבוע חייב להיות בין 1 ל־14."};
+
+  const admin=createSupabaseAdminClient();
+  // The session count lives inside the preferences blob rather than in a column
+  // of its own, so it is merged in - overwriting the blob would drop the
+  // allergies, meal times and equipment the intake put there.
+  const { data: existing }=await admin.from("client_profiles").select("preferences").eq("user_id",clientId).maybeSingle();
+  const currentPreferences=existing?.preferences && typeof existing.preferences==="object" && !Array.isArray(existing.preferences)
+    ? existing.preferences as Record<string,unknown>
+    : {};
+  const preferences={...currentPreferences,weekly_workouts:weeklyWorkouts};
+
+  const { error }=await admin.from("client_profiles").update({
+    preferences,
+    age_years:age,
+    sex:sex==="male"||sex==="female"?sex:null,
+    height,
+    daily_steps:steps,
+    nutrition_goal:nutritionGoal,
+    trainee_level:traineeLevel,
+    // The free-text goal stays in step with the structured one, so the client
+    // card and the older screens do not disagree about what the client is doing.
+    goal:nutritionGoal?GOAL_LABELS[nutritionGoal]:null,
+  }).eq("user_id",clientId);
+  if(error) return {status:"error",message:"השמירה נכשלה. אפשר לנסות שוב בעוד רגע."};
+
+  revalidatePath(`/coach/clients/${clientId}`);
+  revalidatePath("/coach/menus/new");
+  return {status:"saved",message:"נתוני הקליטה נשמרו. יעד הקלוריות בבונה התפריט יחושב מהם."};
+}
+
 const createClientErrorMessage = (error: unknown) => {
   const code=error instanceof Error?error.message:"unknown";
   if(code==="duplicate_client_email") return "כבר קיים חשבון עם כתובת האימייל הזו.";

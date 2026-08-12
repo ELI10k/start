@@ -14,6 +14,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { formatIsraelDateTime } from "@/lib/date-time";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras from "@/components/coach/ClientDetailExtras";
+import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
@@ -42,6 +43,11 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const invitationExpired=latestInvitation?.effective_status==="expired";
   const invitationStatus=intake?.onboarding_completed ? "לקוח פעיל" : !latestInvitation ? "טרם נשלחה הזמנה" : invitationExpired ? "ההזמנה פגה" : latestInvitation.effective_status==="opened" ? "ההזמנה נפתחה" : "הזמנה נשלחה";
   const preferences=intake?.preferences && typeof intake.preferences==="object" && !Array.isArray(intake.preferences) ? Object.entries(intake.preferences).filter(([, item]) => item !== null && item !== "") : [];
+  // The session count is one of the calorie inputs but lives inside the
+  // preferences blob rather than in a column, which is where the repository
+  // reads it from too.
+  const weeklyWorkoutsRaw=Number((intake?.preferences as Record<string,unknown> | null)?.weekly_workouts);
+  const weeklyWorkouts=Number.isFinite(weeklyWorkoutsRaw) && weeklyWorkoutsRaw>0 ? weeklyWorkoutsRaw : null;
 
   return <main className="client-app-content">
     <header className="flex items-center gap-4 pb-4">
@@ -145,6 +151,24 @@ export default async function CoachClientPage({ params, searchParams }: { params
           <div><span>BMI (תצוגה בלבד)</span><strong>{bodyMassIndex(data.progress[0]?.weight ? Number(data.progress[0].weight) : undefined, intake.height ? Number(intake.height) : undefined) ?? "—"}</strong></div>
           {preferences.map(([key,item])=><div key={key}><span>{key.replaceAll("_"," ")}</span><strong>{Array.isArray(item) ? item.join(", ") : String(item)}</strong></div>)}
         </dl> : <Empty text="אין נתוני קליטה זמינים."/>}
+
+        {/* The intake form runs once, at creation. Without this a client created
+            before the calorie columns existed could never be given an age or a
+            goal, and the builder would go on naming what is missing forever. */}
+        <div className="mt-4 border-t border-[#E5E7E5] pt-4">
+          <h3 className="text-sm font-black text-[#3F433F]">עדכון נתוני החישוב</h3>
+          <p className="mb-3 mt-1 text-xs text-[#5B5F5B]">מהם מחושבים BMR, ההוצאה היומית ויעד הקלוריות. שדה שנשאר ריק נשמר כלא מוגדר — המערכת לא מנחשת.</p>
+          <ClientIntakeForm clientId={id} values={{
+            ageYears: intake?.age_years ?? null,
+            sex: intake?.sex ?? null,
+            height: intake?.height ? Number(intake.height) : null,
+            dailySteps: intake?.daily_steps ?? null,
+            weeklyWorkouts: weeklyWorkouts,
+            nutritionGoal: intake?.nutrition_goal ?? null,
+            traineeLevel: intake?.trainee_level ?? null,
+            latestWeight: data.progress[0]?.weight ? Number(data.progress[0].weight) : null,
+          }}/>
+        </div>
       </Section>
 
       {/* Account actions, including the destructive one, live behind a heading

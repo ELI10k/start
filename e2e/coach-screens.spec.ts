@@ -125,16 +125,20 @@ test.describe("coach screens", () => {
     await signOut(page);
   });
 
-  test("an approved programme is read-only, and offers a copy instead", async ({ page }) => {
+  test("an approved programme is editable in place, and says who else it affects", async ({ page }) => {
     await signIn(page, requireIdentity("coach"));
     const opened = await openFirstTrainingDay(page, { officialOnly: true });
     if (!opened) test.skip(true, "no approved programme");
 
-    // The approved programmes are shared by every client and the database
-    // refuses to rewrite one, so the screen must not offer fields that cannot save.
-    await expect(page.getByText(/לקריאה בלבד/)).toBeVisible();
-    await expect(page.getByRole("button", { name: /יצירת עותק לעריכה/ })).toBeVisible();
-    await expect(page.getByLabel(/^סטים ל/)).toHaveCount(0);
+    // These are shared by every client on them, which is worth saying - but it is
+    // a warning now, not a gate. The fields save.
+    await expect(page.getByText(/משותפת לכל הלקוחות/)).toBeVisible();
+    await expect(page.getByLabel(/^סטים ל/).first()).toBeVisible();
+    await expect(page.getByLabel(/^חזרות ל/).first()).toBeVisible();
+    await expect(page.getByLabel(/^מנוחה ל/).first()).toBeVisible();
+    // A copy is still offered, as an option rather than as the only route.
+    await expect(page.getByRole("button", { name: /עריכה בעותק נפרד/ })).toBeVisible();
+    await expect(page.getByText(/לקריאה בלבד/)).toHaveCount(0);
 
     await signOut(page);
   });
@@ -164,7 +168,11 @@ async function openFirstTrainingDay(page: Page, options: { editableOnly?: boolea
     await day.waitFor({ state: "visible", timeout: 20_000 }).catch(() => undefined);
     if (!(await day.count())) continue;
 
-    const isOfficial = (await page.getByText("תוכנית רשמית לקריאה בלבד").count()) > 0;
+    // The label the programme header carries. It used to read "לקריאה בלבד";
+    // approved programmes are editable now, so it says who shares them instead -
+    // and a detector still looking for the old wording matched nothing and
+    // skipped every approved programme silently.
+    const isOfficial = (await page.getByText("תוכנית רשמית משותפת").count()) > 0;
     if (options.editableOnly && isOfficial) continue;
     if (options.officialOnly && !isOfficial) continue;
 

@@ -219,10 +219,14 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1fr_300px]"><div className="space-y-4">
       <section className="grid gap-4 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <Field label="שם התפריט" value={menu.title} onChange={title=>setMenu({...menu,title})}/><Field label="תיאור" value={menu.description} onChange={description=>setMenu({...menu,description})}/>
-        <label className="text-sm font-bold">לקוח<select className="nutrition-input mt-2" value={menu.clientId} onChange={event=>selectClient(event.target.value)}><option value="">ללא שיוך</option>{clients.map(client=><option key={client.id} value={client.id}>{client.full_name}</option>)}</select>{selectedClient&&<span className="mt-1 block text-xs text-[#5B5F5B]">{selectedClient.weight?`משקל עדכני: ${selectedClient.weight} ק״ג`:"לא נמצא משקל עדכני"}</span>}</label>
-        <label className="text-sm font-bold">סטטוס<select className="nutrition-input mt-2" value={menu.status} onChange={event=>setMenu({...menu,status:event.target.value as EditableMenu["status"]})}><option value="draft">טיוטה</option><option value="published">פורסם</option><option value="active">פעיל</option></select></label>
+        {/* Each select carries its own aria-label. A select wrapped in a <label>
+            takes the label text concatenated with every option as its accessible
+            name, so this one would announce as "מטרה לא נבחרה שימור חיטוב עדין…"
+            and nothing looking it up by name could find it. */}
+        <label className="text-sm font-bold">לקוח<select aria-label="לקוח" className="nutrition-input mt-2" value={menu.clientId} onChange={event=>selectClient(event.target.value)}><option value="">ללא שיוך</option>{clients.map(client=><option key={client.id} value={client.id}>{client.full_name}</option>)}</select>{selectedClient&&<span className="mt-1 block text-xs text-[#5B5F5B]">{selectedClient.weight?`משקל עדכני: ${selectedClient.weight} ק״ג`:"לא נמצא משקל עדכני"}</span>}</label>
+        <label className="text-sm font-bold">סטטוס<select aria-label="סטטוס" className="nutrition-input mt-2" value={menu.status} onChange={event=>setMenu({...menu,status:event.target.value as EditableMenu["status"]})}><option value="draft">טיוטה</option><option value="published">פורסם</option><option value="active">פעיל</option></select></label>
         <label className="text-sm font-bold">מטרה
-          <select className="nutrition-input mt-2" value={goal} onChange={event=>changeGoal(event.target.value as NutritionGoal|"")}>
+          <select aria-label="מטרה" className="nutrition-input mt-2" value={goal} onChange={event=>changeGoal(event.target.value as NutritionGoal|"")}>
             <option value="">לא נבחרה</option>
             {(Object.keys(GOAL_LABELS) as NutritionGoal[]).map(item=><option key={item} value={item}>{GOAL_LABELS[item]}</option>)}
           </select>
