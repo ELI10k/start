@@ -12,6 +12,17 @@ export const metadata: Metadata = {
   title: "START by Eli Cohen",
   description: "מערכת הליווי של START",
   appleWebApp: { capable: true, title: "START", statusBarStyle: "default" },
+  // iOS finds /apple-touch-icon.png by convention, but only when it can crawl
+  // for it. Declaring it means the home-screen icon is right on the first
+  // install rather than after a re-visit, and stops a future move of the file
+  // silently reverting the icon to a screenshot of the page.
+  icons: {
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 // The stylesheet already reserves space for the notch and the home indicator
@@ -37,7 +48,8 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={`${assistant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <AuthSessionWatcher />
-        {/* Installability only. The worker is network-only by design. */}
+        {/* Installability, and one static offline page. Nothing per-user is
+            cached; the worker states the boundary. */}
         <ServiceWorker />
         <WorkoutProvider>{children}</WorkoutProvider>
       </body>

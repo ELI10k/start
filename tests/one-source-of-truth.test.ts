@@ -104,10 +104,15 @@ test("the manifest makes START installable, in Hebrew and standalone", async () 
   assert.match(manifest, /scope: "\/"/);
 });
 
-test("the service worker caches nothing, on purpose", async () => {
+test("the service worker caches the offline page and nothing that could carry a person", async () => {
   const worker = await source("public/sw.js");
-  // Every screen is server-rendered per request behind an auth cookie. A caching
-  // worker would serve one person's data on another person's device.
-  assert.match(worker, /event\.respondWith\(fetch\(event\.request\)\)/);
-  assert.doesNotMatch(worker, /caches\.open|cache\.put|cache\.addAll/);
+  // It used to cache nothing at all, which was safe and left a lost signal
+  // showing the browser's error page. It now holds one static page and the
+  // icons - and the boundaries that keep it safe are pinned in
+  // tests/pwa-offline.test.ts.
+  assert.match(worker, /const PUBLIC_ASSETS = \[/);
+  assert.match(worker, /OFFLINE_URL/);
+  // A navigation is per-user HTML: fetched, never stored.
+  assert.doesNotMatch(worker, /cache\.put\(request/);
+  assert.doesNotMatch(worker, /cache\.addAll/);
 });

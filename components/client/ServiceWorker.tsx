@@ -1,9 +1,10 @@
 "use client";
 import { useEffect } from "react";
 
-// Registers the network-only worker in public/sw.js, which exists so the browser
-// will offer to install START. It caches nothing - see the file for why that is
-// deliberate rather than unfinished.
+// Registers the worker in public/sw.js. It exists so the browser will offer to
+// install START, and so a lost signal shows START's own offline page instead of
+// the browser's error screen. The only things it stores are that page and the
+// icons - see the file for the boundary and why it is drawn there.
 export default function ServiceWorker() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
