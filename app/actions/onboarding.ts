@@ -9,6 +9,7 @@ import {
 } from "@/lib/progress/measurements";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { siteUrlForRedirect } from "@/lib/auth/site-url";
 import { GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
 import { assignmentsToAdd, isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
 
@@ -28,6 +29,9 @@ async function assignLevelProgrammes(
   admin:ReturnType<typeof createSupabaseAdminClient>,
   clientId:string,
   level:TraineeLevel,
+  // Which of the level's programmes the coach actually ticked. Empty means the
+  // whole level, which is what the self-serve onboarding path passes.
+  chosenNames:readonly string[]=[],
 ){
   const[{data:catalogue},{data:existing}]=await Promise.all([
     admin.from("workout_programs").select("id,name,training_frequency").eq("status","active"),
@@ -35,7 +39,12 @@ async function assignLevelProgrammes(
   ]);
   const programmes=(catalogue??[]).map(row=>({id:String(row.id),name:String(row.name),trainingFrequency:row.training_frequency?Number(row.training_frequency):undefined}));
   const assigned=(existing??[]).map(row=>String(row.program_id));
-  const toAdd=assignmentsToAdd(level,programmes,assigned);
+  const wanted=assignmentsToAdd(level,programmes,assigned);
+  // A level with three splits is not three programmes a beginner should be given
+  // blindly. When the coach narrowed the list, honour exactly that.
+  const toAdd=chosenNames.length
+    ? wanted.filter(programme=>chosenNames.includes(programme.name.trim()))
+    : wanted;
   if(!toAdd.length)return;
 
   // A client trains several programmes side by side here, so these go in as
@@ -57,13 +66,16 @@ const value=(form:FormData,key:string)=>String(form.get(key)??"").trim();
 const positive=(form:FormData,key:string)=>{const raw=value(form,key);const n=Number(raw);return raw&&Number.isFinite(n)&&n>0?n:null};
 const INVITE_EXPIRY_MS=24*60*60*1000;
 const inviteExpiry=()=>new Date(Date.now()+INVITE_EXPIRY_MS).toISOString();
-const inviteRedirect = () => {
-  const siteUrl=process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/,"");
+// Both come back to the deployment the coach was actually using. On a preview
+// that is the preview's own hostname, which cannot be configured ahead of time
+// because it is generated per deployment.
+const inviteRedirect = async () => {
+  const siteUrl=await siteUrlForRedirect();
   if(!siteUrl) throw new Error("site_url_missing");
   return `${siteUrl}/auth/callback?next=/onboarding`;
 };
-const magicLinkRedirect = () => {
-  const siteUrl=process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/,"");
+const magicLinkRedirect = async () => {
+  const siteUrl=await siteUrlForRedirect();
   if(!siteUrl) throw new Error("site_url_missing");
   return `${siteUrl}/auth/confirm-link`;
 };
@@ -169,7 +181,7 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
     const admin=createSupabaseAdminClient();
     const {data:coachProfile,error:coachProfileError}=await admin.from("profiles").select("is_test_account").eq("id",coach.id).single();
     if(coachProfileError) throw new Error("coach_profile_failed");
-    const { data: invitation, error: inviteError }=await admin.auth.admin.inviteUserByEmail(email,{data:{full_name:fullName},redirectTo:inviteRedirect()});
+    const { data: invitation, error: inviteError }=await admin.auth.admin.inviteUserByEmail(email,{data:{full_name:fullName},redirectTo:await inviteRedirect()});
     if(inviteError||!invitation.user) {
       if(inviteError?.message.toLowerCase().includes("already")) throw new Error("duplicate_client_email");
       throw new Error("client_invitation_failed");
@@ -208,10 +220,13 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
       onboarding_completed:false,
     });
     if(clientProfileError) throw new Error("client_intake_failed");
-    // A level gives the client the programmes that match it straight away, so a
-    // new client is not left with an empty workouts screen until the coach gets
-    // round to assigning one by hand.
-    if(traineeLevel)await assignLevelProgrammes(admin,clientId,traineeLevel as TraineeLevel);
+    // Assignment used to happen silently whenever a level was picked, so a coach
+    // could not tell whether the client had programmes until they opened the
+    // client. It is a choice on the form now, ticked by default, and the form
+    // names the programmes it will assign before the coach submits.
+    const autoAssign=value(form,"autoAssignProgrammes")==="on";
+    const chosenProgrammes=form.getAll("levelProgrammes").map(String).filter(Boolean);
+    if(traineeLevel&&autoAssign)await assignLevelProgrammes(admin,clientId,traineeLevel as TraineeLevel,chosenProgrammes);
     const { error: relationError }=await admin.from("coach_client_relationships").upsert({coach_id:coach.id,client_id:clientId,status:"active"},{onConflict:"coach_id,client_id"});
     if(relationError) throw new Error("client_relationship_failed");
     const { error: invitationHistoryError }=await admin.from("client_invitations").insert({client_id:clientId,coach_id:coach.id,status:"sent",expires_at:inviteExpiry()});
@@ -255,7 +270,7 @@ export async function resendClientInvite(form: FormData) {
 
   const { error }=await admin.auth.admin.inviteUserByEmail(authUser.user.email,{
     data:{full_name:client.profile.full_name},
-    redirectTo:inviteRedirect(),
+    redirectTo:await inviteRedirect(),
   });
   if(error) throw new Error("client_invitation_resend_failed");
   const now=new Date().toISOString();
@@ -299,7 +314,7 @@ export async function requestReplacementInvite(
     ) return generic;
     const {error}=await admin.auth.admin.inviteUserByEmail(authUser.user.email,{
       data:{full_name:profile.full_name},
-      redirectTo:inviteRedirect(),
+      redirectTo:await inviteRedirect(),
     });
     if(error) {
       console.error("Replacement invitation failed",{code:error.code,status:error.status});
@@ -340,7 +355,7 @@ export async function sendClientMagicLink(form: FormData) {
   const clientId=value(form,"clientId");
   const email=await activeCoachClientEmail(clientId);
   const supabase=await createSupabaseServerClient();
-  const { error }=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:magicLinkRedirect(),shouldCreateUser:false}});
+  const { error }=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:await magicLinkRedirect(),shouldCreateUser:false}});
   if(error) throw new Error("client_magic_link_failed");
   revalidatePath(`/coach/clients/${clientId}`);
   redirect(`/coach/clients/${clientId}?login=access-link-sent`);
@@ -350,7 +365,7 @@ export async function sendClientPasswordReset(form: FormData) {
   const clientId=value(form,"clientId");
   const email=await activeCoachClientEmail(clientId);
   const supabase=await createSupabaseServerClient();
-  const { error }=await supabase.auth.resetPasswordForEmail(email,{redirectTo:inviteRedirect()});
+  const { error }=await supabase.auth.resetPasswordForEmail(email,{redirectTo:await inviteRedirect()});
   if(error) throw new Error("client_password_reset_failed");
   revalidatePath(`/coach/clients/${clientId}`);
   redirect(`/coach/clients/${clientId}?login=password-reset-sent`);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   createClientFromCoach,
   type CreateClientState,
@@ -10,12 +10,15 @@ import {
   INITIAL_NAVEL_MIN_CM,
 } from "@/lib/progress/measurements";
 import { GOAL_LABELS, NUTRITION_GOALS } from "@/lib/nutrition/energy";
-import { TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS } from "@/lib/workouts/trainee-level";
+import { PROGRAMMES_BY_LEVEL, TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS, isTraineeLevel } from "@/lib/workouts/trainee-level";
 
 const initialState:CreateClientState={status:"idle",message:""};
 
 export default function CreateClientForm(){
   const[state,action,pending]=useActionState(createClientFromCoach,initialState);
+  // Held here only so the form can name the programmes a level would assign
+  // before the coach submits.
+  const[level,setLevel]=useState("");
   return <form action={action} className="mx-auto max-w-3xl">
     <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START COACH</p>
     <h1 className="mt-2 text-3xl font-black">לקוח חדש</h1>
@@ -51,7 +54,7 @@ export default function CreateClientForm(){
       {/* Sizes the programme, and nothing else. It is not a stand-in for the
           step count or the number of sessions, which is why it sits here rather
           than in the calorie section. */}
-      <Select label="רמת מתאמן" name="traineeLevel" options={TRAINEE_LEVELS.map(level=>[level,TRAINEE_LEVEL_LABELS[level]])}/>
+      <Select label="רמת מתאמן" name="traineeLevel" value={level} onChange={setLevel} options={TRAINEE_LEVELS.map(item=>[item,TRAINEE_LEVEL_LABELS[item]])}/>
       <Field label="סוג אימון" name="trainingType"/>
       <Field
         label="היקף טבור התחלתי (ס״מ)"
@@ -63,6 +66,31 @@ export default function CreateClientForm(){
         inputMode="decimal"
       />
       <label className="block text-sm font-bold sm:col-span-2">מגבלות רפואיות או הערות<textarea name="medicalNotes" className="nutrition-input mt-2 min-h-24"/></label>
+
+      {/* Assignment used to happen silently the moment a level was picked. It is
+          a decision on the form now, and the programmes are named before the
+          coach submits rather than discovered afterwards. A level with three
+          splits is not three programmes a beginner should be handed blindly, so
+          each one can be unticked. */}
+      {isTraineeLevel(level)&&<div className="sm:col-span-2 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-4">
+        <label className="flex items-start gap-3 text-sm font-bold">
+          <input type="checkbox" name="autoAssignProgrammes" defaultChecked className="mt-1 size-5 shrink-0 accent-[#16A34A]"/>
+          <span>שייך תוכנית אימונים אוטומטית לפי הרמה
+            <span className="mt-1 block text-xs font-normal text-[#5B5F5B]">אפשר לבטל, ולשייך ידנית מאוחר יותר ממסך האימונים.</span>
+          </span>
+        </label>
+        <fieldset className="mt-3 border-0 p-0">
+          <legend className="text-xs font-bold text-[#3F433F]">התוכניות שישויכו לרמת {TRAINEE_LEVEL_LABELS[level]}</legend>
+          <div className="mt-2 grid gap-2">
+            {PROGRAMMES_BY_LEVEL[level].map(name=>
+              <label key={name} className="flex items-center gap-2 text-sm font-normal">
+                <input type="checkbox" name="levelProgrammes" value={name} defaultChecked className="size-4 shrink-0 accent-[#16A34A]"/>
+                <span>{name}</span>
+              </label>)}
+          </div>
+          <p className="mt-2 text-xs text-[#5B5F5B]">שיוך מוסיף בלבד. שינוי רמה בעתיד אינו מוחק שיוך קיים ואינו נוגע בהיסטוריית האימונים.</p>
+        </fieldset>
+      </div>}
     </section>
 
     <button disabled={pending} className="mt-6 min-h-14 w-full rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF] disabled:cursor-wait disabled:opacity-50">{pending?"יוצרים לקוח ושולחים הזמנה…":"יצירת לקוח ושליחת הזמנה"}</button>
@@ -73,15 +101,21 @@ function Field({label,name,type="text",required=false,...props}:{label:string;na
   return <label className="block text-sm font-bold">{label}<input name={name} type={type} required={required} className="nutrition-input mt-2" {...props}/></label>;
 }
 
-function Select({label,name,options}:{label:string;name:string;options:readonly (readonly [string,string])[]}){
+function Select({label,name,options,value,onChange}:{label:string;name:string;options:readonly (readonly [string,string])[];value?:string;onChange?:(next:string)=>void}){
+  const controlled=value!==undefined&&onChange!==undefined;
   return <label className="block text-sm font-bold">{label}
     {/* The select carries its own aria-label. Wrapping a select in a label makes
         its accessible name the label text concatenated with every option, so a
         screen reader announces this as "מטרה לא נבחר שימור חיטוב עדין…" - and
         anything looking the field up by name cannot find it. */}
-    <select name={name} aria-label={label} className="nutrition-input mt-2" defaultValue="">
+    <select
+      name={name}
+      aria-label={label}
+      className="nutrition-input mt-2"
+      {...(controlled?{value,onChange:(event)=>onChange(event.target.value)}:{defaultValue:""})}
+    >
       <option value="">לא נבחר</option>
-      {options.map(([value,text])=><option key={value} value={value}>{text}</option>)}
+      {options.map(([item,text])=><option key={item} value={item}>{text}</option>)}
     </select>
   </label>;
 }
