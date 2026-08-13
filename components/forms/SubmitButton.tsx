@@ -11,6 +11,7 @@ export default function SubmitButton({
   icon,
   event,
   eventProperties,
+  formAction,
 }: {
   idle: string;
   pending?: string;
@@ -20,6 +21,7 @@ export default function SubmitButton({
       button that starts them is the honest place to count from. */
   event?: AnalyticsEvent;
   eventProperties?: Record<string, unknown>;
+  formAction?: (formData: FormData) => void | Promise<void>;
 }) {
   const status = useFormStatus();
   return (
@@ -27,6 +29,7 @@ export default function SubmitButton({
       disabled={status.pending}
       className={className}
       onClick={event ? () => track(event, eventProperties) : undefined}
+      formAction={formAction}
     >
       {status.pending ? null : icon}
       {status.pending ? pending : idle}

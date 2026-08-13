@@ -1,6 +1,6 @@
 import { CalendarRange } from "lucide-react";
 import { formatIsraelDate, formatIsraelDateTime } from "@/lib/date-time";
-import { sendWeeklySummary } from "@/app/actions/weekly-summary";
+import { approveWeeklySummary, saveWeeklySummaryDraft, sendWeeklySummary } from "@/app/actions/weekly-summary";
 import SubmitButton from "@/components/forms/SubmitButton";
 import type { StoredWeeklySummary } from "@/lib/coach-intelligence/summary-repository";
 
@@ -32,6 +32,18 @@ export default function WeeklySummaryPanel({ summaries }: { summaries: readonly 
 
               {summary.status === "insufficient_data" ? (
                 <p className="mt-3 text-sm text-[#5B5F5B]">לא נאספו מספיק נתונים לשבוע הזה, ולכן לא נכתב סיכום.</p>
+              ) : !summary.approvedAt ? (
+                <form className="mt-3 grid gap-3">
+                  <input type="hidden" name="summaryId" value={summary.id} />
+                  <EditableList name="wentWell" title="מה היה טוב" items={summary.wentWell} />
+                  <EditableList name="needsWork" title="מה דורש שיפור" items={summary.needsWork} />
+                  <EditableList name="actions" title="פעולות לשבוע הבא" items={summary.actions} />
+                  <p className="text-xs text-[#5B5F5B]">כל שורה נשמרת כנקודה נפרדת. לאחר האישור הגרסה ננעלת ולא ניתן לשנותה.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <SubmitButton formAction={saveWeeklySummaryDraft} idle="שמירת טיוטה" pending="שומרים…" className="chip" />
+                    <SubmitButton formAction={approveWeeklySummary} idle="אישור ושמירת גרסה" pending="מאשרים…" className="chip chip--primary" />
+                  </div>
+                </form>
               ) : (
                 <div className="mt-3 grid gap-3 text-sm">
                   <Block title="מה היה טוב" items={summary.wentWell} />
@@ -42,10 +54,11 @@ export default function WeeklySummaryPanel({ summaries }: { summaries: readonly 
 
               <p className="mt-3 text-xs text-[#3F433F]">
                 נוצר {formatIsraelDateTime(summary.generatedAt)} · מקור: {summary.provider === "rules" ? "מנוע כללים" : summary.provider}
+                {summary.approvedAt ? ` · אושר ${formatIsraelDateTime(summary.approvedAt)} על ידי המאמן` : ""}
                 {summary.sentAt ? ` · נשלח ${formatIsraelDateTime(summary.sentAt)}` : ""}
               </p>
 
-              {summary.status === "draft" && (
+              {summary.status === "draft" && summary.approvedAt && (
                 <form action={sendWeeklySummary} className="mt-3">
                   <input type="hidden" name="summaryId" value={summary.id} />
                   <SubmitButton idle="שליחה ללקוח" pending="שולחים…" className="chip" />
@@ -58,6 +71,15 @@ export default function WeeklySummaryPanel({ summaries }: { summaries: readonly 
         <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-6 text-center text-sm text-[#5B5F5B]">עדיין לא נוצר סיכום שבועי.</p>
       )}
     </section>
+  );
+}
+
+function EditableList({ name, title, items }: { name: string; title: string; items: readonly string[] }) {
+  return (
+    <label className="grid gap-1 text-sm font-black">
+      {title}
+      <textarea name={name} defaultValue={items.join("\n")} rows={Math.max(3, items.length)} maxLength={4000} className="min-h-24 rounded-xl border border-[#D7DAD7] bg-white p-3 font-normal leading-6" />
+    </label>
   );
 }
 

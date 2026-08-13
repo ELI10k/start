@@ -144,9 +144,9 @@ test("the report view separates a number, a direction and a suggestion", async (
   assert.match(view, /אין עדיין שתי נקודות זמן להשוואה/);
 });
 
-test("the versions migration is prepared, additive, and not depended on yet", async () => {
+test("the versions migration is additive and freezes an approved version", async () => {
   const migration = await source("supabase/migrations/202608120002_coach_report_versions.sql");
-  assert.match(migration, /NOT APPLIED/);
+  assert.match(migration, /Applied to the shared Supabase project/);
   assert.match(migration, /add column if not exists approved_at timestamptz/);
   assert.match(migration, /add column if not exists approved_by uuid/);
   // Additive only: nothing dropped or rewritten. Comment lines carry the
@@ -158,4 +158,19 @@ test("the versions migration is prepared, additive, and not depended on yet", as
   // An approved report stops moving.
   assert.match(migration, /approved_summary_is_immutable/);
   assert.match(migration, /Rollback:/);
+});
+
+test("the coach can edit and approve, while an approved report is read-only", async () => {
+  const actions = await source("app/actions/weekly-summary.ts");
+  const panel = await source("components/coach/WeeklySummaryPanel.tsx");
+  const repository = await source("lib/coach-intelligence/summary-repository.ts");
+  assert.match(actions, /auth\.role !== "coach"/);
+  assert.match(actions, /approved_summary_is_immutable/);
+  assert.match(actions, /\.is\("approved_at", null\)/);
+  assert.match(actions, /approved_by: input\.auth\.id/);
+  assert.match(panel, /אישור ושמירת גרסה/);
+  assert.match(panel, /לאחר האישור הגרסה ננעלת/);
+  assert.match(panel, /summary\.status === "draft" && summary\.approvedAt/);
+  assert.match(repository, /row\.edited_went_well \?\? row\.went_well/);
+  assert.match(repository, /approvedAt:/);
 });

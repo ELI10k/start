@@ -2,10 +2,8 @@ begin;
 
 -- Approved versions of the coach's report.
 --
--- NOT APPLIED. This migration is written, validated and left unrun deliberately -
--- it needs an explicit go-ahead. Nothing in the product depends on it yet: the
--- report tab renders from live data today, and the editing and version history it
--- unlocks are hidden until these columns exist.
+-- Applied to the shared Supabase project on 2026-08-13 after a transactional
+-- dry-run and schema snapshot. The report editor reads these columns directly.
 --
 -- What it changes, exactly:
 --

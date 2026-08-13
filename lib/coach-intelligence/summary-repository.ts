@@ -9,8 +9,13 @@ export type StoredWeeklySummary = Readonly<{
   wentWell: readonly string[];
   needsWork: readonly string[];
   actions: readonly string[];
+  generatedWentWell: readonly string[];
+  generatedNeedsWork: readonly string[];
+  generatedActions: readonly string[];
   generatedAt: string;
   sentAt?: string;
+  approvedAt?: string;
+  approvedBy?: string;
 }>;
 
 type Row = Record<string, unknown>;
@@ -22,11 +27,16 @@ const map = (row: Row): StoredWeeklySummary => ({
   weekStart: String(row.week_start),
   status: (row.status as StoredWeeklySummary["status"]) ?? "draft",
   provider: String(row.provider ?? "rules"),
-  wentWell: list(row.went_well),
-  needsWork: list(row.needs_work),
-  actions: list(row.actions),
+  wentWell: list(row.edited_went_well ?? row.went_well),
+  needsWork: list(row.edited_needs_work ?? row.needs_work),
+  actions: list(row.edited_actions ?? row.actions),
+  generatedWentWell: list(row.went_well),
+  generatedNeedsWork: list(row.needs_work),
+  generatedActions: list(row.actions),
   generatedAt: String(row.generated_at ?? ""),
   sentAt: row.sent_at ? String(row.sent_at) : undefined,
+  approvedAt: row.approved_at ? String(row.approved_at) : undefined,
+  approvedBy: row.approved_by ? String(row.approved_by) : undefined,
 });
 
 // RLS decides what comes back: a coach sees their own clients' summaries at
