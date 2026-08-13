@@ -64,6 +64,7 @@ async function assignLevelProgrammes(
 const emailPattern=/^\S+@\S+\.\S+$/;
 const value=(form:FormData,key:string)=>String(form.get(key)??"").trim();
 const positive=(form:FormData,key:string)=>{const raw=value(form,key);const n=Number(raw);return raw&&Number.isFinite(n)&&n>0?n:null};
+const nonNegative=(form:FormData,key:string)=>{const raw=value(form,key);const n=Number(raw);return raw&&Number.isFinite(n)&&n>=0?n:null};
 const INVITE_EXPIRY_MS=24*60*60*1000;
 const inviteExpiry=()=>new Date(Date.now()+INVITE_EXPIRY_MS).toISOString();
 // Both come back to the deployment the coach was actually using. On a preview
@@ -77,7 +78,7 @@ const inviteRedirect = async () => {
 const magicLinkRedirect = async () => {
   const siteUrl=await siteUrlForRedirect();
   if(!siteUrl) throw new Error("site_url_missing");
-  return `${siteUrl}/auth/confirm-link`;
+  return `${siteUrl}/auth/confirm-link?next=/`;
 };
 
 export type CreateClientState = Readonly<{
@@ -127,8 +128,8 @@ export async function updateClientIntake(_:IntakeState,form:FormData):Promise<In
   const steps=value(form,"dailySteps")?Number(value(form,"dailySteps")):null;
   if(steps!==null && (!Number.isFinite(steps) || steps<0 || steps>60000)) return {status:"error",message:"ממוצע צעדים יומי חייב להיות בין 0 ל־60,000."};
   const height=positive(form,"height");
-  const weeklyWorkouts=positive(form,"weeklyWorkouts");
-  if(weeklyWorkouts!==null && weeklyWorkouts>14) return {status:"error",message:"מספר האימונים בשבוע חייב להיות בין 1 ל־14."};
+  const weeklyWorkouts=nonNegative(form,"weeklyWorkouts");
+  if(weeklyWorkouts!==null && weeklyWorkouts>14) return {status:"error",message:"מספר האימונים בשבוע חייב להיות בין 0 ל־14."};
 
   const admin=createSupabaseAdminClient();
   // The session count lives inside the preferences blob rather than in a column
@@ -197,7 +198,7 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
     // were free text nothing read, and the menu is built from the approved
     // catalogue rather than from a sentence.
     const preferences={
-      medical_notes:value(form,"medicalNotes"), training_type:value(form,"trainingType"), weekly_workouts:positive(form,"weeklyWorkouts"),
+      medical_notes:value(form,"medicalNotes"), weekly_workouts:nonNegative(form,"weeklyWorkouts"),
     };
     const { error: profileError }=await admin.from("profiles").update({full_name:fullName,phone:phone||null,role:"client",status:"active",is_test_account:coachProfile.is_test_account}).eq("id",clientId);
     if(profileError) throw new Error("client_profile_failed");
@@ -212,7 +213,7 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
       trainee_level:traineeLevel,
       age_years:positive(form,"ageYears"),
       sex:value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex"):null,
-      daily_steps:positive(form,"dailySteps"),
+      daily_steps:nonNegative(form,"dailySteps"),
       target_weight:positive(form,"targetWeight"),
       height:positive(form,"height"),
       preferences,

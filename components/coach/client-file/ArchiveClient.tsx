@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, RotateCcw } from "lucide-react";
-import { archiveClient, restoreClient } from "@/app/actions/coach";
+import { Archive, RotateCcw, Trash2 } from "lucide-react";
+import { archiveClient, permanentlyDeleteClient, restoreClient } from "@/app/actions/coach";
 
 // Archiving, and the confirmation that makes it safe to offer.
 //
@@ -15,6 +15,8 @@ import { archiveClient, restoreClient } from "@/app/actions/coach";
 export function ArchiveClientPanel({ clientId, clientName }: { clientId: string; clientName: string }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmationName, setConfirmationName] = useState("");
   const [message, setMessage] = useState("");
   const [pending, start] = useTransition();
 
@@ -25,6 +27,15 @@ export function ArchiveClientPanel({ clientId, clientName }: { clientId: string;
       setConfirming(false);
       // Back to the list the client has just left, which is where a coach
       // expects to land - and it is the proof that the archive worked.
+      router.push("/coach/clients");
+      router.refresh();
+    }
+  });
+
+  const remove = () => start(async () => {
+    const result = await permanentlyDeleteClient(clientId, confirmationName);
+    setMessage(result.message);
+    if (result.ok) {
       router.push("/coach/clients");
       router.refresh();
     }
@@ -54,6 +65,32 @@ export function ArchiveClientPanel({ clientId, clientName }: { clientId: string;
         </div>
       </div>}
       {message && <p role="status" className="mt-3 text-sm font-bold text-[#0B0B0B]">{message}</p>}
+
+      <div className="mt-5 border-t border-[#DC2626]/20 pt-4">
+        {!deleting ? <>
+          <p className="text-sm font-black text-[#DC2626]">מחיקה קבועה</p>
+          <p className="mt-1 text-sm text-[#5B5F5B]">מוחקת את החשבון, התפריטים, האימונים, המדידות וההיסטוריה ומאפשרת להזמין מחדש את אותו אימייל.</p>
+          <button type="button" onClick={() => { setDeleting(true); setConfirming(false); setMessage(""); }} className="premium-secondary-button mt-3 border-[#DC2626] text-[#DC2626]">
+            <Trash2 aria-hidden="true" size={17}/>מחיקת לקוח לצמיתות
+          </button>
+        </> : <div role="group" aria-labelledby="delete-confirm">
+          <p id="delete-confirm" className="text-sm font-black text-[#DC2626]">הפעולה אינה ניתנת לביטול</p>
+          <ul className="mt-2 grid gap-1 text-sm text-[#5B5F5B]">
+            <li>· חשבון הכניסה וכל נתוני הלקוח יימחקו.</li>
+            <li>· היסטוריית תזונה, אימונים, מדידות ו־Check-ins לא תהיה ניתנת לשחזור.</li>
+            <li>· לאחר המחיקה אפשר ליצור לקוח חדש עם אותו אימייל.</li>
+          </ul>
+          <label className="mt-3 block text-sm font-bold">להקליד את שם הלקוח לאישור: <span className="font-black">{clientName}</span>
+            <input className="nutrition-input mt-2" value={confirmationName} onChange={event=>setConfirmationName(event.target.value)} autoComplete="off"/>
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" disabled={pending||confirmationName.trim()!==clientName.trim()} onClick={remove} className="premium-secondary-button border-[#DC2626] bg-[#DC2626] text-[#FFFFFF] disabled:opacity-40">
+              {pending?"מוחקים…":"אישור מחיקה לצמיתות"}
+            </button>
+            <button type="button" disabled={pending} onClick={()=>{setDeleting(false);setConfirmationName("")}} className="premium-secondary-button">ביטול</button>
+          </div>
+        </div>}
+      </div>
     </section>
   );
 }

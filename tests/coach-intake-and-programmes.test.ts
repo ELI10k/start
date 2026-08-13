@@ -84,7 +84,7 @@ test("the intake collects what the calculation needs and drops what nothing read
   }
   // Removed: a birth date the calculation would have to derive an age from, and
   // two free-text fields nothing ever read.
-  for (const field of ["birthDate", "dietaryPreferences", "foodDislikes", "activityLevel"]) {
+  for (const field of ["birthDate", "dietaryPreferences", "foodDislikes", "activityLevel", "trainingType"]) {
     assert.doesNotMatch(form, new RegExp(`name="${field}"`), `${field} should no longer be collected`);
   }
   // Trainee level replaced activity level, and says what it is for.
@@ -97,7 +97,7 @@ test("the intake is stored in columns a query can use, not in a free-text blob",
   assert.match(action, /nutrition_goal:nutritionGoal/);
   assert.match(action, /trainee_level:traineeLevel/);
   assert.match(action, /age_years:positive\(form,"ageYears"\)/);
-  assert.match(action, /daily_steps:positive\(form,"dailySteps"\)/);
+  assert.match(action, /daily_steps:nonNegative\(form,"dailySteps"\)/);
   // Only a value from the closed list is stored.
   assert.match(action, /isNutritionGoal\(value\(form,"nutritionGoal"\)\)/);
   assert.match(action, /isTraineeLevel\(value\(form,"traineeLevel"\)\)/);
@@ -119,7 +119,7 @@ test("the builder computes from the client's own data rather than a typed number
   assert.doesNotMatch(editor, /bodyMassIndex/);
 });
 
-test("the picker filters by the food's own group, and keeps master foods first", async () => {
+test("the picker filters by the food's own group, and keeps favorite foods first", async () => {
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   // The old filter let every non-master food through, which is why protein was
   // listing everything.
@@ -128,8 +128,8 @@ test("the picker filters by the food's own group, and keeps master foods first",
 
   const picker = await source("components/coach/menus/FoodCombobox.tsx");
   // Searching narrows; it does not reorder the sections away.
-  assert.match(picker, /const searchMasters=matching\.filter\(item=>item\.food\.isMaster\)/);
-  assert.match(picker, /return\[\.\.\.searchMasters,\.\.\.searchRest\]/);
+  assert.match(picker, /const searchFavorites=matching\.filter\(item=>item\.food\.isMaster\|\|item\.u\?\.favorite\)/);
+  assert.match(picker, /return\[\.\.\.searchFavorites,\.\.\.searchRest\]/);
 });
 
 test("the food name gets its own line, and the primary can be deleted", async () => {

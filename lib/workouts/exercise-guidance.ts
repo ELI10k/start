@@ -4,7 +4,7 @@ import type { Exercise, ExerciseGuidance } from "./types";
 // either present with real content or absent - there is no filler. The panel is
 // allowed to say "לא סופק מידע"; it is never allowed to make something up.
 export type GuidanceSection = Readonly<{ key: GuidanceSectionKey; title: string; kind: "text" | "list"; text?: string; items?: readonly string[] }>;
-export type GuidanceSectionKey = "how-to" | "cues" | "mistakes" | "muscles" | "equipment";
+export type GuidanceSectionKey = "how-to" | "cues" | "mistakes" | "muscles" | "assisting-muscles" | "equipment";
 export type ExerciseGuidanceView = Readonly<{
   exerciseId: string;
   name: string;
@@ -40,6 +40,28 @@ export const isRenderableImageUrl = (value?: string) => {
   }
 };
 
+// The catalogue already links to Eli's approved YouTube demonstrations. When a
+// separate still image was not uploaded, the video's own thumbnail is the most
+// faithful image available: it depicts the exact exercise and does not invent
+// new coaching content.
+export const youtubeThumbnailUrl = (value?: string) => {
+  const raw = clean(value);
+  if (!raw) return undefined;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLocaleLowerCase();
+    let videoId: string | undefined;
+    if (host === "youtu.be" || host === "www.youtu.be") videoId = url.pathname.split("/").filter(Boolean)[0];
+    if (host === "youtube.com" || host === "www.youtube.com" || host === "m.youtube.com") {
+      videoId = url.pathname === "/watch" ? url.searchParams.get("v") ?? undefined : url.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];
+    }
+    if (!videoId || !/^[A-Za-z0-9_-]{6,20}$/.test(videoId)) return undefined;
+    return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+  } catch {
+    return undefined;
+  }
+};
+
 export function normalizeGuidance(input: Partial<ExerciseGuidance>): ExerciseGuidance {
   const imageUrl = clean(input.imageUrl);
   return {
@@ -68,7 +90,8 @@ export function validateGuidance(input: Partial<ExerciseGuidance>): GuidanceVali
 export function buildGuidanceView(exercise: Exercise): ExerciseGuidanceView {
   const guidance = normalizeGuidance(exercise);
   const howTo = guidance.howTo ?? clean(exercise.executionNotes);
-  const muscles = [exercise.primaryMuscleGroup, ...exercise.secondaryMuscleGroups].map((value) => clean(value)).filter((value): value is string => Boolean(value));
+  const primaryMuscles = cleanList(exercise.primaryMuscleGroup ? [exercise.primaryMuscleGroup] : []);
+  const assistingMuscles = cleanList(exercise.secondaryMuscleGroups).filter((muscle) => !primaryMuscles.includes(muscle));
   const equipment = clean(exercise.equipment);
 
   const sections: GuidanceSection[] = [];
@@ -83,8 +106,11 @@ export function buildGuidanceView(exercise: Exercise): ExerciseGuidanceView {
   if (guidance.commonMistakes.length) sections.push({ key: "mistakes", title: "טעויות נפוצות", kind: "list", items: guidance.commonMistakes });
   else missing.push("mistakes");
 
-  if (muscles.length) sections.push({ key: "muscles", title: "שרירים עובדים", kind: "list", items: [...new Set(muscles)] });
+  if (primaryMuscles.length) sections.push({ key: "muscles", title: "שריר עיקרי", kind: "list", items: primaryMuscles });
   else missing.push("muscles");
+
+  if (assistingMuscles.length) sections.push({ key: "assisting-muscles", title: "שרירים מסייעים", kind: "list", items: assistingMuscles });
+  else missing.push("assisting-muscles");
 
   if (equipment) sections.push({ key: "equipment", title: "ציוד", kind: "text", text: equipment });
   else missing.push("equipment");
@@ -92,7 +118,7 @@ export function buildGuidanceView(exercise: Exercise): ExerciseGuidanceView {
   return {
     exerciseId: exercise.id,
     name: exercise.name,
-    imageUrl: guidance.imageUrl,
+    imageUrl: guidance.imageUrl ?? youtubeThumbnailUrl(exercise.video?.url),
     sections,
     missing,
     hasAnyContent: sections.length > 0,

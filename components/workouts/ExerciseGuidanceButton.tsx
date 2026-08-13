@@ -96,6 +96,7 @@ const MISSING_LABELS = {
   "how-to": "איך מבצעים",
   cues: "דגשים חשובים",
   mistakes: "טעויות נפוצות",
-  muscles: "שרירים עובדים",
+  muscles: "שריר עיקרי",
+  "assisting-muscles": "שרירים מסייעים",
   equipment: "ציוד",
 } as const;

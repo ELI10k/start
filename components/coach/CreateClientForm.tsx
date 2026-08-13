@@ -67,7 +67,7 @@ export default function CreateClientForm(){
       <Select label="מין" name="sex" options={[["male","זכר"],["female","נקבה"]]}/>
       <Field label="משקל נוכחי (ק״ג)" name="weight" type="number" step="0.1"/>
       <Field label="גובה (ס״מ)" name="height" type="number"/>
-      <Field label="אימונים בשבוע" name="weeklyWorkouts" type="number" min="1" max="14"/>
+      <Field label="אימונים בשבוע" name="weeklyWorkouts" type="number" min="0" max="14"/>
       <Field label="ממוצע צעדים יומי" name="dailySteps" type="number" min="0" max="60000" step="100"/>
       <Select label="מטרה" name="nutritionGoal" options={NUTRITION_GOALS.map(goal=>[goal,GOAL_LABELS[goal]])}/>
       <Field label="יעד משקל (ק״ג)" name="targetWeight" type="number" step="0.1"/>
@@ -98,7 +98,6 @@ export default function CreateClientForm(){
           step count or the number of sessions, which is why it sits here rather
           than in the calorie section. */}
       <Select label="רמת מתאמן" name="traineeLevel" options={TRAINEE_LEVELS.map(item=>[item,TRAINEE_LEVEL_LABELS[item]])}/>
-      <Field label="סוג אימון" name="trainingType"/>
       <Field
         label="היקף טבור התחלתי (ס״מ)"
         name="navelCircumference"

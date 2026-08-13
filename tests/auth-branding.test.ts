@@ -72,5 +72,6 @@ test("the templates still point at the confirmation screens, not straight at the
   // The whole point of the confirm screens is that opening a mail client, or a
   // scanner following links in it, must not consume the token.
   assert.match(invite, /\/auth\/confirm-invite\?token_hash=\{\{ \.TokenHash \}\}&amp;type=invite/);
-  assert.match(magic, /\/auth\/confirm-link\?token_hash=\{\{ \.TokenHash \}\}&amp;type=magiclink/);
+  assert.match(magic, /\{\{ \.RedirectTo \}\}&amp;token_hash=\{\{ \.TokenHash \}\}&amp;type=magiclink/);
+  assert.doesNotMatch(magic, /\.SiteURL/);
 });

@@ -6,6 +6,7 @@ import { Calculator, ChevronDown, ChevronUp, Copy, Plus, Save, Sparkles, Trash2 
 import {
   recordCoachFoodSelection,
   saveMenuTree,
+  setCoachFoodFavorite,
 } from "@/app/actions/product";
 import BottomSheet from "@/components/client/BottomSheet";
 import FoodCombobox from "@/components/coach/menus/FoodCombobox";
@@ -56,6 +57,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const[pending,startTransition]=useTransition();
   const router=useRouter();
   const foodMap=useMemo(()=>new Map(foods.map(food=>[food.id,food])),[foods]);
+  const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
+  const isFavorite=(food:FoodOption)=>Boolean(food.isMaster||usageMap.get(food.id)?.favorite);
   const selectedClient=clients.find(client=>client.id===menu.clientId);
   const totals=menu.meals.flatMap(meal=>meal.groups.flatMap(group=>group.items.slice(0,1))).reduce((sum,item)=>{
     const food=foodMap.get(item.foodId);
@@ -178,18 +181,43 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const target=portionFor(primaryFood,primary.amount);
     if(!target)return;
     const taken=new Set(group.items.map(item=>item.foodId));
-    const suggestions=foods
-      .filter(food=>food.masterGroup===group.type&&!taken.has(food.id)&&food.calories>0)
+    const suggestions=foodsForGroup(foods,group.type)
+      .filter(food=>isFavorite(food)&&!taken.has(food.id)&&food.calories>0)
       .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type==="carbohydrate"?"carbohydrate":"protein")}))
       .filter((entry):entry is{food:FoodOption;portion:Portion}=>Boolean(entry.portion))
       .sort((a,b)=>Math.abs(a.portion.calories-target.calories)-Math.abs(b.portion.calories-target.calories))
       .slice(0,count)
       .map(entry=>({foodId:entry.food.id,amount:entry.portion.quantity,amountSource:"auto" as const}));
-    if(!suggestions.length){setMessage("אין מאכלי מאסטר מתאימים להצעה בקבוצה הזו.");return}
+    if(!suggestions.length){setMessage("אין מאכלים מועדפים מתאימים להצעה בקבוצה הזו.");return}
     updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,...suggestions]}:value)});
     for(const suggestion of suggestions)void recordCoachFoodSelection(suggestion.foodId);
   };
-  const toggleFavorite=(...args:[string,boolean])=>void args;
+  const toggleFavorite=(foodId:string,favorite:boolean)=>{
+    setUsage(current=>{
+      const previous=current.find(item=>item.foodId===foodId);
+      return[{foodId,count:previous?.count??0,lastUsedAt:previous?.lastUsedAt??"",favorite},...current.filter(item=>item.foodId!==foodId)];
+    });
+    void setCoachFoodFavorite(foodId,favorite).then(result=>{if(!result.ok)setMessage(result.message??"המועדף לא נשמר.")});
+  };
+  // A complete first draft in one click. It cycles through the coach's curated
+  // and manually starred foods, while the strict group classifier guarantees a
+  // carbohydrate can never land in the protein slot (or the reverse).
+  const fillDayFromFavorites=()=>{
+    const favoritesFor=(type:GroupType)=>foodsForGroup(foods,type).filter(isFavorite);
+    const protein=favoritesFor("protein");
+    const carbohydrate=favoritesFor("carbohydrate");
+    if(!protein.length||!carbohydrate.length){setMessage("כדי למלא יום במהירות צריך לפחות מזון מועדף אחד בחלבון ואחד בפחמימה.");return}
+    setMenu(current=>({...current,meals:current.meals.map((meal,mealIndex)=>{
+      if(meal.title==="קלוריות חופשיות")return meal;
+      return{...meal,groups:meal.groups.map(group=>{
+        if(group.items.some(item=>item.foodId))return group;
+        const pool=group.type==="protein"?protein:group.type==="carbohydrate"?carbohydrate:[];
+        const food=pool[mealIndex%pool.length];
+        return food?{...group,items:[{foodId:food.id,amount:defaultPortionQuantity(food),amountSource:"auto" as const}]}:group;
+      })};
+    })}));
+    setMessage("נוצרה טיוטת יום מהמזונות המועדפים. אפשר להחליף כל בחירה ולשנות כמות.");
+  };
   // The six-meal skeleton is a starting point. Meals the coach left untouched are
   // dropped on save rather than blocking it, and groups without a food go with them.
   const savedMeals=()=>menu.meals
@@ -212,10 +240,12 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       </div>
       <div className="flex items-center gap-3">
         <span className="pill">{Math.round(totals.calories+menu.meals.reduce((sum,meal)=>sum+(meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget||0):0),0))}{menu.calorieTarget?` / ${menu.calorieTarget}`:""} קל׳</span>
+        <button type="button" onClick={fillDayFromFavorites} className="hidden min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/40 px-3 text-sm font-bold text-[#16A34A] sm:flex"><Sparkles size={16}/>מלא יום מהמועדפים</button>
         <button type="button" onClick={submit} disabled={pending||!menu.title.trim()} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{pending?"שומרים…":"שמירה"}</button>
       </div>
     </div>
     {message&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">{message}</p>}
+    <button type="button" onClick={fillDayFromFavorites} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#16A34A]/40 bg-[#F0FDF4] px-4 font-black text-[#16A34A] sm:hidden"><Sparkles size={17}/>מלא יום מהמזונות המועדפים</button>
     <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1fr_300px]"><div className="space-y-4">
       <section className="grid gap-4 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <Field label="שם התפריט" value={menu.title} onChange={title=>setMenu({...menu,title})}/><Field label="תיאור" value={menu.description} onChange={description=>setMenu({...menu,description})}/>
@@ -252,7 +282,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       <div className="mt-4 grid items-start gap-4 md:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=>
         <div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4">
           <h3 className="font-black">{groupLabels[group.type]}</h3>
-          <p className="mt-1 text-xs text-[#5B5F5B]">מאכל ראשי אחד, ומתחתיו חלופות בכמות מחושבת.</p>
+          <p className="mt-1 text-xs text-[#5B5F5B]">מוצגים רק מזונות מקבוצת {group.type==="protein"?"החלבון":"הפחמימה"}. מועדפים תמיד ראשונים.</p>
           <div className="mt-3">{group.items.map((item,itemIndex)=>{
             const selectedFood=foodMap.get(item.foodId);
             const portion=selectedFood?portionFor(selectedFood,item.amount):null;

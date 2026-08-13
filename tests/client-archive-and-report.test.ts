@@ -49,11 +49,26 @@ test("a coach can only archive or restore their own relationship", async () => {
 
 test("the confirmation names the client and never calls it a deletion", async () => {
   const panel = await source("components/coach/client-file/ArchiveClient.tsx");
+  const archiveBlock = panel.slice(panel.indexOf("const archive ="), panel.indexOf("const remove ="));
   assert.match(panel, /\{clientName\}/);
   assert.match(panel, /לא יימחקו/);
   assert.match(panel, /העברת לקוח לארכיון/);
   // "מחיקה" would make a coach hesitate over the safe action.
-  assert.doesNotMatch(panel, /מחיקת לקוח|למחוק את הלקוח/);
+  assert.doesNotMatch(archiveBlock, /מחיקת לקוח|למחוק את הלקוח/);
+});
+
+test("permanent deletion is explicit, typed and releases the auth email", async () => {
+  const [actions,panel]=await Promise.all([
+    source("app/actions/coach.ts"),
+    source("components/coach/client-file/ArchiveClient.tsx"),
+  ]);
+  const fn=actions.slice(actions.indexOf("export async function permanentlyDeleteClient"),actions.indexOf("export async function setClientContentAssignment"));
+  assert.match(fn,/confirmationName\.trim\(\)/);
+  assert.match(fn,/relationships.*some/s);
+  assert.match(fn,/auth\.admin\.deleteUser\(clientId\)/);
+  assert.match(panel,/מחיקת לקוח לצמיתות/);
+  assert.match(panel,/confirmationName\.trim\(\)!==clientName\.trim\(\)/);
+  assert.match(panel,/אותו אימייל/);
 });
 
 test("the archive list is the same table, the other side of the status", async () => {

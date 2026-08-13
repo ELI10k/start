@@ -55,11 +55,11 @@ test("master menu and coach usage migration enforce isolation and idempotency",(
   assert.match(sql,/revoke all on function public\.ensure_start_master_menu/);
 });
 
-test("combobox exposes keyboard controls and master-first 30-item recent limits",()=>{
+test("combobox exposes keyboard controls and favorite-first 30-item recent limits",()=>{
   const source=readFileSync(new URL("../components/coach/menus/FoodCombobox.tsx",import.meta.url),"utf8");
   for(const key of ["ArrowDown","ArrowUp","Enter","Escape"])assert.ok(source.includes(key));
   assert.match(source,/slice\(0,30\)/);
-  assert.match(source,/⭐ מאכלי מאסטר/);
+  assert.match(source,/⭐ מאכלים מועדפים/);
   assert.match(source,/מזונות אחרונים/);
   assert.match(source,/foodSearchRelevance/);
 });
@@ -102,7 +102,7 @@ test("menu editor uses fixed meals and grouped alternatives",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
   assert.match(source,/FIXED_MEAL_TITLES/);
   assert.match(source,/קבוצת חלבון/);
-  assert.match(source,/מאכל ראשי אחד, ומתחתיו חלופות בכמות מחושבת/);
+  assert.match(source,/מועדפים תמיד ראשונים/);
   assert.doesNotMatch(source,/title:"ארוחה חדשה"/);
 });
 
@@ -176,11 +176,12 @@ test("a new menu opens with the full six-meal skeleton",()=>{
   assert.doesNotMatch(source,/meals:\[\{title:"ארוחת בוקר"/);
 });
 
-test("the editor offers one-click suggested alternatives from master foods",()=>{
+test("the editor offers one-click suggested alternatives from favorite foods",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
   assert.match(source,/suggestAlternatives/);
   assert.match(source,/הוסף 3 חלופות מומלצות/);
-  assert.match(source,/food\.masterGroup===group\.type/);
+  assert.match(source,/foodsForGroup\(foods,group\.type\)/);
+  assert.match(source,/isFavorite\(food\)/);
   assert.match(source,/amountSource:"auto" as const/);
   assert.match(source,/Math\.abs\(a\.portion\.calories-target\.calories\)/);
 });

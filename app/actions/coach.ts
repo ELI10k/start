@@ -63,6 +63,42 @@ export async function restoreClient(clientId:string):Promise<Result>{
   return{ok:true,message:"הלקוח שוחזר וחזר לרשימת הלקוחות הפעילים."};
 }
 
+/**
+ * Permanently removes a client account so the email address can be invited
+ * again. This is intentionally separate from archive/restore and guarded by
+ * the exact client name in the UI and again on the server.
+ *
+ * Deleting the Auth user is the single source of the cascade: profiles and all
+ * client-owned rows reference it with on-delete rules. We refuse the operation
+ * when another coach still has a relationship with this client, because one
+ * coach must never erase another coach's client file.
+ */
+export async function permanentlyDeleteClient(clientId:string,confirmationName:string):Promise<Result>{
+  const auth=await getAuthContext();
+  if(!auth||auth.role!=="coach"||!validUuid(clientId))return{ok:false,message:"אין הרשאה למחוק את הלקוח."};
+  const session=await createSupabaseServerClient();
+  const {data:owned}=await session.from("coach_client_relationships")
+    .select("client_id").eq("coach_id",auth.id).eq("client_id",clientId).maybeSingle();
+  if(!owned)return{ok:false,message:"אין הרשאה למחוק את הלקוח."};
+
+  const admin=createSupabaseAdminClient();
+  const [{data:profile},{data:relationships}]=await Promise.all([
+    admin.from("profiles").select("full_name,role,is_test_account").eq("id",clientId).maybeSingle(),
+    admin.from("coach_client_relationships").select("coach_id").eq("client_id",clientId),
+  ]);
+  if(!profile||profile.role!=="client"||profile.full_name?.trim()!==confirmationName.trim()){
+    return{ok:false,message:"שם הלקוח שהוקלד אינו תואם. המחיקה לא בוצעה."};
+  }
+  if((relationships??[]).some(row=>String(row.coach_id)!==auth.id)){
+    return{ok:false,message:"לא ניתן למחוק לקוח שמשויך גם למאמן אחר. אפשר להעביר אותו לארכיון."};
+  }
+
+  const {error}=await admin.auth.admin.deleteUser(clientId);
+  if(error)return{ok:false,message:"המחיקה הקבועה נכשלה. לא בוצע שינוי."};
+  revalidatePath("/coach/clients");
+  return{ok:true,message:"חשבון הלקוח וכל נתוניו נמחקו לצמיתות. אפשר להזמין מחדש את אותה כתובת אימייל."};
+}
+
 export async function setClientContentAssignment(clientId:string,contentItemId:string,assigned:boolean):Promise<Result>{const context=await coachFor(clientId);if(!context||!validUuid(contentItemId))return{ok:false,message:"אין הרשאה לשיוך תוכן."};const {auth,supabase}=context;const result=assigned?await supabase.from("client_content_assignments").upsert({client_id:clientId,content_item_id:contentItemId,assigned_by:auth.id},{onConflict:"client_id,content_item_id"}):await supabase.from("client_content_assignments").delete().eq("client_id",clientId).eq("content_item_id",contentItemId);if(result.error)return{ok:false,message:"שיוך התוכן לא נשמר."};revalidate(clientId);return{ok:true,message:assigned?"התוכן שויך ללקוח.":"שיוך התוכן הוסר."}}
 
 export async function createCoachNotification(clientId:string,title:string,body:string,href:string):Promise<Result>{const context=await coachFor(clientId);if(!context||!title.trim()||!href.startsWith("/"))return{ok:false,message:"יש למלא כותרת וקישור תקינים."};const {supabase}=context;const {error}=await supabase.rpc("create_coach_notification",{p_client_id:clientId,p_title:title.trim(),p_body:body.trim(),p_href:href,p_scheduled_at:null});if(error)return{ok:false,message:"ההתראה לא נשמרה."};revalidate(clientId);return{ok:true,message:"ההתראה נשלחה ונשמרה."}}

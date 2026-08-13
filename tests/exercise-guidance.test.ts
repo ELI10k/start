@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import test from "node:test";
-import { buildGuidanceView, isRenderableImageUrl, normalizeGuidance, validateGuidance } from "../lib/workouts/exercise-guidance.ts";
+import { buildGuidanceView, isRenderableImageUrl, normalizeGuidance, validateGuidance, youtubeThumbnailUrl } from "../lib/workouts/exercise-guidance.ts";
 import type { Exercise } from "../lib/workouts/types.ts";
 
 const exercise = (patch: Partial<Exercise> = {}): Exercise => ({
@@ -21,7 +21,7 @@ test("an exercise with no guidance produces no invented sections", () => {
   const view = buildGuidanceView(exercise());
   assert.equal(view.hasAnyContent, false);
   assert.equal(view.sections.length, 0);
-  assert.deepEqual([...view.missing], ["how-to", "cues", "mistakes", "muscles", "equipment"]);
+  assert.deepEqual([...view.missing], ["how-to", "cues", "mistakes", "muscles", "assisting-muscles", "equipment"]);
 });
 
 test("source execution notes stand in for how-to until the coach writes one", () => {
@@ -31,10 +31,20 @@ test("source execution notes stand in for how-to until the coach writes one", ()
   assert.equal(coachWritten.sections.find((section) => section.key === "how-to")?.text, "מהמאמן");
 });
 
-test("muscles merge the primary and secondary groups without duplicates", () => {
+test("primary and assisting muscles are shown separately without duplicates", () => {
   const view = buildGuidanceView(exercise({ primaryMuscleGroup: "חזה", secondaryMuscleGroups: ["יד אחורית", "חזה"] }));
-  assert.deepEqual([...(view.sections.find((section) => section.key === "muscles")?.items ?? [])], ["חזה", "יד אחורית"]);
+  assert.deepEqual([...(view.sections.find((section) => section.key === "muscles")?.items ?? [])], ["חזה"]);
+  assert.deepEqual([...(view.sections.find((section) => section.key === "assisting-muscles")?.items ?? [])], ["יד אחורית"]);
   assert.ok(!view.missing.includes("muscles"));
+  assert.ok(!view.missing.includes("assisting-muscles"));
+});
+
+test("the approved YouTube demonstration supplies a real exercise image fallback", () => {
+  assert.equal(youtubeThumbnailUrl("https://www.youtube.com/watch?v=abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
+  assert.equal(youtubeThumbnailUrl("https://youtu.be/abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
+  assert.equal(youtubeThumbnailUrl("https://evil.example/watch?v=abcDEF_1234"), undefined);
+  const view = buildGuidanceView(exercise({ video: { provider: "youtube", url: "https://youtu.be/abcDEF_1234" } }));
+  assert.equal(view.imageUrl, "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
 });
 
 test("only https images are rendered", () => {

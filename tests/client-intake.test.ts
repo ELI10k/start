@@ -113,6 +113,7 @@ test("out-of-range intake is refused with the field named", async () => {
   assert.match(fn, /age<12 \|\| age>100/);
   assert.match(fn, /steps<0 \|\| steps>60000/);
   assert.match(fn, /weeklyWorkouts>14/);
+  assert.match(fn, /בין 0 ל־14/);
 });
 
 test("every select on the changed screens carries its own accessible name", async () => {
