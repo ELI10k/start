@@ -114,6 +114,39 @@ export async function listCoachClients(coachId: string) {
   }));
 }
 
+/**
+ * The clients this coach has archived.
+ *
+ * The mirror image of listCoachClients: same table, same coach, the other side
+ * of the status. Nothing was deleted to put them here, so everything they own is
+ * still queryable - this list only stops showing them beside the active ones.
+ *
+ * end_date is when the relationship was ended, which is the archive date; it is
+ * an existing column, so this needed no migration.
+ */
+export async function listArchivedCoachClients(coachId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data: relationships, error } = await supabase
+    .from("coach_client_relationships")
+    .select("client_id,start_date,end_date")
+    .eq("coach_id", coachId)
+    .eq("status", "ended");
+  if (error) throw error;
+  const ids = (relationships ?? []).map((row) => row.client_id);
+  if (!ids.length) return [];
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("id,full_name,email,phone,avatar_url")
+    .in("id", ids);
+  if (profileError) throw profileError;
+  return (profiles ?? [])
+    .map((profile) => {
+      const relationship = (relationships ?? []).find((row) => row.client_id === profile.id);
+      return { ...profile, startDate: relationship?.start_date ?? null, archivedAt: relationship?.end_date ?? null };
+    })
+    .sort((a, b) => a.full_name.localeCompare(b.full_name, "he"));
+}
+
 // What the menu editor needs from a client, and nothing else: a name to show in
 // the picker, a weight to derive macros from, and the calorie target to prefill.
 // It used to call listCoachDashboardClients, which additionally scans every

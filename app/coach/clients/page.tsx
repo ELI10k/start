@@ -3,9 +3,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChevronLeft, Plus, Search as SearchIcon, UsersRound } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
-import { getAuthContext, listCoachDashboardClients } from "@/lib/data/product-repository";
+import { getAuthContext, listArchivedCoachClients, listCoachDashboardClients } from "@/lib/data/product-repository";
+import { RestoreClientButton } from "@/components/coach/client-file/ArchiveClient";
 
-type Search = { q?: string; sort?: "name" | "checkin" | "weight"; page?: string };
+type Search = { q?: string; sort?: "name" | "checkin" | "weight"; page?: string; view?: string };
 const labels = { active: "פעיל", waiting: "ממתין", inactive: "לא פעיל" } as const;
 const pills = { active: "pill pill--green", waiting: "pill", inactive: "pill" } as const;
 const sorts = [
@@ -20,6 +21,47 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
   if (!auth) redirect("/login");
   if (auth.role !== "coach") redirect("/unauthorized");
   const params = await searchParams;
+
+  // The archive is the same screen with the other side of the relationship
+  // status. It is deliberately a view of this list rather than its own route:
+  // a coach looking for someone they archived starts by looking for them here.
+  if (params.view === "archived") {
+    const archived = await listArchivedCoachClients(auth.id);
+    return <main className="client-app-content">
+      <header className="premium-page-header">
+        <div>
+          <p>START COACH</p>
+          <h1>לקוחות בארכיון</h1>
+          <span>הליווי הסתיים. שום נתון לא נמחק — התפריטים, האימונים, המדידות וה־Check-ins נשמרו.</span>
+        </div>
+        <span className="pill">{archived.length} בארכיון</span>
+      </header>
+
+      <Link href="/coach/clients" className="chip">חזרה ללקוחות הפעילים</Link>
+
+      {archived.length ? <div className="mt-4 grid gap-3">
+        {archived.map((client) => <article key={client.id} className="premium-card">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="truncate text-lg font-black">{client.full_name}</h2>
+              <p className="mt-1 truncate text-xs text-[#5B5F5B]">{client.email}{client.phone ? ` · ${client.phone}` : ""}</p>
+            </div>
+            <RestoreClientButton clientId={client.id} clientName={client.full_name}/>
+          </div>
+          <dl className="compact-data-list mt-3">
+            <div><span>תחילת ליווי</span><strong>{client.startDate ? date(client.startDate) : "אין נתון"}</strong></div>
+            <div><span>הועבר לארכיון</span><strong>{client.archivedAt ? date(client.archivedAt) : "אין נתון"}</strong></div>
+          </dl>
+          <Link href={`/coach/clients/${client.id}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[#16A34A]">פתיחת תיק</Link>
+        </article>)}
+      </div> : <StateBlock
+          icon={<UsersRound aria-hidden="true" size={22}/>}
+          title="אין לקוחות בארכיון"
+          description="לקוח שתעביר לארכיון יופיע כאן, ואפשר יהיה לשחזר אותו בכל רגע."
+        />}
+    </main>;
+  }
+
   const sort = params.sort === "checkin" || params.sort === "weight" ? params.sort : "name";
   const page = Math.max(1, Number(params.page) || 1);
   const result = await listCoachDashboardClients(auth.id, { query: params.q, sort, page });
@@ -50,6 +92,7 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
 
     <div className="chip-row mt-3">
       {sorts.map((item) => <Link key={item.value} href={sortHref(item.value)} className="chip" aria-current={sort === item.value ? "page" : undefined}>{item.label}</Link>)}
+      <Link href="/coach/clients?view=archived" className="chip">לקוחות בארכיון</Link>
     </div>
 
     {result.items.length ?

@@ -18,6 +18,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
 import ClientTabs from "@/components/coach/client-file/ClientTabs";
+import { ArchiveClientPanel } from "@/components/coach/client-file/ArchiveClient";
+import ClientReportView from "@/components/coach/client-file/ClientReport";
+import { buildClientReport } from "@/lib/coach-intelligence/client-report";
 import { isClientTab } from "@/lib/coach/client-tabs";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
@@ -88,6 +91,27 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const macros=energy.ok && latestWeighIn?.weight
     ? calculateMacroTargetResult(Number(latestWeighIn.weight), energy.calorieTarget)
     : null;
+  // Assembled from the client's own records. Every figure below is one the
+  // database holds; nothing is generated here.
+  const report=buildClientReport({
+    weighIns: data.progress.map((entry) => ({ date: entry.date, weight: Number(entry.weight), navel: entry.navel_circumference === null ? null : Number(entry.navel_circumference) })),
+    checkIns: data.checkIns.map((entry) => ({
+      submittedAt: entry.submitted_at, adherence: entry.adherence ?? null, energy: entry.energy ?? null,
+      sleep: entry.sleep ?? null, hunger: entry.hunger ?? null,
+      workoutsCompleted: entry.workouts_completed ?? null, mealPlanDays: entry.meal_plan_days ?? null,
+      notes: entry.notes ?? null,
+    })),
+    hasMenu: Boolean(data.menu),
+    menuCompletionPercent: data.nutrition.completionPercent,
+    menuPlannedItems: data.nutrition.plannedItems,
+    hasProgram: Boolean(data.workouts.program),
+    programName: data.workouts.program?.name ?? null,
+    weeklyFrequency: data.workouts.assignment?.weekly_frequency ?? null,
+    weeklyCompletionPercent: data.workouts.weeklyCompletionPercent,
+    lastWorkoutAt: data.workouts.lastCompletedAt,
+    goalLabel: isNutritionGoal(intake?.nutrition_goal) ? GOAL_LABELS[intake.nutrition_goal] : null,
+    calorieTarget: energy.ok ? energy.calorieTarget : null,
+  });
 
   return <main className="client-app-content">
     <header className="flex items-center gap-4 pb-4">
@@ -250,21 +274,11 @@ export default async function CoachClientPage({ params, searchParams }: { params
       </>}
 
       {tab === "report" && <div className="grid gap-4">
-        {/* The weekly summary that already exists, in the file rather than in a
-            second engine. What it may and may not say is enforced where it is
-            generated. */}
+        <ClientReportView report={report}/>
+        {/* The weekly summary the AI coach writes, under its own heading, so a
+            coach can always tell the counted lines from the written ones. */}
         <WeeklySummaryPanel summaries={weeklySummaries}/>
-        <section className="premium-card">
-          <h2 className="font-black">על מה הדוח נשען</h2>
-          <p className="mt-2 text-sm text-[#5B5F5B]">הדוח נכתב מנתוני הלקוח בלבד: משקלים, צ׳ק־אינים, עמידה בתפריט ואימונים שהושלמו. כשאין מספיק נתונים הוא אומר מה חסר במקום להשלים.</p>
-          <dl className="compact-data-list mt-3">
-            <div><span>מדידות משקל</span><strong>{data.progress.length}</strong></div>
-            <div><span>צ׳ק־אינים</span><strong>{data.checkIns.length}</strong></div>
-            <div><span>תפריט פעיל</span><strong>{data.menu ? "קיים" : "אין"}</strong></div>
-            <div><span>תוכנית אימונים</span><strong>{data.workouts.program ? "קיימת" : "אין"}</strong></div>
-          </dl>
-          <p className="mt-3 text-xs text-[#5B5F5B]">הדוח אינו נשלח ללקוח אוטומטית.</p>
-        </section>
+        <p className="text-xs text-[#5B5F5B]">הדוח אינו נשלח ללקוח אוטומטית. עריכה ושמירת גרסה מאושרת דורשות עמודות שעדיין אינן קיימות — ראו את המיגרציה המוכנה ב־<code>202608120002</code>.</p>
       </div>}
 
       {/* Only the notes. Content assignment and push notifications are coach
@@ -342,6 +356,8 @@ export default async function CoachClientPage({ params, searchParams }: { params
     </div>
 
     {tab === "nutrition" && <div className="mt-5"><EnableFreeMenu clientId={id}/></div>}
+
+    {tab === "overview" && <ArchiveClientPanel clientId={id} clientName={data.profile.full_name}/>}
   </main>;
 }
 
