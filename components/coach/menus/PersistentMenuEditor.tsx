@@ -230,7 +230,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     setMessage(result.message??"");
     if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
   });
-  return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-6xl">
+  return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-[1600px]">
     {/* The running calorie total lives in the sticky bar: on a phone the summary
         sits below six meals, which is exactly where it is no use. */}
     <div className="sticky top-0 z-30 -mx-4 mb-1 flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7E5] bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
@@ -246,7 +246,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     </div>
     {message&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">{message}</p>}
     <button type="button" onClick={fillDayFromFavorites} className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl border border-[#16A34A]/40 bg-[#F0FDF4] px-4 font-black text-[#16A34A] sm:hidden"><Sparkles size={17}/>מלא יום מהמזונות המועדפים</button>
-    <div className="mt-6 grid items-start gap-5 lg:grid-cols-[1fr_300px]"><div className="space-y-4">
+    <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]"><div className="min-w-0 space-y-4">
       <section className="grid gap-4 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <Field label="שם התפריט" value={menu.title} onChange={title=>setMenu({...menu,title})}/><Field label="תיאור" value={menu.description} onChange={description=>setMenu({...menu,description})}/>
         {/* Each select carries its own aria-label. A select wrapped in a <label>
@@ -279,7 +279,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       {menu.meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><button type="button" aria-label="שכפול ארוחה" onClick={()=>setMenu({...menu,meals:[...menu.meals.slice(0,index+1),structuredClone(meal),...menu.meals.slice(index+1)]})} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMenu({...menu,meals:menu.meals.filter((_,i)=>i!==index)})} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button></div>
       {collapsed.has(index)?<p className="mt-3 text-xs text-[#5B5F5B]">{mealSummary(meal,foodMap)}</p>:<>
       {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:<>
-      <div className="mt-4 grid items-start gap-4 md:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=>
+      <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=>
         <div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4">
           <h3 className="font-black">{groupLabels[group.type]}</h3>
           <p className="mt-1 text-xs text-[#5B5F5B]">מוצגים רק מזונות מקבוצת {group.type==="protein"?"החלבון":"הפחמימה"}. מועדפים תמיד ראשונים.</p>
@@ -316,7 +316,12 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                   <input aria-label="כמות" className="nutrition-input" type="number" min="0.1" step="0.1" value={item.amount} onChange={event=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,amount:Number(event.target.value),amountSource:"manual"}:food)}:value)})}/>
                   <span>{selectedFood?unitLabel(foodUnit(selectedFood).unit,item.amount):"גרם"}</span>
                 </label>
-                {portion?<span className="food-row__meta">{portion.calories} קל׳ · ח {portion.protein} · פ {portion.carbs} · ש {portion.fat}</span>:null}
+                {portion?<dl className="food-row__meta" aria-label={`ערכים תזונתיים של ${selectedFood?.name??"המזון"}`}>
+                  <MacroChip label="קלוריות" value={portion.calories} unit="קל׳"/>
+                  <MacroChip label="חלבון" value={portion.protein} unit="ג׳"/>
+                  <MacroChip label="פחמימה" value={portion.carbs} unit="ג׳"/>
+                  <MacroChip label="שומן" value={portion.fat} unit="ג׳"/>
+                </dl>:null}
               </div>
             </div>})}
           </div>
@@ -356,6 +361,7 @@ function Field({label,value,onChange,type="text"}:{label:string;value:string;onC
 function MacroField({label,value,source,onChange}:{label:string;value:string;source:MacroSource;onChange:(value:string)=>void}){return <label className="text-sm font-bold"><span className="flex items-center justify-between gap-2"><span>{label}</span><span className={`text-[10px] ${source==="auto"?"text-[#16A34A]":"text-[#0B0B0B]"}`}>{source==="auto"?"מחושב אוטומטית":"הוזן ידנית"}</span></span><input className="nutrition-input mt-2" type="number" min="0" value={value} onChange={event=>onChange(event.target.value)}/></label>}
 function Total({label,value}:{label:string;value:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value.toFixed(1)}</dd></div>}
 function MacroTotal({label,value,calories,target}:{label:string;value:string;calories:number;target:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value||"—"} גרם</dd><p className="text-[10px] text-[#5B5F5B]">{target>0?`${Math.round(calories/target*100)}%`:"—"}</p></div>}
+function MacroChip({label,value,unit}:{label:string;value:number;unit:string}){return <div><dt>{label}</dt><dd>{value} {unit}</dd></div>}
 
 function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
   if(meal.title==="קלוריות חופשיות")return meal.freeCalorieTarget?`${meal.freeCalorieTarget} קל׳ חופשיות`:"ללא יעד קלורי";

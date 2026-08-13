@@ -1037,7 +1037,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   grid-template-columns: auto minmax(0, 1fr) auto;
 }
 .food-row__body {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem;
+  display: grid; align-items: center; gap: .65rem;
+  grid-template-columns: minmax(6.5rem, 8rem) minmax(0, 1fr);
 }
 .food-row__pick {
   min-height: 2.75rem; padding-inline: .6rem;
@@ -1056,12 +1057,21 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   color: var(--ink-muted); font-size: .7rem; transform: translateY(-50%); pointer-events: none;
 }
 .food-row__meta {
-  grid-column: 1 / -1;
-  color: var(--ink-muted); font-size: .7rem; font-variant-numeric: tabular-nums;
+  display: grid; min-width: 0;
+  grid-template-columns: repeat(4, minmax(4.4rem, 1fr));
+  gap: .4rem; font-variant-numeric: tabular-nums;
 }
-@media (min-width: 640px) {
-  .food-row { grid-template-columns: auto minmax(0, 1fr) auto auto auto; }
-  .food-row__meta { grid-column: auto; }
+.food-row__meta div {
+  min-width: 0; padding: .45rem .55rem;
+  border: 1px solid var(--line); border-radius: .7rem;
+  background: var(--surface-raised); text-align: center;
+}
+.food-row__meta dt { color: var(--ink-faint); font-size: .62rem; line-height: 1.1; }
+.food-row__meta dd { margin-top: .18rem; color: var(--ink); font-size: .76rem; font-weight: 800; white-space: nowrap; }
+@media (max-width: 639px) {
+  .food-row__body { grid-template-columns: 1fr; }
+  .food-row__amount { width: 100%; }
+  .food-row__meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* ── Login ─────────────────────────────────────────────────────────────── */

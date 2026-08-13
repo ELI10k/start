@@ -132,6 +132,11 @@ test("the picker filters by the food's own group, and keeps favorite foods first
   assert.match(picker, /return\[\.\.\.searchFavorites,\.\.\.searchRest\]/);
 });
 
+test("programme-name filter is generated only from official catalogue entries", async () => {
+  const directory = await source("components/workouts/coach/WorkoutProgramsDirectory.tsx");
+  assert.match(directory, /snapshot\.programs\.filter\(\(program\) => program\.official\)\.map\(\(program\) => program\.name\)/);
+});
+
 test("the food name gets its own line, and the primary can be deleted", async () => {
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   assert.match(editor, /food-row__head/);

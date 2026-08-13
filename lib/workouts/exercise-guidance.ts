@@ -56,11 +56,38 @@ export const youtubeThumbnailUrl = (value?: string) => {
       videoId = url.pathname === "/watch" ? url.searchParams.get("v") ?? undefined : url.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];
     }
     if (!videoId || !/^[A-Za-z0-9_-]{6,20}$/.test(videoId)) return undefined;
-    return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
   } catch {
     return undefined;
   }
 };
+
+// The imported spreadsheets did not carry secondary-muscle columns. These are
+// deliberately conservative, exercise-specific coaching labels: a muscle is
+// shown only when the movement pattern makes it a meaningful assistant. This
+// is preferable to copying the primary body-part label into both sections.
+export function curatedAssistingMuscles(exercise: Exercise): readonly string[] {
+  const name = exercise.normalizedName || exercise.name;
+  const matches = (pattern: RegExp) => pattern.test(name);
+  if (matches(/חימום/)) return [];
+  if (matches(/לחיצת חזה|שכיבות סמיכה/)) return ["יד אחורית", "כתף קדמית"];
+  if (matches(/פרפר/)) return ["כתף קדמית"];
+  if (matches(/לחיצ.*כתפ/)) return ["יד אחורית", "חזה עליון"];
+  if (matches(/הרחקה אופקית|כתף אחורית/)) return ["גב עליון", "טרפז"];
+  if (matches(/הרחקת כתפיים/)) return ["טרפז"];
+  if (matches(/חתירה/)) return ["יד קדמית", "כתף אחורית"];
+  if (matches(/פולי עליון|מתח|פול אובר/)) return ["יד קדמית", "כתף אחורית"];
+  if (matches(/דד ליפט/)) return ["ישבן", "המסטרינג", "גב תחתון"];
+  if (matches(/סומו/)) return ["ישבן", "מקרבי הירך", "המסטרינג"];
+  if (matches(/סקוואט|לחיצת רגליים|לאנג/)) return ["ישבן", "המסטרינג"];
+  if (matches(/כפיפת רגליים/)) return ["תאומים"];
+  if (matches(/פשיטת רגליים/)) return [];
+  if (matches(/הרחקת ירך|רגל לאחור/)) return ["ישבן"];
+  if (matches(/כפיפ(?:ה|ת) מרפקים|פטישים/)) return ["אמות"];
+  if (matches(/פשיטת מרפקים|לחיצה צרפתית|קיק בק|יד אחורית/)) return [];
+  if (matches(/כפיפות בטן|הרמת רגליים|אופניים/)) return ["מכופפי הירך"];
+  return [];
+}
 
 export function normalizeGuidance(input: Partial<ExerciseGuidance>): ExerciseGuidance {
   const imageUrl = clean(input.imageUrl);
@@ -91,7 +118,7 @@ export function buildGuidanceView(exercise: Exercise): ExerciseGuidanceView {
   const guidance = normalizeGuidance(exercise);
   const howTo = guidance.howTo ?? clean(exercise.executionNotes);
   const primaryMuscles = cleanList(exercise.primaryMuscleGroup ? [exercise.primaryMuscleGroup] : []);
-  const assistingMuscles = cleanList(exercise.secondaryMuscleGroups).filter((muscle) => !primaryMuscles.includes(muscle));
+  const assistingMuscles = cleanList(exercise.secondaryMuscleGroups.length ? exercise.secondaryMuscleGroups : primaryMuscles.length ? curatedAssistingMuscles(exercise) : []).filter((muscle) => !primaryMuscles.includes(muscle));
   const equipment = clean(exercise.equipment);
 
   const sections: GuidanceSection[] = [];

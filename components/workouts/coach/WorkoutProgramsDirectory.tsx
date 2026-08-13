@@ -15,7 +15,10 @@ export default function WorkoutProgramsDirectory() {
   const [frequency, setFrequency] = useState("");
 
   const values = (key: "difficulty") => [...new Set(snapshot.programs.map((program) => program[key]).filter((value): value is string => Boolean(value)))];
-  const programOptions = [...new Set(snapshot.programs.map((program) => program.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, "he"));
+  // This selector is the official catalogue, not a history of every private
+  // copy a coach has ever made. Reading it from the live snapshot means a new
+  // official programme appears automatically without another UI change.
+  const programOptions = [...new Set(snapshot.programs.filter((program) => program.official).map((program) => program.name).filter(Boolean))].sort((a, b) => a.localeCompare(b, "he"));
   const equipmentOptions = [...new Set(snapshot.programs.flatMap((program) => program.equipment))];
   const programs = useMemo(
     () => snapshot.programs.filter((program) =>

@@ -40,11 +40,29 @@ test("primary and assisting muscles are shown separately without duplicates", ()
 });
 
 test("the approved YouTube demonstration supplies a real exercise image fallback", () => {
-  assert.equal(youtubeThumbnailUrl("https://www.youtube.com/watch?v=abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
-  assert.equal(youtubeThumbnailUrl("https://youtu.be/abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
+  assert.equal(youtubeThumbnailUrl("https://www.youtube.com/watch?v=abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
+  assert.equal(youtubeThumbnailUrl("https://youtu.be/abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
   assert.equal(youtubeThumbnailUrl("https://evil.example/watch?v=abcDEF_1234"), undefined);
   const view = buildGuidanceView(exercise({ video: { provider: "youtube", url: "https://youtu.be/abcDEF_1234" } }));
-  assert.equal(view.imageUrl, "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
+  assert.equal(view.imageUrl, "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
+});
+
+test("known compound movements receive conservative assisting-muscle labels", () => {
+  const chest = buildGuidanceView(exercise({
+    name: "לחיצת חזה במשקולות בודדות",
+    normalizedName: "לחיצת חזה במשקולות בודדות",
+    primaryMuscleGroup: "חזה",
+    secondaryMuscleGroups: [],
+  }));
+  assert.deepEqual(chest.sections.find((section) => section.key === "assisting-muscles")?.items, ["יד אחורית", "כתף קדמית"]);
+
+  const row = buildGuidanceView(exercise({
+    name: "חתירה בפולי תחתון",
+    normalizedName: "חתירה בפולי תחתון",
+    primaryMuscleGroup: "גב",
+    secondaryMuscleGroups: [],
+  }));
+  assert.deepEqual(row.sections.find((section) => section.key === "assisting-muscles")?.items, ["יד קדמית", "כתף אחורית"]);
 });
 
 test("only https images are rendered", () => {

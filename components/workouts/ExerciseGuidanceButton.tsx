@@ -47,7 +47,7 @@ export function ExerciseGuidancePanel({ exercise }: { exercise: Exercise }) {
           content. */}
       {view.imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- coach-supplied remote URLs are not in the Next image allowlist
-        <img src={view.imageUrl} alt={`תמונת ההדגמה של ${view.name}`} loading="lazy" className="max-h-56 w-full rounded-2xl border border-[#E5E7E5] object-cover" />
+        <img src={view.imageUrl} alt={`תמונת ההדגמה של ${view.name}`} loading="lazy" className="aspect-video w-full rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] object-contain" onError={(event)=>{const image=event.currentTarget;if(image.src.includes("maxresdefault"))image.src=image.src.replace("maxresdefault","hqdefault")}} />
       ) : (
         <div className="grid h-32 place-items-center gap-2 rounded-2xl border border-dashed border-[#E5E7E5] bg-[#F7F8F7] text-[#5B5F5B]">
           <ImageOff aria-hidden="true" size={22} />
