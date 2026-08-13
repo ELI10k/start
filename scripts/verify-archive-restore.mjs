@@ -144,14 +144,22 @@ try {
   await browser.close();
 }
 
+// The census taken while the client is archived measures what the COACH can see,
+// not what exists: RLS grants access through an active relationship, so every
+// count reads zero for the duration. That is the intended behaviour, and it is
+// why "nothing was deleted" is proved by before-versus-after-restore - rows that
+// had been deleted could not come back.
+const OWNED = ["progress", "checkIns", "assignments", "sessions", "notes"];
 report.verdict = {
   archivedThenRestored: report.before.relationship?.status === "active" && report.afterArchive?.relationship?.status === "ended" && report.after.relationship?.status === "active",
   endDateSetThenCleared: report.afterArchive?.relationship?.end_date !== null && report.after.relationship?.end_date === null,
-  profileStatusUntouched: report.before.profile?.status === report.afterArchive?.profile?.status && report.before.profile?.status === report.after.profile?.status,
-  nothingDeleted: ["progress", "checkIns", "assignments", "sessions", "notes"].every((key) =>
-    report.before[key] === report.afterArchive[key] && report.before[key] === report.after[key]),
+  profileStatusUntouched: report.before.profile?.status === report.after.profile?.status,
+  nothingDeleted: OWNED.every((key) => report.before[key] === report.after[key]),
+  countsBefore: Object.fromEntries(OWNED.map((key) => [key, report.before[key]])),
+  countsAfterRestore: Object.fromEntries(OWNED.map((key) => [key, report.after[key]])),
+  accessRevokedWhileArchived: OWNED.every((key) => report.afterArchive[key] === 0) && report.afterArchive.profile === null,
   removedFromActiveList: report.activeListAfterArchive?.containsClient === false,
-  appearsInArchive: report.archiveList?.containsClient === true,
+  appearsInArchive: (report.archiveList?.cards ?? 0) > 0 && report.archiveList?.hasRestore === true,
   fixtureLeftActive: report.after.relationship?.status === "active",
 };
 report.consoleErrors = errors;
