@@ -97,7 +97,7 @@ test.describe("menu round trip", () => {
     await signOut(page);
   });
 
-  test("each group offers only its own foods, master first", async ({ page }) => {
+  test("each group offers only its own foods, favorites first", async ({ page }) => {
     await signIn(page, requireIdentity("coach"));
     await page.goto("/coach/menus/new");
     await settle(page);
@@ -105,7 +105,7 @@ test.describe("menu round trip", () => {
     for (const [index, group] of [[0, "protein"], [1, "carbohydrate"]] as const) {
       await page.getByRole("button", { name: "בחירת מאכל ראשי" }).nth(index).click();
       const sheet = page.getByRole("dialog");
-      await expect(sheet.locator(".food-picker__group").first()).toHaveText(/מאכלי מאסטר/, { timeout: 20_000 });
+      await expect(sheet.locator(".food-picker__group").first()).toHaveText(/מאכלים מועדפים/, { timeout: 20_000 });
 
       // A protein search inside the carbohydrate group finds nothing, and the
       // reverse - which is the filtering that was wrong.

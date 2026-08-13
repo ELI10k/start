@@ -72,8 +72,16 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
       {results.length?results.map((item,index)=>
         <div key={item.food.id}>
           {(index===0||results[index-1]?.group!==item.group)&&<p className="food-picker__group">{item.group}</p>}
-          <div role="option" aria-selected={item.food.id===value} className="food-picker__option flex items-center gap-2" data-active={index===active||undefined}>
-            <button type="button" onMouseDown={event=>event.preventDefault()} onClick={()=>choose(item.food.id)}>
+          <div
+            role="option"
+            tabIndex={0}
+            aria-selected={item.food.id===value}
+            className="food-picker__option flex cursor-pointer items-center gap-2"
+            data-active={index===active||undefined}
+            onClick={()=>choose(item.food.id)}
+            onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();choose(item.food.id)}}}
+          >
+            <button type="button" className="food-picker__choose" onMouseDown={event=>event.preventDefault()} onClick={event=>{event.stopPropagation();choose(item.food.id)}}>
               <strong>{item.food.name}</strong>
               {item.food.brand&&<span>{item.food.brand}</span>}
               {item.u&&<small>נבחר {item.u.count} פעמים</small>}
@@ -83,7 +91,7 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
               aria-label={item.food.isMaster||item.u?.favorite?`${item.food.name} במועדפים`:`הוספת ${item.food.name} למועדפים`}
               title={item.food.isMaster?"מזון מועדף קבוע":item.u?.favorite?"הסרה מהמועדפים":"הוספה למועדפים"}
               disabled={item.food.isMaster}
-              onClick={()=>onToggleFavorite?.(item.food.id,!item.u?.favorite)}
+              onClick={event=>{event.stopPropagation();onToggleFavorite?.(item.food.id,!item.u?.favorite)}}
               className="shrink-0 rounded-xl p-2 text-[#16A34A] disabled:opacity-70"
             ><Star size={17} fill={item.food.isMaster||item.u?.favorite?"currentColor":"none"}/></button>
           </div>

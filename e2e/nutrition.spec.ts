@@ -64,7 +64,7 @@ test.describe("nutrition", () => {
     // client-side transition both page trees are briefly in the DOM, and every
     // label matches twice.
     await menuTitle(page);
-    const client = page.getByLabel("לקוח");
+    const client = page.getByRole("main").getByLabel("לקוח");
     const options = await client.locator("option").allTextContents();
     const named = options.find((option) => option && option !== "ללא שיוך");
     test.skip(!named, "no client is assigned to this test coach");
@@ -94,10 +94,10 @@ test.describe("nutrition", () => {
     await expect(page.getByText("גרם").first()).toBeVisible();
   });
 
-  test("the food picker lists master foods first", async ({ page }) => {
+  test("the food picker lists favorite foods first", async ({ page }) => {
     await page.goto("/coach/menus/new");
     await openFirstPicker(page);
-    await expect(page.getByText("⭐ מאכלי מאסטר")).toBeVisible();
+    await expect(page.getByText("⭐ מאכלים מועדפים")).toBeVisible();
   });
 
   test("search finds foods by Hebrew and by English", async ({ page }) => {

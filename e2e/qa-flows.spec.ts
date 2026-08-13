@@ -22,6 +22,15 @@ test.describe("client flows", () => {
     const meal = page.locator("article").filter({ has: page.locator("fieldset") }).first();
     if (!(await meal.count())) test.skip(true, "no grouped meal on the assigned menu today");
 
+    // A previous interrupted run may have left this shared fixture marked as
+    // skipped or eaten. Normalize it before exercising the transition, and put
+    // it back to the neutral state at the end.
+    const reset = meal.getByRole("button", { name: /ביטול הסימון|ביטול השלמה/ });
+    if (await reset.isVisible().catch(() => false)) {
+      await reset.click();
+      await page.waitForLoadState("networkidle");
+    }
+
     // Until every group has a choice, the screen states the condition instead of
     // offering a button that the database would refuse.
     const groups = meal.locator("fieldset");

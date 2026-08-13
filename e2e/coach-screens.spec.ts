@@ -40,9 +40,10 @@ test.describe("coach screens", () => {
     }
 
     // Kept.
-    for (const label of ["שם מלא", "אימייל", "טלפון", "משקל נוכחי (ק״ג)", "גובה (ס״מ)", "יעד משקל (ק״ג)", "סוג אימון", "אימונים בשבוע"]) {
+    for (const label of ["שם מלא", "אימייל", "טלפון", "משקל נוכחי (ק״ג)", "גובה (ס״מ)", "יעד משקל (ק״ג)", "אימונים בשבוע"]) {
       await expect(page.getByLabel(label, { exact: true }), `${label} should still be collected`).toHaveCount(1);
     }
+    await expect(page.getByLabel("סוג אימון", { exact: true }), "program assignment replaces the old training-type field").toHaveCount(0);
 
     await expect(noSidewaysScroll(page)).resolves.toBe(true);
     await signOut(page);

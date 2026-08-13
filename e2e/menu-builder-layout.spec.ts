@@ -71,19 +71,19 @@ test.describe("menu builder layout", () => {
     await signOut(page);
   });
 
-  test("master foods stay first, before and during a search", async ({ page }) => {
+  test("favorite foods stay first, before and during a search", async ({ page }) => {
     await signIn(page, requireIdentity("coach"));
     const sheet = await openFirstGroup(page);
 
     const headings = sheet.locator(".food-picker__group");
-    await expect(headings.first()).toHaveText(/מאכלי מאסטר/, { timeout: 20_000 });
+    await expect(headings.first()).toHaveText(/מאכלים מועדפים/, { timeout: 20_000 });
 
     // Typing narrows the list. It must not dissolve the sections - which is
     // exactly what it used to do, ranking purely by relevance.
     // By role: the listbox is labelled "תוצאות חיפוש מזון", so a label match
     // alone finds both it and the input.
     await sheet.getByRole("combobox", { name: "חיפוש מזון" }).fill("א");
-    await expect(headings.first()).toHaveText(/מאכלי מאסטר/, { timeout: 20_000 });
+    await expect(headings.first()).toHaveText(/מאכלים מועדפים/, { timeout: 20_000 });
 
     await signOut(page);
   });
