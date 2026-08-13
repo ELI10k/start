@@ -118,11 +118,17 @@ export async function listCoachClients(coachId: string) {
  * The clients this coach has archived.
  *
  * The mirror image of listCoachClients: same table, same coach, the other side
- * of the status. Nothing was deleted to put them here, so everything they own is
- * still queryable - this list only stops showing them beside the active ones.
+ * of the status. Nothing was deleted to put them here - this list only stops
+ * showing them beside the active ones. end_date is the archive date and already
+ * existed, so none of this needed a migration.
  *
- * end_date is when the relationship was ended, which is the archive date; it is
- * an existing column, so this needed no migration.
+ * The names come through the service role, and that is not a shortcut. RLS grants
+ * a coach access to a client's row through is_coach_for(), which requires an
+ * ACTIVE relationship - so the moment a client is archived the coach can no
+ * longer read their profile, and an archive list built on the coach's session
+ * would be a list of blanks. Ownership is still the gate: the relationships are
+ * read through the coach's own session first, and only the ids that query
+ * returns are resolved to names.
  */
 export async function listArchivedCoachClients(coachId: string) {
   const supabase = await createSupabaseServerClient();
@@ -134,15 +140,33 @@ export async function listArchivedCoachClients(coachId: string) {
   if (error) throw error;
   const ids = (relationships ?? []).map((row) => row.client_id);
   if (!ids.length) return [];
-  const { data: profiles, error: profileError } = await supabase
-    .from("profiles")
-    .select("id,full_name,email,phone,avatar_url")
-    .in("id", ids);
-  if (profileError) throw profileError;
-  return (profiles ?? [])
-    .map((profile) => {
-      const relationship = (relationships ?? []).find((row) => row.client_id === profile.id);
-      return { ...profile, startDate: relationship?.start_date ?? null, archivedAt: relationship?.end_date ?? null };
+
+  const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+  let profiles: { id: string; full_name: string; email: string | null; phone: string | null }[] = [];
+  try {
+    const { data } = await createSupabaseAdminClient()
+      .from("profiles")
+      .select("id,full_name,email,phone")
+      .in("id", ids);
+    profiles = (data ?? []) as typeof profiles;
+  } catch {
+    // Without the key the archive is still listable, just without names - which
+    // is better than a screen that fails to load.
+    profiles = [];
+  }
+
+  return ids
+    .map((id) => {
+      const relationship = (relationships ?? []).find((row) => row.client_id === id);
+      const profile = profiles.find((row) => row.id === id);
+      return {
+        id,
+        full_name: profile?.full_name ?? "לקוח בארכיון",
+        email: profile?.email ?? null,
+        phone: profile?.phone ?? null,
+        startDate: relationship?.start_date ?? null,
+        archivedAt: relationship?.end_date ?? null,
+      };
     })
     .sort((a, b) => a.full_name.localeCompare(b.full_name, "he"));
 }

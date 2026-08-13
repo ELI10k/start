@@ -52,7 +52,10 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
             <div><span>תחילת ליווי</span><strong>{client.startDate ? date(client.startDate) : "אין נתון"}</strong></div>
             <div><span>הועבר לארכיון</span><strong>{client.archivedAt ? date(client.archivedAt) : "אין נתון"}</strong></div>
           </dl>
-          <Link href={`/coach/clients/${client.id}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-[#16A34A]">פתיחת תיק</Link>
+          {/* No link to the file: RLS grants a coach access to a client's data
+              through an active relationship, so an archived client's file is not
+              readable until they are restored. Saying so beats a link that 404s. */}
+          <p className="mt-3 text-xs text-[#5B5F5B]">תיק הלקוח ייפתח שוב לאחר שחזור. הנתונים שמורים במלואם.</p>
         </article>)}
       </div> : <StateBlock
           icon={<UsersRound aria-hidden="true" size={22}/>}
