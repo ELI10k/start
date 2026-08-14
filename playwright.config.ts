@@ -14,6 +14,7 @@ loadEnv({ path: join(projectRoot, ".env.e2e"), quiet: true });
 // exercise a real deployment instead - never at Production, which specs assert.
 const baseURL = process.env.E2E_BASE_URL ?? "http://127.0.0.1:3100";
 const usingLocalServer = baseURL.startsWith("http://127.0.0.1") || baseURL.startsWith("http://localhost");
+const localPort = new URL(baseURL).port || "3100";
 
 export default defineConfig({
   testDir: join(projectRoot, "e2e"),
@@ -42,9 +43,9 @@ export default defineConfig({
     // viewport, touch and user-agent parts matter here, so run it on Chromium.
     { name: "chromium-mobile", use: { ...devices["iPhone 13"], browserName: "chromium", defaultBrowserType: "chromium" } },
   ],
-  webServer: usingLocalServer
+  webServer: usingLocalServer && !process.env.E2E_REUSE_SERVER
     ? {
-        command: "npm run dev -- --port 3100",
+        command: `npm run dev -- --port ${localPort}`,
         cwd: projectRoot,
         env: { ...process.env } as Record<string, string>,
         url: baseURL,

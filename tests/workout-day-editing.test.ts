@@ -66,9 +66,11 @@ test("an approved programme is editable in place, by a coach", async () => {
   assert.doesNotMatch(store, /saveCustomWorkoutProgram[^\n]*if\(program\.official\)return snapshot/);
 });
 
-test("the four editable fields include the coach's own note", async () => {
+test("the five editable fields include effort and the coach's own note", async () => {
   const day = await source("components/workouts/WorkoutDayPreview.tsx");
-  assert.match(day, /type EditableField = "sets" \| "reps" \| "rest" \| "notes"/);
+  assert.match(day, /type EditableField = "sets" \| "reps" \| "rest" \| "effort" \| "notes"/);
+  assert.match(day, /רמת מאמץ \(RPE\)/);
+  assert.match(day, /effort: \(patch\.effort \?\? entry\.effort \?\? ""\)\.trim\(\) \|\| undefined/);
   assert.match(day, /label="טכניקה \/ הערה"/);
   assert.match(day, /notes: \(patch\.notes \?\? entry\.notes \?\? ""\)\.trim\(\) \|\| undefined/);
 });
