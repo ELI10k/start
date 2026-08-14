@@ -128,8 +128,11 @@ test("the picker filters by the food's own group, and keeps favorite foods first
 
   const picker = await source("components/coach/menus/FoodCombobox.tsx");
   // Searching narrows; it does not reorder the sections away.
-  assert.match(picker, /const searchFavorites=matching\.filter\(item=>item\.food\.isMaster\|\|item\.u\?\.favorite\)/);
+  assert.match(picker, /const searchFavorites=matching\.filter\(item=>isFavorite\(item\.food,item\.u\)\)/);
   assert.match(picker, /return\[\.\.\.searchFavorites,\.\.\.searchRest\]/);
+  // A coach can explicitly remove an imported master food from their own list.
+  assert.match(picker, /u\?u\.favorite:Boolean\(food\.isMaster\)/);
+  assert.doesNotMatch(picker, /disabled=\{item\.food\.isMaster\}/);
 });
 
 test("programme-name filter is generated only from official catalogue entries", async () => {

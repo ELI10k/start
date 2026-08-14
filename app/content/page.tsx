@@ -1,7 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, Star } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import { StateBlock } from "@/components/client/AppPatterns";
@@ -11,86 +11,77 @@ import {
   listPublishedContent,
 } from "@/lib/data/content-repository";
 
-export default async function ContentPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
+export default async function ContentPage() {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
-  const category = (await searchParams).category;
+
   const [items, categories] = await Promise.all([
-    listPublishedContent(auth.id, category),
+    listPublishedContent(auth.id),
     listContentCategories(),
   ]);
-  const active = categories.find((item) => item.slug === category);
+  const courses = categories.flatMap((category) => {
+    const lessons = items.filter((item) => item.categoryId === category.id);
+    if (!lessons.length) return [];
+    const completed = lessons.filter((item) => item.progressPercent >= 100).length;
+    return [{
+      ...category,
+      lessons,
+      completed,
+      thumbnailUrl: lessons.find((item) => item.thumbnailUrl)?.thumbnailUrl ?? null,
+    }];
+  });
 
   return (
     <ClientShell>
       <PageHeader
         eyebrow="ספריית התוכן"
-        title="תכנים מ־START"
-        description="רק תכנים שפורסמו נטענים מ־Supabase."
+        title="הקורסים של START"
+        description="כל קורס מרוכז במקום אחד, עם השיעורים והקבצים לפי הסדר."
       />
 
-      {/* Category chips scroll rather than wrapping into a block that pushes the
-          library itself off the first screen. */}
-      <nav className="chip-row" aria-label="קטגוריות תוכן">
-        <Link href="/content" className="chip" aria-current={!category ? "page" : undefined}>הכול</Link>
-        {categories.map((item) => (
-          <Link
-            key={item.id}
-            href={`/content?category=${encodeURIComponent(item.slug)}`}
-            className="chip"
-            aria-current={category === item.slug ? "page" : undefined}
-          >
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-
-      {items.length ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <Link key={item.id} href={`/content/${item.id}`} className="premium-card content-card">
-              {item.thumbnailUrl ? (
+      {courses.length ? (
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {courses.map((course) => (
+            <Link
+              key={course.id}
+              href={`/content/category/${encodeURIComponent(course.slug)}`}
+              className="premium-card overflow-hidden p-0 transition-transform hover:-translate-y-0.5"
+            >
+              {course.thumbnailUrl ? (
                 <Image
-                  src={item.thumbnailUrl}
-                  alt={`תמונת ${item.title}`}
-                  width={720}
-                  height={420}
+                  src={course.thumbnailUrl}
+                  alt={`תמונת הקורס ${course.name}`}
+                  width={900}
+                  height={540}
+                  priority={courses.indexOf(course) < 3}
                   unoptimized
-                  className="mb-4 aspect-[16/9] w-full rounded-2xl border border-[#E5E7E5] object-cover"
+                  className="aspect-[16/9] w-full border-b border-[#E5E7E5] object-cover"
                 />
-              ) : null}
-              <div className="content-card__head">
-                <span className="pill pill--green">{item.categoryName}</span>
-                {item.favorite
-                  ? <span className="pill"><Star aria-hidden="true" size={13}/>מועדף</span>
-                  : <span className="pill">{item.progressPercent}%</span>}
-              </div>
-              <h2>{item.title}</h2>
-              <p>{item.description}</p>
-              {/* Progress belongs on the card, not only in the corner number. */}
-              <div className="premium-progress__track" role="img" aria-label={`${item.progressPercent} אחוז נצפה`}>
-                <span style={{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }}/>
-              </div>
-              <div className="content-card__meta">
-                {item.estimatedMinutes && <span>{item.estimatedMinutes} דקות</span>}
-                {item.tags.map((tag) => (
-                  <span key={tag}>#{tag}</span>
-                ))}
+              ) : (
+                <div className="flex aspect-[16/9] items-center justify-center bg-[#F1F3F1] text-[#16A34A]">
+                  <BookOpen aria-hidden="true" size={34} />
+                </div>
+              )}
+              <div className="p-5">
+                <span className="pill pill--green">קורס</span>
+                <h2 className="mt-3 text-xl font-black">{course.name}</h2>
+                {course.description ? (
+                  <p className="mt-2 text-sm leading-6 text-[#5B5F5B]">{course.description}</p>
+                ) : null}
+                <div className="mt-4 flex items-center justify-between border-t border-[#E5E7E5] pt-4 text-sm">
+                  <span>{course.lessons.length} שיעורים</span>
+                  <span>{course.completed}/{course.lessons.length} הושלמו</span>
+                </div>
               </div>
             </Link>
           ))}
         </div>
       ) : (
         <StateBlock
-          icon={<BookOpen aria-hidden="true" size={22}/>}
-          title={active ? `אין עדיין תוכן ב${active.name}` : "אין כאן תוכן עדיין"}
-          description="כשתוכן חדש יפורסם בקטגוריה הזו, הוא יופיע כאן."
-          action={active ? <Link href="/content" className="premium-secondary-button">כל התכנים</Link> : undefined}
+          icon={<BookOpen aria-hidden="true" size={22} />}
+          title="אין קורסים זמינים עדיין"
+          description="קורסים שיפורסמו יופיעו כאן."
         />
       )}
     </ClientShell>

@@ -13,6 +13,7 @@ type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
 export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
   const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
+  const isFavorite=(food:ComboboxFood,u?:Usage)=>u?u.favorite:Boolean(food.isMaster);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
@@ -28,12 +29,12 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
       return usageCount||a.food.name.localeCompare(b.food.name,"he");
     };
     if(q){
-      const searchFavorites=matching.filter(item=>item.food.isMaster||item.u?.favorite).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלים מועדפים"}));
+      const searchFavorites=matching.filter(item=>isFavorite(item.food,item.u)).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלים מועדפים"}));
       const searchFavoriteIds=new Set(searchFavorites.map(item=>item.food.id));
       const searchRest=matching.filter(item=>!searchFavoriteIds.has(item.food.id)).sort(byRelevance).map(item=>({...item,group:"תוצאות חיפוש"}));
       return[...searchFavorites,...searchRest].slice(0,100);
     }
-    const favorites=candidates.filter(item=>item.food.isMaster||item.u?.favorite).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלים מועדפים"}));
+    const favorites=candidates.filter(item=>isFavorite(item.food,item.u)).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלים מועדפים"}));
     const favoriteIds=new Set(favorites.map(item=>item.food.id));
     const used=candidates.filter(item=>item.u);
     const recent=used.filter(item=>!favoriteIds.has(item.food.id)).slice().sort((a,b)=>(b.u?.lastUsedAt??"").localeCompare(a.u?.lastUsedAt??"")).slice(0,30).map(item=>({...item,group:"מזונות אחרונים"}));
@@ -88,12 +89,11 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
             </button>
             <button
               type="button"
-              aria-label={item.food.isMaster||item.u?.favorite?`${item.food.name} במועדפים`:`הוספת ${item.food.name} למועדפים`}
-              title={item.food.isMaster?"מזון מועדף קבוע":item.u?.favorite?"הסרה מהמועדפים":"הוספה למועדפים"}
-              disabled={item.food.isMaster}
-              onClick={event=>{event.stopPropagation();onToggleFavorite?.(item.food.id,!item.u?.favorite)}}
-              className="shrink-0 rounded-xl p-2 text-[#16A34A] disabled:opacity-70"
-            ><Star size={17} fill={item.food.isMaster||item.u?.favorite?"currentColor":"none"}/></button>
+              aria-label={isFavorite(item.food,item.u)?`הסרת ${item.food.name} מהמועדפים`:`הוספת ${item.food.name} למועדפים`}
+              title={isFavorite(item.food,item.u)?"הסרה מהמועדפים":"הוספה למועדפים"}
+              onClick={event=>{event.stopPropagation();onToggleFavorite?.(item.food.id,!isFavorite(item.food,item.u))}}
+              className="shrink-0 rounded-xl p-2 text-[#16A34A]"
+            ><Star size={17} fill={isFavorite(item.food,item.u)?"currentColor":"none"}/></button>
           </div>
         </div>
       ):<p className="p-6 text-center text-sm text-[#5B5F5B]">לא נמצאו מזונות.</p>}
