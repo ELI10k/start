@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { BookOpen, Star } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
@@ -53,6 +54,16 @@ export default async function ContentPage({
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
             <Link key={item.id} href={`/content/${item.id}`} className="premium-card content-card">
+              {item.thumbnailUrl ? (
+                <Image
+                  src={item.thumbnailUrl}
+                  alt={`תמונת ${item.title}`}
+                  width={720}
+                  height={420}
+                  unoptimized
+                  className="mb-4 aspect-[16/9] w-full rounded-2xl border border-[#E5E7E5] object-cover"
+                />
+              ) : null}
               <div className="content-card__head">
                 <span className="pill pill--green">{item.categoryName}</span>
                 {item.favorite

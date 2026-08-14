@@ -7,6 +7,8 @@ import { getAuthContext, getClientOverview } from "@/lib/data/product-repository
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
 import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
+import { buildDailyCoachMessage } from "@/lib/coach-intelligence/proactive-coach";
+import DailyCoachCard from "@/components/client/DailyCoachCard";
 
 export default async function Home() {
   const auth = await getAuthContext();
@@ -29,6 +31,14 @@ export default async function Home() {
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
   const proteinTarget = data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? null;
   const dayPercent = meals.length ? Math.round((completed.length / meals.length) * 100) : 0;
+  const dailyCoachMessage = buildDailyCoachMessage({
+    mealsCompleted: completed.length,
+    mealsPlanned: meals.length,
+    calories: totals.calories,
+    calorieTarget: calorieTarget ?? undefined,
+    protein: totals.protein,
+    proteinTarget: proteinTarget ?? undefined,
+  });
 
   return (
     <ClientShell>
@@ -36,6 +46,8 @@ export default async function Home() {
         <p>שלום, {auth.fullName.split(" ")[0]}</p>
         <h1>מה חשוב לך היום</h1>
       </header>
+
+      <DailyCoachCard message={dailyCoachMessage}/>
 
       <WeeklySummaryCard summary={latestSummary}/>
 
