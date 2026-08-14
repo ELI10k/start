@@ -4,6 +4,7 @@ import { notFound, useRouter } from "next/navigation";
 import { Copy, ExternalLink, Save } from "lucide-react";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
+import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import type { WorkoutExercise, WorkoutProgram } from "@/lib/workouts/types";
 
 // What this screen lets a coach change about one slot in one day. Everything else
@@ -115,7 +116,8 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
         const exercise = getExercise(entry.exerciseId);
         return <article key={entry.id} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="flex min-w-0 items-start gap-3">
+              <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
               <span className="text-xs text-[#5B5F5B]">תרגיל {entry.order + 1}</span>
               <h2 className="mt-1 text-xl font-black">{exercise?.name ?? "תרגיל חסר במאגר"}</h2>
               {/* The muscle group, as a tag rather than a line of small print at
@@ -124,11 +126,11 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
               <div className="mt-2 flex flex-wrap gap-2">
                 <span className="pill pill--green">{exercise?.primaryMuscleGroup ?? "קבוצת שריר לא סווגה"}</span>
                 {exercise?.equipment && <span className="pill">{exercise.equipment}</span>}
-              </div>
+              </div></div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-2">
               {exercise?.video
-                ? <a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink size={15} /></a>
+                ? <a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink size={15} /></a>
                 : <span className="pill">אין סרטון</span>}
               <ExerciseGuidanceButton exercise={exercise} />
             </div>

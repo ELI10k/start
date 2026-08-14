@@ -17,6 +17,8 @@ export type MacroGroup = "protein" | "carbohydrate" | "fat";
 
 export type ClassifiableFood = Readonly<{
   id: string;
+  name?: string;
+  category?: string;
   protein: number | null;
   carbs: number | null;
   fat: number | null;
@@ -46,6 +48,9 @@ export function foodMacroGroup(food: ClassifiableFood): MacroGroup {
  * class of mistake as offering rice there.
  */
 export function foodsForGroup<T extends ClassifiableFood>(foods: readonly T[], group: MacroGroup | "vegetables"): readonly T[] {
-  if (group === "vegetables") return foods;
+  if (group === "vegetables") return foods.filter((food) => {
+    const label=`${food.name??""} ${food.category??""}`.toLocaleLowerCase("he");
+    return /ירק|ירקות|סלט|מלפפון|עגבני|פלפל|חסה|כרוב|קישוא|ברוקולי|כרובית|פטרי|גזר|סלרי|תרד|חציל/.test(label);
+  });
   return foods.filter((food) => foodMacroGroup(food) === group);
 }

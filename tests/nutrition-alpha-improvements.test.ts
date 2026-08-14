@@ -174,6 +174,7 @@ test("a new menu opens with the full six-meal skeleton",()=>{
   assert.match(source,/FIXED_MEAL_TITLES\.map/);
   assert.match(source,/קלוריות חופשיות/);
   assert.doesNotMatch(source,/meals:\[\{title:"ארוחת בוקר"/);
+  for(const group of ["protein","carbohydrate","fat","vegetables"])assert.match(source,new RegExp(`type:\"${group}\"`));
 });
 
 test("the editor offers one-click suggested alternatives from favorite foods",()=>{

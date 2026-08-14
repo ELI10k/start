@@ -159,6 +159,18 @@ test("video and guidance sit together everywhere an exercise is named", async ()
   }
 });
 
+test("exercise cards use a technique label and a compact catalogue image",async()=>{
+  const thumbnail=await source("components/workouts/ExerciseThumbnail.tsx");
+  assert.match(thumbnail,/buildGuidanceView/);
+  assert.match(thumbnail,/h-16 w-20/);
+  for(const path of ["components/workouts/WorkoutDayPreview.tsx","components/workouts/client/AssignedProgram.tsx","components/workouts/client/WorkoutSession.tsx","components/workouts/client/TodayWorkout.tsx"]){
+    const text=await source(path);
+    assert.match(text,/ExerciseThumbnail/);
+    assert.match(text,/סרטון הסבר טכניקה/);
+    assert.doesNotMatch(text,/>וידאו</);
+  }
+});
+
 test("today's screen lists today's exercises rather than only naming the day", async () => {
   const today = await source("components/workouts/client/TodayWorkout.tsx");
   // The client could not see what was coming, or read the coach's דגשים, without

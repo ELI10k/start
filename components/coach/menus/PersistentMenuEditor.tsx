@@ -27,15 +27,17 @@ type Meal={title:typeof FIXED_MEAL_TITLES[number];notes:string;freeCalorieTarget
 type MacroSource="auto"|"manual";
 type MacroSources={protein:MacroSource;carbohydrates:MacroSource;fat:MacroSource};
 export type EditableMenu={id?:string;title:string;description:string;clientId:string;status:"draft"|"published"|"active";calorieTarget:string;proteinTarget:string;carbohydrateTarget:string;fatTarget:string;macroSources:MacroSources;meals:Meal[]};
-const emptyMeal=():Meal=>({title:"ארוחת בוקר",notes:"",freeCalorieTarget:"",groups:[{type:"protein",items:[]},{type:"carbohydrate",items:[]}]});
+const emptyGroups=():Group[]=>[{type:"protein",items:[]},{type:"carbohydrate",items:[]},{type:"fat",items:[]},{type:"vegetables",items:[]}];
+const emptyMeal=():Meal=>({title:"ארוחת בוקר",notes:"",freeCalorieTarget:"",groups:emptyGroups()});
 const groupLabels:Record<GroupType,string>={protein:"קבוצת חלבון",carbohydrate:"קבוצת פחמימה",fat:"קבוצת שומן",vegetables:"קבוצת ירקות"};
 
 export default function PersistentMenuEditor({initial,foods,clients,initialUsage}:{initial:EditableMenu;foods:FoodOption[];clients:readonly ClientOption[];initialUsage:FoodUsage[]}){
   const[menu,setMenu]=useState<EditableMenu>(()=>{
     const client=clients.find(item=>item.id===initial.clientId);
     const plan=planMacros({calories:Number(initial.calorieTarget),weightKg:client?.weight??Number.NaN,sources:planSources(initial.macroSources),current:{}});
-    if(!plan.ok)return initial;
-    return{...initial,
+    const withGroups={...initial,meals:initial.meals.map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:emptyGroups().map(empty=>meal.groups.find(group=>group.type===empty.type)??empty)})};
+    if(!plan.ok)return withGroups;
+    return{...withGroups,
       proteinTarget:initial.macroSources.protein==="auto"&&!initial.proteinTarget?String(plan.plan.protein):initial.proteinTarget,
       carbohydrateTarget:initial.macroSources.carbohydrates==="auto"&&!initial.carbohydrateTarget?String(plan.plan.carbohydrates):initial.carbohydrateTarget,
       fatTarget:initial.macroSources.fat==="auto"&&!initial.fatTarget?String(plan.plan.fat):initial.fatTarget,
@@ -161,7 +163,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const referenceFood=itemIndex===0?currentFood:primaryFood;
     const referenceAmount=itemIndex===0?current?.amount:primary?.amount;
     const calculated=selectedFood&&referenceFood&&referenceAmount
-      ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type==="carbohydrate"?"carbohydrate":"protein")
+      ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type)
       :null;
     updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource}:item)}:value)});
     if(!foodId)return;
@@ -183,7 +185,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const taken=new Set(group.items.map(item=>item.foodId));
     const suggestions=foodsForGroup(foods,group.type)
       .filter(food=>isFavorite(food)&&!taken.has(food.id)&&food.calories>0)
-      .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type==="carbohydrate"?"carbohydrate":"protein")}))
+      .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type)}))
       .filter((entry):entry is{food:FoodOption;portion:Portion}=>Boolean(entry.portion))
       .sort((a,b)=>Math.abs(a.portion.calories-target.calories)-Math.abs(b.portion.calories-target.calories))
       .slice(0,count)
@@ -206,12 +208,14 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const favoritesFor=(type:GroupType)=>foodsForGroup(foods,type).filter(isFavorite);
     const protein=favoritesFor("protein");
     const carbohydrate=favoritesFor("carbohydrate");
+    const fat=favoritesFor("fat");
+    const vegetables=favoritesFor("vegetables");
     if(!protein.length||!carbohydrate.length){setMessage("כדי למלא יום במהירות צריך לפחות מזון מועדף אחד בחלבון ואחד בפחמימה.");return}
     setMenu(current=>({...current,meals:current.meals.map((meal,mealIndex)=>{
       if(meal.title==="קלוריות חופשיות")return meal;
       return{...meal,groups:meal.groups.map(group=>{
         if(group.items.some(item=>item.foodId))return group;
-        const pool=group.type==="protein"?protein:group.type==="carbohydrate"?carbohydrate:[];
+        const pool=group.type==="protein"?protein:group.type==="carbohydrate"?carbohydrate:group.type==="fat"?fat:vegetables;
         const food=pool[mealIndex%pool.length];
         return food?{...group,items:[{foodId:food.id,amount:defaultPortionQuantity(food),amountSource:"auto" as const}]}:group;
       })};
@@ -279,10 +283,10 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       {menu.meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><button type="button" aria-label="שכפול ארוחה" onClick={()=>setMenu({...menu,meals:[...menu.meals.slice(0,index+1),structuredClone(meal),...menu.meals.slice(index+1)]})} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMenu({...menu,meals:menu.meals.filter((_,i)=>i!==index)})} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button></div>
       {collapsed.has(index)?<p className="mt-3 text-xs text-[#5B5F5B]">{mealSummary(meal,foodMap)}</p>:<>
       {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:<>
-      <div className="mt-4 grid items-start gap-5 lg:grid-cols-2">{meal.groups.filter(group=>group.type==="protein"||group.type==="carbohydrate").map((group,groupIndex)=>
+      <div className="mt-4 grid items-start gap-4 2xl:grid-cols-2">{meal.groups.map((group,groupIndex)=>
         <div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4">
           <h3 className="font-black">{groupLabels[group.type]}</h3>
-          <p className="mt-1 text-xs text-[#5B5F5B]">מוצגים רק מזונות מקבוצת {group.type==="protein"?"החלבון":"הפחמימה"}. מועדפים תמיד ראשונים.</p>
+          <p className="mt-1 text-xs text-[#5B5F5B]">מוצגים רק מזונות מתאימים לקבוצה. מזונות מועדפים תמיד ראשונים.</p>
           <div className="mt-3">{group.items.map((item,itemIndex)=>{
             const selectedFood=foodMap.get(item.foodId);
             const portion=selectedFood?portionFor(selectedFood,item.amount):null;
@@ -371,6 +375,6 @@ function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
     const portion=food?portionFor(food,Number(item.amount||0)):null;
     return sum+(portion?.calories??0);
   },0);
-  const options=meal.groups.map(group=>`${group.type==="protein"?"חלבון":"פחמימה"} ${group.items.length}`).join(" · ");
+  const options=meal.groups.map(group=>`${groupLabels[group.type]} ${group.items.length}`).join(" · ");
   return primaries.length?`${Math.round(calories)} קל׳ · ${options}`:"עדיין ריקה";
 }

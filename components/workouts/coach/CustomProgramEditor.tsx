@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
+import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import type { WorkoutDay, WorkoutExercise, WorkoutProgram, WorkoutSetPrescription } from "@/lib/workouts/types";
 
 const uid=(prefix:string)=>`${prefix}-${crypto.randomUUID()}`;
@@ -136,6 +137,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
     <div className="mt-4 grid max-h-64 gap-2 overflow-y-auto md:grid-cols-2">
       {choices.map(exercise=>
         <div key={exercise.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] p-3">
+          <ExerciseThumbnail exercise={exercise}/>
           <span className="min-w-0 text-sm">
             <strong className="block truncate">{exercise.name}</strong>
             <small className="mt-1 block text-[#5B5F5B]">{exercise.primaryMuscleGroup??exercise.category??"ללא סיווג"}</small>
@@ -178,6 +180,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
                 {/* The handle is decoration for a mouse; the buttons beside it are
                     what actually work on a phone, where HTML5 drag does not fire. */}
                 <span className="exercise-slot__handle" aria-hidden="true"><GripVertical size={16}/></span>
+                <ExerciseThumbnail exercise={exercise}/>
                 <strong className="min-w-0 truncate">{exercise?.name??"תרגיל"}</strong>
                 <span className="pill pill--green">{exercise?.primaryMuscleGroup??exercise?.category??"לא סווג"}</span>
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>

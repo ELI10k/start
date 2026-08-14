@@ -1058,11 +1058,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .food-row__meta {
   display: grid; min-width: 0;
-  grid-template-columns: repeat(4, minmax(4.4rem, 1fr));
+  grid-template-columns: repeat(4, minmax(5rem, 1fr));
   gap: .4rem; font-variant-numeric: tabular-nums;
 }
 .food-row__meta div {
-  min-width: 0; padding: .45rem .55rem;
+  min-width: 0; padding: .5rem .65rem;
   border: 1px solid var(--line); border-radius: .7rem;
   background: var(--surface-raised); text-align: center;
 }

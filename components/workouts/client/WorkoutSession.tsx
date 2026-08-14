@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
+import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import { track } from "@/lib/analytics/client";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
@@ -70,19 +71,20 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     {/* One exercise at a time. Everything else is a step away, not a scroll away. */}
     <article className="premium-card mt-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="flex min-w-0 items-start gap-3">
+          <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
           <span className="text-xs font-bold text-[#16A34A]">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
           <h1 className="mt-1 text-2xl font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h1>
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="pill pill--green">{exercise?.primaryMuscleGroup??"קבוצת שריר לא סווגה"}</span>
             {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
-          </div>
+          </div></div>
         </div>
         {/* A missing link never blocks the set - it is stated and the workout
             carries on. */}
         <div className="flex shrink-0 flex-col items-end gap-2">
           {exercise?.video
-            ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">וידאו<ExternalLink aria-hidden="true" size={15}/></a>
+            ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip shrink-0">סרטון הסבר טכניקה<ExternalLink aria-hidden="true" size={15}/></a>
             :<span className="pill shrink-0">אין סרטון</span>}
           <ExerciseGuidanceButton exercise={exercise}/>
         </div>

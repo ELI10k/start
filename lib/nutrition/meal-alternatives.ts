@@ -86,12 +86,12 @@ export function calculateAlternativePortion(
   primaryFood:AlternativeFood,
   primaryQuantity:number,
   alternativeFood:AlternativeFood,
-  groupType:"protein"|"carbohydrate",
+  groupType:"protein"|"carbohydrate"|"fat"|"vegetables",
 ):Portion|null{
   const primary=portionFor(primaryFood,primaryQuantity);
   if(!primary||alternativeFood.calories<=0)return null;
-  const targetMacro=groupType==="protein"?primary.protein:primary.carbs;
-  const alternativeMacroPer100=groupType==="protein"?(alternativeFood.protein??0):(alternativeFood.carbs??0);
+  const targetMacro=groupType==="protein"?primary.protein:groupType==="carbohydrate"?primary.carbs:groupType==="fat"?primary.fat:primary.calories;
+  const alternativeMacroPer100=groupType==="protein"?(alternativeFood.protein??0):groupType==="carbohydrate"?(alternativeFood.carbs??0):groupType==="fat"?(alternativeFood.fat??0):alternativeFood.calories;
   const caloriesGrams=primary.calories/alternativeFood.calories*100;
   const macroGrams=alternativeMacroPer100>0?targetMacro/alternativeMacroPer100*100:caloriesGrams;
   // Calories have priority; a small macro correction improves equivalence

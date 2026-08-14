@@ -6,6 +6,7 @@ import BottomSheet from "@/components/client/BottomSheet";
 import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
+import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { activeAssignmentFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
@@ -69,16 +70,17 @@ export default function TodayWorkout(){
           const exercise=getExercise(entry.exerciseId);
           return <article key={entry.id} className="premium-card">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+              <div className="flex min-w-0 items-start gap-3">
+                <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
                 <span className="text-xs text-[#5B5F5B]">תרגיל {entry.order+1}</span>
                 <h3 className="mt-1 text-lg font-black">{exercise?.name??"פרטי תרגיל חסרים"}</h3>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span className="pill pill--green">{exercise?.primaryMuscleGroup??"קבוצת שריר לא סווגה"}</span>
                   {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
-                </div>
+                </div></div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
-                {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">וידאו<ExternalLink aria-hidden="true" size={14}/></a>}
+                {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink aria-hidden="true" size={14}/></a>}
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>
               </div>
             </div>

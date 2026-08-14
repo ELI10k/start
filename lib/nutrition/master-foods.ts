@@ -4,10 +4,10 @@
 // catalog re-import, unlike the hardcoded numeric id list this replaced.
 const MASTER_ID=/^master-(p|c|f)-\d+$/;
 
-export function masterFoodGroup(id:string):"protein"|"carbohydrate"|null{
+export function masterFoodGroup(id:string):"protein"|"carbohydrate"|"fat"|null{
   const match=MASTER_ID.exec(id);
   if(!match)return null;
-  return match[1]==="p"?"protein":match[1]==="c"?"carbohydrate":null;
+  return match[1]==="p"?"protein":match[1]==="c"?"carbohydrate":"fat";
 }
 
 export function isMasterFood(id:string):boolean{return MASTER_ID.test(id)}
