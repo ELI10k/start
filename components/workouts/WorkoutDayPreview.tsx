@@ -9,7 +9,7 @@ import type { WorkoutExercise, WorkoutProgram } from "@/lib/workouts/types";
 // What this screen lets a coach change about one slot in one day. Everything else
 // about an exercise - its name, its muscle group, its video, its דגשים - belongs
 // to the catalogue entry and is edited in the exercise bank.
-type EditableField = "sets" | "reps" | "rest" | "notes";
+type EditableField = "sets" | "reps" | "rest" | "effort" | "notes";
 
 // The coach's view of one training day, and the place a prescription is actually
 // adjusted. It used to be read-only: sets, reps and rest were three grey tiles,
@@ -67,6 +67,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
             sets: sets || undefined,
             reps: (patch.reps ?? entry.reps ?? "").trim() || undefined,
             rest: (patch.rest ?? entry.rest ?? "").trim() || undefined,
+            effort: (patch.effort ?? entry.effort ?? "").trim() || undefined,
             notes: (patch.notes ?? entry.notes ?? "").trim() || undefined,
             // The per-set rows follow the set count, so a change from three sets
             // to four has somewhere to record the fourth.
@@ -135,10 +136,11 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
 
           {/* Editable in place. Short fields beat a sheet here: a coach adjusting
               a programme usually changes several exercises in a row. */}
-          <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
             <Prescription label="סטים" name={`סטים ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "sets"))} onChange={(next) => edit(entry, "sets", next)} />
             <Prescription label="חזרות" name={`חזרות ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "reps"))} onChange={(next) => edit(entry, "reps", next)} />
             <Prescription label="מנוחה" name={`מנוחה ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "rest"))} onChange={(next) => edit(entry, "rest", next)} />
+            <EffortPrescription name={`רמת מאמץ ל${exercise?.name ?? "תרגיל"}`} value={String(value(entry, "effort"))} onChange={(next) => edit(entry, "effort", next)} />
           </dl>
 
           <dl className="mt-3">
@@ -179,6 +181,18 @@ function Prescription({ label, name, value, onChange }: { label: string; name: s
     <dt className="text-xs text-[#5B5F5B]">{label}</dt>
     <dd className="mt-1">
       <input aria-label={name} className="nutrition-input" value={value} placeholder="—" onChange={(event) => onChange(event.target.value)} />
+    </dd>
+  </div>;
+}
+
+function EffortPrescription({ name, value, onChange }: { name: string; value: string; onChange: (value: string) => void }) {
+  return <div className="rounded-xl bg-[#F7F8F7] p-3">
+    <dt className="text-xs text-[#5B5F5B]">רמת מאמץ (RPE)</dt>
+    <dd className="mt-1">
+      <select aria-label={name} className="nutrition-input" value={value} onChange={(event) => onChange(event.target.value)}>
+        <option value="">לא הוגדר</option>
+        {Array.from({ length: 10 }, (_, index) => index + 1).map((effort) => <option key={effort} value={effort}>RPE {effort}</option>)}
+      </select>
     </dd>
   </div>;
 }
