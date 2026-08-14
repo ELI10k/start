@@ -163,6 +163,7 @@ test("exercise cards use a technique label and a compact catalogue image",async(
   const thumbnail=await source("components/workouts/ExerciseThumbnail.tsx");
   assert.match(thumbnail,/buildGuidanceView/);
   assert.match(thumbnail,/h-16 w-20/);
+  assert.match(thumbnail,/broken===imageUrl/);
   for(const path of ["components/workouts/WorkoutDayPreview.tsx","components/workouts/client/AssignedProgram.tsx","components/workouts/client/WorkoutSession.tsx","components/workouts/client/TodayWorkout.tsx"]){
     const text=await source(path);
     assert.match(text,/ExerciseThumbnail/);
