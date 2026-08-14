@@ -52,8 +52,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
           <span>{program.name}</span>
           <strong className="block truncate">{day.name}</strong>
         </div>
-        <div className="text-end">
-          <strong className="font-mono">{clock(elapsed)}</strong>
+        <div className="text-end" role="timer" aria-label="טיימר אימון">
+          <span className="block">טיימר אימון</span>
+          <strong className="block font-mono text-lg">{clock(elapsed)}</strong>
           <span className="block">{completedSets}/{totalSets} סטים</span>
         </div>
       </div>
@@ -91,6 +92,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         <Value label="סטים" value={current.sets??"לא הוגדר"}/>
         <Value label="חזרות" value={current.reps??"לא הוגדר"}/>
         <Value label="מנוחה" value={current.rest??"לא הוגדר"}/>
+        <Value label="רמת מאמץ" value={current.effort?`RPE ${current.effort}`:"לא הוגדר"}/>
       </dl>
 
       {(current.notes||exercise?.executionNotes)&&<p className="mt-3 rounded-2xl bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">{current.notes||exercise?.executionNotes}</p>}

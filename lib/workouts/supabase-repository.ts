@@ -13,6 +13,9 @@ const optionalText=(value:unknown)=>typeof value==="string"&&value?value:undefin
 const numberValue=(value:unknown)=>value===null||value===undefined?undefined:Number(value);
 const stringArray=(value:unknown)=>Array.isArray(value)?value.filter((item):item is string=>typeof item==="string"):[];
 const rows=(value:unknown)=>Array.isArray(value)?value as Row[]:[];
+const effortPattern=/^RPE יעד:\s*(10|[1-9])(?:\n|$)/;
+const splitExerciseNotes=(value:unknown)=>{const raw=optionalText(value)??"";const match=raw.match(effortPattern);return{effort:match?.[1],notes:raw.replace(effortPattern,"").trim()||undefined}};
+const serialiseExerciseNotes=(effort?:string,notes?:string)=>[effort?`RPE יעד: ${effort}`:"",notes?.trim()??""].filter(Boolean).join("\n");
 
 function mapExercise(row:Row):Exercise{return{id:text(row.id),name:text(row.name),normalizedName:text(row.normalized_name),aliases:stringArray(row.aliases),category:optionalText(row.category),primaryMuscleGroup:optionalText(row.primary_muscle_group),secondaryMuscleGroups:stringArray(row.secondary_muscle_groups),equipment:optionalText(row.equipment),difficulty:optionalText(row.difficulty),video:row.video&&typeof row.video==="object"?row.video as Exercise["video"]:undefined,executionNotes:optionalText(row.execution_notes),imageUrl:optionalText(row.image_url),howTo:optionalText(row.how_to),cues:stringArray(row.cues),commonMistakes:stringArray(row.common_mistakes),sourceWorkbooks:stringArray(row.source_workbooks),sourceReferences:Array.isArray(row.source_references)?row.source_references as Exercise["sourceReferences"]:[],status:row.status==="archived"?"archived":"active"}}
 function mapSet(row:Row):ExerciseSetResult{return{id:text(row.id),prescriptionId:optionalText(row.prescription_id),order:Number(row.sort_order),weightKg:numberValue(row.weight_kg),repetitions:numberValue(row.repetitions),notes:optionalText(row.notes),completed:Boolean(row.completed),completedAt:optionalText(row.completed_at)}}
@@ -49,7 +52,8 @@ export function createSupabaseWorkoutRepository(){
         exercises:entryRows.filter((entry)=>entry.day_id===day.id).map((entry)=>{
           const setPrescriptions=prescriptionRows.filter((set)=>set.program_exercise_id===entry.id).map((set)=>({id:text(set.id),order:Number(set.sort_order),repetitions:optionalText(set.repetitions)}));
           const repetitions=[...new Set(setPrescriptions.map((set)=>set.repetitions).filter((value):value is string=>Boolean(value)))];
-          return{id:text(entry.id),exerciseId:text(entry.exercise_id),order:Number(entry.sort_order),sets:optionalText(entry.sets_text)??(setPrescriptions.length?String(setPrescriptions.length):undefined),reps:optionalText(entry.reps_text)??(repetitions.length?repetitions.join(" / "):undefined),rest:optionalText(entry.rest_text),notes:optionalText(entry.notes),sourceRow:numberValue(entry.source_row),setPrescriptions};
+          const guidance=splitExerciseNotes(entry.notes);
+          return{id:text(entry.id),exerciseId:text(entry.exercise_id),order:Number(entry.sort_order),sets:optionalText(entry.sets_text)??(setPrescriptions.length?String(setPrescriptions.length):undefined),reps:optionalText(entry.reps_text)??(repetitions.length?repetitions.join(" / "):undefined),rest:optionalText(entry.rest_text),effort:guidance.effort,notes:guidance.notes,sourceRow:numberValue(entry.source_row),setPrescriptions};
         }),
       })),
     }));
@@ -70,7 +74,7 @@ export function createSupabaseWorkoutRepository(){
     assign:async(input:AssignmentInput)=>rpc("assign_workout_program",{p_program_id:input.programId,p_client_id:input.clientId,p_start_date:input.startDate,p_end_date:input.endDate??null,p_weekly_frequency:input.weeklyFrequency,p_coach_note:input.coachNote??""}),
     setAssignmentStatus:async(id:string,status:AssignmentStatus)=>rpc("set_workout_assignment_status",{p_assignment_id:id,p_status:status}),
     setAssignmentFrequency:async(id:string,weeklyFrequency:number)=>rpc("set_workout_assignment_frequency",{p_assignment_id:id,p_weekly_frequency:weeklyFrequency}),
-    saveProgram:async(program:WorkoutProgram)=>rpc("save_workout_program_tree",{p_program:program}),
+    saveProgram:async(program:WorkoutProgram)=>rpc("save_workout_program_tree",{p_program:{...program,days:program.days.map((day)=>({...day,exercises:day.exercises.map((entry)=>({...entry,notes:serialiseExerciseNotes(entry.effort,entry.notes)}))}))}}),
     archiveProgram:async(id:string)=>{const{error}=await supabase.from("workout_programs").update({status:"archived"}).eq("id",id);if(error)throw error},
     deleteProgram:async(id:string)=>rpc("delete_workout_program",{p_program_id:id}),
     saveActiveSession:async(session:ActiveWorkoutSession)=>rpc("save_active_workout",{p_session:session}),

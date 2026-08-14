@@ -215,10 +215,16 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
                   </select>
                 </label>}
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-4">
+              <div className="mt-3 grid gap-2 sm:grid-cols-5">
                 <Input label="סטים" type="number" value={entry.sets??""} onChange={sets=>changeSets(day.id,entry,sets)}/>
                 <Input label="טווח חזרות" value={entry.reps??""} onChange={reps=>patchExercise(day.id,entry.id,{reps,setPrescriptions:prescriptions(entry.sets??"",reps)})}/>
                 <Input label="מנוחה" value={entry.rest??""} onChange={rest=>patchExercise(day.id,entry.id,{rest})}/>
+                <label className="block text-xs font-bold">רמת מאמץ (RPE)
+                  <select aria-label={`רמת מאמץ עבור ${exercise?.name??"תרגיל"}`} className="nutrition-input mt-1" value={entry.effort??""} onChange={event=>patchExercise(day.id,entry.id,{effort:event.target.value||undefined})}>
+                    <option value="">לא הוגדר</option>
+                    {Array.from({length:10},(_,index)=>String(index+1)).map(value=><option key={value} value={value}>{value}</option>)}
+                  </select>
+                </label>
                 <Input label="טכניקה / הערה" value={entry.notes??""} onChange={notes=>patchExercise(day.id,entry.id,{notes})}/>
               </div>
             </article>;
