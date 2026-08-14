@@ -64,7 +64,17 @@ export async function GET(request: Request) {
         p_actions: summary.actions,
       });
       if (writeError) throw writeError;
-      if (summary.status === "ready") written += 1;
+      if (summary.status === "ready") {
+        written += 1;
+        const { data: relationship } = await supabase.from("coach_client_relationships").select("coach_id").eq("client_id", clientId).eq("status", "active").maybeSingle();
+        const coachId = (relationship as Row | null)?.coach_id;
+        if (coachId) await supabase.rpc("create_in_app_notification", {
+          p_recipient_id: String(coachId), p_actor_id: null, p_category: "check_ins", p_type: "coach_message",
+          p_title: "דוח שבועי מוכן לאישור", p_body: "START הכינה טיוטה חדשה. יש לבדוק ולאשר לפני שהלקוח יראה אותה.",
+          p_href: `/coach/clients/${clientId}?tab=improvement`, p_source_table: "weekly_summaries",
+          p_source_id: `${clientId}-${week.start}`, p_dedupe_key: `weekly-summary-ready-${clientId}-${week.start}`,
+        });
+      }
       else insufficient += 1;
     } catch (cause) {
       // One client's bad week must not stop the other clients' summaries.
