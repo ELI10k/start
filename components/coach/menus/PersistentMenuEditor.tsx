@@ -262,7 +262,11 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       const previous=current.find(item=>item.foodId===foodId);
       return[{foodId,count:previous?.count??0,lastUsedAt:previous?.lastUsedAt??"",favorite},...current.filter(item=>item.foodId!==foodId)];
     });
-    void setCoachFoodFavorite(foodId,favorite).then(result=>{if(!result.ok)setMessage(result.message??"המועדף לא נשמר.")});
+    void setCoachFoodFavorite(foodId,favorite)
+      .then(result=>{if(!result.ok){setMessage(result.message??"המועדף לא נשמר.");setUsage(current=>current.map(item=>item.foodId===foodId?{...item,favorite:!favorite}:item))}})
+      // Same failure as the save above, and it used to pass silently: the star
+      // stayed on until the next reload and then quietly came back off.
+      .catch(()=>{setMessage("סימון המועדף לא הגיע לשרת. יש לרענן את העמוד ולנסות שוב.");setUsage(current=>current.map(item=>item.foodId===foodId?{...item,favorite:!favorite}:item))});
   };
   // A complete first draft in one click. It cycles through the coach's curated
   // and manually starred foods, while the strict group classifier guarantees a
@@ -293,9 +297,16 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const submit=()=>startTransition(async()=>{
     setMessage("");
     if(!savedMeals().length){setMessage("יש למלא לפחות ארוחה אחת לפני שמירה.");return}
+    try{
     const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?new Date().toISOString().slice(0,10):"",days:[{dayIndex:0,title:"יום רגיל",sortOrder:0,meals:savedMeals().map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}]});
     setMessage(result.message??"");
     if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
+    }catch{
+      // A save that fails without saying so loses the whole menu. The usual cause
+      // is a page loaded before a deploy posting to the build that replaced it -
+      // the action id no longer exists on the server - and a reload fixes it.
+      setMessage("השמירה לא הגיעה לשרת. יש לרענן את העמוד (Cmd/Ctrl+Shift+R) ולנסות שוב - התפריט עדיין כאן עד שתרעננו.");
+    }
   });
   return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-[1600px]">
     {/* The running calorie total lives in the sticky bar: on a phone the summary
