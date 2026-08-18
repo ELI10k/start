@@ -68,8 +68,23 @@ export async function proxy(request: NextRequest) {
     return target;
   };
 
-  const redirect = (destination: string) =>
-    applyPendingAuthState(NextResponse.redirect(new URL(destination, request.url)));
+  // A server action's client does not follow a 307. It expects either
+  // `content-type: text/x-component` or an `x-action-redirect` header, and
+  // anything else - the HTML of /login, at the end of a redirect chain - surfaces
+  // to the user as "An unexpected response was received from the server." on top
+  // of whatever they were trying to save. Redirecting a signed-out or
+  // device-mismatched action has to be said in the form the router understands.
+  const isServerAction = Boolean(request.headers.get("next-action"));
+  const redirect = (destination: string) => {
+    const url = new URL(destination, request.url);
+    if (isServerAction) {
+      return applyPendingAuthState(new NextResponse("", {
+        status: 200,
+        headers: { "content-type": "text/plain", "x-action-redirect": `${url.toString()};replace` },
+      }));
+    }
+    return applyPendingAuthState(NextResponse.redirect(url));
+  };
 
   let response = applyPendingAuthState(NextResponse.next({ request }));
   const supabase = createServerClient(config.url, config.anonKey, {

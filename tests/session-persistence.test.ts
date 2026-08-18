@@ -12,8 +12,12 @@ test("every request refreshes the session and writes the rotated cookies back", 
   assert.match(proxy, /await supabase\.auth\.getUser\(\)/);
   assert.match(proxy, /setAll: \(items, headers\)/);
   assert.match(proxy, /target\.cookies\.set\(name, value, options\)/);
-  // The refreshed cookies must reach redirects too, not only pass-throughs.
-  assert.match(proxy, /const redirect = \(destination: string\) =>\s*applyPendingAuthState\(NextResponse\.redirect/);
+  // The refreshed cookies must reach redirects too, not only pass-throughs -
+  // both shapes of redirect, since a server action is answered with a header
+  // rather than a 307.
+  assert.match(proxy, /applyPendingAuthState\(NextResponse\.redirect\(url\)\)/);
+  assert.match(proxy, /"x-action-redirect": `\$\{url\.toString\(\)\};replace`/);
+  assert.match(proxy, /const isServerAction = Boolean\(request\.headers\.get\("next-action"\)\)/);
 });
 
 test("a signed-in visitor who opens the login screen is sent into the app", async () => {
