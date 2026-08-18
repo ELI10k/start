@@ -21,7 +21,7 @@ import ClientTabs from "@/components/coach/client-file/ClientTabs";
 import { ArchiveClientPanel } from "@/components/coach/client-file/ArchiveClient";
 import ClientReportView from "@/components/coach/client-file/ClientReport";
 import { buildClientReport } from "@/lib/coach-intelligence/client-report";
-import { isClientTab } from "@/lib/coach/client-tabs";
+import { CLIENT_TABS, isClientTab } from "@/lib/coach/client-tabs";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
@@ -176,6 +176,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
     </div>}
 
     <div className="mt-5">
+      {/* Every tab but the overview lives in here, and a coach has been seeing
+          this whole block come back empty while the overview above it renders.
+          The heading is unconditional: if it is on screen and the sections under
+          it are not, the sections are the problem; if the heading is missing too,
+          nothing in here reached the browser at all. It also earns its place -
+          a tab strip plus a bare card left the screen without a title. */}
+      <h2 className="section-heading section-heading--compact">{CLIENT_TABS.find((entry) => entry.id === tab)?.label ?? "תיק הלקוח"}</h2>
+
       {tab === "nutrition" && <>
       <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
         {data.menu ? <>
