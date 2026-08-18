@@ -1016,22 +1016,29 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .photo-strip img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Collapsible section — Client 360. */
-.collapse { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); overflow: hidden; }
-.collapse + .collapse { margin-top: .75rem; }
-.collapse > summary {
+/* Named "disclosure", not "collapse".
+   Bootstrap ships `.collapse { display: none }` and a great many browser
+   extensions inject Bootstrap - or their own reset carrying that same rule - into
+   every page they run on. A coach reported the entire client file empty below the
+   tab strip: the HTML was there and correct, every <details class="collapse"> in
+   it was being hidden by a stylesheet that is not ours. Nothing in this app should
+   answer to a class name that popular. */
+.disclosure { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); overflow: hidden; }
+.disclosure + .disclosure { margin-top: .75rem; }
+.disclosure > summary {
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
   min-height: 3.25rem; padding: var(--space-3) var(--space-4);
   cursor: pointer; font-weight: 800; list-style: none;
 }
-.collapse > summary::-webkit-details-marker { display: none; }
-.collapse > summary::after {
+.disclosure > summary::-webkit-details-marker { display: none; }
+.disclosure > summary::after {
   content: ""; flex: 0 0 auto; width: .55rem; height: .55rem;
   border-inline-end: 2px solid var(--ink-faint); border-block-end: 2px solid var(--ink-faint);
   transform: rotate(45deg); transition: transform var(--duration-fast) ease;
 }
-.collapse[open] > summary::after { transform: rotate(-135deg); }
-.collapse > summary:hover { background: var(--surface-raised); }
-.collapse__body { padding: 0 var(--space-4) var(--space-4); }
+.disclosure[open] > summary::after { transform: rotate(-135deg); }
+.disclosure > summary:hover { background: var(--surface-raised); }
+.disclosure__body { padding: 0 var(--space-4) var(--space-4); }
 
 /* ── Workout builder ───────────────────────────────────────────────────── */
 

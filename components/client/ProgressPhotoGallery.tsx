@@ -59,9 +59,9 @@ export default function ProgressPhotoGallery({
         ))}
       </div>
 
-      <details className="collapse mt-5">
+      <details className="disclosure mt-5">
         <summary>כל המועדים<span className="pill">{sessions.length}</span></summary>
-        <div className="collapse__body grid gap-4">
+        <div className="disclosure__body grid gap-4">
           {sessions.map((session) => (
             <article key={session.checkInId}>
               <h3 className="font-black">{dateLabel(session.submittedAt)}</h3>

@@ -386,14 +386,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
 }
 
 function Section({ title, summary, open = false, children }: { title: string; summary: string; open?: boolean; children: React.ReactNode }) {
-  return <details className="collapse" open={open}>
+  return <details className="disclosure" open={open}>
     <summary>
       <span className="min-w-0">
         <strong className="block">{title}</strong>
         <span className="block truncate text-xs font-normal text-[#5B5F5B]">{summary}</span>
       </span>
     </summary>
-    <div className="collapse__body">{children}</div>
+    <div className="disclosure__body">{children}</div>
   </details>;
 }
 

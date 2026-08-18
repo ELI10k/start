@@ -19,12 +19,12 @@ export default async function CheckInHistoryPage(){
         {data.checkIns.map((entry)=>
           // Each check-in collapses: the list is a timeline, and a client opens the
           // one they want rather than scrolling past every photo set on the way.
-          <details key={entry.id} className="collapse">
+          <details key={entry.id} className="disclosure">
             <summary>
               {new Date(entry.submitted_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
               {entry.coach_response?<span className="pill pill--green">תגובת מאמן</span>:null}
             </summary>
-            <div className="collapse__body">
+            <div className="disclosure__body">
               <dl className="compact-data-list">
                 <div><span>היצמדות</span><strong>{entry.adherence}/10</strong></div>
                 <div><span>אנרגיה</span><strong>{entry.energy}/10</strong></div>

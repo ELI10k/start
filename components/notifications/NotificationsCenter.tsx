@@ -43,11 +43,11 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
         </div>)}
     </div> : <StateBlock icon={<BellOff aria-hidden="true" size={22} />} title="אין התראות כרגע" description="תזכורות ועדכונים מהמאמן יופיעו כאן." />}
 
-    <details className="collapse">
+    <details className="disclosure">
       <summary>
         <span className="flex items-center gap-2"><Settings2 aria-hidden="true" size={17} />העדפות התראות</span>
       </summary>
-      <div className="collapse__body">
+      <div className="disclosure__body">
         <p className="text-sm text-[#5B5F5B]">ההעדפות חלות גם על ההתראות בפעמון וגם על התראות במכשיר.</p>
         {/* Asking here rather than on first launch: the client is already
             looking at their notification settings, so the request has a reason. */}

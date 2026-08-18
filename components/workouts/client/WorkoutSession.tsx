@@ -163,9 +163,9 @@ function Start({program,day,count,warning,onStart,starting,programId}:{program:s
 }
 
 function PreviousPerformance({previous,bestWeight,recent}:{previous?:{date:string;sets:readonly ExerciseSetResult[];volume:number};bestWeight:number;recent:readonly {workoutId:string;date:string;sets:readonly ExerciseSetResult[];volume:number}[]}){
-  return <details className="collapse mt-4">
+  return <details className="disclosure mt-4">
     <summary>ביצוע קודם{bestWeight>0?<span className="pill pill--green">שיא {bestWeight} ק״ג</span>:null}</summary>
-    <div className="collapse__body">
+    <div className="disclosure__body">
       {previous?<>
         <p className="text-xs text-[#5B5F5B]">{new Date(previous.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</p>
         <p className="mt-2 text-sm">{previous.sets.map((set)=>`${set.weightKg??0} ק״ג × ${set.repetitions??0}`).join(" · ")}</p>
