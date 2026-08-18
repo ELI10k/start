@@ -675,6 +675,25 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .state-block--success { border-style: solid; border-color: rgba(22, 163, 74, .35); }
 .state-block--success .state-block__icon { background: var(--green-tint); color: var(--green); }
 
+/* Reordering a food inside its group: a handle for the mouse, two arrows for a
+   thumb. The row dims while it is the one being dragged. */
+.food-row__grip {
+  display: inline-grid; place-items: center;
+  width: 1.75rem; height: 2.25rem; flex: none;
+  border-radius: var(--radius-sm); color: var(--ink-muted);
+  cursor: grab; touch-action: none;
+}
+.food-row__grip:hover { background: var(--surface-raised); color: var(--ink); }
+.food-row__nudge {
+  display: grid; place-items: center;
+  width: 1.5rem; height: 1.1rem;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  color: var(--ink-muted); background: var(--surface);
+}
+.food-row__nudge:first-child { margin-bottom: .15rem; }
+.food-row__nudge:disabled { opacity: .35; }
+.food-row[data-dragging] { opacity: .5; }
+
 /* Bottom sheet: the mobile answer to a modal. */
 .sheet-backdrop {
   position: fixed; inset: 0; z-index: 60;

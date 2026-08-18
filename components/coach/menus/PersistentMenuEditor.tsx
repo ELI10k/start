@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, ChevronDown, ChevronUp, Copy, Plus, Save, Sparkles, Star, Trash2 } from "lucide-react";
+import { Calculator, ChevronDown, ChevronUp, Copy, GripVertical, Plus, Save, Sparkles, Star, Trash2 } from "lucide-react";
 import {
   recordCoachFoodSelection,
   saveMenuTree,
@@ -57,6 +57,10 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const[macroMessage,setMacroMessage]=useState("");
   // Which food slot the picker sheet is currently editing, if any.
   const[picker,setPicker]=useState<{mealIndex:number;groupIndex:number;itemIndex:number}|null>(null);
+  // Which row is being dragged. Held in state rather than in the drag payload
+  // because Safari does not expose dataTransfer during dragover, and the drop
+  // target has to know where the row came from to decide whether it is a no-op.
+  const[dragRow,setDragRow]=useState<{mealIndex:number;groupIndex:number;itemIndex:number}|null>(null);
   const[pending,startTransition]=useTransition();
   const router=useRouter();
   const foodMap=useMemo(()=>new Map(foods.map(food=>[food.id,food])),[foods]);
@@ -170,6 +174,27 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const computed=energyFor(menu.clientId,goal);
     applyPlan(menu.clientId,computed?.ok?String(computed.calorieTarget):menu.calorieTarget,true);
   };
+  // Order inside a group is the order the client reads, and until now it was
+  // whatever order the foods were added in. Rows can be dragged; the arrows do
+  // the same thing with a thumb, which drag-and-drop does not.
+  const moveItem=(mealIndex:number,groupIndex:number,from:number,to:number)=>{
+    const meal=menu.meals[mealIndex];
+    const group=meal?.groups[groupIndex];
+    if(!group||to<0||to>=group.items.length||from===to)return;
+    const items=[...group.items];
+    const[moved]=items.splice(from,1);
+    items.splice(to,0,moved);
+    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items}:value)});
+  };
+  const dropRow=(mealIndex:number,groupIndex:number,itemIndex:number)=>{
+    const origin=dragRow;
+    setDragRow(null);
+    // Reordering happens inside one group: a protein alternative dropped into the
+    // carbohydrate group would be scaled against the wrong primary.
+    if(!origin||origin.mealIndex!==mealIndex||origin.groupIndex!==groupIndex)return;
+    moveItem(mealIndex,groupIndex,origin.itemIndex,itemIndex);
+  };
+
   // What the open picker may offer. Inside a protein group an alternative is
   // restricted to the primary's kind, so a dairy portion never lists meat.
   const pickerGroup=picker?menu.meals[picker.mealIndex]?.groups[picker.groupIndex]:undefined;
@@ -339,8 +364,32 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
             // amount, the unit, the macros and two buttons, so it was the thing
             // that got truncated - and the name is the one part a coach cannot
             // work out from the others.
-            return <div key={itemIndex} className="food-row" data-primary={isPrimary||undefined}>
+            return <div
+              key={itemIndex}
+              className="food-row"
+              data-primary={isPrimary||undefined}
+              data-dragging={dragRow?.mealIndex===index&&dragRow?.groupIndex===groupIndex&&dragRow?.itemIndex===itemIndex||undefined}
+              onDragOver={event=>{if(dragRow)event.preventDefault()}}
+              onDrop={()=>dropRow(index,groupIndex,itemIndex)}
+            >
               <div className="food-row__head">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`שינוי מקום של ${selectedFood?.name??"השורה"}`}
+                  draggable
+                  onDragStart={()=>setDragRow({mealIndex:index,groupIndex,itemIndex})}
+                  onDragEnd={()=>setDragRow(null)}
+                  onKeyDown={event=>{
+                    if(event.key==="ArrowUp"){event.preventDefault();moveItem(index,groupIndex,itemIndex,itemIndex-1)}
+                    if(event.key==="ArrowDown"){event.preventDefault();moveItem(index,groupIndex,itemIndex,itemIndex+1)}
+                  }}
+                  className="food-row__grip"
+                ><GripVertical aria-hidden="true" size={16}/></span>
+                <span className="flex shrink-0 flex-col">
+                  <button type="button" aria-label="הזזה למעלה" disabled={itemIndex===0} onClick={()=>moveItem(index,groupIndex,itemIndex,itemIndex-1)} className="food-row__nudge"><ChevronUp aria-hidden="true" size={13}/></button>
+                  <button type="button" aria-label="הזזה למטה" disabled={itemIndex===group.items.length-1} onClick={()=>moveItem(index,groupIndex,itemIndex,itemIndex+1)} className="food-row__nudge"><ChevronDown aria-hidden="true" size={13}/></button>
+                </span>
                 {/* Primary is a toggle, not a position. A protein portion is
                     sometimes two foods - one egg plus two egg whites - and the
                     first row being the only possible primary made that
