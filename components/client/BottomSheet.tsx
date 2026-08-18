@@ -10,11 +10,16 @@ export default function BottomSheet({
   title,
   onClose,
   children,
+  placement = "bottom",
 }: {
   open: boolean;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** "top" pins the panel near the top of the viewport instead of the bottom
+   *  edge. A long list opened from a row halfway down the page ran off the
+   *  bottom of the screen and the coach could not see what they were choosing. */
+  placement?: "bottom" | "top";
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const opener = useRef<HTMLElement | null>(null);
@@ -62,7 +67,7 @@ export default function BottomSheet({
       <div className="sheet-backdrop" onClick={onClose} aria-hidden="true" />
       <div
         ref={panel}
-        className="sheet"
+        className={placement === "top" ? "sheet sheet--top" : "sheet"}
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -29,6 +29,8 @@ type ContextValue={
   saveSession:(session:ActiveWorkoutSession)=>void;
   cancelSession:(clientId:string)=>Promise<boolean>;
   completeSession:(workout:CompletedWorkout)=>Promise<boolean>;
+  /** Filling in or correcting a workout that was already closed. */
+  updateCompletedSession:(workout:CompletedWorkout)=>Promise<boolean>;
   saveCoachNote:(note:CoachWorkoutNote)=>Promise<boolean>;
   saveExerciseGuidance:(exerciseId:string,guidance:ExerciseGuidance)=>Promise<boolean>;
   savePreferences:(preferences:WorkoutPreferences)=>Promise<boolean>;
@@ -134,7 +136,11 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
   }),[flushSession]);
   const value=useMemo<ContextValue>(()=>({
     snapshot,currentClientId,role,loading:loading||loadedAuthScope!==authScope,persistenceError,offlineData:offline,pendingSync,
-    assign:async(input)=>{if(input.endDate&&input.endDate<input.startDate)return false;if(snapshot.assignments.some((item)=>item.clientId===input.clientId&&item.programId===input.programId&&item.status==="active"))return false;const replaced=snapshot.assignments.find((item)=>item.clientId===input.clientId&&item.status==="active");if(replaced&&!window.confirm("כבר קיימת ללקוח תוכנית פעילה. להחליף אותה ולשמור אותה בהיסטוריה?"))return false;try{await repository.assign(input);await refresh();return true}catch{return fail()}},
+    // Replacing the running programme is now the coach's explicit choice on the
+    // assignment form, not a browser confirm() the form cannot phrase. A client
+    // may train on more than one programme at a time; only the same programme
+    // twice is still refused.
+    assign:async(input)=>{if(input.endDate&&input.endDate<input.startDate)return false;if(snapshot.assignments.some((item)=>item.clientId===input.clientId&&item.programId===input.programId&&item.status==="active"))return false;try{await repository.assign(input);await refresh();return true}catch{return fail()}},
     setAssignmentStatus:async(id,status)=>{try{await repository.setAssignmentStatus(id,status);setSnapshot((current)=>updateAssignmentStatus(current,id,status));return true}catch{return fail()}},
     setAssignmentFrequency:async(id,weeklyFrequency)=>{if(!Number.isInteger(weeklyFrequency)||weeklyFrequency<1||weeklyFrequency>7)return false;try{await repository.setAssignmentFrequency(id,weeklyFrequency);setSnapshot((current)=>({...current,assignments:current.assignments.map((item)=>item.id===id?{...item,weeklyFrequency}:item)}));return true}catch{return fail()}},
     duplicate:async(programId)=>{const source=snapshot.programs.find((program)=>program.id===programId);if(!source)return undefined;const id=`${programId}-copy-${Date.now()}`;const program=duplicateWorkoutProgram(source,id);try{await repository.saveProgram(program);setSnapshot((current)=>({...current,programs:[...current.programs,program]}));return id}catch{fail();return undefined}},
@@ -146,6 +152,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     // does next, the set the client just typed is already safe.
     saveSession:(session)=>{setSnapshot((current)=>cache(saveActiveWorkoutSession(current,session)));pendingSession.current=session;setPendingSync(true);flushSession()},
     cancelSession:async(clientId)=>{try{await saveQueue.current;await repository.cancelActiveSession();pendingSession.current=null;setPendingSync(false);connectionStore.reportSuccess();setSnapshot((current)=>cache(cancelWorkoutSession(current,clientId)));return true}catch(error){return fail(error)}},
+    updateCompletedSession:async(workout)=>{try{await repository.updateCompletedSession(workout);setSnapshot((current)=>cache({...current,completedWorkouts:current.completedWorkouts.map((item)=>item.id===workout.id?workout:item)}));return true}catch(error){return fail(error)}},
     completeSession:async(workout)=>{if(snapshot.completedWorkouts.some((item)=>item.id===workout.id))return false;try{await saveQueue.current;await repository.completeSession(workout);pendingSession.current=null;setPendingSync(false);connectionStore.reportSuccess();setSnapshot((current)=>cache(saveCompletedWorkout(current,workout)));return true}catch(error){return fail(error)}},
     saveCoachNote:async(note)=>{try{await repository.saveCoachNote(note);setSnapshot((current)=>saveCoachWorkoutNote(current,note));return true}catch{return fail()}},
     saveExerciseGuidance:async(exerciseId,guidance)=>{const normalized=normalizeGuidance(guidance);try{await repository.saveExerciseGuidance(exerciseId,normalized);setSnapshot((current)=>({...current,exercises:current.exercises.map((exercise)=>exercise.id===exerciseId?{...exercise,...normalized}:exercise)}));return true}catch{return fail()}},

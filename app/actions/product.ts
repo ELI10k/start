@@ -59,6 +59,16 @@ export async function saveProgress(
   return { ok: true, message: "המדידה נשמרה." };
 }
 
+// Zero is a real answer to "how many workouts did you do", and a blank field is
+// "did not say" rather than zero. Number("") is 0 and Number("x") is NaN, and
+// both used to reach the insert.
+const wholeCount = (form: FormData, key: string) => {
+  const raw = String(form.get(key) ?? "").trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value >= 0 ? value : null;
+};
+
 export async function saveCheckIn(
   _previous: SaveState,
   form: FormData,
@@ -99,8 +109,8 @@ export async function saveCheckIn(
     training: form.get("training") === "on",
     weight,
     navel_circumference: navelCircumference,
-    workouts_completed: Number(form.get("workoutsCompleted")),
-    meal_plan_days: Number(form.get("mealPlanDays")),
+    workouts_completed: wholeCount(form, "workoutsCompleted"),
+    meal_plan_days: wholeCount(form, "mealPlanDays"),
     notes: String(form.get("notes") ?? "").trim() || null,
     status: "submitted",
   }).select("id").single();

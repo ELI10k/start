@@ -1,14 +1,14 @@
-// Read-only probe: which programme is the coach looking at, and is it flagged
-// `official`? WorkoutDayPreview renders sets/reps/rest as plain text - exactly the
-// grey tiles in the screenshot - whenever program.official is true, because
-// save_workout_program_tree refuses to rewrite a shared programme.
+// Read-only inspection of one programme and everything that would stand in the way
+// of editing it in place: the `official` flag, who owns it, and whether any client
+// has already trained on it - because save_workout_program_tree deletes the day
+// rows before re-inserting them, and workout_sessions.day_id references those rows
+// with ON DELETE RESTRICT.
 //
 // Signs in over Supabase's HTTP API rather than through the form, so the password
 // never reaches a browser. Same approach as e2e/support/session.ts.
 import { readFileSync } from "node:fs";
 
 const PROGRAM_ID = process.argv[2] ?? "workout-program-18nf8g8";
-const DAY_ID = process.argv[3] ?? "workout-day-e1x8zr";
 
 const env = Object.fromEntries(
   readFileSync(new URL("../.env.e2e", import.meta.url), "utf8")
@@ -35,22 +35,38 @@ const rest = async (path) => {
   const response = await fetch(`${url}/rest/v1/${path}`, {
     headers: { apikey: anon, authorization: `Bearer ${session.access_token}` },
   });
-  if (!response.ok) throw new Error(`${path} -> HTTP ${response.status}`);
+  if (!response.ok) throw new Error(`${path.split("?")[0]} -> HTTP ${response.status}`);
   return response.json();
 };
 
-const target = await rest(
-  `workout_programs?id=eq.${PROGRAM_ID}&select=id,name,official,status,duplicated_from_id`,
-);
-console.log("=== programme from the screenshot ===");
-console.log(target.length ? JSON.stringify(target[0], null, 2) : "(not visible to the E2E coach)");
+const [program] = await rest(`workout_programs?id=eq.${PROGRAM_ID}&select=*`);
+console.log("=== programme ===");
+console.log(JSON.stringify({
+  id: program?.id,
+  name: program?.name,
+  official: program?.official,
+  coach_id: program?.coach_id,
+  status: program?.status,
+  signed_in_coach: session.user.id,
+  owned_by_signed_in_coach: program?.coach_id === session.user.id,
+}, null, 2));
 
-const editable = await rest(
-  `workout_programs?official=eq.false&status=eq.active&select=id,name,official&limit=5`,
-);
-console.log("=== editable (official=false) programmes visible to the E2E coach ===");
-console.log(JSON.stringify(editable, null, 2));
+const days = await rest(`workout_program_days?program_id=eq.${PROGRAM_ID}&select=id,name,sort_order&order=sort_order`);
+const slots = await rest(`workout_program_exercises?day_id=in.(${days.map((d) => d.id).join(",")})&select=id,day_id,exercise_id,sets_text,reps_text,rest_text,notes,sort_order&order=sort_order`);
+console.log("=== tree ===");
+console.log(JSON.stringify({ days: days.length, slots: slots.length }, null, 2));
 
-const officialSample = await rest(`workout_programs?official=eq.true&select=id,name&limit=5`);
-console.log("=== official programmes ===");
-console.log(JSON.stringify(officialSample, null, 2));
+// The reason an in-place save is not just a permission question.
+const sessions = await rest(`workout_sessions?program_id=eq.${PROGRAM_ID}&select=id,status,day_id,client_id,completed_at`);
+const trained = await rest(`workout_session_exercises?workout_exercise_id=in.(${slots.map((s) => s.id).join(",")})&select=session_id,workout_exercise_id`);
+console.log("=== history pinning this programme ===");
+console.log(JSON.stringify({
+  sessions: sessions.length,
+  completedSessions: sessions.filter((s) => s.status === "completed").length,
+  sessionsPinningDayRows: [...new Set(sessions.map((s) => s.day_id))],
+  sessionExerciseRowsPinningSlots: trained.length,
+  deleteOfDayRowsWouldBeRefused: sessions.length > 0 || trained.length > 0,
+}, null, 2));
+
+console.log("=== current prescription (restore reference) ===");
+console.log(JSON.stringify(slots.map((s) => ({ id: s.id, sets: s.sets_text, reps: s.reps_text, rest: s.rest_text, notes: s.notes })), null, 2));

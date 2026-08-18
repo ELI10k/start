@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarCheck, ClipboardCheck, Dumbbell, Scale, UtensilsCrossed } from "lucide-react";
+import { CalendarCheck, ClipboardCheck, Dumbbell, Lightbulb, UtensilsCrossed } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
 import { MetricTile, PremiumCard } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
@@ -26,11 +26,15 @@ export default async function Home() {
     (sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein }),
     { calories: 0, protein: 0 },
   );
-  const latest = data.progress[0];
   const remainingMeals = Math.max(0, meals.length - completed.length);
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
   const proteinTarget = data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? null;
   const dayPercent = meals.length ? Math.round((completed.length / meals.length) * 100) : 0;
+  // "3/1" reads as three planned this week, one already marked.
+  const plannedWorkouts = data.workouts.planned;
+  const completedWorkouts = data.workouts.completed;
+  const eatenCalories = Math.round(totals.calories);
+  const remainingCalories = calorieTarget ? Math.max(0, Math.round(calorieTarget - totals.calories)) : 0;
   const dailyCoachMessage = buildDailyCoachMessage({
     mealsCompleted: completed.length,
     mealsPlanned: meals.length,
@@ -75,29 +79,26 @@ export default async function Home() {
         </section>
       ) : null}
 
+      {/* Three numbers, and only three: what is left to eat today, how the
+          training week stands, and where the calories are. Protein and the last
+          weigh-in live on their own screens - they were noise here. */}
       <section className="dashboard-metrics" aria-label="מדדים להיום">
-        <MetricTile
-          label="קלוריות"
-          value={`${Math.round(totals.calories)}${calorieTarget ? ` / ${calorieTarget}` : ""}`}
-          icon={<UtensilsCrossed aria-hidden="true" size={18} />}
-        />
-        <MetricTile
-          label="חלבון"
-          value={`${Math.round(totals.protein)}${proteinTarget ? ` / ${proteinTarget}` : ""} ג׳`}
-          accent="green"
-          icon={<ClipboardCheck aria-hidden="true" size={18} />}
-        />
-        <MetricTile
-          label="משקל אחרון"
-          value={latest ? `${latest.weight} ק״ג` : "אין נתון"}
-          accent="neutral"
-          icon={<Scale aria-hidden="true" size={18} />}
-        />
         <MetricTile
           label="ארוחות היום"
           value={`${completed.length}/${meals.length}`}
-          accent="neutral"
           icon={<CalendarCheck aria-hidden="true" size={18} />}
+        />
+        <MetricTile
+          label="אימונים השבוע"
+          value={`${plannedWorkouts}/${completedWorkouts}`}
+          accent="green"
+          icon={<Dumbbell aria-hidden="true" size={18} />}
+        />
+        <MetricTile
+          label="קלוריות"
+          value={calorieTarget ? `${eatenCalories}/${remainingCalories}` : `${eatenCalories}`}
+          accent="neutral"
+          icon={<UtensilsCrossed aria-hidden="true" size={18} />}
         />
       </section>
 
@@ -105,19 +106,19 @@ export default async function Home() {
       <nav className="quick-actions-grid" aria-label="פעולות מהירות">
         <Link href="/nutrition" className="quick-action-card">
           <UtensilsCrossed aria-hidden="true" size={20} />
-          <span>הארוחות שלי</span>
+          <span>התפריט שלי</span>
         </Link>
         <Link href="/workouts" className="quick-action-card">
           <Dumbbell aria-hidden="true" size={20} />
           <span>אימון</span>
         </Link>
-        <Link href="/progress" className="quick-action-card">
-          <Scale aria-hidden="true" size={20} />
-          <span>שקילה</span>
-        </Link>
+        <a href="#daily-coach" className="quick-action-card">
+          <Lightbulb aria-hidden="true" size={20} />
+          <span>טיפ יומי</span>
+        </a>
         <Link href="/check-in" className="quick-action-card">
           <ClipboardCheck aria-hidden="true" size={20} />
-          <span>צ׳ק־אין</span>
+          <span>צ׳ק אין שבועי</span>
         </Link>
       </nav>
 

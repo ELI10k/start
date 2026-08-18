@@ -63,6 +63,30 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
    return{...day,exercises:next};
  }));
 
+ // A whole training day, copied into the next slot. Most programmes are built by
+ // writing one day and then changing two exercises in the next - doing that
+ // exercise by exercise was the longest part of building a programme.
+ // Every id is regenerated so the copy is a real second day and not a shared
+ // reference to the first.
+ const duplicateDay=(dayIndex:number)=>{
+   const source=draft.days[dayIndex];
+   if(!source)return;
+   const copy:WorkoutDay={
+     ...source,
+     id:uid("workout-day"),
+     name:`${source.name} — עותק`,
+     order:dayIndex+1,
+     exercises:source.exercises.map(exercise=>({
+       ...exercise,
+       id:uid("workout-exercise"),
+       setPrescriptions:exercise.setPrescriptions?.map(set=>({...set,id:uid("set")})),
+     })),
+   };
+   const next=[...draft.days];
+   next.splice(dayIndex+1,0,copy);
+   setDays(next);
+ };
+
  // Swapping the exercise keeps everything the coach already typed - sets, reps,
  // rest, notes - because the prescription belongs to the slot, not to the
  // exercise that happens to occupy it.
@@ -103,7 +127,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
    }));
  };
 
- return <main className="client-app-content">
+ return <main id="program-editor" className="client-app-content scroll-mt-6">
   <div className="flex flex-wrap items-center justify-between gap-4">
     <div>
       <p className="text-xs font-black tracking-widest text-[#16A34A]">תוכנית אימונים</p>
@@ -158,6 +182,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
           <input aria-label="שם יום אימון" className="nutrition-input max-w-sm font-black" value={day.name} onChange={event=>patchDay(day.id,{name:event.target.value})}/>
           <button aria-label="הזזת יום למעלה" className="icon-button" disabled={dayIndex===0} onClick={()=>moveDay(dayIndex,-1)}><ChevronUp aria-hidden="true" size={18}/></button>
           <button aria-label="הזזת יום למטה" className="icon-button" disabled={dayIndex===draft.days.length-1} onClick={()=>moveDay(dayIndex,1)}><ChevronDown aria-hidden="true" size={18}/></button>
+          <button type="button" onClick={()=>duplicateDay(dayIndex)} className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[#E5E7E5] px-3 text-xs font-bold"><Copy aria-hidden="true" size={16}/>העתקת האימון ליום הבא</button>
           <button aria-label="מחיקת יום אימון" className="icon-button text-[#DC2626]" disabled={draft.days.length===1} onClick={()=>setDays(draft.days.filter(item=>item.id!==day.id))}><Trash2 aria-hidden="true" size={18}/></button>
           <span className="mr-auto text-sm text-[#5B5F5B]">{day.exercises.length} תרגילים</span>
         </div>

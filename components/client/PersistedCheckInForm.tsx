@@ -94,9 +94,13 @@ export default function PersistedCheckInForm({ photosRequired = false }: { photo
         </Step>
       </div>
 
-      {state.message && (
-        <p role={state.ok ? "status" : "alert"} className={`mt-4 rounded-2xl p-3 text-sm font-bold ${state.ok ? "bg-[#ECFDF3] text-[#15803D]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>{state.message}</p>
-      )}
+      {/* Sending a check-in and hearing nothing back reads as "it did not go".
+          Success gets its own panel, not a line of small print. */}
+      {state.ok
+        ? <p role="status" className="mt-5 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-center text-base font-black text-[#15803D]">הצ׳ק אין נשלח למאמן</p>
+        : state.message
+          ? <p role="alert" className="mt-4 rounded-2xl bg-[#FEF2F2] p-3 text-sm font-bold text-[#DC2626]">{state.message}</p>
+          : null}
 
       {/* Submit stays under the thumb: the form is six steps long and the button
           used to be wherever the last one happened to end. */}
@@ -122,6 +126,9 @@ function Step({ number, title, done, hint, children }: { number: number; title: 
   );
 }
 
+// A count starts at zero and has no fractions; a weight does not start at zero.
+// The two used to share min="0.1", and with step="1" that made every whole number
+// invalid - "3 אימונים" was rejected as "יש להזין ערך תקין".
 function Field({ name, label, integer = false, max, required = false }: { name: string; label: string; integer?: boolean; max?: string; required?: boolean }) {
-  return <label className="block text-sm font-bold">{label}<input className="nutrition-input mt-2" name={name} type="number" min="0.1" max={max} step={integer ? "1" : "0.1"} required={required} /></label>;
+  return <label className="block text-sm font-bold">{label}<input className="nutrition-input mt-2" name={name} type="number" min={integer ? "0" : "0.1"} max={max} step={integer ? "1" : "0.1"} inputMode={integer ? "numeric" : "decimal"} required={required} /></label>;
 }

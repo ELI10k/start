@@ -356,25 +356,48 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   const [menu, deviceResult, assignmentResult, sessionResult] = await Promise.all([
     getActiveClientMenu(clientId, date),
     supabase.from("device_sessions").select("last_seen_at").eq("user_id", clientId).is("revoked_at", null).order("last_seen_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("workout_assignments").select("id,program_id,start_date,weekly_frequency,coach_note").eq("client_id", clientId).eq("status", "active").maybeSingle(),
+    // Every active assignment, not one. A client can run more than one
+    // programme, and maybeSingle() turned that into a request error rather than
+    // a list - the coach saw an empty workouts tab for a client who was training.
+    supabase.from("workout_assignments").select("id,program_id,start_date,weekly_frequency,coach_note").eq("client_id", clientId).eq("status", "active").order("assigned_at", { ascending: false }),
     supabase.from("workout_sessions").select("id,status,completed_at,started_at,day_id").eq("client_id", clientId).order("started_at", { ascending: false }).limit(30),
   ]);
   for (const result of [deviceResult, assignmentResult, sessionResult]) if (result.error) throw result.error;
-  const assignment = assignmentResult.data;
-  const [programResult, daysResult] = assignment
+  const activeAssignments = assignmentResult.data ?? [];
+  const assignment = activeAssignments[0] ?? null;
+  const programIds = [...new Set(activeAssignments.map((row) => row.program_id))];
+  const [programsResult, daysResult] = programIds.length
     ? await Promise.all([
-        supabase.from("workout_programs").select("id,name").eq("id", assignment.program_id).maybeSingle(),
-        supabase.from("workout_program_days").select("id,name,sort_order").eq("program_id", assignment.program_id).order("sort_order"),
+        supabase.from("workout_programs").select("id,name,official,coach_id").in("id", programIds),
+        supabase.from("workout_program_days").select("id,name,sort_order,program_id").in("program_id", programIds).order("sort_order"),
       ])
-    : [{ data: null, error: null }, { data: [], error: null }];
-  for (const result of [programResult, daysResult]) if (result.error) throw result.error;
+    : [{ data: [], error: null }, { data: [], error: null }];
+  for (const result of [programsResult, daysResult]) if (result.error) throw result.error;
+  const programRows = programsResult.data ?? [];
+  const programResult = { data: programRows.find((row) => row.id === assignment?.program_id) ?? null };
   const sessions = sessionResult.data ?? [];
   const completedThisWeek = sessions.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
   const totals = menu?.meals.flatMap((meal) => meal.items.filter((item) => item.eaten)).reduce((sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein, carbs: sum.carbs + item.carbs, fat: sum.fat + item.fat }), { calories: 0, protein: 0, carbs: 0, fat: 0 }) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
   const plannedItems = menu?.meals.flatMap((meal) => meal.items) ?? [];
   const completedItems = plannedItems.filter((item) => item.eaten).length;
   const latestCompleted = sessions.find((session) => session.status === "completed") ?? null;
-  const nextDay = (daysResult.data ?? []).find((day) => !sessions.some((session) => session.day_id === day.id && session.status === "completed")) ?? (daysResult.data ?? [])[0] ?? null;
+  const dayRows = daysResult.data ?? [];
+  const daysFor = (programId: string) => dayRows.filter((day) => day.program_id === programId);
+  const nextDay = daysFor(assignment?.program_id ?? "").find((day) => !sessions.some((session) => session.day_id === day.id && session.status === "completed")) ?? daysFor(assignment?.program_id ?? "")[0] ?? null;
+  // One row per running programme, so the coach's client file can list them all
+  // instead of implying the client has exactly one.
+  const activePrograms = activeAssignments.map((row) => {
+    const program = programRows.find((entry) => entry.id === row.program_id) ?? null;
+    const days = daysFor(row.program_id);
+    const completedThisWeekForRow = sessions.filter((session) => session.status === "completed" && days.some((day) => day.id === session.day_id) && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
+    return {
+      assignment: row,
+      program,
+      days: days.map((day) => ({ id: day.id, name: day.name })),
+      nextDayName: days.find((day) => !sessions.some((session) => session.day_id === day.id && session.status === "completed"))?.name ?? days[0]?.name ?? null,
+      weeklyCompletionPercent: Math.min(100, Math.round(completedThisWeekForRow / Math.max(1, row.weekly_frequency) * 100)),
+    };
+  });
   return {
     ...base,
     menu,
@@ -388,7 +411,7 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
       skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped).map((meal) => meal.title),
     },
     lastLoginAt: deviceResult.data?.last_seen_at ?? null,
-    workouts: { assignment, program: programResult.data, lastCompletedAt: latestCompleted?.completed_at ?? null, nextDayName: nextDay?.name ?? null, weeklyCompletionPercent: assignment ? Math.min(100, Math.round(completedThisWeek / assignment.weekly_frequency * 100)) : 0 },
+    workouts: { assignment, program: programResult.data, activePrograms, lastCompletedAt: latestCompleted?.completed_at ?? null, nextDayName: nextDay?.name ?? null, weeklyCompletionPercent: assignment ? Math.min(100, Math.round(completedThisWeek / assignment.weekly_frequency * 100)) : 0 },
   };
 }
 
@@ -572,9 +595,17 @@ export async function getFreeMenuDay(clientId: string, date: string) {
   return { day, entries: entries ?? [], summary };
 }
 
+// The training week runs Sunday to Saturday, which is the week a client and a
+// coach both mean when they say "this week".
+function weekStart(date: string): string {
+  const day = new Date(`${date}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() - day.getUTCDay());
+  return `${day.toISOString().slice(0, 10)}T00:00:00.000Z`;
+}
+
 export async function getClientOverview(clientId: string, date: string) {
   const supabase = await createSupabaseServerClient();
-  const [menu, profileResult, progressResult, checkInResult] =
+  const [menu, profileResult, progressResult, checkInResult, assignmentResult, sessionResult] =
     await Promise.all([
       getActiveClientMenu(clientId, date),
       supabase
@@ -594,15 +625,36 @@ export async function getClientOverview(clientId: string, date: string) {
         .eq("client_id", clientId)
         .order("submitted_at", { ascending: false })
         .limit(20),
+      // Every running programme, not one: a client can hold more than one active
+      // assignment, and "how many sessions this week" is their sum.
+      supabase
+        .from("workout_assignments")
+        .select("id,weekly_frequency")
+        .eq("client_id", clientId)
+        .eq("status", "active"),
+      supabase
+        .from("workout_sessions")
+        .select("id,completed_at")
+        .eq("client_id", clientId)
+        .eq("status", "completed")
+        .gte("completed_at", weekStart(date))
+        .lte("completed_at", `${date}T23:59:59.999Z`),
     ]);
   if (profileResult.error) throw profileResult.error;
   if (progressResult.error) throw progressResult.error;
   if (checkInResult.error) throw checkInResult.error;
+  if (assignmentResult.error) throw assignmentResult.error;
+  if (sessionResult.error) throw sessionResult.error;
   return {
     menu,
     clientProfile: profileResult.data,
     progress: progressResult.data ?? [],
     checkIns: checkInResult.data ?? [],
+    workouts: {
+      // Planned is what the coach set, summed across active programmes.
+      planned: (assignmentResult.data ?? []).reduce((sum, row) => sum + (row.weekly_frequency ?? 0), 0),
+      completed: (sessionResult.data ?? []).length,
+    },
   };
 }
 

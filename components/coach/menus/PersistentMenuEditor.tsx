@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, ChevronDown, ChevronUp, Copy, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { Calculator, ChevronDown, ChevronUp, Copy, Plus, Save, Sparkles, Star, Trash2 } from "lucide-react";
 import {
   recordCoachFoodSelection,
   saveMenuTree,
@@ -12,6 +12,7 @@ import BottomSheet from "@/components/client/BottomSheet";
 import FoodCombobox from "@/components/coach/menus/FoodCombobox";
 import { calculateEnergy, GOAL_LABELS, isNutritionGoal, MISSING_LABELS, type NutritionGoal } from "@/lib/nutrition/energy";
 import { foodsForGroup } from "@/lib/nutrition/food-groups";
+import { isCompatibleProtein, proteinKind } from "@/lib/nutrition/protein-kind";
 import { planMacros, type MacroSources as PlanSources } from "@/lib/nutrition/macro-plan";
 import { FIXED_MEAL_TITLES } from "@/lib/nutrition/menu-validation";
 import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,portionFor,unitLabel } from "@/lib/nutrition/meal-alternatives";
@@ -20,7 +21,7 @@ import type { Portion } from "@/lib/nutrition/meal-alternatives";
 type FoodOption={id:string;name:string;brand:string|null;category?:string;calories:number;protein:number|null;carbs:number|null;fat:number|null;packageUnit:string|null;unitWeightGrams:number|null;isMaster?:boolean;masterGroup?:GroupType|null};
 type FoodUsage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
 type ClientOption=Readonly<{id:string;full_name:string;weight:number|null;calorieTarget:number|null;ageYears:number|null;sex:"male"|"female"|null;heightCm:number|null;dailySteps:number|null;weeklyWorkouts:number|null;nutritionGoal:string|null}>;
-type Item={foodId:string;amount:number;amountSource?:"auto"|"manual"};
+type Item={foodId:string;amount:number;amountSource?:"auto"|"manual";note?:string;primary?:boolean};
 type GroupType="protein"|"carbohydrate"|"fat"|"vegetables";
 type Group={type:GroupType;items:Item[]};
 type Meal={title:typeof FIXED_MEAL_TITLES[number];notes:string;freeCalorieTarget:string;groups:Group[]};
@@ -67,7 +68,19 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     ?Boolean(usageMap.get(food.id)?.favorite)
     :Boolean(food.isMaster);
   const selectedClient=clients.find(client=>client.id===menu.clientId);
-  const totals=menu.meals.flatMap(meal=>meal.groups.flatMap(group=>group.items.slice(0,1))).reduce((sum,item)=>{
+  // A group can hold more than one primary now - "ביצה 1 + 2 לבני ביצה" is one
+  // protein portion built from two foods - so the totals add every primary and
+  // still ignore the alternatives, which are swaps rather than extras.
+  const primariesOf=(group:Group)=>group.items.filter((item,index)=>item.foodId&&(item.primary??index===0));
+  const macrosOf=(items:readonly Item[])=>items.reduce((sum,item)=>{
+    const food=foodMap.get(item.foodId);
+    const portion=food?portionFor(food,Number(item.amount||0)):null;
+    return{calories:sum.calories+(portion?.calories??0),protein:sum.protein+(portion?.protein??0),carbs:sum.carbs+(portion?.carbs??0),fat:sum.fat+(portion?.fat??0)};
+  },{calories:0,protein:0,carbs:0,fat:0});
+  const mealMacros=(meal:Meal)=>meal.title==="קלוריות חופשיות"
+    ?{calories:Number(meal.freeCalorieTarget||0),protein:0,carbs:0,fat:0}
+    :macrosOf(meal.groups.flatMap(primariesOf));
+  const totals=menu.meals.flatMap(meal=>meal.groups.flatMap(primariesOf)).reduce((sum,item)=>{
     const food=foodMap.get(item.foodId);
     const portion=food?portionFor(food,Number(item.amount||0)):null;
     return{
@@ -157,6 +170,22 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const computed=energyFor(menu.clientId,goal);
     applyPlan(menu.clientId,computed?.ok?String(computed.calorieTarget):menu.calorieTarget,true);
   };
+  // What the open picker may offer. Inside a protein group an alternative is
+  // restricted to the primary's kind, so a dairy portion never lists meat.
+  const pickerGroup=picker?menu.meals[picker.mealIndex]?.groups[picker.groupIndex]:undefined;
+  const pickerPrimaryFood=pickerGroup?foodMap.get(pickerGroup.items.find((item,index)=>item.foodId&&(item.primary??index===0))?.foodId??""):undefined;
+  const pickerIsAlternative=Boolean(picker&&pickerGroup&&!(pickerGroup.items[picker.itemIndex]?.primary??picker.itemIndex===0));
+  const pickerFoods=useMemo(()=>{
+    const list=foodsForGroup(foods,pickerGroup?.type??"protein");
+    if(pickerGroup?.type!=="protein"||!pickerIsAlternative||!pickerPrimaryFood)return list;
+    return list.filter(food=>isCompatibleProtein(pickerPrimaryFood,food));
+  },[foods,pickerGroup?.type,pickerIsAlternative,pickerPrimaryFood]);
+  const pickerTitle=(()=>{
+    const label=groupLabels[pickerGroup?.type??"protein"];
+    if(pickerGroup?.type!=="protein"||!pickerIsAlternative||!pickerPrimaryFood)return label;
+    const kind=proteinKind(pickerPrimaryFood);
+    return kind==="neutral"?`${label} · חלופה`:`${label} · חלופות ${kind==="dairy"?"חלביות":"בשריות"}`;
+  })();
   const selectFood=(mealIndex:number,groupIndex:number,itemIndex:number,foodId:string)=>{
     const meal=menu.meals[mealIndex];
     const group=meal.groups[groupIndex];
@@ -188,14 +217,18 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const target=portionFor(primaryFood,primary.amount);
     if(!target)return;
     const taken=new Set(group.items.map(item=>item.foodId));
+    // Inside a protein group a dairy primary is only ever swapped for dairy (or
+    // for a pareve food), and a meat primary for meat. Ranking by calories alone
+    // put chicken breast under cottage cheese.
     const suggestions=foodsForGroup(foods,group.type)
       .filter(food=>isFavorite(food)&&!taken.has(food.id)&&food.calories>0)
+      .filter(food=>group.type!=="protein"||isCompatibleProtein(primaryFood,food))
       .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type)}))
       .filter((entry):entry is{food:FoodOption;portion:Portion}=>Boolean(entry.portion))
       .sort((a,b)=>Math.abs(a.portion.calories-target.calories)-Math.abs(b.portion.calories-target.calories))
       .slice(0,count)
       .map(entry=>({foodId:entry.food.id,amount:entry.portion.quantity,amountSource:"auto" as const}));
-    if(!suggestions.length){setMessage("אין מאכלים מועדפים מתאימים להצעה בקבוצה הזו.");return}
+    if(!suggestions.length){setMessage(group.type==="protein"?`אין חלופות ${proteinKind(primaryFood)==="dairy"?"חלביות":"בשריות"} מועדפות שמתאימות ל${primaryFood.name}.`:"אין מאכלים מועדפים מתאימים להצעה בקבוצה הזו.");return}
     updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,...suggestions]}:value)});
     for(const suggestion of suggestions)void recordCoachFoodSelection(suggestion.foodId);
   };
@@ -235,7 +268,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const submit=()=>startTransition(async()=>{
     setMessage("");
     if(!savedMeals().length){setMessage("יש למלא לפחות ארוחה אחת לפני שמירה.");return}
-    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?new Date().toISOString().slice(0,10):"",days:[{dayIndex:0,title:"יום רגיל",sortOrder:0,meals:savedMeals().map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",itemRole:itemIndex===0?"primary":"alternative",sortOrder:itemIndex}})}))}))}]});
+    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?new Date().toISOString().slice(0,10):"",days:[{dayIndex:0,title:"יום רגיל",sortOrder:0,meals:savedMeals().map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}]});
     setMessage(result.message??"");
     if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
   });
@@ -285,7 +318,13 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           {macroMessage&&<p role="status" className="mt-2 text-xs text-[#5B5F5B]">{macroMessage}</p>}
         </div>
       </section>
-      {menu.meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><button type="button" aria-label="שכפול ארוחה" onClick={()=>setMenu({...menu,meals:[...menu.meals.slice(0,index+1),structuredClone(meal),...menu.meals.slice(index+1)]})} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMenu({...menu,meals:menu.meals.filter((_,i)=>i!==index)})} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button></div>
+      {menu.meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><button type="button" aria-label="שכפול ארוחה" onClick={()=>setMenu({...menu,meals:[...menu.meals.slice(0,index+1),structuredClone(meal),...menu.meals.slice(index+1)]})} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMenu({...menu,meals:menu.meals.filter((_,i)=>i!==index)})} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button>
+      {/* What this meal costs, on the row that names it. Otherwise the only way
+          to know was to add the four group cards up by eye. */}
+      <span className="mr-auto flex shrink-0 items-center gap-2 text-sm font-black">
+        <span className="pill pill--green">{Math.round(mealMacros(meal).calories)} קל׳</span>
+        <span className="pill">{Math.round(mealMacros(meal).protein)} ג׳ חלבון</span>
+      </span></div>
       {collapsed.has(index)?<p className="mt-3 text-xs text-[#5B5F5B]">{mealSummary(meal,foodMap)}</p>:<>
       {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:<>
       <div className="mt-4 grid items-start gap-5">{meal.groups.map((group,groupIndex)=>
@@ -295,14 +334,24 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           <div className="mt-3">{group.items.map((item,itemIndex)=>{
             const selectedFood=foodMap.get(item.foodId);
             const portion=selectedFood?portionFor(selectedFood,item.amount):null;
-            const isPrimary=itemIndex===0;
+            const isPrimary=item.primary??itemIndex===0;
             // Two lines rather than one. The name had been sharing a row with the
             // amount, the unit, the macros and two buttons, so it was the thing
             // that got truncated - and the name is the one part a coach cannot
             // work out from the others.
             return <div key={itemIndex} className="food-row" data-primary={isPrimary||undefined}>
               <div className="food-row__head">
-                <span className={`pill${isPrimary?" pill--green":""}`}>{isPrimary?"ראשי":item.amountSource==="auto"?"אוטו׳":"ידני"}</span>
+                {/* Primary is a toggle, not a position. A protein portion is
+                    sometimes two foods - one egg plus two egg whites - and the
+                    first row being the only possible primary made that
+                    unsayable. Everything not marked primary is an alternative. */}
+                <button
+                  type="button"
+                  aria-pressed={isPrimary}
+                  title={isPrimary?"מאכל ראשי - נספר בסיכום":"חלופה - לא נספרת בסיכום"}
+                  onClick={()=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,primary:!isPrimary}:food)}:value)})}
+                  className={`pill shrink-0${isPrimary?" pill--green":""}`}
+                ><Star aria-hidden="true" size={13} fill={isPrimary?"currentColor":"none"}/>{isPrimary?"ראשי":"חלופה"}</button>
                 <button type="button" className="food-row__pick" data-empty={selectedFood?undefined:true} onClick={()=>setPicker({mealIndex:index,groupIndex,itemIndex})}>
                   {selectedFood?`${selectedFood.name}${selectedFood.brand?` — ${selectedFood.brand}`:""}`:isPrimary?"בחירת מאכל ראשי":"בחירת מזון"}
                 </button>
@@ -332,27 +381,38 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                   <MacroChip label="שומן" value={portion.fat} unit="ג׳"/>
                 </dl>:null}
               </div>
+              {/* A note belongs to the food, not to the meal: "בלי מלח" applies
+                  to the chicken and to nothing else on the plate. */}
+              {selectedFood?<input
+                className="nutrition-input mt-2 text-sm"
+                placeholder="הערה למאכל (רשות)"
+                aria-label={`הערה ל${selectedFood.name}`}
+                value={item.note??""}
+                onChange={event=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,note:event.target.value}:food)}:value)})}
+              />:null}
             </div>})}
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" onClick={()=>{updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto"}]}:value)});setPicker({mealIndex:index,groupIndex,itemIndex:group.items.length})}} className="chip"><Plus aria-hidden="true" size={15}/>{group.items.length?"הוספת חלופה":"בחירת מאכל ראשי"}</button>
+            {group.items.length?<button type="button" onClick={()=>{updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto" as const,primary:true}]}:value)});setPicker({mealIndex:index,groupIndex,itemIndex:group.items.length})}} className="chip"><Plus aria-hidden="true" size={15}/>מאכל ראשי נוסף</button>:null}
             {group.items[0]?.foodId?<button type="button" onClick={()=>suggestAlternatives(index,groupIndex)} className="chip"><Sparkles aria-hidden="true" size={15}/>הוסף 3 חלופות מומלצות</button>:null}
           </div>
         </div>)}
       </div>
       </>}</>}</section>)}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-[#16A34A]/30 p-3">{FIXED_MEAL_TITLES.filter(title=>!menu.meals.some(meal=>meal.title===title)).map(title=><button key={title} type="button" onClick={()=>setMenu({...menu,meals:[...menu.meals,title==="קלוריות חופשיות"?{title,notes:"",freeCalorieTarget:"",groups:[]}:{...emptyMeal(),title}]})} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4 text-sm font-bold text-[#16A34A]"><Plus size={15} className="inline"/> {title}</button>)}</div>
-    </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">סיכום המזונות</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><Total label="קלוריות" value={totals.calories+menu.meals.reduce((sum,meal)=>sum+(meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget||0):0),0)}/><Total label="חלבון (גרם)" value={totals.protein}/><Total label="פחמימה (גרם)" value={totals.carbs}/><Total label="שומן (גרם)" value={totals.fat}/></dl><h2 className="mt-6 border-t border-[#E5E7E5] pt-5 font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
+    </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">מאקרו אבות מזון</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><Total label="קלוריות" value={totals.calories+menu.meals.reduce((sum,meal)=>sum+(meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget||0):0),0)} target={Number(menu.calorieTarget)}/><Total label="חלבון (גרם)" value={totals.protein} target={Number(menu.proteinTarget)}/><Total label="פחמימה (גרם)" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/><Total label="שומן (גרם)" value={totals.fat} target={Number(menu.fatTarget)}/></dl><h2 className="mt-6 border-t border-[#E5E7E5] pt-5 font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
 
     {/* One picker for the whole editor. It fills a sheet rather than hanging off
         the row it belongs to, so the search and the results have room. */}
     <BottomSheet
       open={Boolean(picker)}
-      title={picker?groupLabels[menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.type??"protein"]:"בחירת מזון"}
+      placement="top"
+      title={picker?pickerTitle:"בחירת מזון"}
       onClose={()=>setPicker(null)}
     >
       {picker&&<FoodCombobox
-        foods={foodsForGroup(foods,menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.type??"protein")}
+        foods={pickerFoods}
         value={menu.meals[picker.mealIndex]?.groups[picker.groupIndex]?.items[picker.itemIndex]?.foodId??""}
         usage={usage}
         onSelect={foodId=>{selectFood(picker.mealIndex,picker.groupIndex,picker.itemIndex,foodId);setPicker(null)}}
@@ -368,7 +428,18 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
 function planSources(sources:MacroSources):PlanSources{return{calories:"manual",protein:sources.protein,carbohydrates:sources.carbohydrates,fat:sources.fat}}
 function Field({label,value,onChange,type="text"}:{label:string;value:string;onChange:(value:string)=>void;type?:string}){return <label className="text-sm font-bold">{label}<input className="nutrition-input mt-2" type={type} min={type==="number"?"1":undefined} value={value} onChange={event=>onChange(event.target.value)}/></label>}
 function MacroField({label,value,source,onChange}:{label:string;value:string;source:MacroSource;onChange:(value:string)=>void}){return <label className="text-sm font-bold"><span className="flex items-center justify-between gap-2"><span>{label}</span><span className={`text-[10px] ${source==="auto"?"text-[#16A34A]":"text-[#0B0B0B]"}`}>{source==="auto"?"מחושב אוטומטית":"הוזן ידנית"}</span></span><input className="nutrition-input mt-2" type="number" min="0" value={value} onChange={event=>onChange(event.target.value)}/></label>}
-function Total({label,value}:{label:string;value:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value.toFixed(1)}</dd></div>}
+// Red until the target is reached, green once it is. The panel used to state four
+// numbers and leave the coach to compare each one against a target three lines
+// further down; the whole question being asked here is "am I short?".
+function Total({label,value,target}:{label:string;value:number;target?:number}){
+  const hasTarget=Boolean(target&&Number.isFinite(target)&&target>0);
+  const short=hasTarget&&value<target!;
+  return <div>
+    <dt className="text-[#5B5F5B]">{label}</dt>
+    <dd className={`mt-1 font-black${hasTarget?short?" text-[#DC2626]":" text-[#16A34A]":""}`}>{value.toFixed(1)}</dd>
+    {hasTarget&&<p className="text-[10px] text-[#5B5F5B]">{short?`חסרים ${(target!-value).toFixed(1)} עד ${target}`:`מעל היעד ${target}`}</p>}
+  </div>;
+}
 function MacroTotal({label,value,calories,target}:{label:string;value:string;calories:number;target:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value||"—"} גרם</dd><p className="text-[10px] text-[#5B5F5B]">{target>0?`${Math.round(calories/target*100)}%`:"—"}</p></div>}
 function MacroChip({label,value,unit}:{label:string;value:number;unit:string}){return <div><dt>{label}</dt><dd>{value} {unit}</dd></div>}
 

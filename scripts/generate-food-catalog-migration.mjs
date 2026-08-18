@@ -6,8 +6,8 @@ const target = new URL(
   import.meta.url,
 );
 const foods = JSON.parse(await readFile(source, "utf8"));
-if (foods.length !== 336) {
-  throw new Error(`Expected 336 foods, received ${foods.length}.`);
+if (foods.filter((food) => /^\d+$/.test(food.id)).length !== 336) {
+  throw new Error("The 336 imported branded products are no longer all present.");
 }
 if (new Set(foods.map((food) => food.id)).size !== foods.length) {
   throw new Error("Food IDs must be unique before generating the migration.");
@@ -84,7 +84,7 @@ begin
   select count(*), count(distinct id), count(distinct (lower(trim(name)), lower(trim(coalesce(brand,'')))))
     into v_total, v_unique_ids, v_unique_products
   from public.foods;
-  if v_total <> 336 or v_unique_ids <> 336 or v_unique_products <> 336 then
+  if v_total <> ${foods.length} or v_unique_ids <> ${foods.length} or v_unique_products <> ${foods.length} then
     raise exception 'food_catalog_verification_failed: total=%, ids=%, products=%', v_total, v_unique_ids, v_unique_products;
   end if;
 end $$;

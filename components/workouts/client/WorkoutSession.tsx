@@ -34,15 +34,15 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   if(saved)return <Finished workout={saved}/>;
   if(!session)return <Start program={program.name} day={day.name} count={ordered.length} warning={warning} onStart={begin} starting={isStarting} programId={programId}/>;
 
-  const current=ordered[Math.min(session.currentExerciseIndex,ordered.length-1)];const result=session.exerciseResults.find((item)=>item.workoutExerciseId===current?.id);if(!current||!result)return <main className="client-app-content"><StateBlock title="אין תרגילים זמינים באימון זה" description="מקור התוכנית אינו כולל תרגילים ליום הזה."/></main>;const difficulty=session.perceivedDifficulty??3;const energy=session.energy??3;
+  const current=ordered[Math.min(session.currentExerciseIndex,ordered.length-1)];const result=session.exerciseResults.find((item)=>item.workoutExerciseId===current?.id);if(!current||!result)return <main className="client-app-content"><StateBlock title="אין תרגילים זמינים באימון זה" description="מקור התוכנית אינו כולל תרגילים ליום הזה."/></main>;const difficulty=session.perceivedDifficulty??3;const energy=session.energy??3;const sleepHours=session.sleepHours;
   const exercise=getExercise(result.exerciseId);const performance=exercisePerformance(snapshot.completedWorkouts,currentClientId,result.exerciseId);const previous=performance.sessions[0];const recentSets=performance.sessions.flatMap((item)=>item.sets.filter((set)=>set.completed));const bestWeight=Math.max(0,...recentSets.map((set)=>set.weightKg??0));
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
   const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item),completed:result.sets.every((item)=>item.id===set.id?nextSet.completed:item.completed)};const restSeconds=patch.completed?Number.parseInt(current.rest??"",10):0;replaceResult(nextResult,Number.isFinite(restSeconds)&&restSeconds>0?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
   const finish=()=>{if(session.exerciseResults.some((item)=>!item.completed&&!item.skipped)&&!warning){setWarning("נותרו תרגילים שלא הושלמו. לחיצה נוספת תשמור אותם כחלקיים.");return}setWarning("");setSummary(true)};
-  const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
-  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)}/>;
+  const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
+  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} setSleepHours={(nextSleep)=>persist({sleepHours:nextSleep})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)}/>;
 
   return <main className="client-app-content">
     {/* Where you are in the workout follows you down the page - on a phone the
@@ -126,14 +126,17 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     {/* Not an error: the sets are recorded, they are just still on the phone. */}
     {pendingSync&&!warning&&<p role="status" className="mt-4 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">הסטים נשמרו במכשיר. הסנכרון יושלם כשהחיבור יחזור.</p>}
 
-    <button onClick={finish} className="premium-primary-button mt-4 w-full">סיום אימון</button>
-    <button onClick={()=>setAbandon(true)} className="mt-2 flex w-full items-center justify-center gap-2 text-sm text-[#DC2626]"><X aria-hidden="true" size={16}/>ביטול האימון</button>
-
-    {/* Previous and next stay under the thumb, above the home indicator. */}
-    <nav className="session-actions" aria-label="מעבר בין תרגילים">
-      <button disabled={session.currentExerciseIndex===0} onClick={()=>persist({currentExerciseIndex:session.currentExerciseIndex-1})} className="premium-secondary-button"><ChevronRight aria-hidden="true" size={17}/>הקודם</button>
-      <button disabled={session.currentExerciseIndex===ordered.length-1} onClick={()=>persist({currentExerciseIndex:session.currentExerciseIndex+1})} className="premium-secondary-button">הבא<ChevronLeft aria-hidden="true" size={17}/></button>
-    </nav>
+    {/* One footer, in the order the workout is actually used: move between
+        exercises first, and finish last. "סיום אימון" used to sit above the
+        arrows, which put the end of the workout under the thumb throughout it. */}
+    <div className="session-footer">
+      <nav className="session-actions" aria-label="מעבר בין תרגילים">
+        <button disabled={session.currentExerciseIndex===0} onClick={()=>persist({currentExerciseIndex:session.currentExerciseIndex-1})} className="premium-secondary-button"><ChevronRight aria-hidden="true" size={17}/>הקודם</button>
+        <button disabled={session.currentExerciseIndex===ordered.length-1} onClick={()=>persist({currentExerciseIndex:session.currentExerciseIndex+1})} className="premium-secondary-button">הבא<ChevronLeft aria-hidden="true" size={17}/></button>
+      </nav>
+      <button onClick={finish} className="premium-primary-button mt-3 w-full">סיום אימון</button>
+      <button onClick={()=>setAbandon(true)} className="mt-2 flex w-full items-center justify-center gap-2 text-sm text-[#DC2626]"><X aria-hidden="true" size={16}/>ביטול האימון</button>
+    </div>
 
     <BottomSheet open={abandon} title="לבטל את האימון הפעיל?" onClose={()=>setAbandon(false)}>
       <p className="text-sm text-[#5B5F5B]">הסטים שנרשמו באימון הזה יימחקו ולא ניתן יהיה לשחזר אותם.</p>
@@ -201,7 +204,7 @@ function RestTimer({seconds,onAdd,onSkip}:{seconds:number;onAdd:()=>void;onSkip:
   </section>;
 }
 
-function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,warning,onSave,saving,onBack}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void}){
+function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,setSleepHours,warning,onSave,saving,onBack}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;setSleepHours:(value:number|undefined)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void}){
   return <main className="client-app-content">
     <header className="premium-page-header"><div><p>סיום אימון</p><h1>סיכום לפני שמירה</h1></div></header>
     <dl className="dashboard-metrics">
@@ -213,6 +216,11 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
     </dl>
     <section className="premium-card mt-4">
       <label className="block text-sm font-bold">הערת אימון<textarea className="nutrition-input mt-2 min-h-24" value={note} onChange={(event)=>setNote(event.target.value)}/></label>
+      {/* Hours, not a 1-5 rating: "ישנתי 5" and "ישנתי 8" are the two numbers a
+          coach acts on, and a scale loses both. */}
+      <label className="mt-4 block text-sm font-bold">כמה שעות ישנת בלילה?
+        <input type="number" min="0" max="24" step="0.5" inputMode="decimal" className="nutrition-input mt-2 max-w-32" value={sleepHours??""} onChange={(event)=>{const parsed=Number(event.target.value);setSleepHours(event.target.value.trim()===""||Number.isNaN(parsed)?undefined:parsed)}}/>
+      </label>
       <Rating label="קושי מורגש" value={difficulty} onChange={setDifficulty}/>
       <Rating label="רמת אנרגיה" value={energy} onChange={setEnergy}/>
     </section>

@@ -224,21 +224,37 @@ export default async function CoachClientPage({ params, searchParams }: { params
       </>}
 
       {tab === "workouts" && <>
-      <Section title="אימונים" summary={data.workouts.program?.name ?? "אין תוכנית פעילה"} open>
-        {data.workouts.assignment ? <dl className="compact-data-list">
-          <div><span>השלמת השבוע</span><strong>{data.workouts.weeklyCompletionPercent}%</strong></div>
-          <div><span>אימון אחרון</span><strong>{date(data.workouts.lastCompletedAt)}</strong></div>
-          <div><span>אימון הבא</span><strong>{data.workouts.nextDayName ?? "לא הוגדר"}</strong></div>
-          <div><span>תדירות</span><strong>{data.workouts.assignment.weekly_frequency} בשבוע</strong></div>
-        </dl> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}
+      {/* One card per running programme. A client can hold more than one active
+          assignment, and a tab that named only the newest hid the rest. */}
+      <Section title="אימונים" summary={data.workouts.activePrograms.length ? data.workouts.activePrograms.map((entry) => entry.program?.name ?? "תוכנית").join(" · ") : "אין תוכנית פעילה"} open>
+        {data.workouts.activePrograms.length ? <div className="grid gap-4">
+          {data.workouts.activePrograms.map((entry) => <article key={entry.assignment.id} className="rounded-2xl border border-[#E5E7E5] p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="font-black">{entry.program?.name ?? "התוכנית אינה זמינה לצפייה"}</h3>
+              <span className="pill pill--green">פעילה</span>
+            </div>
+            <dl className="compact-data-list mt-3">
+              <div><span>השלמת השבוע</span><strong>{entry.weeklyCompletionPercent}%</strong></div>
+              <div><span>אימון הבא</span><strong>{entry.nextDayName ?? "לא הוגדר"}</strong></div>
+              <div><span>תדירות</span><strong>{entry.assignment.weekly_frequency} בשבוע</strong></div>
+              <div><span>התחלה</span><strong>{entry.assignment.start_date}</strong></div>
+              <div><span>ימי אימון</span><strong>{entry.days.length}</strong></div>
+            </dl>
+            {entry.assignment.coach_note && <p className="mt-3 text-sm text-[#5B5F5B]">{entry.assignment.coach_note}</p>}
+            {entry.program && <div className="mt-3 flex flex-wrap gap-2">
+              <Link href={`/coach/workouts/${entry.program.id}`} className="chip">פתיחת התוכנית</Link>
+              <Link href={`/coach/workouts/${entry.program.id}#program-editor`} className="chip">עריכת התוכנית</Link>
+              {entry.days.map((day) => <Link key={day.id} href={`/coach/workouts/${entry.program!.id}/days/${day.id}`} className="chip">{day.name}</Link>)}
+            </div>}
+          </article>)}
+        </div> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}
 
         <div className="mt-4 flex flex-wrap gap-2 border-t border-[#E5E7E5] pt-4">
-          {data.workouts.program && <Link href={`/coach/workouts/${data.workouts.program.id}`} className="chip">פתיחת התוכנית</Link>}
-          <Link href="/coach/workouts" className="chip">{data.workouts.program ? "החלפת תוכנית" : "שיוך תוכנית"}</Link>
+          <Link href="/coach/workouts" className="chip">{data.workouts.activePrograms.length ? "שיוך תוכנית נוספת או החלפה" : "שיוך תוכנית"}</Link>
           <Link href={`/coach/clients/${id}/workouts`} className="chip">אימונים שהושלמו ונפח</Link>
           <Link href={`/coach/clients/${id}?tab=notes`} className="chip">הוספת הערה</Link>
         </div>
-        <p className="mt-2 text-xs text-[#5B5F5B]">משקלים, חזרות ונפח לאורך זמן נמצאים במסך האימונים של הלקוח. המסך הזה אינו משנה תוכנית או היסטוריה.</p>
+        <p className="mt-2 text-xs text-[#5B5F5B]">אימון אחרון: {date(data.workouts.lastCompletedAt)}. משקלים, חזרות ונפח לאורך זמן נמצאים במסך האימונים של הלקוח.</p>
       </Section>
       </>}
 

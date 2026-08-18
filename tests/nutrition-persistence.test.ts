@@ -9,9 +9,13 @@ import { validateMealPlanPayload } from "../lib/nutrition/menu-validation.ts";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("nutrition catalog has exactly 336 distinct products", () => {
-  assert.equal(foods.length, 336);
-  assert.equal(new Set(foods.map((food) => food.id)).size, 336);
+// The 336 branded products from the imported workbook keep their numeric ids and
+// must all still be there; produce and the coach's own portions were added on top
+// and carry "coach-" ids, so the catalogue grows without the import being lost.
+test("nutrition catalog keeps every imported product and stays distinct", () => {
+  assert.equal(foods.filter((food) => /^\d+$/.test(food.id)).length, 336);
+  assert.ok(foods.length > 336);
+  assert.equal(new Set(foods.map((food) => food.id)).size, foods.length);
   assert.equal(
     new Set(
       foods.map(
@@ -21,8 +25,10 @@ test("nutrition catalog has exactly 336 distinct products", () => {
             .toLocaleLowerCase("he")}`,
       ),
     ).size,
-    336,
+    foods.length,
   );
+  // The gap this closed: one vegetable in the whole catalogue.
+  assert.ok(foods.filter((food) => food.category === "ירקות").length > 20);
 });
 
 test("nutrition schema includes canonical relations, constraints, RLS and RPCs", async () => {

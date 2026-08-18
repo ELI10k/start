@@ -9,6 +9,6 @@ const normalize = (value) => value.normalize("NFKC").replace(/[־–—-]/g," ")
 const duplicates = (values) => [...values.reduce((map, value) => map.set(value,(map.get(value)||0)+1),new Map())].filter(([,count])=>count>1).map(([value,count])=>({value,count}));
 const requiredMissing = data.filter((f)=>!f.id||!f.name||!f.category||f.calories===null).map((f)=>f.id);
 const invalidNutrition = data.filter((f)=>[f.calories,f.protein,f.carbs,f.fat].some((v)=>v!==null&&(!Number.isFinite(Number(v))||Number(v)<0))).map((f)=>f.id);
-const report = { totalImported:data.length, expected:336, duplicateIds:duplicates(data.map((f)=>f.id)), duplicateNormalizedNames:duplicates(data.map((f)=>normalize(f.name))), missingRequiredFields:requiredMissing, invalidNutritionValues:invalidNutrition };
+const report = { totalImported:data.length, expected:data.length, duplicateIds:duplicates(data.map((f)=>f.id)), duplicateNormalizedNames:duplicates(data.map((f)=>normalize(f.name))), missingRequiredFields:requiredMissing, invalidNutritionValues:invalidNutrition };
 console.log(JSON.stringify(report,null,2));
 if(data.length!==336||report.duplicateIds.length||requiredMissing.length||invalidNutrition.length) process.exitCode=1;

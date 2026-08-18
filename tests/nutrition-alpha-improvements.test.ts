@@ -76,7 +76,9 @@ test("menu editor preserves manual targets until explicit recalculation",()=>{
   assert.match(source,/חשב מחדש/);
   assert.match(source,/force\?\{protein:"auto" as const,carbohydrates:"auto" as const,fat:"auto" as const\}/);
   assert.doesNotMatch(source,/queueMicrotask/);
-  for(const label of ["סיכום המזונות","חלבון \\(גרם\\)","פחמימה \\(גרם\\)","שומן \\(גרם\\)"])assert.match(source,new RegExp(label));
+  for(const label of ["מאקרו אבות מזון","חלבון \\(גרם\\)","פחמימה \\(גרם\\)","שומן \\(גרם\\)"])assert.match(source,new RegExp(label));
+  // Short of the target reads red, target met reads green.
+  assert.match(source,/short\?" text-\[#DC2626\]":" text-\[#16A34A\]"/);
 });
 
 test("duplicated plans start in automatic macro mode",()=>{

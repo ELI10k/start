@@ -17,10 +17,10 @@ const links = [
   { href: "/profile", label: "פרופיל" },
 ];
 
-export default async function ClientShell({ children }: { children: React.ReactNode }) {
+export default async function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const unreadCount = await getUnreadNotificationCount();
   return (
-    <main className="client-app-shell">
+    <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
         <Link href="/" className="start-wordmark" aria-label="START — מסך הבית">START</Link>
         <div className="mobile-app-header__actions">

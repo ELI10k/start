@@ -8,14 +8,14 @@ import { MetricTile } from "@/components/client/PremiumUI";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
-import { activeAssignmentFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
+import { activeAssignmentsFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
 
 const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=new Date().toISOString().slice(0,10);const assignment=activeAssignmentFor(snapshot.assignments,currentClientId,today);const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
+  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=new Date().toISOString().slice(0,10);const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -33,6 +33,17 @@ export default function TodayWorkout(){
   const startLabel=activeSession?"המשך אימון":"התחלת אימון";
 
   return <div className="grid gap-4">
+    {/* More than one programme can be running at a time, so the client picks
+        which one today's workout comes from. With a single programme the row
+        would say nothing, so it is not rendered at all. */}
+    {assignments.length>1&&
+      <div className="chip-row" role="group" aria-label="בחירת תוכנית פעילה">
+        {assignments.map((item)=>{
+          const itemProgram=snapshot.programs.find((entry)=>entry.id===item.programId);
+          return <button key={item.id} type="button" onClick={()=>setProgramChoice(item.id)} aria-pressed={item.id===assignment.id} className="chip">{itemProgram?.name??"תוכנית"}</button>;
+        })}
+      </div>}
+
     {/* The one inverted surface on the screen: what to do today, and nothing else. */}
     <section className="daily-progress-card" aria-labelledby="today-workout">
       <div className="daily-progress-card__copy">
@@ -51,7 +62,7 @@ export default function TodayWorkout(){
     <section className="dashboard-metrics" aria-label="מדדי אימון">
       <MetricTile label="הושלמו" value={`${adherence.completed}/${adherence.expected}`} icon={<CheckCircle2 aria-hidden="true" size={18}/>}/>
       <MetricTile label="התמדה" value={`${adherence.percent}%`} icon={<Target aria-hidden="true" size={18}/>}/>
-      <MetricTile label="הוחמצו" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
+      <MetricTile label="פיספסת" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
       <MetricTile label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
     </section>
 

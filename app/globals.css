@@ -688,6 +688,24 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 @media (min-width: 640px) {
   .sheet { inset-inline: 50%; width: min(32rem, 100%); transform: translateX(50%); }
 }
+/* Pinned to the top instead of the bottom edge, for a panel whose content is a
+   long scrolling list: the search field lands where the eye already is and the
+   results have the whole screen beneath them. */
+.sheet--top {
+  inset-block-start: max(3dvh, .75rem);
+  inset-block-end: auto;
+  max-height: 92dvh;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(11, 11, 11, .22);
+  animation: sheet-drop var(--duration-base) ease-out;
+}
+@keyframes sheet-drop { from { transform: translateY(-2rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (min-width: 640px) {
+  .sheet--top { width: min(40rem, 100%); }
+  .sheet--top { animation: none; }
+}
+
 @keyframes sheet-rise { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .sheet, .sheet-backdrop { animation: none; } }
@@ -904,6 +922,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .set-row[data-done="true"] .set-row__index { background: var(--green); color: #FFFFFF; }
 .set-row input { text-align: center; }
 
+/* The whole footer sticks, not just the arrows: previous/next on top and
+   "סיום אימון" beneath them, so the control that ends the workout is the last
+   thing on the screen rather than the one nearest the thumb. */
+.session-footer {
+  position: sticky; inset-block-end: 0; z-index: 20;
+  margin-inline: -1rem; margin-block-start: 1rem;
+  padding: .75rem 1rem max(.75rem, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, .96);
+  backdrop-filter: blur(18px);
+}
 .session-actions {
   position: sticky; inset-block-end: 0; z-index: 20;
   display: grid; grid-auto-flow: column; gap: .6rem;
@@ -912,6 +941,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   border-top: 1px solid var(--line);
   background: rgba(255, 255, 255, .96);
   backdrop-filter: blur(18px);
+}
+/* Inside the footer the arrows are just a row - the footer does the sticking. */
+.session-footer .session-actions {
+  position: static; margin-inline: 0; padding: 0; border-top: 0; background: none; backdrop-filter: none;
 }
 .session-actions > * { width: 100%; }
 .session-actions--stack { grid-auto-flow: row; }
