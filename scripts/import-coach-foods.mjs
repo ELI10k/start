@@ -12,6 +12,7 @@
 // updates rather than duplicates, and writes an idempotent upsert to --sql.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, isAbsolute, join } from "node:path";
 import XLSX from "xlsx";
@@ -69,10 +70,10 @@ const FRUITS = [
 // The alternatives the coach dictates by name and the workbook never listed, so
 // "הוספת חלופה" can offer the full dairy and meat lists.
 const COACH_ALTERNATIVES = [
-  ["דג מושט", "בשרים / דגים", 128, 26, 0, 2.7, "ל-100 גרם"],
-  ["משקה פרו יטבתה 25 גרם חלבון עד 140 קלוריות", "גבינות", 140, 25, 8, 1, "למנה"],
-  ["יוגורט חלבון 20-25 גרם חלבון עד 150 קלוריות", "גבינות", 150, 22, 8, 2, "למנה"],
-  ["גבינה לבנה עד 5% (100 גרם)", "גבינות", 100, 14, 4, 4, "למנה"],
+  ["דג מושט", "בשרים / דגים", 128, 26, 0, 2.7, null],
+  ["משקה פרו יטבתה 350 מ״ל", "גבינות", 140, 25, 8, 1, "בקבוק"],
+  ["יוגורט חלבון 20-25 גרם חלבון עד 150 קלוריות", "גבינות", 150, 22, 8, 2, "גביע"],
+  ["גבינה לבנה עד 5%", "גבינות", 100, 14, 4, 4, null],
 ];
 
 // The sheet groups rows under a category cell that is filled once per block.
@@ -82,26 +83,67 @@ const isNoise = (name) => !name
   || name.includes("קלוריות")
   || name.includes("ממוצע");
 
+// Whether a row is a portion or a per-100 g figure, and if a portion, of what.
+//
+// It matters because portionFor() reads every food as per-100 g: a bottle of
+// Yotvata Pro entered as 140 kcal came out as 70 kcal for "50 גרם". A food is a
+// countable unit only when it carries both a unit noun and the weight of one, so
+// a portion row is given unit_weight_grams = 100 - one unit then reproduces the
+// numbers the coach wrote, exactly.
+const UNIT_WORDS = [
+  ["כפית", /כפית/], ["כף", /\bכף\b/], ["פרוסה", /פרוס(ה|ות|ת)/], ["פיתה", /פית(ה|ות)/],
+  ["לחמנייה", /לחמני(ה|יה|ות)/], ["פרכית", /פרכי(ת|ות)/], ["קופסה", /קופס(ה|ת|אות)/],
+  ["כוס", /\bכוס\b/], ["גביע", /גביע/], ["בקבוק", /בקבוק/], ["ביצה", /ביצ(ה|ים)|לבן ביצה/],
+  ["תמר", /\bתמר\b/], ["יחידה", /יחיד(ה|ות)/],
+];
+// "קוטג׳ 1% 250 גרם" and "אגוזים 10 גרם" state a weight: the figures belong to
+// that weight, so they are scaled to 100 g rather than left to be read as such.
+const WEIGHT_IN_NAME = /(\d+(?:\.\d+)?)\s*(?:גרם|גר׳|ג׳)/;
+
+function portionShape(name, category) {
+  if (category === "כריכים") return { unit: "מנה" };
+  for (const [unit, pattern] of UNIT_WORDS) if (pattern.test(name)) return { unit };
+  const weight = name.match(WEIGHT_IN_NAME);
+  if (weight) {
+    const grams = Number(weight[1]);
+    if (grams > 0 && grams !== 100) return { scaleFrom: grams };
+  }
+  return {};
+}
+
+// The coach's portion table is already in the catalogue: migration
+// 202608020001 imported all of it as curated master foods, per 100 g with the
+// weight of one portion attached. Re-importing the same sheet produced a second
+// "כפית שמן" and 47 other twins. The names in that migration are the skip list.
+function curatedMasterNames() {
+  const sql = readFileSync(new URL("../supabase/migrations/202608020001_curated_master_foods.sql", import.meta.url), "utf8");
+  return new Set([...sql.matchAll(/\('master-[pcf]-\d+',\s*'((?:[^']|'')+)'/g)].map((match) => key(match[1].replaceAll("''", "'"))));
+}
+
 function readCoachPortions() {
   const workbook = XLSX.readFile(COACH_WORKBOOK);
   const rows = XLSX.utils.sheet_to_json(workbook.Sheets["קלוריות מאכלים"], { defval: null });
+  const curated = curatedMasterNames();
   const foods = [];
   let category = null;
   for (const row of rows) {
     if (row["חלבונים"]) category = normalise(row["חלבונים"]);
     const name = normalise(row["מוצר "]);
     const calories = number(row["קלוריות"]);
-    if (isNoise(name) || calories === null) continue;
+    if (isNoise(name) || calories === null || curated.has(key(name))) continue;
+    const shape = portionShape(name, category ?? "");
+    const factor = shape.scaleFrom ? 100 / shape.scaleFrom : 1;
+    const scale = (value) => value === null ? null : Math.round(value * factor * 10) / 10;
     foods.push({
       name,
       category: category ?? "מנות המאמן",
-      calories,
-      protein: number(row["חלבון"]),
-      carbs: number(row["פחמימה"]),
-      fat: number(row["שומן"]),
-      // These are portions the coach writes in, not per-100 g figures: "כפית
-      // שמן" and "1 קופסת טונה" carry their own size in the name.
-      servingLabel: "למנה",
+      calories: scale(calories),
+      protein: scale(number(row["חלבון"])),
+      carbs: scale(number(row["פחמימה"])),
+      fat: scale(number(row["שומן"])),
+      packageUnit: shape.unit ?? null,
+      unitWeightGrams: shape.unit ? 100 : null,
+      servingLabel: shape.unit ? `ל${shape.unit}` : "ל-100 גרם",
       notes: "מרשימת המנות של המאמן",
     });
   }
@@ -109,7 +151,7 @@ function readCoachPortions() {
 }
 
 const produce = (rows, category) => rows.map(([name, calories, protein, carbs, fat]) => ({
-  name, category, calories, protein, carbs, fat, servingLabel: "ל-100 גרם", notes: null,
+  name, category, calories, protein, carbs, fat, packageUnit: null, unitWeightGrams: null, servingLabel: "ל-100 גרם", notes: null,
 }));
 
 const catalogue = JSON.parse(await readFile(join(root, "data/foods.json"), "utf8"));
@@ -119,8 +161,9 @@ const additions = [
   ...produce(VEGETABLES, "ירקות"),
   ...produce(FRUITS, "פירות"),
   ...readCoachPortions(),
-  ...COACH_ALTERNATIVES.map(([name, category, calories, protein, carbs, fat, servingLabel]) =>
-    ({ name, category, calories, protein, carbs, fat, servingLabel, notes: "מרשימת החלופות של המאמן" })),
+  ...COACH_ALTERNATIVES.map(([name, category, calories, protein, carbs, fat, unit]) =>
+    ({ name, category, calories, protein, carbs, fat, packageUnit: unit, unitWeightGrams: unit ? 100 : null,
+       servingLabel: unit ? `ל${unit}` : "ל-100 גרם", notes: "מרשימת החלופות של המאמן" })),
 ];
 
 let added = 0;
@@ -138,6 +181,8 @@ for (const [index, food] of additions.entries()) {
     protein: food.protein ?? undefined,
     carbs: food.carbs ?? undefined,
     fat: food.fat ?? undefined,
+    packageUnit: food.packageUnit ?? undefined,
+    unitWeightGrams: food.unitWeightGrams ?? undefined,
     servingLabel: food.servingLabel,
     verificationStatus: "מאושר",
     notes: food.notes ?? undefined,
@@ -155,12 +200,12 @@ if (sqlPath) {
   const quote = (value) => value === undefined || value === null ? "null" : `'${String(value).replaceAll("'", "''")}'`;
   const num = (value) => value === undefined || value === null ? "null" : String(value);
   const values = written.map((row) =>
-    `(${quote(row.id)},${quote(row.name)},${quote(row.brand)},${quote(row.category)},${num(row.calories)},${num(row.protein)},${num(row.carbs)},${num(row.fat)},${quote(row.servingLabel)},${quote(row.verificationStatus)},${quote(row.notes)})`);
+    `(${quote(row.id)},${quote(row.name)},${quote(row.brand)},${quote(row.category)},${num(row.calories)},${num(row.protein)},${num(row.carbs)},${num(row.fat)},${quote(row.packageUnit)},${num(row.unitWeightGrams)},${quote(row.servingLabel)},${quote(row.verificationStatus)},${quote(row.notes)})`);
   await writeFile(sqlPath, [
     "begin;",
-    "insert into public.foods (id,name,brand,category,calories,protein,carbs,fat,serving_label,verification_status,notes) values",
+    "insert into public.foods (id,name,brand,category,calories,protein,carbs,fat,package_unit,unit_weight_grams,serving_label,verification_status,notes) values",
     `${values.join(",\n")}`,
-    "on conflict (id) do update set name=excluded.name,category=excluded.category,calories=excluded.calories,protein=excluded.protein,carbs=excluded.carbs,fat=excluded.fat,serving_label=excluded.serving_label,verification_status=excluded.verification_status,notes=excluded.notes,updated_at=now();",
+    "on conflict (id) do update set name=excluded.name,category=excluded.category,calories=excluded.calories,protein=excluded.protein,carbs=excluded.carbs,fat=excluded.fat,package_unit=excluded.package_unit,unit_weight_grams=excluded.unit_weight_grams,serving_label=excluded.serving_label,verification_status=excluded.verification_status,notes=excluded.notes,updated_at=now();",
     "select count(*) as foods from public.foods;",
     "commit;",
     "",

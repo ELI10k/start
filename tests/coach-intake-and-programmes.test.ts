@@ -144,10 +144,10 @@ test("the food name gets its own line, and the primary can be deleted", async ()
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   assert.match(editor, /food-row__head/);
   assert.match(editor, /food-row__body/);
-  // Deleting the primary clears the group rather than orphaning alternatives
-  // that were each scaled to it.
-  assert.match(editor, /items:isPrimary\?\[\]:value\.items\.filter/);
-  assert.match(editor, /מחיקת המאכל הראשי תאפס גם את החלופות/);
+  // One row, one deletion. A group can hold several primaries, so removing the
+  // first can no longer take the rest of the group with it.
+  assert.match(editor, /items:value\.items\.filter\(\(_,i\)=>i!==itemIndex\)/);
+  assert.doesNotMatch(editor, /מחיקת המאכל הראשי תאפס גם את החלופות/);
   // The delete button is no longer disabled on the primary.
   assert.doesNotMatch(editor, /disabled=\{itemIndex===0&&group\.items\.length===1\}/);
 

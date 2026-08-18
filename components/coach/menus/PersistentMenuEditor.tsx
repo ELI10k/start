@@ -355,17 +355,14 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                 <button type="button" className="food-row__pick" data-empty={selectedFood?undefined:true} onClick={()=>setPicker({mealIndex:index,groupIndex,itemIndex})}>
                   {selectedFood?`${selectedFood.name}${selectedFood.brand?` — ${selectedFood.brand}`:""}`:isPrimary?"בחירת מאכל ראשי":"בחירת מזון"}
                 </button>
-                {/* The primary is deletable too. It could not be removed before,
-                    so a wrong choice meant rebuilding the group. Removing it
-                    takes the alternatives with it: they were each scaled to this
-                    food's portion, so on their own they are arbitrary numbers. */}
+                {/* One row, one deletion. Removing the primary used to empty the
+                    whole group on the theory that the alternatives were scaled to
+                    it - but a group can hold several primaries now, and losing
+                    five rows to one click is never what was meant. */}
                 <button
                   type="button"
-                  aria-label={isPrimary?"מחיקת המאכל הראשי":"הסרת חלופה"}
-                  onClick={()=>{
-                    if(isPrimary&&group.items.length>1&&!window.confirm("מחיקת המאכל הראשי תאפס גם את החלופות שחושבו לפיו. להמשיך?"))return;
-                    updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:isPrimary?[]:value.items.filter((_,i)=>i!==itemIndex)}:value)});
-                  }}
+                  aria-label={`הסרת ${selectedFood?.name??"השורה"}`}
+                  onClick={()=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.filter((_,i)=>i!==itemIndex)}:value)})}
                   className="rounded-xl border border-[#E5E7E5] p-2 text-[#DC2626]"
                 ><Trash2 size={16}/></button>
               </div>

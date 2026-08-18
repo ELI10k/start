@@ -82,7 +82,7 @@ export default async function Home() {
       {/* Three numbers, and only three: what is left to eat today, how the
           training week stands, and where the calories are. Protein and the last
           weigh-in live on their own screens - they were noise here. */}
-      <section className="dashboard-metrics" aria-label="מדדים להיום">
+      <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
         <MetricTile
           label="ארוחות היום"
           value={`${completed.length}/${meals.length}`}

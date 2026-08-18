@@ -529,6 +529,24 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   scrollbar-width: none;
 }
 @media (max-width: 374px) { .dashboard-metrics { margin-inline: -.75rem; padding-inline: .75rem; scroll-padding-inline: .75rem; } }
+/* Three tiles that fit the screen instead of scrolling off it. The scrolling row
+   is right for the coach's four-and-more metrics; on the client's home there are
+   exactly three and half of the third hung off the edge of a phone. */
+.dashboard-metrics--fit {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .5rem; overflow: visible; margin-inline: 0; padding-inline: 0;
+}
+.dashboard-metrics--fit .metric-tile { min-width: 0; flex: initial; padding: .65rem .55rem; min-height: 5.4rem; }
+.dashboard-metrics--fit .metric-tile__head { font-size: .62rem; gap: .25rem; }
+.dashboard-metrics--fit .metric-tile__head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashboard-metrics--fit .metric-tile__icon svg { width: .85rem; height: .85rem; }
+.dashboard-metrics--fit .metric-tile strong { margin-top: .5rem; font-size: 1.05rem; }
+@media (min-width: 480px) {
+  .dashboard-metrics--fit { gap: .7rem; }
+  .dashboard-metrics--fit .metric-tile { padding: .9rem; min-height: 6.4rem; }
+  .dashboard-metrics--fit .metric-tile__head { font-size: .7rem; }
+  .dashboard-metrics--fit .metric-tile strong { font-size: 1.22rem; }
+}
 .dashboard-metrics::-webkit-scrollbar { display: none; }
 
 .metric-tile {
