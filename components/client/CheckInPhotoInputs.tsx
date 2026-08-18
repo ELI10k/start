@@ -35,7 +35,7 @@ function Preview({
   );
 }
 
-export default function CheckInPhotoInputs({ required = false }: { required?: boolean }) {
+export default function CheckInPhotoInputs({ required = false, first = false }: { required?: boolean; first?: boolean }) {
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
   const [error, setError] = useState("");
   const choose = (key: string, file?: File) => {
@@ -57,7 +57,11 @@ export default function CheckInPhotoInputs({ required = false }: { required?: bo
     <div>
       {required ? (
         <p className="rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-3 text-sm font-bold text-[#15803D]">
-          הגיע הזמן לעדכן תמונות התקדמות
+          {/* The first set is the baseline every later comparison is made against,
+              so it says why it is being asked for rather than just that it is. */}
+          {first
+            ? "זה הצ׳ק־אין הראשון שלך — התמונות האלה הן נקודת ההשוואה לכל הבאות"
+            : "הגיע הזמן לעדכן תמונות התקדמות"}
         </p>
       ) : (
         <p className="text-xs text-[#5B5F5B]">

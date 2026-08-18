@@ -17,7 +17,7 @@ const ratings = [
 // the document - the server action receives the whole form in one submit, and the
 // suite asserts each field is reachable - so the steps are marked complete live
 // instead of hiding the ones you are not on.
-export default function PersistedCheckInForm({ photosRequired = false }: { photosRequired?: boolean }) {
+export default function PersistedCheckInForm({ photosRequired = false, firstCheckIn = false }: { photosRequired?: boolean; firstCheckIn?: boolean }) {
   const [state, action] = useActionState(saveCheckIn, initial);
   const form = useRef<HTMLFormElement>(null);
   const [done, setDone] = useState<readonly boolean[]>([false, false, false, false, false, false]);
@@ -89,8 +89,8 @@ export default function PersistedCheckInForm({ photosRequired = false }: { photo
           <label className="block text-sm font-bold">הערות<textarea name="notes" className="nutrition-input mt-2 min-h-28" /></label>
         </Step>
 
-        <Step number={6} title="תמונות" done={done[5]} hint={photosRequired ? "חובה השבוע" : "רשות"}>
-          <CheckInPhotoInputs required={photosRequired} />
+        <Step number={6} title="תמונות" done={done[5]} hint={photosRequired ? (firstCheckIn ? "חובה בצ׳ק־אין הראשון" : "חובה השבוע") : "רשות"}>
+          <CheckInPhotoInputs required={photosRequired} first={firstCheckIn} />
         </Step>
       </div>
 

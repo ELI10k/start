@@ -96,7 +96,7 @@ export async function saveCheckIn(
   const {count,error:countError}=await supabase.from("check_ins").select("id",{count:"exact",head:true}).eq("client_id",auth.id);
   if(countError) return {ok:false,message:"לא ניתן לבדוק כעת אם נדרשות תמונות. אפשר לנסות שוב."};
   if(checkInPhotoCycle(count??0).photosRequired&&files.length!==3)
-    return {ok:false,message:"בצ׳ק־אין הרביעי חובה לצרף תמונות קדימה, צד וגב."};
+    return {ok:false,message:"בצ׳ק־אין הראשון ובכל צ׳ק־אין רביעי חובה לצרף תמונות קדימה, צד וגב."};
   const photoError = files.map(({ file }) => validateCheckInPhoto(file)).find(Boolean);
   if (photoError) return { ok: false, message: photoError };
   const { data:checkIn, error } = await supabase.from("check_ins").insert({
