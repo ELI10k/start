@@ -22,18 +22,20 @@ function Photo({ photo, onOpen }: { photo: CheckInPhoto; onOpen: () => void }) {
   return (
     <figure className="relative overflow-hidden rounded-xl border border-[#E5E7E5] bg-[#F7F8F7]">
       {state === "loading" && (
-        <div role="status" className="grid h-40 place-items-center text-xs text-[#5B5F5B]">
+        <div role="status" className="grid min-h-40 place-items-center text-xs text-[#5B5F5B]">
           טוענים תמונה…
         </div>
       )}
       {state === "error" ? (
-        <div role="alert" className="grid h-40 place-items-center p-4 text-center text-xs text-[#DC2626]">
+        <div role="alert" className="grid min-h-40 place-items-center p-4 text-center text-xs text-[#DC2626]">
           לא ניתן לטעון את התמונה.
         </div>
       ) : (
-        // The thumbnail is cropped to a uniform grid, which is right for three
-        // photos side by side and wrong for the one a coach is actually looking
-        // at. Opening it is the whole point of the picture.
+        // The whole photo, uncropped. It used to be cropped to a uniform 160px
+        // band, which took the top and bottom of exactly the body the picture is
+        // of - a coach comparing a waistline was shown everything except the
+        // waistline. The column decides the width and the photo keeps its own
+        // proportions; clicking still opens it over the page, larger again.
         <button
           type="button"
           onClick={onOpen}
@@ -45,7 +47,7 @@ function Photo({ photo, onOpen }: { photo: CheckInPhoto; onOpen: () => void }) {
           <img
             src={photo.signedUrl}
             alt={`תמונת התקדמות — ${label(photo.view)}`}
-            className="h-40 w-full object-cover"
+            className="block h-auto w-full"
             onLoad={() => setState("ready")}
             onError={() => setState("error")}
           />
@@ -158,7 +160,7 @@ export default function CheckInPhotoGallery({
           <Photo key={photo.id} photo={photo} onOpen={() => setOpen(index)} />
         ))}
       </div>
-      <p className="mt-2 text-center text-xs text-[#5B5F5B]">לחיצה על תמונה פותחת אותה בגודל מלא</p>
+      <p className="mt-2 text-center text-xs text-[#5B5F5B]">לחיצה על תמונה פותחת אותה על כל המסך</p>
       {open !== null && (
         <Lightbox photos={photos} index={open} onClose={() => setOpen(null)} onMove={setOpen} />
       )}
