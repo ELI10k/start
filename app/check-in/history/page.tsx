@@ -16,10 +16,13 @@ export default async function CheckInHistoryPage(){
     <PageHeader eyebrow="צ׳ק-אין" title="עדכונים קודמים" description="היסטוריה, תמונות ותגובות המאמן." action={{href:"/check-in",label:"עדכון חדש"}}/>
     {data.checkIns.length?
       <div className="grid gap-3">
-        {data.checkIns.map((entry)=>
+        {data.checkIns.map((entry,index)=>
           // Each check-in collapses: the list is a timeline, and a client opens the
           // one they want rather than scrolling past every photo set on the way.
-          <details key={entry.id} className="disclosure">
+          // The newest is open, because a client arriving from "המאמן הגיב
+          // לצ׳ק־אין" came to read one specific response and should not have to
+          // hunt for it behind a closed row.
+          <details key={entry.id} className="disclosure" open={index===0}>
             <summary>
               {new Date(entry.submitted_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
               {entry.coach_response?<span className="pill pill--green">תגובת מאמן</span>:null}
