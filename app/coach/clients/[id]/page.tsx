@@ -18,6 +18,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
 import ClientTabs from "@/components/coach/client-file/ClientTabs";
+import CheckInPhotoGallery from "@/components/client/CheckInPhotoGallery";
+import { CHECK_IN_PHOTO_BUCKET, CHECK_IN_PHOTO_URL_TTL_SECONDS } from "@/lib/check-ins/photo-storage";
 import { ArchiveClientPanel } from "@/components/coach/client-file/ArchiveClient";
 import ClientReportView from "@/components/coach/client-file/ClientReport";
 import { buildClientReport } from "@/lib/coach-intelligence/client-report";
@@ -43,6 +45,26 @@ export default async function CoachClientPage({ params, searchParams }: { params
     supabase.from("notifications").select("id,title,body,href,created_at,read_at").eq("recipient_id",id).order("created_at",{ascending:false}).limit(20),
     supabase.from("coach_client_notes").select("id,body,created_at,updated_at").eq("client_id",id).eq("coach_id",auth.id).order("created_at",{ascending:false}),
   ]);
+  // The check-in photos, signed for this request. The client file has always
+  // said "אין תמונות זמינות בצ׳ק־אין זה" - a fixed line, printed under every
+  // check-in whether or not photos were attached, because nothing here ever
+  // looked for them. A coach who asks a client for three photos has to be able
+  // to see the three photos.
+  const checkInIds = data.checkIns.map((entry) => entry.id);
+  const photoRows = checkInIds.length
+    ? (await supabase.from("check_in_photos").select("id,check_in_id,view,storage_path").in("check_in_id", checkInIds).order("created_at")).data ?? []
+    : [];
+  const signedPhotos = photoRows.length
+    ? await supabase.storage.from(CHECK_IN_PHOTO_BUCKET).createSignedUrls(photoRows.map((photo) => photo.storage_path), CHECK_IN_PHOTO_URL_TTL_SECONDS)
+    : { data: [], error: null };
+  const photosByCheckIn: Record<string, { id: string; view: string; signedUrl: string }[]> = {};
+  if (!signedPhotos.error)
+    photoRows.forEach((photo, index) => {
+      const signedUrl = signedPhotos.data?.[index]?.signedUrl;
+      if (!signedUrl) return;
+      (photosByCheckIn[photo.check_in_id] ??= []).push({ id: photo.id, view: photo.view, signedUrl });
+    });
+
   const weeklySummaries = await getWeeklySummaries(id);
   const tab = isClientTab(query.tab) ? query.tab : "overview";
   // The two most recent weigh-ins, so the card can say which way the client is
@@ -272,7 +294,9 @@ export default async function CoachClientPage({ params, searchParams }: { params
           <p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/5 · אנרגיה {entry.energy}/5 · שינה {entry.sleep}/5</p>
           {entry.notes && <p className="mt-2 text-sm">{entry.notes}</p>}
           {entry.coach_response ? <p className="mt-3 border-r-2 border-[#16A34A] pr-3 text-sm text-[#15803D]">{entry.coach_response}</p> : <ReviewCheckInForm checkInId={entry.id} clientId={id}/>}
-          <p className="mt-3 text-xs text-[#5B5F5B]">תמונות: אין תמונות זמינות בצ׳ק־אין זה.</p>
+          {photosByCheckIn[entry.id]?.length
+            ? <div className="mt-3"><CheckInPhotoGallery photos={photosByCheckIn[entry.id]}/></div>
+            : <p className="mt-3 text-xs text-[#5B5F5B]">{signedPhotos.error ? "לא ניתן לטעון את התמונות כרגע. רענון הדף ייצור קישורים חדשים." : "לא צורפו תמונות לצ׳ק־אין זה."}</p>}
         </article>)}</div>
         {!data.checkIns.length && <Empty text="אין צ׳ק־אין שמור."/>}
       </Section>
