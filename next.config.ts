@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   // components unhydrated - a checkbox toggles in the DOM but no handler ever runs.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   experimental: {
+    // The router keeps a client-side copy of a page it has already visited and
+    // reuses it for the next 30 seconds - or until a hard reload - which on a
+    // dynamic, per-client screen means a coach reloads the client file and is
+    // served the version from before the client submitted anything. Two of the
+    // defects reported in this round were that copy, not the server: the text on
+    // screen was from a build that had already been replaced. Nothing here is
+    // cacheable across a navigation anyway; every screen is a live read behind an
+    // auth cookie.
+    staleTimes: { dynamic: 0 },
     serverActions: {
       // Three optional 5MB photos plus multipart boundaries and field metadata.
       bodySizeLimit: "16mb",
