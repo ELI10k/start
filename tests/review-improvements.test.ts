@@ -262,3 +262,42 @@ test("the save result lives inside the sticky bar, and a refusal reads as one", 
   assert.match(editor, /מוכן בבנק/);
 });
 
+
+// ─── the record has to be a record of the same thing ──────────────────────
+
+test("the personal best is compared within the rep range", async () => {
+  const { bestComparableSet, targetRepetitions } = await import("../lib/workouts/progress.ts");
+  const sessions = [{ sets: [
+    { id: "a", order: 0, completed: true, weightKg: 60, repetitions: 12 },
+    { id: "b", order: 1, completed: true, weightKg: 50, repetitions: 10 },
+    { id: "c", order: 2, completed: true, weightKg: 52.5, repetitions: 9 },
+    { id: "d", order: 3, completed: false, weightKg: 90, repetitions: 10 },
+  ] }];
+  // Working at 10: the 60 kg twelve is a different effort and is not the
+  // benchmark. The 90 was never completed, so it is not a record of anything.
+  assert.deepEqual(bestComparableSet(sessions, 10), { weightKg: 52.5, repetitions: 9 });
+  // Working at 12, the 60 is exactly the right comparison.
+  assert.equal(bestComparableSet(sessions, 12)?.weightKg, 60);
+  // Nothing comparable is answered with nothing, not with the heaviest available.
+  assert.equal(bestComparableSet(sessions, 3), null);
+  assert.equal(bestComparableSet([{ sets: [] }], 10), null);
+
+  assert.equal(targetRepetitions("10"), 10);
+  assert.equal(targetRepetitions("8-12"), 10);
+  assert.equal(targetRepetitions(undefined), undefined);
+});
+
+test("the warm-up and the household reading are on the screens that need them", async () => {
+  const [session, option, nutrition] = await Promise.all([
+    source("components/workouts/client/WorkoutSession.tsx"),
+    source("components/client/MealOptionButton.tsx"),
+    source("app/nutrition/page.tsx"),
+  ]);
+  assert.match(session, /planWarmup\(workingWeightFrom\(performance\.sessions\)/);
+  assert.match(session, /compound:isCompoundLift\(exercise\?\.name\)/);
+  // Warm-up sets are guidance, not logged work - they must not reach the volume.
+  assert.match(session, /סטי החימום אינם נרשמים ואינם נספרים בנפח/);
+
+  assert.match(option, /household\?: string/);
+  assert.match(nutrition, /householdMeasure\(item\.amount,group\.type,item\.measurementUnit\)/);
+});

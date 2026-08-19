@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
 import ShoppingList from "@/components/client/ShoppingList";
 
@@ -136,6 +137,7 @@ export default async function NutritionPage() {
                       quantity={String(item.displayQuantity)}
                       unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
                       calories={String(item.calories)}
+                      household={householdMeasure(item.amount,group.type,item.measurementUnit)?.label}
                     />
                   </form>)}</div></fieldset>)}
               </div>}

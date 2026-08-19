@@ -11,7 +11,8 @@ import { track } from "@/lib/analytics/client";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
-import { exercisePerformance, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
+import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
+import { isCompoundLift, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { signalRestOver } from "@/lib/workouts/feedback";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
@@ -68,7 +69,15 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // What is on screen is what is being done. The prescribed exercise is still
   // recorded and is named below when the two differ.
   const performedId=result.performedExerciseId??result.exerciseId;
-  const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);const performance=exercisePerformance(snapshot.completedWorkouts,currentClientId,performedId);const previous=performance.sessions[0];const recentSets=performance.sessions.flatMap((item)=>item.sets.filter((set)=>set.completed));const bestWeight=Math.max(0,...recentSets.map((set)=>set.weightKg??0));
+  const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);const performance=exercisePerformance(snapshot.completedWorkouts,currentClientId,performedId);const previous=performance.sessions[0];// The best set that is comparable to today's work, not the heaviest weight ever
+  // moved on the exercise: a 12-rep back-off set is not a benchmark for a 10-rep
+  // working set, and offering it as one is how a client ends up chasing a number
+  // from a different job.
+  const repTarget=targetRepetitions(current.reps);
+  const best=bestComparableSet(performance.sessions,repTarget);
+  // What to load before the working sets, worked out from what was actually
+  // lifted last time. No previous session means no honest percentage of anything.
+  const warmup=planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name)});
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
   // A replacement has to train the same thing, so the list is the catalogue
@@ -171,7 +180,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
 
       {(current.notes||exercise?.executionNotes)&&<p className="mt-3 rounded-2xl bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">{current.notes||exercise?.executionNotes}</p>}
 
-      <PreviousPerformance previous={previous} bestWeight={bestWeight} recent={performance.sessions.slice(0,3)}/>
+      {warmup?<Warmup plan={warmup}/>:null}
+
+      <PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>
 
       {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
           instance. Rendering an empty table header for those left the client with
@@ -276,15 +287,38 @@ function Start({program,day,count,warning,onStart,starting,programId}:{program:s
   </main>;
 }
 
-function PreviousPerformance({previous,bestWeight,recent}:{previous?:{date:string;sets:readonly ExerciseSetResult[];volume:number};bestWeight:number;recent:readonly {workoutId:string;date:string;sets:readonly ExerciseSetResult[];volume:number}[]}){
+function PreviousPerformance({previous,best,targetReps,recent}:{previous?:{date:string;sets:readonly ExerciseSetResult[];volume:number};best:{weightKg:number;repetitions:number}|null;targetReps?:number;recent:readonly {workoutId:string;date:string;sets:readonly ExerciseSetResult[];volume:number}[]}){
   return <details className="disclosure mt-4">
-    <summary>ביצוע קודם{bestWeight>0?<span className="pill pill--green">שיא {bestWeight} ק״ג</span>:null}</summary>
+    {/* The record says what it is a record of. "שיא 60 ק״ג" on its own was being
+        read off a 12-rep set while the client worked at 10, which is a different
+        effort and a discouraging comparison. */}
+    <summary>ביצוע קודם{best?<span className="pill pill--green">שיא {best.weightKg} ק״ג × {best.repetitions}</span>:null}</summary>
     <div className="disclosure__body">
+      {best?<p className="text-xs text-[#5B5F5B]">השיא מוצג לטווח של {targetReps??best.repetitions} חזרות, כדי שההשוואה תהיה לאותו סוג סט.</p>:null}
       {previous?<>
-        <p className="text-xs text-[#5B5F5B]">{new Date(previous.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</p>
+        <p className="mt-2 text-xs text-[#5B5F5B]">{new Date(previous.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</p>
         <p className="mt-2 text-sm">{previous.sets.map((set)=>`${set.weightKg??0} ק״ג × ${set.repetitions??0}`).join(" · ")}</p>
         {recent.length>1&&recent.map((item)=><p key={item.workoutId} className="mt-2 text-xs text-[#5B5F5B]">{new Date(item.date).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})} · נפח {item.volume}</p>)}
       </>:<p className="text-sm text-[#5B5F5B]">זהו הביצוע הראשון שנרשם לתרגיל.</p>}
+    </div>
+  </details>;
+}
+
+// What to load before the working sets. Percentages of the weight the client
+// actually lifted last time, so the first set is not a guess and not the working
+// weight itself.
+function Warmup({plan}:{plan:{workingWeightKg:number;sets:readonly {percent:number;weightKg:number;repetitions:number}[]}}){
+  return <details className="disclosure mt-4">
+    <summary>חימום<span className="pill">{plan.sets.length} {plan.sets.length===1?"סט":"סטים"}</span></summary>
+    <div className="disclosure__body">
+      <p className="text-xs text-[#5B5F5B]">מחושב מ־{plan.workingWeightKg} ק״ג, המשקל הכבד ביותר שהשלמת בתרגיל הזה באימון הקודם.</p>
+      <ol className="mt-2 grid gap-1 text-sm">
+        {plan.sets.map((set)=><li key={set.percent} className="flex items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] px-3 py-2">
+          <span className="text-[#5B5F5B]">{set.percent}%</span>
+          <strong className="tabular-nums">{set.weightKg} ק״ג × {set.repetitions}</strong>
+        </li>)}
+      </ol>
+      <p className="mt-2 text-xs text-[#5B5F5B]">סטי החימום אינם נרשמים ואינם נספרים בנפח.</p>
     </div>
   </details>;
 }
