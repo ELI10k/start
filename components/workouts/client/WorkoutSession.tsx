@@ -13,6 +13,7 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
 import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
 import { isCompoundLift, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
+import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
@@ -62,7 +63,32 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     }),
   });
   const begin=async(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3)=>{if(isStarting)return;if(!assignment){setWarning("לא נמצאה הקצאת תוכנית פעילה.");return}if(anySession&&!session){setWarning("כבר קיים אימון פעיל אחר.");return}setIsStarting(true);try{if(await startSession(makeSession(startingSleepHours,startingEnergy)))track("workout_started",{exercises:ordered.length,sleepHours:startingSleepHours??null,energy:startingEnergy});else setWarning("לא ניתן להתחיל שני אימונים במקביל.")}finally{setIsStarting(false)}};
-  if(saved)return <Finished workout={saved}/>;
+  if(saved){
+    // Assembled here because only this scope holds both the programme's
+    // prescriptions and each exercise's history.
+    const reportExercises:ReportExercise[]=saved.exerciseResults.map((entry)=>{
+      const performed=entry.performedExerciseId??entry.exerciseId;
+      const prescription=ordered.find((item)=>item.id===entry.workoutExerciseId);
+      const restSeconds=Number.parseInt(prescription?.rest??"",10);
+      // The session just saved is the newest one in the snapshot's history, so
+      // "previous" is the one before it.
+      const history=exercisePerformance(snapshot.completedWorkouts,currentClientId,performed).sessions
+        .filter((session)=>session.workoutId!==saved.id);
+      return{
+        name:getExercise(performed)?.name??"תרגיל",
+        restSeconds:Number.isFinite(restSeconds)&&restSeconds>0?restSeconds:null,
+        sets:entry.sets,
+        previousSets:history[0]?.sets??[],
+        skipped:entry.skipped,
+      };
+    });
+    return <Finished workout={saved} insights={buildWorkoutReport({
+      durationSeconds:saved.durationSeconds,
+      exercises:reportExercises,
+      sleepHours:saved.sleepHours,
+      perceivedDifficulty:saved.perceivedDifficulty,
+    })}/>;
+  }
   if(!session)return <Start program={program.name} day={day.name} count={ordered.length} warning={warning} onStart={begin} starting={isStarting} programId={programId}/>;
 
   const current=ordered[Math.min(session.currentExerciseIndex,ordered.length-1)];const result=session.exerciseResults.find((item)=>item.workoutExerciseId===current?.id);if(!current||!result)return <main className="client-app-content"><StateBlock title="אין תרגילים זמינים באימון זה" description="מקור התוכנית אינו כולל תרגילים ליום הזה."/></main>;const difficulty=session.perceivedDifficulty??3;const energy=session.energy??3;const sleepHours=session.sleepHours;
@@ -381,7 +407,7 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
   </main>;
 }
 
-function Finished({workout}:{workout:CompletedWorkout}){
+function Finished({workout,insights}:{workout:CompletedWorkout;insights:readonly {tone:"praise"|"action"|"note";title:string;detail:string}[]}){
   const exercises=workout.exerciseResults.filter((item)=>item.completed).length;
   const sets=workout.exerciseResults.flatMap((item)=>item.sets).filter((item)=>item.completed).length;
   const skipped=workout.exerciseResults.filter((item)=>item.skipped).length;
@@ -394,6 +420,19 @@ function Finished({workout}:{workout:CompletedWorkout}){
       <Value label="נפח" value={`${workout.totalVolume} ק״ג`}/>
       <Value label="דולגו" value={String(skipped)}/>
     </dl>
+    {/* What this session said, and what to do with it next time. Every line is
+        read off what was recorded - a session with nothing notable in it gets
+        one line saying so rather than an invented observation. */}
+    <section className="mt-5" aria-labelledby="workout-report">
+      <h2 id="workout-report" className="section-heading section-heading--compact">איך להשתפר לאימון הבא</h2>
+      <div className="grid gap-2">
+        {insights.map((insight)=><article key={insight.title} className="workout-insight" data-tone={insight.tone}>
+          <strong>{insight.title}</strong>
+          <p>{insight.detail}</p>
+        </article>)}
+      </div>
+    </section>
+
     <div className="mt-5 grid gap-3">
       <Link href="/workouts" className="premium-primary-button">בית האימונים</Link>
       <Link href={`/workouts/history/${workout.id}`} className="premium-secondary-button">פרטי האימון</Link>

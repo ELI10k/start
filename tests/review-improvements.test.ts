@@ -343,3 +343,49 @@ test("an unfilled alternative slot is dropped, not sent", async () => {
   assert.match(editor, /items:group\.items\.filter\(item=>item\.foodId&&Number\(item\.amount\)>0\)/);
   assert.match(editor, /\.filter\(group=>group\.items\.length\)/);
 });
+
+// ─── what the session just said, and what to do with it ───────────────────
+
+test("the workout report reads off what was recorded, and never fills space", async () => {
+  const { buildWorkoutReport, expectedSeconds } = await import("../lib/workouts/session-report.ts");
+  const set = (id: string, weightKg: number, completed = true) =>
+    ({ id, order: 0, completed, weightKg, repetitions: 10 });
+
+  // Every set completed at last session's weight is the one thing a report
+  // should always say: you are ready for more.
+  const ready = buildWorkoutReport({
+    durationSeconds: 600,
+    exercises: [{ name: "לחיצת חזה", restSeconds: 60, skipped: false,
+      sets: [set("a", 60), set("b", 60)], previousSets: [set("x", 60)] }],
+  });
+  assert.ok(ready.some((item) => item.title === "אפשר לעלות במשקל"));
+
+  // Beating it is praised, with both numbers.
+  const improved = buildWorkoutReport({
+    durationSeconds: 600,
+    exercises: [{ name: "סקוואט", restSeconds: 60, skipped: false,
+      sets: [set("a", 70)], previousSets: [set("x", 60)] }],
+  });
+  assert.ok(improved.some((item) => item.tone === "praise" && /60 → 70/.test(item.detail)));
+
+  // A session that ran long is stated with its own arithmetic rather than an
+  // accusation the data cannot support.
+  const slow = buildWorkoutReport({
+    durationSeconds: 60 * 60,
+    exercises: [{ name: "חתירה", restSeconds: 60, skipped: false,
+      sets: [set("a", 40), set("b", 40)], previousSets: [] }],
+  });
+  const pace = slow.find((item) => item.title === "האימון נמשך יותר מהצפוי");
+  assert.ok(pace);
+  assert.doesNotMatch(pace!.detail, /טלפון|רשתות|מסך/);
+  assert.equal(expectedSeconds([{ name: "x", restSeconds: 60, skipped: false, sets: [set("a", 40)], previousSets: [] }]), 105);
+
+  // Nothing notable produces one honest line, not an empty panel and not an
+  // invented observation.
+  const quiet = buildWorkoutReport({
+    durationSeconds: 300,
+    exercises: [{ name: "כפיפות", restSeconds: 60, skipped: false, sets: [set("a", 20)], previousSets: [] }],
+  });
+  assert.equal(quiet.length, 1);
+  assert.equal(quiet[0].tone, "praise");
+});

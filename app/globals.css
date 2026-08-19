@@ -1509,3 +1509,24 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .menu-dock__total { min-width: 0; flex: 1 1 0; padding: .3rem .4rem; text-align: center; }
   .menu-dock__actions { flex: 1 1 100%; justify-content: space-between; }
 }
+
+/* ── The end-of-workout report ─────────────────────────────────────────── */
+
+/* Three kinds of line, and the border says which without needing a word for it:
+   something to act on, something that went well, something merely worth
+   noticing. */
+.workout-insight {
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--line-strong);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: .85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.workout-insight[data-tone="action"] { border-inline-start-color: var(--green); background: var(--green-tint); }
+.workout-insight[data-tone="praise"] { border-inline-start-color: var(--green); }
+.workout-insight[data-tone="note"] { border-inline-start-color: var(--line-strong); }
+.workout-insight strong { font-size: .95rem; }
+.workout-insight p { margin: 0; font-size: .87rem; line-height: 1.55; color: var(--ink-strong); }
