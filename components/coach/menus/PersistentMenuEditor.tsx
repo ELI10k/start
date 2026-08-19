@@ -463,8 +463,19 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     setActiveDay(0);
   };
 
+  // Empty slots are dropped, not sent. "הוספת חלופה" creates a blank row and the
+  // editor is the thing that created it, so a coach who added one and did not
+  // fill it has not made a mistake - they have an unused slot. It used to travel
+  // to the server anyway, where the validator refused the WHOLE menu with "יש
+  // לבחור מזון בכל חלופה", and on a long menu that message was off-screen. One
+  // stray blank row made everything unsavable.
+  //
+  // The three filters run in order: blank rows go, then groups left with nothing
+  // in them, then meals left with no groups.
   const savedMealsOf=(dayMeals:readonly Meal[])=>dayMeals
-    .map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:meal.groups.filter(group=>group.items.some(item=>item.foodId))})
+    .map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:meal.groups
+      .map(group=>({...group,items:group.items.filter(item=>item.foodId&&Number(item.amount)>0)}))
+      .filter(group=>group.items.length)})
     .filter(meal=>meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget)>0:meal.groups.length>0);
   // A day the coach opened and left empty is dropped rather than saved as an
   // empty day, which the reader would serve as a menu with no meals in it.

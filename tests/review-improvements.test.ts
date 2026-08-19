@@ -301,3 +301,38 @@ test("the warm-up and the household reading are on the screens that need them", 
   assert.match(option, /household\?: string/);
   assert.match(nutrition, /householdMeasure\(item\.amount,group\.type,item\.measurementUnit\)/);
 });
+
+// ─── one blank row made a whole menu unsavable ────────────────────────────
+
+test("an unfilled alternative slot is dropped, not sent", async () => {
+  const { validateMealPlanPayload } = await import("../lib/nutrition/menu-validation.ts");
+  const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
+
+  // "הוספת חלופה" creates a blank row. The editor created it, so leaving it
+  // unfilled is an unused slot rather than a mistake - but it used to travel to
+  // the server, which refused the entire menu over it.
+  const withBlank = {
+    title: "תפריט", status: "published", clientId: "",
+    days: [{ meals: [{ title: "ארוחת בוקר", groups: [
+      { type: "protein", items: [{ foodId: "food-1", amount: 200 }, { foodId: "", amount: 100 }] },
+    ] }] }],
+  };
+  const refused = validateMealPlanPayload(withBlank);
+  assert.equal(refused.ok, false);
+  assert.match(refused.ok === false ? refused.message : "", /יש לבחור מזון בכל חלופה/);
+
+  // The same menu with the blank row dropped is exactly what the editor now
+  // sends, and it is accepted.
+  const cleaned = {
+    ...withBlank,
+    days: [{ meals: [{ title: "ארוחת בוקר", groups: [
+      { type: "protein", items: [{ foodId: "food-1", amount: 200 }] },
+    ] }] }],
+  };
+  assert.equal(validateMealPlanPayload(cleaned).ok, true);
+
+  // Blank rows first, then groups left with nothing, then meals left with no
+  // groups - in that order, or an emptied group survives as an empty one.
+  assert.match(editor, /items:group\.items\.filter\(item=>item\.foodId&&Number\(item\.amount\)>0\)/);
+  assert.match(editor, /\.filter\(group=>group\.items\.length\)/);
+});
