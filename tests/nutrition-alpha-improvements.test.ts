@@ -203,9 +203,12 @@ test("untouched meals from the skeleton do not block saving",()=>{
   // enforces is unchanged - a meal with no chosen food is dropped, not rejected.
   assert.match(source,/const savedMealsOf=\(dayMeals:readonly Meal\[\]\)/);
   assert.match(source,/const savedDays=\(\)=>menu\.days/);
-  assert.match(source,/group\.items\.some\(item=>item\.foodId\)/);
+  // Blank rows are dropped before the groups are, so the check is on the item
+  // filter rather than on a "does any item have a food" test.
+  assert.match(source,/items:group\.items\.filter\(item=>item\.foodId&&Number\(item\.amount\)>0\)/);
   assert.match(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
-  assert.match(source,/sticky top-0/);
+  // The save control lives in the bottom dock now, not a sticky header.
+  assert.match(source,/className="menu-dock"/);
 });
 
 test("the empty-group message names a food, not an alternative",()=>{

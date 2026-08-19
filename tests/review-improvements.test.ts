@@ -239,26 +239,33 @@ test("every group type the database accepts is accepted before the request", asy
 
 // ─── a refusal has to be visible from where the button is ─────────────────
 
-test("the save result lives inside the sticky bar, and a refusal reads as one", async () => {
-  const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
-  // The save control is sticky. The message was not, so pressing save after
-  // scrolling through six meals put the refusal above the viewport and the coach
-  // saw nothing happen - with the menu unsaved.
-  const stickyStart = editor.indexOf("sticky top-0");
+test("the totals and the save sit in one bar at the bottom, and a refusal reads as one", async () => {
+  const [editor, css] = await Promise.all([
+    source("components/coach/menus/PersistentMenuEditor.tsx"),
+    source("app/globals.css"),
+  ]);
+  // The save button was in a sticky header and the totals in a sidebar that
+  // stacks below six meals on anything under 2xl, so building a menu meant
+  // scrolling to the top after every change to ask "am I near the target?" -
+  // and a refusal rendered up there too, out of sight, which is how a menu was
+  // lost. Both now live in one fixed bar at the bottom.
+  const dockAt = editor.indexOf('className="menu-dock"');
   const messageAt = editor.indexOf('role={messageTone==="error"?"alert":"status"}');
-  const stickyEnd = editor.indexOf("{/* A draft found on this device");
-  assert.ok(stickyStart >= 0 && messageAt > stickyStart && messageAt < stickyEnd,
-    "the save message is not rendered inside the sticky bar");
+  const dockEnd = editor.indexOf("<BottomSheet open={confirmActivation}");
+  assert.ok(dockAt >= 0 && messageAt > dockAt && messageAt < dockEnd,
+    "the save message is not rendered inside the bottom dock");
+  assert.match(editor, /<DockTotal label="קל׳"/);
+  assert.match(css, /\.menu-dock \{[^}]*position: fixed/);
+  // The bar covers the end of the page, so the page has to end above it.
+  assert.match(css, /\.menu-editor \{ padding-bottom/);
 
   // A failure and a success must not look the same.
   assert.match(editor, /messageTone==="error"\?"alert":"status"/);
-  assert.match(editor, /border-\[#DC2626\]\/40 bg-\[#FEF2F2\]/);
+  assert.match(css, /\.menu-dock__message--error/);
 
   // The one combination the server refuses outright is refused here first,
   // rather than after a whole menu has been built.
   assert.match(editor, /const activeWithoutClient=menu\.status==="active"&&!menu\.clientId/);
-  // And it points at the status that does what the coach wanted. "פעיל" was
-  // being read as "ready", so a coach building a bank of menus reached for it.
   assert.match(editor, /מוכן בבנק/);
 });
 

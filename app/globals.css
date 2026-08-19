@@ -1418,3 +1418,82 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* The rest timer sits with the buttons a thumb is already on, not at the top of
    the page where it scrolled out of sight the moment a set was logged. */
 .rest-timer--inline { margin: .8rem 0 0; }
+
+/* ── The menu editor's bottom dock ─────────────────────────────────────── */
+
+/* The totals and the save button used to live at the top: the button in a
+   sticky header, the totals in a sidebar that stacks below six meals on any
+   screen under 2xl. Building a menu meant scrolling to the top after every
+   change to ask "am I near the target yet?", and back down to make the next
+   one. Both now sit in one bar at the bottom, which is also where the thumb is
+   on a phone. */
+.menu-editor { padding-bottom: 9rem; }
+
+.menu-dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem 1rem calc(.75rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.menu-dock__totals {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.menu-dock__total {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  padding: .35rem .7rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: var(--surface-raised);
+  min-width: 4.5rem;
+}
+.menu-dock__total dt { font-size: .68rem; color: var(--ink-muted); }
+.menu-dock__total dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: .95rem;
+  font-variant-numeric: tabular-nums;
+}
+.menu-dock__total dd span { font-weight: 600; color: var(--ink-muted); }
+/* Short of the target, or on it. The whole question this bar answers. */
+.menu-dock__total[data-state="short"] dd { color: var(--red); }
+.menu-dock__total[data-state="met"] dd { color: var(--green); }
+
+.menu-dock__actions { display: flex; align-items: center; gap: .6rem; }
+
+.menu-dock__message {
+  flex-basis: 100%;
+  margin: 0;
+  border-radius: .9rem;
+  border: 1px solid transparent;
+  padding: .6rem .8rem;
+  font-size: .85rem;
+  font-weight: 700;
+}
+.menu-dock__message--ok { border-color: rgba(22, 163, 74, .4); background: var(--green-tint); color: var(--green-press); }
+.menu-dock__message--error { border-color: rgba(220, 38, 38, .4); background: var(--red-tint); color: var(--red); }
+.menu-dock__message--warn { border-color: rgba(181, 71, 8, .4); background: #FFFAEB; color: #B54708; }
+
+@media (max-width: 560px) {
+  .menu-dock { padding-inline: .75rem; }
+  .menu-dock__totals { gap: .3rem; }
+  .menu-dock__total { min-width: 0; flex: 1 1 0; padding: .3rem .4rem; text-align: center; }
+  .menu-dock__actions { flex: 1 1 100%; justify-content: space-between; }
+}

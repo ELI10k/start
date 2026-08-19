@@ -518,39 +518,24 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       say("השמירה לא הגיעה לשרת. יש לרענן את העמוד (Cmd/Ctrl+Shift+R) ולנסות שוב - התפריט עדיין כאן עד שתרעננו.","error");
     }
   });
-  return <main className="px-4 pb-20 pt-7 sm:px-6"><div className="mx-auto max-w-[1600px]">
+  return <main className="menu-editor px-4 pt-7 sm:px-6"><div className="mx-auto max-w-[1600px]">
     {/* The running calorie total lives in the sticky bar: on a phone the summary
         sits below six meals, which is exactly where it is no use. */}
-    <div className="sticky top-0 z-30 -mx-4 mb-1 flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7E5] bg-[#FFFFFF]/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+    {/* The header is now just the title. Everything a coach reaches for while
+        building - the running totals and the save - moved to a fixed bar at the
+        bottom of the screen, because that is where the thumb is and because the
+        totals were previously in a sidebar that stacks under six meals on any
+        screen narrower than 2xl. Checking "am I near the target?" meant
+        scrolling to the top and back for every single change. */}
+    <div className="-mx-4 mb-1 flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E7E5] px-4 py-3 sm:-mx-6 sm:px-6">
       <div className="min-w-0">
         <p className="text-xs font-black tracking-widest text-[#16A34A]">תפריט שמור</p>
         <h1 className="mt-1 truncate text-2xl font-black">{menu.id?"עריכת תפריט":"תפריט חדש"}</h1>
       </div>
       <div className="flex items-center gap-3">
-        <span className="pill">{plannedCalories}{menu.calorieTarget?` / ${menu.calorieTarget}`:""} קל׳</span>
-        {/* Whether the work is on the server or only on this device, stated
-            rather than assumed. */}
-        <span className="pill" data-testid="save-state">{pending?"שומרים…":dirty?"טיוטה במכשיר":savedAt?`נשמר ${savedAt}`:"אין שינויים"}</span>
         {menu.id&&<Link href={`/coach/menus/${menu.id}/preview`} className="hidden min-h-11 items-center gap-2 rounded-xl border border-[#E5E7E5] px-3 text-sm font-bold sm:flex"><Eye aria-hidden="true" size={16}/>תצוגת לקוח</Link>}
         <button type="button" onClick={fillDayFromFavorites} className="hidden min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/40 px-3 text-sm font-bold text-[#16A34A] sm:flex"><Sparkles size={16}/>מלא יום מהמועדפים</button>
-        <button type="button" onClick={()=>submit()} disabled={pending||!menu.title.trim()} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{pending?"שומרים…":"שמירה"}</button>
       </div>
-
-      {/* The result belongs with the button that caused it. The save control is
-          sticky and this message was not, so building a menu - which means
-          scrolling down through six meals - and then pressing save put the
-          refusal hundreds of pixels above the viewport. From the coach's side
-          nothing happened at all, and the menu was simply not saved. */}
-      {message&&<p
-        role={messageTone==="error"?"alert":"status"}
-        aria-live={messageTone==="error"?"assertive":"polite"}
-        className={`basis-full rounded-2xl border p-3 text-sm font-bold ${messageTone==="error"?"border-[#DC2626]/40 bg-[#FEF2F2] text-[#DC2626]":"border-[#16A34A]/40 bg-[#ECFDF3] text-[#15803D]"}`}
-      >{message}</p>}
-
-      {/* Stated where the status is chosen, not only when save is pressed. */}
-      {activeWithoutClient&&!message&&<p className="basis-full rounded-2xl border border-[#B54708]/40 bg-[#FFFAEB] p-3 text-sm font-bold text-[#B54708]">
-        „פעיל אצל לקוח” דורש לקוח משויך. לבנק תפריטים בלי שיוך — יש לבחור „מוכן בבנק”.
-      </p>}
     </div>
 
     {/* A draft found on this device is offered, never applied: the copy on the
@@ -749,6 +734,35 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
 
     {/* Activation replaces what the client is eating from today. Asked once, with
         both numbers on screen, rather than discovered afterwards. */}
+    {/* Everything the coach reaches for while building, pinned to the bottom of
+        the screen: the four totals against their targets, whether the work has
+        reached the server, and save. Red when short of a target, green when it
+        is met - the question being asked all the way down a menu is "am I still
+        short?", and the answer should not be a scroll away. */}
+    <div className="menu-dock">
+      <dl className="menu-dock__totals">
+        <DockTotal label="קל׳" value={plannedCalories} target={Number(menu.calorieTarget)}/>
+        <DockTotal label="חלבון" value={totals.protein} target={Number(menu.proteinTarget)}/>
+        <DockTotal label="פחמ׳" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/>
+        <DockTotal label="שומן" value={totals.fat} target={Number(menu.fatTarget)}/>
+      </dl>
+      <div className="menu-dock__actions">
+        <span className="pill" data-testid="save-state">{pending?"שומרים…":dirty?"טיוטה במכשיר":savedAt?`נשמר ${savedAt}`:"אין שינויים"}</span>
+        <button type="button" onClick={()=>submit()} disabled={pending||!menu.title.trim()} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{pending?"שומרים…":"שמירה"}</button>
+      </div>
+
+      {/* The result of a save belongs with the button that caused it. */}
+      {message&&<p
+        role={messageTone==="error"?"alert":"status"}
+        aria-live={messageTone==="error"?"assertive":"polite"}
+        className={`menu-dock__message ${messageTone==="error"?"menu-dock__message--error":"menu-dock__message--ok"}`}
+      >{message}</p>}
+
+      {activeWithoutClient&&!message&&<p className="menu-dock__message menu-dock__message--warn">
+        „פעיל אצל לקוח” דורש לקוח משויך. לבנק תפריטים בלי שיוך — יש לבחור „מוכן בבנק”.
+      </p>}
+    </div>
+
     <BottomSheet open={confirmActivation} title="להפעיל את התפריט ללקוח?" onClose={()=>setConfirmActivation(false)}>
       <p className="text-sm text-[#5B5F5B]">
         התפריט מסתכם ב־<strong>{plannedCalories} קלוריות</strong> מול יעד של <strong>{menu.calorieTarget}</strong> — פער של {Math.round(calorieGap*100)}%.
@@ -800,6 +814,16 @@ function Total({label,value,target}:{label:string;value:number;target?:number}){
   </div>;
 }
 function MacroTotal({label,value,calories,target}:{label:string;value:string;calories:number;target:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value||"—"} גרם</dd><p className="text-[10px] text-[#5B5F5B]">{target>0?`${Math.round(calories/target*100)}%`:"—"}</p></div>}
+// The sidebar's Total, at bar size: label, figure, and the target beside it.
+function DockTotal({label,value,target}:{label:string;value:number;target?:number}){
+  const hasTarget=Boolean(target&&Number.isFinite(target)&&target>0);
+  const short=hasTarget&&value<target!;
+  return <div className="menu-dock__total" data-state={hasTarget?(short?"short":"met"):undefined}>
+    <dt>{label}</dt>
+    <dd>{Math.round(value)}{hasTarget?<span>/{Math.round(target!)}</span>:null}</dd>
+  </div>;
+}
+
 function MacroChip({label,value,unit}:{label:string;value:number;unit:string}){return <div><dt>{label}</dt><dd>{value} {unit}</dd></div>}
 
 function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
