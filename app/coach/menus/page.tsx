@@ -18,6 +18,10 @@ const statusLabels: Record<string, string> = {
 
 const filters = [
   { value: "all", label: "הכול" },
+  // Whose menus, rather than what state they are in. A coach thinking "what did
+  // I build for Dana" is asking a different question from "what is still a
+  // draft", and this view answers it by grouping under the client's name.
+  { value: "clients", label: "לקוחות" },
   { value: "active", label: "פעילים" },
   { value: "published", label: "בבנק" },
   { value: "draft", label: "טיוטות" },
@@ -33,6 +37,12 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
   // Dana" had nothing to look for.
   const [menus, clients] = await Promise.all([listCoachMenus(auth.id), listCoachClients(auth.id)]);
   const nameById = new Map(clients.map((client) => [client.id, client.full_name]));
+  // Passed to the card so "שכפול ללקוח" can name them and scale to their target.
+  const clientOptions = clients.map((client) => ({
+    id: client.id,
+    full_name: client.full_name,
+    calorieTarget: client.clientProfile?.calorie_target ?? null,
+  }));
 
   const params = await searchParams;
   const query = (params.q ?? "").trim();
@@ -41,11 +51,22 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
   const visible = menus.filter((menu) => {
     const clientName = menu.client_id ? nameById.get(menu.client_id) ?? "" : "";
     if (query && !`${menu.title} ${menu.description ?? ""} ${clientName}`.includes(query)) return false;
+    if (status === "clients") return Boolean(menu.client_id);
     if (status === "active") return menu.status === "active";
     if (status === "published") return menu.status === "published";
     if (status === "draft") return menu.status === "draft";
     return true;
   });
+
+  // In the client view the list is grouped: one heading per client, their menus
+  // under it, newest first. Everywhere else it stays one flat list.
+  const grouped = status === "clients"
+    ? [...visible.reduce((map, menu) => {
+        const name = (menu.client_id && nameById.get(menu.client_id)) || "לקוח שאינו פעיל";
+        map.set(name, [...(map.get(name) ?? []), menu]);
+        return map;
+      }, new Map<string, typeof visible>())].sort((a, b) => a[0].localeCompare(b[0], "he"))
+    : null;
 
   const filterHref = (value: string) =>
     `/coach/menus?${new URLSearchParams({ ...(query ? { q: query } : {}), ...(value === "all" ? {} : { status: value }) })}`;
@@ -80,31 +101,18 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
     </div>
 
     {visible.length ?
-      <div className="grid gap-3">
-        {visible.map((menu) => {
-          const clientName = menu.client_id ? nameById.get(menu.client_id) : undefined;
-          return <article key={menu.id} className="premium-card">
-            <Link href={`/coach/menus/${menu.id}`} className="flex items-center gap-3">
-              <span className="app-list__icon"><MenuSquare aria-hidden="true" size={17}/></span>
-              <span className="app-list__main">
-                <strong>{menu.title}</strong>
-                {/* Whose menu this is, before anything else about it. */}
-                <span>
-                  {menu.is_system_template ? "תבנית משותפת" : clientName ?? "לא משויך ללקוח"}
-                  {menu.calorie_target ? ` · ${Math.round(Number(menu.calorie_target))} קל׳` : ""}
-                  {" · עודכן "}
-                  {new Date(menu.updated_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
-                </span>
-              </span>
-              <span className={`pill${menu.is_system_template?"":menu.status==="active"?" pill--green":""}`}>
-                {menu.is_system_template ? "תבנית מערכת" : statusLabels[menu.status] ?? menu.status}
-              </span>
-              <ChevronLeft aria-hidden="true" size={18}/>
-            </Link>
-            <StoredMenuActions id={menu.id} title={menu.title} isSystemTemplate={Boolean(menu.is_system_template)}/>
-          </article>;
-        })}
-      </div>
+      grouped
+        ? <div className="grid gap-6">
+            {grouped.map(([name, items]) =>
+              <section key={name}>
+                <div className="section-heading section-heading--compact">
+                  <h2>{name}</h2>
+                  <span>{items.length} {items.length === 1 ? "תפריט" : "תפריטים"}</span>
+                </div>
+                <div className="grid gap-3">{items.map((menu) => menuCard(menu, nameById, clientOptions))}</div>
+              </section>)}
+          </div>
+        : <div className="grid gap-3">{visible.map((menu) => menuCard(menu, nameById, clientOptions))}</div>
       : menus.length ?
       <StateBlock
         icon={<SearchIcon aria-hidden="true" size={22}/>}
@@ -123,4 +131,33 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
       <Plus aria-hidden="true" size={18}/>תפריט חדש
     </Link>
   </main>;
+}
+
+// One card, used by the flat list and by the per-client grouping alike.
+type MenuRow = Awaited<ReturnType<typeof listCoachMenus>>[number];
+
+type ClientOption = Readonly<{ id: string; full_name: string; calorieTarget: number | null }>;
+
+function menuCard(menu: MenuRow, nameById: ReadonlyMap<string, string>, clients: readonly ClientOption[]) {
+  const clientName = menu.client_id ? nameById.get(menu.client_id) : undefined;
+  return <article key={menu.id} className="premium-card">
+    <Link href={`/coach/menus/${menu.id}`} className="flex items-center gap-3">
+      <span className="app-list__icon"><MenuSquare aria-hidden="true" size={17}/></span>
+      <span className="app-list__main">
+        <strong>{menu.title}</strong>
+        {/* Whose menu this is, before anything else about it. */}
+        <span>
+          {menu.is_system_template ? "תבנית משותפת" : clientName ?? "לא משויך ללקוח"}
+          {menu.calorie_target ? ` · ${Math.round(Number(menu.calorie_target))} קל׳` : ""}
+          {" · עודכן "}
+          {new Date(menu.updated_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
+        </span>
+      </span>
+      <span className={`pill${menu.is_system_template?"":menu.status==="active"?" pill--green":""}`}>
+        {menu.is_system_template ? "תבנית מערכת" : statusLabels[menu.status] ?? menu.status}
+      </span>
+      <ChevronLeft aria-hidden="true" size={18}/>
+    </Link>
+    <StoredMenuActions id={menu.id} title={menu.title} isSystemTemplate={Boolean(menu.is_system_template)} clients={clients}/>
+  </article>;
 }

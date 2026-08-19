@@ -357,7 +357,21 @@ export async function deleteCoachMealPlan(mealPlanId: string): Promise<SaveState
   return { ok: true, message: "התפריט נמחק." };
 }
 
-export async function duplicateCoachMealPlan(mealPlanId: string): Promise<SaveState & { id?: string }> {
+/**
+ * Copies a menu, optionally straight onto a client and scaled to their target.
+ *
+ * Without a client this is the plain duplicate it always was. With one, it does
+ * in a single step what used to take four: copy, open the copy, pick the client,
+ * then work every quantity over by hand against their calorie target. The
+ * portions are scaled by the ratio between the client's target and the source
+ * menu's, so the copy lands near the right size and the coach adjusts rather
+ * than rebuilds.
+ *
+ * The copy is still a draft. Scaling gets a menu close, not correct, and putting
+ * a machine-scaled menu straight in front of a client is not something this
+ * should decide on the coach's behalf.
+ */
+export async function duplicateCoachMealPlan(mealPlanId: string, clientId?: string): Promise<SaveState & { id?: string }> {
   const auth = await getAuthContext();
   if (!auth || auth.role !== "coach") return { ok: false, message: "אין הרשאה לשכפול תפריט." };
   const supabase = await createSupabaseServerClient();
@@ -375,10 +389,62 @@ export async function duplicateCoachMealPlan(mealPlanId: string): Promise<SaveSt
   type DuplicateDay={dayIndex:number;title:string;sortOrder:number;meals:{title:string;notes:string;freeCalorieTarget:string;sortOrder:number;groups:{type:string;sortOrder:number;items:{foodId:string;amount:number;displayQuantity:number;measurementUnit:string;amountSource:string;itemRole:string;sortOrder:number}[]}[]}[]};
   const days=new Map<number,DuplicateDay>();
   for(const meal of meals??[]){const day:DuplicateDay=days.get(meal.day_index)??{dayIndex:meal.day_index,title:"יום רגיל",sortOrder:meal.day_index,meals:[]};day.meals.push({title:meal.title,notes:meal.notes??"",freeCalorieTarget:String(meal.free_calorie_target??""),sortOrder:meal.sort_order,groups:(groups??[]).filter(group=>group.meal_id===meal.id).map(group=>({type:group.group_type,sortOrder:group.sort_order,items:(items??[]).filter(item=>item.group_id===group.id).map(item=>({foodId:item.food_id,amount:Number(item.amount),displayQuantity:Number(item.display_quantity??item.amount),measurementUnit:item.measurement_unit??"גרם",amountSource:item.amount_source??"manual",itemRole:item.item_role??"alternative",sortOrder:item.sort_order}))}))});days.set(meal.day_index,day)}
-  const { data, error } = await supabase.rpc("save_meal_plan_tree", { p_plan: { title: `${source.title} — עותק`, description: source.description ?? "", clientId: "", status: "draft", calorieTarget: source.calorie_target ?? "", proteinTarget: source.protein_target ?? "", carbohydrateTarget: source.carbohydrate_target ?? "", fatTarget: source.fat_target ?? "", proteinTargetSource:"auto",carbohydrateTargetSource:"auto",fatTargetSource:"auto",days: [...days.values()] } });
+  // With a client named, the copy is titled for them and sized against their own
+  // calorie target rather than the source menu's.
+  let target: { clientId: string; name: string; calories: number | null } | null = null;
+  if (clientId) {
+    const [{ data: profile }, { data: intake }] = await Promise.all([
+      supabase.from("profiles").select("id,full_name").eq("id", clientId).maybeSingle(),
+      supabase.from("client_profiles").select("calorie_target").eq("user_id", clientId).maybeSingle(),
+    ]);
+    // RLS only returns a client this coach actually holds, so a missing row is a
+    // refusal rather than a lookup failure.
+    if (!profile) return { ok: false, message: "הלקוח לא נמצא, או שאינו משויך אליך." };
+    target = { clientId, name: profile.full_name, calories: intake?.calorie_target ?? null };
+  }
+
+  const sourceCalories = Number(source.calorie_target ?? 0);
+  // Only scale when both figures are real. Otherwise the copy keeps the source's
+  // quantities, which is the honest fallback.
+  const ratio = target?.calories && sourceCalories > 0 ? target.calories / sourceCalories : 1;
+  const scaled = ratio === 1 ? [...days.values()] : [...days.values()].map((day) => ({
+    ...day,
+    meals: day.meals.map((meal) => ({
+      ...meal,
+      freeCalorieTarget: meal.freeCalorieTarget ? String(Math.round(Number(meal.freeCalorieTarget) * ratio)) : meal.freeCalorieTarget,
+      groups: meal.groups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          amount: Math.round(item.amount * ratio * 10) / 10,
+          displayQuantity: Math.round(item.displayQuantity * ratio * 10) / 10,
+          // The quantity is now derived rather than typed, and the editor's
+          // "recalculate" should feel free to move it.
+          amountSource: "auto",
+        })),
+      })),
+    })),
+  }));
+
+  const { data, error } = await supabase.rpc("save_meal_plan_tree", { p_plan: {
+    title: target ? `${source.title} — ${target.name}` : `${source.title} — עותק`,
+    description: source.description ?? "",
+    clientId: target?.clientId ?? "",
+    status: "draft",
+    calorieTarget: target?.calories ?? source.calorie_target ?? "",
+    proteinTarget: target ? "" : source.protein_target ?? "",
+    carbohydrateTarget: target ? "" : source.carbohydrate_target ?? "",
+    fatTarget: target ? "" : source.fat_target ?? "",
+    proteinTargetSource:"auto",carbohydrateTargetSource:"auto",fatTargetSource:"auto",
+    days: scaled,
+  } });
   if (error) return { ok:false,message:"שכפול התפריט נכשל." };
   revalidatePath("/coach/menus");
-  return { ok:true,id:String(data),message:"נוצר עותק טיוטה." };
+  return { ok:true,id:String(data),message: target
+    ? ratio === 1
+      ? `נוצר עותק עבור ${target.name}. לא נמצא יעד קלורי לשניהם, ולכן הכמויות הועתקו כפי שהן.`
+      : `נוצר עותק עבור ${target.name}, מכוונן ל־${Math.round(target.calories!)} קלוריות. כדאי לעבור על הכמויות לפני הפעלה.`
+    : "נוצר עותק טיוטה." };
 }
 
 export async function recordCoachFoodSelection(foodId:string):Promise<void>{

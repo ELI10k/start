@@ -730,7 +730,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       </div>
       </>}</>}</section>)}
       <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-[#16A34A]/30 p-3">{FIXED_MEAL_TITLES.filter(title=>!meals.some(meal=>meal.title===title)).map(title=><button key={title} type="button" onClick={()=>setMeals(current=>[...current,title==="קלוריות חופשיות"?{title,notes:"",freeCalorieTarget:"",groups:[]}:{...emptyMeal(),title}])} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4 text-sm font-bold text-[#16A34A]"><Plus size={15} className="inline"/> {title}</button>)}</div>
-    </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">מאקרו אבות מזון</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><Total label="קלוריות" value={plannedCalories} target={Number(menu.calorieTarget)}/><Total label="חלבון (גרם)" value={totals.protein} target={Number(menu.proteinTarget)}/><Total label="פחמימה (גרם)" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/><Total label="שומן (גרם)" value={totals.fat} target={Number(menu.fatTarget)}/></dl><h2 className="mt-6 border-t border-[#E5E7E5] pt-5 font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
+    </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
 
     {/* Activation replaces what the client is eating from today. Asked once, with
         both numbers on screen, rather than discovered afterwards. */}
@@ -801,26 +801,21 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
 function planSources(sources:MacroSources):PlanSources{return{calories:"manual",protein:sources.protein,carbohydrates:sources.carbohydrates,fat:sources.fat}}
 function Field({label,value,onChange,type="text"}:{label:string;value:string;onChange:(value:string)=>void;type?:string}){return <label className="text-sm font-bold">{label}<input className="nutrition-input mt-2" type={type} min={type==="number"?"1":undefined} value={value} onChange={event=>onChange(event.target.value)}/></label>}
 function MacroField({label,value,source,onChange}:{label:string;value:string;source:MacroSource;onChange:(value:string)=>void}){return <label className="text-sm font-bold"><span className="flex items-center justify-between gap-2"><span>{label}</span><span className={`text-[10px] ${source==="auto"?"text-[#16A34A]":"text-[#0B0B0B]"}`}>{source==="auto"?"מחושב אוטומטית":"הוזן ידנית"}</span></span><input className="nutrition-input mt-2" type="number" min="0" value={value} onChange={event=>onChange(event.target.value)}/></label>}
-// Red until the target is reached, green once it is. The panel used to state four
-// numbers and leave the coach to compare each one against a target three lines
-// further down; the whole question being asked here is "am I short?".
-function Total({label,value,target}:{label:string;value:number;target?:number}){
-  const hasTarget=Boolean(target&&Number.isFinite(target)&&target>0);
-  const short=hasTarget&&value<target!;
-  return <div>
-    <dt className="text-[#5B5F5B]">{label}</dt>
-    <dd className={`mt-1 font-black${hasTarget?short?" text-[#DC2626]":" text-[#16A34A]":""}`}>{value.toFixed(1)}</dd>
-    {hasTarget&&<p className="text-[10px] text-[#5B5F5B]">{short?`חסרים ${(target!-value).toFixed(1)} עד ${target}`:`מעל היעד ${target}`}</p>}
-  </div>;
-}
 function MacroTotal({label,value,calories,target}:{label:string;value:string;calories:number;target:number}){return <div><dt className="text-[#5B5F5B]">{label}</dt><dd className="mt-1 font-black">{value||"—"} גרם</dd><p className="text-[10px] text-[#5B5F5B]">{target>0?`${Math.round(calories/target*100)}%`:"—"}</p></div>}
-// The sidebar's Total, at bar size: label, figure, and the target beside it.
+// The whole totals table, at bar size. Three lines each: what the macro is,
+// what the menu holds against its target, and - the line a coach is actually
+// reading on the way down - how much is still missing. Red while short, green
+// once the target is met, the same rule the sidebar used.
 function DockTotal({label,value,target}:{label:string;value:number;target?:number}){
   const hasTarget=Boolean(target&&Number.isFinite(target)&&target>0);
-  const short=hasTarget&&value<target!;
+  const rounded=Math.round(value);
+  const goal=Math.round(target??0);
+  const gap=goal-rounded;
+  const short=hasTarget&&gap>0;
   return <div className="menu-dock__total" data-state={hasTarget?(short?"short":"met"):undefined}>
     <dt>{label}</dt>
-    <dd>{Math.round(value)}{hasTarget?<span>/{Math.round(target!)}</span>:null}</dd>
+    <dd>{rounded}{hasTarget?<span>/{goal}</span>:null}</dd>
+    {hasTarget?<small>{short?`נשאר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
   </div>;
 }
 

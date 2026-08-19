@@ -1472,6 +1472,15 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   font-variant-numeric: tabular-nums;
 }
 .menu-dock__total dd span { font-weight: 600; color: var(--ink-muted); }
+/* The line the coach is actually reading on the way down a menu. */
+.menu-dock__total small {
+  font-size: .66rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.menu-dock__total[data-state="short"] small { color: var(--red); }
+.menu-dock__total[data-state="met"] small { color: var(--green); }
 /* Short of the target, or on it. The whole question this bar answers. */
 .menu-dock__total[data-state="short"] dd { color: var(--red); }
 .menu-dock__total[data-state="met"] dd { color: var(--green); }
