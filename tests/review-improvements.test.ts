@@ -254,7 +254,7 @@ test("the totals and the save sit in one bar at the bottom, and a refusal reads 
   const dockEnd = editor.indexOf("<BottomSheet open={confirmActivation}");
   assert.ok(dockAt >= 0 && messageAt > dockAt && messageAt < dockEnd,
     "the save message is not rendered inside the bottom dock");
-  assert.match(editor, /<DockTotal label="קל׳"/);
+  assert.match(editor, /<DockTotal label="קלוריות"/);
   assert.match(css, /\.menu-dock \{[^}]*position: fixed/);
   // The bar covers the end of the page, so the page has to end above it.
   assert.match(css, /\.menu-editor \{ padding-bottom/);

@@ -79,7 +79,7 @@ test("menu editor preserves manual targets until explicit recalculation",()=>{
   // The four totals moved out of the sidebar and into the bottom dock, where
   // they stay in view while the coach works down the menu. Same four figures,
   // same rule - and now also how much is still missing.
-  for(const label of ["קל׳","חלבון","פחמ׳","שומן"])
+  for(const label of ["קלוריות","חלבון","פחמימות","שומן"])
     assert.match(source,new RegExp(`<DockTotal label="${label}"`));
   assert.match(source,/נשאר \$\{gap\}/);
   // Short of the target reads red, target met reads green.

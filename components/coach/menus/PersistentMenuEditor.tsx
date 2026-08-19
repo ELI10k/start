@@ -741,9 +741,9 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         short?", and the answer should not be a scroll away. */}
     <div className="menu-dock">
       <dl className="menu-dock__totals">
-        <DockTotal label="קל׳" value={plannedCalories} target={Number(menu.calorieTarget)}/>
+        <DockTotal label="קלוריות" value={plannedCalories} target={Number(menu.calorieTarget)}/>
         <DockTotal label="חלבון" value={totals.protein} target={Number(menu.proteinTarget)}/>
-        <DockTotal label="פחמ׳" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/>
+        <DockTotal label="פחמימות" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/>
         <DockTotal label="שומן" value={totals.fat} target={Number(menu.fatTarget)}/>
       </dl>
       <div className="menu-dock__actions">
