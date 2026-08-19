@@ -76,6 +76,14 @@ test.describe("client flows", () => {
       await expect(next).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 60_000, intervals: [500, 1_000, 2_000] });
 
+    // A run that failed before its cleanup leaves the session behind, sets and
+    // all, and the next run resumes straight into it - so set 1 already reads
+    // "ביטול השלמת סט 1" and the button this test waits for never appears. That
+    // failure then re-poisons the state for the run after it. Clearing a
+    // completed set on arrival breaks the loop.
+    const undoFirstSet = page.getByRole("button", { name: /^ביטול השלמת סט 1$/ });
+    if (await undoFirstSet.isVisible().catch(() => false)) await undoFirstSet.click();
+
     // A programme can open on a row with no prescribed sets - the source
     // workbooks start several days with a dynamic warm-up. Step forward until
     // there is something to log.
@@ -98,7 +106,7 @@ test.describe("client flows", () => {
 
     // Cancel through the sheet, so nothing is saved to history.
     await page.getByRole("button", { name: "יציאה מהאימון" }).click();
-    const sheet = page.getByRole("dialog", { name: "לבטל את האימון הפעיל?" });
+    const sheet = page.getByRole("dialog", { name: "לצאת מהאימון?" });
     await expect(sheet).toBeVisible();
     await sheet.getByRole("button", { name: "מחיקת האימון וכל הסטים שנרשמו" }).click();
 
