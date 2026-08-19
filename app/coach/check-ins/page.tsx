@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import CoachCheckInCard from "@/components/coach/CoachCheckInCard";
 import CheckInComparison from "@/components/coach/CheckInComparison";
+import { listResponseTemplates } from "@/app/actions/response-templates";
 import {
   getAuthContext,
   listCoachCheckIns,
@@ -35,9 +36,17 @@ export default async function CoachCheckInsPage({
     from: params.from,
     to: params.to,
   };
-  const data = await listCoachCheckIns(auth.id, filters);
+  const [data, templates] = await Promise.all([listCoachCheckIns(auth.id, filters), listResponseTemplates()]);
   const compareA = data.items.find((item) => item.id === params.compareA);
   const compareB = data.items.find((item) => item.id === params.compareB);
+
+  // Each check-in's predecessor for the same client. The list already arrives
+  // newest-first, so the next entry with the same client id is the one before it.
+  const previousByCheckIn = new Map<string, string>();
+  for (const [index, item] of data.items.entries()) {
+    const previous = data.items.slice(index + 1).find((candidate) => candidate.client_id === item.client_id);
+    if (previous) previousByCheckIn.set(item.id, previous.id);
+  }
   return (
     <main className="px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -51,9 +60,16 @@ export default async function CoachCheckInsPage({
               כל העדכונים השבועיים, התמונות, התגובות וסטטוס הטיפול.
             </p>
           </div>
-          <Link href="/coach" className="text-sm font-bold text-[#16A34A]">
-            חזרה ל־Dashboard
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* The list is for looking something up; the queue is for the weekly
+                pass. Both start from here. */}
+            <Link href="/coach/check-ins/review" className="premium-primary-button">
+              מעבר על התור
+            </Link>
+            <Link href="/coach" className="text-sm font-bold text-[#16A34A]">
+              חזרה ל־Dashboard
+            </Link>
+          </div>
         </header>
 
         <form className="mt-6 grid gap-3 rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -103,7 +119,7 @@ export default async function CoachCheckInsPage({
           </button>
         </form>
 
-        <section className="mt-6">
+        <section id="comparison" className="mt-6">
           <h2 className="mb-3 text-xl font-black">השוואת צ׳ק־אינים</h2>
           <CheckInComparison left={compareA} right={compareB} />
         </section>
@@ -120,6 +136,8 @@ export default async function CoachCheckInsPage({
                   key={item.id}
                   item={item}
                   photoError={data.photoError}
+                  previousId={previousByCheckIn.get(item.id)}
+                  templates={templates}
                 />
               ))}
             </div>

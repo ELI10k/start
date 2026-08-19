@@ -1296,3 +1296,125 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   min-height: 3rem;
   border-radius: .9rem;
 }
+
+/* ── Direct messages ───────────────────────────────────────────────────── */
+
+/* A conversation reads downwards, so the newest message is at the bottom and the
+   composer sits under it - the order a person expects from every other thread
+   they have ever used. */
+.message-thread { display: flex; flex-direction: column; gap: 1rem; }
+
+.message-thread__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.message-thread__list > li { display: flex; }
+/* Mine to the left, theirs to the right. In an RTL column the reader's own side
+   is the one the text runs away from, which is what makes the two legible as
+   two voices without a name on every line. */
+.message-thread__list > li[data-mine] { justify-content: flex-start; }
+
+.message-bubble {
+  max-width: min(85%, 34rem);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  border-radius: 1.1rem;
+  padding: .7rem .9rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+[data-mine] > .message-bubble {
+  background: var(--green-tint);
+  border-color: rgba(22, 163, 74, .3);
+}
+.message-bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-bubble__topic {
+  font-size: .7rem;
+  font-weight: 800;
+  color: var(--green-press);
+}
+.message-bubble__time {
+  font-size: .7rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.message-composer {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: .9rem;
+}
+.message-composer textarea { flex: 1; resize: vertical; }
+.message-composer button { flex: 0 0 auto; }
+
+@media (max-width: 430px) {
+  .message-bubble { max-width: 92%; }
+}
+
+/* ── The workout session, on one screen ────────────────────────────────── */
+
+/* The exercise name used to share a row with a thumbnail and two buttons, so on
+   a phone it was squeezed into a column about eight characters wide and stacked
+   into six lines. It gets the full width now; the buttons moved below it. */
+.session-exercise { padding: .9rem; }
+.session-exercise__head { display: flex; align-items: center; gap: .6rem; }
+.session-exercise__count { font-size: .7rem; font-weight: 700; color: var(--green); }
+.session-exercise__name {
+  margin: .15rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-wrap: balance;
+  /* Two lines is the ceiling, not the target - a name this long is unreadable
+     truncated, and unusable stacked. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.session-exercise__chips { margin-top: .5rem; }
+
+/* Four figures, one row, no sideways scroll. dashboard-metrics is a scroller,
+   which is why the fourth tile was sliced down the middle. */
+.session-stats {
+  margin: .7rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .35rem;
+}
+.session-stats > div {
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+  padding: .4rem .3rem;
+  text-align: center;
+  min-width: 0;
+}
+.session-stats dt {
+  font-size: .62rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* A missing figure is named - "לא הוגדר", never a dash - so the value wraps
+   rather than being clipped into something unreadable. Two short lines still fit
+   the row. */
+.session-stats dd {
+  margin: .15rem 0 0;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* The rest timer sits with the buttons a thumb is already on, not at the top of
+   the page where it scrolled out of sight the moment a set was logged. */
+.rest-timer--inline { margin: .8rem 0 0; }

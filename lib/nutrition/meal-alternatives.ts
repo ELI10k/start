@@ -108,3 +108,32 @@ function roundQuantity(value:number,unit:string){
   return Math.max(1,Math.round(value/5)*5);
 }
 function round(value:number){return Math.round(value*10)/10}
+
+// The quantity of a food that costs a given number of calories, rounded the same
+// way every other quantity in the builder is. Used to fill a meal against a
+// budget instead of handing every food its flat 100 g default portion.
+export function portionForCalories(food:AlternativeFood,targetCalories:number):Portion|null{
+  if(!Number.isFinite(targetCalories)||targetCalories<=0||food.calories<=0)return null;
+  const unit=foodUnit(food);
+  const grams=targetCalories/food.calories*100;
+  return portionFor(food,roundQuantity(grams/unit.gramsPerUnit,unit.unit));
+}
+
+// How a day's calories fall across the fixed meals. Two main meals and a lighter
+// breakfast is how the plans are actually written; the snacks carry the rest.
+export const MEAL_CALORIE_SHARE:Readonly<Record<string,number>>={
+  "ארוחת בוקר":0.25,
+  "ארוחת ביניים 1":0.10,
+  "ארוחת צהריים":0.30,
+  "ארוחת ביניים 2":0.10,
+  "ארוחת ערב":0.25,
+};
+
+// And how one meal's calories fall across its groups. Vegetables are not given a
+// share - they are an addition to the plate, not a portion measured against it.
+export const GROUP_CALORIE_SHARE:Readonly<Record<string,number>>={
+  protein:0.40,
+  carbohydrate:0.45,
+  fat:0.15,
+  vegetables:0,
+};

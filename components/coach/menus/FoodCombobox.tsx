@@ -4,7 +4,9 @@ import { Search, Star } from "lucide-react";
 import { foodSearchRelevance,normalizeFoodText } from "@/lib/foods/repository";
 
 export type ComboboxFood={id:string;name:string;brand:string|null;category?:string;isMaster?:boolean};
-type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
+// favorite is null when the coach has said nothing either way - a usage row
+// exists because the food was selected, which is not an opinion about it.
+type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean|null};
 
 // The picker is a panel, not a dropdown. It used to be an absolutely positioned
 // list hanging off a 150px input inside a wrapping row - on a phone that put the
@@ -13,7 +15,10 @@ type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean};
 export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
   const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
-  const isFavorite=(food:ComboboxFood,u?:Usage)=>u?u.favorite:Boolean(food.isMaster);
+  // Only an explicit star or unstar overrides the curated status. Merely having
+  // been chosen before does not, which is what "u ? u.favorite : ..." meant and
+  // is how the curated list emptied itself through use.
+  const isFavorite=(food:ComboboxFood,u?:Usage)=>u?.favorite??Boolean(food.isMaster);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});

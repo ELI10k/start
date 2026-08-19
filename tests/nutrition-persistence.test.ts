@@ -68,11 +68,13 @@ test("nutrition RLS avoids recursive meal plan and assignment policies", async (
 });
 
 test("production nutrition repository reads Supabase canonical tables", async () => {
-  const [repository, actions, page, provider] = await Promise.all([
+  // ClientAppProvider used to be asserted here too - it held the demo nutrition
+  // state in memory. It has been deleted along with the rest of the pre-Supabase
+  // client screens, so there is no longer a second store to keep honest.
+  const [repository, actions, page] = await Promise.all([
     file("lib/data/product-repository.ts"),
     file("app/actions/product.ts"),
     file("app/nutrition/page.tsx"),
-    file("components/client/ClientAppProvider.tsx"),
   ]);
   for (const table of [
     "meal_plans",
@@ -86,8 +88,6 @@ test("production nutrition repository reads Supabase canonical tables", async ()
   assert.match(actions, /rpc\("set_meal_item_eaten"/);
   assert.match(actions, /rpc\("set_meal_eaten"/);
   assert.match(page, /selectMealGroupAlternative/);
-  assert.match(provider, /createMemoryAdapter/);
-  assert.doesNotMatch(provider, /localStorage|createBrowserDemoAdapter/);
 });
 
 test("nutrition totals still use the approved calculation engine", () => {

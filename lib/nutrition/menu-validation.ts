@@ -10,7 +10,12 @@ export const FIXED_MEAL_TITLES=[
   "ארוחת בוקר","ארוחת ביניים 1","ארוחת צהריים",
   "ארוחת ביניים 2","ארוחת ערב","קלוריות חופשיות",
 ] as const;
-const GROUP_TYPES=new Set(["protein","carbohydrate"]);
+// All four, matching save_meal_plan_tree. 202608180004 widened the database to
+// accept fat and vegetables - its own header says the narrow list "made the whole
+// menu unsavable" - but this validator was never widened with it, so a coach who
+// filled a fat portion or the vegetables row still had their save rejected here,
+// before the request ever reached the server that would have accepted it.
+const GROUP_TYPES=new Set(["protein","carbohydrate","fat","vegetables"]);
 
 export function validateMealPlanPayload(payload: unknown): MenuValidationResult {
   if (!payload || typeof payload !== "object") {

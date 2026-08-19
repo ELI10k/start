@@ -136,10 +136,15 @@ test.describe("nutrition", () => {
     await expect(suggest).toBeVisible();
     await suggest.click();
 
-    // Each suggestion arrives marked auto, meaning the quantity was calculated
-    // rather than copied.
-    await expect(page.getByText("אוטו׳").first()).toBeVisible();
-    expect(await page.getByText("אוטו׳").count()).toBeGreaterThanOrEqual(1);
+    // Three rows arrive beside the primary, each with its own quantity - the
+    // point of the button is that the quantities are calculated rather than
+    // copied, so a row carrying the primary's amount would be the bug.
+    // ("אוטו׳" was asserted here for a long time; no screen has ever rendered
+    // that string, so the assertion could only ever have passed by accident.)
+    await expect(page.locator(".food-row").nth(3)).toBeVisible({ timeout: 20_000 });
+    const amounts = await page.locator(".food-row").locator("input[aria-label='כמות']").evaluateAll(
+      (inputs) => inputs.map((input) => (input as HTMLInputElement).value));
+    expect(new Set(amounts.slice(0, 4)).size).toBeGreaterThan(1);
   });
 
   test("a meal collapses to a one-line summary and expands again", async ({ page }) => {

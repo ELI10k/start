@@ -1,3 +1,4 @@
+import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/supabase/database.types";
@@ -39,7 +40,9 @@ export type PersistedMeal = Readonly<{
   groups: readonly Readonly<{id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string}>[];
   completed: boolean;
   // Unmarked is null; the two marks are explicit.
-  status: "eaten" | "not_eaten" | null;
+  status: "eaten" | "not_eaten" | "other" | null;
+  /** Only ever set alongside status "other": what the client ate instead. */
+  statusNote: string | null;
   skipped: boolean;
 }>;
 
@@ -349,7 +352,7 @@ export async function getCoachClient(coachId: string, clientId: string) {
   };
 }
 
-export async function getCoachClientDashboard(coachId: string, clientId: string, date = new Date().toISOString().slice(0, 10)) {
+export async function getCoachClientDashboard(coachId: string, clientId: string, date = israelDateKey()) {
   const base = await getCoachClient(coachId, clientId);
   if (!base) return null;
   const supabase = await createSupabaseServerClient();
@@ -446,7 +449,9 @@ export async function getActiveClientMenu(
     .order("day_index")
     .order("sort_order");
   if (mealError) throw mealError;
-  const dayIndex = new Date(`${date}T00:00:00Z`).getUTCDay();
+  // Sunday is 0. Resolved through the Israel calendar so a Saturday menu is
+  // served on Saturday here, not from 03:00 onwards.
+  const dayIndex = israelWeekday(date);
   const availableDays = new Set((allMeals ?? []).map((meal) => meal.day_index));
   const selectedDay = availableDays.has(dayIndex)
     ? dayIndex
@@ -539,23 +544,25 @@ export async function getActiveClientMenu(
         // considered eaten once every group's chosen item is logged - that is how
         // the state behaved before the mark existed, and menus assigned before
         // this change keep reading correctly.
-        status: statusByMeal.get(meal.id) ?? null,
-        completed: statusByMeal.get(meal.id) === "eaten" || (
-          statusByMeal.get(meal.id) !== "not_eaten" &&
+        status: statusByMeal.get(meal.id)?.status ?? null,
+        // What the client wrote when they said they ate something else.
+        statusNote: statusByMeal.get(meal.id)?.note ?? null,
+        completed: statusByMeal.get(meal.id)?.status === "eaten" || (
+          !statusByMeal.get(meal.id) &&
           (groups??[]).filter(group=>group.meal_id===meal.id).length>0&&
           (groups??[]).filter(group=>group.meal_id===meal.id).every(group=>{
             const selected=selectedByGroup.get(group.id);
             return Boolean(selected&&eatenIds.has(selected));
           })
         ),
-        skipped: statusByMeal.get(meal.id) === "not_eaten",
+        skipped: statusByMeal.get(meal.id)?.status === "not_eaten",
         items: mealItems,
       };
     }),
   };
 }
 
-export type MealDayStatus = "eaten" | "not_eaten";
+export type MealDayStatus = "eaten" | "not_eaten" | "other";
 
 // Reads the explicit per-meal marks for a day.
 //
@@ -570,12 +577,12 @@ async function readMealDayStatus(
   clientId: string,
   date: string,
   mealIds: readonly string[],
-): Promise<ReadonlyMap<string, MealDayStatus>> {
+): Promise<ReadonlyMap<string, { status: MealDayStatus; note: string | null }>> {
   if (!mealIds.length) return new Map();
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("meal_day_status")
-    .select("meal_id,status")
+    .select("meal_id,status,note")
     .eq("client_id", clientId)
     .eq("status_date", date)
     .in("meal_id", mealIds);
@@ -583,7 +590,14 @@ async function readMealDayStatus(
     if (MISSING_RELATION.has(error.code ?? "")) return new Map();
     throw error;
   }
-  return new Map((data ?? []).map((row) => [row.meal_id as string, row.status as MealDayStatus]));
+  // A status this build does not know is read as unmarked rather than guessed at.
+  const known = new Set(["eaten", "not_eaten", "other"]);
+  return new Map((data ?? [])
+    .filter((row) => known.has(String(row.status)))
+    .map((row) => [row.meal_id as string, {
+      status: row.status as MealDayStatus,
+      note: ("note" in row ? (row.note as string | null) : null) ?? null,
+    }]));
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {
@@ -823,7 +837,9 @@ export async function listCoachMenus(coachId: string) {
   const supabase = await createSupabaseServerClient();
   const { data: plans, error } = await supabase
     .from("meal_plans")
-    .select("id,title,description,status,updated_at,is_system_template")
+    // The calorie target comes along: the menus list shows it, and "start from an
+    // existing menu" ranks by how close it is to the new client's target.
+    .select("id,title,description,status,updated_at,is_system_template,calorie_target")
     .eq("coach_id", coachId)
     .order("updated_at", { ascending: false });
   if (error) throw error;

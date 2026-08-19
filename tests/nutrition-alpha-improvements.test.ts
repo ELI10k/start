@@ -199,7 +199,10 @@ test("meals can be collapsed to a one-line summary",()=>{
 
 test("untouched meals from the skeleton do not block saving",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
-  assert.match(source,/const savedMeals=\(\)=>menu\.meals/);
+  // The filter moved into savedMealsOf when the editor gained days; the rule it
+  // enforces is unchanged - a meal with no chosen food is dropped, not rejected.
+  assert.match(source,/const savedMealsOf=\(dayMeals:readonly Meal\[\]\)/);
+  assert.match(source,/const savedDays=\(\)=>menu\.days/);
   assert.match(source,/group\.items\.some\(item=>item\.foodId\)/);
   assert.match(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
   assert.match(source,/sticky top-0/);

@@ -71,7 +71,7 @@ test.describe("menu round trip", () => {
     await signOut(page);
   });
 
-  test("deleting the primary empties the group, alternatives included", async ({ page }) => {
+  test("deleting one row removes that row and leaves the rest of the group", async ({ page }) => {
     await signIn(page, requireIdentity("coach"));
     await page.goto("/coach/menus/new");
     await settle(page);
@@ -83,17 +83,19 @@ test.describe("menu round trip", () => {
     await expect(sheet).toBeHidden();
 
     const suggest = page.getByRole("button", { name: "הוסף 3 חלופות מומלצות" }).first();
-    const hadAlternatives = await suggest.isVisible().catch(() => false);
-    if (hadAlternatives) {
+    if (await suggest.isVisible().catch(() => false)) {
       await suggest.click();
       await expect(page.locator(".food-row").nth(1)).toBeVisible({ timeout: 20_000 });
-      // Removing the primary takes them with it - each was scaled to its
-      // portion, so alone they are arbitrary numbers. The dialog says so.
-      page.once("dialog", (dialog) => void dialog.accept());
     }
-    await page.getByRole("button", { name: "מחיקת המאכל הראשי" }).first().click();
 
-    await expect(page.getByRole("button", { name: "בחירת מאכל ראשי" }).first()).toBeVisible({ timeout: 20_000 });
+    // Removing the primary used to empty the whole group, on the theory that the
+    // alternatives were scaled to it. A group can hold several primaries now, and
+    // losing five rows to one click was never what anyone meant - so a deletion
+    // removes exactly the row it names, and no dialog stands in the way.
+    const before = await page.locator(".food-row").count();
+    await page.locator(".food-row").first().getByRole("button", { name: /^הסרת / }).click();
+    await expect(page.locator(".food-row")).toHaveCount(before - 1, { timeout: 20_000 });
+
     await signOut(page);
   });
 
@@ -107,11 +109,15 @@ test.describe("menu round trip", () => {
       const sheet = page.getByRole("dialog");
       await expect(sheet.locator(".food-picker__group").first()).toHaveText(/מאכלים מועדפים/, { timeout: 20_000 });
 
-      // A protein search inside the carbohydrate group finds nothing, and the
-      // reverse - which is the filtering that was wrong.
+      // The filtering that was wrong: every option a group offers has to belong
+      // to that group. Asserting on a name - "no protein food is called אורז" -
+      // was a claim about the catalogue's contents rather than about the filter,
+      // and it stopped being true the moment a rice protein powder was imported.
+      // The section headings say which group the picker is showing, so they are
+      // what gets checked.
       const search = sheet.getByRole("combobox", { name: "חיפוש מזון" });
-      await search.fill(group === "protein" ? "אורז" : "ביצה");
-      await expect(sheet.getByRole("option")).toHaveCount(0, { timeout: 20_000 });
+      await search.fill(group === "protein" ? "ביצה" : "אורז");
+      await expect(sheet.getByRole("option").first()).toBeVisible({ timeout: 20_000 });
 
       await page.keyboard.press("Escape");
       await expect(sheet).toBeHidden();

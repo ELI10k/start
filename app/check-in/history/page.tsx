@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ClipboardCheck } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
@@ -34,7 +35,13 @@ export default async function CheckInHistoryPage(){
                 <div><span>שינה</span><strong>{entry.sleep}/10</strong></div>
               </dl>
               <CheckInPhotoGallery photos={data.photosByCheckIn[entry.id] ?? []} error={data.photoError}/>
-              {entry.coach_response&&<div className="mt-4 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4"><strong className="text-sm text-[#15803D]">תגובת המאמן</strong><p className="mt-2 text-sm">{entry.coach_response}</p></div>}
+              {/* A response used to be the end of the exchange - it could be read
+                  and nothing else. Now it can be answered. */}
+              {entry.coach_response&&<div className="mt-4 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4">
+                <strong className="text-sm text-[#15803D]">תגובת המאמן</strong>
+                <p className="mt-2 text-sm">{entry.coach_response}</p>
+                <Link href="/messages" className="premium-secondary-button mt-3">תשובה למאמן</Link>
+              </div>}
             </div>
           </details>
         )}

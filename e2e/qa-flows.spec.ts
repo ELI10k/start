@@ -97,10 +97,10 @@ test.describe("client flows", () => {
     await expect(page.locator(".session-sticky")).toContainText("סטים");
 
     // Cancel through the sheet, so nothing is saved to history.
-    await page.getByRole("button", { name: "ביטול האימון" }).click();
+    await page.getByRole("button", { name: "יציאה מהאימון" }).click();
     const sheet = page.getByRole("dialog", { name: "לבטל את האימון הפעיל?" });
     await expect(sheet).toBeVisible();
-    await sheet.getByRole("button", { name: "ביטול האימון ומחיקת הנתונים" }).click();
+    await sheet.getByRole("button", { name: "מחיקת האימון וכל הסטים שנרשמו" }).click();
 
     await expect(page.getByRole("button", { name: "התחלת אימון" })).toBeVisible({ timeout: 30_000 });
   });

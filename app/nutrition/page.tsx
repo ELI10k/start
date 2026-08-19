@@ -13,17 +13,30 @@ import {
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
+import ShoppingList from "@/components/client/ShoppingList";
 
 export default async function NutritionPage() {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
-  const today = new Date().toISOString().slice(0, 10);
+  const today = israelDateKey();
   const [menu, freeMenu, foods] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods()]);
   const freeCalories=menu?.meals.reduce((sum,meal)=>sum+(meal.freeCalorieTarget??0),0)??0;
-  const menuTotals = menu?.meals
-    .flatMap((meal) => meal.groups.flatMap(group=>group.items.filter(item=>item.id===group.selectedItemId)))
-    .reduce(
+  // Before any choice is made the summary used to read 0 against the target,
+  // which looks like a broken screen rather than "you have not started". Where a
+  // group has no chosen alternative yet the primary stands in for it, so the
+  // number opens as the day the coach planned and then follows the real choices.
+  const summaryItems = menu?.meals.flatMap((meal) =>
+    meal.groups.flatMap((group) => {
+      const chosen = group.items.find((item) => item.id === group.selectedItemId);
+      if (chosen) return [chosen];
+      const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
+      return primary ? [primary] : [];
+    })) ?? [];
+  const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
+  const menuTotals = menu
+    ? summaryItems.reduce(
       (sum, item) => ({
         calories: sum.calories + item.calories,
         protein: sum.protein + item.protein,
@@ -31,7 +44,20 @@ export default async function NutritionPage() {
         fat: sum.fat + item.fat,
       }),
       { calories: freeCalories, protein: 0, carbs: 0, fat: 0 },
-    );
+    )
+    : undefined;
+  // Which meal it is now. The fixed meal titles map to the day, so the screen can
+  // open on the meal the client came to mark instead of at the top of a list of
+  // six. Free text from onboarding is not used for this - it cannot be relied on
+  // to parse - so the windows are the ones the fixed titles already imply.
+  const hour = Number(new Intl.DateTimeFormat("he-IL", { timeZone: ISRAEL_TIME_ZONE, hour: "2-digit", hour12: false }).format(new Date()));
+  const currentMealTitle =
+    hour < 10 ? "ארוחת בוקר"
+    : hour < 12 ? "ארוחת ביניים 1"
+    : hour < 16 ? "ארוחת צהריים"
+    : hour < 18 ? "ארוחת ביניים 2"
+    : "ארוחת ערב";
+
   return (
     <ClientShell>
       <PageHeader
@@ -39,7 +65,15 @@ export default async function NutritionPage() {
         title="הארוחות של היום"
         description={menu?.title ?? "התפריט האישי שלך"}
       />
-      <div className="mb-4"><BarcodeScanner date={today}/></div>
+      <div className="mb-4 grid gap-2 sm:grid-cols-2">
+        <BarcodeScanner date={today}/>
+        {menu ? <ShoppingList
+          title={menu.title}
+          items={menu.meals.flatMap((meal)=>meal.groups.flatMap((group)=>group.items.map((item)=>({
+            name:item.name,displayQuantity:Number(item.displayQuantity),measurementUnit:item.measurementUnit,itemRole:item.itemRole,
+          }))))}
+        /> : null}
+      </div>
       {freeMenu ? <FreeMenu date={today} day={freeMenu} foods={foods}/> : menu ? (
         <div className="space-y-4">
           {menuTotals ? (
@@ -50,6 +84,11 @@ export default async function NutritionPage() {
               <h2 id="daily-macro-summary" className="text-lg font-black">
                 סיכום התפריט היומי
               </h2>
+              <p className="mt-1 text-xs text-[#5B5F5B]">
+                {anyChoiceMade
+                  ? "מחושב לפי החלופות שבחרת. קבוצה שטרם נבחרה נספרת לפי המאכל הראשי."
+                  : "כך נראה היום המתוכנן. הסיכום יתעדכן לפי החלופות שתבחרו."}
+              </p>
               <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <MacroTotal label="קלוריות" value={menuTotals.calories} target={menu.calorieTarget} unit="קל׳" />
                 <MacroTotal label="חלבון" value={menuTotals.protein} target={menu.proteinTarget} unit="גרם" />
@@ -64,20 +103,25 @@ export default async function NutritionPage() {
             // button and landing on the error screen, so the button now states the
             // condition and waits for it.
             const missingChoice = !meal.freeCalorieTarget && meal.groups.some((group) => !group.selectedItemId);
+            // Marked, not reordered: the day still reads in its own order, and
+            // the meal that is due right now says so.
+            const isNow = meal.title === currentMealTitle && !meal.status && !meal.completed;
             return (
             <article
               key={meal.id}
-              className="start-surface rounded-[24px] p-5 sm:p-6"
+              id={isNow ? "current-meal" : undefined}
+              className={`start-surface rounded-[24px] p-5 sm:p-6${isNow ? " border-2 border-[#16A34A]" : ""}`}
             >
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-black">{meal.title}</h2>
+                  <h2 className="text-xl font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</h2>
                   {meal.freeCalorieTarget?<p className="mt-1 text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
                 </div>
                 <MealStatusControl
                   mealId={meal.id}
                   date={today}
                   status={meal.status}
+                  statusNote={meal.statusNote}
                   completed={meal.completed}
                   blocked={missingChoice}
                 />

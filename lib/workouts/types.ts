@@ -13,7 +13,10 @@ export type WorkoutProgram = Readonly<{ id: string; name: string; description?: 
 export type AssignmentStatus = "active" | "paused" | "completed" | "archived";
 export type ClientWorkoutAssignment = Readonly<{ id: string; clientId: string; programId: string; assignedAt: string; startDate: string; endDate?: string; weeklyFrequency: number; coachNote?: string; status: AssignmentStatus }>;
 export type ExerciseSetResult = Readonly<{ id: string; prescriptionId?: string; order: number; weightKg?: number; repetitions?: number; notes?: string; completed: boolean; completedAt?: string }>;
-export type ActiveExerciseResult = Readonly<{ workoutExerciseId: string; exerciseId: string; skipped: boolean; completed: boolean; sets: readonly ExerciseSetResult[] }>;
+// exerciseId is what the programme prescribed and never changes;
+// performedExerciseId is what the client actually did when the machine was taken
+// and they swapped for an equivalent. Absent means "as prescribed".
+export type ActiveExerciseResult = Readonly<{ workoutExerciseId: string; exerciseId: string; performedExerciseId?: string; skipped: boolean; completed: boolean; sets: readonly ExerciseSetResult[] }>;
 export type ActiveWorkoutSession = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; currentExerciseIndex: number; restEndsAt?: string; workoutNote?: string; perceivedDifficulty?:1|2|3|4|5; energy?:1|2|3|4|5; sleepHours?: number; exerciseResults: readonly ActiveExerciseResult[] }>;
 export type CompletedWorkout = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; completedAt: string; durationSeconds: number; exerciseResults: readonly ActiveExerciseResult[]; workoutNote?: string; perceivedDifficulty?: 1|2|3|4|5; energy?: 1|2|3|4|5; sleepHours?: number; totalVolume: number }>;
 export type WorkoutHistoryEntry = CompletedWorkout;
