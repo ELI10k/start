@@ -236,6 +236,7 @@ function revalidateNutrition() {
 // with no idea what was wrong; the rule is unchanged, only how it reads.
 const NUTRITION_RULES: Record<string, string> = {
   select_one_alternative_per_group: "יש לבחור חלופה אחת בכל קבוצה לפני סימון הארוחה.",
+  invalid_quantity: "הכמות חייבת להיות מספר גדול מאפס.",
 };
 
 function nutritionRule(error: { message?: string } | null): Error | null {
@@ -301,6 +302,33 @@ export async function selectMealGroupAlternative(form:FormData):Promise<void>{
   if(!/^[0-9a-f-]{36}$/i.test(groupId)||!/^[0-9a-f-]{36}$/i.test(itemId)||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error("invalid_alternative");
   const{error}=await supabase.rpc("select_meal_group_alternative",{p_group_id:groupId,p_meal_item_id:itemId,p_date:date});
   if(error)throw error;
+  revalidateNutrition();
+}
+
+/**
+ * How much of the chosen portion the client actually ate.
+ *
+ * A plan prescribes a portion and a person eats what a person eats. The only two
+ * answers were "eaten" and "not eaten", so half a portion had to be reported as
+ * one of them - and the day's totals were wrong by the difference, five times a
+ * day. The plan is untouched: the coach's portion stays exactly as written and
+ * this records what happened to it. An empty value clears the override and the
+ * row goes back to reading as prescribed.
+ */
+export async function setMealGroupAmount(form: FormData): Promise<void> {
+  const supabase = await requireClient();
+  const groupId = String(form.get("groupId") ?? "");
+  const date = String(form.get("date") ?? "");
+  const raw = String(form.get("quantity") ?? "").trim();
+  if (!/^[0-9a-f-]{36}$/i.test(groupId) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("invalid_amount");
+  const quantity = raw === "" ? null : Number(raw);
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity <= 0)) throw new Error("invalid_amount");
+  const { error } = await supabase.rpc("set_meal_group_amount", {
+    p_group_id: groupId,
+    p_date: date,
+    p_quantity: quantity,
+  });
+  if (error) throw nutritionRule(error) ?? error;
   revalidateNutrition();
 }
 

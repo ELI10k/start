@@ -10,6 +10,9 @@ export const ANALYTICS_EVENTS = [
   // "the same as yesterday" - worth counting on its own, because if it is what
   // most clients press then the per-day choice is the wrong default.
   "selections_repeated",
+  // "I ate a different amount" - how often a prescribed portion is not the
+  // portion, which is a fact about the plans rather than about the clients.
+  "portion_adjusted",
   "barcode_scanned",
   "manual_food_added",
   "check_in_submitted",

@@ -17,6 +17,7 @@ import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
 import ShoppingList from "@/components/client/ShoppingList";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
+import PortionOverride from "@/components/client/PortionOverride";
 
 export default async function NutritionPage() {
   const auth = await getAuthContext();
@@ -157,7 +158,17 @@ export default async function NutritionPage() {
                       household={householdMeasure(item.amount,group.type,item.measurementUnit)?.label}
                       note={item.note}
                     />
-                  </form>)}</div></fieldset>)}
+                  </form>)}</div>
+                  {/* Only where something is chosen: an amount with nothing
+                      chosen is an amount of nothing. */}
+                  {(()=>{const chosen=group.items.find(item=>item.id===group.selectedItemId);return chosen?<PortionOverride
+                    groupId={group.id}
+                    date={today}
+                    planned={String(chosen.displayQuantity)}
+                    unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
+                    current={group.amountOverride}
+                  />:null})()}
+                  </fieldset>)}
               </div>}
             </article>
           );})}

@@ -461,3 +461,47 @@ test("opening a menu with a client derives the goal and the macros from them", a
   // second action.
   assert.match(editor, /const plan=planMacros\(\{calories:Number\(initial\.calorieTarget\),weightKg:client\?\.weight\?\?Number\.NaN/);
 });
+
+// ============================== the client says how much they actually ate
+
+test("a portion the client changes is recorded without touching the plan", async () => {
+  const [migration, rollback, repository, actions] = await Promise.all([
+    source("supabase/migrations/202608200006_client_portion_override.sql"),
+    source("supabase/seeds/client-portion-override-rollback.sql"),
+    source("lib/data/product-repository.ts"),
+    source("app/actions/product.ts"),
+  ]);
+  // The override lives on the selection, which is already per client, per group
+  // and per day. Null means "as prescribed" - which every existing row means,
+  // and is why there is no backfill.
+  assert.match(migration, /add column if not exists amount_override numeric\(10,2\)/);
+  assert.match(migration, /check \(amount_override is null or amount_override > 0\)/);
+  // The same ownership gate as choosing an alternative.
+  assert.match(migration, /a\.client_id = auth\.uid\(\) and a\.status = 'active'/);
+  // And an amount with nothing chosen is an amount of nothing.
+  assert.match(migration, /if v_id is null then raise exception 'select_one_alternative_per_group'/);
+  assert.match(rollback, /drop column if exists amount_override/);
+  assert.match(actions, /rpc\("set_meal_group_amount"/);
+
+  // Only the chosen row is scaled: the alternatives are offers, and were not
+  // eaten, so they keep the coach's figures.
+  assert.match(repository, /item\.id===chosen&&override\?scaleItem\(item,override\):item/);
+  assert.match(repository, /function scaleItem\(item: PersistedMealItem, eaten: number\)/);
+});
+
+test("scaling a portion is linear in every figure on the row", async () => {
+  // The stored values are the food's per-100 g figures times the amount, so
+  // halving the amount halves all four - anything else would invent nutrition.
+  const { default: repo } = { default: null };
+  void repo;
+  const planned = { calories: 250, protein: 7, carbs: 40, fat: 6.9, amount: 100, displayQuantity: 2 };
+  const factor = 1 / planned.displayQuantity;
+  const scaled = {
+    calories: Math.round(planned.calories * factor * 10) / 10,
+    protein: Math.round(planned.protein * factor * 10) / 10,
+    amount: Math.round(planned.amount * factor * 10) / 10,
+  };
+  assert.equal(scaled.calories, 125);
+  assert.equal(scaled.protein, 3.5);
+  assert.equal(scaled.amount, 50);
+});

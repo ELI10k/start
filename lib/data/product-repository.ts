@@ -40,7 +40,12 @@ export type PersistedMeal = Readonly<{
   freeCalorieTarget?: number;
   sortOrder: number;
   items: readonly PersistedMealItem[];
-  groups: readonly Readonly<{id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string}>[];
+  groups: readonly Readonly<{
+    id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string;
+    /** What the client says they actually ate, in the unit they are shown. Absent
+        is "as prescribed", which is what most days are. */
+    amountOverride?:number;
+  }>[];
   completed: boolean;
   // Unmarked is null; the two marks are explicit.
   status: "eaten" | "not_eaten" | "other" | null;
@@ -513,10 +518,16 @@ export async function getActiveClientMenu(
   const eatenIds = new Set((eatenRows ?? []).map((entry) => entry.meal_item_id));
   const groupIds=(groups??[]).map(group=>group.id);
   const {data:selections,error:selectionError}=groupIds.length
-    ?await supabase.from("meal_group_selections").select("group_id,meal_item_id").eq("client_id",clientId).eq("selection_date",date).in("group_id",groupIds)
+    ?await supabase.from("meal_group_selections").select("group_id,meal_item_id,amount_override").eq("client_id",clientId).eq("selection_date",date).in("group_id",groupIds)
     :{data:[],error:null};
   if(selectionError)throw selectionError;
   const selectedByGroup=new Map((selections??[]).map(row=>[row.group_id,row.meal_item_id]));
+  // How much of it was actually eaten. Absent on the overwhelming majority of
+  // rows, which is why it is read as its own map rather than folded into the
+  // item: an item is what the coach wrote, this is what happened to it.
+  const overrideByGroup=new Map((selections??[])
+    .filter(row=>"amount_override" in row && row.amount_override !== null)
+    .map(row=>[row.group_id as string,Number(row.amount_override)]));
   const statusByMeal = await readMealDayStatus(clientId, date, meals.map((meal) => meal.id));
 
   return {
@@ -555,11 +566,22 @@ export async function getActiveClientMenu(
         notes: "notes" in meal ? String(meal.notes??"") : undefined,
         freeCalorieTarget: "free_calorie_target" in meal && meal.free_calorie_target?Number(meal.free_calorie_target):undefined,
         sortOrder: meal.sort_order,
-        groups:(groups??[]).filter(group=>group.meal_id===meal.id).map(group=>({
-          id:group.id,type:group.group_type,
-          items:mealItems.filter(item=>(items??[]).find(row=>row.id===item.id)?.group_id===group.id),
-          selectedItemId:selectedByGroup.get(group.id),
-        })),
+        groups:(groups??[]).filter(group=>group.meal_id===meal.id).map(group=>{
+          const override=overrideByGroup.get(group.id);
+          const chosen=selectedByGroup.get(group.id);
+          return{
+            id:group.id,type:group.group_type,
+            // The chosen row carries the eaten amount, so every total downstream -
+            // the client's summary, the coach's file, the evening message - reads
+            // what happened rather than what was planned. The alternatives keep
+            // the coach's figures: they are offers, and were not eaten.
+            items:mealItems
+              .filter(item=>(items??[]).find(row=>row.id===item.id)?.group_id===group.id)
+              .map(item=>item.id===chosen&&override?scaleItem(item,override):item),
+            selectedItemId:chosen,
+            amountOverride:override,
+          };
+        }),
         // An explicit mark wins. Without one, a meal that has groups is still
         // considered eaten once every group's chosen item is logged - that is how
         // the state behaved before the mark existed, and menus assigned before
@@ -579,6 +601,25 @@ export async function getActiveClientMenu(
         items: mealItems,
       };
     }),
+  };
+}
+
+// The same food, at the amount the client says they ate. Scaling is linear in
+// the portion, which is how every figure on the row was produced in the first
+// place: the stored values are the food's per-100 g figures times the amount.
+function scaleItem(item: PersistedMealItem, eaten: number): PersistedMealItem {
+  const planned = Number(item.displayQuantity);
+  if (!Number.isFinite(planned) || planned <= 0 || eaten === planned) return item;
+  const factor = eaten / planned;
+  const round = (value: number) => Math.round(value * 10) / 10;
+  return {
+    ...item,
+    amount: round(item.amount * factor),
+    displayQuantity: eaten,
+    calories: round(item.calories * factor),
+    protein: round(item.protein * factor),
+    carbs: round(item.carbs * factor),
+    fat: round(item.fat * factor),
   };
 }
 
