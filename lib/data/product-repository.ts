@@ -853,7 +853,7 @@ export async function listCoachMenus(coachId: string) {
     .from("meal_plans")
     // The calorie target comes along: the menus list shows it, and "start from an
     // existing menu" ranks by how close it is to the new client's target.
-    .select("id,title,description,status,updated_at,is_system_template,calorie_target")
+    .select("id,title,description,status,updated_at,is_system_template,calorie_target,intended_client_id")
     .eq("coach_id", coachId)
     .order("updated_at", { ascending: false });
   if (error) throw error;
@@ -872,7 +872,10 @@ export async function listCoachMenus(coachId: string) {
     );
     return {
       ...plan,
-      client_id: assignment?.client_id ?? null,
+      // Same rule as the editor: served-to first, built-for second. Without it a
+      // draft made for a client sat under "לא משויך ללקוח" in the list and never
+      // appeared in the per-client grouping.
+      client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null,
       status: assignment ? "active" : plan.status,
     };
   });
@@ -946,7 +949,10 @@ export async function getCoachMenu(coachId: string, menuId: string) {
   const dayIndexes = [...new Set((meals ?? []).map((meal) => meal.day_index))];
   return {
     ...plan,
-    client_id: assignment?.client_id ?? null,
+    // Who is eating it today wins; failing that, who it was built for. A draft
+    // has no assignment by definition, and reading only the assignment is what
+    // made "שכפול ללקוח" hand back a copy with no client, no goal and no macros.
+    client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null,
     active_from: assignment?.assigned_from ?? null,
     active_until: assignment?.assigned_until ?? null,
     status: assignment ? "active" : plan.status,

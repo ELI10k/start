@@ -426,3 +426,38 @@ test("filling a day picks the food that fits the budget", async () => {
   assert.match(body, /draftCalories/);
   assert.match(body, /מול יעד של/);
 });
+
+// ================================ a menu remembers who it was built for
+
+test("a draft made for a client keeps that client", async () => {
+  const [migration, rollback, repository] = await Promise.all([
+    source("supabase/migrations/202608200005_menu_intended_client.sql"),
+    source("supabase/seeds/menu-intended-client-rollback.sql"),
+    source("lib/data/product-repository.ts"),
+  ]);
+  // meal_plans held no client at all: it lived only in an ACTIVE assignment, and
+  // the save writes an assignment only for an active plan. So "שכפול ללקוח",
+  // which deliberately produces a draft, dropped the client on the floor.
+  assert.match(migration, /add column if not exists intended_client_id uuid references public\.profiles\(id\) on delete set null/);
+  assert.match(migration, /intended_client_id=excluded\.intended_client_id/);
+  // Plans already assigned must not read as unassigned after this runs.
+  assert.match(migration, /set intended_client_id = a\.client_id/);
+  assert.match(rollback, /drop column if exists intended_client_id/);
+
+  // Both read paths prefer the live assignment and fall back to the intent.
+  const editor = repository.slice(repository.indexOf("export async function getCoachMenu"));
+  assert.match(editor, /client_id: assignment\?\.client_id \?\? \(plan as \{ intended_client_id\?: string \| null \}\)\.intended_client_id \?\? null/);
+  const list = repository.slice(repository.indexOf("export async function listCoachMenus"), repository.indexOf("export async function getCoachMenu"));
+  assert.match(list, /intended_client_id/);
+});
+
+test("opening a menu with a client derives the goal and the macros from them", async () => {
+  const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
+  // The goal is read off the client's own intake at mount, not left blank for
+  // the coach to re-pick something they already chose when creating the client.
+  assert.match(editor, /const client=clients\.find\(item=>item\.id===initial\.clientId\);\s*\n\s*return isNutritionGoal\(client\?\.nutritionGoal\)\?client\.nutritionGoal:"";/);
+  // And the macro targets are computed from that client's weight on the same
+  // pass, so a restored client fills protein, carbohydrate and fat without a
+  // second action.
+  assert.match(editor, /const plan=planMacros\(\{calories:Number\(initial\.calorieTarget\),weightKg:client\?\.weight\?\?Number\.NaN/);
+});
