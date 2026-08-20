@@ -2,12 +2,20 @@ import { expect, test } from "@playwright/test";
 import { assertNotProduction, identity, requireIdentity, signIn } from "./support/guards";
 
 /**
- * "I ate less than that."
+ * "I ate less than that", and "I ate none of it".
  *
- * A plan prescribes a portion and a person eats what a person eats. Only the
- * totals prove this works, and only against a real database: the override is a
- * column on the selection and the scaling happens in the repository.
+ * A plan prescribes a portion and a person eats what a person eats. Only a real
+ * database proves this: the override is a column on the selection and the
+ * scaling happens in the repository.
+ *
+ * Both cases assert on the chosen row rather than on the day's totals. A meal
+ * already answered - eaten, skipped, or eaten-as-something-else - contributes to
+ * neither half of the summary, so on a day like that the totals cannot move no
+ * matter what the override says, and an assertion on them would be measuring the
+ * fixture instead of the feature. The row is the thing the override acts on.
  */
+
+test.describe.configure({ mode: "serial" });
 
 test.describe("portion override", () => {
   test.skip(!identity("client"), "set the client E2E credentials to run");
@@ -16,64 +24,100 @@ test.describe("portion override", () => {
     assertNotProduction(testInfo.project.use.baseURL);
   });
 
-  test("changing a portion moves the day's totals, and clears back to the plan", async ({ page }) => {
-    test.setTimeout(180_000);
-    await signIn(page, requireIdentity("client"));
+  /** Opens today's first meal, chooses something, and opens the amount control. */
+  async function openControl(page: import("@playwright/test").Page) {
     await page.goto("/nutrition");
     await expect(page.getByRole("heading", { name: "הארוחות של היום" })).toBeVisible({ timeout: 30_000 });
 
-    const reset = page.getByRole("button", { name: /חזרה למתוכנן/ });
-    const totals = async () => (await page.locator("dl").first().innerText()).replace(/\n+/g, " | ");
-
-    // Any override left behind by an earlier run goes first, or the control
-    // opens already changed and there is no baseline to compare against.
-    while (await reset.count()) {
-      await reset.first().click();
-      await expect(reset).toHaveCount(0, { timeout: 20_000 });
-    }
-
-    // The day reads one meal at a time now, so the groups live inside a closed
-    // row until it is opened.
     const card = page.locator("details.meal-card").first();
-    test.skip(!(await card.count()), "no active menu today");
-    if (!(await card.evaluate((node) => (node as HTMLDetailsElement).open))) {
-      await card.locator("summary").click();
+    if (!(await card.count())) return null;
+    if (!(await card.evaluate((node) => (node as HTMLDetailsElement).open))) await card.locator("summary").click();
+
+    // Any override left behind by an earlier run has to go before a baseline is
+    // read, or the "prescribed" portion is itself an override and clearing back
+    // to the plan looks like a failure.
+    const clear = card.getByRole("button", { name: /חזרה למתוכנן/ });
+    while (await clear.count()) {
+      await clear.first().click();
+      await expect(clear).toHaveCount(0, { timeout: 20_000 });
     }
 
     const option = card.locator("fieldset button[aria-pressed]").first();
-    test.skip(!(await option.count()), "no active menu with groups today");
+    if (!(await option.count())) return null;
     await option.click();
 
-    // The control is server-rendered and only exists once a choice has round
-    // tripped, so its arrival is the proof that the totals below it are the
-    // totals for this selection - aria-pressed flips optimistically and would
-    // have the baseline read from the page before the choice landed.
-    const adjust = page.getByRole("button", { name: /אכלתי כמות אחרת/ }).first();
-    await expect(adjust).toBeVisible({ timeout: 30_000 });
-    const planned = await totals();
+    // The control is collapsed until it has been used and stays open afterwards,
+    // so the earlier case in this file can leave it in either state. Its
+    // quantity field appearing is the proof that the choice round tripped -
+    // aria-pressed flips optimistically, before the server has answered.
+    const collapsed = card.getByRole("button", { name: /אכלתי כמות אחרת/ });
+    await expect(async () => {
+      if (await collapsed.count()) await collapsed.first().click();
+      await expect(card.locator("input[name=quantity]").first()).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 40_000 });
 
-    await adjust.click();
-    const form = page.locator("form").filter({ has: page.getByRole("button", { name: "עדכון" }) }).first();
-    const field = form.locator("input[name=quantity]");
-    const amount = Number(await field.inputValue());
+    return {
+      card,
+      form: card.locator("form").filter({ has: page.getByRole("button", { name: "עדכון" }) }).first(),
+      row: async () =>
+        (await card.locator("fieldset button[aria-pressed='true']").first().innerText()).replace(/\n+/g, " | "),
+    };
+  }
+
+  test("a smaller portion is recorded, and clears back to the plan", async ({ page }) => {
+    test.setTimeout(180_000);
+    await signIn(page, requireIdentity("client"));
+    const control = await openControl(page);
+    test.skip(!control, "no active menu with groups today");
+    const { card, form, row } = control!;
+
+    const prescribed = await row();
+    const amount = Number(await form.locator("input[name=quantity]").inputValue());
     // Three quarters of a portion. Deliberately not a multiple of a tenth: with
     // step="0.1" the browser refuses it as a step mismatch and refuses it
     // silently, so the form never submits and the number never saves.
     const eaten = Math.round(amount * 0.75 * 100) / 100;
-    await field.fill(String(eaten));
+    console.log(`מתוכנן: ${prescribed} → מדווח ${eaten}`);
+
+    await form.locator("input[name=quantity]").fill(String(eaten));
     await form.getByRole("button", { name: "עדכון" }).click();
-
-    // Poll the totals rather than a control. A button's presence flickers while
-    // the page re-renders, and clicking one mid-render lands on an element that
-    // is already detaching - which reads as success and does nothing.
     await expect
-      .poll(totals, { timeout: 30_000, message: `${amount} → ${eaten} must move the day's totals` })
-      .not.toBe(planned);
+      .poll(row, { timeout: 30_000, message: `${amount} → ${eaten} must change the row` })
+      .not.toBe(prescribed);
+    console.log("אחרי עדכון:", await row());
 
-    await expect(reset).toHaveCount(1, { timeout: 20_000 });
-    await reset.first().click();
+    await card.getByRole("button", { name: /חזרה למתוכנן/ }).first().click();
     await expect
-      .poll(totals, { timeout: 30_000, message: "clearing it must restore the planned totals" })
-      .toBe(planned);
+      .poll(row, { timeout: 30_000, message: "clearing must restore the prescribed portion" })
+      .toBe(prescribed);
+  });
+
+  /**
+   * The one honest answer for a portion that was served and left. Marking the
+   * whole meal "לא נאכל" is a different claim: it says the meal did not happen,
+   * when what happened is that one group of it did not.
+   */
+  test("eating none of a portion is accepted and costs that portion nothing", async ({ page }) => {
+    test.setTimeout(180_000);
+    await signIn(page, requireIdentity("client"));
+    const control = await openControl(page);
+    test.skip(!control, "no active menu with groups today");
+    const { card, form, row } = control!;
+
+    const prescribed = await row();
+    await form.locator("input[name=quantity]").fill("0");
+    await form.getByRole("button", { name: "עדכון" }).click();
+    await expect
+      .poll(row, { timeout: 30_000, message: "zero must be accepted, not refused" })
+      .not.toBe(prescribed);
+
+    const zeroed = await row();
+    console.log(`${prescribed}  →  ${zeroed}`);
+    expect(zeroed, "the row has to read nothing at all").toContain("0 קל׳");
+
+    await card.getByRole("button", { name: /חזרה למתוכנן/ }).first().click();
+    await expect
+      .poll(row, { timeout: 30_000, message: "clearing must restore the prescribed portion" })
+      .toBe(prescribed);
   });
 });
