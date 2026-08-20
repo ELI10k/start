@@ -27,6 +27,12 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const anySession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);
   const session=anySession?.programId===programId&&anySession.dayId===dayId?anySession:undefined;
   const[now,setNow]=useState(()=>Date.now());const[summary,setSummary]=useState(false);const[warning,setWarning]=useState("");const[saved,setSaved]=useState<CompletedWorkout>();const[isStarting,setIsStarting]=useState(false);const[isCompleting,setIsCompleting]=useState(false);const[abandon,setAbandon]=useState(false);const[swapping,setSwapping]=useState(false);
+  // Whether "there are unfinished exercises" has already been put to the client.
+  // This used to be inferred from `warning` holding anything at all - and
+  // completing the last exercise writes a warning of its own ("אפשר לסיים את
+  // האימון"), so the client most likely to have unfinished exercises was exactly
+  // the one who was never asked about them.
+  const[confirmedPartial,setConfirmedPartial]=useState(false);
   const ordered=useMemo(()=>[...(day?.exercises??[])].sort((a,b)=>a.order-b.order),[day]);
   useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
   useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(session){event.preventDefault();event.returnValue=""}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard)},[session]);
@@ -132,16 +138,29 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     const now=new Date().toISOString();
     const nextResult={...result,completed:true,skipped:false,
       sets:result.sets.map((set,index)=>({...set,completed:true,completedAt:set.completedAt??now,repetitions:set.repetitions??targetReps(index)}))};
-    const remaining=ordered.findIndex((entry,index)=>{
+    // Forward first, then wrap. findIndex scans from zero, so finishing exercise
+    // four sent the client back to exercise one - "next" pointing backwards in a
+    // workout that is read in order. Anything left behind is still picked up,
+    // just after everything ahead has been offered.
+    const unfinished=(entry:typeof ordered[number],index:number)=>{
       if(index===session.currentExerciseIndex)return false;
       const entryResult=session.exerciseResults.find((item)=>item.workoutExerciseId===entry.id);
-      return entryResult&&!entryResult.completed&&!entryResult.skipped;
-    });
+      return Boolean(entryResult&&!entryResult.completed&&!entryResult.skipped);
+    };
+    const ahead=ordered.findIndex((entry,index)=>index>session.currentExerciseIndex&&unfinished(entry,index));
+    const remaining=ahead>=0?ahead:ordered.findIndex(unfinished);
     replaceResult(nextResult,remaining>=0?{currentExerciseIndex:remaining}:{});
     if(remaining<0)setWarning("זה היה התרגיל האחרון שנותר. אפשר לסיים את האימון.");
   };
 
-  const finish=()=>{if(session.exerciseResults.some((item)=>!item.completed&&!item.skipped)&&!warning){setWarning("נותרו תרגילים שלא הושלמו. לחיצה נוספת תשמור אותם כחלקיים.");return}setWarning("");setSummary(true)};
+  const finish=()=>{
+    if(session.exerciseResults.some((item)=>!item.completed&&!item.skipped)&&!confirmedPartial){
+      setConfirmedPartial(true);
+      setWarning("נותרו תרגילים שלא הושלמו. לחיצה נוספת תשמור אותם כחלקיים.");
+      return;
+    }
+    setWarning("");setSummary(true);
+  };
   const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
   if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} setSleepHours={(nextSleep)=>persist({sleepHours:nextSleep})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)}/>;
 

@@ -21,7 +21,7 @@ import { getAuthContext, listCoachCheckIns } from "@/lib/data/product-repository
 export default async function ReviewQueuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ position?: string }>;
+  searchParams: Promise<{ position?: string; id?: string }>;
 }) {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
@@ -36,10 +36,22 @@ export default async function ReviewQueuePage({
   // been written - a coach who replied but did not close it meant to come back.
   const queue = data.items.filter((item) => !item.handled_at);
   const params = await searchParams;
-  const position = Math.min(Math.max(0, Number(params.position) || 0), Math.max(0, queue.length - 1));
+  // The place in the queue is a check-in, not an index.
+  //
+  // Marking one handled removes it from the queue, so every later check-in
+  // shifts down one - and a coach working straight down the list with a
+  // position-based link skipped whoever moved into the slot they had just left.
+  // The id is carried instead, and the index is only ever derived from it.
+  const byId = params.id ? queue.findIndex((item) => item.id === params.id) : -1;
+  const position = byId >= 0
+    ? byId
+    // A named check-in that is no longer in the queue is one that was just
+    // handled: the coach stays where they are, which is now the next one.
+    : Math.min(Math.max(0, Number(params.position) || 0), Math.max(0, queue.length - 1));
   const current = queue[position];
 
-  const hrefFor = (target: number) => `/coach/check-ins/review?position=${target}`;
+  const hrefFor = (target: number) =>
+    queue[target] ? `/coach/check-ins/review?id=${queue[target].id}` : `/coach/check-ins/review?position=${target}`;
 
   return (
     <main className="client-app-content">

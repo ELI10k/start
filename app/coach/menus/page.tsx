@@ -22,6 +22,10 @@ const filters = [
   // I build for Dana" is asking a different question from "what is still a
   // draft", and this view answers it by grouping under the client's name.
   { value: "clients", label: "לקוחות" },
+  // The question that produces work, rather than describing what exists: which
+  // active clients have nothing to eat from. Every other filter here answers
+  // "what did I build"; this one answers "what is missing".
+  { value: "no-menu", label: "ללא תפריט" },
   { value: "active", label: "פעילים" },
   { value: "published", label: "בבנק" },
   { value: "draft", label: "טיוטות" },
@@ -48,9 +52,20 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
   const query = (params.q ?? "").trim();
   const status = filters.some((item) => item.value === params.status) ? params.status! : "all";
 
+  // Folded, like the clients search beside it. This was the one search in the
+  // product that was case-sensitive, so a menu named "Low Carb" could not be
+  // found by typing "low carb".
+  const needle = query.toLocaleLowerCase("he");
+  // Active clients with no active menu. The rows already carry the assignment's
+  // client id - the screen simply never asked the question from the other side.
+  const clientsWithMenu = new Set(menus.filter((menu) => menu.status === "active" && menu.client_id).map((menu) => menu.client_id));
+  const clientsWithoutMenu = clients
+    .filter((client) => !clientsWithMenu.has(client.id))
+    .sort((a, b) => a.full_name.localeCompare(b.full_name, "he"));
+
   const visible = menus.filter((menu) => {
     const clientName = menu.client_id ? nameById.get(menu.client_id) ?? "" : "";
-    if (query && !`${menu.title} ${menu.description ?? ""} ${clientName}`.includes(query)) return false;
+    if (needle && !`${menu.title} ${menu.description ?? ""} ${clientName}`.toLocaleLowerCase("he").includes(needle)) return false;
     if (status === "clients") return Boolean(menu.client_id);
     if (status === "active") return menu.status === "active";
     if (status === "published") return menu.status === "published";
@@ -100,7 +115,26 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
         </Link>)}
     </div>
 
-    {visible.length ?
+    {status === "no-menu" ? (clientsWithoutMenu.length
+      ? <div className="app-list">
+          {clientsWithoutMenu.map((client) =>
+            <Link key={client.id} href={`/coach/menus/new?clientId=${client.id}`}>
+              <span className="app-list__icon">{client.full_name.slice(0, 1)}</span>
+              <span className="app-list__main">
+                <strong>{client.full_name}</strong>
+                <span>{client.clientProfile?.calorie_target ? `יעד ${Math.round(Number(client.clientProfile.calorie_target))} קל׳` : "אין יעד קלורי בכרטיס"}</span>
+              </span>
+              <span className="pill">אין תפריט פעיל</span>
+              <ChevronLeft aria-hidden="true" size={18}/>
+            </Link>)}
+        </div>
+      : <StateBlock
+          icon={<MenuSquare aria-hidden="true" size={22}/>}
+          title="לכל הלקוחות הפעילים יש תפריט"
+          description="אין כרגע לקוח פעיל שממתין לתפריט."
+          action={<Link href="/coach/menus" className="premium-secondary-button">לכל התפריטים</Link>}
+        />)
+    : visible.length ?
       grouped
         ? <div className="grid gap-6">
             {grouped.map(([name, items]) =>

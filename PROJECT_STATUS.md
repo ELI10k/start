@@ -1,6 +1,7 @@
 # START - Project Status
 
-Last updated: 2026-08-19 — product review implemented. The 2026-08-09 feature
+Last updated: 2026-08-20 — second product review implemented; see "2026-08-20" below.
+Previously: 2026-08-19 — first product review implemented. The 2026-08-09 feature
 freeze is lifted; see the review section below for what changed and what still
 needs a person.
 
@@ -34,6 +35,90 @@ Production runs `main` @ `a3f7cf3`.
 `scripts/validate-migrations.mjs` had been failing since 2026-08-18 — it required
 `begin;` to be the first characters of the file, so every migration with a header
 comment was rejected. It now skips leading comments.
+
+## 2026-08-20 second product review
+
+A second pass over every coach and client screen, focused on defects that are
+invisible on screen — figures displayed correctly but computed wrongly, and one
+screen that crashed outright. **11 defects fixed, plus every open item and every
+proposal the review itself raised.** 18 regression tests added
+(`tests/product-review-2026-08-20.test.ts`).
+
+### The one that mattered
+`markThreadRead` called `revalidatePath` from inside a page render, which Next
+throws on. Its trigger condition is "there is an unread message", so **both
+message screens crashed except when there was nothing to read** — the flow this
+document already listed as never having been run end to end. The mark now lives
+in `lib/messages/repository.ts` with no revalidation.
+
+### Migrations added — applied 2026-08-20 by Eli via the Supabase SQL editor
+| Migration | What it does | Why it matters |
+|---|---|---|
+| `202608200001_resolve_meal_status_overload` | drops the redundant 3-arg `set_meal_day_status` | `202608190002` left two candidates that are ambiguous to Postgres for a 3-arg call (`function ... is not unique`). Dead path today — no screen calls `set_meal_eaten` — but a trap for the next caller. |
+| `202608200002_repeat_meal_selections` | `repeat_meal_group_selections(from, to)` | powers "כמו אתמול" on the nutrition screen. Additive only: never overwrites a choice already made today. |
+
+Both are additive, both have rollbacks in `supabase/seeds/`. Confirm with:
+
+```sql
+select p.proname, pg_get_function_identity_arguments(p.oid)
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('set_meal_day_status','set_meal_eaten','repeat_meal_group_selections');
+```
+
+Three rows, and **exactly one** for `set_meal_day_status` — two means 200001 did
+not take and the ambiguity is still there.
+
+### Other defects fixed
+1. **Nutrition adherence could never exceed 25%** — it divided logged rows by
+   *written* rows, but a group holds a primary plus three alternatives and only
+   one is ever eaten. Fed the client file, the alert panel and the generated
+   report, which announced "רוב פריטי התפריט אינם מסומנים" about clients who had
+   marked everything. Now counted in meals.
+2. **`client-report.ts` still read check-ins on the 1-5 scale** after
+   `202607280002` moved them to 1-10 — the same class of bug fixed in the client
+   file on 2026-08-19, missed in the report generator. Thresholds and every
+   printed denominator corrected.
+3. **"דורש תשומת לב" fired for every client every day** — two of its three rules
+   are true of everyone on a Monday morning. Rules now describe lateness.
+4. **"מלא יום מהמועדפים" always reported 0 foods** — counter incremented inside a
+   `setState` updater, read before React ran it.
+5. **"מאכל ראשי נוסף" arrived scaled down** to be calorie-equivalent to the first
+   primary — "ראשי" was read as position rather than as the mark.
+6. **The daily-coach cron counted meals across all days** of a multi-day menu.
+7. **The dashboard calorie tile printed eaten/remaining** with no words, read by
+   everyone as eaten/target.
+8. Folded meals followed the position, not the meal, across reorder/delete/day-switch.
+9. Duplicate-to-client claimed "no calorie target" when the two targets were equal.
+10. The menus search was the one case-sensitive search in the product.
+
+### Open items closed in the same pass
+- `/coach/menus/[id]/preview` now marks the primary by `item_role` (was carried
+  over unfixed from 2026-08-19, and mattered more once a group can hold two).
+- Dead `setMealCompletion` / `setMealItemCompletion` actions removed.
+- Workout session: "next exercise" searches forward before wrapping, and the
+  unfinished-exercises confirm is its own state rather than "is any warning up".
+
+### Improvements shipped
+- **"כמו אתמול"** on the nutrition screen — one tap fills every group still
+  waiting with yesterday's choice. This was the most repeated action in the
+  product: a five-meal menu with four groups is twenty taps, remade every morning.
+- A link to the meal that is due now (the anchor existed; nothing linked to it).
+- The check-in now writes weight and navel circumference to `progress_entries`,
+  so the graph stops missing weekly weigh-ins.
+- The check-in says which number it is and when photos are next required.
+- Coach: a "ללא תפריט" view listing active clients with no active menu, linking
+  into the builder with the client already selected.
+- Coach: the check-in review queue holds its place by check-in id, not by index,
+  so marking one handled no longer skips the next.
+- The daily-coach cron reads every client in a fixed number of queries instead of
+  five sequential round trips each.
+- The client file no longer loads weekly summaries and response templates on tabs
+  that do not render them.
+
+### Verification
+`tsc` clean · `lint` clean · **434 / 434** tests · `build` passes ·
+migration validation passes (67 migrations).
 
 ## 2026-08-19 product review
 

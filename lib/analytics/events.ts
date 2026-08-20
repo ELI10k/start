@@ -7,6 +7,9 @@ export const ANALYTICS_EVENTS = [
   "workout_started",
   "workout_completed",
   "meal_marked",
+  // "the same as yesterday" - worth counting on its own, because if it is what
+  // most clients press then the per-day choice is the wrong default.
+  "selections_repeated",
   "barcode_scanned",
   "manual_food_added",
   "check_in_submitted",

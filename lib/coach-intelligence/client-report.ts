@@ -28,6 +28,11 @@ export type ClientReport = Readonly<{
   referral: string | null;
 }>;
 
+// Check-in ratings run 1-10 (202607280002). Four and below is the bottom of the
+// scale; eight and above is the top of it.
+const LOW_RATING = 4;
+const HIGH_RATING = 8;
+
 export type ReportInput = Readonly<{
   weighIns: readonly { date: string; weight: number; navel: number | null }[];
   checkIns: readonly {
@@ -37,7 +42,7 @@ export type ReportInput = Readonly<{
   }[];
   hasMenu: boolean;
   menuCompletionPercent: number;
-  menuPlannedItems: number;
+  menuPlannedMeals: number;
   hasProgram: boolean;
   programName: string | null;
   weeklyFrequency: number | null;
@@ -120,11 +125,16 @@ export function buildClientReport(input: ReportInput): ClientReport {
   // ------------------------------------------- 3/4. what is going well, and not
   const latestCheckIn = input.checkIns[0];
   if (latestCheckIn) {
-    if ((latestCheckIn.adherence ?? 0) >= 4) positives.push({ text: "היצמדות גבוהה בצ׳ק־אין האחרון", basis: `היצמדות ${latestCheckIn.adherence}/5` });
-    if ((latestCheckIn.energy ?? 0) >= 4) positives.push({ text: "רמת אנרגיה טובה", basis: `אנרגיה ${latestCheckIn.energy}/5` });
-    if (latestCheckIn.sleep !== null && latestCheckIn.sleep <= 2) attention.push({ text: "שינה נמוכה בדיווח האחרון", basis: `שינה ${latestCheckIn.sleep}/5` });
-    if (latestCheckIn.hunger !== null && latestCheckIn.hunger >= 4) attention.push({ text: "רעב גבוה מדווח", basis: `רעב ${latestCheckIn.hunger}/5` });
-    if (latestCheckIn.adherence !== null && latestCheckIn.adherence <= 2) attention.push({ text: "היצמדות נמוכה בצ׳ק־אין האחרון", basis: `היצמדות ${latestCheckIn.adherence}/5` });
+    if ((latestCheckIn.adherence ?? 0) >= HIGH_RATING) positives.push({ text: "היצמדות גבוהה בצ׳ק־אין האחרון", basis: `היצמדות ${latestCheckIn.adherence}/10` });
+    if ((latestCheckIn.energy ?? 0) >= HIGH_RATING) positives.push({ text: "רמת אנרגיה טובה", basis: `אנרגיה ${latestCheckIn.energy}/10` });
+    // Out of ten. Every rating moved to 1-10 in 202607280002 and this file kept
+    // both the old thresholds and the old denominator, so "שינה <= 2" almost
+    // never fired on a scale that starts being poor at 4, "רעב >= 4" fired for
+    // any client who was not starving, and every basis line understated the
+    // figure it was quoting by half.
+    if (latestCheckIn.sleep !== null && latestCheckIn.sleep <= LOW_RATING) attention.push({ text: "שינה נמוכה בדיווח האחרון", basis: `שינה ${latestCheckIn.sleep}/10` });
+    if (latestCheckIn.hunger !== null && latestCheckIn.hunger >= HIGH_RATING) attention.push({ text: "רעב גבוה מדווח", basis: `רעב ${latestCheckIn.hunger}/10` });
+    if (latestCheckIn.adherence !== null && latestCheckIn.adherence <= LOW_RATING) attention.push({ text: "היצמדות נמוכה בצ׳ק־אין האחרון", basis: `היצמדות ${latestCheckIn.adherence}/10` });
   }
   if (input.hasProgram && input.weeklyCompletionPercent >= 100) {
     positives.push({ text: "תוכנית האימונים הושלמה השבוע", basis: `${input.weeklyCompletionPercent}% מהאימונים המתוכננים` });
@@ -132,8 +142,8 @@ export function buildClientReport(input: ReportInput): ClientReport {
   if (input.hasProgram && input.weeklyCompletionPercent < 50) {
     attention.push({ text: "פחות ממחצית האימונים השבועיים הושלמו", basis: `${input.weeklyCompletionPercent}% מתוך ${input.weeklyFrequency ?? "?"} בשבוע` });
   }
-  if (input.hasMenu && input.menuPlannedItems > 0 && input.menuCompletionPercent < 50) {
-    attention.push({ text: "רוב פריטי התפריט אינם מסומנים כנאכלו", basis: `${input.menuCompletionPercent}% מתוך ${input.menuPlannedItems} פריטים היום` });
+  if (input.hasMenu && input.menuPlannedMeals > 0 && input.menuCompletionPercent < 50) {
+    attention.push({ text: "רוב ארוחות היום אינן מסומנות", basis: `${input.menuCompletionPercent}% מתוך ${input.menuPlannedMeals} ארוחות היום` });
   }
 
   // ------------------------------------------------------- 5/6. what to change
@@ -146,12 +156,12 @@ export function buildClientReport(input: ReportInput): ClientReport {
       basis: `מגמת משקל ${weightTrend.detail} · ${weightTrend.basis}`,
     });
   }
-  if (input.hasMenu && input.menuCompletionPercent < 50 && input.menuPlannedItems > 0) {
+  if (input.hasMenu && input.menuCompletionPercent < 50 && input.menuPlannedMeals > 0) {
     nutrition.push({ text: "לפני שינוי ביעד — לבדוק מה מונע סימון של הארוחות", basis: `סימון ${input.menuCompletionPercent}% היום` });
   }
   if (!input.hasMenu) nutrition.push({ text: "לבנות תפריט, אחרת אין מה למדוד מול היעד", basis: "אין תפריט פעיל" });
-  if (latestCheckIn?.hunger !== undefined && latestCheckIn?.hunger !== null && latestCheckIn.hunger >= 4) {
-    nutrition.push({ text: "לשקול חלוקה מחדש של הארוחות או העלאת חלבון וסיבים", basis: `רעב ${latestCheckIn.hunger}/5 בצ׳ק־אין האחרון` });
+  if (latestCheckIn?.hunger !== undefined && latestCheckIn?.hunger !== null && latestCheckIn.hunger >= HIGH_RATING) {
+    nutrition.push({ text: "לשקול חלוקה מחדש של הארוחות או העלאת חלבון וסיבים", basis: `רעב ${latestCheckIn.hunger}/10 בצ׳ק־אין האחרון` });
   }
 
   if (!input.hasProgram) workouts.push({ text: "לשייך תוכנית אימונים", basis: "אין תוכנית משויכת" });
@@ -165,7 +175,7 @@ export function buildClientReport(input: ReportInput): ClientReport {
   }
 
   // ------------------------------------------------------------- 7. questions
-  if (latestCheckIn?.sleep !== null && latestCheckIn?.sleep !== undefined && latestCheckIn.sleep <= 2) questions.push("מה משפיע על השינה בשבועות האחרונים?");
+  if (latestCheckIn?.sleep !== null && latestCheckIn?.sleep !== undefined && latestCheckIn.sleep <= LOW_RATING) questions.push("מה משפיע על השינה בשבועות האחרונים?");
   if (input.hasMenu && input.menuCompletionPercent < 50) questions.push("אילו ארוחות הכי קשה לעמוד בהן, ולמה?");
   if (input.hasProgram && input.weeklyCompletionPercent < 50) questions.push("מה מונע להגיע לאימונים — זמן, עומס או משהו אחר?");
   if (!input.checkIns.length) questions.push("האם יש חסם בהגשת הצ׳ק־אין השבועי?");

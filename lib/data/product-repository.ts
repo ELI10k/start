@@ -381,8 +381,22 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   const sessions = sessionResult.data ?? [];
   const completedThisWeek = sessions.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
   const totals = menu?.meals.flatMap((meal) => meal.items.filter((item) => item.eaten)).reduce((sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein, carbs: sum.carbs + item.carbs, fat: sum.fat + item.fat }), { calories: 0, protein: 0, carbs: 0, fat: 0 }) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  const plannedItems = menu?.meals.flatMap((meal) => meal.items) ?? [];
-  const completedItems = plannedItems.filter((item) => item.eaten).length;
+  // Adherence is counted in meals, not in rows.
+  //
+  // meal.items holds every row the coach wrote - the primary AND its
+  // alternatives - but a client only ever eats one item per group, so exactly
+  // one of four rows can ever be logged. Dividing logged rows by written rows
+  // therefore capped a perfect day at 25%, and the figure was read as adherence
+  // on the client file, in the "requires attention" panel and in the generated
+  // report, which duly announced that "most of the menu is not marked" about a
+  // client who had marked all of it.
+  //
+  // A meal is the unit the client actually answers: eaten, not eaten, ate
+  // something else. All three are answers, and all three count as marked - the
+  // figure says how much of the day the client has responded to, not how much
+  // of it they obeyed.
+  const plannedMeals = menu?.meals ?? [];
+  const markedMeals = plannedMeals.filter((meal) => meal.status !== null || meal.completed).length;
   const latestCompleted = sessions.find((session) => session.status === "completed") ?? null;
   const dayRows = daysResult.data ?? [];
   const daysFor = (programId: string) => dayRows.filter((day) => day.program_id === programId);
@@ -406,9 +420,9 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
     menu,
     nutrition: {
       totals,
-      plannedItems: plannedItems.length,
-      completedItems,
-      completionPercent: plannedItems.length ? Math.round(completedItems / plannedItems.length * 100) : 0,
+      plannedMeals: plannedMeals.length,
+      markedMeals,
+      completionPercent: plannedMeals.length ? Math.round(markedMeals / plannedMeals.length * 100) : 0,
       // What the client actively skipped, so a coach can tell a deliberate skip
       // from a meal that was simply never marked.
       skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped).map((meal) => meal.title),

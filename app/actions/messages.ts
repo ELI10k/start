@@ -63,16 +63,3 @@ export async function sendMessage(_state: MessageState, form: FormData): Promise
   paths(clientId);
   return { ok: true, message: "ההודעה נשלחה." };
 }
-
-export async function markThreadRead(form: FormData): Promise<void> {
-  const auth = await getAuthContext();
-  if (!auth) return;
-  const clientId = auth.role === "coach" ? String(form.get("clientId") ?? "") : auth.id;
-  if (auth.role === "coach" && !/^[0-9a-f-]{36}$/i.test(clientId)) return;
-  const supabase = await createSupabaseServerClient();
-  // Opening a thread you cannot read is not an error worth showing anyone.
-  await supabase.rpc("mark_message_thread_read", {
-    p_client_id: auth.role === "coach" ? clientId : null,
-  });
-  paths(clientId);
-}

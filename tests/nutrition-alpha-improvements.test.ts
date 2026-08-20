@@ -236,7 +236,11 @@ test("a duplicated plan is unassigned and recalculates for the next client",()=>
     assert.match(body,new RegExp(`${key}:"auto"`));
   // Quantities are scaled by the ratio between the two calorie targets, and only
   // when both are real - otherwise they are copied as they are.
-  assert.match(body,/const ratio = target\?\.calories && sourceCalories > 0/);
+  // "Both targets were known" is asserted as its own flag, separate from the
+  // ratio: equal targets give a ratio of exactly 1, and reading the message off
+  // the ratio alone reported that as "no calorie target was found".
+  assert.match(body,/const scalable = Boolean\(target\?\.calories && sourceCalories > 0\)/);
+  assert.match(body,/const ratio = scalable \?/);
   assert.match(body,/amount: Math\.round\(item\.amount \* ratio \* 10\) \/ 10/);
   assert.match(body,/הכמויות הועתקו כפי שהן/);
 });

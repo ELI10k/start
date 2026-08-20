@@ -11,6 +11,7 @@ import {
 import { validateMealPlanPayload } from "@/lib/nutrition/menu-validation";
 import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
+import { israelDateKey } from "@/lib/date-time";
 
 export type SaveState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -135,10 +136,36 @@ export async function saveCheckIn(
           : "שמירת התמונה נכשלה. הצ׳ק־אין לא נשמר.",
     };
   }
+  // The same weight, in the one place the graph reads.
+  //
+  // The check-in asks for weight and navel circumference, and the progress screen
+  // asks for the same two numbers in a separate form. Only the second fed
+  // progress_entries - so a client who did their weekly check-in faithfully and
+  // never opened the progress screen had a flat, empty graph, and the coach's
+  // "משקל אחרון" said "אין מדידה" about someone who had just reported it.
+  //
+  // A failure here does not undo the check-in: the coach has the numbers either
+  // way, and throwing away a submitted check-in over a chart row would be the
+  // worse trade. It is reported rather than swallowed.
+  const { error: progressError } = await supabase.from("progress_entries").upsert(
+    {
+      client_id: auth.id,
+      date: israelDateKey(),
+      weight,
+      navel_circumference: navelCircumference,
+    },
+    { onConflict: "client_id,date" },
+  );
   revalidatePath("/check-in");
   revalidatePath("/check-in/history");
+  revalidatePath("/progress");
   revalidatePath("/");
-  return { ok: true, message: "הצ׳ק-אין נשמר ונשלח למאמן." };
+  return {
+    ok: true,
+    message: progressError
+      ? "הצ׳ק-אין נשמר ונשלח למאמן, אך המשקל לא נוסף לגרף ההתקדמות. אפשר להזין אותו במסך ההתקדמות."
+      : "הצ׳ק-אין נשמר ונשלח למאמן. המשקל והמדידה נוספו גם לגרף ההתקדמות.",
+  };
 }
 
 export async function reviewCheckIn(
@@ -193,15 +220,6 @@ export async function setCheckInHandled(
   };
 }
 
-function nutritionMutation(form: FormData) {
-  const id = String(form.get("id") ?? "");
-  const eaten = form.get("eaten") === "true";
-  const date = String(form.get("date") ?? "");
-  if (!/^[0-9a-f-]{36}$/i.test(id) || !/^\d{4}-\d{2}-\d{2}$/.test(date))
-    throw new Error("invalid_nutrition_log");
-  return { id, eaten, date };
-}
-
 async function requireClient() {
   const auth = await getAuthContext();
   if (!auth || auth.role !== "client") throw new Error("not_authorized");
@@ -224,18 +242,6 @@ function nutritionRule(error: { message?: string } | null): Error | null {
   if (!error) return null;
   const known = error.message ? NUTRITION_RULES[error.message] : undefined;
   return known ? new Error(known) : null;
-}
-
-export async function setMealCompletion(form: FormData): Promise<void> {
-  const supabase = await requireClient();
-  const { id, eaten, date } = nutritionMutation(form);
-  const { error } = await supabase.rpc("set_meal_eaten", {
-    p_meal_id: id,
-    p_date: date,
-    p_eaten: eaten,
-  });
-  if (error) throw nutritionRule(error) ?? error;
-  revalidateNutrition();
 }
 
 const MEAL_STATUSES = new Set(["eaten", "not_eaten", "other", "none"]);
@@ -264,15 +270,26 @@ export async function setMealStatus(form: FormData): Promise<void> {
   revalidateNutrition();
 }
 
-export async function setMealItemCompletion(form: FormData): Promise<void> {
+/**
+ * Fills today's empty groups with yesterday's choices.
+ *
+ * Choosing an alternative in every group is the most repeated action in the
+ * product - it is stored per day, so it resets at midnight and is made again
+ * every morning, usually to the same answer. Groups already chosen today are
+ * left alone by the database, so this fills the gaps rather than replacing a
+ * decision the client has already made.
+ */
+export async function repeatYesterdaySelections(form: FormData): Promise<void> {
   const supabase = await requireClient();
-  const { id, eaten, date } = nutritionMutation(form);
-  const { error } = await supabase.rpc("set_meal_item_eaten", {
-    p_meal_item_id: id,
-    p_date: date,
-    p_eaten: eaten,
+  const date = String(form.get("date") ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("invalid_date");
+  const yesterday = new Date(`${date}T12:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const { error } = await supabase.rpc("repeat_meal_group_selections", {
+    p_from: yesterday.toISOString().slice(0, 10),
+    p_to: date,
   });
-  if (error) throw error;
+  if (error) throw nutritionRule(error) ?? error;
   revalidateNutrition();
 }
 
@@ -406,7 +423,14 @@ export async function duplicateCoachMealPlan(mealPlanId: string, clientId?: stri
   const sourceCalories = Number(source.calorie_target ?? 0);
   // Only scale when both figures are real. Otherwise the copy keeps the source's
   // quantities, which is the honest fallback.
-  const ratio = target?.calories && sourceCalories > 0 ? target.calories / sourceCalories : 1;
+  //
+  // Whether the two targets were known is a separate fact from whether the ratio
+  // came out at 1. A client whose target happens to equal the source menu's
+  // produces a ratio of exactly 1, and the message read off the ratio alone -
+  // so the one case where the sizing is already perfect was reported as "no
+  // calorie target was found for either", which is the opposite of the truth.
+  const scalable = Boolean(target?.calories && sourceCalories > 0);
+  const ratio = scalable ? target!.calories! / sourceCalories : 1;
   const scaled = ratio === 1 ? [...days.values()] : [...days.values()].map((day) => ({
     ...day,
     meals: day.meals.map((meal) => ({
@@ -441,9 +465,11 @@ export async function duplicateCoachMealPlan(mealPlanId: string, clientId?: stri
   if (error) return { ok:false,message:"שכפול התפריט נכשל." };
   revalidatePath("/coach/menus");
   return { ok:true,id:String(data),message: target
-    ? ratio === 1
-      ? `נוצר עותק עבור ${target.name}. לא נמצא יעד קלורי לשניהם, ולכן הכמויות הועתקו כפי שהן.`
-      : `נוצר עותק עבור ${target.name}, מכוונן ל־${Math.round(target.calories!)} קלוריות. כדאי לעבור על הכמויות לפני הפעלה.`
+    ? !scalable
+      ? `נוצר עותק עבור ${target.name}. לא נמצא יעד קלורי לאחד מהשניים, ולכן הכמויות הועתקו כפי שהן.`
+      : ratio === 1
+        ? `נוצר עותק עבור ${target.name}. יעד הקלוריות שלו זהה לזה של תפריט המקור (${Math.round(target.calories!)} קל׳), ולכן הכמויות נשארו כפי שהן.`
+        : `נוצר עותק עבור ${target.name}, מכוונן ל־${Math.round(target.calories!)} קלוריות. כדאי לעבור על הכמויות לפני הפעלה.`
     : "נוצר עותק טיוטה." };
 }
 

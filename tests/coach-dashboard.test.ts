@@ -17,7 +17,7 @@ test("coach dashboard uses persisted client data with pagination and no demo ada
   assert.match(repository, /workout_sessions/);
   assert.match(listPage, /pageSize/);
   assert.match(listPage, /חיפוש/);
-  assert.match(detailPage, /השלמת היום/);
+  assert.match(detailPage, /ארוחות שסומנו היום/);
   assert.match(detailPage, /השלמת השבוע/);
   assert.match(detailPage, /צ׳ק־אין/);
   assert.doesNotMatch(`${repository}\n${listPage}\n${detailPage}`, /mockCheckIns|mockWeighIns|createMemoryAdapter/);

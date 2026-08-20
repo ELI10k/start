@@ -85,8 +85,13 @@ test("production nutrition repository reads Supabase canonical tables", async ()
     assert.match(repository, new RegExp(`from\\(\"${table}\"\\)`));
   assert.doesNotMatch(repository, /from\("menus"\)|meal_completion_logs/);
   assert.match(actions, /rpc\("save_meal_plan_tree"/);
-  assert.match(actions, /rpc\("set_meal_item_eaten"/);
-  assert.match(actions, /rpc\("set_meal_eaten"/);
+  // Marking is one entry point now. set_meal_eaten and set_meal_item_eaten are
+  // still in the database for anything already calling them, but no screen does,
+  // and the wrappers that reached them from here have been removed - they were
+  // the only callers of the ambiguous three-argument overload.
+  assert.match(actions, /rpc\("set_meal_day_status"/);
+  assert.match(actions, /rpc\("select_meal_group_alternative"/);
+  assert.doesNotMatch(actions, /rpc\("set_meal_eaten"/);
   assert.match(page, /selectMealGroupAlternative/);
 });
 

@@ -46,3 +46,22 @@ export function israelDateKey(value: Date = new Date()) {
 export function israelWeekday(dateKey: string) {
   return new Date(`${dateKey}T12:00:00Z`).getUTCDay();
 }
+
+// The hour of the day in Israel, 0-23. Anything that asks "is it late enough
+// that an unanswered day is going to stay unanswered?" needs the clock the
+// client is living by, not the server's.
+export function israelHour(value: Date = new Date()) {
+  return Number(new Intl.DateTimeFormat("en-GB", {
+    timeZone: ISRAEL_TIME_ZONE,
+    hour: "2-digit",
+    hour12: false,
+  }).format(value));
+}
+
+// How many whole days have passed since a timestamp. Lives here rather than
+// inline in a screen because reading the clock is not something a component may
+// do during render - and because "is this late?" is the same question wherever
+// it is asked.
+export function daysSince(value: string | number | Date, now: Date = new Date()) {
+  return Math.floor((now.getTime() - new Date(value).getTime()) / 86_400_000);
+}

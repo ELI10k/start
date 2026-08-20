@@ -14,7 +14,7 @@ import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-lev
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { formatIsraelDateTime } from "@/lib/date-time";
+import { daysSince, formatIsraelDateTime, israelDateKey, israelHour, israelWeekday } from "@/lib/date-time";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
@@ -26,8 +26,7 @@ import ClientReportView from "@/components/coach/client-file/ClientReport";
 import { buildClientReport } from "@/lib/coach-intelligence/client-report";
 import { CLIENT_TABS, isClientTab } from "@/lib/coach/client-tabs";
 import MessageThread from "@/components/messages/MessageThread";
-import { listThread } from "@/lib/messages/repository";
-import { markThreadRead } from "@/app/actions/messages";
+import { listThread, markThreadRead } from "@/lib/messages/repository";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
@@ -39,7 +38,25 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const { id } = await params; const query=await searchParams; const data = await getCoachClientDashboard(auth.id, id); if (!data) notFound();
   const lastCheckIn = data.checkIns[0] ?? null;
   const latestNavelMeasurement=data.progress.find((entry)=>entry.navel_circumference!==null);
-  const alertRows = [!lastCheckIn ? "צ׳ק־אין ממתין" : null, data.workouts.assignment && data.workouts.weeklyCompletionPercent < 100 ? "אימון שבועי שטרם הושלם" : null, data.menu && data.nutrition.completionPercent < 100 ? "ארוחות שטרם סומנו" : null].filter(Boolean);
+  // "Requires attention" has to be able to be empty, or it is furniture.
+  //
+  // The three rules it used to run were "no check-in yet", "the training week is
+  // not finished" and "not every meal is marked" - and the last two are true of
+  // every client on a Monday morning, so the red panel was on every file, every
+  // day, and stopped being read. Each rule now describes something that is
+  // actually late rather than merely unfinished: a check-in that has not come in
+  // for over a week, a week that is nearly over with most of the training still
+  // to do, and a day whose meals are going unanswered past the evening.
+  const daysSinceCheckIn = lastCheckIn ? daysSince(lastCheckIn.submitted_at) : null;
+  // Sunday is 0, so 5 is Friday: by then the training week is what it is going
+  // to be. 20:00 is past dinner, so a day still unanswered then will stay so.
+  const weekday = israelWeekday(israelDateKey());
+  const hour = israelHour();
+  const alertRows = [
+    daysSinceCheckIn === null ? "טרם הוגש צ׳ק־אין" : daysSinceCheckIn > 8 ? `לא הוגש צ׳ק־אין ${daysSinceCheckIn} ימים` : null,
+    data.workouts.assignment && weekday >= 5 && data.workouts.weeklyCompletionPercent < 50 ? "רוב אימוני השבוע לא בוצעו, והשבוע נגמר" : null,
+    data.menu && hour >= 20 && data.nutrition.completionPercent < 50 ? "רוב ארוחות היום נותרו ללא סימון" : null,
+  ].filter(Boolean);
   const intake=data.profile.clientProfile;
   const supabase=await createSupabaseServerClient();
   // The file is eight tabs and shows one at a time, but it used to load all
@@ -90,15 +107,18 @@ export default async function CoachClientPage({ params, searchParams }: { params
       .map((row) => [String(row.source_id), row.read_at as string | null]),
   );
 
-  const [weeklySummaries, responseTemplates] = await Promise.all([getWeeklySummaries(id), listResponseTemplates()]);
+  // Both of these belong to one tab each - the summaries to "report", the saved
+  // replies to "progress", where the response form is - and both ran on every
+  // load regardless. The rest of this screen was made tab-aware above; these two
+  // were missed.
+  const [weeklySummaries, responseTemplates] = await Promise.all([
+    tab === "report" ? getWeeklySummaries(id) : Promise.resolve([]),
+    tab === "progress" ? listResponseTemplates() : Promise.resolve([]),
+  ]);
   // Only when the tab is open: loading a conversation to render a tab nobody
   // clicked is the same waste as signing every photo for the overview.
   const messages = tab === "messages" ? await listThread(id) : [];
-  if (messages.some((message) => !message.fromMe && !message.readAt)) {
-    const form = new FormData();
-    form.set("clientId", id);
-    await markThreadRead(form);
-  }
+  if (messages.some((message) => !message.fromMe && !message.readAt)) await markThreadRead(id);
   // The two most recent weigh-ins, so the card can say which way the client is
   // going rather than only where they are. One measurement is a number, not a
   // direction, and is reported as such.
@@ -157,7 +177,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
     })),
     hasMenu: Boolean(data.menu),
     menuCompletionPercent: data.nutrition.completionPercent,
-    menuPlannedItems: data.nutrition.plannedItems,
+    menuPlannedMeals: data.nutrition.plannedMeals,
     hasProgram: Boolean(data.workouts.program),
     programName: data.workouts.program?.name ?? null,
     weeklyFrequency: data.workouts.assignment?.weekly_frequency ?? null,
@@ -242,12 +262,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
       <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
         {data.menu ? <>
           <dl className="compact-data-list">
-            <div><span>השלמת היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
+            <div><span>ארוחות שסומנו היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
             <div><span>קלוריות</span><strong>{number(data.nutrition.totals.calories)}</strong></div>
             <div><span>חלבון</span><strong>{number(data.nutrition.totals.protein)} ג׳</strong></div>
             <div><span>פחמימות / שומן</span><strong>{number(data.nutrition.totals.carbs)} / {number(data.nutrition.totals.fat)} ג׳</strong></div>
           </dl>
-          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.completedItems} מתוך {data.nutrition.plannedItems} פריטים סומנו היום.</p>
+          {/* Meals, not rows: a meal holds a primary and its alternatives, and
+              only one of them is ever eaten. */}
+          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו היום (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
           {data.nutrition.skippedMeals.length > 0 && (
             <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="text-[#5B5F5B]">סומנו כלא נאכלו:</span>

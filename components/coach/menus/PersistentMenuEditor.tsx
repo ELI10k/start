@@ -66,8 +66,25 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     return isNutritionGoal(client?.nutritionGoal)?client.nutritionGoal:"";
   });
   const[usage,setUsage]=useState(initialUsage);
+  // Which meals are folded up, by position in the day on screen.
+  //
+  // Position is the only handle a meal has - they carry no id - so every edit
+  // that shifts positions has to move this set with it. Without that, folding
+  // breakfast and then dragging it down left the *new* first meal folded and
+  // breakfast open, deleting a meal folded its neighbour, and switching to a
+  // second day carried the first day's folds onto a different list entirely.
+  // Which day is on screen. Everything below edits this day; the rest of the
+  // menu - name, client, targets - is shared by all of them.
+  const[activeDay,setActiveDay]=useState(0);
   const[collapsed,setCollapsed]=useState<ReadonlySet<number>>(new Set());
   const toggleCollapsed=(index:number)=>setCollapsed(current=>{const next=new Set(current);if(next.has(index))next.delete(index);else next.add(index);return next});
+  // Applies the same index shift to the folds that the edit applied to the meals.
+  const remapCollapsed=(move:(index:number)=>number|null)=>setCollapsed(current=>{
+    const next=new Set<number>();
+    for(const index of current){const moved=move(index);if(moved!==null)next.add(moved)}
+    return next;
+  });
+  const showDay=(dayIndex:number)=>{setActiveDay(dayIndex);setCollapsed(new Set())};
   const[message,setMessage]=useState("");
   // Whether the last message was a refusal. A save that failed and a save that
   // worked used to look identical - the same grey box - which is no way to find
@@ -97,9 +114,6 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const foodMap=useMemo(()=>new Map(foods.map(food=>[food.id,food])),[foods]);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
 
-  // Which day is on screen. Everything below edits this day; the rest of the
-  // menu - name, client, targets - is shared by all of them.
-  const[activeDay,setActiveDay]=useState(0);
   const meals=menu.days.find(day=>day.dayIndex===activeDay)?.meals??menu.days[0]?.meals??[];
   const setMeals=(next:Meal[]|((current:Meal[])=>Meal[]))=>setMenu(current=>({...current,
     days:current.days.map(day=>day.dayIndex===activeDay?{...day,meals:typeof next==="function"?next(day.meals):next}:day)}));
@@ -287,6 +301,11 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const moveMeal=(from:number,to:number)=>{
     if(to<0||to>=meals.length||from===to)return;
     setMeals(current=>{const next=[...current];const[moved]=next.splice(from,1);next.splice(to,0,moved);return next});
+    remapCollapsed(index=>{
+      if(index===from)return to;
+      if(from<to)return index>from&&index<=to?index-1:index;
+      return index>=to&&index<from?index+1:index;
+    });
   };
 
   const changeAmount=(mealIndex:number,groupIndex:number,itemIndex:number,amount:number)=>{
@@ -338,12 +357,20 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const meal=meals[mealIndex];
     const group=meal.groups[groupIndex];
     const selectedFood=foodMap.get(foodId);
-    const primary=group.items[0];
-    const primaryFood=foodMap.get(primary?.foodId);
+    // The primary is whichever row is marked one, not row zero. "מאכל ראשי נוסף"
+    // appends a second primary, and treating position as the marker sent that
+    // row down the alternative path - so "2 לבני ביצה" beside "ביצה 1" arrived
+    // already scaled to cost the same calories as the whole egg, which is the
+    // opposite of what a second primary is for.
+    const primary=group.items.find((item,index)=>item.foodId&&(item.primary??index===0));
+    const primaryFood=foodMap.get(primary?.foodId??"");
     const current=group.items[itemIndex];
     const currentFood=foodMap.get(current?.foodId);
-    const referenceFood=itemIndex===0?currentFood:primaryFood;
-    const referenceAmount=itemIndex===0?current?.amount:primary?.amount;
+    const targetIsPrimary=current?.primary??itemIndex===0;
+    // Replacing an existing primary keeps its portion equivalent; a new primary
+    // has no food to be equivalent to and gets its own default portion.
+    const referenceFood=targetIsPrimary?currentFood:primaryFood;
+    const referenceAmount=targetIsPrimary?current?.amount:primary?.amount;
     const calculated=selectedFood&&referenceFood&&referenceAmount
       ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type)
       :null;
@@ -361,7 +388,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const suggestAlternatives=(mealIndex:number,groupIndex:number,count=3)=>{
     const meal=meals[mealIndex];
     const group=meal.groups[groupIndex];
-    const primary=group.items[0];
+    const primary=group.items.find((item,index)=>item.foodId&&(item.primary??index===0));
     const primaryFood=foodMap.get(primary?.foodId??"");
     if(!primaryFood||!primary?.amount)return;
     const target=portionFor(primaryFood,primary.amount);
@@ -417,8 +444,12 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     // does not quietly plan for five.
     const shareTotal=structuredMeals.reduce((sum,meal)=>sum+(MEAL_CALORIE_SHARE[meal.title]??0),0)||1;
 
+    // Counted here rather than inside the updater. React runs a functional
+    // update during the next render, not on the line that schedules it, so the
+    // counter was still zero when the message was built - every fill reported
+    // "נוצרה טיוטת יום מ־0 מזונות מועדפים" no matter how many it had placed.
     let filled=0;
-    setMeals(current=>current.map((meal,mealIndex)=>{
+    const nextMeals=meals.map((meal,mealIndex)=>{
       if(meal.title==="קלוריות חופשיות")return meal;
       const mealCalories=dayCalories*((MEAL_CALORIE_SHARE[meal.title]??0)/shareTotal);
       // Groups the coach left empty are the ones to fill; anything already chosen
@@ -438,7 +469,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         filled+=1;
         return{...group,items:[{foodId:food.id,amount:portion?.quantity??defaultPortionQuantity(food),amountSource:"auto" as const}]};
       })};
-    }));
+    });
+    setMeals(nextMeals);
     setMessage(dayCalories>0
       ?`נוצרה טיוטת יום מ־${filled} מזונות מועדפים, בכמויות שמכוונות ליעד של ${Math.round(dayCalories)} קלוריות. אפשר להחליף כל בחירה ולשנות כמות.`
       :"נוצרה טיוטת יום מהמזונות המועדפים. ללא יעד קלורי הכמויות הן מנות ברירת מחדל - כדאי להזין יעד ולמלא שוב.");
@@ -452,7 +484,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     if(menu.days.some(day=>day.dayIndex===dayIndex))return;
     const source=menu.days.find(day=>day.dayIndex===activeDay)??menu.days[0];
     setMenu(current=>({...current,days:[...current.days,{dayIndex,meals:structuredClone(source?.meals??[])}].sort((a,b)=>a.dayIndex-b.dayIndex)}));
-    setActiveDay(dayIndex);
+    showDay(dayIndex);
     setMessage(`נוסף ${dayLabel(dayIndex)} כעותק של ${dayLabel(activeDay)}. כל שינוי כאן חל רק על היום הזה.`);
   };
   // Day 0 is the fallback for every weekday that has no day of its own, so it is
@@ -460,7 +492,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const removeDay=(dayIndex:number)=>{
     if(dayIndex===0)return;
     setMenu(current=>({...current,days:current.days.filter(day=>day.dayIndex!==dayIndex)}));
-    setActiveDay(0);
+    showDay(0);
   };
 
   // Empty slots are dropped, not sent. "הוספת חלופה" creates a blank row and the
@@ -604,7 +636,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           <h2 className="font-black">ימי התפריט</h2>
           {menu.days.map(day=>
             <span key={day.dayIndex} className="inline-flex items-center gap-1">
-              <button type="button" onClick={()=>setActiveDay(day.dayIndex)} aria-pressed={day.dayIndex===activeDay} className={`chip${day.dayIndex===activeDay?" pill--green":""}`}>
+              <button type="button" onClick={()=>showDay(day.dayIndex)} aria-pressed={day.dayIndex===activeDay} className={`chip${day.dayIndex===activeDay?" pill--green":""}`}>
                 {dayLabel(day.dayIndex)}
               </button>
               {day.dayIndex!==0&&
@@ -626,7 +658,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         <button type="button" aria-label={`הזזת ${meal.title} למעלה`} disabled={index===0} onClick={()=>moveMeal(index,index-1)} className="food-row__nudge"><ChevronUp aria-hidden="true" size={14}/></button>
         <button type="button" aria-label={`הזזת ${meal.title} למטה`} disabled={index===meals.length-1} onClick={()=>moveMeal(index,index+1)} className="food-row__nudge"><ChevronDown aria-hidden="true" size={14}/></button>
       </span>
-      <button type="button" aria-label="שכפול ארוחה" onClick={()=>setMeals(current=>[...current.slice(0,index+1),structuredClone(meal),...current.slice(index+1)])} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>setMeals(current=>current.filter((_,i)=>i!==index))} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button>
+      <button type="button" aria-label="שכפול ארוחה" onClick={()=>{setMeals(current=>[...current.slice(0,index+1),structuredClone(meal),...current.slice(index+1)]);remapCollapsed(folded=>folded>index?folded+1:folded)}} className="min-h-12 rounded-xl border border-[#16A34A]/30 px-3 text-[#16A34A]"><Copy size={18}/></button><button type="button" aria-label="מחיקת ארוחה" onClick={()=>{setMeals(current=>current.filter((_,i)=>i!==index));remapCollapsed(folded=>folded===index?null:folded>index?folded-1:folded)}} className="min-h-12 rounded-xl border border-[#DC2626]/30 px-3 text-[#DC2626]"><Trash2 size={18}/></button>
       {/* What this meal costs, on the row that names it. Otherwise the only way
           to know was to add the four group cards up by eye. */}
       <span className="mr-auto flex shrink-0 items-center gap-2 text-sm font-black">
@@ -724,7 +756,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           <div className="mt-3 flex flex-wrap gap-2">
             <button type="button" onClick={()=>{updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto"}]}:value)});setPicker({mealIndex:index,groupIndex,itemIndex:group.items.length})}} className="chip"><Plus aria-hidden="true" size={15}/>{group.items.length?"הוספת חלופה":"בחירת מאכל ראשי"}</button>
             {group.items.length?<button type="button" onClick={()=>{updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:[...value.items,{foodId:"",amount:100,amountSource:"auto" as const,primary:true}]}:value)});setPicker({mealIndex:index,groupIndex,itemIndex:group.items.length})}} className="chip"><Plus aria-hidden="true" size={15}/>מאכל ראשי נוסף</button>:null}
-            {group.items[0]?.foodId?<button type="button" onClick={()=>suggestAlternatives(index,groupIndex)} className="chip"><Sparkles aria-hidden="true" size={15}/>הוסף 3 חלופות מומלצות</button>:null}
+            {group.items.some((item,i)=>item.foodId&&(item.primary??i===0))?<button type="button" onClick={()=>suggestAlternatives(index,groupIndex)} className="chip"><Sparkles aria-hidden="true" size={15}/>הוסף 3 חלופות מומלצות</button>:null}
           </div>
         </div>)}
       </div>

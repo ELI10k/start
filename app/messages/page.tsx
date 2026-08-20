@@ -2,9 +2,8 @@ import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import MessageThread from "@/components/messages/MessageThread";
-import { markThreadRead } from "@/app/actions/messages";
 import { getAuthContext } from "@/lib/data/product-repository";
-import { listThread } from "@/lib/messages/repository";
+import { listThread, markThreadRead } from "@/lib/messages/repository";
 
 export default async function MessagesPage() {
   const auth = await getAuthContext();
@@ -15,7 +14,7 @@ export default async function MessagesPage() {
   // Opening the thread is what reading it means. Done here rather than behind a
   // button, so the coach's "נקראה" is true rather than optimistic.
   if (messages.some((message) => !message.fromMe && !message.readAt))
-    await markThreadRead(new FormData());
+    await markThreadRead(null);
 
   return (
     <ClientShell>

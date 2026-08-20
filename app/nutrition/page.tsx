@@ -16,6 +16,7 @@ import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
 import ShoppingList from "@/components/client/ShoppingList";
+import RepeatYesterday from "@/components/client/RepeatYesterday";
 
 export default async function NutritionPage() {
   const auth = await getAuthContext();
@@ -66,6 +67,16 @@ export default async function NutritionPage() {
         title="הארוחות של היום"
         description={menu?.title ?? "התפריט האישי שלך"}
       />
+      {/* The screen already works out which meal is due and gives it an anchor -
+          nothing ever linked to it, so a client at 19:00 still scrolled past five
+          meals to reach dinner. One link, only while there is something to jump
+          to: once the current meal is marked, the anchor is gone and so is this. */}
+      {/* How many groups are still waiting for a choice today. The button only
+          appears while that number is above zero. */}
+      {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
+      {menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
+        ? <a href="#current-meal" className="chip mb-3 inline-flex">לארוחה של עכשיו · {currentMealTitle}</a>
+        : null}
       <div className="mb-4 grid gap-2 sm:grid-cols-2">
         <BarcodeScanner date={today}/>
         {menu ? <ShoppingList

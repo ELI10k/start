@@ -84,3 +84,28 @@ export async function listCoachThreads(): Promise<readonly CoachThread[]> {
   }
   return [...threads.entries()].map(([clientId, value]) => ({ clientId, ...value }));
 }
+
+/**
+ * Marks everything the other side wrote in this thread as read.
+ *
+ * Deliberately not a server action and deliberately without revalidatePath.
+ * Opening a thread *is* reading it, so both message screens mark it while they
+ * render - and revalidatePath during a render is not merely discouraged, Next
+ * throws on it ("used revalidatePath during render which is unsupported"). The
+ * action wrapper that did call it therefore took the screen down on the one
+ * visit that matters: the first one after the other side wrote.
+ *
+ * There is nothing to revalidate here anyway. The page doing the marking is
+ * already rendering the fresh thread, and the badge it feeds is read on the next
+ * navigation.
+ *
+ * `clientId` is the coach's side of the call; a client passes null and the
+ * database resolves their coach.
+ */
+export async function markThreadRead(clientId: string | null): Promise<void> {
+  const supabase = await createSupabaseServerClient();
+  // Opening a thread you cannot read, or before the channel migration has run,
+  // is not an error worth showing anyone - and it must never take the thread
+  // down, because the thread is the thing the visitor came for.
+  await supabase.rpc("mark_message_thread_read", { p_client_id: clientId });
+}
