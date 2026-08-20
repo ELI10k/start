@@ -166,11 +166,17 @@ test("meal-plan mutations reject incomplete or unsafe payloads before the RPC", 
   );
 });
 
-test("client nutrition screen exposes full daily macro totals and targets", async () => {
+test("the client sees the day's totals, and no targets beside them", async () => {
   const page = await file("app/nutrition/page.tsx");
   assert.match(page, /סיכום התפריט היומי/);
   assert.match(page, /menuTotals\.protein/);
   assert.match(page, /menuTotals\.carbs/);
   assert.match(page, /menuTotals\.fat/);
-  assert.match(page, /menu\.calorieTarget/);
+  // A target is the coach's instrument. A menu does not always land on the
+  // protein or the carbohydrate figure on purpose - the coach trades them off
+  // knowingly - and printing the gap turns a deliberate decision into a number
+  // the client appears to have missed. The coach still sees both sides in the
+  // builder and on the client file.
+  assert.doesNotMatch(page, /target=\{menu\./);
+  assert.doesNotMatch(page, /יעד:/);
 });

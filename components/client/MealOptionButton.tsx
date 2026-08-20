@@ -11,6 +11,7 @@ export default function MealOptionButton({
   unit,
   calories,
   household,
+  note,
 }: {
   selected: boolean;
   name: string;
@@ -19,6 +20,9 @@ export default function MealOptionButton({
   calories: string;
   /** The same portion in spoons or palms, when there is an honest reading. */
   household?: string;
+  /** The coach's instruction for this food. Written for the client and, until
+      now, shown only to the coach who wrote it. */
+  note?: string | null;
 }) {
   const status = useFormStatus();
   return (
@@ -38,6 +42,9 @@ export default function MealOptionButton({
       <span className="flex min-w-0 flex-1 flex-col">
         <span className={`truncate ${selected ? "font-bold text-[#16A34A]" : "text-[#0B0B0B]"}`}>{name}</span>
         {household ? <span className="text-xs text-[#5B5F5B]">{household}</span> : null}
+        {/* The coach's own words, in their own colour so they do not read as
+            another measurement. */}
+        {note ? <span className="truncate text-xs font-bold text-[#16A34A]">{note}</span> : null}
       </span>
       <span className="shrink-0 text-[#5B5F5B]">{quantity} {unit}</span>
       <span className="shrink-0 text-xs tabular-nums text-[#5B5F5B]">{calories} קל׳</span>

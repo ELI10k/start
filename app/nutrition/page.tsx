@@ -101,11 +101,17 @@ export default async function NutritionPage() {
                   ? "מחושב לפי החלופות שבחרת. קבוצה שטרם נבחרה נספרת לפי המאכל הראשי."
                   : "כך נראה היום המתוכנן. הסיכום יתעדכן לפי החלופות שתבחרו."}
               </p>
+              {/* No targets here. A target is the coach's instrument, and a menu
+                  does not always land on the protein or the carbohydrate figure
+                  on purpose - the coach trades them off knowingly. Printing the
+                  gap to a client turns every deliberate decision into a number
+                  they appear to have missed. The coach still sees both sides,
+                  in the builder and on the client file. */}
               <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MacroTotal label="קלוריות" value={menuTotals.calories} target={menu.calorieTarget} unit="קל׳" />
-                <MacroTotal label="חלבון" value={menuTotals.protein} target={menu.proteinTarget} unit="גרם" />
-                <MacroTotal label="פחמימות" value={menuTotals.carbs} target={menu.carbohydrateTarget} unit="גרם" />
-                <MacroTotal label="שומן" value={menuTotals.fat} target={menu.fatTarget} unit="גרם" />
+                <MacroTotal label="קלוריות" value={menuTotals.calories} unit="קל׳" />
+                <MacroTotal label="חלבון" value={menuTotals.protein} unit="גרם" />
+                <MacroTotal label="פחמימות" value={menuTotals.carbs} unit="גרם" />
+                <MacroTotal label="שומן" value={menuTotals.fat} unit="גרם" />
               </dl>
             </section>
           ) : null}
@@ -149,6 +155,7 @@ export default async function NutritionPage() {
                       unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
                       calories={String(item.calories)}
                       household={householdMeasure(item.amount,group.type,item.measurementUnit)?.label}
+                      note={item.note}
                     />
                   </form>)}</div></fieldset>)}
               </div>}
@@ -172,12 +179,10 @@ function groupLabel(type:string){return({protein:"מנת חלבון",carbohydrat
 function MacroTotal({
   label,
   value,
-  target,
   unit,
 }: {
   label: string;
   value: number;
-  target?: number;
   unit: string;
 }) {
   return (
@@ -186,11 +191,6 @@ function MacroTotal({
       <dd className="mt-1 font-black">
         {value.toFixed(1)} {unit}
       </dd>
-      {target ? (
-        <p className="mt-1 text-xs text-[#5B5F5B]">
-          יעד: {Number(target).toFixed(1)} {unit}
-        </p>
-      ) : null}
     </div>
   );
 }

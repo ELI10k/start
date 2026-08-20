@@ -25,9 +25,12 @@ const UNIT_FORMS:ReadonlyArray<readonly[string,string]>=[
   ["יחידה","יחידות"],
   ["פרוסה","פרוסות"],
   ["פיתה","פיתות"],
+  // Both spellings resolve to the same plural, and UNIT_SINGULARS is built by
+  // reversing this list - so whichever pair comes last decides how "לחמניות"
+  // reads back in the singular. Eli's own catalog says לחמנייה, so it goes last.
+  ["לחמניה","לחמניות"],
   ["לחמנייה","לחמניות"],
   ["בגט","בגטים"],
-  ["לחמניה","לחמניות"],
   ["פרכית","פרכיות"],
   ["טורטייה","טורטיות"],
   ["טורטיה","טורטיות"],

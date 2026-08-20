@@ -23,6 +23,9 @@ export type PersistedMealItem = Readonly<{
   measurementUnit:string;
   itemRole:"primary"|"alternative";
   amountSource:"auto"|"manual";
+  /** The coach's note on this food - "בלי מלח", "מבושל". Belongs to the food,
+      not to the meal, and the client is who it was written for. */
+  note: string | null;
   calories: number;
   protein: number;
   carbs: number;
@@ -484,7 +487,7 @@ export async function getActiveClientMenu(
         ? supabase
             .from("meal_items")
             .select(
-              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
+              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
             )
             .in("meal_id", mealIds)
             .order("sort_order")
@@ -537,6 +540,9 @@ export async function getActiveClientMenu(
           measurementUnit:item.measurement_unit??"גרם",
           itemRole:(item.item_role==="primary"?"primary":"alternative") as "primary"|"alternative",
           amountSource:(item.amount_source==="auto"?"auto":"manual") as "auto"|"manual",
+          // Written by the coach against this food. It was stored and shown back
+          // in the builder, and never once reached the person it was written for.
+          note: ("note" in item ? (item.note as string | null) : null) || null,
           calories: Number(item.calculated_calories),
           protein: Number(item.calculated_protein),
           carbs: Number(item.calculated_carbohydrates),

@@ -17,7 +17,10 @@ const statusLabels: Record<string, string> = {
 };
 
 const filters = [
-  { value: "all", label: "הכול" },
+  // Not "everything" - everything the coach is building. A menu assigned to a
+  // client moves under "לקוחות", where it is looked for by the client's name,
+  // and stops crowding the list the coach works in.
+  { value: "all", label: "שלי" },
   // Whose menus, rather than what state they are in. A coach thinking "what did
   // I build for Dana" is asking a different question from "what is still a
   // draft", and this view answers it by grouping under the client's name.
@@ -70,7 +73,9 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
     if (status === "active") return menu.status === "active";
     if (status === "published") return menu.status === "published";
     if (status === "draft") return menu.status === "draft";
-    return true;
+    // The default view is the bank and the work in progress. Anything already
+    // attached to a client lives under "לקוחות".
+    return !menu.client_id;
   });
 
   // In the client view the list is grouped: one heading per client, their menus
@@ -91,7 +96,7 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
       <div>
         <p>START COACH</p>
         <h1>תפריטים</h1>
-        <span>תפריטים שמורים במסד הנתונים.</span>
+        <span>התפריטים שאתה בונה. תפריט ששויך ללקוח עובר ללשונית „לקוחות”.</span>
       </div>
       <span className="pill pill--green">{menus.length}</span>
     </header>
