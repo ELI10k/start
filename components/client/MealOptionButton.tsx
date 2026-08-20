@@ -30,7 +30,7 @@ export default function MealOptionButton({
       type="submit"
       disabled={status.pending}
       aria-pressed={selected}
-      className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 text-right text-sm transition disabled:opacity-50 ${selected ? "border-[#16A34A] bg-[#16A34A]/[.07]" : "border-[#E5E7E5] hover:border-[#E5E7E5]"}`}
+      className={`flex min-h-12 w-full items-center gap-2 rounded-xl border px-3 text-right text-sm transition disabled:opacity-50 sm:gap-3 ${selected ? "border-[#16A34A] bg-[#16A34A]/[.07]" : "border-[#E5E7E5] hover:border-[#E5E7E5]"}`}
     >
       {selected ? (
         <CircleDot size={18} aria-hidden="true" className="shrink-0 text-[#16A34A]" />
@@ -46,8 +46,14 @@ export default function MealOptionButton({
             another measurement. */}
         {note ? <span className="truncate text-xs font-bold text-[#16A34A]">{note}</span> : null}
       </span>
-      <span className="shrink-0 text-[#5B5F5B]">{quantity} {unit}</span>
-      <span className="shrink-0 text-xs tabular-nums text-[#5B5F5B]">{calories} קל׳</span>
+      {/* The figures were being pushed off the edge of a phone. They keep their
+          own column, they are allowed to sit on two lines, and they never wrap
+          mid-number: a quantity cut in half is worse than a name cut in half,
+          because the name is still recognisable and "20" is not. */}
+      <span className="flex shrink-0 flex-col items-end text-xs leading-tight text-[#5B5F5B]">
+        <span className="whitespace-nowrap">{quantity} {unit}</span>
+        <span className="whitespace-nowrap tabular-nums">{calories} קל׳</span>
+      </span>
     </button>
   );
 }

@@ -134,16 +134,40 @@ export default async function NutritionPage() {
             // Marked, not reordered: the day still reads in its own order, and
             // the meal that is due right now says so.
             const isNow = meal.title === currentMealTitle && !meal.status && !meal.completed;
+            // What this meal costs as it currently stands: the chosen alternative
+            // in each group, or the primary where nothing is chosen yet - the same
+            // rule the daily summary uses, so the two never disagree.
+            const mealCalories = Math.round(meal.groups.reduce((sum, group) => {
+              const chosen = group.items.find((item) => item.id === group.selectedItemId);
+              const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
+              return sum + ((chosen ?? primary)?.calories ?? 0);
+            }, meal.freeCalorieTarget ?? 0));
+            // Where the meal stands, in one word, for the closed row.
+            const mark = meal.status === "not_eaten" ? "לא נאכל"
+              : meal.status === "other" ? "נאכל משהו אחר"
+              : (meal.status === "eaten" || meal.completed) ? "נאכל"
+              : missingChoice ? "ממתין לבחירה"
+              : "טרם סומן";
             return (
-            <article
+            <details
               key={meal.id}
               id={isNow ? "current-meal" : undefined}
-              className={`start-surface rounded-[24px] p-5 sm:p-6${isNow ? " border-2 border-[#16A34A]" : ""}`}
+              // Six meals in one scroll is a page nobody reads to the end. Each
+              // one is a closed row carrying what it costs and where it stands,
+              // and the meal that is due right now is the one already open.
+              open={isNow}
+              className={`start-surface meal-card rounded-[24px]${isNow ? " border-2 border-[#16A34A]" : ""}`}
             >
+              <summary className="meal-card__summary">
+                <span className="min-w-0">
+                  <strong className="block text-lg font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</strong>
+                  <span className="mt-1 block text-xs text-[#5B5F5B]">{mealCalories} קל׳ · {mark}</span>
+                </span>
+              </summary>
+              <div className="meal-card__body">
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</h2>
-                  {meal.freeCalorieTarget?<p className="mt-1 text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
+                  {meal.freeCalorieTarget?<p className="text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
                 </div>
                 <MealStatusControl
                   mealId={meal.id}
@@ -157,8 +181,8 @@ export default async function NutritionPage() {
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {/* What was eaten instead of this meal, under the meal it replaced. */}
               <LoggedFoodList entries={logged.filter((entry)=>entry.mealId===meal.id)}/>
-              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
-                {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-[#E5E7E5] p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
+              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
+                {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
                     <MealOptionButton
                       selected={group.selectedItemId===item.id}
@@ -166,7 +190,7 @@ export default async function NutritionPage() {
                       quantity={String(item.displayQuantity)}
                       unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
                       calories={String(item.calories)}
-                      household={householdMeasure(item.amount,group.type,item.measurementUnit)?.label}
+                      household={householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label}
                       note={item.note}
                     />
                   </form>)}</div>
@@ -181,7 +205,8 @@ export default async function NutritionPage() {
                   />:null})()}
                   </fieldset>)}
               </div>}
-            </article>
+              </div>
+            </details>
           );})}
         </div>
       ) : (

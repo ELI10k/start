@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Camera, PencilLine, Barcode } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
+import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { logClientFood, type FoodLogState } from "@/app/actions/food-log";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
@@ -47,8 +48,8 @@ export default function AteSomethingElse({
   const [miss, setMiss] = useState("");
   const [grams, setGrams] = useState("100");
 
-  const lookup = async () => {
-    const barcode = normalizeBarcode(code);
+  const lookupFor = async (raw: string) => {
+    const barcode = normalizeBarcode(raw);
     if (!barcode) { setMiss("ברקוד מוצר הוא 8, 12 או 13 ספרות."); return; }
     setLooking(true); setMiss(""); setFound(null);
     try {
@@ -62,6 +63,8 @@ export default function AteSomethingElse({
       setLooking(false);
     }
   };
+
+  const lookup = () => lookupFor(code);
 
   // The catalog's figures are per 100 grams; this is the portion actually eaten.
   const factor = (Number(grams) || 0) / 100;
@@ -96,6 +99,9 @@ export default function AteSomethingElse({
           <button type="button" onClick={lookup} disabled={looking || !code.trim()} className="premium-secondary-button">
             {looking ? "מחפשים…" : "חיפוש מוצר"}
           </button>
+          {/* Reading thirteen digits off a curved bottle and typing them in is
+              not a feature. The camera is the way in; the field is the fallback. */}
+          <CameraScan onDetected={(value) => { setCode(value); void lookupFor(value); }} />
           {miss && <p role="status" className="rounded-2xl bg-[#F7F8F7] p-3 text-sm">{miss}</p>}
         </div>
       )}

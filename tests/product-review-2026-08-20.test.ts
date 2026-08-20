@@ -551,3 +551,48 @@ test("logging against a meal answers that meal too", async () => {
   // A failed row must not leave its photograph behind.
   assert.match(action, /if \(photoPath\) await supabase\.storage\.from\(FOOD_LOG_PHOTO_BUCKET\)\.remove\(\[photoPath\]\)/);
 });
+
+// ================================ the day, read one meal at a time
+
+test("the spoon rule is a lunch rule, and a serving spoon takes over from a silly count", async () => {
+  const { householdMeasure, GRAMS_PER_SERVING_SPOON, SPOON_MEAL_TITLE } =
+    await import("../lib/nutrition/household-measures.ts");
+
+  // "19 כפות בורגול" is a true sentence that helps nobody.
+  assert.equal(GRAMS_PER_SERVING_SPOON, 100);
+  assert.equal(householdMeasure(375, "carbohydrate", "גרם", SPOON_MEAL_TITLE)?.label, "≈ 4 כפות הגשה");
+  assert.equal(householdMeasure(60, "carbohydrate", "גרם", SPOON_MEAL_TITLE)?.label, "≈ 3 כפות אכילה");
+  // Anywhere else the portion stands on its grams.
+  assert.equal(householdMeasure(200, "carbohydrate", "גרם", "ארוחת בוקר"), null);
+  // A food sold by the unit already says "1 פרוסה", which beats any spoon count.
+  assert.equal(householdMeasure(150, "carbohydrate", "פיתות", SPOON_MEAL_TITLE), null);
+  // The palm is not a spoon and is not restricted to a meal.
+  assert.equal(householdMeasure(200, "protein", "גרם", "ארוחת ערב")?.unit, "palm");
+});
+
+test("a barcode can be scanned wherever it is asked for", async () => {
+  const [camera, scanner, sheet] = await Promise.all([
+    source("components/client/CameraScan.tsx"),
+    source("components/client/BarcodeScanner.tsx"),
+    source("components/client/AteSomethingElse.tsx"),
+  ]);
+  // Reading thirteen digits off a curved bottle and typing them in is not a
+  // feature, so both places that ask for a barcode open the camera.
+  assert.match(camera, /export default function CameraScan/);
+  assert.match(scanner, /<CameraScan onDetected=/);
+  assert.match(sheet, /<CameraScan onDetected=/);
+  // ZXing stays behind a dynamic import so it costs nothing until a camera opens.
+  assert.match(camera, /await import\("@zxing\/browser"\)/);
+});
+
+test("the day opens one meal at a time", async () => {
+  const [page, css] = await Promise.all([source("app/nutrition/page.tsx"), source("app/globals.css")]);
+  // Six meals in a single scroll is a page nobody reads to the end, and the
+  // marking controls live at the bottom of each one.
+  assert.match(page, /<details\s*\n\s*key=\{meal\.id\}/);
+  assert.match(page, /open=\{isNow\}/);
+  // The closed row has to carry enough to decide whether to open it.
+  assert.match(page, /const mealCalories = Math\.round\(/);
+  assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
+  assert.match(css, /\.meal-card > summary/);
+});

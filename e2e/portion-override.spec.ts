@@ -32,7 +32,15 @@ test.describe("portion override", () => {
       await expect(reset).toHaveCount(0, { timeout: 20_000 });
     }
 
-    const option = page.locator("fieldset button[aria-pressed]").first();
+    // The day reads one meal at a time now, so the groups live inside a closed
+    // row until it is opened.
+    const card = page.locator("details.meal-card").first();
+    test.skip(!(await card.count()), "no active menu today");
+    if (!(await card.evaluate((node) => (node as HTMLDetailsElement).open))) {
+      await card.locator("summary").click();
+    }
+
+    const option = card.locator("fieldset button[aria-pressed]").first();
     test.skip(!(await option.count()), "no active menu with groups today");
     await option.click();
 

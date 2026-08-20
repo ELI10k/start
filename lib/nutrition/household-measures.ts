@@ -9,8 +9,20 @@
 // The nutrition values themselves are never touched by any of this - the portion
 // stays the grams the coach prescribed, and this is a second way of reading it.
 
-/** Eli's rule: one level tablespoon is about 20 g. */
+/** Eli's rule: one level eating spoon is about 20 g. */
 export const GRAMS_PER_TABLESPOON = 20;
+
+/** And a serving spoon is 100 g. "19 כפות בורגול" is a true sentence that helps
+    nobody; the same portion is under four serving spoons. */
+export const GRAMS_PER_SERVING_SPOON = 100;
+
+/** Above this, an eating spoon stops being a usable instruction. */
+const SERVING_SPOON_FROM_GRAMS = 100;
+
+/** The one meal whose carbohydrate is measured this way. Eli's instruction: the
+    spoon rule is a lunch rule, and printing it on breakfast cereal or on an
+    evening portion is a number nobody asked for. */
+export const SPOON_MEAL_TITLE = "ארוחת צהריים";
 
 /** And a meat portion of 100 g is about the size of a palm. */
 export const GRAMS_PER_PALM = 100;
@@ -20,7 +32,7 @@ export type HouseholdMeasure = Readonly<{
   label: string;
   /** How many of the unit, rounded to something sayable. */
   count: number;
-  unit: "tablespoon" | "palm";
+  unit: "tablespoon" | "serving-spoon" | "palm";
 }>;
 
 // Halves, because "3.5 כפות" is a thing a person can do and "3.47" is not.
@@ -44,15 +56,25 @@ export function householdMeasure(
   grams: number,
   groupType: string,
   measurementUnit?: string,
+  mealTitle?: string,
 ): HouseholdMeasure | null {
   if (!Number.isFinite(grams) || grams <= 0) return null;
   // Already expressed in a natural unit from the food source - leave it alone.
+  // "1 פרוסה" is a better instruction than any spoon count, and the food's own
+  // unit is real data where a spoon is a rule of thumb.
   if (measurementUnit && measurementUnit !== "גרם") return null;
 
   if (groupType === "carbohydrate") {
+    // Only at lunch. Elsewhere the portion stands on its grams.
+    if (mealTitle !== undefined && mealTitle !== SPOON_MEAL_TITLE) return null;
+    if (grams >= SERVING_SPOON_FROM_GRAMS) {
+      const count = toHalf(grams / GRAMS_PER_SERVING_SPOON);
+      if (count < 0.5) return null;
+      return { label: `≈ ${count} ${plural(count, "כף הגשה", "כפות הגשה")}`, count, unit: "serving-spoon" };
+    }
     const count = toHalf(grams / GRAMS_PER_TABLESPOON);
     if (count < 0.5) return null;
-    return { label: `≈ ${count} ${plural(count, "כף", "כפות")}`, count, unit: "tablespoon" };
+    return { label: `≈ ${count} ${plural(count, "כף אכילה", "כפות אכילה")}`, count, unit: "tablespoon" };
   }
 
   if (groupType === "protein") {

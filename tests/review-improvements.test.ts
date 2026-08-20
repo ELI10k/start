@@ -306,7 +306,9 @@ test("the warm-up and the household reading are on the screens that need them", 
   assert.match(session, /סטי החימום אינם נרשמים ואינם נספרים בנפח/);
 
   assert.match(option, /household\?: string/);
-  assert.match(nutrition, /householdMeasure\(item\.amount,group\.type,item\.measurementUnit\)/);
+  // The meal is part of the reading now: the spoon rule is a lunch rule, and a
+  // spoon count printed on breakfast cereal is a number nobody asked for.
+  assert.match(nutrition, /householdMeasure\(item\.amount,group\.type,item\.measurementUnit,meal\.title\)/);
 });
 
 // ─── one blank row made a whole menu unsavable ────────────────────────────
