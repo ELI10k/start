@@ -70,7 +70,12 @@ export function householdMeasure(
     if (grams >= SERVING_SPOON_FROM_GRAMS) {
       const count = toHalf(grams / GRAMS_PER_SERVING_SPOON);
       if (count < 0.5) return null;
-      return { label: `≈ ${count} ${plural(count, "כף הגשה", "כפות הגשה")}`, count, unit: "serving-spoon" };
+      // Both readings, because not every kitchen has a serving spoon and not
+      // every portion is worth counting out in twenties. One instrument or the
+      // other will be within reach.
+      const spoons = toHalf(grams / GRAMS_PER_TABLESPOON);
+      const label = `≈ ${count} ${plural(count, "כף הגשה", "כפות הגשה")} · ${spoons} ${plural(spoons, "כף אכילה", "כפות אכילה")}`;
+      return { label, count, unit: "serving-spoon" };
     }
     const count = toHalf(grams / GRAMS_PER_TABLESPOON);
     if (count < 0.5) return null;

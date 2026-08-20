@@ -49,13 +49,14 @@ export default function PortionOverride({
           <input
             name="quantity"
             type="number"
-            min="0.1"
+            min="0"
             // Any real portion, not a multiple of a tenth. With step="0.1" the
             // browser refuses 0.75 - three quarters of a pita - as a step
             // mismatch, and refuses it silently: the form never submits and the
             // action never runs, so the number simply does not save.
             step="any"
             defaultValue={current ?? planned}
+            placeholder="0"
             aria-label={`כמות שנאכלה ב${unit}`}
             className="nutrition-input w-20 py-1 text-sm"
           />

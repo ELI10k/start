@@ -97,7 +97,7 @@ export default function AteSomethingElse({
             <input inputMode="numeric" dir="ltr" value={code} onChange={(event) => setCode(event.target.value)} className="nutrition-input mt-2" placeholder="7290000066318" />
           </label>
           <button type="button" onClick={lookup} disabled={looking || !code.trim()} className="premium-secondary-button">
-            {looking ? "מחפשים…" : "חיפוש מוצר"}
+            {looking ? "מחפשים…" : code.trim() ? "חיפוש מוצר" : "סרקו או הקלידו ברקוד"}
           </button>
           {/* Reading thirteen digits off a curved bottle and typing them in is
               not a feature. The camera is the way in; the field is the fallback. */}

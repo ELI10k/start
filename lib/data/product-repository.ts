@@ -582,7 +582,7 @@ export async function getActiveClientMenu(
             // the coach's figures: they are offers, and were not eaten.
             items:mealItems
               .filter(item=>(items??[]).find(row=>row.id===item.id)?.group_id===group.id)
-              .map(item=>item.id===chosen&&override?scaleItem(item,override):item),
+              .map(item=>item.id===chosen&&override!==undefined?scaleItem(item,override):item),
             selectedItemId:chosen,
             amountOverride:override,
           };

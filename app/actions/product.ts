@@ -322,7 +322,9 @@ export async function setMealGroupAmount(form: FormData): Promise<void> {
   const raw = String(form.get("quantity") ?? "").trim();
   if (!/^[0-9a-f-]{36}$/i.test(groupId) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("invalid_amount");
   const quantity = raw === "" ? null : Number(raw);
-  if (quantity !== null && (!Number.isFinite(quantity) || quantity <= 0)) throw new Error("invalid_amount");
+  // Zero is a real answer - the portion was served and left. Empty clears the
+  // override; below zero is not a portion.
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) throw new Error("invalid_amount");
   const { error } = await supabase.rpc("set_meal_group_amount", {
     p_group_id: groupId,
     p_date: date,

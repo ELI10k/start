@@ -168,10 +168,13 @@ test("meal-plan mutations reject incomplete or unsafe payloads before the RPC", 
 
 test("the client sees the day's totals, and no targets beside them", async () => {
   const page = await file("app/nutrition/page.tsx");
-  assert.match(page, /סיכום התפריט היומי/);
-  assert.match(page, /menuTotals\.protein/);
-  assert.match(page, /menuTotals\.carbs/);
-  assert.match(page, /menuTotals\.fat/);
+  // The card is named for what it answers now - what has been eaten - and each
+  // macro carries both halves, because "1688/2014" was read as often for what
+  // is left as for what was eaten, and the two are opposite instructions.
+  assert.match(page, /מה נאכל היום/);
+  assert.match(page, /eatenTotals\.protein/);
+  assert.match(page, /remainingTotals\.protein/);
+  assert.match(page, /eatenTotals\.fat/);
   // A target is the coach's instrument. A menu does not always land on the
   // protein or the carbohydrate figure on purpose - the coach trades them off
   // knowingly - and printing the gap turns a deliberate decision into a number

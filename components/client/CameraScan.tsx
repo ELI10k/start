@@ -23,6 +23,13 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
   const video = useRef<HTMLVideoElement>(null);
   const [live, setLive] = useState(false);
   const [error, setError] = useState("");
+  // The callback is written inline at both call sites, so it is a new function
+  // on every parent render. With it in the dependency array the whole camera
+  // tore down and restarted each time - which is why it could sit open and
+  // never resolve anything. The effect depends on `live` and nothing else.
+  const handler = useRef(onDetected);
+  // Assigned in an effect, never during render.
+  useEffect(() => { handler.current = onDetected; }, [onDetected]);
 
   useEffect(() => {
     if (!live) return;
@@ -54,7 +61,7 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
       }
 
       const found = (value: string) => {
-        onDetected(value);
+        handler.current(value);
         setLive(false);
       };
 
@@ -98,7 +105,7 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
       controls?.stop();
       stream?.getTracks().forEach((track) => track.stop());
     };
-  }, [live, onDetected]);
+  }, [live]);
 
   if (!live) {
     return (
@@ -114,6 +121,9 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
   return (
     <div className="grid gap-2">
       <video ref={video} muted playsInline className="w-full rounded-2xl border border-[#E5E7E5]" />
+      {/* A barcode on a curved bottle needs to fill the frame to decode, and
+          nothing on screen said so - the camera just sat there. */}
+      <p className="text-xs text-[#5B5F5B]">להחזיק את הברקוד ישר וקרוב, שימלא את רוחב המסגרת. אם לא נקרא תוך כמה שניות — אפשר להקליד אותו.</p>
       <button type="button" onClick={() => setLive(false)} className="premium-secondary-button">עצירה</button>
     </div>
   );

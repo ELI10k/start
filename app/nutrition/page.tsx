@@ -20,6 +20,7 @@ import ShoppingList from "@/components/client/ShoppingList";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
+import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 
 export default async function NutritionPage() {
@@ -37,13 +38,43 @@ export default async function NutritionPage() {
   // which looks like a broken screen rather than "you have not started". Where a
   // group has no chosen alternative yet the primary stands in for it, so the
   // number opens as the day the coach planned and then follows the real choices.
-  const summaryItems = menu?.meals.flatMap((meal) =>
+  // What one meal costs as it stands: the chosen alternative in each group, or
+  // the primary where nothing is chosen yet.
+  const mealItemsOf = (meal: typeof menu extends undefined ? never : NonNullable<typeof menu>["meals"][number]) =>
     meal.groups.flatMap((group) => {
       const chosen = group.items.find((item) => item.id === group.selectedItemId);
       if (chosen) return [chosen];
       const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
       return primary ? [primary] : [];
-    })) ?? [];
+    });
+  const summaryItems = menu?.meals.flatMap(mealItemsOf) ?? [];
+  // Eaten and still to come, kept apart. A single number cannot answer "how am I
+  // doing" and "what is left", and a slash between two figures says neither: it
+  // reads as a fraction, a score or a ratio depending on who is looking.
+  //
+  // A meal is eaten when it says so. One marked not-eaten or eaten-something-else
+  // is neither eaten nor still to come - it is answered, and counting it as
+  // remaining would keep asking a question the client has already answered.
+  const eatenItems = menu?.meals.filter((meal) => meal.status === "eaten" || meal.completed).flatMap(mealItemsOf) ?? [];
+  const remainingItems = menu?.meals.filter((meal) => !meal.status && !meal.completed).flatMap(mealItemsOf) ?? [];
+  const totalOf = (items: readonly { calories: number; protein: number; carbs: number; fat: number }[]) =>
+    items.reduce((sum, item) => ({
+      calories: sum.calories + item.calories,
+      protein: sum.protein + item.protein,
+      carbs: sum.carbs + item.carbs,
+      fat: sum.fat + item.fat,
+    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  // Anything logged was eaten by definition - that is what logging it means.
+  const eatenTotals = (() => {
+    const base = totalOf(eatenItems);
+    return {
+      calories: base.calories + loggedTotals.calories,
+      protein: base.protein + loggedTotals.protein,
+      carbs: base.carbs + loggedTotals.carbs,
+      fat: base.fat + loggedTotals.fat,
+    };
+  })();
+  const remainingTotals = totalOf(remainingItems);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
   const menuTotals = menu
     ? summaryItems.reduce(
@@ -102,12 +133,12 @@ export default async function NutritionPage() {
               className="start-surface rounded-[24px] p-5 sm:p-6"
             >
               <h2 id="daily-macro-summary" className="text-lg font-black">
-                סיכום התפריט היומי
+                מה נאכל היום
               </h2>
               <p className="mt-1 text-xs text-[#5B5F5B]">
                 {anyChoiceMade
-                  ? "מחושב לפי החלופות שבחרת. קבוצה שטרם נבחרה נספרת לפי המאכל הראשי."
-                  : "כך נראה היום המתוכנן. הסיכום יתעדכן לפי החלופות שתבחרו."}
+                  ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו — מה שנשאר בתפריט להיום."
+                  : "עדיין לא סומנה אף ארוחה. המספרים יתמלאו ככל שתסמנו."}
                 {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שסרקת.` : ""}
                 {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
               </p>
@@ -118,10 +149,10 @@ export default async function NutritionPage() {
                   they appear to have missed. The coach still sees both sides,
                   in the builder and on the client file. */}
               <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MacroTotal label="קלוריות" value={menuTotals.calories} unit="קל׳" />
-                <MacroTotal label="חלבון" value={menuTotals.protein} unit="גרם" />
-                <MacroTotal label="פחמימות" value={menuTotals.carbs} unit="גרם" />
-                <MacroTotal label="שומן" value={menuTotals.fat} unit="גרם" />
+                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} unit="קל׳" />
+                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} unit="גרם" />
+                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} unit="גרם" />
+                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} unit="גרם" />
               </dl>
             </section>
           ) : null}
@@ -181,7 +212,17 @@ export default async function NutritionPage() {
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {/* What was eaten instead of this meal, under the meal it replaced. */}
               <LoggedFoodList entries={logged.filter((entry)=>entry.mealId===meal.id)}/>
-              {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
+              {meal.freeCalorieTarget?(()=>{
+                const mine=logged.filter((entry)=>entry.mealId===meal.id);
+                const measured=mine.filter((entry)=>entry.calories!==null);
+                return <FreeCalorieMeal
+                  mealId={meal.id}
+                  date={today}
+                  frame={meal.freeCalorieTarget}
+                  logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
+                  unmeasured={mine.length-measured.length}
+                />;
+              })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
                 {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
                     <MealOptionButton
@@ -226,18 +267,25 @@ function groupLabel(type:string){return({protein:"מנת חלבון",carbohydrat
 function MacroTotal({
   label,
   value,
+  left,
   unit,
 }: {
   label: string;
   value: number;
+  /** Still on the plan for today, in meals not yet answered. */
+  left: number;
   unit: string;
 }) {
   return (
     <div className="rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3">
       <dt className="text-xs text-[#5B5F5B]">{label}</dt>
+      {/* Named, not slashed. Which figure is which is the whole question. */}
       <dd className="mt-1 font-black">
-        {value.toFixed(1)} {unit}
+        {Math.round(value)} {unit}
       </dd>
+      <p className="mt-1 text-xs text-[#5B5F5B]">
+        {left > 0.5 ? `נותרו ${Math.round(left)} בתפריט` : "אין עוד ארוחות לסמן"}
+      </p>
     </div>
   );
 }

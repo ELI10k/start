@@ -22,10 +22,21 @@ const rounded = (value: number) => Math.max(0, Math.round(value));
 // from today's persisted menu state; absent targets produce an honest missing-
 // data message instead of an invented recommendation.
 export function buildDailyCoachMessage(input: DailyCoachInput): DailyCoachMessage {
+  // A slash says nothing about which side is which. "1688/2014 קלוריות" reads
+  // as a fraction, a score or a ratio depending on the reader, and the one thing
+  // it never says out loud is how much is left - which is the only part that
+  // changes what the client does next. Both sides are named, and where the
+  // figure is already past its target the sentence says that instead.
+  const gap = (eaten: number, target: number, unit: string) => {
+    const left = rounded(target - eaten);
+    return left > 0
+      ? `נאכלו ${rounded(eaten)} ${unit}, נותרו ${left}`
+      : `נאכלו ${rounded(eaten)} ${unit} — היעד (${rounded(target)}) הושלם`;
+  };
   const evidence = [
-    `${input.mealsCompleted}/${input.mealsPlanned} ארוחות סומנו`,
-    input.calorieTarget ? `${rounded(input.calories)}/${rounded(input.calorieTarget)} קלוריות` : "אין יעד קלורי",
-    input.proteinTarget ? `${rounded(input.protein)}/${rounded(input.proteinTarget)} גרם חלבון` : "אין יעד חלבון",
+    `סומנו ${input.mealsCompleted} ארוחות מתוך ${input.mealsPlanned}`,
+    input.calorieTarget ? gap(input.calories, input.calorieTarget, "קלוריות") : "אין יעד קלורי",
+    input.proteinTarget ? gap(input.protein, input.proteinTarget, "גרם חלבון") : "אין יעד חלבון",
   ];
 
   if (!input.mealsPlanned || !input.calorieTarget || !input.proteinTarget) {

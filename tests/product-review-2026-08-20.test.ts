@@ -485,7 +485,9 @@ test("a portion the client changes is recorded without touching the plan", async
 
   // Only the chosen row is scaled: the alternatives are offers, and were not
   // eaten, so they keep the coach's figures.
-  assert.match(repository, /item\.id===chosen&&override\?scaleItem\(item,override\):item/);
+  // Zero is a real answer - the portion was served and left - so the test is
+  // "is there an override", not "is it truthy".
+  assert.match(repository, /item\.id===chosen&&override!==undefined\?scaleItem\(item,override\):item/);
   assert.match(repository, /function scaleItem\(item: PersistedMealItem, eaten: number\)/);
 });
 
@@ -560,7 +562,9 @@ test("the spoon rule is a lunch rule, and a serving spoon takes over from a sill
 
   // "19 כפות בורגול" is a true sentence that helps nobody.
   assert.equal(GRAMS_PER_SERVING_SPOON, 100);
-  assert.equal(householdMeasure(375, "carbohydrate", "גרם", SPOON_MEAL_TITLE)?.label, "≈ 4 כפות הגשה");
+  // Both readings: not every kitchen has a serving spoon, and not every portion
+  // is worth counting out in twenties.
+  assert.equal(householdMeasure(375, "carbohydrate", "גרם", SPOON_MEAL_TITLE)?.label, "≈ 4 כפות הגשה · 19 כפות אכילה");
   assert.equal(householdMeasure(60, "carbohydrate", "גרם", SPOON_MEAL_TITLE)?.label, "≈ 3 כפות אכילה");
   // Anywhere else the portion stands on its grams.
   assert.equal(householdMeasure(200, "carbohydrate", "גרם", "ארוחת בוקר"), null);
@@ -595,4 +599,46 @@ test("the day opens one meal at a time", async () => {
   assert.match(page, /const mealCalories = Math\.round\(/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);
+});
+
+// ============================ zero, the free window, and a camera that stays open
+
+test("eating none of a portion is an amount, not a skipped meal", async () => {
+  const [migration, rollback, control, action] = await Promise.all([
+    source("supabase/migrations/202608200008_portion_override_zero.sql"),
+    source("supabase/seeds/portion-override-zero-rollback.sql"),
+    source("components/client/PortionOverride.tsx"),
+    source("app/actions/product.ts"),
+  ]);
+  // Marking the whole meal "לא נאכל" is a different claim: it says the meal did
+  // not happen, when what happened is that one group of it did not.
+  assert.match(migration, /check \(amount_override is null or amount_override >= 0\)/);
+  assert.match(migration, /if p_quantity is not null and p_quantity < 0 then raise exception/);
+  assert.match(control, /min="0"/);
+  assert.match(action, /quantity !== null && \(!Number\.isFinite\(quantity\) \|\| quantity < 0\)/);
+  assert.match(rollback, /amount_override > 0/);
+});
+
+test("the free-calorie window can be filled in, not just described", async () => {
+  const [component, page] = await Promise.all([
+    source("components/client/FreeCalorieMeal.tsx"),
+    source("app/nutrition/page.tsx"),
+  ]);
+  // It used to be a sentence with nowhere to answer it, so the frame could not
+  // be tracked against and the day counted the whole allowance either way.
+  assert.match(component, /<AteSomethingElse/);
+  assert.match(component, /הוספת מה שאכלתי/);
+  assert.match(component, /נותרו/);
+  assert.match(page, /<FreeCalorieMeal/);
+});
+
+test("the camera is not torn down by its own parent re-rendering", async () => {
+  const camera = await source("components/client/CameraScan.tsx");
+  // The callback is written inline at both call sites, so it is a new function
+  // every render. With it in the dependency array the camera restarted on each
+  // one - which is how it could sit open and never resolve anything.
+  assert.match(camera, /const handler = useRef\(onDetected\)/);
+  assert.match(camera, /useEffect\(\(\) => \{ handler\.current = onDetected; \}, \[onDetected\]\)/);
+  assert.match(camera, /\}, \[live\]\);/);
+  assert.doesNotMatch(camera, /\}, \[live, onDetected\]\);/);
 });
