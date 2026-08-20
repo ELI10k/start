@@ -1147,7 +1147,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .food-row__unit:hover { color: var(--green); text-decoration: underline; }
 .food-row__unit:focus-visible { outline: 2px solid var(--green); outline-offset: 1px; }
-.food-row__amount:has(.food-row__unit) input { padding-inline-end: 3.6rem; }
+/* A picker needs more room than the fixed label it replaced, and the number
+   beside it can be three digits of grams - so the field grows rather than
+   clipping "100" down to "00". */
+.food-row__amount:has(.food-row__unit) { width: 9rem; }
+.food-row__amount:has(.food-row__unit) input { padding-inline-end: 4.2rem; }
 .food-row__meta {
   display: grid; min-width: 0;
   grid-template-columns: repeat(4, minmax(5rem, 1fr));
