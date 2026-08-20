@@ -6,6 +6,11 @@ import {
   CHECK_IN_PHOTO_BUCKET,
   CHECK_IN_PHOTO_URL_TTL_SECONDS,
 } from "@/lib/check-ins/photo-storage";
+import {
+  FOOD_LOG_PHOTO_BUCKET,
+  FOOD_LOG_PHOTO_URL_TTL_SECONDS,
+  type LoggedFood,
+} from "@/lib/nutrition/food-log";
 
 export type AuthContext = Readonly<{
   id: string;
@@ -659,6 +664,55 @@ async function readMealDayStatus(
       status: row.status as MealDayStatus,
       note: ("note" in row ? (row.note as string | null) : null) ?? null,
     }]));
+}
+
+/**
+ * What the client logged eating today, beside the plan rather than inside it.
+ *
+ * Photographs are signed here, for the same short window the check-in photos
+ * use: a food-log picture is as private as a progress photo and is stored under
+ * the same rule.
+ */
+export async function listClientFoodLog(clientId: string, date: string): Promise<readonly LoggedFood[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("client_food_log")
+    .select("id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path")
+    .eq("client_id", clientId)
+    .eq("log_date", date)
+    .order("created_at");
+  if (error) {
+    // The table arrives in 202608200007. Until it is applied the screen simply
+    // has nothing logged on it, which is exactly how it behaved before.
+    if (MISSING_RELATION.has(error.code ?? "")) return [];
+    throw error;
+  }
+  const rows = data ?? [];
+  const paths = rows.map((row) => row.photo_path).filter((path): path is string => Boolean(path));
+  const signed = paths.length
+    ? await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).createSignedUrls(paths, FOOD_LOG_PHOTO_URL_TTL_SECONDS)
+    : { data: [], error: null };
+  const urlByPath = new Map<string, string>();
+  if (!signed.error)
+    paths.forEach((path, index) => {
+      const url = signed.data?.[index]?.signedUrl;
+      if (url) urlByPath.set(path, url);
+    });
+
+  const figure = (value: unknown) => (value === null || value === undefined ? null : Number(value));
+  return rows.map((row) => ({
+    id: String(row.id),
+    mealId: row.meal_id ? String(row.meal_id) : null,
+    name: String(row.name),
+    quantity: figure(row.quantity),
+    unit: row.unit ? String(row.unit) : null,
+    calories: figure(row.calories),
+    protein: figure(row.protein),
+    carbs: figure(row.carbs),
+    fat: figure(row.fat),
+    source: (["text", "scan", "photo"].includes(String(row.source)) ? row.source : "text") as LoggedFood["source"],
+    photoUrl: row.photo_path ? urlByPath.get(String(row.photo_path)) ?? null : null,
+  }));
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {

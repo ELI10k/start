@@ -9,6 +9,7 @@ import {
   getActiveClientMenu,
   getAuthContext,
   getFreeMenuDay,
+  listClientFoodLog,
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
@@ -18,13 +19,19 @@ import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
 import ShoppingList from "@/components/client/ShoppingList";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
+import LoggedFoodList from "@/components/client/LoggedFoodList";
+import { sumLoggedFood } from "@/lib/nutrition/food-log";
 
 export default async function NutritionPage() {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
   const today = israelDateKey();
-  const [menu, freeMenu, foods] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods()]);
+  const [menu, freeMenu, foods, logged] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today)]);
+  // What was eaten instead, and what of it carries figures. Only the measured
+  // part joins the day's totals; the rest is shown as unmeasured rather than
+  // counted as zero.
+  const loggedTotals=sumLoggedFood(logged);
   const freeCalories=menu?.meals.reduce((sum,meal)=>sum+(meal.freeCalorieTarget??0),0)??0;
   // Before any choice is made the summary used to read 0 against the target,
   // which looks like a broken screen rather than "you have not started". Where a
@@ -46,7 +53,7 @@ export default async function NutritionPage() {
         carbs: sum.carbs + item.carbs,
         fat: sum.fat + item.fat,
       }),
-      { calories: freeCalories, protein: 0, carbs: 0, fat: 0 },
+      { calories: freeCalories + loggedTotals.calories, protein: loggedTotals.protein, carbs: loggedTotals.carbs, fat: loggedTotals.fat },
     )
     : undefined;
   // Which meal it is now. The fixed meal titles map to the day, so the screen can
@@ -101,6 +108,8 @@ export default async function NutritionPage() {
                 {anyChoiceMade
                   ? "מחושב לפי החלופות שבחרת. קבוצה שטרם נבחרה נספרת לפי המאכל הראשי."
                   : "כך נראה היום המתוכנן. הסיכום יתעדכן לפי החלופות שתבחרו."}
+                {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שסרקת.` : ""}
+                {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
               </p>
               {/* No targets here. A target is the coach's instrument, and a menu
                   does not always land on the protein or the carbohydrate figure
@@ -146,6 +155,8 @@ export default async function NutritionPage() {
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
+              {/* What was eaten instead of this meal, under the meal it replaced. */}
+              <LoggedFoodList entries={logged.filter((entry)=>entry.mealId===meal.id)}/>
               {meal.freeCalorieTarget?<p className="mt-4 rounded-xl border border-[#16A34A]/20 p-4 text-sm text-[#16A34A]">אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {meal.freeCalorieTarget} קלוריות.</p>:<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start">
                 {meal.groups.map(group=><fieldset key={group.id} className="rounded-2xl border border-[#E5E7E5] p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>

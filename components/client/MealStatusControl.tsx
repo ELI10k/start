@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, PencilLine, Undo2, X } from "lucide-react";
-import BottomSheet from "@/components/client/BottomSheet";
+import AteSomethingElse from "@/components/client/AteSomethingElse";
 import { setMealStatus } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
 
@@ -92,33 +92,7 @@ export default function MealStatusControl({
         className="chip border-[#DC2626] text-[#DC2626]"
       />
 
-      <BottomSheet open={substituting} title="מה אכלת במקום?" onClose={() => setSubstituting(false)}>
-        <form action={setMealStatus} className="grid gap-3">
-          <input type="hidden" name="id" value={mealId} />
-          <input type="hidden" name="date" value={date} />
-          <input type="hidden" name="status" value="other" />
-          <label className="text-sm font-bold">
-            תיאור קצר
-            <input
-              name="note"
-              required
-              maxLength={500}
-              className="nutrition-input mt-2"
-              placeholder="לדוגמה: חביתה משתי ביצים ופרוסת לחם"
-            />
-          </label>
-          {/* Said plainly, so nobody expects a calorie count that START cannot
-              honestly produce from free text. */}
-          <p className="text-xs text-[#5B5F5B]">
-            הארוחה לא תיספר בקלוריות של היום, אבל המאמן יראה בדיוק מה אכלת - וזה
-            עוזר לו הרבה יותר מ״לא נאכל״.
-          </p>
-          <div className="sheet__actions">
-            <SubmitButton idle="שמירה" pending="שומרים…" className="premium-primary-button w-full" event="meal_marked" eventProperties={{ status: "other" }} />
-            <button type="button" onClick={() => setSubstituting(false)} className="premium-secondary-button">ביטול</button>
-          </div>
-        </form>
-      </BottomSheet>
+      <AteSomethingElse mealId={mealId} date={date} open={substituting} onClose={() => setSubstituting(false)} />
     </div>
   );
 }

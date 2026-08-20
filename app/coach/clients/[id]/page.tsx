@@ -15,6 +15,9 @@ import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { daysSince, formatIsraelDateTime, israelDateKey, israelHour, israelWeekday } from "@/lib/date-time";
+import { listClientFoodLog } from "@/lib/data/product-repository";
+import LoggedFoodList from "@/components/client/LoggedFoodList";
+import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
@@ -111,6 +114,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
   // replies to "progress", where the response form is - and both ran on every
   // load regardless. The rest of this screen was made tab-aware above; these two
   // were missed.
+  // What the client says they actually ate today, in their own words and their
+  // own photographs. Read on the tab that shows it and nowhere else.
+  const loggedFood = tab === "nutrition" ? await listClientFoodLog(id, israelDateKey()) : [];
+  const loggedTotals = sumLoggedFood(loggedFood);
   const [weeklySummaries, responseTemplates] = await Promise.all([
     tab === "report" ? getWeeklySummaries(id) : Promise.resolve([]),
     tab === "progress" ? listResponseTemplates() : Promise.resolve([]),
@@ -270,6 +277,17 @@ export default async function CoachClientPage({ params, searchParams }: { params
           {/* Meals, not rows: a meal holds a primary and its alternatives, and
               only one of them is ever eaten. */}
           <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו היום (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
+          {/* Read-only here: this is the client's account of their own day. */}
+          {loggedFood.length > 0 && (
+            <div className="mt-4 border-t border-[#E5E7E5] pt-4">
+              <h3 className="text-sm font-black text-[#3F433F]">מה נאכל במקום</h3>
+              <p className="mt-1 text-xs text-[#5B5F5B]">
+                {loggedTotals.measured ? `${loggedTotals.measured} פריטים סרוקים · ${Math.round(loggedTotals.calories)} קל׳` : "ללא ערכים מאושרים"}
+                {loggedTotals.unmeasured ? ` · ${loggedTotals.unmeasured} תיאורים או תמונות ללא ערכים` : ""}
+              </p>
+              <LoggedFoodList entries={loggedFood} readOnly/>
+            </div>
+          )}
           {data.nutrition.skippedMeals.length > 0 && (
             <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="text-[#5B5F5B]">סומנו כלא נאכלו:</span>

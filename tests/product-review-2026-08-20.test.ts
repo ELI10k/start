@@ -505,3 +505,49 @@ test("scaling a portion is linear in every figure on the row", async () => {
   assert.equal(scaled.protein, 3.5);
   assert.equal(scaled.amount, 50);
 });
+
+// ==================================== what the client actually ate
+
+test("the food log carries figures only where there are figures", async () => {
+  const { sumLoggedFood } = await import("../lib/nutrition/food-log.ts");
+  const entries = [
+    { id: "1", mealId: null, name: "חלב", quantity: 200, unit: "גרם", calories: 120, protein: 7, carbs: 10, fat: 6, source: "scan" as const, photoUrl: null },
+    { id: "2", mealId: null, name: "חביתה", quantity: null, unit: null, calories: null, protein: null, carbs: null, fat: null, source: "text" as const, photoUrl: null },
+    { id: "3", mealId: null, name: "צלחת", quantity: null, unit: null, calories: null, protein: null, carbs: null, fat: null, source: "photo" as const, photoUrl: "x" },
+  ];
+  const total = sumLoggedFood(entries);
+  // Only the scanned entry has real numbers. The other two are not zero - they
+  // are unknown, and rounding unknown to zero is how a day's total becomes a
+  // lie the coach then acts on.
+  assert.equal(total.calories, 120);
+  assert.equal(total.protein, 7);
+  assert.equal(total.measured, 1);
+  assert.equal(total.unmeasured, 2);
+});
+
+test("a food-log photo can only be written under its owner's folder", async () => {
+  const [{ foodLogPhotoPath, validateFoodLogPhoto }, migration] = await Promise.all([
+    import("../lib/nutrition/food-log.ts"),
+    source("supabase/migrations/202608200007_client_food_log.sql"),
+  ]);
+  const owner = "5062fb99-816c-454d-a80c-2de8f2668be2";
+  // The first path segment is the owner's id, because that is what the storage
+  // policy reads - the same rule the check-in photos use.
+  assert.ok(foodLogPhotoPath(owner, "2026-08-20", "image/jpeg").startsWith(`${owner}/2026-08-20/`));
+  assert.match(migration, /\(storage\.foldername\(name\)\)\[1\] = auth\.uid\(\)::text/);
+  // And the row is checked against the same rule, so it can never point at a
+  // file its owner could not have written.
+  assert.match(migration, /split_part\(p_photo_path, '\/', 1\) <> auth\.uid\(\)::text/);
+  assert.equal(validateFoodLogPhoto({ size: 10, type: "application/pdf" }) !== null, true);
+  assert.equal(validateFoodLogPhoto({ size: 10, type: "image/jpeg" }), null);
+});
+
+test("logging against a meal answers that meal too", async () => {
+  const action = await source("app/actions/food-log.ts");
+  // Otherwise the client says the same thing twice, in two controls, and the
+  // meal goes on asking.
+  assert.match(action, /rpc\("set_meal_day_status"/);
+  assert.match(action, /p_status: "other"/);
+  // A failed row must not leave its photograph behind.
+  assert.match(action, /if \(photoPath\) await supabase\.storage\.from\(FOOD_LOG_PHOTO_BUCKET\)\.remove\(\[photoPath\]\)/);
+});

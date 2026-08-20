@@ -80,9 +80,26 @@ test("only the negative state is red, and eating and skipping need no dialog", a
   // Skipping is offered even when an alternative has not been chosen.
   assert.match(control, /status="not_eaten"/);
   // The substitution is the one state that asks a question, because it is the
-  // one state that carries an answer.
-  assert.match(control, /value="other"/);
-  assert.match(control, /name="note"/);
+  // one state that carries an answer. It now asks it in three ways - a
+  // sentence, a barcode or a photograph - so the sheet lives in its own
+  // component and the control opens it.
+  assert.match(control, /<AteSomethingElse/);
+  assert.match(control, /setSubstituting\(true\)/);
+});
+
+test("saying what was eaten instead offers all three ways", async () => {
+  const sheet = await source("components/client/AteSomethingElse.tsx");
+  // A sentence carries no figures, a barcode carries the catalog's own scaled
+  // to the amount eaten, and a photograph carries none either but tells a coach
+  // more in two seconds than a paragraph does.
+  assert.match(sheet, /source="text"|setTab\("text"\)/);
+  assert.match(sheet, /setTab\("scan"\)/);
+  assert.match(sheet, /setTab\("photo"\)/);
+  assert.match(sheet, /\/api\/foods\/barcode\//);
+  // Only the scanned figures are ever counted, and the other two say so.
+  assert.match(sheet, /הערכים האלה כן ייספרו ביום שלך/);
+  assert.match(sheet, /הארוחה לא תיספר בקלוריות של היום/);
+  assert.match(sheet, /name="photo"/);
 });
 
 test("the coach can see which meals were skipped", async () => {
