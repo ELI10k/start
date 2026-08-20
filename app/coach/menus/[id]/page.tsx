@@ -10,7 +10,8 @@ import {
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
-type StoredItem={food_id:string;amount:number|string;display_quantity?:number|string;amount_source?:string;item_role?:string;note?:string|null};
+import { GRAM_UNIT } from "@/lib/nutrition/meal-alternatives";
+type StoredItem={food_id:string;amount:number|string;display_quantity?:number|string;measurement_unit?:string|null;amount_source?:string;item_role?:string;note?:string|null};
 type StoredDay = { day_index?: number; meals: Array<{ title: EditableMenu["days"][number]["meals"][number]["title"]; notes?:string;free_calorie_target?:number|string; groups?:Array<{group_type:"protein"|"carbohydrate"|"fat"|"vegetables";items:StoredItem[]}>; items: StoredItem[] }> };
 
 // Reopening a saved menu has to hand back everything that was saved.
@@ -34,6 +35,10 @@ function editableGroups(meal:StoredDay["meals"][number]){
         // Legacy rows carry no role; there the first row was the primary.
         primary:item.item_role?item.item_role==="primary":index===0,
         note:item.note??"",
+        // Which unit the coach wrote the row in. The saved unit is the answer:
+        // a row stored in grams reopens in grams even when the food could be
+        // counted in pitas, because that is how the coach chose to say it.
+        unitMode:(item.measurement_unit??GRAM_UNIT)===GRAM_UNIT?"gram" as const:"native" as const,
       })),
     };
   });

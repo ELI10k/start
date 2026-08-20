@@ -244,3 +244,123 @@ test("the client is told where to start and when photos are due", async () => {
   assert.match(checkIn, /cycle\.nextCheckInNumber/);
   assert.match(checkIn, /cycle\.remainingUntilPhotos/);
 });
+
+// ==================================================== units alongside grams
+
+test("a portion can be counted in the food's own unit or in grams", async () => {
+  const { convertQuantity, foodUnit, hasNaturalUnit, portionFor } =
+    await import("../lib/nutrition/meal-alternatives.ts");
+  const pita = { calories: 250, protein: 7, carbs: 40, fat: 6.89, packageUnit: "פיתה", unitWeightGrams: 100 };
+  const cereal = { calories: 313, protein: 12.3, carbs: 56.6, fat: 2.5, packageUnit: null, unitWeightGrams: null };
+
+  // Only a food whose source carries the weight of one unit can be counted in
+  // anything but grams. Nothing is guessed from the product name.
+  assert.equal(hasNaturalUnit(pita), true);
+  assert.equal(hasNaturalUnit(cereal), false);
+  assert.equal(foodUnit(pita, "gram").unit, "גרם");
+  assert.equal(foodUnit(cereal).unit, "גרם");
+
+  // The same portion, said two ways. Switching the unit must not resize it.
+  const asUnit = portionFor(pita, 1, "native")!;
+  const grams = convertQuantity(pita, 1, "native", "gram");
+  const asGram = portionFor(pita, grams, "gram")!;
+  assert.equal(grams, 100);
+  assert.equal(asUnit.calories, asGram.calories);
+  assert.equal(asUnit.grams, asGram.grams);
+  // And back again, without drift.
+  assert.equal(convertQuantity(pita, grams, "gram", "native"), 1);
+
+  // Grams let a coach write half a pita, which the unit alone cannot say well.
+  assert.equal(portionFor(pita, 55, "gram")!.calories, 137.5);
+});
+
+test("the builder carries the chosen unit through save and reload", async () => {
+  const [editor, editPage] = await Promise.all([
+    source("components/coach/menus/PersistentMenuEditor.tsx"),
+    source("app/coach/menus/[id]/page.tsx"),
+  ]);
+  // The row remembers which unit it was written in...
+  assert.match(editor, /unitMode\?:"native"\|"gram"/);
+  assert.match(editor, /const changeUnitMode=/);
+  // ...every reading of it respects that...
+  assert.match(editor, /portionFor\(food,Number\(item\.amount\|\|0\),item\.unitMode\?\?"native"\)/);
+  assert.match(editor, /portionFor\(food,item\.amount,item\.unitMode\?\?"native"\)/);
+  // ...and reopening the menu restores it from the unit that was stored.
+  assert.match(editPage, /measurement_unit\?:string\|null/);
+  assert.match(editPage, /unitMode:\(item\.measurement_unit\?\?GRAM_UNIT\)===GRAM_UNIT\?"gram"/);
+});
+
+// ==================================== units, and two more of Eli's breads
+
+test("a food with a natural unit can be counted in grams as well", async () => {
+  const { convertQuantity, calculateAlternativePortion, foodUnit, hasNaturalUnit, portionFor } =
+    await import("../lib/nutrition/meal-alternatives.ts");
+
+  const pita = { calories: 250, protein: 7, carbs: 40, fat: 6.89, packageUnit: "פיתה", unitWeightGrams: 100 };
+  const rice = { calories: 130, protein: 2.7, carbs: 28, fat: 0.3, packageUnit: null, unitWeightGrams: null };
+
+  // Grams are always available; the natural unit only where the source carries
+  // the weight of one.
+  assert.equal(hasNaturalUnit(pita), true);
+  assert.equal(hasNaturalUnit(rice), false);
+  assert.equal(foodUnit(pita, "gram").unit, "גרם");
+  assert.equal(foodUnit(pita, "gram").gramsPerUnit, 1);
+
+  // Switching a row converts the number rather than reinterpreting it: the
+  // portion has to stay the same size.
+  const grams = convertQuantity(pita, 1, "native", "gram");
+  assert.equal(grams, 100);
+  assert.equal(convertQuantity(pita, grams, "gram", "native"), 1);
+  assert.equal(portionFor(pita, 1, "native")?.calories, portionFor(pita, grams, "gram")?.calories);
+
+  // And an alternative scaled against a primary written in grams must land in
+  // the same place as one scaled against the same primary written in units.
+  const bread = { calories: 266.667, protein: 13.333, carbs: 53.333, fat: 0, packageUnit: "פרוסה", unitWeightGrams: 30 };
+  const fromUnits = calculateAlternativePortion(pita, 1, bread, "carbohydrate", "native");
+  const fromGrams = calculateAlternativePortion(pita, 100, bread, "carbohydrate", "gram");
+  assert.equal(fromUnits?.calories, fromGrams?.calories);
+  assert.equal(fromUnits?.quantity, fromGrams?.quantity);
+});
+
+test("the editor carries each row's unit through save and reload", async () => {
+  const [editor, edit] = await Promise.all([
+    source("components/coach/menus/PersistentMenuEditor.tsx"),
+    source("app/coach/menus/[id]/page.tsx"),
+  ]);
+  // The picker, and the conversion behind it.
+  assert.match(editor, /const changeUnitMode=/);
+  assert.match(editor, /convertQuantity\(food,Number\(row\.amount\|\|0\),current,next\)/);
+  assert.match(editor, /hasNaturalUnit\(selectedFood\)/);
+  // Grams are the stored truth; the coach's own number and unit ride alongside.
+  assert.match(editor, /portionFor\(food,item\.amount,item\.unitMode\?\?"native"\)/);
+  // Reopening a menu restores how the coach wrote it, not how the food is shaped.
+  assert.match(edit, /measurement_unit\?\?GRAM_UNIT\)===GRAM_UNIT\?"gram"/);
+});
+
+test("the two breads Eli asked for are master carbohydrates with real units", async () => {
+  const [migration, rollback] = await Promise.all([
+    source("supabase/migrations/202608200003_master_bread_units.sql"),
+    source("supabase/seeds/master-bread-units-rollback.sql"),
+  ]);
+  const { masterFoodGroup } = await import("../lib/nutrition/master-foods.ts");
+  const { portionFor } = await import("../lib/nutrition/meal-alternatives.ts");
+
+  // The id prefix is what files them under carbohydrate and stars them.
+  assert.equal(masterFoodGroup("master-c-019"), "carbohydrate");
+  assert.equal(masterFoodGroup("master-c-020"), "carbohydrate");
+  assert.match(migration, /'master-c-019', 'לחמנייה'/);
+  assert.match(migration, /'master-c-020', 'בגט'/);
+  assert.match(migration, /on conflict \(id\) do update set/);
+  assert.match(rollback, /delete from public\.foods where id in \('master-c-019', 'master-c-020'\)/);
+
+  // One unit has to come back at Eli's own figures, which are not estimates.
+  const roll = { calories: 250, protein: 13.1, carbs: 43.1, fat: 2.8, packageUnit: "לחמנייה", unitWeightGrams: 100 };
+  const baguette = { calories: 253.333, protein: 9, carbs: 50.96, fat: 1.5, packageUnit: "בגט", unitWeightGrams: 150 };
+  assert.equal(portionFor(roll, 1)?.grams, 100);
+  assert.equal(portionFor(roll, 1)?.calories, 250);
+  assert.equal(portionFor(baguette, 1)?.grams, 150);
+  assert.equal(portionFor(baguette, 1)?.calories, 380);
+
+  // "2 בגט" would be wrong; the plural has to exist.
+  assert.equal(portionFor(baguette, 2)?.unit, "בגטים");
+});

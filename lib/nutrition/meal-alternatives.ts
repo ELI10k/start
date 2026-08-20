@@ -26,6 +26,7 @@ const UNIT_FORMS:ReadonlyArray<readonly[string,string]>=[
   ["פרוסה","פרוסות"],
   ["פיתה","פיתות"],
   ["לחמנייה","לחמניות"],
+  ["בגט","בגטים"],
   ["לחמניה","לחמניות"],
   ["פרכית","פרכיות"],
   ["טורטייה","טורטיות"],
@@ -54,15 +55,42 @@ export function unitLabel(unit:string,quantity:number):string{
 // and treating those as countable multiplies every value by that weight.
 const MEASURE_UNITS=new Set(["גרם","גר","ג","גרמים","מ\"ל","מל","מיליליטר","ליטר","ק\"ג","קג","קילו","קילוגרם","g","gr","gram","grams","ml","l","kg"]);
 
-export function foodUnit(food:AlternativeFood):Readonly<{unit:string;gramsPerUnit:number}>{
+/**
+ * How a quantity of this food is counted.
+ *
+ * `mode` lets the caller override the food's natural unit and work in grams
+ * instead. A coach writing "1 פיתה" and a coach writing "55 גרם" of the same
+ * pita are describing the same portion, and until now a food carrying a unit
+ * could only ever be counted in that unit - there was no way to say the number
+ * in grams, which is how half of a menu is actually written.
+ *
+ * Grams are always available. The natural unit is only offered where the source
+ * carries the weight of one, never guessed from the product name.
+ */
+export function foodUnit(food:AlternativeFood,mode:"native"|"gram"="native"):Readonly<{unit:string;gramsPerUnit:number}>{
+  if(mode==="gram")return{unit:GRAM_UNIT,gramsPerUnit:1};
   const source=food.packageUnit?.trim();
   if(source&&!MEASURE_UNITS.has(source.toLowerCase())&&food.unitWeightGrams&&food.unitWeightGrams>0)
     return{unit:UNIT_PLURALS.get(source)??source,gramsPerUnit:food.unitWeightGrams};
   return{unit:GRAM_UNIT,gramsPerUnit:1};
 }
 
-export function portionFor(food:AlternativeFood,quantity:number):Portion|null{
-  const unit=foodUnit(food);
+/** Whether this food can be counted in anything other than grams. */
+export function hasNaturalUnit(food:AlternativeFood):boolean{
+  return foodUnit(food).unit!==GRAM_UNIT;
+}
+
+/** The same portion, expressed in the other unit. Used when a row is switched. */
+export function convertQuantity(food:AlternativeFood,quantity:number,from:"native"|"gram",to:"native"|"gram"):number{
+  if(from===to||!Number.isFinite(quantity)||quantity<=0)return quantity;
+  const grams=quantity*foodUnit(food,from).gramsPerUnit;
+  const converted=grams/foodUnit(food,to).gramsPerUnit;
+  // Grams read as whole numbers; counted units keep a half.
+  return to==="gram"?Math.max(1,Math.round(converted)):Math.max(0.5,Math.round(converted*2)/2);
+}
+
+export function portionFor(food:AlternativeFood,quantity:number,mode:"native"|"gram"="native"):Portion|null{
+  const unit=foodUnit(food,mode);
   if(!Number.isFinite(quantity)||quantity<=0)return null;
   const grams=quantity*unit.gramsPerUnit;
   const factor=grams/100;
@@ -82,13 +110,24 @@ export function defaultPortionQuantity(food:AlternativeFood){
   return roundQuantity(100/unit.gramsPerUnit,unit.unit);
 }
 
+/**
+ * An equivalent portion of `alternativeFood` for a given portion of the primary.
+ *
+ * `primaryMode` says which unit `primaryQuantity` is counted in, and it matters:
+ * a coach who switched the primary row to grams is holding a gram figure, and
+ * reading "55" as fifty-five pitas rather than fifty-five grams scales every
+ * alternative in the group by a factor of a hundred. The alternative's own
+ * quantity always comes back in its natural unit, which is how the row that
+ * receives it is written.
+ */
 export function calculateAlternativePortion(
   primaryFood:AlternativeFood,
   primaryQuantity:number,
   alternativeFood:AlternativeFood,
   groupType:"protein"|"carbohydrate"|"fat"|"vegetables",
+  primaryMode:"native"|"gram"="native",
 ):Portion|null{
-  const primary=portionFor(primaryFood,primaryQuantity);
+  const primary=portionFor(primaryFood,primaryQuantity,primaryMode);
   if(!primary||alternativeFood.calories<=0)return null;
   const targetMacro=groupType==="protein"?primary.protein:groupType==="carbohydrate"?primary.carbs:groupType==="fat"?primary.fat:primary.calories;
   const alternativeMacroPer100=groupType==="protein"?(alternativeFood.protein??0):groupType==="carbohydrate"?(alternativeFood.carbs??0):groupType==="fat"?(alternativeFood.fat??0):alternativeFood.calories;

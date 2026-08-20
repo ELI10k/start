@@ -16,7 +16,7 @@ import { foodsForGroup } from "@/lib/nutrition/food-groups";
 import { isCompatibleProtein, proteinKind } from "@/lib/nutrition/protein-kind";
 import { planMacros, type MacroSources as PlanSources } from "@/lib/nutrition/macro-plan";
 import { FIXED_MEAL_TITLES } from "@/lib/nutrition/menu-validation";
-import { calculateAlternativePortion,defaultPortionQuantity,foodUnit,GROUP_CALORIE_SHARE,MEAL_CALORIE_SHARE,portionFor,portionForCalories,unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { calculateAlternativePortion,convertQuantity,defaultPortionQuantity,foodUnit,GROUP_CALORIE_SHARE,hasNaturalUnit,MEAL_CALORIE_SHARE,portionFor,portionForCalories,unitLabel } from "@/lib/nutrition/meal-alternatives";
 import type { Portion } from "@/lib/nutrition/meal-alternatives";
 import { israelDateKey } from "@/lib/date-time";
 
@@ -24,7 +24,10 @@ type FoodOption={id:string;name:string;brand:string|null;category?:string;calori
 // favorite is null when the coach has said nothing either way.
 type FoodUsage={foodId:string;count:number;lastUsedAt:string;favorite:boolean|null};
 type ClientOption=Readonly<{id:string;full_name:string;weight:number|null;calorieTarget:number|null;ageYears:number|null;sex:"male"|"female"|null;heightCm:number|null;dailySteps:number|null;weeklyWorkouts:number|null;nutritionGoal:string|null}>;
-type Item={foodId:string;amount:number;amountSource?:"auto"|"manual";note?:string;primary?:boolean};
+// `unitMode` is which unit `amount` is counted in. "native" is the food's own -
+// a pita, a slice, an egg - and "gram" is grams. A food without a natural unit
+// is always grams and the picker is not offered for it.
+type Item={foodId:string;amount:number;amountSource?:"auto"|"manual";note?:string;primary?:boolean;unitMode?:"native"|"gram"};
 type GroupType="protein"|"carbohydrate"|"fat"|"vegetables";
 type Group={type:GroupType;items:Item[]};
 type Meal={title:typeof FIXED_MEAL_TITLES[number];notes:string;freeCalorieTarget:string;groups:Group[]};
@@ -179,7 +182,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const primariesOf=(group:Group)=>group.items.filter((item,index)=>item.foodId&&(item.primary??index===0));
   const macrosOf=(items:readonly Item[])=>items.reduce((sum,item)=>{
     const food=foodMap.get(item.foodId);
-    const portion=food?portionFor(food,Number(item.amount||0)):null;
+    const portion=food?portionFor(food,Number(item.amount||0),item.unitMode??"native"):null;
     return{calories:sum.calories+(portion?.calories??0),protein:sum.protein+(portion?.protein??0),carbs:sum.carbs+(portion?.carbs??0),fat:sum.fat+(portion?.fat??0)};
   },{calories:0,protein:0,carbs:0,fat:0});
   const mealMacros=(meal:Meal)=>meal.title==="קלוריות חופשיות"
@@ -187,7 +190,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     :macrosOf(meal.groups.flatMap(primariesOf));
   const totals=meals.flatMap(meal=>meal.groups.flatMap(primariesOf)).reduce((sum,item)=>{
     const food=foodMap.get(item.foodId);
-    const portion=food?portionFor(food,Number(item.amount||0)):null;
+    const portion=food?portionFor(food,Number(item.amount||0),item.unitMode??"native"):null;
     return{
       calories:sum.calories+(portion?.calories??0),
       protein:sum.protein+(portion?.protein??0),
@@ -322,10 +325,26 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       if(isPrimary||item.amountSource!=="auto")return item;
       const alternativeFood=foodMap.get(item.foodId);
       if(!alternativeFood)return item;
-      const portion=calculateAlternativePortion(editedFood,amount,alternativeFood,group.type);
-      return portion?{...item,amount:portion.quantity}:item;
+      const portion=calculateAlternativePortion(editedFood,amount,alternativeFood,group.type,edited?.unitMode??"native");
+      // The alternative comes back in its own natural unit, so its row is put
+      // back into that unit alongside the number.
+      return portion?{...item,amount:portion.quantity,unitMode:"native" as const}:item;
     });
     updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items}:value)});
+  };
+
+  // Switching a row between its own unit and grams keeps the portion the same
+  // size: 1 פיתה becomes 100 גרם, not 1 גרם.
+  const changeUnitMode=(mealIndex:number,groupIndex:number,itemIndex:number,next:"native"|"gram")=>{
+    const meal=meals[mealIndex];
+    const group=meal?.groups[groupIndex];
+    const item=group?.items[itemIndex];
+    const food=foodMap.get(item?.foodId??"");
+    if(!meal||!group||!item||!food)return;
+    const current=item.unitMode??"native";
+    if(current===next)return;
+    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((row,i)=>
+      i===itemIndex?{...row,unitMode:next,amount:convertQuantity(food,Number(row.amount||0),current,next)}:row)}:value)});
   };
 
   const dropRow=(mealIndex:number,groupIndex:number,itemIndex:number)=>{
@@ -371,10 +390,11 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     // has no food to be equivalent to and gets its own default portion.
     const referenceFood=targetIsPrimary?currentFood:primaryFood;
     const referenceAmount=targetIsPrimary?current?.amount:primary?.amount;
+    const referenceMode=(targetIsPrimary?current?.unitMode:primary?.unitMode)??"native";
     const calculated=selectedFood&&referenceFood&&referenceAmount
-      ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type)
+      ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type,referenceMode)
       :null;
-    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource}:item)}:value)});
+    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource,unitMode:"native" as const}:item)}:value)});
     if(!foodId)return;
     const now=new Date().toISOString();
     // Carry the existing opinion forward rather than inventing "not a favourite":
@@ -391,7 +411,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const primary=group.items.find((item,index)=>item.foodId&&(item.primary??index===0));
     const primaryFood=foodMap.get(primary?.foodId??"");
     if(!primaryFood||!primary?.amount)return;
-    const target=portionFor(primaryFood,primary.amount);
+    const primaryMode=primary.unitMode??"native";
+    const target=portionFor(primaryFood,primary.amount,primaryMode);
     if(!target)return;
     const taken=new Set(group.items.map(item=>item.foodId));
     // Inside a protein group a dairy primary is only ever swapped for dairy (or
@@ -400,7 +421,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const suggestions=foodsForGroup(foods,group.type)
       .filter(food=>isFavorite(food)&&!taken.has(food.id)&&food.calories>0)
       .filter(food=>group.type!=="protein"||isCompatibleProtein(primaryFood,food))
-      .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type)}))
+      .map(food=>({food,portion:calculateAlternativePortion(primaryFood,primary.amount,food,group.type,primaryMode)}))
       .filter((entry):entry is{food:FoodOption;portion:Portion}=>Boolean(entry.portion))
       .sort((a,b)=>Math.abs(a.portion.calories-target.calories)-Math.abs(b.portion.calories-target.calories))
       .slice(0,count)
@@ -534,7 +555,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     if(needsActivationConfirm&&!confirmed){setConfirmActivation(true);return}
     setConfirmActivation(false);
     try{
-    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?israelDateKey():"",days:savedDays().map((day,daySortOrder)=>({dayIndex:day.dayIndex,title:dayLabel(day.dayIndex),sortOrder:daySortOrder,meals:day.meals.map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}))});
+    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?israelDateKey():"",days:savedDays().map((day,daySortOrder)=>({dayIndex:day.dayIndex,title:dayLabel(day.dayIndex),sortOrder:daySortOrder,meals:day.meals.map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount,item.unitMode??"native"):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}))});
     say(result.message??"",result.ok?"ok":"error");
     if(result.ok){
       // The server now holds it, so the local copy is no longer the only one.
@@ -673,7 +694,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           <p className="mt-1 text-xs text-[#5B5F5B]">מוצגים רק מזונות מתאימים לקבוצה. מזונות מועדפים תמיד ראשונים.</p>
           <div className="mt-3">{group.items.map((item,itemIndex)=>{
             const selectedFood=foodMap.get(item.foodId);
-            const portion=selectedFood?portionFor(selectedFood,item.amount):null;
+            const unitMode=item.unitMode??"native";
+            const portion=selectedFood?portionFor(selectedFood,item.amount,unitMode):null;
             const isPrimary=item.primary??itemIndex===0;
             // Two lines rather than one. The name had been sharing a row with the
             // amount, the unit, the macros and two buttons, so it was the thing
@@ -733,7 +755,28 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
               <div className="food-row__body">
                 <label className="food-row__amount"><span className="sr-only">כמות</span>
                   <input aria-label="כמות" className="nutrition-input" type="number" min="0.1" step="0.1" value={item.amount} onChange={event=>changeAmount(index,groupIndex,itemIndex,Number(event.target.value))}/>
-                  <span>{selectedFood?unitLabel(foodUnit(selectedFood).unit,item.amount):"גרם"}</span>
+                  {/* Units or grams, the coach's choice, per row. A pita is
+                      sometimes "1 פיתה" and sometimes "55 גרם", and the same
+                      menu carries both ways of saying it. Switching converts
+                      the number rather than reinterpreting it. */}
+                  {selectedFood&&hasNaturalUnit(selectedFood)
+                    ?<select
+                        aria-label={`יחידת מדידה של ${selectedFood.name}`}
+                        className="food-row__unit"
+                        value={unitMode}
+                        onChange={event=>{
+                          const next=event.target.value as "native"|"gram";
+                          changeUnitMode(index,groupIndex,itemIndex,next);
+                        }}
+                      >
+                        {/* Labelled by what the quantity would BE in that unit,
+                            not by the number currently on screen - otherwise a
+                            row holding 100 grams offers "פיתות" for a switch
+                            that would produce exactly one pita. */}
+                        <option value="native">{unitLabel(foodUnit(selectedFood).unit,convertQuantity(selectedFood,Number(item.amount||0),unitMode,"native"))}</option>
+                        <option value="gram">גרם</option>
+                      </select>
+                    :<span>{selectedFood?unitLabel(foodUnit(selectedFood,unitMode).unit,item.amount):"גרם"}</span>}
                 </label>
                 {portion?<dl className="food-row__meta" aria-label={`ערכים תזונתיים של ${selectedFood?.name??"המזון"}`}>
                   <MacroChip label="קלוריות" value={portion.calories} unit="קל׳"/>
@@ -861,7 +904,7 @@ function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
   const primaries=meal.groups.flatMap(group=>group.items.filter((item,index)=>item.foodId&&(item.primary??index===0)));
   const calories=primaries.reduce((sum,item)=>{
     const food=foodMap.get(item.foodId);
-    const portion=food?portionFor(food,Number(item.amount||0)):null;
+    const portion=food?portionFor(food,Number(item.amount||0),item.unitMode??"native"):null;
     return sum+(portion?.calories??0);
   },0);
   const options=meal.groups.map(group=>`${groupLabels[group.type]} ${group.items.length}`).join(" · ");
