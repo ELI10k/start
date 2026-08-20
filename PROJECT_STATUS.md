@@ -18,7 +18,18 @@ needs a person.
 | `backup/start-full-state-2026-07-30` | snapshot of the rescued uncommitted work | keep until beta ends |
 | `codex/start-premium-client-experience` | the dark/gold redesign source | keep until beta ends |
 
-Production runs `main` @ `a3f7cf3`.
+Production ran `main` @ `85d94c1` — **a commit from 2026-08-10** — until 2026-08-20.
+
+### The deploy pipeline was broken for ten days
+Vercel's link to `ELI10k/start` had failed with `Project Link not found`, so no
+push produced a deployment and the site kept serving the 2026-08-10 build. Every
+commit from 2026-08-11 onwards — both product reviews included — was in GitHub
+and had never reached a client. Fixed 2026-08-20 by removing and re-adding the
+connection in Vercel → Project Settings → Git.
+
+**If work stops appearing on the site, check that panel first.** The symptom is
+silence, not an error: pushes succeed, GitHub holds the commits, and the
+Deployments list simply never grows.
 
 ## Baseline validation — 2026-08-19
 | Check | Command | Result |
