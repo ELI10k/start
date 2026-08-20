@@ -364,3 +364,65 @@ test("the two breads Eli asked for are master carbohydrates with real units", as
   // "2 בגט" would be wrong; the plural has to exist.
   assert.equal(portionFor(baguette, 2)?.unit, "בגטים");
 });
+
+// ============================== the unit reaches the client, and portions are sane
+
+test("a real unit survives the save instead of collapsing to grams", async () => {
+  const [migration, rollback] = await Promise.all([
+    source("supabase/migrations/202608200004_menu_item_real_units.sql"),
+    source("supabase/seeds/menu-item-units-rollback.sql"),
+  ]);
+  // The column allowed three values and the function collapsed everything else,
+  // so "1 פיתה" and "10 חלבון ביצה" both reached the client saying "גרם".
+  assert.match(migration, /check\(measurement_unit is not null and length\(btrim\(measurement_unit\)\) between 1 and 24\)/);
+  assert.match(migration, /v_unit:=coalesce\(nullif\(trim\(coalesce\(v_item->>'measurementUnit',''\)\),''\),'גרם'\)/);
+  assert.doesNotMatch(migration, /v_unit:=case when v_item->>'measurementUnit'='יחידות'/);
+  // Grams stay the stored truth - the migration must not touch the arithmetic.
+  assert.match(migration, /round\(v_food\.calories\*\(v_item->>'amount'\)::numeric\/100,2\)/);
+  // The backfill identifies unit-written rows without guessing, and leaves
+  // gram-written rows (where the two are equal) alone.
+  assert.match(migration, /abs\(i\.amount - i\.display_quantity \* f\.unit_weight_grams\) < 0\.01/);
+  assert.match(migration, /and i\.amount <> i\.display_quantity/);
+  assert.match(rollback, /check\(measurement_unit in \('g','גרם','יחידות'\)\)/);
+});
+
+test("a unit label reads correctly whether it was stored singular or plural", async () => {
+  const { unitLabel } = await import("../lib/nutrition/meal-alternatives.ts");
+  // New rows store the plural; rows repaired by the backfill carry the food's
+  // own package_unit, which is singular.
+  assert.equal(unitLabel("פיתות", 1), "פיתה");
+  assert.equal(unitLabel("פיתה", 1), "פיתה");
+  assert.equal(unitLabel("פיתה", 3), "פיתות");
+  assert.equal(unitLabel("פיתות", 3), "פיתות");
+  // A label with no known pair is passed through untouched, not mangled.
+  assert.equal(unitLabel("חלבון ביצה", 4), "חלבון ביצה");
+});
+
+test("a calorie budget cannot produce a portion nobody eats", async () => {
+  const { MAX_COUNTABLE_UNITS, portionForCalories } = await import("../lib/nutrition/meal-alternatives.ts");
+  const eggWhite = { calories: 60.606, protein: 9.091, carbs: 0, fat: 2.697, packageUnit: "חלבון ביצה", unitWeightGrams: 33 };
+  const chicken = { calories: 165, protein: 31, carbs: 0, fat: 3.6, packageUnit: null, unitWeightGrams: null };
+
+  // Arithmetic alone answers "ten egg whites" for a 200 kcal protein slot.
+  const capped = portionForCalories(eggWhite, 200);
+  assert.equal(capped?.quantity, MAX_COUNTABLE_UNITS);
+  assert.ok((capped?.calories ?? 0) < 200, "a capped portion costs less than the budget");
+
+  // Grams stay uncapped - they scale continuously and 120 g of chicken is an
+  // ordinary answer where ten units of anything is not.
+  const grams = portionForCalories(chicken, 200);
+  assert.equal(grams?.unit, "גרם");
+  assert.ok(Math.abs((grams?.calories ?? 0) - 200) < 5);
+});
+
+test("filling a day picks the food that fits the budget", async () => {
+  const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
+  const body = editor.slice(editor.indexOf("const fillDayFromFavorites"), editor.indexOf("const addDay"));
+  // Capping units means one food can no longer stretch to any budget, so the
+  // choice of food has to do the work.
+  assert.match(body, /\.sort\(\(a,b\)=>Math\.abs\(a\.portion\.calories-budget\)-Math\.abs\(b\.portion\.calories-budget\)\)/);
+  assert.doesNotMatch(body, /const food=pool\[mealIndex%pool\.length\];\n/);
+  // And the message reports what it produced rather than promising the target.
+  assert.match(body, /draftCalories/);
+  assert.match(body, /מול יעד של/);
+});

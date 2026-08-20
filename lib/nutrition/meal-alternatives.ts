@@ -47,7 +47,10 @@ const UNIT_SINGULARS=new Map(UNIT_FORMS.map(([singular,plural])=>[plural,singula
 // Quantities are stored against the plural form. Read it back as a singular when
 // there is exactly one, so a row says "1 פיתה" rather than "1 פיתות".
 export function unitLabel(unit:string,quantity:number):string{
-  return quantity===1?UNIT_SINGULARS.get(unit)??unit:unit;
+  // Both directions. New rows are stored plural, but rows repaired by
+  // 202608200004 carry the food's own package_unit, which is singular - and
+  // "3 פיתה" is as wrong as "1 פיתות".
+  return quantity===1?UNIT_SINGULARS.get(unit)??unit:UNIT_PLURALS.get(unit)??unit;
 }
 
 // A mass or volume is already the measurement - it is never a countable unit.
@@ -151,11 +154,26 @@ function round(value:number){return Math.round(value*10)/10}
 // The quantity of a food that costs a given number of calories, rounded the same
 // way every other quantity in the builder is. Used to fill a meal against a
 // budget instead of handing every food its flat 100 g default portion.
+/**
+ * The quantity of a food that costs a given number of calories.
+ *
+ * Countable units are capped. Arithmetic alone will happily answer "ten egg
+ * whites" for a 200 calorie protein budget - which is correct and is not a
+ * portion anybody eats. Grams are left uncapped: they scale continuously, and
+ * 330 g of chicken is an ordinary answer where 10 units of anything is not.
+ *
+ * A capped portion no longer costs `targetCalories`, so a caller filling
+ * against a budget should rank foods by how close they land rather than trust
+ * any single one to hit it.
+ */
+export const MAX_COUNTABLE_UNITS=4;
+
 export function portionForCalories(food:AlternativeFood,targetCalories:number):Portion|null{
   if(!Number.isFinite(targetCalories)||targetCalories<=0||food.calories<=0)return null;
   const unit=foodUnit(food);
   const grams=targetCalories/food.calories*100;
-  return portionFor(food,roundQuantity(grams/unit.gramsPerUnit,unit.unit));
+  const quantity=roundQuantity(grams/unit.gramsPerUnit,unit.unit);
+  return portionFor(food,unit.unit===GRAM_UNIT?quantity:Math.min(quantity,MAX_COUNTABLE_UNITS));
 }
 
 // How a day's calories fall across the fixed meals. Two main meals and a lighter

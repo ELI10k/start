@@ -481,19 +481,40 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         if(group.items.some(item=>item.foodId))return group;
         const pool=pools[group.type];
         if(!pool.length)return group;
-        // Rotating by meal index keeps the same food out of all five meals.
-        const food=pool[mealIndex%pool.length];
-        if(!food)return group;
         const share=budgetTotal>0?GROUP_CALORIE_SHARE[group.type]/budgetTotal:0;
         const budget=mealCalories*share;
-        const portion=budget>0?portionForCalories(food,budget):null;
+        // Which food, not just which quantity.
+        //
+        // This used to take pool[mealIndex] and force it to the budget, so a
+        // 200-calorie protein slot filled with ten egg whites - arithmetically
+        // right, and not a portion anybody eats. Countable units are capped
+        // now, which means one food can no longer stretch to any budget, so the
+        // choice of food is what has to do the work: rank the pool by how close
+        // a sensible portion of each lands to the budget, then rotate among the
+        // best few so the same food does not appear in all five meals.
+        const ranked=budget>0
+          ?pool
+            .map(candidate=>({candidate,portion:portionForCalories(candidate,budget)}))
+            .filter((entry):entry is{candidate:FoodOption;portion:Portion}=>Boolean(entry.portion))
+            .sort((a,b)=>Math.abs(a.portion.calories-budget)-Math.abs(b.portion.calories-budget))
+          :[];
+        const choice=ranked.slice(0,3)[mealIndex%Math.max(1,Math.min(3,ranked.length))];
+        const food=choice?.candidate??pool[mealIndex%pool.length];
+        if(!food)return group;
+        const portion=choice?.portion??(budget>0?portionForCalories(food,budget):null);
         filled+=1;
         return{...group,items:[{foodId:food.id,amount:portion?.quantity??defaultPortionQuantity(food),amountSource:"auto" as const}]};
       })};
     });
     setMeals(nextMeals);
+    // What it produced, against what was asked for - not a promise that the two
+    // match. Portions are capped at something a person eats, so a day can land
+    // short of its target, and saying so is more use than implying it did not.
+    const draftCalories=Math.round(nextMeals.reduce((sum,meal)=>meal.title==="קלוריות חופשיות"
+      ?sum+Number(meal.freeCalorieTarget||0)
+      :sum+macrosOf(meal.groups.flatMap(primariesOf)).calories,0));
     setMessage(dayCalories>0
-      ?`נוצרה טיוטת יום מ־${filled} מזונות מועדפים, בכמויות שמכוונות ליעד של ${Math.round(dayCalories)} קלוריות. אפשר להחליף כל בחירה ולשנות כמות.`
+      ?`נוצרה טיוטת יום מ־${filled} מזונות מועדפים: ${draftCalories} קלוריות מול יעד של ${Math.round(Number(menu.calorieTarget||0))}. המנות מוגבלות לגודל סביר, אז כדאי לעבור ולכוונן.`
       :"נוצרה טיוטת יום מהמזונות המועדפים. ללא יעד קלורי הכמויות הן מנות ברירת מחדל - כדאי להזין יעד ולמלא שוב.");
   };
   // The six-meal skeleton is a starting point. Meals the coach left untouched are
