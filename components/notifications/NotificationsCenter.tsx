@@ -64,6 +64,11 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
           <fieldset className="rounded-2xl border border-[#E5E7E5] p-4">
             <legend className="px-1 text-sm font-black">תזכורות אימון</legend>
             <p className="mt-1 text-xs text-[#5B5F5B]">רק בימי אימון מתוכננים, ובהתאם להשלמת האימון.</p>
+            {/* The scheduler runs once a day, in the morning. The evening
+                reminder is therefore created when the app is next opened rather
+                than pushed at the hour - promising a push that cannot arrive is
+                how a client concludes that notifications do not work. */}
+            <p className="mt-1 text-xs text-[#5B5F5B]">תזכורת הבוקר נשלחת למכשיר בשעה שנבחרה. תזכורת הערב מופיעה באפליקציה בכניסה הבאה.</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-bold">תזכורת בוקר<input name="workoutMorningReminder" type="checkbox" defaultChecked={preferences.workoutMorningReminder} className="size-5 accent-[#16A34A]" /></label>
               <label className="text-sm font-bold">שעת בוקר<input name="workoutMorningReminderTime" type="time" defaultValue={preferences.workoutMorningReminderTime.slice(0, 5)} className="nutrition-input mt-2" /></label>

@@ -76,9 +76,14 @@ test("menu editor preserves manual targets until explicit recalculation",()=>{
   assert.match(source,/חשב מחדש/);
   assert.match(source,/force\?\{protein:"auto" as const,carbohydrates:"auto" as const,fat:"auto" as const\}/);
   assert.doesNotMatch(source,/queueMicrotask/);
-  for(const label of ["מאקרו אבות מזון","חלבון \\(גרם\\)","פחמימה \\(גרם\\)","שומן \\(גרם\\)"])assert.match(source,new RegExp(label));
+  // The four totals moved out of the sidebar and into the bottom dock, where
+  // they stay in view while the coach works down the menu. Same four figures,
+  // same rule - and now also how much is still missing.
+  for(const label of ["קלוריות","חלבון","פחמימות","שומן"])
+    assert.match(source,new RegExp(`<DockTotal label="${label}"`));
+  assert.match(source,/נשאר \$\{gap\}/);
   // Short of the target reads red, target met reads green.
-  assert.match(source,/short\?" text-\[#DC2626\]":" text-\[#16A34A\]"/);
+  assert.match(source,/data-state=\{hasTarget\?\(short\?"short":"met"\):undefined\}/);
 });
 
 test("duplicated plans start in automatic macro mode",()=>{
@@ -199,10 +204,16 @@ test("meals can be collapsed to a one-line summary",()=>{
 
 test("untouched meals from the skeleton do not block saving",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
-  assert.match(source,/const savedMeals=\(\)=>menu\.meals/);
-  assert.match(source,/group\.items\.some\(item=>item\.foodId\)/);
+  // The filter moved into savedMealsOf when the editor gained days; the rule it
+  // enforces is unchanged - a meal with no chosen food is dropped, not rejected.
+  assert.match(source,/const savedMealsOf=\(dayMeals:readonly Meal\[\]\)/);
+  assert.match(source,/const savedDays=\(\)=>menu\.days/);
+  // Blank rows are dropped before the groups are, so the check is on the item
+  // filter rather than on a "does any item have a food" test.
+  assert.match(source,/items:group\.items\.filter\(item=>item\.foodId&&Number\(item\.amount\)>0\)/);
   assert.match(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
-  assert.match(source,/sticky top-0/);
+  // The save control lives in the bottom dock now, not a sticky header.
+  assert.match(source,/className="menu-dock"/);
 });
 
 test("the empty-group message names a food, not an alternative",()=>{
@@ -214,11 +225,24 @@ test("the empty-group message names a food, not an alternative",()=>{
 test("a duplicated plan is unassigned and recalculates for the next client",()=>{
   const source=readFileSync(new URL("../app/actions/product.ts",import.meta.url),"utf8");
   const start=source.indexOf("export async function duplicateCoachMealPlan");
-  const body=source.slice(start,start+4000);
-  assert.match(body,/clientId: ""/);
+  const body=source.slice(start,start+6000);
+  // A plain duplicate is still unassigned. Naming a client is now also possible,
+  // and then the copy carries that client instead of an empty string.
+  assert.match(body,/clientId: target\?\.clientId \?\? ""/);
+  // A copy is a draft either way: scaling gets a menu close, not correct, and a
+  // machine-scaled menu should not reach a client without the coach looking.
   assert.match(body,/status: "draft"/);
   for(const key of ["proteinTargetSource","carbohydrateTargetSource","fatTargetSource"])
     assert.match(body,new RegExp(`${key}:"auto"`));
+  // Quantities are scaled by the ratio between the two calorie targets, and only
+  // when both are real - otherwise they are copied as they are.
+  // "Both targets were known" is asserted as its own flag, separate from the
+  // ratio: equal targets give a ratio of exactly 1, and reading the message off
+  // the ratio alone reported that as "no calorie target was found".
+  assert.match(body,/const scalable = Boolean\(target\?\.calories && sourceCalories > 0\)/);
+  assert.match(body,/const ratio = scalable \?/);
+  assert.match(body,/amount: Math\.round\(item\.amount \* ratio \* 10\) \/ 10/);
+  assert.match(body,/הכמויות הועתקו כפי שהן/);
 });
 
 test("selecting a client fills the calorie target from their profile",()=>{

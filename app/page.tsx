@@ -9,13 +9,14 @@ import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 import { buildDailyCoachMessage } from "@/lib/coach-intelligence/proactive-coach";
 import DailyCoachCard from "@/components/client/DailyCoachCard";
+import { israelDateKey } from "@/lib/date-time";
 
 export default async function Home() {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = israelDateKey();
   const data = await getClientOverview(auth.id, today);
   // RLS returns sent summaries only, so the newest row is the newest release.
   const [latestSummary] = await getWeeklySummaries(auth.id, 1);
@@ -30,7 +31,11 @@ export default async function Home() {
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
   const proteinTarget = data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? null;
   const dayPercent = meals.length ? Math.round((completed.length / meals.length) * 100) : 0;
-  // "3/1" reads as three planned this week, one already marked.
+  // The tile beside this one spells its pair out - "3 מתוך 5" - and this one did
+  // not: it printed eaten/remaining as a bare "800/1200", which every reader
+  // takes for eaten-out-of-target. The target here was 2000. Same wording as its
+  // neighbour now, against the target, with what is left said underneath in
+  // words rather than implied by a slash.
   const plannedWorkouts = data.workouts.planned;
   const completedWorkouts = data.workouts.completed;
   const eatenCalories = Math.round(totals.calories);
@@ -85,18 +90,18 @@ export default async function Home() {
       <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
         <MetricTile
           label="ארוחות היום"
-          value={`${completed.length}/${meals.length}`}
+          value={`${completed.length} מתוך ${meals.length}`}
           icon={<CalendarCheck aria-hidden="true" size={18} />}
         />
         <MetricTile
           label="אימונים השבוע"
-          value={`${plannedWorkouts}/${completedWorkouts}`}
+          value={`${completedWorkouts} מתוך ${plannedWorkouts}`}
           accent="green"
           icon={<Dumbbell aria-hidden="true" size={18} />}
         />
         <MetricTile
-          label="קלוריות"
-          value={calorieTarget ? `${eatenCalories}/${remainingCalories}` : `${eatenCalories}`}
+          label={calorieTarget ? `קלוריות · נותרו ${remainingCalories}` : "קלוריות"}
+          value={calorieTarget ? `${eatenCalories} מתוך ${calorieTarget}` : `${eatenCalories}`}
           accent="neutral"
           icon={<UtensilsCrossed aria-hidden="true" size={18} />}
         />

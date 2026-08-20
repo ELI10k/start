@@ -68,11 +68,13 @@ test("nutrition RLS avoids recursive meal plan and assignment policies", async (
 });
 
 test("production nutrition repository reads Supabase canonical tables", async () => {
-  const [repository, actions, page, provider] = await Promise.all([
+  // ClientAppProvider used to be asserted here too - it held the demo nutrition
+  // state in memory. It has been deleted along with the rest of the pre-Supabase
+  // client screens, so there is no longer a second store to keep honest.
+  const [repository, actions, page] = await Promise.all([
     file("lib/data/product-repository.ts"),
     file("app/actions/product.ts"),
     file("app/nutrition/page.tsx"),
-    file("components/client/ClientAppProvider.tsx"),
   ]);
   for (const table of [
     "meal_plans",
@@ -83,11 +85,14 @@ test("production nutrition repository reads Supabase canonical tables", async ()
     assert.match(repository, new RegExp(`from\\(\"${table}\"\\)`));
   assert.doesNotMatch(repository, /from\("menus"\)|meal_completion_logs/);
   assert.match(actions, /rpc\("save_meal_plan_tree"/);
-  assert.match(actions, /rpc\("set_meal_item_eaten"/);
-  assert.match(actions, /rpc\("set_meal_eaten"/);
+  // Marking is one entry point now. set_meal_eaten and set_meal_item_eaten are
+  // still in the database for anything already calling them, but no screen does,
+  // and the wrappers that reached them from here have been removed - they were
+  // the only callers of the ambiguous three-argument overload.
+  assert.match(actions, /rpc\("set_meal_day_status"/);
+  assert.match(actions, /rpc\("select_meal_group_alternative"/);
+  assert.doesNotMatch(actions, /rpc\("set_meal_eaten"/);
   assert.match(page, /selectMealGroupAlternative/);
-  assert.match(provider, /createMemoryAdapter/);
-  assert.doesNotMatch(provider, /localStorage|createBrowserDemoAdapter/);
 });
 
 test("nutrition totals still use the approved calculation engine", () => {

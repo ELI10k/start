@@ -61,7 +61,11 @@ test.describe("coach screens", () => {
     await expect(card.locator(".pill").first()).toBeVisible();
     // Video and guidance sit together on every exercise.
     await expect(card.getByRole("button", { name: "דגשים לתרגיל" })).toBeVisible();
-    await expect(card.getByRole("link", { name: /וידאו/ }).or(card.getByText("אין סרטון")).first()).toBeVisible();
+    // The link is named for what it is - "סרטון הסבר טכניקה". /וידאו/ has never
+    // matched it, so this assertion could only ever have passed through the
+    // "אין סרטון" branch, and stopped even doing that once the first <article>
+    // on the page was no longer an exercise card.
+    await expect(card.getByRole("link", { name: /סרטון/ }).or(card.getByText("אין סרטון")).first()).toBeVisible();
 
     // And the sheet opens with something honest in it.
     await card.getByRole("button", { name: "דגשים לתרגיל" }).click();

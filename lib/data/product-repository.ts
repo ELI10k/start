@@ -1,3 +1,4 @@
+import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/supabase/database.types";
@@ -39,7 +40,9 @@ export type PersistedMeal = Readonly<{
   groups: readonly Readonly<{id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string}>[];
   completed: boolean;
   // Unmarked is null; the two marks are explicit.
-  status: "eaten" | "not_eaten" | null;
+  status: "eaten" | "not_eaten" | "other" | null;
+  /** Only ever set alongside status "other": what the client ate instead. */
+  statusNote: string | null;
   skipped: boolean;
 }>;
 
@@ -349,7 +352,7 @@ export async function getCoachClient(coachId: string, clientId: string) {
   };
 }
 
-export async function getCoachClientDashboard(coachId: string, clientId: string, date = new Date().toISOString().slice(0, 10)) {
+export async function getCoachClientDashboard(coachId: string, clientId: string, date = israelDateKey()) {
   const base = await getCoachClient(coachId, clientId);
   if (!base) return null;
   const supabase = await createSupabaseServerClient();
@@ -378,8 +381,22 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   const sessions = sessionResult.data ?? [];
   const completedThisWeek = sessions.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
   const totals = menu?.meals.flatMap((meal) => meal.items.filter((item) => item.eaten)).reduce((sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein, carbs: sum.carbs + item.carbs, fat: sum.fat + item.fat }), { calories: 0, protein: 0, carbs: 0, fat: 0 }) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
-  const plannedItems = menu?.meals.flatMap((meal) => meal.items) ?? [];
-  const completedItems = plannedItems.filter((item) => item.eaten).length;
+  // Adherence is counted in meals, not in rows.
+  //
+  // meal.items holds every row the coach wrote - the primary AND its
+  // alternatives - but a client only ever eats one item per group, so exactly
+  // one of four rows can ever be logged. Dividing logged rows by written rows
+  // therefore capped a perfect day at 25%, and the figure was read as adherence
+  // on the client file, in the "requires attention" panel and in the generated
+  // report, which duly announced that "most of the menu is not marked" about a
+  // client who had marked all of it.
+  //
+  // A meal is the unit the client actually answers: eaten, not eaten, ate
+  // something else. All three are answers, and all three count as marked - the
+  // figure says how much of the day the client has responded to, not how much
+  // of it they obeyed.
+  const plannedMeals = menu?.meals ?? [];
+  const markedMeals = plannedMeals.filter((meal) => meal.status !== null || meal.completed).length;
   const latestCompleted = sessions.find((session) => session.status === "completed") ?? null;
   const dayRows = daysResult.data ?? [];
   const daysFor = (programId: string) => dayRows.filter((day) => day.program_id === programId);
@@ -403,9 +420,9 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
     menu,
     nutrition: {
       totals,
-      plannedItems: plannedItems.length,
-      completedItems,
-      completionPercent: plannedItems.length ? Math.round(completedItems / plannedItems.length * 100) : 0,
+      plannedMeals: plannedMeals.length,
+      markedMeals,
+      completionPercent: plannedMeals.length ? Math.round(markedMeals / plannedMeals.length * 100) : 0,
       // What the client actively skipped, so a coach can tell a deliberate skip
       // from a meal that was simply never marked.
       skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped).map((meal) => meal.title),
@@ -446,7 +463,9 @@ export async function getActiveClientMenu(
     .order("day_index")
     .order("sort_order");
   if (mealError) throw mealError;
-  const dayIndex = new Date(`${date}T00:00:00Z`).getUTCDay();
+  // Sunday is 0. Resolved through the Israel calendar so a Saturday menu is
+  // served on Saturday here, not from 03:00 onwards.
+  const dayIndex = israelWeekday(date);
   const availableDays = new Set((allMeals ?? []).map((meal) => meal.day_index));
   const selectedDay = availableDays.has(dayIndex)
     ? dayIndex
@@ -539,23 +558,25 @@ export async function getActiveClientMenu(
         // considered eaten once every group's chosen item is logged - that is how
         // the state behaved before the mark existed, and menus assigned before
         // this change keep reading correctly.
-        status: statusByMeal.get(meal.id) ?? null,
-        completed: statusByMeal.get(meal.id) === "eaten" || (
-          statusByMeal.get(meal.id) !== "not_eaten" &&
+        status: statusByMeal.get(meal.id)?.status ?? null,
+        // What the client wrote when they said they ate something else.
+        statusNote: statusByMeal.get(meal.id)?.note ?? null,
+        completed: statusByMeal.get(meal.id)?.status === "eaten" || (
+          !statusByMeal.get(meal.id) &&
           (groups??[]).filter(group=>group.meal_id===meal.id).length>0&&
           (groups??[]).filter(group=>group.meal_id===meal.id).every(group=>{
             const selected=selectedByGroup.get(group.id);
             return Boolean(selected&&eatenIds.has(selected));
           })
         ),
-        skipped: statusByMeal.get(meal.id) === "not_eaten",
+        skipped: statusByMeal.get(meal.id)?.status === "not_eaten",
         items: mealItems,
       };
     }),
   };
 }
 
-export type MealDayStatus = "eaten" | "not_eaten";
+export type MealDayStatus = "eaten" | "not_eaten" | "other";
 
 // Reads the explicit per-meal marks for a day.
 //
@@ -570,12 +591,12 @@ async function readMealDayStatus(
   clientId: string,
   date: string,
   mealIds: readonly string[],
-): Promise<ReadonlyMap<string, MealDayStatus>> {
+): Promise<ReadonlyMap<string, { status: MealDayStatus; note: string | null }>> {
   if (!mealIds.length) return new Map();
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("meal_day_status")
-    .select("meal_id,status")
+    .select("meal_id,status,note")
     .eq("client_id", clientId)
     .eq("status_date", date)
     .in("meal_id", mealIds);
@@ -583,7 +604,14 @@ async function readMealDayStatus(
     if (MISSING_RELATION.has(error.code ?? "")) return new Map();
     throw error;
   }
-  return new Map((data ?? []).map((row) => [row.meal_id as string, row.status as MealDayStatus]));
+  // A status this build does not know is read as unmarked rather than guessed at.
+  const known = new Set(["eaten", "not_eaten", "other"]);
+  return new Map((data ?? [])
+    .filter((row) => known.has(String(row.status)))
+    .map((row) => [row.meal_id as string, {
+      status: row.status as MealDayStatus,
+      note: ("note" in row ? (row.note as string | null) : null) ?? null,
+    }]));
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {
@@ -823,7 +851,9 @@ export async function listCoachMenus(coachId: string) {
   const supabase = await createSupabaseServerClient();
   const { data: plans, error } = await supabase
     .from("meal_plans")
-    .select("id,title,description,status,updated_at,is_system_template")
+    // The calorie target comes along: the menus list shows it, and "start from an
+    // existing menu" ranks by how close it is to the new client's target.
+    .select("id,title,description,status,updated_at,is_system_template,calorie_target")
     .eq("coach_id", coachId)
     .order("updated_at", { ascending: false });
   if (error) throw error;

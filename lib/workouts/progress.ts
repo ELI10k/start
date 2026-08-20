@@ -1,4 +1,4 @@
-import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, WorkoutDay, WorkoutProgram } from "./types.ts";
+import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutProgram } from "./types.ts";
 export function getTodayWorkoutDay(program:WorkoutProgram,completedWorkouts:readonly CompletedWorkout[],clientId:string):WorkoutDay|undefined{if(!program.days.length)return undefined;const completed=completedWorkouts.filter((item)=>item.clientId===clientId&&item.programId===program.id).length;return [...program.days].sort((a,b)=>a.order-b.order)[completed%program.days.length]}
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
 export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
@@ -13,3 +13,40 @@ const dateOnly=(value:string)=>value.slice(0,10);
 export function adherenceSummary(assignmentOrWorkouts:ClientWorkoutAssignment|readonly CompletedWorkout[],workoutsOrAssignment:readonly CompletedWorkout[]|ClientWorkoutAssignment|undefined,todayValue:string|Date){const legacy=Array.isArray(assignmentOrWorkouts);const assignment=(legacy?workoutsOrAssignment:assignmentOrWorkouts) as ClientWorkoutAssignment|undefined;const workouts=(legacy?assignmentOrWorkouts:workoutsOrAssignment) as readonly CompletedWorkout[];if(!assignment)return{completed:0,expected:0,missed:0,percent:0};const today=typeof todayValue==="string"?todayValue:todayValue.toISOString().slice(0,10);const start=new Date(`${assignment.startDate}T00:00:00Z`);const end=new Date(`${today}T00:00:00Z`);const elapsedDays=Math.max(1,Math.floor((end.getTime()-start.getTime())/86400000)+1);const expected=Math.max(1,Math.ceil(elapsedDays/7*assignment.weeklyFrequency));const completed=workouts.filter((item)=>item.assignmentId===assignment.id&&dateOnly(item.completedAt)>=assignment.startDate&&dateOnly(item.completedAt)<=today).length;return{completed,expected,missed:Math.max(0,expected-completed),percent:Math.min(100,Math.round(completed/expected*100))}}
 export function workoutStreak(workouts:readonly CompletedWorkout[],clientId:string):number{const dates=[...new Set(workouts.filter((item)=>item.clientId===clientId).map((item)=>dateOnly(item.completedAt)))].sort((a,b)=>b.localeCompare(a));if(!dates.length)return 0;let streak=1;for(let i=1;i<dates.length;i++){const previous=new Date(`${dates[i-1]}T00:00:00Z`);const current=new Date(`${dates[i]}T00:00:00Z`);if((previous.getTime()-current.getTime())/86400000>7)break;streak++}return streak}
 export function trend(current?:number,previous?:number):"up"|"down"|"stable"|"insufficient-data"{if(current===undefined||previous===undefined)return"insufficient-data";if(current>previous)return"up";if(current<previous)return"down";return"stable"}
+
+// The best set that is actually comparable to what is being lifted today.
+//
+// "שיא 60 ק״ג" was the heaviest weight ever moved on the exercise, whatever the
+// rep count. A 12-rep back-off set and a 10-rep working set are not the same
+// effort, so a client working at 10 was being shown a number from a different
+// job and told it was their benchmark. Comparing within a rep window fixes that;
+// with no comparable set the honest answer is none, not the heaviest available.
+export function bestComparableSet(
+  sessions:readonly {sets:readonly ExerciseSetResult[]}[],
+  targetReps:number|undefined,
+  // One rep either way. Two was too generous to fix the reported problem: with a
+  // target of 10 it still admitted the 12-rep set that started this, which is the
+  // comparison a client called wrong.
+  tolerance=1,
+):{weightKg:number;repetitions:number}|null{
+  const done=sessions.flatMap((session)=>session.sets).filter((set)=>
+    set.completed&&typeof set.weightKg==="number"&&set.weightKg>0);
+  if(!done.length)return null;
+  const comparable=Number.isFinite(targetReps)&&targetReps
+    ?done.filter((set)=>typeof set.repetitions==="number"&&Math.abs(set.repetitions-targetReps)<=tolerance)
+    :done;
+  if(!comparable.length)return null;
+  // Heaviest first; among equal weights the one that got more reps out of it.
+  const best=[...comparable].sort((a,b)=>
+    (b.weightKg??0)-(a.weightKg??0)||(b.repetitions??0)-(a.repetitions??0))[0];
+  return{weightKg:best.weightKg as number,repetitions:best.repetitions??0};
+}
+
+// "10", "8-12" and "10 חזרות" all have to yield a number to compare against.
+export function targetRepetitions(reps?:string):number|undefined{
+  if(!reps)return undefined;
+  const numbers=[...reps.matchAll(/\d+/g)].map((match)=>Number(match[0])).filter(Number.isFinite);
+  if(!numbers.length)return undefined;
+  // A range is represented by its midpoint - the middle of "8-12" is the work.
+  return Math.round(numbers.reduce((sum,value)=>sum+value,0)/numbers.length);
+}

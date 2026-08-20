@@ -10,12 +10,15 @@ export default function MealOptionButton({
   quantity,
   unit,
   calories,
+  household,
 }: {
   selected: boolean;
   name: string;
   quantity: string;
   unit: string;
   calories: string;
+  /** The same portion in spoons or palms, when there is an honest reading. */
+  household?: string;
 }) {
   const status = useFormStatus();
   return (
@@ -30,7 +33,12 @@ export default function MealOptionButton({
       ) : (
         <Circle size={18} aria-hidden="true" className="shrink-0 text-[#3F433F]" />
       )}
-      <span className={`flex-1 truncate ${selected ? "font-bold text-[#16A34A]" : "text-[#0B0B0B]"}`}>{name}</span>
+      {/* The name and, under it, the portion in something a kitchen has. A client
+          handed "200 גרם" either owns a scale or guesses, and most guess. */}
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className={`truncate ${selected ? "font-bold text-[#16A34A]" : "text-[#0B0B0B]"}`}>{name}</span>
+        {household ? <span className="text-xs text-[#5B5F5B]">{household}</span> : null}
+      </span>
       <span className="shrink-0 text-[#5B5F5B]">{quantity} {unit}</span>
       <span className="shrink-0 text-xs tabular-nums text-[#5B5F5B]">{calories} קל׳</span>
     </button>

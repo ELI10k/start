@@ -1,4 +1,5 @@
 "use client";
+import { israelDateKey } from "@/lib/date-time";
 import Link from "next/link";
 import { useState } from "react";
 import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, Target } from "lucide-react";
@@ -15,7 +16,7 @@ const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=new Date().toISOString().slice(0,10);const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
+  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -60,7 +61,9 @@ export default function TodayWorkout(){
     </section>
 
     <section className="dashboard-metrics" aria-label="מדדי אימון">
-      <MetricTile label="הושלמו" value={`${adherence.completed}/${adherence.expected}`} icon={<CheckCircle2 aria-hidden="true" size={18}/>}/>
+      {/* "2/1" in an RTL column reads as one-of-two, which is the opposite of
+          what it says. Spelled out, it cannot be read backwards. */}
+      <MetricTile label="הושלמו" value={`${adherence.completed} מתוך ${adherence.expected}`} icon={<CheckCircle2 aria-hidden="true" size={18}/>}/>
       <MetricTile label="התמדה" value={`${adherence.percent}%`} icon={<Target aria-hidden="true" size={18}/>}/>
       <MetricTile label="פיספסת" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
       <MetricTile label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>

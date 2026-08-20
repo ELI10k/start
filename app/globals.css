@@ -1296,3 +1296,237 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   min-height: 3rem;
   border-radius: .9rem;
 }
+
+/* ── Direct messages ───────────────────────────────────────────────────── */
+
+/* A conversation reads downwards, so the newest message is at the bottom and the
+   composer sits under it - the order a person expects from every other thread
+   they have ever used. */
+.message-thread { display: flex; flex-direction: column; gap: 1rem; }
+
+.message-thread__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.message-thread__list > li { display: flex; }
+/* Mine to the left, theirs to the right. In an RTL column the reader's own side
+   is the one the text runs away from, which is what makes the two legible as
+   two voices without a name on every line. */
+.message-thread__list > li[data-mine] { justify-content: flex-start; }
+
+.message-bubble {
+  max-width: min(85%, 34rem);
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+  border-radius: 1.1rem;
+  padding: .7rem .9rem;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+[data-mine] > .message-bubble {
+  background: var(--green-tint);
+  border-color: rgba(22, 163, 74, .3);
+}
+.message-bubble p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.message-bubble__topic {
+  font-size: .7rem;
+  font-weight: 800;
+  color: var(--green-press);
+}
+.message-bubble__time {
+  font-size: .7rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.message-composer {
+  display: flex;
+  gap: .6rem;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: .9rem;
+}
+.message-composer textarea { flex: 1; resize: vertical; }
+.message-composer button { flex: 0 0 auto; }
+
+@media (max-width: 430px) {
+  .message-bubble { max-width: 92%; }
+}
+
+/* ── The workout session, on one screen ────────────────────────────────── */
+
+/* The exercise name used to share a row with a thumbnail and two buttons, so on
+   a phone it was squeezed into a column about eight characters wide and stacked
+   into six lines. It gets the full width now; the buttons moved below it. */
+.session-exercise { padding: .9rem; }
+.session-exercise__head { display: flex; align-items: center; gap: .6rem; }
+.session-exercise__count { font-size: .7rem; font-weight: 700; color: var(--green); }
+.session-exercise__name {
+  margin: .15rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-wrap: balance;
+  /* Two lines is the ceiling, not the target - a name this long is unreadable
+     truncated, and unusable stacked. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.session-exercise__chips { margin-top: .5rem; }
+
+/* Four figures, one row, no sideways scroll. dashboard-metrics is a scroller,
+   which is why the fourth tile was sliced down the middle. */
+.session-stats {
+  margin: .7rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: .35rem;
+}
+.session-stats > div {
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+  padding: .4rem .3rem;
+  text-align: center;
+  min-width: 0;
+}
+.session-stats dt {
+  font-size: .62rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* A missing figure is named - "לא הוגדר", never a dash - so the value wraps
+   rather than being clipped into something unreadable. Two short lines still fit
+   the row. */
+.session-stats dd {
+  margin: .15rem 0 0;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* The rest timer sits with the buttons a thumb is already on, not at the top of
+   the page where it scrolled out of sight the moment a set was logged. */
+.rest-timer--inline { margin: .8rem 0 0; }
+
+/* ── The menu editor's bottom dock ─────────────────────────────────────── */
+
+/* The totals and the save button used to live at the top: the button in a
+   sticky header, the totals in a sidebar that stacks below six meals on any
+   screen under 2xl. Building a menu meant scrolling to the top after every
+   change to ask "am I near the target yet?", and back down to make the next
+   one. Both now sit in one bar at the bottom, which is also where the thumb is
+   on a phone. */
+.menu-editor { padding-bottom: 9rem; }
+
+.menu-dock {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem 1rem calc(.75rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.menu-dock__totals {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.menu-dock__total {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  padding: .35rem .65rem;
+  border: 1px solid var(--line);
+  border-radius: .75rem;
+  background: var(--surface-raised);
+  min-width: 5.4rem;
+  white-space: nowrap;
+}
+/* Full words, in the same ink as the figure. Grey abbreviations read as small
+   print on a bar the coach is meant to be checking constantly. */
+.menu-dock__total dt { font-size: .72rem; font-weight: 700; color: var(--ink); }
+.menu-dock__total dd {
+  margin: 0;
+  font-weight: 800;
+  font-size: .95rem;
+  font-variant-numeric: tabular-nums;
+}
+.menu-dock__total dd span { font-weight: 600; color: var(--ink); }
+/* The line the coach is actually reading on the way down a menu. */
+.menu-dock__total small {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.menu-dock__total[data-state="short"] small { color: var(--red); }
+.menu-dock__total[data-state="met"] small { color: var(--green); }
+/* Short of the target, or on it. The whole question this bar answers. */
+.menu-dock__total[data-state="short"] dd { color: var(--red); }
+.menu-dock__total[data-state="met"] dd { color: var(--green); }
+
+.menu-dock__actions { display: flex; align-items: center; gap: .6rem; }
+
+.menu-dock__message {
+  flex-basis: 100%;
+  margin: 0;
+  border-radius: .9rem;
+  border: 1px solid transparent;
+  padding: .6rem .8rem;
+  font-size: .85rem;
+  font-weight: 700;
+}
+.menu-dock__message--ok { border-color: rgba(22, 163, 74, .4); background: var(--green-tint); color: var(--green-press); }
+.menu-dock__message--error { border-color: rgba(220, 38, 38, .4); background: var(--red-tint); color: var(--red); }
+.menu-dock__message--warn { border-color: rgba(181, 71, 8, .4); background: #FFFAEB; color: #B54708; }
+
+@media (max-width: 560px) {
+  .menu-dock { padding-inline: .75rem; }
+  .menu-dock__totals { gap: .3rem; }
+  .menu-dock__total { min-width: 0; flex: 1 1 0; padding: .3rem .4rem; text-align: center; }
+  .menu-dock__actions { flex: 1 1 100%; justify-content: space-between; }
+}
+
+/* ── The end-of-workout report ─────────────────────────────────────────── */
+
+/* Three kinds of line, and the border says which without needing a word for it:
+   something to act on, something that went well, something merely worth
+   noticing. */
+.workout-insight {
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--line-strong);
+  border-radius: 1rem;
+  background: var(--surface);
+  padding: .85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.workout-insight[data-tone="action"] { border-inline-start-color: var(--green); background: var(--green-tint); }
+.workout-insight[data-tone="praise"] { border-inline-start-color: var(--green); }
+.workout-insight[data-tone="note"] { border-inline-start-color: var(--line-strong); }
+.workout-insight strong { font-size: .95rem; }
+.workout-insight p { margin: 0; font-size: .87rem; line-height: 1.55; color: var(--ink-strong); }

@@ -63,8 +63,10 @@ test.describe("menu builder layout", () => {
 
     await expect(page.locator(".food-row").first()).toBeVisible();
 
-    // With no alternatives yet there is nothing to warn about, so no dialog.
-    await page.getByRole("button", { name: "מחיקת המאכל הראשי" }).first().click();
+    // One row, one deletion - and the button is named for the food it removes,
+    // not for its position. "מחיקת המאכל הראשי" has not existed since the group
+    // stopped being emptied by removing its first row.
+    await page.locator(".food-row").first().getByRole("button", { name: /^הסרת / }).click();
 
     // Back to the state the group started in.
     await expect(page.getByRole("button", { name: "בחירת מאכל ראשי" }).first()).toBeVisible({ timeout: 20_000 });

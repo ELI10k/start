@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import SubmitButton from "@/components/forms/SubmitButton";
 import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
+import { listResponseTemplates } from "@/app/actions/response-templates";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { resetClientDevice } from "@/app/actions/product";
 import { getAuthContext, getCoachClientDashboard } from "@/lib/data/product-repository";
@@ -13,7 +14,7 @@ import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-lev
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { formatIsraelDateTime } from "@/lib/date-time";
+import { daysSince, formatIsraelDateTime, israelDateKey, israelHour, israelWeekday } from "@/lib/date-time";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
@@ -24,6 +25,8 @@ import { ArchiveClientPanel } from "@/components/coach/client-file/ArchiveClient
 import ClientReportView from "@/components/coach/client-file/ClientReport";
 import { buildClientReport } from "@/lib/coach-intelligence/client-report";
 import { CLIENT_TABS, isClientTab } from "@/lib/coach/client-tabs";
+import MessageThread from "@/components/messages/MessageThread";
+import { listThread, markThreadRead } from "@/lib/messages/repository";
 import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
@@ -35,22 +38,50 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const { id } = await params; const query=await searchParams; const data = await getCoachClientDashboard(auth.id, id); if (!data) notFound();
   const lastCheckIn = data.checkIns[0] ?? null;
   const latestNavelMeasurement=data.progress.find((entry)=>entry.navel_circumference!==null);
-  const alertRows = [!lastCheckIn ? "צ׳ק־אין ממתין" : null, data.workouts.assignment && data.workouts.weeklyCompletionPercent < 100 ? "אימון שבועי שטרם הושלם" : null, data.menu && data.nutrition.completionPercent < 100 ? "ארוחות שטרם סומנו" : null].filter(Boolean);
+  // "Requires attention" has to be able to be empty, or it is furniture.
+  //
+  // The three rules it used to run were "no check-in yet", "the training week is
+  // not finished" and "not every meal is marked" - and the last two are true of
+  // every client on a Monday morning, so the red panel was on every file, every
+  // day, and stopped being read. Each rule now describes something that is
+  // actually late rather than merely unfinished: a check-in that has not come in
+  // for over a week, a week that is nearly over with most of the training still
+  // to do, and a day whose meals are going unanswered past the evening.
+  const daysSinceCheckIn = lastCheckIn ? daysSince(lastCheckIn.submitted_at) : null;
+  // Sunday is 0, so 5 is Friday: by then the training week is what it is going
+  // to be. 20:00 is past dinner, so a day still unanswered then will stay so.
+  const weekday = israelWeekday(israelDateKey());
+  const hour = israelHour();
+  const alertRows = [
+    daysSinceCheckIn === null ? "טרם הוגש צ׳ק־אין" : daysSinceCheckIn > 8 ? `לא הוגש צ׳ק־אין ${daysSinceCheckIn} ימים` : null,
+    data.workouts.assignment && weekday >= 5 && data.workouts.weeklyCompletionPercent < 50 ? "רוב אימוני השבוע לא בוצעו, והשבוע נגמר" : null,
+    data.menu && hour >= 20 && data.nutrition.completionPercent < 50 ? "רוב ארוחות היום נותרו ללא סימון" : null,
+  ].filter(Boolean);
   const intake=data.profile.clientProfile;
   const supabase=await createSupabaseServerClient();
+  // The file is eight tabs and shows one at a time, but it used to load all
+  // eight - including signing a URL for every photo of every check-in while the
+  // overview tab, which shows no photos at all, was the one on screen. Each
+  // query now belongs to the tab that renders it.
+  const tab = isClientTab(query.tab) ? query.tab : "overview";
+  const none = <T,>() => Promise.resolve({ data: [] as T[] });
   const [{ data: invitations }, { data: contentRows }, { data: contentAssignments }, { data: clientNotifications }, { data: coachNotes }]=await Promise.all([
     supabase.from("client_invitation_statuses").select("id,status,effective_status,sent_at,expires_at,opened_at,onboarding_completed_at").eq("client_id",id).order("sent_at",{ascending:false}),
-    supabase.from("content_items").select("id,title").eq("status","published").order("sort_order"),
-    supabase.from("client_content_assignments").select("content_item_id").eq("client_id",id),
-    supabase.from("notifications").select("id,title,body,href,created_at,read_at").eq("recipient_id",id).order("created_at",{ascending:false}).limit(20),
-    supabase.from("coach_client_notes").select("id,body,created_at,updated_at").eq("client_id",id).eq("coach_id",auth.id).order("created_at",{ascending:false}),
+    tab==="notes"?supabase.from("content_items").select("id,title").eq("status","published").order("sort_order"):none<{id:string;title:string}>(),
+    tab==="notes"?supabase.from("client_content_assignments").select("content_item_id").eq("client_id",id):none<{content_item_id:string}>(),
+    // Read on the progress tab, where each coach response is shown alongside
+    // whether the client has opened it, and on notes, which lists them.
+    tab==="progress"||tab==="notes"?supabase.from("notifications").select("id,type,source_id,title,body,href,created_at,read_at").eq("recipient_id",id).order("created_at",{ascending:false}).limit(50):none<{id:string;type:string;source_id:string|null;title:string;body:string;href:string;created_at:string;read_at:string|null}>(),
+    tab==="notes"?supabase.from("coach_client_notes").select("id,body,created_at,updated_at").eq("client_id",id).eq("coach_id",auth.id).order("created_at",{ascending:false}):none<{id:string;body:string;created_at:string;updated_at:string}>(),
   ]);
   // The check-in photos, signed for this request. The client file has always
   // said "אין תמונות זמינות בצ׳ק־אין זה" - a fixed line, printed under every
   // check-in whether or not photos were attached, because nothing here ever
   // looked for them. A coach who asks a client for three photos has to be able
   // to see the three photos.
-  const checkInIds = data.checkIns.map((entry) => entry.id);
+  // Signing a URL is a network round trip per photo. Only the tab that shows
+  // them needs them.
+  const checkInIds = tab === "progress" ? data.checkIns.map((entry) => entry.id) : [];
   const photoRows = checkInIds.length
     ? (await supabase.from("check_in_photos").select("id,check_in_id,view,storage_path").in("check_in_id", checkInIds).order("created_at")).data ?? []
     : [];
@@ -65,8 +96,29 @@ export default async function CoachClientPage({ params, searchParams }: { params
       (photosByCheckIn[photo.check_in_id] ??= []).push({ id: photo.id, view: photo.view, signedUrl });
     });
 
-  const weeklySummaries = await getWeeklySummaries(id);
-  const tab = isClientTab(query.tab) ? query.tab : "overview";
+  // Whether the client has actually opened what the coach sent. The review
+  // notification carries the check-in's id, and notifications already record
+  // when they were read - the client file simply never looked. A coach who
+  // writes feedback and hears nothing should be able to tell "not read yet"
+  // from "read and ignored".
+  const responseReadAt = new Map(
+    (clientNotifications ?? [])
+      .filter((row) => row.type === "check_in_reviewed" && row.source_id)
+      .map((row) => [String(row.source_id), row.read_at as string | null]),
+  );
+
+  // Both of these belong to one tab each - the summaries to "report", the saved
+  // replies to "progress", where the response form is - and both ran on every
+  // load regardless. The rest of this screen was made tab-aware above; these two
+  // were missed.
+  const [weeklySummaries, responseTemplates] = await Promise.all([
+    tab === "report" ? getWeeklySummaries(id) : Promise.resolve([]),
+    tab === "progress" ? listResponseTemplates() : Promise.resolve([]),
+  ]);
+  // Only when the tab is open: loading a conversation to render a tab nobody
+  // clicked is the same waste as signing every photo for the overview.
+  const messages = tab === "messages" ? await listThread(id) : [];
+  if (messages.some((message) => !message.fromMe && !message.readAt)) await markThreadRead(id);
   // The two most recent weigh-ins, so the card can say which way the client is
   // going rather than only where they are. One measurement is a number, not a
   // direction, and is reported as such.
@@ -125,7 +177,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
     })),
     hasMenu: Boolean(data.menu),
     menuCompletionPercent: data.nutrition.completionPercent,
-    menuPlannedItems: data.nutrition.plannedItems,
+    menuPlannedMeals: data.nutrition.plannedMeals,
     hasProgram: Boolean(data.workouts.program),
     programName: data.workouts.program?.name ?? null,
     weeklyFrequency: data.workouts.assignment?.weekly_frequency ?? null,
@@ -210,12 +262,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
       <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
         {data.menu ? <>
           <dl className="compact-data-list">
-            <div><span>השלמת היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
+            <div><span>ארוחות שסומנו היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
             <div><span>קלוריות</span><strong>{number(data.nutrition.totals.calories)}</strong></div>
             <div><span>חלבון</span><strong>{number(data.nutrition.totals.protein)} ג׳</strong></div>
             <div><span>פחמימות / שומן</span><strong>{number(data.nutrition.totals.carbs)} / {number(data.nutrition.totals.fat)} ג׳</strong></div>
           </dl>
-          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.completedItems} מתוך {data.nutrition.plannedItems} פריטים סומנו היום.</p>
+          {/* Meals, not rows: a meal holds a primary and its alternatives, and
+              only one of them is ever eaten. */}
+          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו היום (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
           {data.nutrition.skippedMeals.length > 0 && (
             <p className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <span className="text-[#5B5F5B]">סומנו כלא נאכלו:</span>
@@ -291,9 +345,16 @@ export default async function CoachClientPage({ params, searchParams }: { params
       {tab === "progress" && <>
       <Section title="צ׳ק־אין" summary="עדכון אחרון, הערות ותגובה" open>
         <div className="grid gap-3">{data.checkIns.slice(0, 4).map((entry) => <article key={entry.id} className="rounded-2xl border border-[#E5E7E5] p-4">
-          <p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/5 · אנרגיה {entry.energy}/5 · שינה {entry.sleep}/5</p>
+          {/* Out of ten. The scale moved to 1-10 in 202607280002 and this line
+              was still dividing by five, so every rating here read as double. */}
+          <p className="text-sm text-[#5B5F5B]">{date(entry.submitted_at)} · היצמדות {entry.adherence}/10 · אנרגיה {entry.energy}/10 · שינה {entry.sleep}/10</p>
           {entry.notes && <p className="mt-2 text-sm">{entry.notes}</p>}
-          {entry.coach_response ? <p className="mt-3 border-r-2 border-[#16A34A] pr-3 text-sm text-[#15803D]">{entry.coach_response}</p> : <ReviewCheckInForm checkInId={entry.id} clientId={id}/>}
+          {entry.coach_response ? <div className="mt-3 border-r-2 border-[#16A34A] pr-3">
+            <p className="text-sm text-[#15803D]">{entry.coach_response}</p>
+            <p className="mt-1 text-xs text-[#5B5F5B]">
+              {responseReadAt.get(entry.id) ? `הלקוח קרא · ${date(responseReadAt.get(entry.id)!)}` : "טרם נקרא על ידי הלקוח"}
+            </p>
+          </div> : <ReviewCheckInForm checkInId={entry.id} clientId={id} clientName={data.profile.full_name} templates={responseTemplates}/>}
           {photosByCheckIn[entry.id]?.length
             ? <div className="mt-3"><CheckInPhotoGallery photos={photosByCheckIn[entry.id]}/></div>
             : <p className="mt-3 text-xs text-[#5B5F5B]">{signedPhotos.error ? "לא ניתן לטעון את התמונות כרגע. רענון הדף ייצור קישורים חדשים." : "לא צורפו תמונות לצ׳ק־אין זה."}</p>}
@@ -333,6 +394,18 @@ export default async function CoachClientPage({ params, searchParams }: { params
           tools too, but they are not notes, and a tab named for one thing should
           not carry three. */}
       {tab === "notes" && <NotesPanel clientId={id} notes={coachNotes??[]} open/>}
+
+      {/* The direct channel. Notes above are private to the coach; this is the
+          one place the two of them actually talk. */}
+      {tab === "messages" && <section className="mt-5">
+        <MessageThread
+          messages={messages}
+          clientId={id}
+          emptyTitle={`עדיין לא התכתבתם עם ${data.profile.full_name.split(" ")[0]}`}
+          emptyDescription="הודעה שתישלח כאן מגיעה ללקוח עם התראה, גם כשהאפליקציה סגורה."
+          placeholder="מה לכתוב ללקוח?"
+        />
+      </section>}
 
       {tab === "overview" && <>
       <Section title="סטטוס הזמנה" summary={invitationStatus}>

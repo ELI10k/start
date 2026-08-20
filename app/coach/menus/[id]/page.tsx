@@ -10,17 +10,30 @@ import {
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
-type StoredDay = { meals: Array<{ title: EditableMenu["meals"][number]["title"]; notes?:string;free_calorie_target?:number|string; groups?:Array<{group_type:"protein"|"carbohydrate"|"fat"|"vegetables";items:Array<{food_id:string;amount:number|string;display_quantity?:number|string;amount_source?:string}>}>; items: Array<{ food_id: string; amount: number | string;display_quantity?:number|string;amount_source?:string }> }> };
+type StoredItem={food_id:string;amount:number|string;display_quantity?:number|string;amount_source?:string;item_role?:string;note?:string|null};
+type StoredDay = { day_index?: number; meals: Array<{ title: EditableMenu["days"][number]["meals"][number]["title"]; notes?:string;free_calorie_target?:number|string; groups?:Array<{group_type:"protein"|"carbohydrate"|"fat"|"vegetables";items:StoredItem[]}>; items: StoredItem[] }> };
+
+// Reopening a saved menu has to hand back everything that was saved.
+//
+// This used to rebuild only the protein and carbohydrate groups, and only the
+// food id, amount and source of each row. So a coach who added a fat portion and
+// vegetables, saved, and came back the next day found both gone from the editor -
+// and saving again deleted them from the menu for real. The same was true of
+// which rows were marked primary and of any per-food note.
+const GROUP_TYPES=["protein","carbohydrate","fat","vegetables"] as const;
 function editableGroups(meal:StoredDay["meals"][number]){
   const stored=meal.groups?.length?meal.groups:[{group_type:"protein" as const,items:meal.items}];
-  return(["protein","carbohydrate"] as const).map(type=>{
+  return GROUP_TYPES.map(type=>{
     const group=stored.find(candidate=>candidate.group_type===type);
     return{
       type,
-      items:(group?.items??[]).map(item=>({
+      items:(group?.items??[]).map((item,index)=>({
         foodId:item.food_id,
         amount:Number(item.display_quantity??item.amount),
         amountSource:item.amount_source==="auto"?"auto" as const:"manual" as const,
+        // Legacy rows carry no role; there the first row was the primary.
+        primary:item.item_role?item.item_role==="primary":index===0,
+        note:item.note??"",
       })),
     };
   });
@@ -77,14 +90,20 @@ export default async function EditMenuPage({
           ? "auto"
           : "manual",
     },
-    meals: (menu.days as StoredDay[]).flatMap((day) =>
-      day.meals.map((meal) => ({
-        title: meal.title,
-        notes:meal.notes??"",
-        freeCalorieTarget:String(meal.free_calorie_target??""),
-        groups:editableGroups(meal),
-      })),
-    ),
+    // One entry per stored day, in weekday order. A menu saved before the day
+    // model existed has exactly one day with index 0, which is what the editor
+    // now calls "ברירת מחדל" - so it opens unchanged.
+    days: (menu.days as StoredDay[])
+      .map((day) => ({
+        dayIndex: Number(day.day_index ?? 0),
+        meals: day.meals.map((meal) => ({
+          title: meal.title,
+          notes: meal.notes ?? "",
+          freeCalorieTarget: String(meal.free_calorie_target ?? ""),
+          groups: editableGroups(meal),
+        })),
+      }))
+      .sort((a, b) => a.dayIndex - b.dayIndex),
   };
   return (
     <PersistentMenuEditor
@@ -95,7 +114,7 @@ export default async function EditMenuPage({
         foodId: String(row.food_id),
         count: Number(row.selection_count),
         lastUsedAt: String(row.last_used_at),
-        favorite: Boolean(row.manual_favorite),
+        favorite: row.manual_favorite === null || row.manual_favorite === undefined ? null : Boolean(row.manual_favorite),
       }))}
     />
   );

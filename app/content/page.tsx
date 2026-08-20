@@ -33,7 +33,7 @@ export default async function ContentPage() {
   });
 
   return (
-    <ClientShell className="bg-[#090B09] text-white">
+    <ClientShell>
       <PageHeader
         eyebrow="ספריית התוכן"
         title="הקורסים של START"
@@ -46,7 +46,7 @@ export default async function ContentPage() {
             <Link
               key={course.id}
               href={`/content/category/${encodeURIComponent(course.slug)}`}
-              className="group overflow-hidden rounded-[28px] border border-white/10 bg-[#151815] shadow-2xl shadow-black/30 transition-transform hover:-translate-y-1"
+              className="group overflow-hidden rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] transition-transform hover:-translate-y-1 hover:border-[#16A34A]/50"
             >
               {course.thumbnailUrl ? (
                 <Image
@@ -59,7 +59,7 @@ export default async function ContentPage() {
                   className="aspect-[16/9] w-full object-cover transition duration-500 group-hover:scale-[1.03]"
                 />
               ) : (
-                <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-[#183D24] via-[#101C13] to-black text-[#4ADE80]">
+                <div className="flex aspect-[16/9] items-center justify-center bg-[#ECFDF3] text-[#16A34A]">
                   <BookOpen aria-hidden="true" size={34} />
                 </div>
               )}
@@ -67,9 +67,9 @@ export default async function ContentPage() {
                 <span className="pill pill--green">קורס</span>
                 <h2 className="mt-3 text-xl font-black">{course.name}</h2>
                 {course.description ? (
-                  <p className="mt-2 text-sm leading-6 text-[#B7BCB7]">{course.description}</p>
+                  <p className="mt-2 text-sm leading-6 text-[#5B5F5B]">{course.description}</p>
                 ) : null}
-                <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-4 text-sm text-[#D7DBD7]">
+                <div className="mt-4 flex items-center justify-between border-t border-[#E5E7E5] pt-4 text-sm text-[#5B5F5B]">
                   <span>{course.lessons.length} שיעורים</span>
                   <span>{course.completed}/{course.lessons.length} הושלמו</span>
                 </div>

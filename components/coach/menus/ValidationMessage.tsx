@@ -1,2 +1,0 @@
-import { AlertCircle } from "lucide-react";
-export default function ValidationMessage({ messages }: { messages: readonly string[] }) { if (!messages.length) return null; return <div role="alert" className="rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-4 text-sm text-[#DC2626]"><div className="mb-2 flex items-center gap-2 font-bold"><AlertCircle size={17} />נדרש תיקון לפני השמירה</div><ul className="list-inside list-disc space-y-1">{messages.map((message) => <li key={message}>{message}</li>)}</ul></div>; }

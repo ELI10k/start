@@ -7,12 +7,12 @@ import { CLIENT_TABS, isClientTab } from "../lib/coach/client-tabs.ts";
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
 // The client card used to be one scroll of nine collapsed panels. These pin the
-// seven sections it became, and the property that matters most: every tab is
-// still the client you opened.
+// sections it became, and the property that matters most: every tab is still the
+// client you opened.
 
-test("the file has the seven sections, and only those", () => {
+test("the file has the eight sections, and only those", () => {
   assert.deepEqual(CLIENT_TABS.map((tab) => tab.id), [
-    "overview", "intake", "nutrition", "workouts", "progress", "report", "notes",
+    "overview", "intake", "nutrition", "workouts", "progress", "messages", "report", "notes",
   ]);
   assert.equal(isClientTab("nutrition"), true);
   assert.equal(isClientTab("../../etc"), false);

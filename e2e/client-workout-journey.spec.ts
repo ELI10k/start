@@ -63,10 +63,12 @@ test.describe("client workout journey", () => {
     await expect(sheet).toBeHidden();
 
     // Leave no active session behind for the next spec.
-    const cancel = page.getByRole("button", { name: "ביטול האימון" });
+    // Renamed when leaving stopped meaning "delete everything": the way out is
+    // now "יציאה מהאימון", and deleting is one of three choices behind it.
+    const cancel = page.getByRole("button", { name: "יציאה מהאימון" });
     if (await cancel.count()) {
       await cancel.click();
-      await page.getByRole("button", { name: /ביטול האימון ומחיקת הנתונים/ }).click();
+      await page.getByRole("button", { name: /מחיקת האימון וכל הסטים שנרשמו/ }).click();
     }
     await signOut(page);
   });

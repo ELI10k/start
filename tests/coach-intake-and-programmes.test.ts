@@ -130,8 +130,11 @@ test("the picker filters by the food's own group, and keeps favorite foods first
   // Searching narrows; it does not reorder the sections away.
   assert.match(picker, /const searchFavorites=matching\.filter\(item=>isFavorite\(item\.food,item\.u\)\)/);
   assert.match(picker, /return\[\.\.\.searchFavorites,\.\.\.searchRest\]/);
-  // A coach can explicitly remove an imported master food from their own list.
-  assert.match(picker, /u\?u\.favorite:Boolean\(food\.isMaster\)/);
+  // A coach can explicitly remove an imported master food from their own list -
+  // and only explicitly. This used to assert `u ? u.favorite : isMaster`, which
+  // demoted a master food the first time it was *selected*, because a usage row
+  // is evidence of use and not of an opinion. Null is "no opinion".
+  assert.match(picker, /u\?\.favorite\?\?Boolean\(food\.isMaster\)/);
   assert.doesNotMatch(picker, /disabled=\{item\.food\.isMaster\}/);
 });
 

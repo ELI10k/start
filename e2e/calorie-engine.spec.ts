@@ -22,7 +22,7 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.locator('select[aria-label="לקוח"]');
+    const clientSelect = page.locator('select[aria-label="לקוח"]').first();
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
 
@@ -56,7 +56,10 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.locator('select[aria-label="לקוח"]');
+    // .first(): in dev the page can momentarily hold two mounts of the editor,
+    // and a bare selector then resolves to two and trips strict mode. Scoping to
+    // <main> was worse - it made the test skip silently instead of run.
+    const clientSelect = page.locator('select[aria-label="לקוח"]').first();
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
     await clientSelect.selectOption((await options[1].getAttribute("value")) ?? "");
@@ -89,7 +92,7 @@ test.describe("calorie engine in the builder", () => {
     await page.goto("/coach/menus/new");
     await expect(page.getByLabel("שם התפריט")).toHaveCount(1);
 
-    const clientSelect = page.locator('select[aria-label="לקוח"]');
+    const clientSelect = page.locator('select[aria-label="לקוח"]').first();
     const options = await clientSelect.locator("option").all();
     if (options.length < 2) test.skip(true, "no clients to choose from");
     await clientSelect.selectOption((await options[1].getAttribute("value")) ?? "");

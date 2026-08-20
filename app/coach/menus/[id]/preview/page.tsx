@@ -38,17 +38,26 @@ export default async function MenuPreviewPage({
                 <h2 className="text-xl font-black">{meal.title}</h2>
                 {meal.notes?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
                 {meal.free_calorie_target?<p className="mt-3 rounded-xl border border-[#16A34A]/20 p-3 text-[#16A34A]">מסגרת: {meal.free_calorie_target} קלוריות חופשיות</p>:<div className="mt-3 space-y-3">
-                  {(meal.groups??[]).map(group=><section key={group.id} className="rounded-xl border border-[#E5E7E5] p-3"><h3 className="font-bold">{groupName(group.group_type)}</h3><p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור אפשרות אחת מהקבוצה</p><ul className="mt-2 divide-y divide-[#E5E7E5]">{group.items.map((item,index) => (
+                  {(meal.groups??[]).map(group=>{
+                  // Which row is the primary is a property of the row, not of its
+                  // position: a group can hold more than one primary - "ביצה 1 +
+                  // 2 לבני ביצה" is one protein portion built from two foods - and
+                  // reading position alone showed the coach a preview with one
+                  // primary where the client will be served two. Position is used
+                  // only for rows saved before item_role existed.
+                  const roled=group.items.some((item)=>item.item_role==="primary"||item.item_role==="alternative");
+                  const isPrimary=(item:PreviewItem,index:number)=>roled?item.item_role==="primary":index===0;
+                  return <section key={group.id} className="rounded-xl border border-[#E5E7E5] p-3"><h3 className="font-bold">{groupName(group.group_type)}</h3><p className="mt-1 text-xs text-[#5B5F5B]">יש לבחור אפשרות אחת מהקבוצה</p><ul className="mt-2 divide-y divide-[#E5E7E5]">{group.items.map((item,index) => (
                     <li
                       key={item.id}
-                      className={`flex justify-between gap-4 py-3 text-sm ${index===0?"font-bold text-[#16A34A]":""}`}
+                      className={`flex justify-between gap-4 py-3 text-sm ${isPrimary(item,index)?"font-bold text-[#16A34A]":""}`}
                     >
-                      <span>{index===0?"מאכל ראשי · ":"חלופה · "}{names.get(item.food_id) ?? "מזון לא זמין"}</span>
+                      <span>{isPrimary(item,index)?"מאכל ראשי · ":"חלופה · "}{names.get(item.food_id) ?? "מזון לא זמין"}</span>
                       <span className="text-[#5B5F5B]">
                         {item.display_quantity??item.amount} {item.measurement_unit==="יחידות"?"יחידות":"גרם"} · {item.calculated_calories} קל׳
                       </span>
                     </li>
-                  ))}</ul></section>)}
+                  ))}</ul></section>})}
                 </div>}
               </article>
             ))}

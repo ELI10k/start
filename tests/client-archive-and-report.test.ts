@@ -8,7 +8,7 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 
 const EMPTY: ReportInput = {
   weighIns: [], checkIns: [],
-  hasMenu: false, menuCompletionPercent: 0, menuPlannedItems: 0,
+  hasMenu: false, menuCompletionPercent: 0, menuPlannedMeals: 0,
   hasProgram: false, programName: null, weeklyFrequency: null,
   weeklyCompletionPercent: 0, lastWorkoutAt: null, goalLabel: null, calorieTarget: null,
 };
@@ -113,7 +113,7 @@ test("two measurements make a trend, and it carries both points", () => {
 test("every recommendation carries the figures it came from", () => {
   const report = buildClientReport({
     ...EMPTY,
-    hasMenu: true, menuCompletionPercent: 20, menuPlannedItems: 10,
+    hasMenu: true, menuCompletionPercent: 20, menuPlannedMeals: 5,
     hasProgram: true, programName: "A-B", weeklyFrequency: 4, weeklyCompletionPercent: 25,
     goalLabel: "חיטוב עדין", calorieTarget: 2100,
   });

@@ -47,11 +47,12 @@ test("a meal with no groups can be marked eaten, which is what the free-calorie 
 
   // Completion used to require at least one group, which made the free-calorie
   // meal impossible to close. An explicit mark now wins outright.
-  assert.match(repository, /completed: statusByMeal\.get\(meal\.id\) === "eaten"/);
-  assert.match(repository, /skipped: statusByMeal\.get\(meal\.id\) === "not_eaten"/);
+  assert.match(repository, /completed: statusByMeal\.get\(meal\.id\)\?\.status === "eaten"/);
+  assert.match(repository, /skipped: statusByMeal\.get\(meal\.id\)\?\.status === "not_eaten"/);
 
-  // A skip suppresses the inferred completion too.
-  assert.match(repository, /statusByMeal\.get\(meal\.id\) !== "not_eaten"/);
+  // Any explicit mark suppresses the inferred completion - not only a skip.
+  // "Ate something else" must not read as a completed meal either.
+  assert.match(repository, /!statusByMeal\.get\(meal\.id\) &&/);
 
   // A missing relation degrades to "unmarked" so the screen survives the window
   // between deploying the code and applying the migration.
@@ -59,21 +60,29 @@ test("a meal with no groups can be marked eaten, which is what the free-calorie 
   assert.match(repository, /42P01/);
 });
 
-test("the action accepts exactly the three states", async () => {
+test("the action accepts exactly the four states, and only 'other' carries a note", async () => {
   const actions = await source("app/actions/product.ts");
-  assert.match(actions, /const MEAL_STATUSES = new Set\(\["eaten", "not_eaten", "none"\]\)/);
+  assert.match(actions, /const MEAL_STATUSES = new Set\(\["eaten", "not_eaten", "other", "none"\]\)/);
   assert.match(actions, /set_meal_day_status/);
   assert.match(actions, /invalid_meal_status/);
+  // A substitution without a description is the old "not eaten" in disguise: it
+  // records that the plan was missed and nothing about what replaced it.
+  assert.match(actions, /substitution_requires_note/);
+  assert.match(actions, /p_note: status === "other" \? note : null/);
 });
 
-test("only the negative state is red, and the skip needs no dialog", async () => {
+test("only the negative state is red, and eating and skipping need no dialog", async () => {
   const control = await source("components/client/MealStatusControl.tsx");
   assert.match(control, /pill pill--red[\s\S]*לא נאכל/);
   assert.match(control, /pill pill--green[\s\S]*נאכל/);
-  // One form post per state: no confirmation step, no sheet, no free-text field.
-  assert.doesNotMatch(control, /window\.confirm|BottomSheet|<textarea/);
+  // "Eaten" and "not eaten" are still one post each - no confirmation step.
+  assert.doesNotMatch(control, /window\.confirm/);
   // Skipping is offered even when an alternative has not been chosen.
   assert.match(control, /status="not_eaten"/);
+  // The substitution is the one state that asks a question, because it is the
+  // one state that carries an answer.
+  assert.match(control, /value="other"/);
+  assert.match(control, /name="note"/);
 });
 
 test("the coach can see which meals were skipped", async () => {

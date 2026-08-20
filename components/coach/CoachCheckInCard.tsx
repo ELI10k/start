@@ -1,7 +1,9 @@
+import Link from "next/link";
 import CheckInPhotoGallery from "@/components/client/CheckInPhotoGallery";
 import CheckInHandledForm from "@/components/coach/CheckInHandledForm";
 import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
 import { coachCheckInStatus } from "@/lib/check-ins/coach";
+import type { ResponseTemplate } from "@/app/actions/response-templates";
 
 type CheckInItem = {
   id: string;
@@ -44,9 +46,15 @@ export function checkInStatus(item: CheckInItem) {
 export default function CoachCheckInCard({
   item,
   photoError,
+  previousId,
+  templates = [],
 }: {
   item: CheckInItem;
   photoError: boolean;
+  /** The same client's preceding check-in, when there is one. */
+  previousId?: string;
+  /** The coach's saved replies, offered above the response box. */
+  templates?: readonly ResponseTemplate[];
 }) {
   const status = checkInStatus(item);
   return (
@@ -62,11 +70,22 @@ export default function CoachCheckInCard({
           </h2>
           <p className="text-xs text-[#3F433F]">{item.client?.email}</p>
         </div>
-        <span
-          className={`rounded-full border border-current/20 bg-[#F7F8F7] px-3 py-1 text-xs font-black ${status.className}`}
-        >
-          {status.label}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The comparison a coach actually wants is this client, this week
+              against last. Reaching it through two dropdowns listing every
+              check-in of every client made it easier to compare two different
+              people by accident than to compare the same one over time. */}
+          {previousId && (
+            <Link href={`/coach/check-ins?compareA=${item.id}&compareB=${previousId}#comparison`} className="chip">
+              השוואה לצ׳ק־אין הקודם
+            </Link>
+          )}
+          <span
+            className={`rounded-full border border-current/20 bg-[#F7F8F7] px-3 py-1 text-xs font-black ${status.className}`}
+          >
+            {status.label}
+          </span>
+        </div>
       </header>
 
       <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -106,7 +125,7 @@ export default function CoachCheckInCard({
           <summary className="cursor-pointer text-sm font-black text-[#16A34A]">
             {item.coach_response ? "עדכון תגובה" : "כתיבת תגובה"}
           </summary>
-          <ReviewCheckInForm checkInId={item.id} clientId={item.client_id} />
+          <ReviewCheckInForm checkInId={item.id} clientId={item.client_id} clientName={item.client?.full_name ?? ""} templates={templates} />
         </details>
         <CheckInHandledForm
           checkInId={item.id}
