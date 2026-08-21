@@ -18,6 +18,7 @@ import { daysSince, formatIsraelDateTime, israelDateKey, israelHour, israelWeekd
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
+import { reportedPortions } from "@/lib/nutrition/menu-intake";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
@@ -69,7 +70,12 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const tab = isClientTab(query.tab) ? query.tab : "overview";
   const none = <T,>() => Promise.resolve({ data: [] as T[] });
   const [{ data: invitations }, { data: contentRows }, { data: contentAssignments }, { data: clientNotifications }, { data: coachNotes }]=await Promise.all([
-    supabase.from("client_invitation_statuses").select("id,status,effective_status,sent_at,expires_at,opened_at,onboarding_completed_at").eq("client_id",id).order("sent_at",{ascending:false}),
+    // The pill under the client's name needs the newest invitation on every tab.
+    // The full history - and the "how many were sent" count - is only rendered
+    // on the overview, so only the overview pays for it.
+    tab==="overview"
+      ?supabase.from("client_invitation_statuses").select("id,status,effective_status,sent_at,expires_at,opened_at,onboarding_completed_at").eq("client_id",id).order("sent_at",{ascending:false})
+      :supabase.from("client_invitation_statuses").select("id,status,effective_status,sent_at,expires_at,opened_at,onboarding_completed_at").eq("client_id",id).order("sent_at",{ascending:false}).limit(1),
     tab==="notes"?supabase.from("content_items").select("id,title").eq("status","published").order("sort_order"):none<{id:string;title:string}>(),
     tab==="notes"?supabase.from("client_content_assignments").select("content_item_id").eq("client_id",id):none<{content_item_id:string}>(),
     // Read on the progress tab, where each coach response is shown alongside
@@ -139,14 +145,18 @@ export default async function CoachClientPage({ params, searchParams }: { params
   // includes the E2E dev server. Unknown is a fine answer here.
   // The factory throws synchronously when the key is absent, so the guard has to
   // wrap the call itself and not just the promise.
-  const authUser=await (async () => {
+  //
+  // Read on the overview and nowhere else: it is a round trip to the Admin API,
+  // and "פעולות חשבון" - the only section that asks whether the account is
+  // verified - lives on that tab. Every other tab was paying for it.
+  const authUser=tab==="overview"?await (async () => {
     try {
       const { data } = await createSupabaseAdminClient().auth.admin.getUserById(id);
       return data.user;
     } catch {
       return null;
     }
-  })();
+  })():null;
   const accountActivated=Boolean(authUser?.email_confirmed_at);
   const latestInvitation=invitations?.[0] ?? null;
   const invitationExpired=latestInvitation?.effective_status==="expired";
@@ -174,7 +184,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
     : null;
   // Assembled from the client's own records. Every figure below is one the
   // database holds; nothing is generated here.
-  const report=buildClientReport({
+  // Built on the tab that prints it. It reads no database of its own, but it
+  // walks every weigh-in and every check-in the client has ever filed, on every
+  // load of a screen that shows it one time in eight.
+  const report=tab==="report"?buildClientReport({
     weighIns: data.progress.map((entry) => ({ date: entry.date, weight: Number(entry.weight), navel: entry.navel_circumference === null ? null : Number(entry.navel_circumference) })),
     checkIns: data.checkIns.map((entry) => ({
       submittedAt: entry.submitted_at, adherence: entry.adherence ?? null, energy: entry.energy ?? null,
@@ -192,7 +205,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
     lastWorkoutAt: data.workouts.lastCompletedAt,
     goalLabel: isNutritionGoal(intake?.nutrition_goal) ? GOAL_LABELS[intake.nutrition_goal] : null,
     calorieTarget: energy.ok ? energy.calorieTarget : null,
-  });
+  }):null;
 
   return <main className="client-app-content">
     <header className="flex items-center gap-4 pb-4">
@@ -277,6 +290,29 @@ export default async function CoachClientPage({ params, searchParams }: { params
           {/* Meals, not rows: a meal holds a primary and its alternatives, and
               only one of them is ever eaten. */}
           <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו היום (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
+          {/* The figures above already read what the client reported eating. This
+              says where that differs from what was written - which is the part
+              that changes what a coach does next. A day eaten as prescribed
+              produces nothing here, which is the common case. */}
+          {(() => {
+            const changed = reportedPortions(data.menu?.meals ?? []);
+            if (!changed.length) return null;
+            return (
+              <div className="mt-4 border-t border-[#E5E7E5] pt-4">
+                <h3 className="text-sm font-black text-[#3F433F]">כמויות ששונו מהמתוכנן</h3>
+                <ul className="mt-2 grid gap-1.5 text-sm">
+                  {changed.map((row) => (
+                    <li key={`${row.mealTitle}-${row.name}`} className="flex flex-wrap items-baseline justify-between gap-2 rounded-xl bg-[#F7F8F7] px-3 py-2">
+                      <span className="min-w-0"><strong>{row.name}</strong><span className="mr-2 text-xs text-[#5B5F5B]">{row.mealTitle}</span></span>
+                      <span className="text-[#5B5F5B]">
+                        תוכנן {row.planned} {row.unit} · נאכל <strong className={row.reported < row.planned ? "text-[#B45309]" : "text-[#0B0B0B]"}>{row.reported}</strong>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
           {/* Read-only here: this is the client's account of their own day. */}
           {loggedFood.length > 0 && (
             <div className="mt-4 border-t border-[#E5E7E5] pt-4">
@@ -401,7 +437,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
       </>}
 
       {tab === "report" && <div className="grid gap-4">
-        <ClientReportView report={report}/>
+        {report && <ClientReportView report={report}/>}
         {/* The weekly summary the AI coach writes, under its own heading, so a
             coach can always tell the counted lines from the written ones. */}
         <WeeklySummaryPanel summaries={weeklySummaries}/>

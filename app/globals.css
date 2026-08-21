@@ -684,14 +684,26 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   cursor: grab; touch-action: none;
 }
 .food-row__grip:hover { background: var(--surface-raised); color: var(--ink); }
+/* Reorder arrows on the menu builder.
+ *
+ * These were 24px wide. The global rule above already gives every button a 44px
+ * min-height, so they were 24x44 - tall enough and half as wide as a thumb
+ * needs, which is the shape you mis-tap. They are the only way to reorder a
+ * meal: the drag grip exists on food rows, not on meal headers.
+ *
+ * Square and side by side rather than a narrow stack. Stacking two 44px buttons
+ * would make the pair 88px tall in a header row that is 48px, so the axis they
+ * grow along had to change with the size.
+ */
 .food-row__nudge {
   display: grid; place-items: center;
-  width: 1.5rem; height: 1.1rem;
+  width: 2.75rem; height: 2.75rem;
   border: 1px solid var(--line); border-radius: var(--radius-sm);
   color: var(--ink-muted); background: var(--surface);
 }
-.food-row__nudge:first-child { margin-bottom: .15rem; }
 .food-row__nudge:disabled { opacity: .35; }
+/* The pair, laid out along the axis that has room for it. */
+.food-row__nudges { display: flex; flex: none; align-items: center; gap: .25rem; }
 .food-row[data-dragging] { opacity: .5; }
 
 /* Bottom sheet: the mobile answer to a modal. */

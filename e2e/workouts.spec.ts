@@ -81,7 +81,12 @@ test.describe("workouts - coach", () => {
   test("the coach client list renders", async ({ page }) => {
     await page.goto("/coach/clients");
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
-    await expect(page.locator("main")).toBeVisible();
+    // The route has a loading boundary that renders its own <main role="status">
+    // while the list resolves, so on a slow viewport two <main> elements exist
+    // for a moment and a bare locator("main") is a strict-mode violation rather
+    // than a failure of the screen. What this test is for is that the list
+    // arrives, so it waits for the list's own heading.
+    await expect(page.getByRole("heading", { name: "לקוחות" })).toBeVisible({ timeout: 30_000 });
   });
 
   test("the coach check-in review screen renders", async ({ page }) => {

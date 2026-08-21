@@ -26,10 +26,28 @@ export async function GET(request: Request) {
   const clientIds = rows(clients).map((client) => String(client.id));
   const dailyInput = await gatherDailyInputs(supabase, clientIds, date);
 
+  // Whether each client asked for this message.
+  //
+  // "סיכום סוף יום" has been a switch on the preferences screen since
+  // 202607210002 and nothing has ever read it - not this route, not any reminder
+  // function. A client who turned it off kept getting the evening message every
+  // night, which is the one thing a notification setting must never do. The
+  // category gate inside create_in_app_notification does not cover it: that asks
+  // whether nutrition notifications are wanted at all, which is a broader
+  // question than this one.
+  //
+  // Absent row means never configured, and the column's default is true.
+  const { data: preferences } = clientIds.length
+    ? await supabase.from("notification_preferences").select("user_id,end_of_day_reminder").in("user_id", clientIds)
+    : { data: [] };
+  const wantsSummary = new Map(rows(preferences).map((row) => [String(row.user_id), row.end_of_day_reminder !== false]));
+
   let delivered = 0;
   let failed = 0;
+  let declined = 0;
   for (const client of rows(clients)) {
     const clientId = String(client.id);
+    if (!(wantsSummary.get(clientId) ?? true)) { declined += 1; continue; }
     try {
       const input = dailyInput(clientId);
       const message = buildDailyCoachMessage(input);
@@ -52,7 +70,7 @@ export async function GET(request: Request) {
       console.error("daily coach failed for client", { clientId, message: cause instanceof Error ? cause.message : "unknown" });
     }
   }
-  return NextResponse.json({ ok: failed === 0, date, delivered, failed });
+  return NextResponse.json({ ok: failed === 0, date, delivered, failed, declined });
 }
 
 type DailyInput = ReturnType<typeof emptyInput>;

@@ -110,3 +110,25 @@ export async function signOutThroughApp(page: Page, who: TestIdentity): Promise<
   await page.context().clearCookies();
   invalidateSession(who.email);
 }
+
+/**
+ * Opens every meal card on the nutrition screen.
+ *
+ * The 2026-08-20 review collapsed the six meals into closed <details> rows and
+ * opens only the meal that is due right now - and only while it is still
+ * unmarked. Everything inside a closed <details> is hidden, so a spec that
+ * reaches straight for `fieldset button` passes or fails on what time of day it
+ * ran at and whether the test account had already marked that meal. Two specs
+ * had been failing that way since the collapse shipped.
+ *
+ * Opening them first asserts the behaviour the screen actually has, rather than
+ * depending on the clock.
+ */
+export async function openMealCards(page: Page): Promise<void> {
+  const cards = page.locator("details.meal-card");
+  const count = await cards.count();
+  for (let index = 0; index < count; index += 1) {
+    const card = cards.nth(index);
+    if ((await card.getAttribute("open")) === null) await card.locator("summary").first().click();
+  }
+}

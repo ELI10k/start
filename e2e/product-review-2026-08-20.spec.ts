@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { assertNotProduction, identity, requireIdentity, signIn } from "./support/guards";
+import { assertNotProduction, identity, requireIdentity, signIn, openMealCards } from "./support/guards";
 
 /**
  * The four flows the 2026-08-20 review changed, exercised against a real
@@ -86,6 +86,10 @@ test.describe("2026-08-20 review", () => {
 
     const repeat = page.getByRole("button", { name: /כמו אתמול/ });
     test.skip(!(await repeat.count()), "no menu, or every group is already chosen today");
+
+    // The meals are collapsed rows and only the one due right now is open, so
+    // the groups are hidden unless the clock happens to agree with the spec.
+    await openMealCards(page);
 
     // Choose one alternative by hand first. That choice is the thing the copier
     // must not touch.

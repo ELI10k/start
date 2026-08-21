@@ -16,6 +16,10 @@ export type CoachThread = Readonly<{
   lastBody: string;
   lastAt: string;
   unread: number;
+  /** Whether the last word in the thread was the client's - i.e. it is the
+      coach's turn. Unread and awaiting-a-reply are different questions: reading
+      a message answers the first and not the second. */
+  awaitingReply: boolean;
 }>;
 
 export const TOPIC_LABELS: Readonly<Record<DirectMessage["topic"], string>> = {

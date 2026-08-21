@@ -44,7 +44,9 @@ test("nutrition adherence is counted in meals, not in menu rows", async () => {
   // One item per group is ever eaten, so dividing eaten rows by written rows
   // capped a fully marked day at 25%.
   assert.match(body, /const plannedMeals = menu\?\.meals \?\? \[\]/);
-  assert.match(body, /markedMeals = plannedMeals\.filter\(\(meal\) => meal\.status !== null \|\| meal\.completed\)/);
+  // The same predicate, now shared with the two client screens that ask it.
+  assert.match(body, /markedMeals = plannedMeals\.filter\(isMealAnswered\)/);
+  assert.match(repository, /isMealAnswered = \(meal: IntakeMeal\)|isMealAnswered/);
   assert.match(body, /markedMeals \/ plannedMeals\.length/);
   assert.doesNotMatch(body, /plannedItems/);
 });

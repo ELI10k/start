@@ -6,7 +6,7 @@ import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
 import NativeBridge from "@/components/native/NativeBridge";
-import { getUnreadNotificationCount } from "@/lib/notifications/repository";
+import { DIRECT_MESSAGE_TYPE, getUnreadNotificationCount } from "@/lib/notifications/repository";
 import { getUnreadMessageCount } from "@/lib/messages/repository";
 
 const links = [
@@ -22,11 +22,18 @@ const links = [
 export default async function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   // The bottom bar carries one badge, so it carries one figure: anything at all
   // that is waiting for this client, notification or message.
-  const [unreadNotifications, unreadMessages] = await Promise.all([
+  //
+  // Counted once each. A message from the coach writes a message row AND a
+  // notification pointing at it, so adding the two counts every message twice -
+  // one unread message showed a badge of 2 beside a bell showing 1. The bell
+  // keeps counting notification-centre rows, which is what it opens; the badge
+  // counts things waiting, and takes messages from the message side only.
+  const [unreadNotifications, unreadOtherNotifications, unreadMessages] = await Promise.all([
     getUnreadNotificationCount(),
+    getUnreadNotificationCount([DIRECT_MESSAGE_TYPE]),
     getUnreadMessageCount(),
   ]);
-  const unreadCount = unreadNotifications + unreadMessages;
+  const unreadCount = unreadOtherNotifications + unreadMessages;
   return (
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">

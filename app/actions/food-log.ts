@@ -101,18 +101,34 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     return { ok: false, message: describe(error.message) };
   }
 
-  // Logging against a meal is also the answer to "did you eat it?" - the meal
-  // is marked as eaten-something-else, carrying this entry's own words. Without
-  // it the client would have to say the same thing twice, in two controls, and
-  // the meal would keep asking.
+  // Logging against a meal is also the answer to "did you eat it?" - so an
+  // unanswered meal is marked as eaten-something-else, carrying this entry's own
+  // words. Without it the client would have to say the same thing twice, in two
+  // controls, and the meal would keep asking.
+  //
+  // Two meals must NOT be marked, and both used to be:
+  //
+  //   * a meal already answered. Marking "other" deletes the meal's recorded
+  //     intake, so a client who marked breakfast eaten and then scanned a snack
+  //     against it lost the mark and the day's calories fell by a whole meal -
+  //     silently, as the side effect of logging something extra.
+  //   * a free-calorie meal. There is no plan to have eaten instead of: filling
+  //     the window IS the plan, and calling it a substitution both mislabels it
+  //     on the client's screen and tells the coach the frame was missed.
   const mealId = uuid(form.get("mealId"));
   if (mealId) {
-    await supabase.rpc("set_meal_day_status", {
-      p_meal_id: mealId,
-      p_date: date,
-      p_status: "other",
-      p_note: resolvedName.slice(0, 500),
-    });
+    const [{ data: meal }, { data: existing }] = await Promise.all([
+      supabase.from("meals").select("free_calorie_target").eq("id", mealId).maybeSingle(),
+      supabase.from("meal_day_status").select("status").eq("client_id", auth.id).eq("meal_id", mealId).eq("status_date", date).maybeSingle(),
+    ]);
+    const isFreeCalorieMeal = Boolean(meal?.free_calorie_target);
+    if (!isFreeCalorieMeal && !existing)
+      await supabase.rpc("set_meal_day_status", {
+        p_meal_id: mealId,
+        p_date: date,
+        p_status: "other",
+        p_note: resolvedName.slice(0, 500),
+      });
   }
 
   revalidatePath("/nutrition");

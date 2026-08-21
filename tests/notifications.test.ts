@@ -58,19 +58,22 @@ test("workout reminders use planned days, completion checks and independent morn
 });
 
 test("workout reminder preferences validate times and are persisted through the authenticated action", async () => {
-  const [actions, repository, center] = await Promise.all([
+  const [actions, repository, form] = await Promise.all([
     readFile(new URL("../app/actions/notifications.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/notifications/repository.ts", import.meta.url), "utf8"),
-    readFile(new URL("../components/notifications/NotificationsCenter.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/notifications/NotificationPreferencesForm.tsx", import.meta.url), "utf8"),
   ]);
-  assert.match(actions, /invalid_workout_reminder_times/);
+  // The rule is unchanged - morning must precede evening - but it is now an
+  // answer rather than a thrown Error, which took the screen down.
+  assert.match(actions, /morningTime >= eveningTime/);
+  assert.match(actions, /שעת תזכורת הבוקר חייבת להיות מוקדמת משעת הערב/);
   assert.match(actions, /p_workout_morning_reminder/);
   assert.match(actions, /p_workout_evening_reminder/);
   assert.match(repository, /workoutMorningReminderTime/);
-  assert.match(center, /workoutMorningReminderTime/);
-  assert.match(center, /workoutEveningReminderTime/);
-  assert.match(center, /mealReminderDelayMinutes/);
-  assert.match(center, /endOfDayReminderTime/);
+  assert.match(form, /workoutMorningReminderTime/);
+  assert.match(form, /workoutEveningReminderTime/);
+  assert.match(form, /mealReminderDelayMinutes/);
+  assert.match(form, /endOfDayReminderTime/);
 });
 
 test("daily reminder sprint schema protects snooze, skipped workouts and notification preferences", async () => {

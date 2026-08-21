@@ -15,19 +15,41 @@ import {
 import FreeMenu from "@/components/client/FreeMenu";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
-import { israelDateKey, ISRAEL_TIME_ZONE } from "@/lib/date-time";
+import { israelDateKey, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
+import NutritionDayStrip from "@/components/client/NutritionDayStrip";
 import ShoppingList from "@/components/client/ShoppingList";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
+import { addTotals, isMealAnswered, isMealEaten, mealStanding, sumItems } from "@/lib/nutrition/menu-intake";
 
-export default async function NutritionPage() {
+export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
-  const today = israelDateKey();
+  const now = israelDateKey();
+  // Which day is on screen.
+  //
+  // Everything here has always been stored per date - the selections, the marks,
+  // the amounts, the food log - and the screen simply never asked for any date
+  // but this one. So a client who marked four meals and went to bed had no way
+  // to close the fifth in the morning, and no way to look at what they ate
+  // yesterday at all.
+  //
+  // Backwards only, and only a week. Tomorrow has not happened, and a menu can
+  // be reassigned, so a date far enough back stops describing anything the
+  // client would recognise. The database applies the same rule from its own
+  // side: every write checks the assignment was active on that date.
+  const days = Array.from({ length: 7 }, (_, back) => {
+    const day = new Date(`${now}T12:00:00Z`);
+    day.setUTCDate(day.getUTCDate() - back);
+    return day.toISOString().slice(0, 10);
+  });
+  const requested = (await searchParams).date;
+  const today = requested && days.includes(requested) ? requested : now;
+  const isToday = today === now;
   const [menu, freeMenu, foods, logged] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today)]);
   // What was eaten instead, and what of it carries figures. Only the measured
   // part joins the day's totals; the rest is shown as unmeasured rather than
@@ -39,15 +61,10 @@ export default async function NutritionPage() {
   // group has no chosen alternative yet the primary stands in for it, so the
   // number opens as the day the coach planned and then follows the real choices.
   // What one meal costs as it stands: the chosen alternative in each group, or
-  // the primary where nothing is chosen yet.
-  const mealItemsOf = (meal: typeof menu extends undefined ? never : NonNullable<typeof menu>["meals"][number]) =>
-    meal.groups.flatMap((group) => {
-      const chosen = group.items.find((item) => item.id === group.selectedItemId);
-      if (chosen) return [chosen];
-      const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
-      return primary ? [primary] : [];
-    });
-  const summaryItems = menu?.meals.flatMap(mealItemsOf) ?? [];
+  // the primary where nothing is chosen yet. Shared with the dashboard and the
+  // coach's client file - three screens quoting the same day had three copies of
+  // this and did not agree.
+  const summaryItems = menu?.meals.flatMap(mealStanding) ?? [];
   // Eaten and still to come, kept apart. A single number cannot answer "how am I
   // doing" and "what is left", and a slash between two figures says neither: it
   // reads as a fraction, a score or a ratio depending on who is looking.
@@ -55,26 +72,11 @@ export default async function NutritionPage() {
   // A meal is eaten when it says so. One marked not-eaten or eaten-something-else
   // is neither eaten nor still to come - it is answered, and counting it as
   // remaining would keep asking a question the client has already answered.
-  const eatenItems = menu?.meals.filter((meal) => meal.status === "eaten" || meal.completed).flatMap(mealItemsOf) ?? [];
-  const remainingItems = menu?.meals.filter((meal) => !meal.status && !meal.completed).flatMap(mealItemsOf) ?? [];
-  const totalOf = (items: readonly { calories: number; protein: number; carbs: number; fat: number }[]) =>
-    items.reduce((sum, item) => ({
-      calories: sum.calories + item.calories,
-      protein: sum.protein + item.protein,
-      carbs: sum.carbs + item.carbs,
-      fat: sum.fat + item.fat,
-    }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+  const eatenItems = menu?.meals.filter(isMealEaten).flatMap(mealStanding) ?? [];
+  const remainingItems = menu?.meals.filter((meal) => !isMealAnswered(meal)).flatMap(mealStanding) ?? [];
   // Anything logged was eaten by definition - that is what logging it means.
-  const eatenTotals = (() => {
-    const base = totalOf(eatenItems);
-    return {
-      calories: base.calories + loggedTotals.calories,
-      protein: base.protein + loggedTotals.protein,
-      carbs: base.carbs + loggedTotals.carbs,
-      fat: base.fat + loggedTotals.fat,
-    };
-  })();
-  const remainingTotals = totalOf(remainingItems);
+  const eatenTotals = addTotals(sumItems(eatenItems), loggedTotals);
+  const remainingTotals = sumItems(remainingItems);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
   const menuTotals = menu
     ? summaryItems.reduce(
@@ -103,9 +105,10 @@ export default async function NutritionPage() {
     <ClientShell>
       <PageHeader
         eyebrow="התזונה שלי"
-        title="הארוחות של היום"
+        title={isToday ? "הארוחות של היום" : `הארוחות של ${formatIsraelDate(`${today}T12:00:00Z`, { weekday: "long", day: "numeric", month: "long" })}`}
         description={menu?.title ?? "התפריט האישי שלך"}
       />
+      <NutritionDayStrip days={days} active={today} today={now} />
       {/* The screen already works out which meal is due and gives it an anchor -
           nothing ever linked to it, so a client at 19:00 still scrolled past five
           meals to reach dinner. One link, only while there is something to jump
@@ -113,7 +116,7 @@ export default async function NutritionPage() {
       {/* How many groups are still waiting for a choice today. The button only
           appears while that number is above zero. */}
       {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
-      {menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
+      {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
         ? <a href="#current-meal" className="chip mb-3 inline-flex">לארוחה של עכשיו · {currentMealTitle}</a>
         : null}
       <div className="mb-4 grid gap-2 sm:grid-cols-2">
@@ -164,7 +167,7 @@ export default async function NutritionPage() {
             const missingChoice = !meal.freeCalorieTarget && meal.groups.some((group) => !group.selectedItemId);
             // Marked, not reordered: the day still reads in its own order, and
             // the meal that is due right now says so.
-            const isNow = meal.title === currentMealTitle && !meal.status && !meal.completed;
+            const isNow = isToday && meal.title === currentMealTitle && !meal.status && !meal.completed;
             // What this meal costs as it currently stands: the chosen alternative
             // in each group, or the primary where nothing is chosen yet - the same
             // rule the daily summary uses, so the two never disagree.
@@ -252,9 +255,9 @@ export default async function NutritionPage() {
         </div>
       ) : (
         <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
-          <h2 className="font-black">עדיין אין תפריט פעיל</h2>
+          <h2 className="font-black">{isToday ? "עדיין אין תפריט פעיל" : "לא היה תפריט פעיל ביום הזה"}</h2>
           <p className="mt-2 text-sm text-[#5B5F5B]">
-            לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן.
+            {isToday ? "לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן." : "אפשר לחזור להיום ולהמשיך משם."}
           </p>
         </div>
       )}

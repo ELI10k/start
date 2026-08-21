@@ -35,14 +35,38 @@ export async function markAllNotificationsRead(): Promise<void> {
   revalidateNotifications();
 }
 
-export async function saveNotificationPreferences(form: FormData): Promise<void> {
-  if (!(await getAuthContext())) throw new Error("not_authorized");
-  const morningTime = reminderTime(form, "workoutMorningReminderTime", "08:00");
-  const eveningTime = reminderTime(form, "workoutEveningReminderTime", "19:30");
-  const endOfDayTime = reminderTime(form, "endOfDayReminderTime", "21:30");
+export type PreferencesState = Readonly<{ ok: boolean; message?: string }>;
+
+/**
+ * Saves the notification preferences, and says so.
+ *
+ * Every refusal here used to be a thrown Error, and a thrown Error out of a
+ * server action is the full-page error screen. So a client who set their evening
+ * workout reminder earlier than their morning one - which the two time fields
+ * happily accept - lost the notifications screen and got "something went wrong",
+ * with no hint that one of the four fields they had just touched was the reason.
+ * The rules are unchanged; they are now answers rather than crashes.
+ */
+export async function saveNotificationPreferences(
+  _previous: PreferencesState,
+  form: FormData,
+): Promise<PreferencesState> {
+  if (!(await getAuthContext())) return { ok: false, message: "יש להתחבר מחדש." };
+  let morningTime: string;
+  let eveningTime: string;
+  let endOfDayTime: string;
+  try {
+    morningTime = reminderTime(form, "workoutMorningReminderTime", "08:00");
+    eveningTime = reminderTime(form, "workoutEveningReminderTime", "19:30");
+    endOfDayTime = reminderTime(form, "endOfDayReminderTime", "21:30");
+  } catch {
+    return { ok: false, message: "יש להזין שעה תקינה בכל שדות התזכורות." };
+  }
   const mealDelay = Number(form.get("mealReminderDelayMinutes") ?? 60);
-  if (morningTime >= eveningTime) throw new Error("invalid_workout_reminder_times");
-  if (!Number.isInteger(mealDelay) || mealDelay < 1 || mealDelay > 240) throw new Error("invalid_meal_reminder_delay");
+  if (morningTime >= eveningTime)
+    return { ok: false, message: "שעת תזכורת הבוקר חייבת להיות מוקדמת משעת הערב." };
+  if (!Number.isInteger(mealDelay) || mealDelay < 1 || mealDelay > 240)
+    return { ok: false, message: "ההשהיה לתזכורת ארוחה היא בין דקה ל־240 דקות." };
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc("save_notification_preferences", {
     p_nutrition: form.get("nutrition") === "on",
@@ -59,6 +83,7 @@ export async function saveNotificationPreferences(form: FormData): Promise<void>
     p_end_of_day_reminder: form.get("endOfDayReminder") === "on",
     p_end_of_day_reminder_time: endOfDayTime,
   });
-  if (error) throw error;
+  if (error) return { ok: false, message: "ההעדפות לא נשמרו. אפשר לנסות שוב." };
   revalidateNotifications();
+  return { ok: true, message: "ההעדפות נשמרו." };
 }

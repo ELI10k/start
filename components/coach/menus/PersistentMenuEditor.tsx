@@ -43,9 +43,10 @@ type MacroSources={protein:MacroSource;carbohydrates:MacroSource;fat:MacroSource
 export type EditableDay={dayIndex:number;meals:Meal[]};
 export type EditableMenu={id?:string;title:string;description:string;clientId:string;status:"draft"|"published"|"active";calorieTarget:string;proteinTarget:string;carbohydrateTarget:string;fatTarget:string;macroSources:MacroSources;days:EditableDay[]};
 
-// Sunday is 0, matching the reader's weekday index.
-export const WEEKDAY_LABELS=["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"] as const;
-const dayLabel=(dayIndex:number)=>dayIndex===0?"ברירת מחדל":`יום ${WEEKDAY_LABELS[dayIndex]}`;
+// Sunday is 0, matching the reader's weekday index. Shared with the preview
+// screen, which has to name the same day the same way.
+export { WEEKDAY_LABELS } from "@/lib/nutrition/menu-days";
+import { dayLabel, WEEKDAY_LABELS } from "@/lib/nutrition/menu-days";
 const emptyGroups=():Group[]=>[{type:"protein",items:[]},{type:"carbohydrate",items:[]},{type:"fat",items:[]},{type:"vegetables",items:[]}];
 const emptyMeal=():Meal=>({title:"ארוחת בוקר",notes:"",freeCalorieTarget:"",groups:emptyGroups()});
 const groupLabels:Record<GroupType,string>={protein:"קבוצת חלבון",carbohydrate:"קבוצת פחמימה",fat:"קבוצת שומן",vegetables:"קבוצת ירקות"};
@@ -696,7 +697,11 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         </p>
       </section>
 
-      {meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><div className="flex gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><span className="flex shrink-0 flex-col justify-center">
+      {meals.map((meal,index)=><section key={index} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">{/* Wraps on a phone. Five controls in one row - collapse, meal type, the
+          reorder pair, duplicate and delete - fit a desktop and squeezed the meal
+          type select down to 26px on a 390px screen, which is a control you
+          cannot open. */}
+      <div className="flex flex-wrap items-center gap-3"><button type="button" aria-expanded={!collapsed.has(index)} aria-label={collapsed.has(index)?"פתיחת הארוחה":"קיפול הארוחה"} onClick={()=>toggleCollapsed(index)} className="min-h-12 rounded-xl border border-[#E5E7E5] px-3 text-[#5B5F5B]">{collapsed.has(index)?<ChevronDown size={18}/>:<ChevronUp size={18}/>}</button><select aria-label={`סוג ארוחה ${index+1}`} className="nutrition-input min-w-40 flex-1" value={meal.title} onChange={event=>updateMeal(index,{...meal,title:event.target.value as Meal["title"]})}>{FIXED_MEAL_TITLES.map(title=><option key={title}>{title}</option>)}</select><span className="food-row__nudges">
         <button type="button" aria-label={`הזזת ${meal.title} למעלה`} disabled={index===0} onClick={()=>moveMeal(index,index-1)} className="food-row__nudge"><ChevronUp aria-hidden="true" size={14}/></button>
         <button type="button" aria-label={`הזזת ${meal.title} למטה`} disabled={index===meals.length-1} onClick={()=>moveMeal(index,index+1)} className="food-row__nudge"><ChevronDown aria-hidden="true" size={14}/></button>
       </span>
@@ -744,7 +749,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                   }}
                   className="food-row__grip"
                 ><GripVertical aria-hidden="true" size={16}/></span>
-                <span className="flex shrink-0 flex-col">
+                <span className="food-row__nudges">
                   <button type="button" aria-label="הזזה למעלה" disabled={itemIndex===0} onClick={()=>moveItem(index,groupIndex,itemIndex,itemIndex-1)} className="food-row__nudge"><ChevronUp aria-hidden="true" size={13}/></button>
                   <button type="button" aria-label="הזזה למטה" disabled={itemIndex===group.items.length-1} onClick={()=>moveItem(index,groupIndex,itemIndex,itemIndex+1)} className="food-row__nudge"><ChevronDown aria-hidden="true" size={13}/></button>
                 </span>

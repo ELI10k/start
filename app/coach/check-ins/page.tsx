@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import CoachCheckInCard from "@/components/coach/CoachCheckInCard";
 import CheckInComparison from "@/components/coach/CheckInComparison";
+import HandleAnsweredCheckIns from "@/components/coach/HandleAnsweredCheckIns";
 import { listResponseTemplates } from "@/app/actions/response-templates";
 import {
   getAuthContext,
@@ -66,6 +67,8 @@ export default async function CoachCheckInsPage({
             <Link href="/coach/check-ins/review" className="premium-primary-button">
               מעבר על התור
             </Link>
+            {/* Answered but never closed. These are what silt the queue up. */}
+            <HandleAnsweredCheckIns count={data.items.filter((item) => item.status === "reviewed" && !item.handled_at).length}/>
             <Link href="/coach" className="text-sm font-bold text-[#16A34A]">
               חזרה ל־Dashboard
             </Link>

@@ -90,7 +90,39 @@ export async function getNotificationCenter() {
   };
 }
 
-export async function getUnreadNotificationCount() {
-  const center = await getNotificationCenter();
-  return center.unreadCount;
+/**
+ * How many notifications are waiting, as a count rather than as a page of rows.
+ *
+ * This used to call getNotificationCenter, which fetches eighty notification
+ * rows and the whole preferences record to return one integer - and it is called
+ * on every render of the client shell and the coach navigation, so every screen
+ * in the product paid for a page of data it discarded.
+ *
+ * `ensure_in_app_reminders` stays: generating the day's reminders on arrival is
+ * how they appear for a client who has not opened the notifications screen, and
+ * dropping it here would quietly change when reminders exist.
+ *
+ * `excludeTypes` exists for the one badge that counts messages separately. A
+ * direct message writes both a notification and a message row, so a badge that
+ * adds the two counts one message twice.
+ */
+export async function getUnreadNotificationCount(excludeTypes: readonly string[] = []) {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+  await supabase.rpc("ensure_in_app_reminders");
+  let query = supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_id", user.id)
+    .is("read_at", null);
+  if (excludeTypes.length) query = query.not("type", "in", `(${excludeTypes.join(",")})`);
+  const { count, error } = await query;
+  if (error) throw error;
+  return count ?? 0;
 }
+
+/** The notification a direct message raises. Counted as a message, not twice. */
+export const DIRECT_MESSAGE_TYPE = "direct_message";
