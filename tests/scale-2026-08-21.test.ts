@@ -94,3 +94,53 @@ test("neither batch writer is reachable by a signed-in person", async () => {
   // And no grant puts them back.
   assert.doesNotMatch(migration, /grant execute on function public\.(create_in_app_notifications|upsert_weekly_summaries|prune_notifications)/);
 });
+
+// The batch functions are called with a JSON array built in TypeScript and read
+// field by field in SQL. Nothing type-checks across that boundary: rename a key
+// on one side and the other silently reads NULL, which for a notification means
+// a row that is quietly never written. These two tests compare the key sets.
+//
+// They exist because the cron cannot be run from a development machine - it
+// needs the service-role key, which lives only in the deployment environment -
+// so a mismatch would not surface until the job next fired in production.
+
+const keysSentIn = (source: string, marker: string) => {
+  const start = source.indexOf(marker);
+  assert.notEqual(start, -1, `could not find ${marker}`);
+  const slice = source.slice(start, source.indexOf("});", start));
+  // A key follows the opening brace or a comma. Anchoring to the start of a line
+  // reads only the first key on each - which is how this test first failed,
+  // against an object literal that puts several on one line.
+  return new Set([...slice.matchAll(/[{,]\s*([a-z_]+):/g)].map((match) => match[1]));
+};
+
+const keysReadBy = (sql: string, fn: string) => {
+  const start = sql.indexOf(`create or replace function public.${fn}`);
+  assert.notEqual(start, -1, `could not find ${fn}`);
+  const body = sql.slice(start, sql.indexOf("end $$;", start));
+  return new Set([...body.matchAll(/v_row->>?'([a-z_]+)'/g)].map((match) => match[1]));
+};
+
+test("the daily coach sends exactly the keys the batch writer reads", async () => {
+  const [route, sql] = await Promise.all([
+    source("app/api/cron/daily-coach/route.ts"),
+    source("supabase/migrations/202608210007_notifications_at_scale.sql"),
+  ]);
+  const sent = keysSentIn(route, "batch.push({");
+  const read = keysReadBy(sql, "create_in_app_notifications");
+  assert.deepEqual([...sent].sort(), [...read].sort());
+  assert.ok(sent.has("dedupe_key"), "without a dedupe key a re-run duplicates every row");
+});
+
+test("the weekly summary sends exactly the keys its batch writer reads", async () => {
+  const [route, sql] = await Promise.all([
+    source("app/api/cron/weekly-summary/route.ts"),
+    source("supabase/migrations/202608210007_notifications_at_scale.sql"),
+  ]);
+  const summaryKeys = keysSentIn(route, "summaries.push({");
+  assert.deepEqual([...summaryKeys].sort(), [...keysReadBy(sql, "upsert_weekly_summaries")].sort());
+  // The coach notice goes through the notification writer, so it answers to that
+  // function's keys and not to this one's.
+  const noticeKeys = keysSentIn(route, "coachNotices.push({");
+  assert.deepEqual([...noticeKeys].sort(), [...keysReadBy(sql, "create_in_app_notifications")].sort());
+});
