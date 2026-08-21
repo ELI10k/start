@@ -63,6 +63,24 @@ export async function listCoachThreads(): Promise<readonly CoachThread[]> {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
+
+  // One row per thread, folded where the rows are. 202608210005.
+  const { data: threadRows, error: threadError } = await supabase.rpc("coach_message_threads");
+  if (!threadError)
+    return (threadRows ?? []).map((row: {
+      client_id: string; last_body: string; last_at: string; unread: number; awaiting_reply: boolean;
+    }) => ({
+      clientId: row.client_id,
+      lastBody: row.last_body,
+      lastAt: row.last_at,
+      unread: Number(row.unread ?? 0),
+      awaitingReply: Boolean(row.awaiting_reply),
+    }));
+  // Until that migration is applied, fold the recent messages here as before.
+  // The ceiling is why the function exists: past 500 messages the oldest threads
+  // stop appearing at all, so this is a fallback and not the intended path.
+  if (!isMissing(threadError.code)) throw threadError;
+
   const { data, error } = await supabase
     .from("coach_client_messages")
     .select("client_id,body,created_at,read_at,sender_id")
@@ -72,17 +90,25 @@ export async function listCoachThreads(): Promise<readonly CoachThread[]> {
     if (isMissing(error.code)) return [];
     throw error;
   }
-  const threads = new Map<string, { lastBody: string; lastAt: string; unread: number }>();
+  const threads = new Map<string, { lastBody: string; lastAt: string; unread: number; awaitingReply: boolean }>();
   for (const row of data ?? []) {
     const clientId = row.client_id as string;
     const existing = threads.get(clientId);
     const unread = !row.read_at && row.sender_id !== user.id ? 1 : 0;
     // Rows arrive newest first, so the first one seen for a client is the last
-    // message in that thread.
-    if (!existing) threads.set(clientId, { lastBody: row.body as string, lastAt: row.created_at as string, unread });
+    // message in that thread - and who wrote it is whose turn it is.
+    if (!existing)
+      threads.set(clientId, {
+        lastBody: row.body as string,
+        lastAt: row.created_at as string,
+        unread,
+        awaitingReply: row.sender_id !== user.id,
+      });
     else existing.unread += unread;
   }
-  return [...threads.entries()].map(([clientId, value]) => ({ clientId, ...value }));
+  return [...threads.entries()]
+    .map(([clientId, value]) => ({ clientId, ...value }))
+    .sort((a, b) => b.lastAt.localeCompare(a.lastAt));
 }
 
 /**

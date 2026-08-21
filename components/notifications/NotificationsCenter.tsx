@@ -1,12 +1,11 @@
 import Link from "next/link";
 import { BellOff, CheckCheck, ChevronLeft, Settings2 } from "lucide-react";
-import { markAllNotificationsRead, markNotificationRead, saveNotificationPreferences } from "@/app/actions/notifications";
+import { markAllNotificationsRead, markNotificationRead } from "@/app/actions/notifications";
+import NotificationPreferencesForm from "@/components/notifications/NotificationPreferencesForm";
 import type { InAppNotification, NotificationPreferences } from "@/lib/notifications/repository";
 import { StateBlock } from "@/components/client/AppPatterns";
 import SubmitButton from "@/components/forms/SubmitButton";
 import PushRegistration from "@/components/client/PushRegistration";
-
-const labels = [["nutrition", "תזונה"], ["workouts", "אימונים"], ["checkIns", "צ׳ק-אין והתקדמות"], ["content", "תוכן"], ["reminders", "תזכורות"]] as const;
 
 const when = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem", day: "numeric", month: "short" });
@@ -52,44 +51,7 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
         {/* Asking here rather than on first launch: the client is already
             looking at their notification settings, so the request has a reason. */}
         <div className="mt-3"><PushRegistration showPrompt /></div>
-        <form action={saveNotificationPreferences} className="mt-4 grid gap-3">
-          <div className="settings-group">
-            {labels.map(([key, label]) =>
-              <label key={key}>
-                <span className="settings-group__label">{label}</span>
-                <input name={key} type="checkbox" defaultChecked={preferences[key]} className="size-5 accent-[#16A34A]" />
-              </label>)}
-          </div>
-
-          <fieldset className="rounded-2xl border border-[#E5E7E5] p-4">
-            <legend className="px-1 text-sm font-black">תזכורות אימון</legend>
-            <p className="mt-1 text-xs text-[#5B5F5B]">רק בימי אימון מתוכננים, ובהתאם להשלמת האימון.</p>
-            {/* The scheduler runs once a day, in the morning. The evening
-                reminder is therefore created when the app is next opened rather
-                than pushed at the hour - promising a push that cannot arrive is
-                how a client concludes that notifications do not work. */}
-            <p className="mt-1 text-xs text-[#5B5F5B]">תזכורת הבוקר נשלחת למכשיר בשעה שנבחרה. תזכורת הערב מופיעה באפליקציה בכניסה הבאה.</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-bold">תזכורת בוקר<input name="workoutMorningReminder" type="checkbox" defaultChecked={preferences.workoutMorningReminder} className="size-5 accent-[#16A34A]" /></label>
-              <label className="text-sm font-bold">שעת בוקר<input name="workoutMorningReminderTime" type="time" defaultValue={preferences.workoutMorningReminderTime.slice(0, 5)} className="nutrition-input mt-2" /></label>
-              <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-bold">תזכורת ערב<input name="workoutEveningReminder" type="checkbox" defaultChecked={preferences.workoutEveningReminder} className="size-5 accent-[#16A34A]" /></label>
-              <label className="text-sm font-bold">שעת ערב<input name="workoutEveningReminderTime" type="time" defaultValue={preferences.workoutEveningReminderTime.slice(0, 5)} className="nutrition-input mt-2" /></label>
-            </div>
-          </fieldset>
-
-          <fieldset className="rounded-2xl border border-[#E5E7E5] p-4">
-            <legend className="px-1 text-sm font-black">תזכורות תזונה</legend>
-            <p className="mt-1 text-xs text-[#5B5F5B]">תזכורת לאחר ארוחה שלא סומנה, וסיכום בסוף היום.</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-bold">תזכורות ארוחה<input name="mealReminders" type="checkbox" defaultChecked={preferences.mealReminders} className="size-5 accent-[#16A34A]" /></label>
-              <label className="text-sm font-bold">השהיה בדקות<input name="mealReminderDelayMinutes" type="number" min="1" max="240" step="1" defaultValue={preferences.mealReminderDelayMinutes} className="nutrition-input mt-2" /></label>
-              <label className="flex min-h-11 items-center justify-between gap-3 text-sm font-bold">סיכום סוף יום<input name="endOfDayReminder" type="checkbox" defaultChecked={preferences.endOfDayReminder} className="size-5 accent-[#16A34A]" /></label>
-              <label className="text-sm font-bold">שעת סיכום<input name="endOfDayReminderTime" type="time" defaultValue={preferences.endOfDayReminderTime.slice(0, 5)} className="nutrition-input mt-2" /></label>
-            </div>
-          </fieldset>
-
-          <SubmitButton idle="שמירת העדפות" pending="שומרים…" className="premium-primary-button w-full" />
-        </form>
+        <NotificationPreferencesForm preferences={preferences} />
       </div>
     </details>
 

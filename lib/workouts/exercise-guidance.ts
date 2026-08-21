@@ -56,7 +56,15 @@ export const youtubeThumbnailUrl = (value?: string) => {
       videoId = url.pathname === "/watch" ? url.searchParams.get("v") ?? undefined : url.pathname.match(/^\/(?:shorts|embed)\/([^/]+)/)?.[1];
     }
     if (!videoId || !/^[A-Za-z0-9_-]{6,20}$/.test(videoId)) return undefined;
-    return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+    // hqdefault, not maxresdefault.
+    //
+    // YouTube generates maxresdefault only for videos uploaded at HD, so for
+    // most of this catalogue it does not exist - every exercise card fired a
+    // request that 404ed, showed a placeholder, then swapped to hqdefault and
+    // loaded it. Two requests and a visible flicker per card, on a screen that
+    // shows a list of them. hqdefault exists for every video that exists, and
+    // at 480x360 it is larger than the 80x64 the card draws.
+    return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
   } catch {
     return undefined;
   }

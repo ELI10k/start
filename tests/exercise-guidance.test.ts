@@ -40,11 +40,14 @@ test("primary and assisting muscles are shown separately without duplicates", ()
 });
 
 test("the approved YouTube demonstration supplies a real exercise image fallback", () => {
-  assert.equal(youtubeThumbnailUrl("https://www.youtube.com/watch?v=abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
-  assert.equal(youtubeThumbnailUrl("https://youtu.be/abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
+  // hqdefault, not maxresdefault: YouTube only generates the latter for videos
+  // uploaded at HD, so most of this catalogue 404ed on first request and swapped
+  // to hqdefault after - two requests and a visible flicker per exercise card.
+  assert.equal(youtubeThumbnailUrl("https://www.youtube.com/watch?v=abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
+  assert.equal(youtubeThumbnailUrl("https://youtu.be/abcDEF_1234"), "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
   assert.equal(youtubeThumbnailUrl("https://evil.example/watch?v=abcDEF_1234"), undefined);
   const view = buildGuidanceView(exercise({ video: { provider: "youtube", url: "https://youtu.be/abcDEF_1234" } }));
-  assert.equal(view.imageUrl, "https://i.ytimg.com/vi/abcDEF_1234/maxresdefault.jpg");
+  assert.equal(view.imageUrl, "https://i.ytimg.com/vi/abcDEF_1234/hqdefault.jpg");
 });
 
 test("known compound movements receive conservative assisting-muscle labels", () => {

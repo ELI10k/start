@@ -13,6 +13,11 @@ const initial: FoodLogState = { ok: false };
 type Scanned = Readonly<{
   name: string; brand: string | null;
   calories: number; protein: number | null; carbs: number | null; fat: number | null;
+  // What the package weighs, when the catalogue knows. The lookup has always
+  // returned it and this sheet has always thrown it away, so the client was
+  // asked to weigh a yoghurt they had just scanned.
+  unitWeightGrams?: number | null;
+  servingLabel?: string | null;
 }>;
 
 const round = (value: number) => Math.round(value * 10) / 10;
@@ -34,11 +39,18 @@ export default function AteSomethingElse({
   date,
   open,
   onClose,
+  // A free-calorie window is not a substitution - filling it IS the plan - and
+  // the sheet asked "what did you eat instead?" of a meal that never prescribed
+  // anything. Same three ways in, different sentence around them.
+  title = "מה אכלת במקום?",
+  unmeasuredNote = "הארוחה לא תיספר בקלוריות של היום — אין דרך לגזור אותן מתיאור או מתמונה. המאמן יראה בדיוק מה אכלת, וזה עוזר לו הרבה יותר מ״לא נאכל״.",
 }: {
   mealId: string;
   date: string;
   open: boolean;
   onClose: () => void;
+  title?: string;
+  unmeasuredNote?: string;
 }) {
   const [tab, setTab] = useState<"text" | "scan" | "photo">("text");
   const [state, action] = useActionState(logClientFood, initial);
@@ -55,7 +67,13 @@ export default function AteSomethingElse({
     try {
       const response = await fetch(`/api/foods/barcode/${barcode}`);
       const payload = await response.json();
-      if (payload.found) setFound(payload.food as Scanned);
+      if (payload.found) {
+        const food = payload.food as Scanned;
+        setFound(food);
+        // Start on the package where there is one. It is the answer more often
+        // than any other, and it is still one tap to change.
+        if (food.unitWeightGrams && food.unitWeightGrams > 0) setGrams(String(Math.round(food.unitWeightGrams)));
+      }
       else setMiss("המוצר לא נמצא. אפשר לתאר אותו במילים או לצלם אותו.");
     } catch {
       setMiss("החיפוש נכשל. אפשר לתאר במילים או לצלם.");
@@ -78,7 +96,7 @@ export default function AteSomethingElse({
   const close = () => { setFound(null); setMiss(""); setCode(""); onClose(); };
 
   return (
-    <BottomSheet open={open} title="מה אכלת במקום?" onClose={close}>
+    <BottomSheet open={open} title={title} onClose={close}>
       <div className="chip-row">
         <button type="button" onClick={() => setTab("text")} aria-pressed={tab === "text"} className={`chip${tab === "text" ? " pill--green" : ""}`}>
           <PencilLine aria-hidden="true" size={15} />תיאור
@@ -122,6 +140,35 @@ export default function AteSomethingElse({
             <input type="hidden" name="name" value={found.brand ? `${found.name} — ${found.brand}` : found.name} />
             <input type="hidden" name="unit" value="גרם" />
             <p className="font-bold">{found.name}{found.brand ? ` — ${found.brand}` : ""}</p>
+            {/* The common answers first, typing second. A barcode identifies a
+                package, and "the whole thing" is what happened to it most of the
+                time - so asking for a number in grams before offering that is
+                asking the client to weigh something they have already eaten. */}
+            {(() => {
+              const pack = found.unitWeightGrams && found.unitWeightGrams > 0 ? Math.round(found.unitWeightGrams) : null;
+              const presets = [
+                ...(pack ? [
+                  { label: `אריזה שלמה · ${pack} ג׳`, value: String(pack) },
+                  { label: `חצי אריזה · ${Math.round(pack / 2)} ג׳`, value: String(Math.round(pack / 2)) },
+                ] : []),
+                { label: "100 גרם", value: "100" },
+              ];
+              return (
+                <div className="chip-row">
+                  {presets.map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => setGrams(preset.value)}
+                      aria-pressed={grams === preset.value}
+                      className={`chip${grams === preset.value ? " pill--green" : ""}`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
             <label className="text-sm font-bold">כמה גרם אכלת?
               <input name="quantity" type="number" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
             </label>
@@ -155,11 +202,7 @@ export default function AteSomethingElse({
           </>
         )}
 
-        {tab !== "scan" && (
-          <p className="text-xs text-[#5B5F5B]">
-            הארוחה לא תיספר בקלוריות של היום — אין דרך לגזור אותן מתיאור או מתמונה. המאמן יראה בדיוק מה אכלת, וזה עוזר לו הרבה יותר מ״לא נאכל״.
-          </p>
-        )}
+        {tab !== "scan" && <p className="text-xs text-[#5B5F5B]">{unmeasuredNote}</p>}
 
         {state.message && (
           <p role={state.ok ? "status" : "alert"} className={`rounded-2xl p-3 text-sm font-bold ${state.ok ? "bg-[#ECFDF3] text-[#15803D]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>{state.message}</p>

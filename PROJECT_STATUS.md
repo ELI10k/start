@@ -1,6 +1,8 @@
 # START - Project Status
 
-Last updated: 2026-08-20 — second product review implemented; see "2026-08-20" below.
+Last updated: 2026-08-21 — third product review implemented, then all twelve of
+its actionable proposals built; see "2026-08-21" below.
+Previously: 2026-08-20 — second product review implemented.
 Previously: 2026-08-19 — first product review implemented. The 2026-08-09 feature
 freeze is lifted; see the review section below for what changed and what still
 needs a person.
@@ -46,6 +48,257 @@ Deployments list simply never grows.
 `scripts/validate-migrations.mjs` had been failing since 2026-08-18 — it required
 `begin;` to be the first characters of the file, so every migration with a header
 comment was rejected. It now skips leading comments.
+
+## 2026-08-21 proposals — twelve of fourteen built, plus one defect they exposed
+
+The review's own "found and not implemented" list, worked through. Twelve are
+done; two need something this session cannot obtain and are listed under Open
+items. 15 regression tests added (`tests/proposals-2026-08-21.test.ts`).
+
+### One of them was not an improvement at all
+**"סיכום סוף יום" has been a dead switch since `202607210002`.** The toggle and
+the time are stored on `notification_preferences` and *nothing has ever read
+either* — not the daily-coach route, not any reminder function. A client who
+turned the evening summary off kept receiving it every night, which is the one
+thing a notification setting must never do. The category gate inside
+`create_in_app_notification` does not cover it: that asks whether nutrition
+notifications are wanted at all, which is a broader question.
+
+The cron now reads the switch and skips the clients who set it off (the response
+reports `declined`). The *hour* it cannot honour — one nightly job cannot fire at
+thirty different times — so the time picker is gone and the screen states the
+actual hour instead, the same treatment the evening workout reminder already got.
+`vercel.json` moved the run to 18:30 UTC so the stated 21:30 is true in summer.
+
+### Migrations added — applied 2026-08-21 by Eli via the Supabase SQL editor
+| Migration | What it does |
+|---|---|
+| `202608210003_repeat_carries_the_amount` | "כמו אתמול" copies the reported amount along with the choice |
+| `202608210004_one_check_in_per_week` | a trigger refusing a second check-in in the same Sunday-to-Saturday week, plus `check_in_week_state()` so the screen can say so on arrival |
+| `202608210005_coach_thread_list` | `coach_message_threads()` — one row per thread, computed in the database |
+
+All additive, all with rollbacks in `supabase/seeds/`. `202608210004` is a trigger
+rather than a unique index on purpose: the natural index would be over a
+time-zone expression, which is STABLE and therefore not indexable. A trigger also
+needs no backfill, so a client who already holds two rows in one week keeps both.
+
+**`202608210004` shipped daily first and was corrected the same day.** Eli applied
+the daily version, then pointed out that a check-in is a full weekly analysis and
+a daily ceiling permits seven a week — a guard that does not guard the thing that
+matters. He was right, and the product already said so in the one place that sets
+the cadence: the reminder is deduped on `'check-in-reminder-' || week`, the form
+asks how many of seven days the menu was kept, and it asks how the *week* went.
+The replacement drops `check_ins_one_per_day_trigger`, `check_ins_one_per_day()`
+and `check_in_submitted_today()`, so a database that took the daily version
+converts cleanly by running the new file.
+
+Verified on application: `check_ins_one_per_week_trigger` is the only check-in
+trigger present — two rows there would mean the daily one had survived.
+
+**All five of today's migrations are now live in production.** The application
+degrades cleanly without them, which is what let the daily-to-weekly correction
+be a single re-run rather than a coordinated deploy.
+
+### Built
+**Client**
+1. **The check-in keeps a draft.** Six steps, five ratings and a weight, and until
+   now a closed tab took all of it — while the menu editor has mirrored a draft to
+   the device every second since the day a coach lost one. The photographs are
+   deliberately not in it: a `File` handle does not survive the document that
+   produced it, and restoring one would show a complete-looking form that submits
+   without them. The banner says so when photos are due this week.
+2. **The nutrition screen has a past.** Everything on it — selections, marks,
+   amounts, the food log — has always been stored per date and nothing ever asked
+   for a date but today, so a client could not close last night's fifth meal or
+   look at yesterday at all. Seven days back, never forward; every day is a URL.
+   "Now" markers are a property of today and no longer follow the view.
+3. **"כמו אתמול" carries the amount.** It filled the choice and dropped the
+   portion — for the client the override was built for, that is the keystroke it
+   exists to remove, retyped every morning.
+4. **One check-in a week**, said on arrival rather than after six steps, naming
+   the date the next one opens. A double tap was enough to file two, and
+   duplicates shift the photo cycle out of step because it counts check-ins.
+   Sunday to Saturday, the same week `weekStart()` and the coach's file use.
+12. **A check-in whose photographs failed is actually removed** — or reported as
+   kept, truthfully. `check_ins` carries an insert policy, a select policy and a
+   coach update policy, and **no delete policy for anybody**, so the rollback in
+   `saveCheckIn` deleted zero rows through the client's own session and reported
+   no error: RLS filtering every row out is not a failure. The client was told
+   "the check-in was not saved" while the row sat in the coach's queue without its
+   photographs — and under the weekly guard that phantom row would lock them out
+   until Sunday. The cleanup now goes through the service role, and where that is
+   unavailable the message says the check-in was kept rather than the opposite.
+5. **A scanned package offers itself.** The barcode lookup has always returned the
+   package weight and the sheet discarded it, so a client was asked to weigh a
+   yoghurt they had just scanned. "אריזה שלמה", "חצי אריזה", and the package is
+   the opening value.
+
+**Coach**
+6. **An inbox at `/coach/messages`**, with a nav entry. Writing to a client should
+   not require navigating to them: the only routes in were the dashboard panel and
+   a tab inside one client's file. Default view is whose turn it is; unread is a
+   separate filter; clients with no thread are listed under their own heading,
+   because "who have I not spoken to" is half of what an inbox is for.
+7. **The thread list lost its ceiling.** It read the 500 most recent messages and
+   folded them in TypeScript. Past that, the oldest threads stop appearing and the
+   unread counts are short by whatever fell off — the exact failure an inbox exists
+   to prevent. `DISTINCT ON` in the database, one row per thread.
+8. **The gap, not only the total.** Yesterday's fix made the totals read what was
+   eaten; a correct total still does not say *why*. The nutrition tab now lists the
+   rows the client changed — "אורז · תוכנן 150 גרם · נאכל 75" — and prints nothing
+   on a day eaten as written, which is most days.
+9. **The client file loads what the open tab renders.** Three things still ran on
+   all eight: the invitation history, `auth.admin.getUserById` (a round trip to the
+   Admin API for one line on one tab), and `buildClientReport`, which walks every
+   weigh-in and check-in the client has ever filed.
+10. **The menu preview shows one day and says which.** It flattened every day into
+    one list, so a two-day menu previewed as twelve meals with nothing saying which
+    six the client is served. Defaults to the day they would be served now, by the
+    same rule `getActiveClientMenu` uses. `WEEKDAY_LABELS` now has one home.
+11. **"סגירת N שנענו".** The queue holds anything not marked handled, which is
+    right — but replying is the satisfying half and closing is the bookkeeping, so
+    it only ever grew. Closes answered check-ins only; one nobody replied to
+    cannot be dismissed by it.
+
+### The E2E run, and the three defects it found
+The suite had not been run since 2026-08-19. Running it against this work
+produced **219 passed, 9 failed** — and none of the nine were caused by it.
+
+1. **Two specs had been broken since 2026-08-20** and nobody knew, because that
+   day's review shipped without an E2E run. The collapse of the six meals into
+   closed `<details>` rows hid every `fieldset button` on the nutrition screen,
+   so `menu-units-and-client` and the "same as yesterday" spec passed or failed
+   on what time of day they ran at. Both now open the meal cards first
+   (`openMealCards` in `e2e/support/guards.ts`).
+2. **A third spec had never run at all.** `menu-units-and-client.spec.ts` is
+   `mode: "serial"`, so the failure above skipped everything after it. Fixing the
+   first revealed that "a menu duplicated onto a client opens with that client,
+   goal and macros" asserts derived macros for an account whose card cannot
+   produce a calorie target — it is missing age, height, sex and goal, and the
+   screen says so. It now asserts the explanation on that branch and the macros
+   on the other.
+3. `workouts.spec.ts` used a bare `locator("main")` on `/coach/clients`, which is
+   a strict-mode violation while the route's loading boundary renders its own
+   `<main role="status">`. It waits for the list's heading instead.
+
+### Two real defects the sweep found
+- **Every exercise thumbnail 404ed before loading.** `youtubeThumbnailUrl` asked
+  for `maxresdefault`, which YouTube generates only for videos uploaded at HD —
+  so for most of this catalogue the first request failed, the card drew its
+  placeholder, and only then did the component swap to `hqdefault` and load it.
+  Two requests and a visible flicker per card, on a screen that is a list of
+  them. It asks for `hqdefault` first now; the fallback below it is `mqdefault`.
+  This is the "13 dead `i.ytimg.com` 404s" this document has listed as known
+  since 2026-08-19 — they were not dead links, they were the wrong size.
+- **The menu builder's reorder arrows were 24px wide** against the 44px a thumb
+  needs, and they are the only way to reorder a meal — the drag grip exists on
+  food rows, not on meal headers. Now 44×44, side by side rather than stacked,
+  because two 44px buttons in a column would make the pair 88px tall in a 48px
+  row. Widening them squeezed the meal-type `select` to 26px on a 390px screen,
+  so the header row wraps now.
+
+### Verification
+`tsc` clean · `lint` clean · **484 / 484** unit tests · `build` passes ·
+migration validation passes (72 migrations) · **E2E green**.
+
+## 2026-08-21 third product review
+
+A pass over every coach and client feature. **Nine defects fixed**, all in the
+same family: a fact the client stated that did not reach the person it was
+stated to. 17 regression tests added (`tests/product-review-2026-08-21.test.ts`).
+
+### The one that mattered
+**Yesterday's portion override never left the client's screen.** 202608200006 and
+202608200008 let a client say "I ate half of that" and "I ate none of that", and
+`getActiveClientMenu` scales the group's chosen row by it — so the client's
+nutrition screen was correct. Nothing else was. `eaten_meal_items`, which is the
+row that records intake, was written straight from `meal_items`, so the coach's
+client file, the evening daily-coach message and every report built on it all
+reported **the portion the coach planned**. An override of `0` recorded a full
+planned meal. Setting the amount *after* marking the meal eaten changed nothing
+at all, and changing the chosen alternative after marking it eaten left the
+previous food standing as eaten — with an `amount_override` that had been typed
+against a different food's unit still attached to it.
+
+`202608210001_intake_follows_the_client` puts one rule in one place:
+`refresh_meal_intake(meal, date)` rewrites a meal's recorded intake from its
+current selections, scaled by `meal_item_intake_factor`, and is called from all
+three functions that can change what "I ate this much of that" means. A zero
+override records no row — which is both the truth and the only value
+`eaten_meal_items.amount` accepts, being constrained positive.
+
+### Migrations added — applied 2026-08-21 by Eli via the Supabase SQL editor
+| Migration | What it does | Why it matters |
+|---|---|---|
+| `202608210001_intake_follows_the_client` | intake is recorded at the portion the client reported, and rewritten whenever the selection, the amount or the mark changes | without it the coach reads the plan and calls it the client's week |
+| `202608210002_reading_a_thread_clears_its_bell` | `mark_message_thread_read` also marks the notification it raised | the bell kept a badge for a message already read, permanently |
+
+Both additive, both with rollbacks in `supabase/seeds/`. Verified on application:
+the three new/changed functions are present, and `set_meal_day_status` has
+**exactly one** signature — the four-argument one. Two would mean an ambiguous
+overload, which is the trap `202608200001` was written to close.
+
+```sql
+select p.proname, pg_get_function_identity_arguments(p.oid)
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('refresh_meal_intake','meal_item_intake_factor',
+                    'mark_message_thread_read','set_meal_day_status');
+```
+
+Four rows, one per name.
+
+**The database half of this review is therefore live in production; the code half
+is not.** The deployed build still calls `set_meal_day_status('other')` on every
+food-log entry, so defect 1 below — logging a food erasing an answer the client
+already gave — remains live until this work is pushed and deployed.
+
+### Other defects fixed
+1. **Logging a food against an already-answered meal erased the answer.**
+   `logClientFood` called `set_meal_day_status(..., 'other')` unconditionally,
+   and that call *deletes* the meal's recorded intake — so a client who marked
+   breakfast eaten and then scanned a snack against it lost the mark and the
+   day's calories fell by a whole meal, silently, as a side effect of logging
+   something extra. Now only an unanswered meal is marked.
+2. **A free-calorie window was recorded as a substitution.** The same call marked
+   "נאכל משהו אחר" on a meal that prescribes nothing, so filling the frame as
+   designed reached the coach as a missed meal. Free-calorie meals are no longer
+   marked, and the sheet asks "מה אכלת במסגרת הזו?" rather than "מה אכלת במקום?".
+3. **The dashboard and the client file counted a different day from the nutrition
+   screen.** Both read `meal.items` — every row the coach wrote, alternatives
+   included, at the coach's portion — so both ignored the portion override and
+   every scanned item. All three now share one rule in `lib/nutrition/menu-intake.ts`.
+4. **The dashboard called an answered meal unmarked.** "נשארו 3 ארוחות לסמן"
+   counted meals the client had already marked "לא נאכל" or "אכלתי משהו אחר".
+5. **Coach and client counted different training weeks.** The client's dashboard
+   counts from Sunday; the coach's file counted a rolling seven days, so on a
+   Wednesday the coach's "אימונים השבוע" included last Thursday's session and the
+   client's did not.
+6. **One unread message showed a badge of two.** A direct message writes a
+   message row *and* a notification pointing at it; the bottom-bar badge added
+   the two counts.
+7. **Reading a thread never cleared its bell entry** (migration 210002).
+8. **Notification preferences crashed the screen on a refusal.** An evening
+   reminder set earlier than the morning one — which the two time fields happily
+   accept — threw out of the server action, which is the full-page error screen.
+   The rules are unchanged; they are answers now. The form moved to
+   `NotificationPreferencesForm` so it can show one.
+9. **A read message vanished from the coach's to-do list.** The dashboard panel
+   filtered on *unread*, so opening a client's question removed it — a coach who
+   read it on a phone and meant to reply at a desk arrived to an empty panel. It
+   now asks whose turn it is, and says how long they have been waiting.
+
+### Improvement shipped
+- Counting unread notifications no longer fetches a page of them.
+  `getUnreadNotificationCount` called `getNotificationCenter`, which reads eighty
+  notification rows and the whole preferences record — on **every render of the
+  client shell and the coach navigation**, i.e. every screen in the product. It
+  is a `head: true` count now; `ensure_in_app_reminders` still runs, so reminders
+  appear exactly when they did.
+
+### Verification
+`tsc` clean · `lint` clean · **471 / 471** tests · `build` passes ·
+migration validation passes (69 migrations).
 
 ## 2026-08-20 second product review
 

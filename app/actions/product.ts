@@ -100,6 +100,9 @@ export async function saveCheckIn(
     return {ok:false,message:"בצ׳ק־אין הראשון ובכל צ׳ק־אין רביעי חובה לצרף תמונות קדימה, צד וגב."};
   const photoError = files.map(({ file }) => validateCheckInPhoto(file)).find(Boolean);
   if (photoError) return { ok: false, message: photoError };
+  // One a week. The guard is a trigger, so this is the message rather than the
+  // rule - but catching it here means the client is told plainly instead of
+  // reading a Postgres exception.
   const { data:checkIn, error } = await supabase.from("check_ins").insert({
     client_id: auth.id,
     adherence: values[0],
@@ -116,7 +119,12 @@ export async function saveCheckIn(
     status: "submitted",
   }).select("id").single();
   if (error||!checkIn)
-    return { ok: false, message: "הצ׳ק-אין לא נשמר. אפשר לנסות שוב." };
+    return {
+      ok: false,
+      message: error?.message?.includes("check_in_already_this_week")
+        ? "הצ׳ק־אין של השבוע כבר נשלח. אפשר לראות אותו בהיסטוריה, ולעדכן את המאמן בהודעה."
+        : "הצ׳ק-אין לא נשמר. אפשר לנסות שוב.",
+    };
   const photoResult = await uploadCheckInPhotos({
     storage: supabase.storage.from(CHECK_IN_PHOTO_BUCKET),
     rows: { insert: (row) => supabase.from("check_in_photos").insert(row) },
@@ -125,15 +133,37 @@ export async function saveCheckIn(
     checkInId: checkIn.id,
   });
   if (!photoResult.ok) {
-    const { error: deleteError } = await supabase.from("check_ins").delete().eq("id", checkIn.id);
-    if (!photoResult.cleanupOk || deleteError)
-      return { ok: false, message: "השליחה נכשלה וגם הניקוי לא הושלם. יש לפנות לתמיכה." };
+    // Undoing the row needs the service role, because nobody can delete a
+    // check-in through their own session: check_ins carries an insert policy, a
+    // select policy and a coach update policy, and no delete policy for anyone.
+    // So this rollback used to remove zero rows and report no error - RLS
+    // filtering every row out is not a failure - and the client was told "the
+    // check-in was not saved" while the row sat in the coach's queue without its
+    // photographs. With one check-in a week, that phantom row also locked them
+    // out until Sunday.
+    const removed = await (async () => {
+      try {
+        const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
+        const { error } = await createSupabaseAdminClient().from("check_ins").delete().eq("id", checkIn.id);
+        return !error;
+      } catch {
+        // No service-role key on this deployment. Nothing here can remove it.
+        return false;
+      }
+    })();
+    // The row survived, so say that rather than the opposite. A client who is
+    // told it did not save will try again and be refused for the week.
+    if (!removed || !photoResult.cleanupOk)
+      return {
+        ok: false,
+        message: "התמונות לא נשמרו, והצ׳ק־אין עצמו כן נשמר — בלי תמונות. המאמן רואה אותו; כדאי לכתוב לו בהודעה.",
+      };
     return {
       ok: false,
       message:
         photoResult.reason === "upload"
-          ? "העלאת התמונה נכשלה. הצ׳ק־אין לא נשמר."
-          : "שמירת התמונה נכשלה. הצ׳ק־אין לא נשמר.",
+          ? "העלאת התמונה נכשלה. הצ׳ק־אין לא נשמר, אפשר לנסות שוב."
+          : "שמירת התמונה נכשלה. הצ׳ק־אין לא נשמר, אפשר לנסות שוב.",
     };
   }
   // The same weight, in the one place the graph reads.
@@ -218,6 +248,47 @@ export async function setCheckInHandled(
     ok: true,
     message: handled ? "הצ׳ק־אין סומן כטופל." : "הצ׳ק־אין הוחזר לטיפול.",
   };
+}
+
+/**
+ * Closes every check-in that has already been answered.
+ *
+ * The queue holds anything not marked handled, whether or not a reply was
+ * written - which is right, because a coach who replied and did not close it
+ * meant to come back. What it produced in practice is a queue that only ever
+ * grows: replying is the satisfying part, closing is the bookkeeping, and a
+ * coach with thirty clients was walking past the same answered check-ins every
+ * Sunday to reach the new ones.
+ *
+ * Only the answered ones. A check-in nobody has replied to is not something this
+ * is allowed to dismiss, and the whole point of the queue is that it cannot be.
+ */
+export async function handleAnsweredCheckIns(): Promise<SaveState> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "coach")
+    return { ok: false, message: "אין הרשאה לעדכון הצ׳ק־אינים." };
+  const supabase = await createSupabaseServerClient();
+  // RLS returns only this coach's clients, so the set is already theirs.
+  const { data: rows, error } = await supabase
+    .from("check_ins")
+    .select("id")
+    .eq("status", "reviewed")
+    .is("handled_at", null);
+  if (error) return { ok: false, message: "לא ניתן לקרוא את רשימת הצ׳ק־אינים." };
+  const ids = (rows ?? []).map((row) => String(row.id));
+  if (!ids.length) return { ok: true, message: "אין צ׳ק־אינים שנענו וממתינים לסגירה." };
+
+  // One RPC per row: the function does the authorisation, and a bulk statement
+  // would have to repeat that check rather than inherit it.
+  const results = await Promise.all(
+    ids.map((id) => supabase.rpc("set_check_in_handled", { p_check_in_id: id, p_handled: true })),
+  );
+  const failed = results.filter((result) => result.error).length;
+  revalidatePath("/coach/check-ins");
+  revalidatePath("/coach");
+  return failed
+    ? { ok: false, message: `${ids.length - failed} נסגרו, ${failed} נכשלו. אפשר לנסות שוב.` }
+    : { ok: true, message: `${ids.length} צ׳ק־אינים שנענו סומנו כטופלו.` };
 }
 
 async function requireClient() {

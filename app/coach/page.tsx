@@ -32,7 +32,15 @@ export default async function CoachDashboard() {
   ]);
 
   const nameById = new Map(clients.map((client) => [client.id, client.full_name]));
-  const waitingThreads = threads.filter((thread) => thread.unread > 0);
+  // Whose turn it is, not what is unread.
+  //
+  // This listed threads with unread messages, so opening one removed it from the
+  // list - a coach who read a client's question on their phone and meant to
+  // answer it at a desk arrived to an empty panel and no record that anyone was
+  // waiting. Reading a message answers "have I seen this"; it does not answer
+  // "have I replied". The panel now asks the second question, and marks which of
+  // them have not even been read yet.
+  const waitingThreads = threads.filter((thread) => thread.awaitingReply);
   const pendingCheckIns = checkIns.newCount + checkIns.respondedCount;
 
   return <main className="px-4 py-10 sm:px-6 lg:px-8">
@@ -50,7 +58,10 @@ export default async function CoachDashboard() {
       {/* Unanswered messages, before anything else: a client who wrote is waiting
           on a person, not on a report. */}
       {waitingThreads.length > 0 && <section className="mt-6 rounded-[26px] border border-[#16A34A]/30 bg-[#F0FDF4] p-5">
-        <h2 className="flex items-center gap-2 text-xl font-black"><MessageSquare aria-hidden="true" size={19}/>הודעות שממתינות לתשובה</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-xl font-black"><MessageSquare aria-hidden="true" size={19}/>הודעות שממתינות לתשובה</h2>
+          <Link href="/coach/messages" className="text-sm font-bold text-[#16A34A]">לכל השיחות</Link>
+        </div>
         <div className="mt-4 grid gap-2">
           {waitingThreads.map((thread) =>
             <Link key={thread.clientId} href={`/coach/clients/${thread.clientId}?tab=messages`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#FFFFFF] p-3 text-sm">
@@ -58,7 +69,12 @@ export default async function CoachDashboard() {
                 <strong>{nameById.get(thread.clientId) ?? "לקוח"}</strong>
                 <span className="mr-2 block truncate text-[#5B5F5B] sm:inline">{thread.lastBody}</span>
               </span>
-              <span className="pill pill--green">{thread.unread} חדשות</span>
+              {/* How long they have been waiting is the part that decides who to
+                  answer first; "unread" only says whether the coach has looked. */}
+              <span className="flex shrink-0 items-center gap-2">
+                <span className="text-xs text-[#5B5F5B]">{waitedFor(thread.lastAt)}</span>
+                {thread.unread > 0 && <span className="pill pill--green">{thread.unread} חדשות</span>}
+              </span>
             </Link>)}
         </div>
       </section>}
@@ -113,6 +129,17 @@ export default async function CoachDashboard() {
       </section>
     </div>
   </main>;
+}
+
+// How long a client has been waiting for an answer, in the coarsest unit that
+// is still true. A timestamp needs subtracting; "לפני 3 שעות" does not.
+function waitedFor(value: string) {
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60_000));
+  if (minutes < 60) return "עכשיו";
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `לפני ${hours} שע׳`;
+  const days = Math.floor(hours / 24);
+  return `לפני ${days} ${days === 1 ? "יום" : "ימים"}`;
 }
 
 function Metric({ label, value }: { label: string; value: number }) {

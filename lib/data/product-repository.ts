@@ -10,7 +10,9 @@ import {
   FOOD_LOG_PHOTO_BUCKET,
   FOOD_LOG_PHOTO_URL_TTL_SECONDS,
   type LoggedFood,
+  sumLoggedFood,
 } from "@/lib/nutrition/food-log";
+import { addTotals, eatenFromMenu, isMealAnswered } from "@/lib/nutrition/menu-intake";
 
 export type AuthContext = Readonly<{
   id: string;
@@ -392,8 +394,27 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   const programRows = programsResult.data ?? [];
   const programResult = { data: programRows.find((row) => row.id === assignment?.program_id) ?? null };
   const sessions = sessionResult.data ?? [];
-  const completedThisWeek = sessions.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
-  const totals = menu?.meals.flatMap((meal) => meal.items.filter((item) => item.eaten)).reduce((sum, item) => ({ calories: sum.calories + item.calories, protein: sum.protein + item.protein, carbs: sum.carbs + item.carbs, fat: sum.fat + item.fat }), { calories: 0, protein: 0, carbs: 0, fat: 0 }) ?? { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  // The training week, as both sides mean it: Sunday to Saturday.
+  //
+  // This counted a rolling seven days back from today while the client's own
+  // dashboard counted from Sunday, so on a Wednesday the coach's "אימונים השבוע"
+  // silently included last Thursday's session and the client's did not. Two
+  // screens, one client, one week, two numbers.
+  const weekOpened = new Date(weekStart(date)).getTime();
+  const completedInWeek = (rows: readonly { status: string; completed_at: string | null }[]) =>
+    rows.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= weekOpened).length;
+  const completedThisWeek = completedInWeek(sessions);
+  // What the client ate, at the amount the client reported eating, plus anything
+  // they logged beside the plan.
+  //
+  // This read `meal.items.filter(item => item.eaten)` - every row the coach
+  // wrote, at the coach's portion. `meal.items` is deliberately unscaled (the
+  // alternatives are offers and were not eaten), so a client who said "I only
+  // ate half" moved their own screen and nothing on the coach's, and a scanned
+  // snack never appeared here at all. The client's screens read the group's
+  // chosen row; so does this now, through the same shared rule.
+  const loggedToday = await listClientFoodLog(clientId, date);
+  const totals = addTotals(eatenFromMenu(menu?.meals ?? []), sumLoggedFood(loggedToday));
   // Adherence is counted in meals, not in rows.
   //
   // meal.items holds every row the coach wrote - the primary AND its
@@ -409,7 +430,7 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   // figure says how much of the day the client has responded to, not how much
   // of it they obeyed.
   const plannedMeals = menu?.meals ?? [];
-  const markedMeals = plannedMeals.filter((meal) => meal.status !== null || meal.completed).length;
+  const markedMeals = plannedMeals.filter(isMealAnswered).length;
   const latestCompleted = sessions.find((session) => session.status === "completed") ?? null;
   const dayRows = daysResult.data ?? [];
   const daysFor = (programId: string) => dayRows.filter((day) => day.program_id === programId);
@@ -419,7 +440,7 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   const activePrograms = activeAssignments.map((row) => {
     const program = programRows.find((entry) => entry.id === row.program_id) ?? null;
     const days = daysFor(row.program_id);
-    const completedThisWeekForRow = sessions.filter((session) => session.status === "completed" && days.some((day) => day.id === session.day_id) && session.completed_at && new Date(session.completed_at).getTime() >= new Date(`${date}T00:00:00Z`).getTime() - 6 * 24 * 60 * 60 * 1000).length;
+    const completedThisWeekForRow = completedInWeek(sessions.filter((session) => days.some((day) => day.id === session.day_id)));
     return {
       assignment: row,
       program,

@@ -55,7 +55,14 @@ export default function FreeCalorieMeal({
         <Plus aria-hidden="true" size={15} />הוספת מה שאכלתי
       </button>
 
-      <AteSomethingElse mealId={mealId} date={date} open={adding} onClose={() => setAdding(false)} />
+      <AteSomethingElse
+        mealId={mealId}
+        date={date}
+        open={adding}
+        onClose={() => setAdding(false)}
+        title="מה אכלת במסגרת הזו?"
+        unmeasuredNote="פריט שנרשם בתיאור או בתמונה לא ייספר במסגרת — רק סריקת ברקוד נושאת ערכים. המאמן יראה בדיוק מה אכלת."
+      />
     </div>
   );
 }
