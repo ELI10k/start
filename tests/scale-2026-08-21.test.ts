@@ -144,3 +144,38 @@ test("the weekly summary sends exactly the keys its batch writer reads", async (
   const noticeKeys = keysSentIn(route, "coachNotices.push({");
   assert.deepEqual([...noticeKeys].sort(), [...keysReadBy(sql, "create_in_app_notifications")].sort());
 });
+
+// ------------------------------------------------- the panel that never filled
+
+test("the risk scores the coach dashboard reads are actually written", async () => {
+  const [route, repository, panel, dashboard] = await Promise.all([
+    source("app/api/cron/weekly-summary/route.ts"),
+    source("lib/coach-intelligence/proactive-repository.ts"),
+    source("components/coach/CoachAttentionPanel.tsx"),
+    source("app/coach/page.tsx"),
+  ]);
+  // habit_analysis_reports was read since the day it was created and written by
+  // nothing - no code, no job, not even an insert policy - so the panel the
+  // 2026-08-20 review moved to the top of the coach's morning screen had never
+  // once had a row to show.
+  assert.match(route, /from\("habit_analysis_reports"\)\s*\n?\s*\.upsert\(reports/);
+  assert.match(route, /onConflict: "client_id,week_start,week_end"/);
+  // The engine already existed; only the writer was missing.
+  assert.match(route, /calculateCoachScores\(metrics\)/);
+  assert.match(route, /weeklyRecommendations\(metrics\)/);
+  // A panel must not cost every client their summary.
+  assert.match(route, /console\.error\("habit reports threw"/);
+
+  // The risk score leans on logins - with no figure every client scores as
+  // absent, which is how a "requires attention" panel names everybody.
+  assert.match(route, /from\("device_sessions"\)/);
+  assert.match(route, /logins: facts\.loginDays/);
+  // A week with nothing in it is insufficient data, not risk.
+  assert.match(route, /status: measured \? "ready" : "insufficient_data"/);
+
+  // "Nothing has been measured" and "no client is at risk" are different facts,
+  // and the panel used to tell the coach the second when the truth was the first.
+  assert.match(repository, /measured: signals\.length > 0/);
+  assert.match(panel, /measured \? "אין כרגע לקוח עם אות סיכון מבוסס נתונים\." :/);
+  assert.match(dashboard, /measured=\{attention\.measured\}/);
+});

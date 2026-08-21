@@ -79,7 +79,7 @@ export default async function CoachDashboard() {
         </div>
       </section>}
 
-      <CoachAttentionPanel items={attention}/>
+      <CoachAttentionPanel items={attention.items} measured={attention.measured}/>
 
       <section className="mt-6 rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
         <div className="flex items-center justify-between gap-4">

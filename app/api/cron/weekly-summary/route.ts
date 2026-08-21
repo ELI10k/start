@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { resolveSummaryProvider } from "@/lib/coach-intelligence/summary-provider";
 import { isSummaryHour, israelWeek } from "@/lib/coach-intelligence/week-window";
+import { calculateCoachScores, weeklyRecommendations, type HabitMetrics } from "@/lib/coach-intelligence/rule-engine";
 import type { WeeklyFacts } from "@/lib/coach-intelligence/weekly-facts";
 
 export const dynamic = "force-dynamic";
@@ -96,6 +97,65 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, week: week.start, message: writeError.message }, { status: 500 });
     }
   }
+  // The risk scores the coach dashboard reads.
+  //
+  // habit_analysis_reports has been read since it was created and written by
+  // nothing: no application code, no SQL, no job, and no insert policy. So the
+  // "דורשים תשומת לב" panel - the thing the 2026-08-20 review moved to the top of
+  // the coach's morning screen as the most actionable item on it - has never
+  // once had a row to show, and its empty state says "no client currently has a
+  // data-based risk signal", which a coach reads as "everyone is fine".
+  //
+  // The engine to fill it already existed: calculateCoachScores turns the same
+  // facts gathered above into exactly the seven scores the table stores. Only
+  // the writer was missing.
+  //
+  // Best effort on purpose. This is a panel, and the summaries are the point of
+  // the run - a bad column name here must not cost every client their report.
+  try {
+    const reports = clientIds.flatMap((clientId) => {
+      const coachId = coachByClient.get(clientId);
+      if (!coachId) return [];
+      const facts = factsFor(clientId);
+      // Optional on WeeklyFacts because a summary may have none; here a client
+      // with no check-ins is a client with zero, not a client with nothing.
+      const submitted = facts.checkIns?.submitted ?? 0;
+      const metrics: HabitMetrics = {
+        mealCompletion: facts.nutrition?.mealsPlanned ? Math.round((facts.nutrition.mealsEaten / facts.nutrition.mealsPlanned) * 100) : 0,
+        workoutCompletion: facts.workouts?.planned ? Math.round((facts.workouts.completed / facts.workouts.planned) * 100) : 0,
+        averageProtein: 0,
+        activeDays: facts.nutrition?.daysReported ?? 0,
+        checkIns: submitted,
+        weightTrend: facts.weight?.changeKg ?? 0,
+        skippedWorkouts: facts.workouts?.skipped ?? 0,
+        logins: facts.loginDays,
+      };
+      const scores = calculateCoachScores(metrics);
+      const actions = weeklyRecommendations(metrics);
+      // A week with nothing in it scores badly for the wrong reason, so it is
+      // marked as such rather than reported as risk.
+      const measured = Boolean(facts.workouts || facts.nutrition || submitted || facts.loginDays);
+      return [{
+        client_id: clientId, coach_id: coachId,
+        week_start: week.start, week_end: week.end,
+        consistency_score: scores.consistency, nutrition_score: scores.nutrition,
+        workout_score: scores.workouts, tracking_score: scores.tracking,
+        client_health_score: scores.health, risk_score: scores.risk, retention_risk: scores.retention,
+        summary: measured ? `עקביות ${scores.consistency}/100 · תזונה ${scores.nutrition} · אימונים ${scores.workouts}` : "אין מספיק נתונים לשבוע הזה.",
+        progress_explanation: measured ? `נכנס ל־${facts.loginDays} ימים מתוך 7, ${submitted} צ׳ק־אינים.` : "לא נרשמה פעילות מדודה.",
+        strengths: [], improvements: [], recommended_actions: actions,
+        metrics, status: measured ? "ready" : "insufficient_data",
+      }];
+    });
+    if (reports.length) {
+      const { error: reportError } = await supabase.from("habit_analysis_reports")
+        .upsert(reports, { onConflict: "client_id,week_start,week_end" });
+      if (reportError) console.error("habit reports failed", { message: reportError.message });
+    }
+  } catch (cause) {
+    console.error("habit reports threw", { message: cause instanceof Error ? cause.message : "unknown" });
+  }
+
   if (coachNotices.length) {
     const { error: noticeError } = await supabase.rpc("create_in_app_notifications", { p_rows: coachNotices });
     // The summaries are the point of the run; a coach who did not get the nudge
@@ -127,11 +187,14 @@ async function coachesFor(supabase: SupabaseClient, clientIds: readonly string[]
  * produced by exactly one piece of code.
  */
 async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly string[], week: ReturnType<typeof israelWeek>) {
-  const empty = (): WeeklyFacts => ({ weekStart: week.start, weekEnd: week.end, checkIns: { submitted: 0, reviewed: 0 } });
-  if (!clientIds.length) return () => empty();
+  // The facts a summary is built from, plus how many days the client opened the
+  // app - which the risk score needs and a summary does not.
+  type FactsWithLogins = WeeklyFacts & { loginDays: number };
+  const empty = (): FactsWithLogins => ({ weekStart: week.start, weekEnd: week.end, checkIns: { submitted: 0, reviewed: 0 }, loginDays: 0 });
+  if (!clientIds.length) return (): FactsWithLogins => empty();
   const ids = [...clientIds];
 
-  const [sessions, previousSessions, mealStatus, steps, previousSteps, progress, earlierProgress, checkIns, assignments, stepGoals] =
+  const [sessions, previousSessions, mealStatus, steps, previousSteps, progress, earlierProgress, checkIns, assignments, stepGoals, deviceSessions] =
     await Promise.all([
       supabase.from("workout_sessions").select("client_id,id,status,completed_at,total_volume,assignment_id").in("client_id", ids).eq("status", "completed").gte("completed_at", `${week.start}T00:00:00Z`).lte("completed_at", `${week.end}T23:59:59Z`),
       supabase.from("workout_sessions").select("client_id,id").in("client_id", ids).eq("status", "completed").gte("completed_at", `${week.previousStart}T00:00:00Z`).lt("completed_at", `${week.start}T00:00:00Z`),
@@ -145,6 +208,11 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
       supabase.from("check_ins").select("client_id,id,status").in("client_id", ids).gte("submitted_at", `${week.start}T00:00:00Z`).lte("submitted_at", `${week.end}T23:59:59Z`),
       supabase.from("workout_assignments").select("client_id,weekly_frequency").in("client_id", ids).eq("status", "active"),
       supabase.from("health_preferences").select("client_id,daily_step_goal").in("client_id", ids),
+      // How many days of the week the client actually opened the app. The risk
+      // score leans on this hard - with no figure at all every client scores as
+      // absent, which is how a "requires attention" panel ends up naming
+      // everybody and being read by nobody.
+      supabase.from("device_sessions").select("user_id,last_seen_at").in("user_id", ids).gte("last_seen_at", `${week.start}T00:00:00Z`).lte("last_seen_at", `${week.end}T23:59:59Z`),
     ]);
 
   const group = (result: { data: unknown }) => {
@@ -160,9 +228,16 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
   const stepsBy = group(steps), previousStepsBy = group(previousSteps), progressBy = group(progress);
   const earlierProgressBy = group(earlierProgress), checkInsBy = group(checkIns);
   const assignmentBy = group(assignments), goalBy = group(stepGoals);
+  const loginDaysBy = new Map<string, number>();
+  for (const row of rows(deviceSessions)) {
+    const key = String(row.user_id);
+    const days = loginDaysBy.get(key) ?? 0;
+    loginDaysBy.set(key, days + 1);
+  }
   const of = (map: Map<string, Row[]>, id: string) => map.get(id) ?? [];
 
-  return (clientId: string): WeeklyFacts => buildFacts({
+  return (clientId: string): FactsWithLogins => ({
+    ...buildFacts({
     week,
     sessions: of(sessionsBy, clientId),
     previousSessions: of(previousSessionsBy, clientId),
@@ -174,6 +249,8 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
     checkIns: of(checkInsBy, clientId),
     plannedFrequency: num(of(assignmentBy, clientId)[0]?.weekly_frequency),
     stepGoal: num(of(goalBy, clientId)[0]?.daily_step_goal) || 10_000,
+    }),
+    loginDays: Math.min(7, loginDaysBy.get(clientId) ?? 0),
   });
 }
 
