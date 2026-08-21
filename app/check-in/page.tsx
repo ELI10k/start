@@ -7,6 +7,7 @@ import { getAuthContext } from "@/lib/data/product-repository";
 import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatIsraelDate } from "@/lib/date-time";
+import WithdrawCheckIn from "@/components/client/WithdrawCheckIn";
 export default async function CheckInPage(){const auth=await getAuthContext();if(!auth)redirect("/login");if(auth.role!=="client")redirect("/unauthorized");const supabase=await createSupabaseServerClient();
 const[{count},{data:weekState}]=await Promise.all([
   supabase.from("check_ins").select("id",{count:"exact",head:true}).eq("client_id",auth.id),
@@ -17,6 +18,9 @@ const[{count},{data:weekState}]=await Promise.all([
   // behaves exactly as it did - the form is simply offered.
   supabase.rpc("check_in_week_state"),
 ]);
+// This week's check-in, so it can be taken back while it is still unanswered.
+// Only the id is needed, and only when there is one.
+const{data:thisWeek}=await supabase.from("check_ins").select("id,coach_response,handled_at").eq("client_id",auth.id).order("submitted_at",{ascending:false}).limit(1).maybeSingle();
 const week=Array.isArray(weekState)?weekState[0]:weekState;
 const submittedThisWeek=week?.submitted===true;
 const nextOpens=week?.next_opens?formatIsraelDate(`${week.next_opens}T12:00:00Z`,{weekday:"long",day:"numeric",month:"long"}):null;
@@ -34,9 +38,15 @@ return <ClientShell><PageHeader eyebrow="עדכון שבועי" title="איך ע
       <p className="mt-2 text-sm text-[#5B5F5B]">
         המאמן קיבל אותו.{nextOpens?` הצ׳ק־אין הבא נפתח ב${nextOpens}.`:""} רוצה לעדכן משהו לפני כן — אפשר לכתוב למאמן.
       </p>
-      <div className="mt-4 flex flex-wrap justify-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Link href="/check-in/history" className="premium-primary-button">לצפייה בצ׳ק־אין</Link>
         <Link href="/messages" className="premium-secondary-button">הודעה למאמן</Link>
+        {/* Only while it is still the client's to take back. Once the coach has
+            replied or closed it, the database refuses and the button would be an
+            offer the product cannot keep. */}
+        {thisWeek&&!thisWeek.coach_response&&!thisWeek.handled_at
+          ? <WithdrawCheckIn checkInId={String(thisWeek.id)}/>
+          : null}
       </div>
     </div>
   : <PersistedCheckInForm photosRequired={cycle.photosRequired} firstCheckIn={cycle.isFirst}/>}

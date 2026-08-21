@@ -198,6 +198,58 @@ export async function saveCheckIn(
   };
 }
 
+/**
+ * Takes back a check-in the coach has not answered yet.
+ *
+ * The client had no way to correct one: check_ins has no update or delete policy
+ * for them, so "file another" was the whole repertoire - and the weekly guard
+ * closed that. This is the door that replaces it.
+ *
+ * The database decides whether it may go: the policy added in 202608210006
+ * allows the delete only for the client's own row, only while the coach has not
+ * written back and has not marked it handled. Nothing is re-checked here, so
+ * there is one rule and not two that can disagree.
+ */
+export async function withdrawCheckIn(
+  _previous: SaveState,
+  form: FormData,
+): Promise<SaveState> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "client")
+    return { ok: false, message: "אין הרשאה לביטול הצ׳ק־אין." };
+  const checkInId = String(form.get("checkInId") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(checkInId)) return { ok: false, message: "צ׳ק־אין לא תקין." };
+
+  const supabase = await createSupabaseServerClient();
+  // Read the photo paths first: the rows cascade with the check-in, and once
+  // they are gone there is nothing left that knows where the files were.
+  const { data: photos } = await supabase
+    .from("check_in_photos")
+    .select("storage_path")
+    .eq("check_in_id", checkInId);
+
+  const { data: deleted, error } = await supabase
+    .from("check_ins")
+    .delete()
+    .eq("id", checkInId)
+    .select("id");
+  if (error) return { ok: false, message: "הצ׳ק־אין לא בוטל. אפשר לנסות שוב." };
+  // RLS filtering the row out is not an error, it is a refusal - and it means
+  // the coach has already answered or closed it.
+  if (!deleted?.length)
+    return { ok: false, message: "המאמן כבר הגיב או סימן את הצ׳ק־אין כטופל, ולכן אי אפשר לבטל אותו. אפשר לכתוב לו בהודעה." };
+
+  const paths = (photos ?? []).map((row) => String(row.storage_path)).filter(Boolean);
+  // Best effort: a leftover object is a tidiness problem, a stuck client is not.
+  if (paths.length) await supabase.storage.from(CHECK_IN_PHOTO_BUCKET).remove(paths);
+
+  revalidatePath("/check-in");
+  revalidatePath("/check-in/history");
+  revalidatePath("/coach/check-ins");
+  revalidatePath("/coach");
+  return { ok: true, message: "הצ׳ק־אין בוטל. אפשר לשלוח אחד חדש." };
+}
+
 export async function reviewCheckIn(
   _previous: SaveState,
   form: FormData,

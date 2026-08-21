@@ -219,3 +219,40 @@ test("the end-of-day summary obeys its own switch", async () => {
   assert.match(form, /בסביבות 21:30/);
   assert.match(crons, /"schedule": "30 18 \* \* \*"/);
 });
+
+// ------------------------------------------------- taking a check-in back
+
+test("a client may withdraw a check-in the coach has not answered", async () => {
+  const [migration, action, page, button] = await Promise.all([
+    source("supabase/migrations/202608210006_client_may_withdraw_a_check_in.sql"),
+    source("app/actions/product.ts"),
+    source("app/check-in/page.tsx"),
+    source("components/client/WithdrawCheckIn.tsx"),
+  ]);
+  // check_ins had no delete or update policy for a client at all, so "file
+  // another" was the only correction - and the weekly guard closed it.
+  assert.match(migration, /create policy check_ins_self_delete on public\.check_ins/);
+  assert.match(migration, /for delete to authenticated/);
+  // Their own row, and only while it is still theirs to take back: a coach who
+  // replied would lose their reply with it, and one who closed it has acted.
+  assert.match(migration, /client_id = \(select auth\.uid\(\)\)/);
+  assert.match(migration, /coach_response is null/);
+  assert.match(migration, /handled_at is null/);
+
+  // One rule, in the database. The action does not re-check it.
+  assert.match(action, /export async function withdrawCheckIn/);
+  assert.doesNotMatch(action, /withdrawCheckIn[\s\S]{0,1200}coach_response !== null/);
+  // RLS filtering the row out is a refusal, not an error, and reads as zero rows.
+  assert.match(action, /if \(!deleted\?\.length\)/);
+  assert.match(action, /המאמן כבר הגיב או סימן את הצ׳ק־אין כטופל/);
+  // The photo rows cascade; the stored objects do not.
+  assert.match(action, /from\("check_in_photos"\)[\s\S]{0,120}storage_path/);
+  assert.match(action, /storage\.from\(CHECK_IN_PHOTO_BUCKET\)\.remove\(paths\)/);
+
+  // Offered only while the database would allow it - a button the product
+  // cannot honour is worse than no button.
+  assert.match(page, /thisWeek&&!thisWeek\.coach_response&&!thisWeek\.handled_at/);
+  // It throws away photographs and a week of answers, so it asks first.
+  assert.match(button, /confirming/);
+  assert.match(button, /אי אפשר לשחזר/);
+});

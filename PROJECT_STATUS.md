@@ -197,9 +197,30 @@ produced **219 passed, 9 failed** — and none of the nine were caused by it.
   row. Widening them squeezed the meal-type `select` to 26px on a 390px screen,
   so the header row wraps now.
 
+### The hole the weekly guard opened, closed
+`check_ins` carries an insert policy, a select policy and a coach update policy,
+and **no delete or update policy for a client**. So the only way a client could
+correct a mistyped weight was to file a second check-in — and `202608210004`
+closed that. `202608210006` adds a delete policy scoped to their own row, and
+only while `coach_response` and `handled_at` are both null: once the coach has
+written back the check-in is half a conversation, and once they have closed it
+they have acted on it.
+
+Withdrawing is a delete rather than a status, because the photo cycle counts
+rows — a withdrawn row left behind would go on shifting "photos required" by one
+exactly as a duplicate did. The photo rows cascade; the stored objects are
+removed by the action.
+
+### Merged and deployed — 2026-08-21
+`main` at `ee61888`. The deploy was **verified rather than assumed**: the live
+bundle's fingerprint was captured before the push and polled until it changed,
+which it did after about 60 seconds (`1b84d0bd…` → `aabf2527…`). Given this
+project's Vercel link once failed silently for ten days, a successful push is
+not evidence of a deployment.
+
 ### Verification
-`tsc` clean · `lint` clean · **484 / 484** unit tests · `build` passes ·
-migration validation passes (72 migrations) · **E2E green**.
+`tsc` clean · `lint` clean · **485 / 485** unit tests · `build` passes ·
+migration validation passes (73 migrations) · **E2E 230 passed, 0 failed**.
 
 ## 2026-08-21 third product review
 
