@@ -153,8 +153,18 @@ test("a sent summary is never rewritten underneath the client", async () => {
 
 test("the schedule stays inside what the hosting plan allows", async () => {
   const vercel = JSON.parse(await source("vercel.json")) as { crons: { path: string; schedule: string }[] };
-  const cron = vercel.crons.find((entry) => entry.path === "/api/cron/weekly-summary");
-  assert.equal(cron?.schedule, "0 17 * * 6");
+  // Two slots, and not one more.
+  //
+  // The Hobby plan registers exactly two cron jobs. Declaring four does not fail
+  // the deploy and does not warn - Vercel takes two and silently drops the rest.
+  // On 2026-08-21 the Cron Jobs panel listed two, and neither was the 05:00
+  // reminders run nor the Saturday summary: both had been declared for weeks and
+  // neither had ever fired. The weekly summary therefore no longer has an entry
+  // of its own; it runs inside the evening job, which gates it on isSummaryHour.
+  assert.equal(vercel.crons.length, 2, "more than two entries means some are silently dropped");
+  assert.ok(vercel.crons.some((entry) => entry.path === "/api/cron/reminders"));
+  assert.ok(vercel.crons.some((entry) => entry.path === "/api/cron/evening"));
+  assert.equal(vercel.crons.find((entry) => entry.path === "/api/cron/evening")?.schedule, "30 18 * * *");
   // A cron that fires more than once a day is rejected at deploy time on the
   // current plan - which means a bad schedule here breaks every deployment, not
   // just the job. None of these may use a step or a range in the hour field.
@@ -162,6 +172,14 @@ test("the schedule stays inside what the hosting plan allows", async () => {
     const hour = entry.schedule.split(" ")[1];
     assert.doesNotMatch(hour, /[*/,-]/, `${entry.path} runs more than once a day: ${entry.schedule}`);
   }
+  // The summary is reached through the evening job now, so that is what has to
+  // call it - an unreferenced route would simply never run.
+  const evening = await source("app/api/cron/evening/route.ts");
+  assert.match(evening, /weekly-summary\/route/);
+  assert.match(evening, /reminders\/route/);
+  assert.match(evening, /daily-coach\/route/);
+  // 18:30 UTC is 21:30 in Israel in summer and 20:30 in winter; isSummaryHour
+  // accepts 18:00-21:00 on a Saturday, so both land inside it.
   const route = await source("app/api/cron/weekly-summary/route.ts");
   assert.match(route, /isSummaryHour/);
   assert.match(route, /Bearer \$\{secret\}/);

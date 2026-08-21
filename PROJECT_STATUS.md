@@ -94,9 +94,43 @@ The application degrades cleanly without it only in the sense that the old code
 is gone — **this migration has to run before the next cron fires**, or the daily
 and weekly jobs will fail on a missing function.
 
+### The schedule — corrected again, from the Vercel panel
+The Cron Jobs panel on 2026-08-21 settled it, and both earlier accounts were
+wrong.
+
+**The Hobby plan registers exactly two cron jobs.** Declaring more does not fail
+the deploy and does not warn: Vercel takes two and drops the rest silently. The
+panel listed two — `/api/cron/reminders` at 30 17 and `/api/cron/daily-coach` at
+30 18 — which are the *last two* entries `vercel.json` declared. So the 05:00
+reminders run and the Saturday weekly summary had been declared for weeks and
+**neither had ever been registered**. That is why the scheduler appeared to do
+nothing: it was never called. Adding a fourth entry earlier the same day pushed
+the summary out too.
+
+The schedule is now built for two slots:
+
+| Slot | Runs |
+|---|---|
+| `0 5 * * *` → `/api/cron/reminders` | morning reminders, and the notification prune |
+| `30 18 * * *` → `/api/cron/evening` | reminders again (the evening workout rule only fires from 19:30 Israel), then the daily coach, then the weekly summary — which gates itself on `isSummaryHour` and costs one cheap check on the other six days |
+
+18:30 UTC is 21:30 in Israel in summer and 20:30 in winter. `isSummaryHour`
+accepts 18:00–21:00 on a Saturday, so the summary lands inside it either way, and
+21:30 matches what the preferences screen tells the client.
+
+The steps run in sequence, not in parallel: they share a database and a
+serverless function, and three concurrent sweeps of the roster is how one of them
+times out. One failing step does not cancel the others.
+
+**The batched code was confirmed working by the same panel** — `daily-coach`
+returned in 274ms and `reminders` in 2.48s, which is the end-to-end verification
+that could not be done from a development machine for want of the service-role
+key.
+
 ### What still costs money, and what does not
-- **Vercel:** nothing. The "Hobby permits one cron a day" note was wrong and is
-  corrected above.
+- **Vercel:** nothing, but the plan caps cron jobs at two and that is now a
+  design constraint rather than a note. A third scheduled thing has to join the
+  evening job, not claim a slot.
 - **Supabase Free:** the binding constraint is the 1GB storage bucket. With the
   food log compressed it is photographs at roughly 300KB rather than up to 5MB,
   which moves the wall by more than a factor of ten.

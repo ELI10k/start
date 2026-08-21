@@ -6,16 +6,8 @@
       "schedule": "0 5 * * *"
     },
     {
-      "path": "/api/cron/weekly-summary",
-      "schedule": "0 17 * * 6"
-    },
-    {
-      "path": "/api/cron/daily-coach",
+      "path": "/api/cron/evening",
       "schedule": "30 18 * * *"
-    },
-    {
-      "path": "/api/cron/reminders",
-      "schedule": "30 17 * * *"
     }
   ]
 }

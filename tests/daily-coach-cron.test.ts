@@ -14,7 +14,12 @@ test("daily coach cron creates one deduplicated next-best-action notification pe
   assert.match(route, /israelDateKey\(\)/);
   assert.match(route, /israelWeekday\(date\)/);
   assert.match(route, /Bearer \$\{secret\}/);
-  assert.ok(config.crons.some((item: { path: string }) => item.path === "/api/cron/daily-coach"));
+  // The daily coach no longer has a cron entry of its own: the Hobby plan
+  // registers two jobs and silently drops the rest, so it runs inside the
+  // evening job instead. An entry here would push a working one out.
+  assert.ok(!config.crons.some((item: { path: string }) => item.path === "/api/cron/daily-coach"));
+  const evening = await readFile(new URL("../app/api/cron/evening/route.ts", import.meta.url), "utf8");
+  assert.match(evening, /daily-coach\/route/);
 });
 
 test("weekly generation alerts the coach but still does not auto-send the report to the client", async () => {
