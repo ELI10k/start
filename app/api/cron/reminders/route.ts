@@ -35,8 +35,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
     }
     const clients = typeof data === "number" ? data : 0;
-    console.info("reminder scheduler ran", { clients, ms: Date.now() - startedAt });
-    return NextResponse.json({ ok: true, clients, ms: Date.now() - startedAt });
+    // Nothing had ever deleted a notification, and this job writes up to four a
+    // day per client. Pruning here rather than on its own schedule because this
+    // one already runs daily and the delete is a single indexed statement.
+    //
+    // A failure to prune is not a failure to remind: the reminders are the point
+    // of the run and tidying is not worth losing them over.
+    const { data: pruned, error: pruneError } = await supabase.rpc("prune_notifications");
+    if (pruneError) console.error("notification prune failed", { code: pruneError.code, message: pruneError.message });
+    console.info("reminder scheduler ran", { clients, pruned: Number(pruned ?? 0), ms: Date.now() - startedAt });
+    return NextResponse.json({ ok: true, clients, pruned: Number(pruned ?? 0), ms: Date.now() - startedAt });
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : "unknown error";
     console.error("reminder scheduler threw", { message });

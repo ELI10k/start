@@ -42,34 +42,46 @@ export async function GET(request: Request) {
     : { data: [] };
   const wantsSummary = new Map(rows(preferences).map((row) => [String(row.user_id), row.end_of_day_reminder !== false]));
 
-  let delivered = 0;
-  let failed = 0;
+  // One write for the whole roster, not one per client.
+  //
+  // The reads stopped growing with the roster on 2026-08-20; the writes did not,
+  // and they are inside a serverless function with a wall clock. At a few
+  // hundred clients the loop was cut off partway through and the clients at the
+  // end of the list never heard from it - with no error, because the function
+  // simply stopped. The message is still built here, per client, in the language
+  // the product speaks; only the delivery is batched.
   let declined = 0;
+  const batch: Record<string, string | null>[] = [];
   for (const client of rows(clients)) {
     const clientId = String(client.id);
     if (!(wantsSummary.get(clientId) ?? true)) { declined += 1; continue; }
-    try {
-      const input = dailyInput(clientId);
-      const message = buildDailyCoachMessage(input);
-      const { error: notificationError } = await supabase.rpc("create_in_app_notification", {
-        p_recipient_id: clientId,
-        p_actor_id: null,
-        p_category: "nutrition",
-        p_type: "end_of_day_reminder",
-        p_title: message.title,
-        p_body: `${message.summary} ${message.action}`,
-        p_href: message.href,
-        p_source_table: "daily_coach",
-        p_source_id: date,
-        p_dedupe_key: `daily-coach-${date}`,
-      });
-      if (notificationError) throw notificationError;
-      delivered += 1;
-    } catch (cause) {
-      failed += 1;
-      console.error("daily coach failed for client", { clientId, message: cause instanceof Error ? cause.message : "unknown" });
-    }
+    const message = buildDailyCoachMessage(dailyInput(clientId));
+    batch.push({
+      recipient_id: clientId,
+      actor_id: null,
+      category: "nutrition",
+      type: "end_of_day_reminder",
+      title: message.title,
+      body: `${message.summary} ${message.action}`,
+      href: message.href,
+      source_table: "daily_coach",
+      source_id: date,
+      dedupe_key: `daily-coach-${date}`,
+    });
   }
+
+  const { data: written, error: writeError } = batch.length
+    ? await supabase.rpc("create_in_app_notifications", { p_rows: batch })
+    : { data: 0, error: null };
+  if (writeError) {
+    console.error("daily coach batch failed", { message: writeError.message, size: batch.length });
+    return NextResponse.json({ ok: false, date, message: writeError.message }, { status: 500 });
+  }
+  const delivered = Number(written ?? 0);
+  // The function skips a row it cannot use rather than failing the batch, so a
+  // shortfall is worth naming.
+  const failed = batch.length - delivered;
+  if (failed) console.error("daily coach skipped rows", { failed, size: batch.length });
   return NextResponse.json({ ok: failed === 0, date, delivered, failed, declined });
 }
 

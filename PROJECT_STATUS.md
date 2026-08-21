@@ -49,6 +49,63 @@ Deployments list simply never grows.
 `begin;` to be the first characters of the file, so every migration with a header
 comment was rejected. It now skips leading comments.
 
+## 2026-08-21 scale — what breaks before a thousand clients
+
+Eli asked whether the app can carry ~1000 users without buying anything, since
+the App Store and Play conversions are the expense he is saving for. Three things
+were shaped for nine clients. 5 regression tests added (`tests/scale-2026-08-21.test.ts`).
+
+**A correction first.** The initial answer said no photograph anywhere is
+compressed. That was wrong: `CheckInPhotoInputs` has downscaled its three photos
+to 1600px at quality 0.82 since the request-body limit forced it, which is a
+factor of about eight off the storage estimate that was given. The path that
+genuinely uploaded whatever the camera produced is the **food log** — one
+photograph per meal, no cadence limit, up to 5MB each.
+
+1. **The shrinker is now shared** (`lib/images/shrink.ts`) and the food log uses
+   it. It also gained `imageOrientation: "from-image"`, so a portrait photo is no
+   longer re-encoded on its side once its EXIF tag is dropped.
+2. **The daily-coach job wrote one notification per client, sequentially.** Its
+   reads were batched on 2026-08-20 and its writes were not, inside a serverless
+   function with a wall clock — so past a few hundred clients it was cut off
+   partway and the clients at the end of the list heard nothing, with no error
+   anywhere. `create_in_app_notifications` takes the batch;
+   `create_in_app_notification` still does each row, so the category preference
+   and the dedupe key behave exactly as before.
+3. **The weekly-summary job ran about thirteen round trips per client** — ten in
+   `gatherFacts`, three to write. It now reads the whole roster in ten queries and
+   writes through `upsert_weekly_summaries` and the notification batch. The
+   arithmetic moved to `buildFacts`, operating on rows already fetched, so the
+   figures a summary is built on still come from exactly one piece of code. This
+   was the one that broke earliest — around forty clients, not a thousand.
+4. **Nothing had ever deleted a notification**, and the scheduler writes up to
+   four a day per client. `prune_notifications` keeps read ones 60 days and unread
+   ones 180 — unread outlives read because deleting something the client has not
+   seen silently answers a question nobody asked. It runs from the daily reminder
+   job and never at its expense.
+
+### Migration added — **not yet applied**
+`202608210007_notifications_at_scale` — three functions and one index.
+`create_in_app_notification` and `upsert_weekly_summary` are untouched. All three
+new functions are revoked from `public` and `anon`: two are batch writers for the
+cron and one deletes rows, and none is something a signed-in person should call.
+
+The application degrades cleanly without it only in the sense that the old code
+is gone — **this migration has to run before the next cron fires**, or the daily
+and weekly jobs will fail on a missing function.
+
+### What still costs money, and what does not
+- **Vercel:** nothing. The "Hobby permits one cron a day" note was wrong and is
+  corrected above.
+- **Supabase Free:** the binding constraint is the 1GB storage bucket. With the
+  food log compressed it is photographs at roughly 300KB rather than up to 5MB,
+  which moves the wall by more than a factor of ten.
+- **Apple Developer:** needed for push to reach a locked screen, and for the App
+  Store conversion. Not needed for anything the app does today.
+- **Worth checking:** Vercel's Hobby plan is for non-commercial use. A coaching
+  business charging clients is commercial, which is an account-terms question
+  rather than a technical one.
+
 ## 2026-08-21 proposals — twelve of fourteen built, plus one defect they exposed
 
 The review's own "found and not implemented" list, worked through. Twelve are

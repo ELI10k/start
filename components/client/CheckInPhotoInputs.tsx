@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ImagePlus } from "lucide-react";
+import { PHOTO_TYPES, replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 
 const slots = [
   { key: "front", label: "קדימה" },
@@ -35,40 +36,6 @@ function Preview({
   );
 }
 
-// Three photos straight off a phone are 3-15MB together, and the request body a
-// serverless function will accept is 4.5MB - the whole check-in was rejected by
-// the platform before any of this code ran, which reached the client as "An
-// unexpected response was received from the server" on submit. Downscaling to
-// 1600px on the long edge keeps every detail a progress photo is for and brings
-// a set of three to well under a megabyte.
-const MAX_EDGE = 1600;
-const COMPRESS_ABOVE_BYTES = 600 * 1024;
-
-async function shrink(file: File): Promise<File> {
-  if (file.size <= COMPRESS_ABOVE_BYTES) return file;
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
-    const width = Math.round(bitmap.width * scale);
-    const height = Math.round(bitmap.height * scale);
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext("2d");
-    if (!context) return file;
-    context.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close?.();
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.82));
-    // If the re-encode did not actually help, the original is the better file.
-    if (!blob || blob.size >= file.size) return file;
-    return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg", lastModified: Date.now() });
-  } catch {
-    // Any browser that cannot do this keeps the original: the server still
-    // accepts a single photo of this size, and the size check below stands.
-    return file;
-  }
-}
-
 export default function CheckInPhotoInputs({ required = false, first = false }: { required?: boolean; first?: boolean }) {
   const [files, setFiles] = useState<Record<string, File | undefined>>({});
   const [error, setError] = useState("");
@@ -79,28 +46,21 @@ export default function CheckInPhotoInputs({ required = false, first = false }: 
       setFiles((current) => ({ ...current, [key]: undefined }));
       return;
     }
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    if (!(PHOTO_TYPES as readonly string[]).includes(file.type)) {
       setError("יש לבחור JPG, PNG או WebP.");
       input.value = "";
       return;
     }
     setError("");
     setWorking(true);
-    const prepared = await shrink(file);
+    const prepared = await shrinkImage(file);
     setWorking(false);
     if (prepared.size > 5 * 1024 * 1024) {
       setError("התמונה גדולה מדי גם אחרי הקטנה. יש לבחור תמונה אחרת.");
       input.value = "";
       return;
     }
-    // The form is submitted by the browser, so the shrunk file has to replace the
-    // one the input is holding - state alone would preview one file and send
-    // another.
-    if (prepared !== file) {
-      const transfer = new DataTransfer();
-      transfer.items.add(prepared);
-      input.files = transfer.files;
-    }
+    if (prepared !== file) replaceInputFile(input, prepared);
     setFiles((current) => ({ ...current, [key]: prepared }));
   };
   return (

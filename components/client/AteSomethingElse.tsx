@@ -7,6 +7,7 @@ import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { logClientFood, type FoodLogState } from "@/app/actions/food-log";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
+import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 
 const initial: FoodLogState = { ok: false };
 
@@ -59,6 +60,8 @@ export default function AteSomethingElse({
   const [found, setFound] = useState<Scanned | null>(null);
   const [miss, setMiss] = useState("");
   const [grams, setGrams] = useState("100");
+  // Whether a chosen photograph is still being downscaled.
+  const [preparing, setPreparing] = useState(false);
 
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
@@ -194,8 +197,29 @@ export default function AteSomethingElse({
         {tab === "photo" && (
           <>
             <label className="text-sm font-bold">תמונה של הארוחה
-              <input name="photo" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" required className="nutrition-input mt-2" />
+              {/* Downscaled here, before it is uploaded. This path accepts a
+                  photograph per meal with no cadence limit, and it was sending
+                  whatever the camera produced - up to 5MB a picture, which is
+                  ten times what the same photograph is worth to a coach. */}
+              <input
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                capture="environment"
+                required
+                className="nutrition-input mt-2"
+                onChange={async (event) => {
+                  const input = event.target;
+                  const chosen = input.files?.[0];
+                  if (!chosen) return;
+                  setPreparing(true);
+                  const prepared = await shrinkImage(chosen);
+                  if (prepared !== chosen) replaceInputFile(input, prepared);
+                  setPreparing(false);
+                }}
+              />
             </label>
+            {preparing && <p role="status" className="text-xs text-[#5B5F5B]">מכינים את התמונה…</p>}
             <label className="text-sm font-bold">תיאור <span className="font-normal text-[#5B5F5B]">(רשות)</span>
               <input name="name" maxLength={200} className="nutrition-input mt-2" placeholder="מה יש בצלחת" />
             </label>
