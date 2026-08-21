@@ -41,11 +41,18 @@ test.describe("2026-08-20 review", () => {
     const waiting = page.getByRole("link", { name: /חדשות/ }).first();
     test.skip(!(await waiting.count()), "the coach dashboard shows no waiting thread");
     await waiting.click();
+    // Wait for the destination rather than for text that also exists on the page
+    // being left: during a soft navigation the outgoing dashboard is still in the
+    // DOM, and the dashboard panel prints the same message body as its preview.
+    // getByText(body) then matches twice and fails on strict mode - a race in the
+    // test, not a defect in the screen.
+    await page.waitForURL(/\/coach\/clients\/[0-9a-f-]{36}\?tab=messages/, { timeout: 20_000 });
 
     // The screen rendered at all - that is the assertion. The message being on it
-    // is the second one.
+    // is the second one, and it is asserted inside the thread, which is the only
+    // place that answers "the coach can read what the client wrote".
     await expect(page.getByRole("heading", { name: "הודעות" })).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText(body)).toBeVisible();
+    await expect(page.locator(".message-thread").getByText(body)).toBeVisible({ timeout: 20_000 });
   });
 
   test("the client can open a thread that has something unread in it", async ({ page }) => {
