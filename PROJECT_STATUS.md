@@ -197,7 +197,7 @@ produced **219 passed, 9 failed** — and none of the nine were caused by it.
   row. Widening them squeezed the meal-type `select` to 26px on a 390px screen,
   so the header row wraps now.
 
-### The hole the weekly guard opened, closed
+### The hole the weekly guard opened, closed — `202608210006` applied 2026-08-21
 `check_ins` carries an insert policy, a select policy and a coach update policy,
 and **no delete or update policy for a client**. So the only way a client could
 correct a mistyped weight was to file a second check-in — and `202608210004`
@@ -205,6 +205,9 @@ closed that. `202608210006` adds a delete policy scoped to their own row, and
 only while `coach_response` and `handled_at` are both null: once the coach has
 written back the check-in is half a conversation, and once they have closed it
 they have acted on it.
+
+Verified on application: `select polname from pg_policy where polname =
+'check_ins_self_delete'` returns one row.
 
 Withdrawing is a delete rather than a status, because the photo cycle counts
 rows — a withdrawn row left behind would go on shifting "photos required" by one
@@ -558,7 +561,19 @@ reminder therefore cannot fire; restoring it needs a paid plan, which is Eli's c
    left alone. The preferences screen states what actually happens instead of
    promising a push that cannot arrive.
 
-## Next recommended task
+## Next recommended task — as of 2026-08-21
+
+Everything from the third review is merged, deployed and applied. What is left
+needs a person or a purchase:
+
+1. **A real run through the new flows.** Tests do not close a task, and none of
+   these have been touched by a human: the nutrition screen's day navigation, the
+   coach's message inbox, a two-day menu, withdrawing a check-in.
+2. **Two purchases.** A paid Vercel plan for the evening workout reminder (the
+   scheduler runs once a day and cannot fire it), and a second Supabase project
+   so Preview stops sharing Production's database.
+
+### Older note
 Run `202608020002_background_reminder_scheduler.sql` in the Supabase SQL editor so
 the cron has something to call, then confirm the daily run by checking the Vercel
 function logs the following morning. After that: time a full five-meal menu build
