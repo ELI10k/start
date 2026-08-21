@@ -510,9 +510,23 @@ Canonical production URL is **https://start.elicohenfitness.co.il**.
 Reminders now exist whether or not the client opens the app. `vercel.json` registers one daily run at 05:00 UTC
 (08:00 Israel in summer), matching the 08:00 morning workout reminder default.
 
-**Vercel is on the Hobby plan, which permits exactly one cron run per day.** A
-three-a-day schedule was rejected and failed the deploy. The 19:30 evening workout
-reminder therefore cannot fire; restoring it needs a paid plan, which is Eli's call.
+**Corrected 2026-08-21. The "one cron run per day" claim above was wrong** — or
+had stopped being true. `vercel.json` has carried three entries for some time and
+every deploy has succeeded, including two on 2026-08-21. A fourth was added the
+same day and deployed too.
+
+The evening workout reminder had never fired, but not for a billing reason.
+`ensure_workout_day_reminders_for_client` sends it only when the Israel clock
+reads at or past `workout_evening_reminder_time` (19:30 by default), and the
+scheduler ran once, at 05:00 UTC — 08:00 in Israel. It was never awake at the
+hour its own rule required. `/api/cron/reminders` now also runs at 17:30 UTC,
+which is 20:30 in Israel in summer and 19:30 in winter: past the default in both.
+
+**What is genuinely blocked is push delivery, and not by Vercel.** No APNs or FCM
+credentials are configured, so `/api/push/dispatch` has nothing to send and is on
+no schedule. Both reminders are the in-app bell until an Apple Developer account
+exists. The preferences screen says that rather than promising a notification
+that cannot arrive.
 
 ## Nutrition engine — current behaviour
 - Macro targets: protein 1.8 g/kg, fat 25% of calories, carbohydrate the remainder.
@@ -569,9 +583,10 @@ needs a person or a purchase:
 1. **A real run through the new flows.** Tests do not close a task, and none of
    these have been touched by a human: the nutrition screen's day navigation, the
    coach's message inbox, a two-day menu, withdrawing a check-in.
-2. **Two purchases.** A paid Vercel plan for the evening workout reminder (the
-   scheduler runs once a day and cannot fire it), and a second Supabase project
-   so Preview stops sharing Production's database.
+2. **Two purchases.** An Apple Developer account, so APNs credentials exist and
+   a reminder can reach a locked screen rather than only the in-app bell; and a
+   second Supabase project so Preview stops sharing Production's database.
+   Neither is a Vercel plan — that was a misreading corrected on 2026-08-21.
 
 ### Older note
 Run `202608020002_background_reminder_scheduler.sql` in the Supabase SQL editor so
