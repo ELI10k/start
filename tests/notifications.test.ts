@@ -87,7 +87,12 @@ test("daily reminder sprint schema protects snooze, skipped workouts and notific
   assert.match(actions, /p_meal_reminders/);
   assert.match(actions, /p_end_of_day_reminder/);
   assert.match(dailyActions, /הזכר לי בעוד שעה/);
-  assert.match(dailyActions, /דלג על היום/);
+  // Declaring a workout missed moved out of this sheet and up beside the start
+  // button, where the question is actually being asked. Same RPC, one door.
+  assert.doesNotMatch(dailyActions, /skipScheduledWorkout/);
+  const today = await readFile(new URL("../components/workouts/client/TodayWorkout.tsx", import.meta.url), "utf8");
+  assert.match(today, /פיספסתי אימון/);
+  assert.match(today, /skipScheduledWorkout\(assignment\.id,day\.id,today,missedReason\)/);
 });
 
 test("habits and free-menu MVP stores events, weekly reports and daily nutrition summaries in Supabase", async () => {

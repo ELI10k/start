@@ -15,7 +15,6 @@ import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
-import ShoppingList from "@/components/client/ShoppingList";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
@@ -121,15 +120,6 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
           tab inside every meal's "אכלתי משהו אחר" sheet, so the card here was a
           second door to one room, charging 90px for it. */}
       <div className="nutrition-toolbar">
-        {menu ? (
-          <ShoppingList
-            compact
-            title={menu.title}
-            items={menu.meals.flatMap((meal)=>meal.groups.flatMap((group)=>group.items.map((item)=>({
-              name:item.name,displayQuantity:Number(item.displayQuantity),measurementUnit:item.measurementUnit,itemRole:item.itemRole,
-            }))))}
-          />
-        ) : null}
         {/* Only while there is something to jump to: once the current meal is
             marked, the anchor is gone and so is this. */}
         {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)

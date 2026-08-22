@@ -2,7 +2,7 @@
 import { israelDateKey } from "@/lib/date-time";
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, Target } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, SkipForward, Target } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
@@ -16,7 +16,7 @@ const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);
+  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,skipScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);const[missed,setMissed]=useState(false);const[missedReason,setMissedReason]=useState("");
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -32,6 +32,15 @@ export default function TodayWorkout(){
 
   const sessionHref=`/workouts/${program.id}/${activeSession?.dayId??day.id}`;
   const startLabel=activeSession?"המשך אימון":"התחלת אימון";
+  // Already declared missed today, so the offer to declare it is withdrawn -
+  // the same test the daily-actions sheet applies, against the same rows.
+  const skippedToday=snapshot.scheduleChanges.some((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.status==="skipped");
+  const submitMissed=async()=>{if(pending)return;setPending(true);try{
+    setMessage(await skipScheduledWorkout(assignment.id,day.id,today,missedReason)
+      ?"האימון סומן כמפוספס. הוא נשאר בהיסטוריה ולא נספר כהושלם."
+      :"לא הצלחנו לסמן את האימון. נסה שוב.");
+    setMissed(false);setMissedReason("");
+  }finally{setPending(false)}};
 
   return <div className="grid gap-4">
     {/* More than one programme can be running at a time, so the client picks
@@ -150,12 +159,39 @@ export default function TodayWorkout(){
 
     {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
 
-    {/* Start is the screen's single primary action and appears exactly once, in
-        the FAB, within thumb reach. The hero states what today is; it does not
-        repeat the button. */}
-    <Link href={sessionHref} className="fab" aria-label={startLabel}>
-      <Play aria-hidden="true" size={18}/>{startLabel}
-    </Link>
+    {/* The two answers to "what happened to today's workout", in thumb reach and
+        in the order they are true in: it is starting, or it did not happen.
+        
+        Declaring a miss existed already - three taps into "פעולות לאימון היום",
+        behind a sheet a client opens by accident more often than on purpose - so
+        a workout that was skipped stayed unanswered, and the day it belongs to
+        stayed "today's workout". It is the same call to the same function; it is
+        simply where the question is being asked. */}
+    <div className="fab-stack">
+      <Link href={sessionHref} className="fab" aria-label={startLabel}>
+        <Play aria-hidden="true" size={18}/>{startLabel}
+      </Link>
+      {completed||skippedToday?null:
+        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
+          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
+        </button>}
+    </div>
+
+    <BottomSheet open={missed} title="פיספסתי את האימון" onClose={()=>setMissed(false)}>
+      <p className="text-sm text-[#5B5F5B]">
+        האימון של היום — {day.name} — יסומן כמפוספס. הוא לא יימחק, לא ייספר כהושלם,
+        והאימון הבא בתוכנית יתפוס את מקומו.
+      </p>
+      <label className="mt-3 block text-sm font-bold">סיבה (רשות)
+        <textarea value={missedReason} onChange={(event)=>setMissedReason(event.target.value)} className="nutrition-input mt-2 min-h-20"/>
+      </label>
+      <div className="sheet__actions">
+        <button type="button" onClick={submitMissed} disabled={pending} className="premium-primary-button premium-primary-button--danger">
+          {pending?"שומרים…":"סימון כמפוספס"}
+        </button>
+        <button type="button" onClick={()=>setMissed(false)} disabled={pending} className="premium-secondary-button">ביטול</button>
+      </div>
+    </BottomSheet>
 
     <BottomSheet open={confirm} title="העברת האימון ליום אחר" onClose={()=>{setConfirm(false);setConflict(false)}}>
       <label className="block text-sm font-bold">תאריך חדש

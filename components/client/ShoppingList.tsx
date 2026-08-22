@@ -11,12 +11,11 @@ import { buildShoppingList, shoppingListText, type ShoppingSource } from "@/lib/
 export default function ShoppingList({
   items,
   title,
-  // The nutrition screen has to fit a phone, and a full-width button for a job
-  // done once a week was taking the room the meals needed. `compact` is the same
-  // button as an icon in that screen's tool row; the sheet behind it is
-  // untouched, and the label it drops is still its accessible name.
-  compact = false,
-}: { items: readonly ShoppingSource[]; title: string; compact?: boolean }) {
+  // `inline` renders the list as the screen rather than behind a button: the
+  // shopping list has its own tab now, and a screen whose only content is a
+  // button that opens the content is a screen with an extra tap in it.
+  inline = false,
+}: { items: readonly ShoppingSource[]; title: string; inline?: boolean }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
@@ -45,37 +44,49 @@ export default function ShoppingList({
 
   if (!lines.length) return null;
 
+  const body = (
+    <>
+      <Group lines={planned} ticked={ticked} onToggle={toggle} />
+      {alternatives.length > 0 && (
+        <>
+          <h3 className="mt-4 text-sm font-black">חלופות</h3>
+          <p className="text-xs text-[#5B5F5B]">כדאי לקנות לפחות אחת מכל קבוצה, כדי שתהיה באמת בחירה.</p>
+          <Group lines={alternatives} ticked={ticked} onToggle={toggle} />
+        </>
+      )}
+    </>
+  );
+  const copyButton = (
+    <button type="button" onClick={copy} className="premium-primary-button">
+      {copied ? <Check aria-hidden="true" size={17} /> : <Copy aria-hidden="true" size={17} />}
+      {copied ? "הועתק" : "העתקת הרשימה"}
+    </button>
+  );
+
+  if (inline) return (
+    <div className="grid gap-3">
+      <p className="text-sm text-[#5B5F5B]">
+        כל המזונות בתפריט, עם הכמויות מחוברות. סימון פריט נשאר עד יציאה מהמסך.
+      </p>
+      {body}
+      <div className="mt-2">{copyButton}</div>
+    </div>
+  );
+
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={compact ? "רשימת קניות מהתפריט" : undefined}
-        className={compact ? "icon-button" : "premium-secondary-button w-full"}
-      >
-        <ShoppingBasket aria-hidden="true" size={compact ? 19 : 17} />
-        {compact ? null : "רשימת קניות מהתפריט"}
+      <button type="button" onClick={() => setOpen(true)} className="premium-secondary-button w-full">
+        <ShoppingBasket aria-hidden="true" size={17} />
+        רשימת קניות מהתפריט
       </button>
 
       <BottomSheet open={open} title="רשימת קניות" onClose={() => setOpen(false)}>
         <p className="text-sm text-[#5B5F5B]">
           כל המזונות בתפריט, עם הכמויות מחוברות. סימון פריט נשאר עד סגירת החלון.
         </p>
-
-        <Group lines={planned} ticked={ticked} onToggle={toggle} />
-        {alternatives.length > 0 && (
-          <>
-            <h3 className="mt-4 text-sm font-black">חלופות</h3>
-            <p className="text-xs text-[#5B5F5B]">כדאי לקנות לפחות אחת מכל קבוצה, כדי שתהיה באמת בחירה.</p>
-            <Group lines={alternatives} ticked={ticked} onToggle={toggle} />
-          </>
-        )}
-
+        {body}
         <div className="sheet__actions">
-          <button type="button" onClick={copy} className="premium-primary-button">
-            {copied ? <Check aria-hidden="true" size={17} /> : <Copy aria-hidden="true" size={17} />}
-            {copied ? "הועתק" : "העתקת הרשימה"}
-          </button>
+          {copyButton}
           <button type="button" onClick={() => setOpen(false)} className="premium-secondary-button">סגירה</button>
         </div>
       </BottomSheet>

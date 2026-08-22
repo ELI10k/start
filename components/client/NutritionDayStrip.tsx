@@ -46,8 +46,14 @@ export default function NutritionDayStrip({
             aria-label={`${isToday ? "היום, " : ""}${formatIsraelDate(at, { weekday: "long", day: "numeric", month: "long" })}`}
             className={`chip day-strip__day${isActive ? " pill--green" : ""}`}
           >
+            {/* Today names its weekday like every other day in the row.
+                
+                It used to say "היום" instead, which reads as the one thing the
+                client already knows and hides the one they were looking for -
+                on a Saturday the newest weekday on the screen was Friday's, so
+                the row looked a day behind. The green fill is what says today. */}
             <span aria-hidden="true" className="day-strip__weekday">
-              {isToday ? "היום" : formatIsraelDate(at, { weekday: "narrow" })}
+              {formatIsraelDate(at, { weekday: "narrow" })}
             </span>
             <span aria-hidden="true" className="day-strip__date">
               {formatIsraelDate(at, { day: "numeric", month: "numeric" })}
