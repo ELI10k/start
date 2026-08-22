@@ -414,7 +414,9 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   // snack never appeared here at all. The client's screens read the group's
   // chosen row; so does this now, through the same shared rule.
   const loggedToday = await listClientFoodLog(clientId, date);
-  const totals = addTotals(eatenFromMenu(menu?.meals ?? []), sumLoggedFood(loggedToday));
+  const loggedCaloriesIn = (mealId: string | undefined) =>
+    loggedToday.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+  const totals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), sumLoggedFood(loggedToday));
   // Adherence is counted in meals, not in rows.
   //
   // meal.items holds every row the coach wrote - the primary AND its

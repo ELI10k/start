@@ -7,6 +7,9 @@ import { getAuthContext, getClientOverview } from "@/lib/data/product-repository
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
 import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
+import { listContentCategories, listPublishedContent } from "@/lib/data/content-repository";
+import { lessonForWeek } from "@/lib/content/weekly-lesson";
+import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
 import { israelDateKey } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
@@ -20,12 +23,16 @@ export default async function Home() {
   const today = israelDateKey();
   // The same three reads the nutrition screen makes, because this screen quotes
   // its figures back and the two disagreeing is worse than either being wrong.
-  const [data, [latestSummary], logged] = await Promise.all([
+  const [data, [latestSummary], logged, lessons, categories] = await Promise.all([
     getClientOverview(auth.id, today),
     // RLS returns sent summaries only, so the newest row is the newest release.
     getWeeklySummaries(auth.id, 1),
     listClientFoodLog(auth.id, today),
+    listPublishedContent(auth.id),
+    listContentCategories(),
   ]);
+  // The library, in course order, advanced by one lesson a week.
+  const weeklyLesson = lessonForWeek(lessons, categories.map((category) => category.id), today);
   const meals = data.menu?.meals ?? [];
   // Marked eaten, or every choice in it logged - the same test the nutrition
   // screen applies. `meal.completed` alone missed nothing today, but it is one
@@ -36,7 +43,11 @@ export default async function Home() {
   // they logged beside the plan and the free-calorie windows they filled. This
   // tile used to read `meal.items`, which is every row the coach wrote at the
   // coach's portion, so it ignored "I only ate half" and every scanned item.
-  const totals = addTotals(eatenFromMenu(meals), sumLoggedFood(logged));
+  // A free-calorie window marked eaten counts for what was left of it, so this
+  // tile and the nutrition screen answer with the same number.
+  const loggedCaloriesIn = (mealId: string | undefined) =>
+    logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+  const totals = addTotals(eatenFromMenu(meals, loggedCaloriesIn), sumLoggedFood(logged));
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
   const plannedWorkouts = data.workouts.planned;
   const completedWorkouts = data.workouts.completed;
@@ -112,6 +123,22 @@ export default async function Home() {
             <span className="quick-action-card__meta">דיווח שבועי</span>
           </Link>
         </nav>
+
+        {/* One lesson from the library, changing every week in course order.
+            
+            The library was a tile and nothing more, so a client who never
+            pressed it never met the content - and a course nobody opens is a
+            course that was not written. This asks for one decision a week
+            instead of thirty, and it is last on the screen because it is the
+            one thing here that is not today's business. */}
+        {weeklyLesson ? (
+          <section aria-labelledby="weekly-lesson-heading">
+            <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
+              הלימוד השבועי
+            </h2>
+            <WeeklyLessonCard lesson={weeklyLesson} />
+          </section>
+        ) : null}
       </div>
     </ClientShell>
   );

@@ -29,6 +29,7 @@ type Item = Readonly<{
 type Group = Readonly<{ items: readonly Item[]; selectedItemId?: string }>;
 
 export type IntakeMeal = Readonly<{
+  id?: string;
   status: "eaten" | "not_eaten" | "other" | null;
   completed: boolean;
   freeCalorieTarget?: number;
@@ -60,6 +61,13 @@ export function mealStanding(meal: IntakeMeal): readonly Item[] {
   });
 }
 
+export const addTotals = (a: IntakeTotals, b: IntakeTotals): IntakeTotals => ({
+  calories: a.calories + b.calories,
+  protein: a.protein + b.protein,
+  carbs: a.carbs + b.carbs,
+  fat: a.fat + b.fat,
+});
+
 export function sumItems(items: readonly Item[]): IntakeTotals {
   return items.reduce(
     (sum, item) => ({
@@ -72,20 +80,57 @@ export function sumItems(items: readonly Item[]): IntakeTotals {
   );
 }
 
-export const addTotals = (a: IntakeTotals, b: IntakeTotals): IntakeTotals => ({
-  calories: a.calories + b.calories,
-  protein: a.protein + b.protein,
-  carbs: a.carbs + b.carbs,
-  fat: a.fat + b.fat,
-});
+/**
+ * A free-calorie window, at what it was worth.
+ *
+ * These meals have no groups - the whole point of the window is that the coach
+ * did not write rows for it - so `mealStanding` returns nothing for them and
+ * `sumItems` therefore returned zero. A client who marked "קלוריות חופשיות ·
+ * 300 קל׳" as eaten watched their day's total not move, which reads as the app
+ * not having heard them.
+ *
+ * Netted against whatever was logged into the window, never below zero: items
+ * scanned or written into it are counted by the food log, and adding the target
+ * on top of them would count the same food twice. Marked and unlogged, the
+ * target is the only estimate there is, and it is the number the client was
+ * given and answered against.
+ */
+export function freeCalorieIntake(
+  meals: readonly IntakeMeal[],
+  loggedCaloriesIn: (mealId: string | undefined) => number = () => 0,
+): IntakeTotals {
+  const calories = meals
+    .filter((meal) => Boolean(meal.freeCalorieTarget) && isMealEaten(meal))
+    .reduce((sum, meal) => sum + Math.max(0, (meal.freeCalorieTarget ?? 0) - loggedCaloriesIn(meal.id)), 0);
+  // Only calories: a free window is a calorie allowance, and the coach did not
+  // say what it is made of. Inventing a macro split would be inventing data.
+  return { ...ZERO_TOTALS, calories };
+}
 
-/** What has been eaten off the plan so far today. */
-export const eatenFromMenu = (meals: readonly IntakeMeal[]): IntakeTotals =>
-  sumItems(meals.filter(isMealEaten).flatMap(mealStanding));
+/** What is still open in the free windows nobody has answered yet. */
+export function freeCalorieRemaining(meals: readonly IntakeMeal[]): IntakeTotals {
+  const calories = meals
+    .filter((meal) => Boolean(meal.freeCalorieTarget) && !isMealAnswered(meal))
+    .reduce((sum, meal) => sum + (meal.freeCalorieTarget ?? 0), 0);
+  return { ...ZERO_TOTALS, calories };
+}
+
+/** What has been eaten off the plan so far today, free windows included. */
+export const eatenFromMenu = (
+  meals: readonly IntakeMeal[],
+  loggedCaloriesIn?: (mealId: string | undefined) => number,
+): IntakeTotals =>
+  addTotals(
+    sumItems(meals.filter(isMealEaten).flatMap(mealStanding)),
+    freeCalorieIntake(meals, loggedCaloriesIn),
+  );
 
 /** What is still on the plan today - meals nobody has answered yet. */
 export const remainingInMenu = (meals: readonly IntakeMeal[]): IntakeTotals =>
-  sumItems(meals.filter((meal) => !isMealAnswered(meal)).flatMap(mealStanding));
+  addTotals(
+    sumItems(meals.filter((meal) => !isMealAnswered(meal)).flatMap(mealStanding)),
+    freeCalorieRemaining(meals),
+  );
 
 /**
  * Where the client ate something other than the portion that was written.

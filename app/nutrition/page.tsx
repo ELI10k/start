@@ -20,7 +20,7 @@ import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
-import { addTotals, isMealAnswered, isMealEaten, mealStanding, sumItems } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, mealStanding, remainingInMenu } from "@/lib/nutrition/menu-intake";
 
 export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const auth = await getAuthContext();
@@ -78,11 +78,15 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // A meal is eaten when it says so. One marked not-eaten or eaten-something-else
   // is neither eaten nor still to come - it is answered, and counting it as
   // remaining would keep asking a question the client has already answered.
-  const eatenItems = menu?.meals.filter(isMealEaten).flatMap(mealStanding) ?? [];
-  const remainingItems = menu?.meals.filter((meal) => !isMealAnswered(meal)).flatMap(mealStanding) ?? [];
-  // Anything logged was eaten by definition - that is what logging it means.
-  const eatenTotals = addTotals(sumItems(eatenItems), loggedTotals);
-  const remainingTotals = sumItems(remainingItems);
+  // Anything logged was eaten by definition - that is what logging it means -
+  // and a free-calorie window marked eaten counts for what was left of it after
+  // whatever went in. It used to count for nothing: a window has no rows, so the
+  // arithmetic over rows returned zero and marking "300 קל׳ חופשיות" as eaten
+  // moved no number on any screen.
+  const loggedCaloriesIn = (mealId: string | undefined) =>
+    logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+  const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
+  const remainingTotals = remainingInMenu(menu?.meals ?? []);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
   const menuTotals = menu
     ? summaryItems.reduce(
