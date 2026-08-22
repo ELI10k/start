@@ -1843,3 +1843,498 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .meal-card > summary { padding: 1.4rem 1.5rem; }
   .meal-card__body { padding: 0 1.5rem 1.5rem; }
 }
+
+/* ═══ Cinema — the course library ══════════════════════════════════════════════
+   The rest of START is white because it is a workspace: numbers, forms and
+   lists, read in daylight. The library is not a workspace. It is a shelf of
+   films, and cover art only reads as cover art when the room is dark. This one
+   section inverts end to end - header, rails, player - and keeps START's green
+   for anything actionable. Everything below is scoped to `.cinema` and reaches
+   no screen on either side of it. */
+.cinema {
+  --cine-bg: #08080A;
+  --cine-raised: #16171B;
+  --cine-line: rgba(255, 255, 255, .13);
+  --cine-ink: #FFFFFF;
+  --cine-muted: rgba(255, 255, 255, .66);
+  --cine-faint: rgba(255, 255, 255, .44);
+  /* One step brighter than the daylight green: #16A34A on near-black does not
+     hold 4.5:1 at body weight. */
+  --cine-green: #22C55E;
+  --cine-green-lift: #3BDD79;
+  --cine-gutter: clamp(1rem, 4.2vw, 3.75rem);
+  background: var(--cine-bg);
+  color: var(--cine-ink);
+}
+
+/* The rails run off both edges of the screen, so the shell's gutter would crop
+   them a finger short and make every row look like it had ended. */
+.cinema .client-app-content {
+  width: 100%;
+  max-width: none;
+  padding: 0 0 var(--nav-clearance);
+}
+.cinema-gutter { padding-inline: var(--cine-gutter); }
+.cinema :where(a, button):focus-visible { outline-color: var(--cine-green); }
+
+/* ── Chrome ──────────────────────────────────────────────────────────────────
+   The header floats over the artwork instead of sitting on a bar above it, and
+   only takes on a background once the hero has scrolled behind it. */
+.cinema .mobile-app-header,
+.cinema .desktop-app-nav {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 50;
+  border-color: transparent;
+  background: linear-gradient(to bottom, rgba(8, 8, 10, .85), transparent);
+  color: var(--cine-ink);
+  transition: background-color var(--duration-base) ease, border-color var(--duration-base) ease;
+}
+.cinema[data-scrolled="true"] .mobile-app-header,
+.cinema[data-scrolled="true"] .desktop-app-nav {
+  background: rgba(8, 8, 10, .94);
+  border-block-end: 1px solid var(--cine-line);
+  backdrop-filter: blur(18px);
+}
+.cinema .desktop-app-nav { position: fixed; }
+.cinema .start-wordmark { color: var(--cine-ink); }
+.cinema .desktop-app-nav__links a,
+.cinema .desktop-app-nav__actions button { color: var(--cine-muted); }
+.cinema .desktop-app-nav__links a:hover,
+.cinema .desktop-app-nav__actions button:hover { color: var(--cine-ink); }
+.cinema .avatar-button {
+  border-color: rgba(255, 255, 255, .28);
+  background: rgba(0, 0, 0, .3);
+  color: var(--cine-ink);
+  backdrop-filter: blur(8px);
+}
+.cinema .bottom-app-nav {
+  background: rgba(8, 8, 10, .95);
+  border-block-start: 1px solid var(--cine-line);
+  backdrop-filter: blur(18px);
+}
+.cinema .bottom-app-nav a { color: var(--cine-faint); }
+.cinema .bottom-app-nav a[aria-current="page"] { color: var(--cine-green); }
+
+/* ── Hero ────────────────────────────────────────────────────────────────────
+   Cover art is the whole top of the screen. It is never letterboxed and never
+   given a border: the picture runs to all four edges and dissolves into the
+   page, so the first rail looks like it is sitting on top of the artwork rather
+   than in a box below it. */
+.cinema-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  /* Short enough that a 16:9 designed banner is not cropped down to a strip of
+     its middle, tall enough to still open the screen. */
+  min-height: min(74svh, 34rem);
+  padding-block-start: 5rem;
+}
+.cinema-hero__art { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
+.cinema-hero__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 28%;
+}
+/* Two scrims, not one. The vertical fade gives the copy a floor and hands the
+   bottom edge to the page; the horizontal one comes off the reading edge so
+   Hebrew text never lands on a face. */
+.cinema-hero__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, var(--cine-bg) 0%, rgba(8, 8, 10, .88) 22%, rgba(8, 8, 10, .35) 58%, rgba(8, 8, 10, .55) 100%),
+    linear-gradient(to left, rgba(8, 8, 10, .9) 0%, rgba(8, 8, 10, .4) 42%, transparent 78%);
+}
+.cinema-hero__body {
+  padding-block: 2rem 2.5rem;
+  max-width: 36rem;
+  animation: cinema-rise var(--duration-base) ease both;
+}
+.cinema-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .14em;
+  color: var(--cine-green);
+}
+.cinema-hero h1 {
+  margin-block: .55rem .7rem;
+  font-size: clamp(2rem, 7.5vw, 3.6rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -.02em;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, .6);
+  text-wrap: balance;
+}
+.cinema-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .4rem .7rem;
+  font-size: .86rem;
+  font-weight: 700;
+  color: var(--cine-muted);
+}
+.cinema-hero__meta i { font-style: normal; color: rgba(255, 255, 255, .3); }
+.cinema-hero__meta em { font-style: normal; color: var(--cine-green); }
+.cinema-hero__blurb {
+  margin-top: .8rem;
+  font-size: .95rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, .84);
+  text-shadow: 0 1px 14px rgba(0, 0, 0, .5);
+}
+.cinema-hero__actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.5rem; }
+
+@keyframes cinema-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.cinema-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 3.15rem;
+  padding-inline: 1.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: .97rem;
+  font-weight: 900;
+}
+.cinema-button--play {
+  background: var(--cine-green);
+  color: #04120A;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, .32);
+}
+.cinema-button--play:hover { background: var(--cine-green-lift); }
+.cinema-button--ghost {
+  background: rgba(255, 255, 255, .13);
+  border-color: rgba(255, 255, 255, .2);
+  color: var(--cine-ink);
+  backdrop-filter: blur(12px);
+}
+.cinema-button--ghost:hover { background: rgba(255, 255, 255, .22); }
+.cinema-button--icon { min-height: 3.15rem; width: 3.15rem; padding: 0; }
+
+/* ── Rails ───────────────────────────────────────────────────────────────────
+   The first rail is pulled up over the foot of the hero so the artwork carries
+   on behind it. */
+.cinema-rails { position: relative; z-index: 1; margin-top: -3.5rem; }
+.cinema-rail { margin-top: clamp(1.5rem, 3.6vw, 2.4rem); }
+.cinema-rail__head {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: .8rem;
+}
+.cinema-rail__head h2 {
+  font-size: clamp(1.05rem, 3.6vw, 1.45rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+}
+.cinema-rail__head a { display: inline-flex; align-items: center; gap: .5rem; color: inherit; }
+.cinema-rail__more {
+  display: inline-flex;
+  align-items: center;
+  font-size: .78rem;
+  font-weight: 800;
+  color: var(--cine-green);
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+.cinema-rail__head a:hover .cinema-rail__more { opacity: 1; transform: none; }
+
+.cinema-rail__viewport { position: relative; }
+.cinema-rail__track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(72vw, 16rem);
+  gap: .7rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--cine-gutter);
+  padding-inline: var(--cine-gutter);
+  /* Room above and below for a card to grow into on hover without the row
+     clipping it or growing a scrollbar. */
+  padding-block: 1.4rem;
+  margin-block: -1.4rem;
+}
+.cinema-rail__track::-webkit-scrollbar { display: none; }
+.cinema-rail__track > * { scroll-snap-align: start; }
+.cinema-rail__nav {
+  position: absolute;
+  inset-block: 1.4rem;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--cine-gutter);
+  min-width: 2.5rem;
+  border: 0;
+  color: var(--cine-ink);
+  background: linear-gradient(to right, rgba(8, 8, 10, .95), rgba(8, 8, 10, 0));
+  opacity: 0;
+  transition: opacity var(--duration-fast) ease;
+}
+.cinema-rail__nav[data-side="start"] { inset-inline-start: 0; }
+.cinema-rail__nav[data-side="end"] { inset-inline-end: 0; transform: scaleX(-1); }
+.cinema-rail__viewport:hover .cinema-rail__nav:not(:disabled),
+.cinema-rail__nav:focus-visible { opacity: 1; }
+.cinema-rail__nav:disabled { opacity: 0 !important; pointer-events: none; }
+@media (hover: hover) and (min-width: 768px) {
+  .cinema-rail__nav { display: flex; }
+  .cinema-rail__track { grid-auto-columns: 16.5rem; gap: .8rem; }
+}
+
+/* ── Cards ───────────────────────────────────────────────────────────────────
+   On a pointer device a card lifts out of its row and shows what it is - the
+   move Netflix is recognised by. It is delayed so that sweeping the mouse
+   across a row does not set off ten of them, and it never runs for anyone who
+   has asked the system for less motion. */
+.cinema-card {
+  position: relative;
+  display: block;
+  border-radius: .85rem;
+  background: var(--cine-raised);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
+  transition: transform var(--duration-base) cubic-bezier(.22, 1, .36, 1),
+    box-shadow var(--duration-base) ease;
+}
+.cinema-card__art {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #0E0F12;
+}
+.cinema-card__art img { width: 100%; height: 100%; object-fit: cover; }
+.cinema-card__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 8, 10, .85), rgba(8, 8, 10, .05) 55%);
+}
+.cinema-card__glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, .28);
+}
+.cinema-card__badge {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: .5rem;
+  inset-inline-start: .5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  padding: .18rem .5rem;
+  border-radius: .4rem;
+  background: rgba(8, 8, 10, .74);
+  backdrop-filter: blur(8px);
+  font-size: .67rem;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+.cinema-card__badge--done { background: var(--cine-green); color: #04120A; }
+.cinema-card__bar {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  inset-block-end: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, .24);
+}
+.cinema-card__bar span { display: block; height: 100%; background: var(--cine-green); }
+/* The caption sits over the foot of the artwork rather than under it: a row of
+   cards then reads as a row of pictures, not a row of boxes with labels. */
+.cinema-card__body {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: .6rem .7rem .75rem;
+}
+.cinema-card__body strong {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: .9rem;
+  font-weight: 800;
+  line-height: 1.3;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .8);
+}
+.cinema-card__body small {
+  display: block;
+  margin-top: .25rem;
+  font-size: .73rem;
+  font-weight: 700;
+  color: var(--cine-faint);
+}
+.cinema-card__play {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: .7rem;
+  inset-inline-end: .7rem;
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .92);
+  color: #04120A;
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+@media (hover: hover) and (min-width: 768px) {
+  .cinema-card { transition-delay: 0s; }
+  .cinema-card:hover, .cinema-card:focus-visible {
+    z-index: 4;
+    transform: scale(1.09);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .7);
+    transition-delay: .18s;
+  }
+  .cinema-card:hover .cinema-card__play,
+  .cinema-card:focus-visible .cinema-card__play { opacity: 1; transform: none; transition-delay: .18s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinema-card, .cinema-card:hover { transform: none; transition: none; }
+  .cinema-hero__body { animation: none; }
+}
+
+/* ── Episode list ────────────────────────────────────────────────────────── */
+.cinema-chapter {
+  margin: 1.9rem 0 .7rem;
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--cine-faint);
+}
+.cinema-episode {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .65rem;
+  border-radius: .9rem;
+  border: 1px solid transparent;
+}
+.cinema-episode:hover { background: var(--cine-raised); border-color: var(--cine-line); }
+.cinema-episode__index {
+  width: 1.5rem;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--cine-faint);
+}
+.cinema-episode__art {
+  position: relative;
+  width: 7.5rem;
+  flex-shrink: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: .55rem;
+  overflow: hidden;
+  background: #0E0F12;
+}
+.cinema-episode__art img { width: 100%; height: 100%; object-fit: cover; }
+.cinema-episode__body { min-width: 0; flex: 1; }
+.cinema-episode__body strong { display: block; font-size: .94rem; font-weight: 800; line-height: 1.35; }
+.cinema-episode__body small { display: block; font-size: .78rem; font-weight: 700; color: var(--cine-muted); }
+.cinema-episode__body small:first-child { color: var(--cine-green); letter-spacing: .1em; }
+.cinema-episode__body small + strong { margin-top: .1rem; }
+.cinema-episode__body strong + small { margin-top: .2rem; }
+.cinema-episode__icon { flex-shrink: 0; color: var(--cine-green); }
+@media (max-width: 480px) { .cinema-episode__art { width: 6rem; } }
+
+/* ── Lesson screen ───────────────────────────────────────────────────────── */
+.cinema-stage { position: relative; background: #000; }
+.cinema-stage iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
+.cinema-stage img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+/* The player and the page below it are both black; without this the frame ends
+   on a hard horizontal line across the screen. */
+.cinema-stage::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -1px;
+  height: 3.5rem;
+  pointer-events: none;
+  background: linear-gradient(to top, var(--cine-bg), transparent);
+}
+.cinema-stage--instagram iframe { aspect-ratio: 4 / 5; max-height: 84svh; }
+.cinema-panel {
+  border: 1px solid var(--cine-line);
+  border-radius: 1.1rem;
+  background: var(--cine-raised);
+  padding: 1.05rem 1.2rem;
+}
+.cinema-note { white-space: pre-wrap; line-height: 1.8; color: rgba(255, 255, 255, .86); }
+.cinema-empty {
+  border: 1px dashed var(--cine-line);
+  border-radius: 1.1rem;
+  padding: 2.25rem 1.25rem;
+  text-align: center;
+  color: var(--cine-muted);
+}
+.cinema-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.4rem; }
+.cinema-actions form { display: contents; }
+.cinema-viewed {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--cine-faint);
+  margin-top: .9rem;
+}
+
+/* ── Skeleton ────────────────────────────────────────────────────────────── */
+.cinema-skeleton { background: var(--cine-bg); min-height: 100svh; }
+.cinema-skeleton__block { background: rgba(255, 255, 255, .07); border-radius: .85rem; animation: cinema-pulse 1.4s ease-in-out infinite; }
+@keyframes cinema-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .cinema-skeleton__block { animation: none; } }
+
+/* A guide reads inside the library rather than on the site that stores it. The
+   frame is tall because these are portrait pages, and it is bordered so the
+   white of a PDF does not bleed into the black of the room. */
+.cinema-pdf__frame {
+  display: block;
+  width: 100%;
+  height: min(78svh, 46rem);
+  margin-block: 1.25rem .25rem;
+  border: 1px solid var(--cine-line);
+  border-radius: 1.1rem;
+  background: #FFFFFF;
+}
+
+/* A course card shows the banner and nothing else on it. The caption sits in a
+   strip beneath the picture - the way the school itself presents these courses -
+   because the artwork is a designed graphic with its own headline, and laying a
+   second headline over it hides the thing the card exists to show. */
+.cinema-card--course { background: var(--cine-raised); }
+.cinema-card--course .cinema-card__art { border-end-start-radius: 0; border-end-end-radius: 0; }
+.cinema-card--course .cinema-card__art img { object-fit: contain; background: #0E0F12; }
+.cinema-card--course .cinema-card__art::after { content: none; }
+.cinema-card--course .cinema-card__body {
+  position: static;
+  padding: .7rem .8rem .85rem;
+}
+.cinema-card--course .cinema-card__body strong { text-shadow: none; font-size: .95rem; }
+.cinema-card--course .cinema-card__body small { color: var(--cine-muted); }
+.cinema-card--course .cinema-card__play { inset-block-end: 3.9rem; }

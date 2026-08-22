@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Bell, BookOpen, ChevronLeft, ClipboardCheck, LifeBuoy, LogOut, MessageSquare, Scale } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
-import PageHeader from "@/components/client/PageHeader";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/date-time";
 import RequestProfileUpdate from "@/components/client/RequestProfileUpdate";
@@ -16,23 +15,14 @@ export default async function ProfilePage() {
 
   return (
     <ClientShell>
-      <PageHeader
-        eyebrow="הפרופיל שלי"
-        title="פרטים ויעדים"
-        description="הפרטים שמוצגים כאן נטענים מהחשבון המאובטח שלך."
-      />
-
-      <header className="premium-card flex items-center gap-4">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#ECFDF3] text-xl font-black text-[#16A34A]">
-          {auth.fullName.slice(0, 1)}
-        </span>
-        <div className="min-w-0">
-          <strong className="block truncate text-lg">{auth.fullName}</strong>
-          <span className={`pill${auth.status === "active" ? " pill--green" : ""}`}>
-            {auth.status === "active" ? "פעיל" : auth.status}
-          </span>
-        </div>
-      </header>
+      {/* No header and no identity card.
+          
+          "הפרופיל שלי / פרטים ויעדים" over a card repeating the name and status
+          of whoever is holding the phone is three blocks answering a question
+          nobody arrived with: they pressed their own avatar to get here. The
+          screen opens on what it is actually for - the targets, and the rows
+          that lead somewhere. */}
+      <h1 className="sr-only">הפרופיל שלי</h1>
 
       {/* Six boxes in a grid read as six equal facts. As rows, the label sits on
           one side and the number on the other, which is what a client scans. */}
