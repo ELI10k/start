@@ -151,7 +151,16 @@ export default function AteSomethingElse({
       <form action={action} className="mt-4 grid gap-3">
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="mealId" value={mealId} />
-        <input type="hidden" name="source" value={tab} />
+        {/* The catalogue reports itself as "scan".
+            
+            The database's own check accepts text, scan or photo, so a fourth
+            name would be refused at the last step - which is exactly what
+            happened: everything computed correctly and then the save came back
+            "סוג הרישום אינו מוכר". Of the three it is a scan: an identified
+            food carrying approved figures, differing from a barcode only in how
+            it was found. Giving it a name of its own needs a migration, and is
+            not worth breaking the save over. */}
+        <input type="hidden" name="source" value={tab === "food" ? "scan" : tab} />
 
         {tab === "text" && (
           <label className="text-sm font-bold">תיאור קצר
