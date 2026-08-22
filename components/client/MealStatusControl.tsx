@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, PencilLine, Undo2, X } from "lucide-react";
+import { Check, PencilLine, Plus, Undo2, X } from "lucide-react";
 import AteSomethingElse from "@/components/client/AteSomethingElse";
 import { setMealStatus } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -48,7 +48,19 @@ export default function MealStatusControl({
       <div className="flex flex-wrap items-center justify-end gap-2">
         <span className="pill">נאכל משהו אחר</span>
         {statusNote && <span className="text-xs text-[#5B5F5B]">{statusNote}</span>}
+        {/* A meal is rarely one thing.
+            
+            Marking "אכלתי משהו אחר" once closed the door: the row showed what
+            had been logged and offered nothing but undoing it, so a client who
+            ate a sandwich and a yoghurt could record the sandwich, and then had
+            to delete it to record the yoghurt. Same sheet, same scanner, still
+            open. */}
+        <button type="button" onClick={() => setSubstituting(true)} className="chip">
+          <Plus aria-hidden="true" size={15} />
+          הוספת פריט
+        </button>
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
+        <AteSomethingElse mealId={mealId} date={date} open={substituting} onClose={() => setSubstituting(false)} />
       </div>
     );
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Flashlight, FlashlightOff } from "lucide-react";
 
 // BarcodeDetector is Chromium-only. On iOS Safari - and therefore on every
 // iPhone - it does not exist, and the camera button used to be hidden behind it:
@@ -23,6 +23,16 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
   const video = useRef<HTMLVideoElement>(null);
   const [live, setLive] = useState(false);
   const [error, setError] = useState("");
+  // The torch, where the browser has one.
+  //
+  // A barcode in a dim kitchen or a supermarket aisle simply does not decode,
+  // and the camera gave no way to help it. `torch` is a MediaTrack capability:
+  // Android Chrome exposes it, iOS Safari does not expose it at all, so the
+  // button appears only where pressing it would do something rather than
+  // sitting there dead on half the phones that see it.
+  const torchTrack = useRef<MediaStreamTrack | null>(null);
+  const [torchable, setTorchable] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
   // The callback is written inline at both call sites, so it is a new function
   // on every parent render. With it in the dependency array the whole camera
   // tore down and restarted each time - which is why it could sit open and
@@ -54,6 +64,9 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
           video.current.srcObject = stream;
           await video.current.play();
         }
+        const track = stream.getVideoTracks()[0] ?? null;
+        torchTrack.current = track;
+        setTorchable(Boolean((track?.getCapabilities?.() as { torch?: boolean } | undefined)?.torch));
       } catch {
         setError("אין גישה למצלמה. יש לאשר את הרשאת המצלמה לאתר, או להקליד את הברקוד.");
         setLive(false);
@@ -103,9 +116,30 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
       cancelled = true;
       window.clearTimeout(timer);
       controls?.stop();
+      // Stopping the track turns the torch off with it, but the state has to
+      // follow or reopening the camera would show a lit button over a dark lamp.
+      torchTrack.current = null;
+      setTorchable(false);
+      setTorchOn(false);
       stream?.getTracks().forEach((track) => track.stop());
     };
   }, [live]);
+
+  const toggleTorch = async () => {
+    const track = torchTrack.current;
+    if (!track) return;
+    const next = !torchOn;
+    try {
+      // `torch` is real and shipping in Chromium, and absent from the DOM
+      // typings, which describe the standardised set only.
+      await track.applyConstraints({ advanced: [{ torch: next }] } as unknown as MediaTrackConstraints);
+      setTorchOn(next);
+    } catch {
+      // A lamp that refuses is not worth an error screen over; the field below
+      // still takes the digits.
+      setTorchable(false);
+    }
+  };
 
   if (!live) {
     return (
@@ -124,7 +158,15 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
       {/* A barcode on a curved bottle needs to fill the frame to decode, and
           nothing on screen said so - the camera just sat there. */}
       <p className="text-xs text-[#5B5F5B]">להחזיק את הברקוד ישר וקרוב, שימלא את רוחב המסגרת. אם לא נקרא תוך כמה שניות — אפשר להקליד אותו.</p>
-      <button type="button" onClick={() => setLive(false)} className="premium-secondary-button">עצירה</button>
+      <div className="grid gap-2">
+        {torchable ? (
+          <button type="button" onClick={toggleTorch} aria-pressed={torchOn} className="premium-secondary-button">
+            {torchOn ? <FlashlightOff aria-hidden="true" size={17} /> : <Flashlight aria-hidden="true" size={17} />}
+            {torchOn ? "כיבוי הפנס" : "הדלקת הפנס"}
+          </button>
+        ) : null}
+        <button type="button" onClick={() => setLive(false)} className="premium-secondary-button">עצירה</button>
+      </div>
     </div>
   );
 }

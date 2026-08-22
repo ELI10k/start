@@ -224,7 +224,7 @@ test("the bottom bar is five tabs, and nothing on it is reachable twice", async 
   const shell = await source("components/client/ClientShell.tsx");
   const home = await source("app/page.tsx");
   const hrefs = [...nav.matchAll(/href: "([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(hrefs, ["/", "/shopping", "/notifications", "/progress", "/profile"]);
+  assert.deepEqual(hrefs, ["/", "/progress", "/shopping", "/notifications", "/profile"]);
   // Training and nutrition left the bar as the home screen gained tiles that
   // open them and name what is inside, so the bar must not open either again.
   assert.doesNotMatch(nav, /"\/workouts"/);

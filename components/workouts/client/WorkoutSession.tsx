@@ -398,6 +398,21 @@ function RestTimer({seconds,onAdd,onSkip}:{seconds:number;onAdd:()=>void;onSkip:
 }
 
 function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,setSleepHours,warning,onSave,saving,onBack}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;setSleepHours:(value:number|undefined)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void}){
+  // The note is typed locally and saved when the field is left.
+  //
+  // It used to be controlled straight off the session: every keystroke wrote to
+  // Supabase, the snapshot came back, the whole form re-rendered - and the form
+  // also re-renders once a second for the clock above. Typing a sentence in it
+  // meant the caret jumping and the page scrolling out from under the thumb
+  // after almost every letter. Nothing here needs to be saved per character; it
+  // needs to be saved before the workout is.
+  // Seeded once, on purpose. This form is mounted only when the client opens the
+  // summary, by which point the session - and any note already on it - has
+  // loaded, and leaving the summary unmounts it. There is no moment where the
+  // note can change underneath a client who is typing into it.
+  const [draft, setDraft] = useState(note);
+  const flush = () => { if (draft !== note) setNote(draft); };
+
   return <main className="client-app-content">
     <header className="premium-page-header"><div><p>סיום אימון</p><h1>סיכום לפני שמירה</h1></div></header>
     <dl className="dashboard-metrics">
@@ -408,7 +423,7 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
       <Value label="דולגו" value={String(skipped)}/>
     </dl>
     <section className="premium-card mt-4">
-      <label className="block text-sm font-bold">הערת אימון<textarea className="nutrition-input mt-2 min-h-24" value={note} onChange={(event)=>setNote(event.target.value)}/></label>
+      <label className="block text-sm font-bold">הערת אימון<textarea className="nutrition-input mt-2 min-h-24" value={draft} onChange={(event)=>setDraft(event.target.value)} onBlur={flush}/></label>
       {/* Sleep and energy were answered before the workout started. They are here
           to be corrected, not asked again - hours, not a 1-5 rating, because
           "ישנתי 5" and "ישנתי 8" are the two numbers a coach acts on. */}
@@ -420,7 +435,10 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
     </section>
     {warning&&<p role="alert" className="mt-4 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">{warning}</p>}
     <div className="session-actions session-actions--stack mt-5">
-      <button onClick={onSave} disabled={saving} className="premium-primary-button">{saving?"שומרים…":"שמירת האימון"}</button>
+      {/* Flushed here as well as on blur: a tap on this button blurs the field
+          first on every browser that matters, but "almost always" is not a good
+          enough reason to lose somebody's last sentence. */}
+      <button onClick={()=>{flush();void onSave()}} disabled={saving} className="premium-primary-button">{saving?"שומרים…":"שמירת האימון"}</button>
       <button onClick={onBack} disabled={saving} className="premium-secondary-button">חזרה לאימון</button>
     </div>
   </main>;
