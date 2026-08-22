@@ -34,6 +34,7 @@ export default async function ShoppingPage() {
               displayQuantity: Number(item.displayQuantity),
               measurementUnit: item.measurementUnit,
               itemRole: item.itemRole,
+              groupType: group.type,
             }))))}
           />
         </>

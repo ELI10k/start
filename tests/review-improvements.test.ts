@@ -163,15 +163,15 @@ test("the screens survive the window before the migration is applied", async () 
 
 test("the shopping list sums per unit and never converts between them", () => {
   const lines = buildShoppingList([
-    { name: "חזה עוף", displayQuantity: 150, measurementUnit: "גרם", itemRole: "primary" },
-    { name: "חזה עוף", displayQuantity: 120, measurementUnit: "גרם", itemRole: "primary" },
-    { name: "פיתה", displayQuantity: 1, measurementUnit: "יחידות", itemRole: "primary" },
-    { name: "פיתה", displayQuantity: 1.5, measurementUnit: "יחידות", itemRole: "alternative" },
-    { name: "קוטג׳", displayQuantity: 200, measurementUnit: "גרם", itemRole: "alternative" },
+    { name: "חזה עוף", displayQuantity: 150, measurementUnit: "גרם", itemRole: "primary", groupType: "protein" },
+    { name: "חזה עוף", displayQuantity: 120, measurementUnit: "גרם", itemRole: "primary", groupType: "protein" },
+    { name: "פיתה", displayQuantity: 1, measurementUnit: "יחידות", itemRole: "primary", groupType: "carbohydrate" },
+    { name: "פיתה", displayQuantity: 1.5, measurementUnit: "יחידות", itemRole: "alternative", groupType: "carbohydrate" },
+    { name: "קוטג׳", displayQuantity: 200, measurementUnit: "גרם", itemRole: "alternative", groupType: "protein" },
   ]);
 
   const chicken = lines.find((line) => line.name === "חזה עוף");
-  assert.deepEqual(chicken, { name: "חזה עוף", quantity: 270, unit: "גרם", alternativeOnly: false });
+  assert.deepEqual(chicken, { name: "חזה עוף", quantity: 270, unit: "גרם", alternativeOnly: false, category: "protein" });
 
   // Same food, both a countable unit and a mass, stays two lines - START does not
   // invent the conversion between them.
@@ -180,21 +180,39 @@ test("the shopping list sums per unit and never converts between them", () => {
   assert.equal(pitta[0].quantity, 2.5);
 
   // A food that only ever appears as a swap is still on the list - one you have
-  // not bought is not a choice - but it is marked and sorted after the plan.
+  // not bought is not a choice - but it is marked, and sorted after the plan
+  // within its own aisle rather than after the whole list.
   const cottage = lines.find((line) => line.name === "קוטג׳");
   assert.equal(cottage?.alternativeOnly, true);
-  assert.equal(lines.at(-1)?.name, "קוטג׳");
+
+  // Aisle order beats everything: proteins before carbohydrates, whatever the
+  // alphabet or the item's role says.
+  assert.deepEqual(lines.map((line) => line.name), ["חזה עוף", "קוטג׳", "פיתה"]);
 
   const text = shoppingListText(lines, "תפריט 1800");
   assert.match(text, /רשימת קניות · תפריט 1800/);
-  assert.match(text, /חלופות:/);
+  assert.match(text, /חלבונים:/);
+  assert.match(text, /פחמימות:/);
+  // A swap says so on its own line now that it is not in a section of its own.
+  assert.match(text, /קוטג׳ — 200 גרם \(חלופה\)/);
+});
+
+test("a food group the menu does not recognise still gets bought", () => {
+  const lines = buildShoppingList([
+    { name: "מלח", displayQuantity: 5, measurementUnit: "גרם", itemRole: "primary", groupType: "seasoning" },
+    { name: "אבוקדו", displayQuantity: 1, measurementUnit: "יחידות", itemRole: "primary", groupType: "fat" },
+  ]);
+  // Unknown groups land in "other", which sorts last - never dropped, because a
+  // line missing from the list is a food missing from the trolley.
+  assert.deepEqual(lines.map((line) => line.category), ["fat", "other"]);
+  assert.match(shoppingListText(lines, "ת"), /נוסף:/);
 });
 
 test("a zero or negative quantity is dropped rather than printed", () => {
   const lines = buildShoppingList([
-    { name: "אפס", displayQuantity: 0, measurementUnit: "גרם", itemRole: "primary" },
-    { name: "ריק", displayQuantity: Number.NaN, measurementUnit: "גרם", itemRole: "primary" },
-    { name: "  ", displayQuantity: 100, measurementUnit: "גרם", itemRole: "primary" },
+    { name: "אפס", displayQuantity: 0, measurementUnit: "גרם", itemRole: "primary", groupType: "protein" },
+    { name: "ריק", displayQuantity: Number.NaN, measurementUnit: "גרם", itemRole: "primary", groupType: "protein" },
+    { name: "  ", displayQuantity: 100, measurementUnit: "גרם", itemRole: "primary", groupType: "protein" },
   ]);
   assert.deepEqual(lines, []);
 });

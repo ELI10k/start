@@ -13,7 +13,7 @@ import {
 import FreeMenu from "@/components/client/FreeMenu";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
-import { israelDateKey, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
+import { israelDateKey, israelWeekday, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
@@ -35,17 +35,26 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // to close the fifth in the morning, and no way to look at what they ate
   // yesterday at all.
   //
-  // Backwards only, and only a week. Tomorrow has not happened, and a menu can
-  // be reassigned, so a date far enough back stops describing anything the
-  // client would recognise. The database applies the same rule from its own
-  // side: every write checks the assignment was active on that date.
-  const days = Array.from({ length: 7 }, (_, back) => {
-    const day = new Date(`${now}T12:00:00Z`);
-    day.setUTCDate(day.getUTCDate() - back);
+  // The week as it is counted in Hebrew: Sunday to Saturday, in that order.
+  //
+  // This was the last seven days, newest first, so the row started on today and
+  // ran backwards - a Wednesday put Thursday of the previous week beside Sunday
+  // of this one, and no two consecutive screens showed the same week. A week has
+  // a first day and a last day here, and they do not move.
+  //
+  // Days later in the week are drawn and not opened. Tomorrow has not happened,
+  // and the database says so from its own side: every write checks the
+  // assignment was active on that date.
+  const weekOpens = new Date(`${now}T12:00:00Z`);
+  weekOpens.setUTCDate(weekOpens.getUTCDate() - israelWeekday(now));
+  const days = Array.from({ length: 7 }, (_, ahead) => {
+    const day = new Date(weekOpens);
+    day.setUTCDate(day.getUTCDate() + ahead);
     return day.toISOString().slice(0, 10);
   });
   const requested = (await searchParams).date;
-  const today = requested && days.includes(requested) ? requested : now;
+  // A day this week that has already happened. Anything else falls back to today.
+  const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
   const [menu, freeMenu, foods, logged] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today)]);
   // What was eaten instead, and what of it carries figures. Only the measured

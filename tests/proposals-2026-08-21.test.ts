@@ -28,7 +28,10 @@ test("the nutrition screen can look backwards, and only backwards", async () => 
   const page = await source("app/nutrition/page.tsx");
   // Every part of this day has always been stored per date; nothing asked.
   assert.match(page, /searchParams: Promise<\{ date\?: string \}>/);
-  assert.match(page, /days\.includes\(requested\) \? requested : now/);
+  // The row is the Hebrew week now - Sunday to Saturday - so "backwards only" is
+  // no longer a property of the list itself and has to be asserted directly: a
+  // requested day has to be in this week AND to have already happened.
+  assert.match(page, /days\.includes\(requested\) && requested <= now \? requested : now/);
   assert.match(page, /length: 7/);
   // "Now" is a property of today, not of whichever day is on screen.
   assert.match(page, /const isNow = isToday &&/);

@@ -4,8 +4,9 @@ import { formatIsraelDate } from "@/lib/date-time";
 /**
  * The last seven days, as a row of links.
  *
- * Newest first, reading right to left, so today is where the eye starts and
- * yesterday is the next tap along.
+ * Sunday to Saturday, which in an RTL column layout puts ראשון on the right and
+ * שבת on the left - the order a Hebrew week is read in, and the order it is
+ * spoken in.
  *
  * Two lines per day: the weekday above, the date below. It used to be one line
  * built by the Hebrew locale's own "short" weekday, which is not short - it
@@ -36,6 +37,17 @@ export default function NutritionDayStrip({
         const at = `${day}T12:00:00Z`;
         const isActive = day === active;
         const isToday = day === today;
+        const weekday = formatIsraelDate(at, { weekday: "narrow" });
+        const date = formatIsraelDate(at, { day: "numeric", month: "numeric" });
+        // Drawn, not opened. A day later this week has no menu to answer for
+        // yet, and a link to it would take the client to today wearing the
+        // wrong date.
+        if (day > today && !isToday) return (
+          <span key={day} aria-hidden="true" className="chip day-strip__day day-strip__day--ahead">
+            <span className="day-strip__weekday">{weekday}</span>
+            <span className="day-strip__date">{date}</span>
+          </span>
+        );
         return (
           <Link
             key={day}
@@ -52,12 +64,8 @@ export default function NutritionDayStrip({
                 client already knows and hides the one they were looking for -
                 on a Saturday the newest weekday on the screen was Friday's, so
                 the row looked a day behind. The green fill is what says today. */}
-            <span aria-hidden="true" className="day-strip__weekday">
-              {formatIsraelDate(at, { weekday: "narrow" })}
-            </span>
-            <span aria-hidden="true" className="day-strip__date">
-              {formatIsraelDate(at, { day: "numeric", month: "numeric" })}
-            </span>
+            <span aria-hidden="true" className="day-strip__weekday">{weekday}</span>
+            <span aria-hidden="true" className="day-strip__date">{date}</span>
           </Link>
         );
       })}

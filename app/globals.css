@@ -194,6 +194,15 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   border-radius: var(--radius-md);
   color: var(--ink);
   font: inherit;
+  /* Never under 16px, whatever it inherited.
+     
+     iOS Safari zooms the whole page into any control it focuses whose text is
+     smaller than 16px, and it does not zoom back out. Most of these controls sit
+     inside a `text-sm` label, so they inherited 14px - which is why tapping the
+     reason box on "פיספסתי אימון", or the barcode field, threw the sheet's right
+     edge off the screen and left it there. `1em` is the parent's size, so a
+     control in a larger context still scales up with it. */
+  font-size: max(16px, 1em);
   outline: none;
   transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
@@ -962,6 +971,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Seven of these have to sit inside a phone, so the chip is allowed to be
    narrower than its own text and the text is sized against the viewport rather
    than given a fixed point size. Two lines: weekday, then date. */
+/* A day still to come: present, so the week keeps its shape, and plainly not
+   something to press. */
+.day-strip__day--ahead { border-style: dashed; color: var(--ink-faint); opacity: .6; }
 .day-strip .chip {
   flex: initial; min-width: 0; overflow: hidden;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1011,6 +1023,33 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .nutrition-toolbar:empty { display: none; }
 /* The shortcuts take the room they need; the icon never stretches with them. */
 .nutrition-toolbar > .icon-button { flex: 0 0 auto; }
+
+/* Shopping list rows: a checkbox, a name and an amount, sized to be hit while
+   holding a basket. The circle carries the state; the strike-through only
+   agrees with it. */
+.shopping-row {
+  display: flex; width: 100%; min-height: 3rem; align-items: center; gap: .75rem;
+  padding-inline: .75rem;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); color: var(--ink);
+  font: inherit; text-align: start;
+}
+.shopping-row__box {
+  display: grid; flex: 0 0 auto; width: 1.4rem; height: 1.4rem; place-items: center;
+  border: 2px solid var(--line-strong); border-radius: 999px;
+  color: #FFFFFF;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+.shopping-row__name { flex: 1 1 auto; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+.shopping-row__swap {
+  margin-inline-start: .4rem; padding-inline: .4rem;
+  border-radius: 999px; background: var(--surface-raised);
+  color: var(--ink-muted); font-size: .62rem; font-weight: 700;
+}
+.shopping-row__amount { flex: 0 0 auto; color: var(--ink-muted); font-size: .8rem; }
+.shopping-row[data-done] { border-color: var(--green); background: var(--green-tint); }
+.shopping-row[data-done] .shopping-row__box { border-color: var(--green); background: var(--green); }
+.shopping-row[data-done] .shopping-row__name { color: var(--ink-muted); text-decoration: line-through; }
 
 /* Grouped settings rows — the profile pattern. */
 .settings-group { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
