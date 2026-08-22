@@ -6,15 +6,19 @@
 export const WEEKDAY_LABELS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"] as const;
 
 /**
- * Every day is named after the day it is. Sunday included.
+ * The base day is called what it does: it is served all week.
  *
- * Day 0 used to be labelled "ברירת מחדל", which is not a day of the week - so a
- * coach looking for ראשון found שני through שבת and concluded the app had no
- * Sunday. Being the fallback is not a different kind of day, it is what happens
- * to whichever day is lowest: getActiveClientMenu serves the exact weekday when
- * the coach wrote one and the lowest day present otherwise, so a menu with only
- * Sunday in it is served every day of the week, and a menu that gains Tuesday
- * keeps serving Sunday's on the other six. That rule is stated where the days
- * are added rather than smuggled into the name of one of them.
+ * It was "ברירת מחדל", which is not a day, and then "יום ראשון", which is only
+ * a seventh of the truth - a menu holding just this day is served every day of
+ * the week, not on Sundays. getActiveClientMenu serves the exact weekday where
+ * the coach wrote one and falls back to the lowest day present otherwise, so
+ * day 0 is the whole week until another day is added and the six that are still
+ * unwritten afterwards.
+ *
+ * The collision this leaves is real and is not fixable with a word: day 0 is
+ * also the index israelWeekday returns on a Sunday, so a coach cannot give
+ * Sunday something different from the rest of the week without a schema change.
+ * Naming it for the job it actually does beats naming it for the job it cannot.
  */
-export const dayLabel = (dayIndex: number) => `יום ${WEEKDAY_LABELS[dayIndex] ?? dayIndex}`;
+export const dayLabel = (dayIndex: number) =>
+  dayIndex === 0 ? "כל השבוע" : `יום ${WEEKDAY_LABELS[dayIndex] ?? dayIndex}`;

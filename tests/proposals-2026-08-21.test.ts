@@ -200,7 +200,10 @@ test("the menu preview shows one day, and says which", async () => {
   // concluded the app had no Sunday. Being the fallback is not a kind of day; it
   // is what happens to whichever day is lowest, and that rule is stated where
   // days are added instead of hidden in the name of one of them.
-  assert.equal(dayLabel(0), "יום ראשון");
+  // The base day is named for what it does: served all week, not on Sundays. A
+  // menu holding only this day is the whole week; the days added beside it carve
+  // themselves out of it.
+  assert.equal(dayLabel(0), "כל השבוע");
   // Sunday is 0, so index 2 is Tuesday - the same indexing israelWeekday and
   // day_index use, which is the whole reason this list has one home.
   assert.equal(dayLabel(1), "יום שני");
