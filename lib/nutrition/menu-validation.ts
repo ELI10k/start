@@ -44,15 +44,22 @@ export function validateMealPlanPayload(payload: unknown): MenuValidationResult 
   ) {
     return { ok: false, message: "תפריט פעיל חייב להיות משויך ללקוח." };
   }
-  if (!Array.isArray(plan.days) || plan.days.length === 0) {
-    return { ok: false, message: "יש להוסיף לפחות יום אחד לתפריט." };
+  if (!Array.isArray(plan.days)) {
+    return { ok: false, message: "מבנה ימי התפריט אינו תקין." };
   }
 
   const meals = (plan.days as MenuDayInput[]).flatMap((day) =>
     Array.isArray(day.meals) ? (day.meals as MenuMealInput[]) : [],
   );
-  if (meals.length === 0) {
-    return { ok: false, message: "יש להוסיף לפחות ארוחה אחת לתפריט." };
+  // Empty is a legitimate menu right up until somebody eats from it.
+  //
+  // A coach building a freestyle plan - calories and macros, no prescribed rows -
+  // had nothing to save: the emptiness that is the whole point of it was refused
+  // as an unfinished draft. The rule that matters is the one at the other end,
+  // and it is unchanged: a menu that reaches a client has to have something in
+  // it, because an active menu with no meals serves that client nothing.
+  if (plan.status === "active" && (plan.days.length === 0 || meals.length === 0)) {
+    return { ok: false, message: "כדי להפעיל תפריט אצל לקוח יש להוסיף לפחות ארוחה אחת." };
   }
   for (const meal of meals) {
     if (typeof meal.title !== "string" || !FIXED_MEAL_TITLES.includes(meal.title as typeof FIXED_MEAL_TITLES[number])) {

@@ -572,7 +572,10 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
 
   const submit=(confirmed=false)=>startTransition(async()=>{
     setMessage("");
-    if(!savedDays().length){say("יש למלא לפחות ארוחה אחת לפני שמירה.","error");return}
+    // Only on the way to a client. A freestyle menu - targets and no rows - is a
+    // real thing a coach builds, and refusing to save it made the emptiness that
+    // is its whole point look like an unfinished draft.
+    if(menu.status==="active"&&!savedDays().length){say("כדי להפעיל תפריט אצל לקוח יש למלא לפחות ארוחה אחת.","error");return}
     if(activeWithoutClient){say("„פעיל אצל לקוח” מגיש את התפריט ללקוח מסוים, ולכן דורש לקוח משויך. אם זה תפריט לבנק — יש לבחור „מוכן בבנק”.","error");return}
     if(needsActivationConfirm&&!confirmed){setConfirmActivation(true);return}
     setConfirmActivation(false);

@@ -211,7 +211,11 @@ test("untouched meals from the skeleton do not block saving",()=>{
   // Blank rows are dropped before the groups are, so the check is on the item
   // filter rather than on a "does any item have a food" test.
   assert.match(source,/items:group\.items\.filter\(item=>item\.foodId&&Number\(item\.amount\)>0\)/);
-  assert.match(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
+  // A freestyle menu - targets and no rows - saves. The rule that matters is at
+  // the other end: a menu on its way to a client still has to have something in
+  // it, because an active menu with no meals serves that client nothing.
+  assert.doesNotMatch(source,/יש למלא לפחות ארוחה אחת לפני שמירה/);
+  assert.match(source,/menu\.status==="active"&&!savedDays\(\)\.length/);
   // The save control lives in the bottom dock now, not a sticky header.
   assert.match(source,/className="menu-dock"/);
 });
