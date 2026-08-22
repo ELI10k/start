@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Home, LineChart, ShoppingBasket, UserRound } from "lucide-react";
+import { Bell, BookOpen, Home, ShoppingBasket, UserRound } from "lucide-react";
 
 // Five, and every one of them is somewhere the home screen does not already go.
 //
@@ -13,12 +13,14 @@ import { Bell, Home, LineChart, ShoppingBasket, UserRound } from "lucide-react";
 // away from the phone's owner's kitchen - in a supermarket, one-handed - so it
 // is the one thing that had to be reachable without reading a screen first.
 //
-// Progress sits beside home because it is the pair a client moves between - "how
-// am I doing today" and "how am I doing overall" - and the bell says whose
+// Progress left in its turn, once the home screen gained a tile for it, and the
+// content library took the slot: it had no thumb-sized target anywhere - a tile
+// on the home screen and one lesson a week beneath it - so the courses a coach
+// writes were the hardest thing in the app to reach. The bell says whose
 // notifications these are, since the only sender is the coach.
 const items = [
   { href: "/", label: "בית", icon: Home },
-  { href: "/progress", label: "התקדמות", icon: LineChart },
+  { href: "/content", label: "קורסים", icon: BookOpen },
   { href: "/shopping", label: "קניות", icon: ShoppingBasket },
   { href: "/notifications", label: "התראות מאמן", icon: Bell },
   { href: "/profile", label: "פרופיל", icon: UserRound },

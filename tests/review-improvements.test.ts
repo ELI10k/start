@@ -224,7 +224,7 @@ test("the bottom bar is five tabs, and nothing on it is reachable twice", async 
   const shell = await source("components/client/ClientShell.tsx");
   const home = await source("app/page.tsx");
   const hrefs = [...nav.matchAll(/href: "([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(hrefs, ["/", "/progress", "/shopping", "/notifications", "/profile"]);
+  assert.deepEqual(hrefs, ["/", "/content", "/shopping", "/notifications", "/profile"]);
   // Training and nutrition left the bar as the home screen gained tiles that
   // open them and name what is inside, so the bar must not open either again.
   assert.doesNotMatch(nav, /"\/workouts"/);
@@ -237,14 +237,13 @@ test("the bottom bar is five tabs, and nothing on it is reachable twice", async 
   assert.doesNotMatch(phoneHeader, /NotificationBell/);
   assert.match(shell, /desktop-app-nav__actions[\s\S]*NotificationBell/);
   // Everything the bar dropped still has a way in from the first screen.
-  for (const href of ["/nutrition", "/check-in"]) {
+  for (const href of ["/nutrition", "/check-in", "/progress"]) {
     assert.match(home, new RegExp(`href="${href}"`), `${href} lost its tile`);
   }
-  // The content library gave up its tile when the tiles went two-across - the
-  // weekly lesson beneath them leads into the same library - so the index has to
-  // still be reachable, and it is, from the profile tab.
-  const profile = await source("app/profile/page.tsx");
-  assert.match(profile, /href="\/content"/);
+  // The content library gave up its home tile when the tiles went two-across;
+  // it has a tab of its own now, which is the only place in the app the courses
+  // are reachable by thumb.
+  assert.doesNotMatch(nav, /"\/progress"/);
   // Training's tile is a client component - the next session's name is held by
   // the workout provider, not by the request that renders this page.
   assert.match(home, /<DashboardWorkoutWidget \/>/);
