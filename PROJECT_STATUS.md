@@ -49,6 +49,41 @@ Deployments list simply never grows.
 `begin;` to be the first characters of the file, so every migration with a header
 comment was rejected. It now skips leading comments.
 
+## 2026-08-21 the panel that had never had a row
+
+`habit_analysis_reports` has been read since the day it was created and written
+by nothing — no application code, no SQL, no job, and no insert policy. So
+**"דורשים תשומת לב"**, which the 2026-08-20 review moved to the top of the coach's
+morning screen as the most actionable thing on it, has always rendered its empty
+state. And that empty state said *"no client currently has a data-based risk
+signal"* — which a coach reads as "everyone is fine" rather than "nothing has
+ever been measured".
+
+The engine already existed: `calculateCoachScores` turns the facts the weekly job
+already gathers into exactly the seven scores the table stores. Only the writer
+was missing, and it is now part of the weekly run — best effort and logged,
+because this is a panel and the summaries are the point of that job.
+
+**Login days are gathered too.** The risk score leans on them hard, and with no
+figure at all every client scores as absent. That is how a panel meant to name
+the two clients who need attention ends up naming all of them and being read by
+nobody — the same failure mode the 2026-08-20 review fixed in the client file's
+alert rows.
+
+`getCoachAttention` now returns `{ items, measured }`, and the panel says
+"טרם נמדד" until a report exists. The first one is written the coming Saturday
+evening, by the evening cron.
+
+### E2E — 2026-08-21
+Run twice. The first run was discarded: files were edited while the dev server
+was up, so it recompiled mid-suite and its result meant nothing. The clean run on
+a frozen tree returned **228 passed, 1 failed**, and the failure was a race in
+the test rather than a defect — `getByText(body)` matched twice because the
+outgoing dashboard was still in the DOM during the soft navigation and its thread
+preview prints the same message body. The spec waits for the destination URL and
+asserts inside `.message-thread` now, which is the only place that answers the
+question it is named after. **10/10 on re-run.**
+
 ## 2026-08-21 scale — what breaks before a thousand clients
 
 Eli asked whether the app can carry ~1000 users without buying anything, since
@@ -313,8 +348,9 @@ project's Vercel link once failed silently for ten days, a successful push is
 not evidence of a deployment.
 
 ### Verification
-`tsc` clean · `lint` clean · **485 / 485** unit tests · `build` passes ·
-migration validation passes (73 migrations) · **E2E 230 passed, 0 failed**.
+`tsc` clean · `lint` clean · **493 / 493** unit tests · `build` passes ·
+migration validation passes (74 migrations) · **E2E 228 passed** on a frozen
+tree, with the one failure fixed and re-run green.
 
 ## 2026-08-21 third product review
 
