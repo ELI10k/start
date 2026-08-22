@@ -1,20 +1,20 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell, Home, LineChart, Salad, UserRound } from "lucide-react";
+import { Bell, Home, LineChart, Salad, UserRound } from "lucide-react";
 
-// Five, not seven.
+// Five, not seven. Seven targets across a phone leaves each about 50px, which is
+// under the size a thumb can hit reliably.
 //
-// Notifications had a tab here as well as the bell in the header - the same
-// screen reachable twice from one viewport - and content had one despite being
-// something a client opens occasionally, not daily. Seven targets across a phone
-// leaves each about 50px, which is under the size a thumb can hit reliably.
-// These five are the daily loop; the bell keeps notifications, and content and
-// messages live one tap into the profile.
+// Training left this bar rather than gaining a second entrance: the home screen
+// opens it from a tile that also names the next training day, so keeping a tab
+// for it made the same destination reachable twice from one viewport. What took
+// the slot is what had no thumb-sized target at all - the coach's notifications,
+// which until now were only the bell in the header.
 const items = [
   { href: "/", label: "בית", icon: Home },
   { href: "/nutrition", label: "תזונה", icon: Salad },
-  { href: "/workouts", label: "אימונים", icon: Dumbbell },
+  { href: "/notifications", label: "התראות", icon: Bell },
   { href: "/progress", label: "התקדמות", icon: LineChart },
   { href: "/profile", label: "פרופיל", icon: UserRound },
 ];
@@ -30,14 +30,17 @@ export default function BottomNav({ unreadCount = 0 }: { unreadCount?: number })
       <div>
         {items.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
-          // Anything waiting - a notification or a message - shows on the profile
-          // tab, which is the tab that now leads to both.
-          const isProfile = href === "/profile";
+          // The badge sits on the tab that opens the thing it is counting, and
+          // it counts what the bell counts. Two badges on one screen showing
+          // different totals for the same inbox is how this last went wrong -
+          // the bell said 1 beside a tab saying 2 - so the tab and the bell are
+          // now handed the same figure.
+          const isInbox = href === "/notifications";
           return (
             <Link key={href} href={href} aria-current={active ? "page" : undefined} data-active={active || undefined}>
               <span className="bottom-app-nav__icon">
                 <Icon aria-hidden="true" size={21} />
-                {isProfile && unreadCount > 0 && (
+                {isInbox && unreadCount > 0 && (
                   <span className="bottom-app-nav__badge" aria-label={`${unreadCount} עדכונים שלא נקראו`}>
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>

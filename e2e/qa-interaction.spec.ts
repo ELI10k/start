@@ -39,15 +39,17 @@ test.describe("keyboard, focus and navigation", () => {
   test("the back button returns to the previous screen", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
     await page.goto("/");
-    await page.getByRole("navigation", { name: "ניווט ראשי ללקוח" }).getByRole("link", { name: "אימונים" }).click();
-    await page.waitForURL(/\/workouts$/);
+    await page.getByRole("navigation", { name: "פעולות מהירות" }).getByRole("link", { name: "אימון" }).click();
+    await page.waitForURL(/\/workouts/);
 
     await page.goBack();
     await page.waitForURL((url) => url.pathname === "/");
-    await expect(page.getByRole("heading", { name: "מה חשוב לך היום" })).toBeVisible();
+    // The home screen has no visible title any more - it has to fit one phone
+    // viewport - so the heading it lands on is the one only a reader hears.
+    await expect(page.getByRole("heading", { name: "מה חשוב לך היום" })).toBeAttached();
 
     await page.goForward();
-    await page.waitForURL(/\/workouts$/);
+    await page.waitForURL(/\/workouts/);
     await expect(page.locator("main").first()).toBeVisible();
   });
 

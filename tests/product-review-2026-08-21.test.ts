@@ -130,10 +130,14 @@ test("logging a food never erases an answer the client already gave", async () =
 
 test("one unread message counts once", async () => {
   const shell = await source("components/client/ClientShell.tsx");
+  const bar = await source("components/BottomNav.tsx");
   // A direct message writes a message row AND a notification pointing at it, so
-  // adding the two counts every message twice.
-  assert.match(shell, /getUnreadNotificationCount\(\[DIRECT_MESSAGE_TYPE\]\)/);
-  assert.match(shell, /unreadOtherNotifications \+ unreadMessages/);
+  // adding the two counts every message twice. Since the bar's badge moved to
+  // the notifications tab it opens the same screen the bell does, so it is
+  // handed the bell's own figure and there is nothing left to add up.
+  assert.doesNotMatch(shell, /getUnreadMessageCount/);
+  assert.match(shell, /const unreadCount = unreadNotifications;/);
+  assert.match(bar, /const isInbox = href === "\/notifications";/);
 });
 
 test("counting unread notifications does not fetch a page of them", async () => {

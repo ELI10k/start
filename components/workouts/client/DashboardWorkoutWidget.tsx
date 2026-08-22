@@ -1,6 +1,37 @@
 "use client";
-import { israelDateKey } from "@/lib/date-time";
+import { Dumbbell } from "lucide-react";
 import Link from "next/link";
+import { israelDateKey } from "@/lib/date-time";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { activeAssignmentFor, getTodayWorkoutDay } from "@/lib/workouts/progress";
-export default function DashboardWorkoutWidget(){const{snapshot,currentClientId,loading,persistenceError}=useWorkouts();const assignment=activeAssignmentFor(snapshot.assignments,currentClientId,israelDateKey());const program=snapshot.programs.find((item)=>item.id===assignment?.programId);const today=program?getTodayWorkoutDay(program,snapshot.completedWorkouts,currentClientId):undefined;const active=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);return <section className="mt-6 rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5"><h2 className="text-xl font-black">האימון הבא</h2>{loading?<p role="status" className="mt-3 text-sm text-[#5B5F5B]">טוענים את תוכנית האימון…</p>:persistenceError?<p role="alert" className="mt-3 text-sm text-[#DC2626]">{persistenceError}</p>:program?<><p className="mt-2 text-[#5B5F5B]">{program.name}{today?` · ${today.name}`:" · ימי האימון זמינים במסך האימונים"}</p><Link href={active?`/workouts/${active.programId}/${active.dayId}`:"/workouts"} className="mt-4 inline-flex min-h-12 items-center rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF]">{active?"המשך אימון פעיל":"למסך האימונים"}</Link></>:<p className="mt-3 text-sm text-[#5B5F5B]">אין כרגע תוכנית אימונים פעילה.</p>}</section>}
+
+// The card this replaced said the same three things in five times the height:
+// which programme is running, which day is next, and whether a session is still
+// open. The home screen has to fit one phone viewport, so it says them from
+// inside the tile the client was going to press anyway - and presses through to
+// the open session when there is one, exactly as the card's button did.
+export default function DashboardWorkoutWidget() {
+  const { snapshot, currentClientId, loading, persistenceError } = useWorkouts();
+  const assignment = activeAssignmentFor(snapshot.assignments, currentClientId, israelDateKey());
+  const program = snapshot.programs.find((item) => item.id === assignment?.programId);
+  const today = program ? getTodayWorkoutDay(program, snapshot.completedWorkouts, currentClientId) : undefined;
+  const active = snapshot.activeSessions.find((item) => item.clientId === currentClientId);
+  return (
+    <Link
+      href={active ? `/workouts/${active.programId}/${active.dayId}` : "/workouts"}
+      className="quick-action-card"
+    >
+      <span className="quick-action-card__icon"><Dumbbell aria-hidden="true" size={20} /></span>
+      <span className="quick-action-card__label">אימון</span>
+      {loading ? (
+        <span role="status" className="quick-action-card__meta">טוען…</span>
+      ) : persistenceError ? (
+        <span role="alert" className="quick-action-card__meta quick-action-card__meta--error">שגיאה בטעינה</span>
+      ) : (
+        <span className="quick-action-card__meta">
+          {active ? "המשך אימון פעיל" : today?.name ?? program?.name ?? "אין תוכנית פעילה"}
+        </span>
+      )}
+    </Link>
+  );
+}

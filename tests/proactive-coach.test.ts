@@ -27,10 +27,17 @@ test("coach attention keeps the latest report and ranks real risk", () => {
   assert.equal(items[0]?.severity, "high");
 });
 
-test("client and coach dashboards wire the proactive coach without a second weekly engine", async () => {
-  const [client, coach] = await Promise.all([readFile("app/page.tsx", "utf8"), readFile("app/coach/page.tsx", "utf8")]);
-  assert.match(client, /buildDailyCoachMessage/);
-  assert.match(client, /DailyCoachCard/);
+test("the proactive coach runs from the cron, and no second weekly engine exists", async () => {
+  const [client, coach, cron] = await Promise.all([
+    readFile("app/page.tsx", "utf8"),
+    readFile("app/coach/page.tsx", "utf8"),
+    readFile("app/api/cron/daily-coach/route.ts", "utf8"),
+  ]);
+  // The daily tip stopped being a card on the client home screen - that screen
+  // now has to fit one phone viewport, and the tip itself is a lesson in the
+  // content library. It still reaches the client, as the push it always was.
+  assert.match(cron, /buildDailyCoachMessage/);
+  assert.doesNotMatch(client, /buildDailyCoachMessage/);
   assert.match(coach, /getCoachAttention/);
   assert.match(coach, /CoachAttentionPanel/);
   assert.doesNotMatch(client + coach, /generateWeeklyReport/);

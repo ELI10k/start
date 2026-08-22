@@ -518,17 +518,22 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Metric tiles scroll on a phone and grid out on a tablet. The row bleeds to the
    screen edge and pads itself back, so the tile peeking off the side reads as
    "there is more" rather than as a card clipped by the page margin. */
+/* Tiles wrap; they do not scroll sideways.
+   
+   This was a horizontal scroller, and on the training screen - four tiles, the
+   widest of them "2 מתוך 3" - the fourth and half the third sat off the left
+   edge of a phone. A row that scrolls sideways inside a page that scrolls
+   downwards hides whatever is past the edge: nobody swipes a row of numbers
+   they cannot see the start of, so "רצף" was, in practice, not on the screen.
+   
+   auto-fit rather than a fixed count, so the number of columns follows the
+   width it actually got: two on a 375pt phone, three on a 6.9" one, and the
+   768px rule below still pins the desktop layout at four. */
 .dashboard-metrics {
-  display: flex;
-  gap: .7rem;
-  overflow-x: auto;
-  margin-inline: -1rem;
-  padding: 0 1rem .35rem;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 1rem;
-  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: .6rem;
 }
-@media (max-width: 374px) { .dashboard-metrics { margin-inline: -.75rem; padding-inline: .75rem; scroll-padding-inline: .75rem; } }
 /* Three tiles that fit the screen instead of scrolling off it. The scrolling row
    is right for the coach's four-and-more metrics; on the client's home there are
    exactly three and half of the third hung off the edge of a phone. */
@@ -547,14 +552,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .dashboard-metrics--fit .metric-tile__head { font-size: .7rem; }
   .dashboard-metrics--fit .metric-tile strong { font-size: 1.22rem; }
 }
-.dashboard-metrics::-webkit-scrollbar { display: none; }
 
 .metric-tile {
-  min-width: 9.5rem;
+  min-width: 0;
   min-height: 6.4rem;
-  flex: 1 0 9.5rem;
   padding: .9rem;
-  scroll-snap-align: start;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -566,34 +568,84 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .metric-tile__icon { color: var(--green); }
 .metric-tile__icon svg { width: 1rem; height: 1rem; }
-.metric-tile strong { display: block; margin-top: .7rem; color: var(--ink); font-size: 1.22rem; white-space: nowrap; }
+/* Never wraps and never widens its tile: at two columns on a small phone the
+   tile is about 120px, and "2 אימונים" set at 1.22rem does not fit one. */
+.metric-tile strong {
+  display: block; margin-top: .7rem; overflow: hidden;
+  color: var(--ink); font-size: clamp(1rem, 4.4vw, 1.22rem);
+  text-overflow: ellipsis; white-space: nowrap;
+}
 .metric-tile small { display: block; margin-top: .15rem; overflow: hidden; color: var(--ink-muted); font-size: .65rem; text-overflow: ellipsis; white-space: nowrap; }
 .metric-tile--neutral .metric-tile__icon,
 .metric-tile--green .metric-tile__icon { color: var(--green); }
 .metric-tile--down strong { color: var(--red); }
 
 @media (min-width: 768px) {
-  .dashboard-metrics {
-    display: grid; overflow: visible;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-inline: 0; padding-inline: 0;
-  }
+  .dashboard-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; }
+  .metric-tile strong { font-size: 1.22rem; }
+}
+
+/* The client home screen: three figures, four destinations, one viewport.
+   
+   Nothing here is allowed under the fold, so the two rows are measured against
+   the screen rather than given fixed heights - a 6.9" phone would otherwise
+   leave the bottom third empty and a 4.7" one would push the tiles under the
+   nav bar. The subtraction is the sticky header, this container's own top
+   padding, and the padding that already clears the fixed bottom bar.
+   
+   Not `overflow: hidden`. On the one day a week the coach releases a summary,
+   and for anyone running large text, the screen is meant to grow and scroll
+   rather than crop something the client never finds out was there. */
+/* The shell pads the bottom for the fixed bar, and so does the content box
+   inside it - about 180px of clearance for a 72px bar. Everywhere else that is
+   only slack at the end of a long scroll; here it was the whole difference
+   between fitting the screen and not, so the home screen pays for the bar once. */
+.client-app-shell--home { padding-bottom: 0; }
+.client-app-shell--home .client-app-content { padding-bottom: var(--nav-clearance); }
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(.7rem, 2.4vh, 1.25rem);
+  min-height: calc(100dvh - 3.5rem - 1rem - var(--nav-clearance) - env(safe-area-inset-top));
+}
+.home-screen .premium-card { margin-bottom: 0; }
+.home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
+.home-screen .quick-action-card { min-height: clamp(6rem, 17vh, 9.5rem); }
+/* The desktop nav is a top bar, there is no fold to fit inside, and stretching
+   seven tiles down a 1440px window looks like an error. */
+@media (min-width: 768px) {
+  .home-screen { justify-content: flex-start; min-height: 0; gap: 1.25rem; }
+  .home-screen .dashboard-metrics--fit .metric-tile,
+  .home-screen .quick-action-card { min-height: 7rem; }
 }
 
 .quick-actions-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 5.75rem;
-  align-items: center; justify-content: center; flex-direction: column; gap: .5rem;
+  align-items: center; justify-content: center; flex-direction: column; gap: .35rem;
+  padding-inline: .3rem;
   border: 1px solid var(--line); border-radius: var(--radius-md);
   background: var(--surface); box-shadow: var(--shadow-card);
   color: var(--ink); font-size: .72rem; font-weight: 700; text-decoration: none;
   text-align: center;
 }
 .quick-action-card > svg { color: var(--green); }
+.quick-action-card__icon,
 .quick-action-card > span:first-child:has(svg) {
   display: grid; width: 2.35rem; height: 2.35rem; place-items: center;
   border-radius: .75rem; background: var(--green-tint); color: var(--green);
 }
+.quick-action-card__label { font-size: .76rem; font-weight: 800; line-height: 1.2; }
+/* The line that absorbed the cards this screen no longer has room for - the
+   active plan's name, the next training day. One line, clipped: a coach who
+   names a menu "תפריט העלאת מסה - שלב ב׳" must not be able to change how tall
+   this row is, because the row has to end above the fold. */
+.quick-action-card__meta {
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--ink-muted); font-size: .62rem; font-weight: 600; line-height: 1.2;
+}
+.quick-action-card__meta--error { color: var(--red); }
 @media (min-width: 1024px) {
   .quick-action-card { min-height: 7rem; }
   .quick-action-card:hover, .premium-card:hover { border-color: rgba(22, 163, 74, .38); transform: translateY(-2px); }
@@ -715,6 +767,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .sheet {
   position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 61;
   max-height: 85dvh; overflow-y: auto;
+  /* A sheet scrolls one way only.
+     
+     `overflow-y: auto` alone computes the other axis to `auto` too, so anything
+     inside that refused to wrap turned the whole panel into a sideways
+     scroller - and since this is an RTL app, the panel opened already scrolled
+     away from its own right edge: a scanned product with a long English name
+     ("Winners Protein Drink Cafe Latte — Winners") pushed the title, the gram
+     field and the save button off the screen, in a dialog with nowhere to
+     scroll back to. Clipped here, and made unable to happen in the rule
+     below. */
+  overflow-x: clip;
+  overscroll-behavior: contain;
   padding: var(--space-3) var(--space-5) max(var(--space-6), env(safe-area-inset-bottom));
   background: var(--surface);
   border-start-start-radius: var(--radius-xl);
@@ -728,6 +792,19 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   border-radius: 999px; background: var(--line-strong);
 }
 .sheet__title { color: var(--ink); font-size: 1.0625rem; font-weight: 800; margin-bottom: var(--space-3); }
+/* Grid and flex children default to min-content width, which is what let one
+   unbreakable product name set the width of the entire panel. Nothing in a
+   sheet is allowed to be wider than the sheet, and a long name breaks. */
+.sheet > *, .sheet > * > *, .sheet form > * { min-width: 0; max-width: 100%; }
+/* Brand names arrive from a barcode database and are not written to fit. */
+.sheet__product-name { overflow-wrap: anywhere; }
+/* A row of options in a sheet wraps onto a second line. The scrolling version is
+   right for a tab strip on a full page, where there is somewhere to swipe to;
+   inside a panel it just hides half the choices. */
+.sheet .chip-row { flex-wrap: wrap; overflow-x: visible; }
+.sheet p, .sheet h2, .sheet h3, .sheet label, .sheet strong, .sheet span {
+  overflow-wrap: anywhere;
+}
 .sheet__actions {
   position: sticky; inset-block-end: 0;
   display: grid; gap: var(--space-2); margin-top: var(--space-4);
@@ -841,6 +918,37 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   scrollbar-width: none;
 }
 .chip-row::-webkit-scrollbar { display: none; }
+
+/* The seven days of the nutrition screen, all seven on the screen.
+   
+   They were a scrolling chip row, so on a 375pt phone the oldest two days sat
+   past the left edge of a strip that gives no sign there is anything past it.
+   A week is a known, fixed number of things - it gets a column each and is
+   sized to the width it has, rather than to the width the labels would like. */
+.day-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: .3rem;
+}
+/* Seven of these have to sit inside a phone, so the chip is allowed to be
+   narrower than its own text and the text is sized against the viewport rather
+   than given a fixed point size. Two lines: weekday, then date. */
+.day-strip .chip {
+  flex: initial; min-width: 0; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .05rem; min-height: 3.1rem; padding-inline: .15rem;
+  font-size: clamp(.6rem, 2.9vw, .78rem); line-height: 1.15;
+}
+.day-strip__weekday { font-weight: 800; }
+/* Quieter than the weekday, and quieter still on the day that is already
+   green - white at full strength there would fight the label above it. */
+.day-strip__date { color: var(--ink-muted); font-size: .86em; font-weight: 600; }
+.day-strip .pill--green .day-strip__date,
+.day-strip .chip[aria-current="page"] .day-strip__date { color: rgba(255, 255, 255, .85); }
+@media (min-width: 480px) {
+  .day-strip { gap: .5rem; }
+  .day-strip .chip { padding-inline: .5rem; }
+}
 
 /* The client file's tab strip keeps its scrollbar, on purpose and against the
    convention above. Seven Hebrew labels do not fit in 375px, and a strip that

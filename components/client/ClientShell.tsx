@@ -6,8 +6,7 @@ import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
 import NativeBridge from "@/components/native/NativeBridge";
-import { DIRECT_MESSAGE_TYPE, getUnreadNotificationCount } from "@/lib/notifications/repository";
-import { getUnreadMessageCount } from "@/lib/messages/repository";
+import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
   { href: "/", label: "בית" },
@@ -20,26 +19,26 @@ const links = [
 ];
 
 export default async function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  // The bottom bar carries one badge, so it carries one figure: anything at all
-  // that is waiting for this client, notification or message.
+  // One inbox, one figure.
   //
-  // Counted once each. A message from the coach writes a message row AND a
-  // notification pointing at it, so adding the two counts every message twice -
-  // one unread message showed a badge of 2 beside a bell showing 1. The bell
-  // keeps counting notification-centre rows, which is what it opens; the badge
-  // counts things waiting, and takes messages from the message side only.
-  const [unreadNotifications, unreadOtherNotifications, unreadMessages] = await Promise.all([
-    getUnreadNotificationCount(),
-    getUnreadNotificationCount([DIRECT_MESSAGE_TYPE]),
-    getUnreadMessageCount(),
-  ]);
-  const unreadCount = unreadOtherNotifications + unreadMessages;
+  // The bar's badge used to sit on the profile tab and count notifications plus
+  // messages, while the bell counted notification-centre rows - two badges on
+  // one viewport, disagreeing, because a coach message writes both a message row
+  // and a notification pointing at it. The badge now rides the notifications tab
+  // and is handed the same count the bell shows, which is the count of the
+  // screen they both open. Messages are not lost from it: every one of them puts
+  // a row in the notification centre.
+  const unreadNotifications = await getUnreadNotificationCount();
+  const unreadCount = unreadNotifications;
   return (
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
         <Link href="/" className="start-wordmark" aria-label="START — מסך הבית">START</Link>
+        {/* No bell here. The bottom bar now has a notifications tab, and on a
+            phone that puts the same screen a thumb-width apart from a header
+            icon nobody reaches for - the bar tab is the one that gets pressed.
+            The desktop nav below keeps its bell: there is no bottom bar there. */}
         <div className="mobile-app-header__actions">
-          <NotificationBell unreadCount={unreadNotifications} />
           <Link href="/profile" className="avatar-button" aria-label="פתיחת הפרופיל">
             <UserRound aria-hidden="true" size={18} />
           </Link>

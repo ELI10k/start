@@ -201,12 +201,32 @@ test("a zero or negative quantity is dropped rather than printed", () => {
 
 // ─── ז-1, ז-2 the shape of the app ────────────────────────────────────────
 
-test("the bottom bar is five tabs, and notifications are not in two places", async () => {
+test("the bottom bar is five tabs, and nothing on it is reachable twice", async () => {
   const nav = await source("components/BottomNav.tsx");
+  const shell = await source("components/client/ClientShell.tsx");
+  const home = await source("app/page.tsx");
   const hrefs = [...nav.matchAll(/href: "([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(hrefs, ["/", "/nutrition", "/workouts", "/progress", "/profile"]);
-  // The bell in the header is the one place notifications live.
-  assert.doesNotMatch(nav, /"\/notifications"/);
+  assert.deepEqual(hrefs, ["/", "/nutrition", "/notifications", "/progress", "/profile"]);
+  // Training left the bar when the home screen gained a tile that opens it and
+  // names the next session, so the bar must not open it a second time.
+  assert.doesNotMatch(nav, /"\/workouts"/);
+  // ...and notifications took the slot, so the phone header gives up its bell.
+  // Exactly one of the two navigations renders at a time, so the desktop bar -
+  // which has no bottom tabs - keeps it.
+  const phoneHeader = shell.match(/<header className="mobile-app-header">[\s\S]*?<\/header>/)?.[0] ?? "";
+  assert.ok(phoneHeader, "the phone header is gone");
+  assert.doesNotMatch(phoneHeader, /NotificationBell/);
+  assert.match(shell, /desktop-app-nav__actions[\s\S]*NotificationBell/);
+  // Everything the bar dropped still has a way in from the first screen.
+  for (const href of ["/nutrition", "/content", "/check-in"]) {
+    assert.match(home, new RegExp(`href="${href}"`), `${href} lost its tile`);
+  }
+  // Training's tile is a client component - the next session's name is held by
+  // the workout provider, not by the request that renders this page.
+  assert.match(home, /<DashboardWorkoutWidget \/>/);
+  const trainingTile = await source("components/workouts/client/DashboardWorkoutWidget.tsx");
+  assert.match(trainingTile, /"\/workouts"/);
+  assert.match(trainingTile, /className="quick-action-card"/);
 });
 
 test("the pre-Supabase client screens are gone, mock data and all", async () => {

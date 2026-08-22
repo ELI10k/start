@@ -1,16 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CalendarCheck, ClipboardCheck, Dumbbell, Lightbulb, UtensilsCrossed } from "lucide-react";
+import { BookOpen, CalendarCheck, ClipboardCheck, Dumbbell, UtensilsCrossed } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
-import { MetricTile, PremiumCard } from "@/components/client/PremiumUI";
+import { MetricTile } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
 import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
-import { buildDailyCoachMessage } from "@/lib/coach-intelligence/proactive-coach";
-import DailyCoachCard from "@/components/client/DailyCoachCard";
 import { israelDateKey } from "@/lib/date-time";
-import { addTotals, eatenFromMenu, isMealAnswered, isMealEaten } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 
@@ -39,128 +37,82 @@ export default async function Home() {
   // tile used to read `meal.items`, which is every row the coach wrote at the
   // coach's portion, so it ignored "I only ate half" and every scanned item.
   const totals = addTotals(eatenFromMenu(meals), sumLoggedFood(logged));
-  // Still waiting for an answer of any kind. A meal marked "not eaten" or "ate
-  // something else" has been answered, and counting it as "left to mark" keeps
-  // asking a question the client already answered - the nutrition screen stopped
-  // doing that; this screen was still doing it.
-  const answered = meals.filter(isMealAnswered);
-  const remainingMeals = Math.max(0, meals.length - answered.length);
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
-  const proteinTarget = data.menu?.proteinTarget ?? data.clientProfile.protein_target ?? null;
-  const dayPercent = meals.length ? Math.round((answered.length / meals.length) * 100) : 0;
-  // The tile beside this one spells its pair out - "3 מתוך 5" - and this one did
-  // not: it printed eaten/remaining as a bare "800/1200", which every reader
-  // takes for eaten-out-of-target. The target here was 2000. Same wording as its
-  // neighbour now, against the target, with what is left said underneath in
-  // words rather than implied by a slash.
   const plannedWorkouts = data.workouts.planned;
   const completedWorkouts = data.workouts.completed;
   const eatenCalories = Math.round(totals.calories);
   const remainingCalories = calorieTarget ? Math.max(0, Math.round(calorieTarget - totals.calories)) : 0;
-  const dailyCoachMessage = buildDailyCoachMessage({
-    mealsCompleted: completed.length,
-    mealsPlanned: meals.length,
-    calories: totals.calories,
-    calorieTarget: calorieTarget ?? undefined,
-    protein: totals.protein,
-    proteinTarget: proteinTarget ?? undefined,
-  });
 
   return (
-    <ClientShell>
-      <header className="dashboard-greeting">
-        <p>שלום, {auth.fullName.split(" ")[0]}</p>
-        <h1>מה חשוב לך היום</h1>
-      </header>
+    <ClientShell className="client-app-shell--home">
+      {/* Three numbers and four destinations, and they have to land inside one
+          phone viewport with nothing under the fold.
+          
+          What used to sit here - the greeting, the daily-tip card, the "היום
+          שלך" bar, the next-workout card and the active-menu card - was five
+          more blocks saying things these seven tiles already say, or say one tap
+          later. The two that carried real information now say it from inside the
+          tile the client was going to press anyway: the workout tile names the
+          next training day, the menu tile names the active plan. Nothing was
+          dropped, it was folded. */}
+      <div className="home-screen">
+        {/* The screen has no visible title any more - the tiles are the
+            headline - but it still needs one to be announced by, and to be
+            landed on when the back button returns here. */}
+        <h1 className="sr-only">מה חשוב לך היום</h1>
 
-      <DailyCoachCard message={dailyCoachMessage}/>
+        {/* Only ever renders in the days after the coach releases one, which is
+            also the only time this screen is allowed to grow past the fold. */}
+        <WeeklySummaryCard summary={latestSummary} />
 
-      <WeeklySummaryCard summary={latestSummary}/>
-
-      {meals.length ? (
-        <section className="daily-progress-card" aria-labelledby="daily-progress">
-          <div className="daily-progress-card__copy">
-            <h2 id="daily-progress">היום שלך</h2>
-            <p>
-              {remainingMeals
-                ? `נשארו ${remainingMeals} ארוחות לסמן`
-                : "סגרת את כל משימות התזונה להיום"}
-            </p>
-          </div>
-          <div className="premium-progress" role="img" aria-label={`${dayPercent} אחוז מהיום הושלם`}>
-            <div className="premium-progress__meta">
-              <span>{dayPercent}%</span>
-              <span>
-                {answered.length}/{meals.length}
-              </span>
-            </div>
-            <div className="premium-progress__track">
-              <span style={{ width: `${dayPercent}%` }} />
-            </div>
-          </div>
+        <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
+          <MetricTile
+            label="ארוחות היום"
+            value={`${completed.length} מתוך ${meals.length}`}
+            icon={<CalendarCheck aria-hidden="true" size={18} />}
+          />
+          <MetricTile
+            label="אימונים השבוע"
+            value={`${completedWorkouts} מתוך ${plannedWorkouts}`}
+            accent="green"
+            icon={<Dumbbell aria-hidden="true" size={18} />}
+          />
+          {/* What is left goes on its own line. It used to be appended to the
+              label - "קלוריות · נותרו 2000" - which is wider than a third of a
+              phone, so the tile clipped it to "קלוריות · נותרו 0…" and a client
+              with 2000 calories still to eat read that as none left. */}
+          <MetricTile
+            label="קלוריות"
+            value={calorieTarget ? `${eatenCalories} מתוך ${calorieTarget}` : `${eatenCalories}`}
+            detail={calorieTarget ? `נותרו ${remainingCalories}` : undefined}
+            accent="neutral"
+            icon={<UtensilsCrossed aria-hidden="true" size={18} />}
+          />
         </section>
-      ) : null}
 
-      {/* Three numbers, and only three: what is left to eat today, how the
-          training week stands, and where the calories are. Protein and the last
-          weigh-in live on their own screens - they were noise here. */}
-      <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
-        <MetricTile
-          label="ארוחות היום"
-          value={`${completed.length} מתוך ${meals.length}`}
-          icon={<CalendarCheck aria-hidden="true" size={18} />}
-        />
-        <MetricTile
-          label="אימונים השבוע"
-          value={`${completedWorkouts} מתוך ${plannedWorkouts}`}
-          accent="green"
-          icon={<Dumbbell aria-hidden="true" size={18} />}
-        />
-        <MetricTile
-          label={calorieTarget ? `קלוריות · נותרו ${remainingCalories}` : "קלוריות"}
-          value={calorieTarget ? `${eatenCalories} מתוך ${calorieTarget}` : `${eatenCalories}`}
-          accent="neutral"
-          icon={<UtensilsCrossed aria-hidden="true" size={18} />}
-        />
-      </section>
-
-      <h2 className="section-heading section-heading--compact">פעולות מהירות</h2>
-      <nav className="quick-actions-grid" aria-label="פעולות מהירות">
-        <Link href="/nutrition" className="quick-action-card">
-          <UtensilsCrossed aria-hidden="true" size={20} />
-          <span>התפריט שלי</span>
-        </Link>
-        <Link href="/workouts" className="quick-action-card">
-          <Dumbbell aria-hidden="true" size={20} />
-          <span>אימון</span>
-        </Link>
-        <a href="#daily-coach" className="quick-action-card">
-          <Lightbulb aria-hidden="true" size={20} />
-          <span>טיפ יומי</span>
-        </a>
-        <Link href="/check-in" className="quick-action-card">
-          <ClipboardCheck aria-hidden="true" size={20} />
-          <span>צ׳ק אין שבועי</span>
-        </Link>
-      </nav>
-
-      <DashboardWorkoutWidget />
-
-      <PremiumCard className="dashboard-section">
-        <h2 className="section-heading section-heading--compact">התפריט הפעיל</h2>
-        {data.menu ? (
-          <>
-            <p className="premium-card__description">{data.menu.title}</p>
-            <Link href="/nutrition" className="premium-primary-button premium-card__link">
-              לארוחות היום
-            </Link>
-          </>
-        ) : (
-          <p className="premium-card__description">
-            המאמן עדיין לא שייך תפריט פעיל. הוא יופיע כאן מיד כשהוא מוכן.
-          </p>
-        )}
-      </PremiumCard>
+        <nav className="quick-actions-grid" aria-label="פעולות מהירות">
+          <Link href="/nutrition" className="quick-action-card">
+            <span className="quick-action-card__icon"><UtensilsCrossed aria-hidden="true" size={20} /></span>
+            <span className="quick-action-card__label">התפריט שלי</span>
+            <span className="quick-action-card__meta">{data.menu?.title ?? "אין תפריט פעיל"}</span>
+          </Link>
+          {/* The only tile that has to be a client component: which day comes
+              next is held by the workout provider, not by this request. */}
+          <DashboardWorkoutWidget />
+          {/* The daily tip is a lesson in the library, so the tile opens the
+              library rather than a generated card that lived on this screen. */}
+          <Link href="/content" className="quick-action-card">
+            <span className="quick-action-card__icon"><BookOpen aria-hidden="true" size={20} /></span>
+            <span className="quick-action-card__label">טיפ יומי</span>
+            <span className="quick-action-card__meta">ספריית התוכן</span>
+          </Link>
+          <Link href="/check-in" className="quick-action-card">
+            <span className="quick-action-card__icon"><ClipboardCheck aria-hidden="true" size={20} /></span>
+            <span className="quick-action-card__label">צ׳ק אין</span>
+            <span className="quick-action-card__meta">דיווח שבועי</span>
+          </Link>
+        </nav>
+      </div>
     </ClientShell>
   );
 }

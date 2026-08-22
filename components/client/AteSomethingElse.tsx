@@ -142,7 +142,7 @@ export default function AteSomethingElse({
           <>
             <input type="hidden" name="name" value={found.brand ? `${found.name} — ${found.brand}` : found.name} />
             <input type="hidden" name="unit" value="גרם" />
-            <p className="font-bold">{found.name}{found.brand ? ` — ${found.brand}` : ""}</p>
+            <p className="sheet__product-name font-bold">{found.name}{found.brand ? ` — ${found.brand}` : ""}</p>
             {/* The common answers first, typing second. A barcode identifies a
                 package, and "the whole thing" is what happened to it most of the
                 time - so asking for a number in grams before offering that is
