@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
-import { WEEKDAY_LABELS } from "@/lib/nutrition/menu-days";
+import { dayLabel } from "@/lib/nutrition/menu-days";
 import {
   getAuthContext,
   getCoachMenu,
@@ -47,7 +47,10 @@ export default async function MenuPreviewPage({
   const requested = Number(query.day);
   const activeDay = Number.isInteger(requested) && available.includes(requested) ? requested : served;
   const meals = days.find((day) => day.day_index === activeDay)?.meals ?? [];
-  const dayName = (index: number) => index === 0 ? "ברירת מחדל" : `יום ${WEEKDAY_LABELS[index] ?? index}`;
+  // Second copy of the days of the week, deleted: the preview and the builder
+  // disagreeing about what day 0 is called is exactly how a coach concluded
+  // Sunday was missing from the app.
+  const dayName = dayLabel;
   return (
     <main className="px-4 py-8 text-[#0B0B0B] sm:px-6">
       <div className="mx-auto max-w-3xl">

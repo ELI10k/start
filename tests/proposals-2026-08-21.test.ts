@@ -195,7 +195,10 @@ test("the menu preview shows one day, and says which", async () => {
   // One list of weekdays, shared with the builder.
   assert.match(days, /export const WEEKDAY_LABELS/);
   assert.equal(WEEKDAY_LABELS.length, 7);
-  assert.equal(dayLabel(0), "ברירת מחדל");
+  // Day 0 names both jobs it does. It read "ברירת מחדל" alone, and the chip row
+  // that offers days to add skips it because it always exists - so a coach
+  // looking for ראשון found שני through שבת and concluded Sunday was missing.
+  assert.equal(dayLabel(0), "יום ראשון · ברירת מחדל");
   // Sunday is 0, so index 2 is Tuesday - the same indexing israelWeekday and
   // day_index use, which is the whole reason this list has one home.
   assert.equal(dayLabel(1), "יום שני");
