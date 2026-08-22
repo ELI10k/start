@@ -1766,11 +1766,15 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
-.menu-dock__total[data-state="short"] small { color: var(--red); }
+/* Room left is green and an overshoot is red - the coach's question, not the
+   sign of the subtraction. Red on "נותר" painted every half-built menu as an
+   error and left the one real error, going over, in green. */
+.menu-dock__total[data-state="short"] small,
 .menu-dock__total[data-state="met"] small { color: var(--green); }
-/* Short of the target, or on it. The whole question this bar answers. */
-.menu-dock__total[data-state="short"] dd { color: var(--red); }
+.menu-dock__total[data-state="over"] small { color: var(--red); }
+.menu-dock__total[data-state="short"] dd,
 .menu-dock__total[data-state="met"] dd { color: var(--green); }
+.menu-dock__total[data-state="over"] dd { color: var(--red); }
 
 .menu-dock__actions { display: flex; align-items: center; gap: .6rem; }
 

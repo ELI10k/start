@@ -915,11 +915,17 @@ function DockTotal({label,value,target}:{label:string;value:number;target?:numbe
   const rounded=Math.round(value);
   const goal=Math.round(target??0);
   const gap=goal-rounded;
-  const short=hasTarget&&gap>0;
-  return <div className="menu-dock__total" data-state={hasTarget?(short?"short":"met"):undefined}>
+  // Three states, and the colours follow the coach's question rather than the
+  // arithmetic's sign. Room left on a target is not a problem - it is a menu
+  // still being written - so it is green. Going past the target is the only one
+  // of the three that has to be fixed before this menu reaches anybody, so red
+  // belongs to it alone. It used to be the other way round, which painted every
+  // half-built menu red and an overshoot green.
+  const state=!hasTarget?undefined:gap>0?"short":gap===0?"met":"over";
+  return <div className="menu-dock__total" data-state={state}>
     <dt>{label}</dt>
     <dd>{rounded}{hasTarget?<span>/{goal}</span>:null}</dd>
-    {hasTarget?<small>{short?`נשאר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
+    {hasTarget?<small>{gap>0?`נותר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
   </div>;
 }
 

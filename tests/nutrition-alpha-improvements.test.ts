@@ -81,9 +81,13 @@ test("menu editor preserves manual targets until explicit recalculation",()=>{
   // same rule - and now also how much is still missing.
   for(const label of ["קלוריות","חלבון","פחמימות","שומן"])
     assert.match(source,new RegExp(`<DockTotal label="${label}"`));
-  assert.match(source,/נשאר \$\{gap\}/);
+  // Room left is green and an overshoot is red - the coach's question, not the
+  // sign of the subtraction. The old pairing painted every half-built menu red
+  // and left the one real error, going over target, in green.
+  assert.match(source,/נותר \$\{gap\}/);
+  assert.match(source,/gap>0\?"short":gap===0\?"met":"over"/);
   // Short of the target reads red, target met reads green.
-  assert.match(source,/data-state=\{hasTarget\?\(short\?"short":"met"\):undefined\}/);
+  assert.match(source,/data-state=\{state\}/);
 });
 
 test("duplicated plans start in automatic macro mode",()=>{
