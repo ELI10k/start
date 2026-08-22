@@ -6,13 +6,15 @@
 export const WEEKDAY_LABELS = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"] as const;
 
 /**
- * Day 0 is Sunday and it is also the fallback, and the label has to say both.
+ * Every day is named after the day it is. Sunday included.
  *
- * It read "ברירת מחדל" alone, and the chip row that offers days to add skips it
- * because it always exists - so a coach looking for ראשון found שני through שבת
- * and concluded Sunday was missing. It was never missing: israelWeekday returns
- * 0 on a Sunday and the reader serves day 0, so the default day IS the Sunday
- * menu, and is also what gets served on any day the coach did not write.
+ * Day 0 used to be labelled "ברירת מחדל", which is not a day of the week - so a
+ * coach looking for ראשון found שני through שבת and concluded the app had no
+ * Sunday. Being the fallback is not a different kind of day, it is what happens
+ * to whichever day is lowest: getActiveClientMenu serves the exact weekday when
+ * the coach wrote one and the lowest day present otherwise, so a menu with only
+ * Sunday in it is served every day of the week, and a menu that gains Tuesday
+ * keeps serving Sunday's on the other six. That rule is stated where the days
+ * are added rather than smuggled into the name of one of them.
  */
-export const dayLabel = (dayIndex: number) =>
-  dayIndex === 0 ? "יום ראשון · ברירת מחדל" : `יום ${WEEKDAY_LABELS[dayIndex] ?? dayIndex}`;
+export const dayLabel = (dayIndex: number) => `יום ${WEEKDAY_LABELS[dayIndex] ?? dayIndex}`;

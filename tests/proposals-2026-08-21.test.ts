@@ -195,10 +195,12 @@ test("the menu preview shows one day, and says which", async () => {
   // One list of weekdays, shared with the builder.
   assert.match(days, /export const WEEKDAY_LABELS/);
   assert.equal(WEEKDAY_LABELS.length, 7);
-  // Day 0 names both jobs it does. It read "ברירת מחדל" alone, and the chip row
-  // that offers days to add skips it because it always exists - so a coach
-  // looking for ראשון found שני through שבת and concluded Sunday was missing.
-  assert.equal(dayLabel(0), "יום ראשון · ברירת מחדל");
+  // Every day is named after the day it is. Day 0 read "ברירת מחדל" - not a day
+  // of the week - so a coach looking for ראשון found שני through שבת and
+  // concluded the app had no Sunday. Being the fallback is not a kind of day; it
+  // is what happens to whichever day is lowest, and that rule is stated where
+  // days are added instead of hidden in the name of one of them.
+  assert.equal(dayLabel(0), "יום ראשון");
   // Sunday is 0, so index 2 is Tuesday - the same indexing israelWeekday and
   // day_index use, which is the whole reason this list has one home.
   assert.equal(dayLabel(1), "יום שני");

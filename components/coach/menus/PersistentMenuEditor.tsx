@@ -690,13 +690,13 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
             </span>)}
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {WEEKDAY_LABELS.map((label,dayIndex)=>dayIndex===0||menu.days.some(day=>day.dayIndex===dayIndex)?null:
+          {WEEKDAY_LABELS.map((label,dayIndex)=>menu.days.some(day=>day.dayIndex===dayIndex)?null:
             <button key={label} type="button" onClick={()=>addDay(dayIndex)} className="chip"><Plus aria-hidden="true" size={14}/>{label}</button>)}
         </div>
         <p className="mt-2 text-xs text-[#5B5F5B]">
           {menu.days.length>1
-            ?`נערך כעת: ${dayLabel(activeDay)}. כל יום שלא הוגדר בנפרד מקבל את תפריט ברירת המחדל.`
-            :"התפריט הזה חל על כל ימות השבוע. הוספת יום נותנת ליום מסוים תפריט משלו - למשל יום אימון מול יום מנוחה."}
+            ?`נערך כעת: ${dayLabel(activeDay)}. כל יום שלא הוגדר בנפרד מקבל את התפריט של ${dayLabel(Math.min(...menu.days.map(day=>day.dayIndex)))}.`
+            :`התפריט הזה מוגש בכל ימות השבוע, כל עוד לא הוגדר יום נפרד. הוספת יום נותנת ליום מסוים תפריט משלו - למשל יום אימון מול יום מנוחה.`}
         </p>
       </section>
 
