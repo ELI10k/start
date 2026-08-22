@@ -21,8 +21,8 @@ export default function DashboardWorkoutWidget() {
       href={active ? `/workouts/${active.programId}/${active.dayId}` : "/workouts"}
       className="quick-action-card"
     >
-      <span className="quick-action-card__icon"><Dumbbell aria-hidden="true" size={20} /></span>
-      <span className="quick-action-card__label">אימון</span>
+      <span className="quick-action-card__icon"><Dumbbell aria-hidden="true" size={22} /></span>
+      <span className="quick-action-card__label">תוכנית אימון</span>
       {loading ? (
         <span role="status" className="quick-action-card__meta">טוען…</span>
       ) : persistenceError ? (

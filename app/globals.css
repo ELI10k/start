@@ -634,7 +634,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .home-screen .premium-card { margin-bottom: 0; }
 .home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
-.home-screen .quick-action-card { min-height: clamp(6rem, 17vh, 9.5rem); }
+/* Two rows of them now, so each is measured against half of what one row had.
+   The screen still has to end above the fold with a lesson under it. */
+.home-screen .quick-action-card { min-height: clamp(4.9rem, 11.5vh, 7rem); }
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
    seven tiles down a 1440px window looks like an error. */
 @media (min-width: 768px) {
@@ -643,7 +645,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .quick-action-card { min-height: 7rem; }
 }
 
-.quick-actions-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; }
+/* Two across, not four. Four left each tile about 80px - a label's width and
+   no more - so the subtitle naming the active plan or the next training day
+   arrived truncated, which is the half of the tile that was worth adding. */
+.quick-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 5.75rem;
   align-items: center; justify-content: center; flex-direction: column; gap: .35rem;
@@ -656,17 +661,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .quick-action-card > svg { color: var(--green); }
 .quick-action-card__icon,
 .quick-action-card > span:first-child:has(svg) {
-  display: grid; width: 2.35rem; height: 2.35rem; place-items: center;
+  display: grid; width: 2.6rem; height: 2.6rem; place-items: center;
   border-radius: .75rem; background: var(--green-tint); color: var(--green);
 }
-.quick-action-card__label { font-size: .76rem; font-weight: 800; line-height: 1.2; }
+.quick-action-card__label { font-size: .88rem; font-weight: 800; line-height: 1.2; }
 /* The line that absorbed the cards this screen no longer has room for - the
    active plan's name, the next training day. One line, clipped: a coach who
    names a menu "תפריט העלאת מסה - שלב ב׳" must not be able to change how tall
    this row is, because the row has to end above the fold. */
 .quick-action-card__meta {
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink-muted); font-size: .62rem; font-weight: 600; line-height: 1.2;
+  color: var(--ink-muted); font-size: .72rem; font-weight: 600; line-height: 1.2;
 }
 .quick-action-card__meta--error { color: var(--red); }
 @media (min-width: 1024px) {

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, CalendarCheck, ClipboardCheck, Dumbbell, UtensilsCrossed } from "lucide-react";
+import { CalendarCheck, ClipboardCheck, Dumbbell, LineChart, UtensilsCrossed } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
@@ -101,26 +101,35 @@ export default async function Home() {
           />
         </section>
 
+        {/* Four tiles, two across, each twice the size it was.
+            
+            At four across they were about 80px wide - room for a label and
+            nothing else, which is why the subtitle that names the active plan
+            was arriving as "בדיקת יחידות 9…". Two across gives each tile a full
+            line to say what is inside it, which is most of what a tile on this
+            screen is for.
+            
+            The daily tip left. It opened the content library, and the library
+            now has a lesson of its own further down this screen - a tile and a
+            row, one under the other, leading to the same place. */}
         <nav className="quick-actions-grid" aria-label="פעולות מהירות">
           <Link href="/nutrition" className="quick-action-card">
-            <span className="quick-action-card__icon"><UtensilsCrossed aria-hidden="true" size={20} /></span>
+            <span className="quick-action-card__icon"><UtensilsCrossed aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">התפריט שלי</span>
             <span className="quick-action-card__meta">{data.menu?.title ?? "אין תפריט פעיל"}</span>
           </Link>
           {/* The only tile that has to be a client component: which day comes
               next is held by the workout provider, not by this request. */}
           <DashboardWorkoutWidget />
-          {/* The daily tip is a lesson in the library, so the tile opens the
-              library rather than a generated card that lived on this screen. */}
-          <Link href="/content" className="quick-action-card">
-            <span className="quick-action-card__icon"><BookOpen aria-hidden="true" size={20} /></span>
-            <span className="quick-action-card__label">טיפ יומי</span>
-            <span className="quick-action-card__meta">ספריית התוכן</span>
-          </Link>
           <Link href="/check-in" className="quick-action-card">
-            <span className="quick-action-card__icon"><ClipboardCheck aria-hidden="true" size={20} /></span>
+            <span className="quick-action-card__icon"><ClipboardCheck aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">צ׳ק אין</span>
             <span className="quick-action-card__meta">דיווח שבועי</span>
+          </Link>
+          <Link href="/progress" className="quick-action-card">
+            <span className="quick-action-card__icon"><LineChart aria-hidden="true" size={22} /></span>
+            <span className="quick-action-card__label">התקדמות</span>
+            <span className="quick-action-card__meta">משקל ומדידות</span>
           </Link>
         </nav>
 

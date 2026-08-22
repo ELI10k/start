@@ -237,9 +237,14 @@ test("the bottom bar is five tabs, and nothing on it is reachable twice", async 
   assert.doesNotMatch(phoneHeader, /NotificationBell/);
   assert.match(shell, /desktop-app-nav__actions[\s\S]*NotificationBell/);
   // Everything the bar dropped still has a way in from the first screen.
-  for (const href of ["/nutrition", "/content", "/check-in"]) {
+  for (const href of ["/nutrition", "/check-in"]) {
     assert.match(home, new RegExp(`href="${href}"`), `${href} lost its tile`);
   }
+  // The content library gave up its tile when the tiles went two-across - the
+  // weekly lesson beneath them leads into the same library - so the index has to
+  // still be reachable, and it is, from the profile tab.
+  const profile = await source("app/profile/page.tsx");
+  assert.match(profile, /href="\/content"/);
   // Training's tile is a client component - the next session's name is held by
   // the workout provider, not by the request that renders this page.
   assert.match(home, /<DashboardWorkoutWidget \/>/);
