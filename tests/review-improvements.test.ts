@@ -201,15 +201,16 @@ test("a zero or negative quantity is dropped rather than printed", () => {
 
 // ─── ז-1, ז-2 the shape of the app ────────────────────────────────────────
 
-test("the bottom bar is five tabs, and nothing on it is reachable twice", async () => {
+test("the bottom bar is four tabs, and nothing on it is reachable twice", async () => {
   const nav = await source("components/BottomNav.tsx");
   const shell = await source("components/client/ClientShell.tsx");
   const home = await source("app/page.tsx");
   const hrefs = [...nav.matchAll(/href: "([^"]+)"/g)].map((match) => match[1]);
-  assert.deepEqual(hrefs, ["/", "/nutrition", "/notifications", "/progress", "/profile"]);
-  // Training left the bar when the home screen gained a tile that opens it and
-  // names the next session, so the bar must not open it a second time.
+  assert.deepEqual(hrefs, ["/", "/notifications", "/progress", "/profile"]);
+  // Training and nutrition left the bar as the home screen gained tiles that
+  // open them and name what is inside, so the bar must not open either again.
   assert.doesNotMatch(nav, /"\/workouts"/);
+  assert.doesNotMatch(nav, /"\/nutrition"/);
   // ...and notifications took the slot, so the phone header gives up its bell.
   // Exactly one of the two navigations renders at a time, so the desktop bar -
   // which has no bottom tabs - keeps it.

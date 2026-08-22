@@ -1,19 +1,18 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Home, LineChart, Salad, UserRound } from "lucide-react";
+import { Bell, Home, LineChart, UserRound } from "lucide-react";
 
-// Five, not seven. Seven targets across a phone leaves each about 50px, which is
-// under the size a thumb can hit reliably.
+// Four, and every one of them is somewhere the home screen does not already go.
 //
-// Training left this bar rather than gaining a second entrance: the home screen
-// opens it from a tile that also names the next training day, so keeping a tab
-// for it made the same destination reachable twice from one viewport. What took
-// the slot is what had no thumb-sized target at all - the coach's notifications,
-// which until now were only the bell in the header.
+// The bar and the home screen are one viewport apart, so a destination in both
+// is a destination twice - and the tile always wins, because it is bigger and it
+// carries a subtitle the tab cannot. Training left first, then nutrition, each
+// as its tile took over. What is left is the four the tiles do not cover, which
+// also buys every tab back the width a thumb needs: seven targets across a phone
+// leave about 50px each, four leave nearly 100.
 const items = [
   { href: "/", label: "בית", icon: Home },
-  { href: "/nutrition", label: "תזונה", icon: Salad },
   { href: "/notifications", label: "התראות", icon: Bell },
   { href: "/progress", label: "התקדמות", icon: LineChart },
   { href: "/profile", label: "פרופיל", icon: UserRound },

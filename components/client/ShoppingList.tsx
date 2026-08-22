@@ -8,7 +8,15 @@ import { buildShoppingList, shoppingListText, type ShoppingSource } from "@/lib/
 // The menu already lists every food and every quantity. Turning that into a
 // shopping list is presentation, not a new engine - and it is the one thing a
 // client has to do outside the app for the plan to be followable at all.
-export default function ShoppingList({ items, title }: { items: readonly ShoppingSource[]; title: string }) {
+export default function ShoppingList({
+  items,
+  title,
+  // The nutrition screen has to fit a phone, and a full-width button for a job
+  // done once a week was taking the room the meals needed. `compact` is the same
+  // button as an icon in that screen's tool row; the sheet behind it is
+  // untouched, and the label it drops is still its accessible name.
+  compact = false,
+}: { items: readonly ShoppingSource[]; title: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
@@ -39,9 +47,14 @@ export default function ShoppingList({ items, title }: { items: readonly Shoppin
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="premium-secondary-button w-full">
-        <ShoppingBasket aria-hidden="true" size={17} />
-        רשימת קניות מהתפריט
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={compact ? "רשימת קניות מהתפריט" : undefined}
+        className={compact ? "icon-button" : "premium-secondary-button w-full"}
+      >
+        <ShoppingBasket aria-hidden="true" size={compact ? 19 : 17} />
+        {compact ? null : "רשימת קניות מהתפריט"}
       </button>
 
       <BottomSheet open={open} title="רשימת קניות" onClose={() => setOpen(false)}>

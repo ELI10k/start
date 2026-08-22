@@ -1,7 +1,5 @@
 import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
-import PageHeader from "@/components/client/PageHeader";
-import BarcodeScanner from "@/components/client/BarcodeScanner";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
 import { selectMealGroupAlternative } from "@/app/actions/product";
@@ -103,62 +101,47 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
 
   return (
     <ClientShell>
-      <PageHeader
-        eyebrow="התזונה שלי"
-        title={isToday ? "הארוחות של היום" : `הארוחות של ${formatIsraelDate(`${today}T12:00:00Z`, { weekday: "long", day: "numeric", month: "long" })}`}
-        description={menu?.title ?? "התפריט האישי שלך"}
-      />
+      {/* No page header. "התזונה שלי / הארוחות של היום / <שם התפריט>" was three
+          lines and about 140px saying what the day strip below it, the bottom
+          bar behind it and the tile that opened it all already say. The heading
+          stays for anyone listening rather than looking. */}
+      <h1 className="sr-only">
+        {isToday ? "הארוחות של היום" : `הארוחות של ${formatIsraelDate(`${today}T12:00:00Z`, { weekday: "long", day: "numeric", month: "long" })}`}
+      </h1>
       <NutritionDayStrip days={days} active={today} today={now} />
-      {/* The screen already works out which meal is due and gives it an anchor -
-          nothing ever linked to it, so a client at 19:00 still scrolled past five
-          meals to reach dinner. One link, only while there is something to jump
-          to: once the current meal is marked, the anchor is gone and so is this. */}
-      {/* How many groups are still waiting for a choice today. The button only
-          appears while that number is above zero. */}
-      {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
-      {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
-        ? <a href="#current-meal" className="chip mb-3 inline-flex">לארוחה של עכשיו · {currentMealTitle}</a>
-        : null}
-      <div className="mb-4 grid gap-2 sm:grid-cols-2">
-        <BarcodeScanner date={today}/>
-        {menu ? <ShoppingList
-          title={menu.title}
-          items={menu.meals.flatMap((meal)=>meal.groups.flatMap((group)=>group.items.map((item)=>({
-            name:item.name,displayQuantity:Number(item.displayQuantity),measurementUnit:item.measurementUnit,itemRole:item.itemRole,
-          }))))}
-        /> : null}
+      {/* One row of tools, not three stacked ones.
+          
+          The jump-to-current-meal link, the repeat-yesterday button and the
+          shopping list each had a line of their own, which is about 200px of a
+          screen whose job is to show meals. They are all the same kind of thing
+          - a shortcut off this screen - so they share a line and wrap only if
+          they have to.
+          
+          The barcode scanner is not among them any more. The same scanner is a
+          tab inside every meal's "אכלתי משהו אחר" sheet, so the card here was a
+          second door to one room, charging 90px for it. */}
+      <div className="nutrition-toolbar">
+        {menu ? (
+          <ShoppingList
+            compact
+            title={menu.title}
+            items={menu.meals.flatMap((meal)=>meal.groups.flatMap((group)=>group.items.map((item)=>({
+              name:item.name,displayQuantity:Number(item.displayQuantity),measurementUnit:item.measurementUnit,itemRole:item.itemRole,
+            }))))}
+          />
+        ) : null}
+        {/* Only while there is something to jump to: once the current meal is
+            marked, the anchor is gone and so is this. */}
+        {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
+          ? <a href="#current-meal" className="chip">לארוחה של עכשיו · {currentMealTitle}</a>
+          : null}
+        {/* How many groups are still waiting for a choice today. Appears only
+            while that number is above zero. */}
+        {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
       </div>
+
       {freeMenu ? <FreeMenu date={today} day={freeMenu} foods={foods}/> : menu ? (
         <div className="space-y-4">
-          {menuTotals ? (
-            <section
-              aria-labelledby="daily-macro-summary"
-              className="start-surface rounded-[24px] p-5 sm:p-6"
-            >
-              <h2 id="daily-macro-summary" className="text-lg font-black">
-                מה נאכל היום
-              </h2>
-              <p className="mt-1 text-xs text-[#5B5F5B]">
-                {anyChoiceMade
-                  ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו — מה שנשאר בתפריט להיום."
-                  : "עדיין לא סומנה אף ארוחה. המספרים יתמלאו ככל שתסמנו."}
-                {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שסרקת.` : ""}
-                {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
-              </p>
-              {/* No targets here. A target is the coach's instrument, and a menu
-                  does not always land on the protein or the carbohydrate figure
-                  on purpose - the coach trades them off knowingly. Printing the
-                  gap to a client turns every deliberate decision into a number
-                  they appear to have missed. The coach still sees both sides,
-                  in the builder and on the client file. */}
-              <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} unit="קל׳" />
-                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} unit="גרם" />
-                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} unit="גרם" />
-                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} unit="גרם" />
-              </dl>
-            </section>
-          ) : null}
           {menu.meals.map((meal) => {
             // The database refuses to mark a meal eaten until every group has a
             // chosen alternative. That rule was only discoverable by pressing the
@@ -252,6 +235,41 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               </div>
             </details>
           );})}
+          {/* What the day adds up to, under the day rather than over it.
+              
+              This sat above the first meal, so the screen opened on four macro
+              figures and the meals began below the fold - and the figures are a
+              summary of what is underneath them, which is not something to read
+              first. Nothing about it changed but where it is. */}
+          {menuTotals ? (
+            <section
+              aria-labelledby="daily-macro-summary"
+              className="start-surface rounded-[24px] p-5 sm:p-6"
+            >
+              <h2 id="daily-macro-summary" className="text-lg font-black">
+                מה נאכל היום
+              </h2>
+              <p className="mt-1 text-xs text-[#5B5F5B]">
+                {anyChoiceMade
+                  ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו — מה שנשאר בתפריט להיום."
+                  : "עדיין לא סומנה אף ארוחה. המספרים יתמלאו ככל שתסמנו."}
+                {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שסרקת.` : ""}
+                {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
+              </p>
+              {/* No targets here. A target is the coach's instrument, and a menu
+                  does not always land on the protein or the carbohydrate figure
+                  on purpose - the coach trades them off knowingly. Printing the
+                  gap to a client turns every deliberate decision into a number
+                  they appear to have missed. The coach still sees both sides,
+                  in the builder and on the client file. */}
+              <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} unit="קל׳" />
+                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} unit="גרם" />
+                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} unit="גרם" />
+                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} unit="גרם" />
+              </dl>
+            </section>
+          ) : null}
         </div>
       ) : (
         <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">

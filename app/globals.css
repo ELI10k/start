@@ -972,6 +972,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   background: var(--green); border-color: var(--green); color: #FFFFFF;
 }
 
+/* The nutrition screen's tool row: page-level actions that are not meal
+   actions, as icons on one line. It sits beside the day strip rather than under
+   it, so a job done once a week costs a corner instead of a full-width row. */
+.nutrition-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+  margin-block: -.25rem .75rem;
+}
+.nutrition-toolbar:empty { display: none; }
+/* The shortcuts take the room they need; the icon never stretches with them. */
+.nutrition-toolbar > .icon-button { flex: 0 0 auto; }
+
 /* Grouped settings rows — the profile pattern. */
 .settings-group { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .settings-group > * {
