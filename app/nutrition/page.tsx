@@ -95,6 +95,20 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     carbs: food.carbs === null ? null : Number(food.carbs),
     fat: food.fat === null ? null : Number(food.fat),
   }));
+  // What was logged against a meal that is no longer in the menu.
+  //
+  // A logged row is keyed by date and meal, and the coach replacing a menu
+  // replaces its meals - so anything the client had already recorded that day
+  // lost the meal it hung under. It went on counting, correctly, and stopped
+  // being displayed anywhere, which is the worst of both: the day's total moved
+  // for a reason the client could not see and could not undo, because the delete
+  // button lives on the row that was no longer being drawn.
+  //
+  // Kept rather than deleted - the client did eat it - and shown under its own
+  // heading with its own delete, so a total that looks wrong can be read and,
+  // if it was a mistake, taken back.
+  const orphanedLogs = logged.filter((entry) =>
+    entry.mealId && !(menu?.meals ?? []).some((meal) => meal.id === entry.mealId));
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
   const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
@@ -251,6 +265,17 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               </div>
             </details>
           );})}
+          {orphanedLogs.length ? (
+            <section className="start-surface rounded-[24px] p-5 sm:p-6" aria-labelledby="orphaned-logs">
+              <h2 id="orphaned-logs" className="text-lg font-black">נרשם היום, מחוץ לתפריט הנוכחי</h2>
+              <p className="mt-1 text-xs text-[#5B5F5B]">
+                נרשם לארוחה שכבר אינה בתפריט של היום — למשל אחרי שהמאמן החליף תפריט.
+                זה נספר ביום שלך; אם נרשם בטעות אפשר למחוק כאן.
+              </p>
+              <LoggedFoodList entries={orphanedLogs} />
+            </section>
+          ) : null}
+
           {/* What the day adds up to, under the day rather than over it.
               
               This sat above the first meal, so the screen opened on four macro
