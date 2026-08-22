@@ -1095,6 +1095,28 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .weekly-lesson__meta { color: var(--ink-muted); font-size: .65rem; }
 
+/* The home screen's progress reflection: one true sentence and the two figures
+   behind it, in the space left under the weekly lesson. Sized to fit what was
+   already spare - this screen ends above the fold and is not allowed to stop. */
+.progress-pulse {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: .5rem .75rem;
+  padding: .7rem .85rem;
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); box-shadow: var(--shadow-card);
+  color: var(--ink); text-decoration: none;
+}
+.progress-pulse__line { flex: 1 1 10rem; min-width: 0; font-size: .82rem; font-weight: 700; line-height: 1.3; }
+.progress-pulse__figures { display: flex; flex: 0 0 auto; gap: .5rem; }
+.progress-pulse__figure {
+  display: inline-flex; align-items: center; gap: .25rem;
+  padding: .25rem .5rem;
+  border-radius: 999px; background: var(--green-tint); color: var(--green-press);
+  font-size: .68rem; font-weight: 700; white-space: nowrap;
+}
+.progress-pulse__figure[data-rising] { background: var(--red-tint); color: var(--red); }
+.progress-pulse__figure-label { color: inherit; opacity: .75; }
+
 /* Grouped settings rows — the profile pattern. */
 .settings-group { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
 .settings-group > * {

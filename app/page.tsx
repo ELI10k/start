@@ -10,6 +10,7 @@ import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository"
 import { listContentCategories, listPublishedContent } from "@/lib/data/content-repository";
 import { lessonForWeek } from "@/lib/content/weekly-lesson";
 import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
+import ProgressPulse from "@/components/client/ProgressPulse";
 import { israelDateKey } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
@@ -143,11 +144,19 @@ export default async function Home() {
         {weeklyLesson ? (
           <section aria-labelledby="weekly-lesson-heading">
             <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
-              הלימוד השבועי
+              השיעור שלך השבוע
             </h2>
             <WeeklyLessonCard lesson={weeklyLesson} />
           </section>
         ) : null}
+
+        {/* Where they have got to, in the space the screen had left over.
+            
+            The measurements screen keeps these figures and the charts behind
+            them; this is a reflection of them, on the screen a client actually
+            opens - because somebody three kilos down who does not know it is
+            somebody about to stop. */}
+        <ProgressPulse entries={data.progress} />
       </div>
     </ClientShell>
   );
