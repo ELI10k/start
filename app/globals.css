@@ -833,6 +833,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .sheet p, .sheet h2, .sheet h3, .sheet label, .sheet strong, .sheet span {
   overflow-wrap: anywhere;
 }
+/* `display: grid` below beats the hidden attribute's own display:none, and a
+   sticky bar that will not hide sits on top of whatever it was hidden from. */
+.sheet__actions[hidden] { display: none; }
 .sheet__actions {
   position: sticky; inset-block-end: 0;
   display: grid; gap: var(--space-2); margin-top: var(--space-4);

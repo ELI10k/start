@@ -1,13 +1,23 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Camera, PencilLine, Barcode } from "lucide-react";
+import { Barcode, Camera, Database, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { logClientFood, type FoodLogState } from "@/app/actions/food-log";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
 import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
+import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
+import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
+
+/** The database rows this sheet needs: enough to search by and enough to count. */
+export type PickableFood = ComboboxFood & {
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+};
 
 const initial: FoodLogState = { ok: false };
 
@@ -44,6 +54,9 @@ export default function AteSomethingElse({
   // the sheet asked "what did you eat instead?" of a meal that never prescribed
   // anything. Same three ways in, different sentence around them.
   title = "מה אכלת במקום?",
+  // Empty until the screen has loaded the catalogue; the tab hides itself rather
+  // than offering a search with nothing behind it.
+  foods = [],
   unmeasuredNote = "הארוחה לא תיספר בקלוריות של היום — אין דרך לגזור אותן מתיאור או מתמונה. המאמן יראה בדיוק מה אכלת, וזה עוזר לו הרבה יותר מ״לא נאכל״.",
 }: {
   mealId: string;
@@ -52,8 +65,11 @@ export default function AteSomethingElse({
   onClose: () => void;
   title?: string;
   unmeasuredNote?: string;
+  foods?: readonly PickableFood[];
 }) {
-  const [tab, setTab] = useState<"text" | "scan" | "photo">("text");
+  const [tab, setTab] = useState<"text" | "food" | "scan" | "photo">("text");
+  // Shares the barcode tab's gram field: it is the same question, asked once.
+  const [pickedId, setPickedId] = useState("");
   const [state, action] = useActionState(logClientFood, initial);
   const [code, setCode] = useState("");
   const [looking, setLooking] = useState(false);
@@ -107,6 +123,11 @@ export default function AteSomethingElse({
         <button type="button" onClick={() => setTab("scan")} aria-pressed={tab === "scan"} className={`chip${tab === "scan" ? " pill--green" : ""}`}>
           <Barcode aria-hidden="true" size={15} />ברקוד
         </button>
+        {foods.length ? (
+          <button type="button" onClick={() => setTab("food")} aria-pressed={tab === "food"} className={`chip${tab === "food" ? " pill--green" : ""}`}>
+            <Database aria-hidden="true" size={15} />מהמאגר
+          </button>
+        ) : null}
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
           <Camera aria-hidden="true" size={15} />צילום
         </button>
@@ -194,6 +215,70 @@ export default function AteSomethingElse({
           </>
         )}
 
+        {/* The catalogue, with a weight - the one path here that produces numbers
+            without a barcode.
+            
+            "תיאור" writes down what was eaten and counts nothing, because there
+            is no way to get calories out of a sentence. Most of what a client
+            eats instead is an ordinary food that is already in the database with
+            approved figures beside it; all that was missing was a way to say
+            which one and how much of it. Same arithmetic the menu builder uses,
+            so the coach's screen and this one cannot disagree about a portion. */}
+        {tab === "food" && (() => {
+          const picked = foods.find((food) => food.id === pickedId) ?? null;
+          const weight = Number(grams);
+          const macros = picked && Number.isFinite(weight) && weight > 0
+            ? calculateFoodNutrition({
+                calories: picked.calories ?? 0,
+                protein: picked.protein ?? 0,
+                carbs: picked.carbs ?? 0,
+                fat: picked.fat ?? 0,
+              }, weight)
+            : null;
+          return (
+            <>
+              {/* The catalogue is the whole panel until something is chosen, and
+                  then it gets out of the way: a list still open under the
+                  answer invites a second answer over the first. */}
+              {picked ? null : (
+                <FoodCombobox foods={foods} value={pickedId} usage={[]} onSelect={(id) => setPickedId(id)} />
+              )}
+              {picked ? (
+                <>
+                <p className="font-bold">{picked.brand ? `${picked.name} — ${picked.brand}` : picked.name}</p>
+                </>
+              ) : null}
+              {picked ? (
+                <>
+                  <input type="hidden" name="name" value={picked.brand ? `${picked.name} — ${picked.brand}` : picked.name} />
+                  <input type="hidden" name="unit" value="גרם" />
+                  <label className="text-sm font-bold">כמה גרם אכלת?
+                    <input name="quantity" type="number" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
+                  </label>
+                  {macros ? (
+                    <>
+                      <input type="hidden" name="calories" value={macros.calories} />
+                      <input type="hidden" name="protein" value={macros.protein} />
+                      <input type="hidden" name="carbs" value={macros.carbs} />
+                      <input type="hidden" name="fat" value={macros.fat} />
+                      <dl className="compact-data-list">
+                        <div><span>קלוריות</span><strong>{macros.calories}</strong></div>
+                        <div><span>חלבון</span><strong>{macros.protein}</strong></div>
+                        <div><span>פחמימות</span><strong>{macros.carbs}</strong></div>
+                        <div><span>שומן</span><strong>{macros.fat}</strong></div>
+                      </dl>
+                      <p className="text-xs text-[#5B5F5B]">הערכים האלה כן ייספרו ביום שלך.</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[#5B5F5B]">יש להזין כמות כדי לחשב את הערכים.</p>
+                  )}
+                  <button type="button" onClick={() => setPickedId("")} className="chip w-fit">מזון אחר</button>
+                </>
+              ) : null}
+            </>
+          );
+        })()}
+
         {tab === "photo" && (
           <>
             <label className="text-sm font-bold">תמונה של הארוחה
@@ -232,7 +317,9 @@ export default function AteSomethingElse({
           <p role={state.ok ? "status" : "alert"} className={`rounded-2xl p-3 text-sm font-bold ${state.ok ? "bg-[#ECFDF3] text-[#15803D]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>{state.message}</p>
         )}
 
-        <div className="sheet__actions">
+        {/* Nothing to save until a food is chosen, and the sticky bar was sitting
+            on top of the results while the client was still scrolling them. */}
+        <div className="sheet__actions" hidden={tab === "food" && !pickedId}>
           <SubmitButton
             idle="שמירה"
             pending="שומרים…"

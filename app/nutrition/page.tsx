@@ -83,6 +83,18 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // whatever went in. It used to count for nothing: a window has no rows, so the
   // arithmetic over rows returned zero and marking "300 קל׳ חופשיות" as eaten
   // moved no number on any screen.
+  // The catalogue as the "אכלתי משהו אחר" sheet needs it: enough to search by,
+  // and the four figures it needs to turn a weight into a count.
+  const pickableFoods = foods.map((food) => ({
+    id: String(food.id),
+    name: String(food.name),
+    brand: food.brand ? String(food.brand) : null,
+    category: food.category ? String(food.category) : undefined,
+    calories: food.calories === null ? null : Number(food.calories),
+    protein: food.protein === null ? null : Number(food.protein),
+    carbs: food.carbs === null ? null : Number(food.carbs),
+    fat: food.fat === null ? null : Number(food.fat),
+  }));
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
   const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
@@ -196,6 +208,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   statusNote={meal.statusNote}
                   completed={meal.completed}
                   blocked={missingChoice}
+                  foods={pickableFoods}
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
