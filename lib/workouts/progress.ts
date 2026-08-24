@@ -13,20 +13,21 @@ export function trainingWeekStart(dateKey: string): string {
 }
 
 /**
- * Which day of the programme is due, counted inside this week only.
+ * Which day of the programme is due: the first one this week nobody has answered for.
  *
- * It used to index on every session the client had ever completed - `days[total
- * % days.length]` - so the programme was one endless rotation with no idea what
- * a week is. Two consequences, both reported: a workout declared missed came
- * straight back the next day because nothing had advanced past it, and a client
- * who finished all three of their days could not begin the week again on Sunday
- * because the counter had already rolled on into the next slot.
+ * This was a count - `days[answered % days.length]` - and a count does not know
+ * WHICH day was answered. A client who declared אימון 3 missed had the pointer
+ * moved on by one and was offered אימון 2, a workout they had said nothing
+ * about, because one thing had been answered and one step was taken.
  *
- * Counting within the week fixes both. Sunday opens on day one whatever
- * happened last week; a workout done or declared missed advances the week by
- * one; and a client who has answered for all of them is offered the first again
- * rather than being locked out - answering twice is theirs to decide, running
- * out of week is not.
+ * The week holds every day of the programme and the client may do all of them,
+ * Sunday to Saturday. So the question is not how many are behind us; it is which
+ * one is still unanswered. Completing a day answers it, and so does declaring it
+ * missed - that is what declaring is for - and the days answer independently, in
+ * whatever order the client gets to them.
+ *
+ * When they have all been answered the first is offered again rather than
+ * nothing: doing one twice is the client's decision, running out of week is not.
  */
 export function getTodayWorkoutDay(
   program:WorkoutProgram,
@@ -35,17 +36,21 @@ export function getTodayWorkoutDay(
   // Optional so every existing caller keeps working; when absent the week is
   // taken from the machine's own date, which is what all of them meant.
   today:string=new Date().toISOString().slice(0,10),
-  // Days the client declared missed. They advance the week exactly as a
-  // completed one does - that is the whole point of declaring it.
-  skippedDates:readonly string[]=[],
+  // Days declared missed, as {dayId, date} - the date so the week can be
+  // bounded, the day so the right one is crossed off.
+  skipped:readonly {dayId:string;date:string}[]=[],
 ):WorkoutDay|undefined{
   if(!program.days.length)return undefined;
   const opened=trainingWeekStart(today);
-  const answered=completedWorkouts.filter((item)=>
-    item.clientId===clientId&&item.programId===program.id&&dateOnly(item.completedAt)>=opened&&dateOnly(item.completedAt)<=today).length
-    +skippedDates.filter((date)=>date>=opened&&date<=today).length;
+  const inWeek=(date:string)=>date>=opened&&date<=today;
+  const answered=new Set<string>([
+    ...completedWorkouts
+      .filter((item)=>item.clientId===clientId&&item.programId===program.id&&inWeek(dateOnly(item.completedAt)))
+      .map((item)=>item.dayId),
+    ...skipped.filter((item)=>inWeek(item.date)).map((item)=>item.dayId),
+  ]);
   const ordered=[...program.days].sort((a,b)=>a.order-b.order);
-  return ordered[answered%ordered.length];
+  return ordered.find((day)=>!answered.has(day.id))??ordered[0];
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}

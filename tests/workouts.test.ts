@@ -22,8 +22,11 @@ test("completion is idempotent, closes active session and updates performance",(
   assert.equal(getTodayWorkoutDay(fixture,repeated.completedWorkouts,"client","2026-07-20")?.id,"day-b");
   // A new week opens on the first day again, whatever last week held.
   assert.equal(getTodayWorkoutDay(fixture,repeated.completedWorkouts,"client","2026-07-27")?.id,"day-a");
-  // A workout declared missed advances the week exactly as a completed one does.
-  assert.equal(getTodayWorkoutDay(fixture,[],"client","2026-07-20",["2026-07-20"])?.id,"day-b");assert.equal(workoutCompletionPercent(4,3),75)});
+  // Declaring a day missed answers THAT day, not "one day". Crossing off day-b
+  // has to leave day-a due - a count would have stepped past it.
+  assert.equal(getTodayWorkoutDay(fixture,[],"client","2026-07-20",[{dayId:"day-b",date:"2026-07-20"}])?.id,"day-a");
+  // And crossing off day-a leaves day-b due.
+  assert.equal(getTodayWorkoutDay(fixture,[],"client","2026-07-20",[{dayId:"day-a",date:"2026-07-20"}])?.id,"day-b");assert.equal(workoutCompletionPercent(4,3),75)});
 test("memory repository isolates and resets snapshots",()=>{const repository=createMemoryWorkoutRepository(initial);repository.save({...repository.load(),programs:[]});assert.equal(repository.load().programs.length,0);repository.reset();assert.equal(repository.load().programs.length,1)});
 test("import audit confirms real approved programs, exercises and resolved references",async()=>{const audit=JSON.parse(await readFile(new URL("../reports/workout-import-audit.json",import.meta.url),"utf8"));assert.equal(audit.filesCopied.length,9);assert.ok(audit.programsImported>0);assert.ok(audit.uniqueExercisesImported>0);assert.equal(audit.unresolvedReferences.length,0);assert.ok(audit.videoLinksPreserved>0)});
 test("Supabase workout schema covers catalog, assignments, sessions, sets and role policies",async()=>{const sql=await readFile(new URL("../supabase/migrations/202607200004_workout_persistence.sql",import.meta.url),"utf8");for(const table of ["workout_exercises","workout_programs","workout_program_days","workout_program_exercises","workout_assignments","workout_sessions","workout_session_exercises","workout_sets"])assert.match(sql,new RegExp(`create table public\\.${table}`));for(const rpc of ["assign_workout_program","save_active_workout","complete_workout"])assert.match(sql,new RegExp(`function public\\.${rpc}`));assert.match(sql,/enable row level security/)});

@@ -294,11 +294,18 @@ test("the courses rail is gone, and nothing still refers to it", async () => {
   assert.equal(/cinema-card--course/.test(css), false);
 });
 
-test("a course name is set to be read, not tucked against the edge", async () => {
+test("a course name is large, and sits on the reading edge", async () => {
   const css = await file("app/globals.css");
   const head = css.match(/\.cinema-rail__head \{[^}]*\}/s)?.[0] ?? "";
-  assert.match(head, /justify-content: center/);
-  assert.match(head, /text-align: center/);
+  /* The size was the fix for "כמעט לא רואים"; the centring that came with it
+     was not, and Eli asked for the names back on the right. In Hebrew the
+     reading edge is the right, and `start` is what follows the direction of the
+     page instead of naming a side - which also lines every heading up with the
+     first card of its own row. */
+  assert.match(head, /justify-content: flex-start/);
+  assert.match(head, /text-align: start/);
+  // `align-items: center` stays - that is vertical, and correct.
+  assert.equal(/(justify-content|text-align): center/.test(head), false);
   // Large enough to carry a course, not a section label.
   assert.match(css, /\.cinema-rail__head h2 \{[^}]*font-size: clamp\(1\.35rem/s);
 });
@@ -308,8 +315,12 @@ test("the navigation bar sits at the top and clears the app header", async () =>
     file("components/client/CoursePicker.tsx"),
     file("app/globals.css"),
   ]);
-  // Above the artwork, not revealed by scrolling past it.
-  assert.match(page, /<CoursePicker[\s\S]*?\/>\s*<section className="cinema-hero">/);
+  // First thing on the screen. It used to be checked as sitting above the
+  // banner; Eli has since had the banner taken off this screen, so what has to
+  // hold now is that the bar is the first element of the page and that no
+  // banner has crept back in above it.
+  assert.match(page, /<CinemaChrome \/>\s*<CoursePicker/);
+  assert.equal(/cinema-hero/.test(page), false);
   const bar = css.match(/\.cinema-picker \{[^}]*\}/s)?.[0] ?? "";
   assert.match(bar, /position: sticky/);
   assert.match(bar, /inset-block-start: var\(--cine-headroom\)/);
@@ -444,4 +455,20 @@ test("fullscreen asks the browser first and never rotates the picture", async ()
   assert.match(css, /body:has\(\.cinema-player\[data-full="true"\]\)/);
   // A portrait phone letterboxes the lesson rather than cropping its sides.
   assert.match(css, /\.cinema-player\[data-full="true"\] \.cinema-player__frame \{[^}]*aspect-ratio: 16 \/ 9/s);
+});
+
+test("the library opens on the rows, with no banner above them", async () => {
+  const [page, css] = await Promise.all([
+    file("app/content/page.tsx"),
+    file("app/globals.css"),
+  ]);
+  // The banner is gone from the library, and so is everything that fed it.
+  assert.equal(/cinema-hero|featured/.test(page), false);
+  assert.equal(/from "next\/image"/.test(page), false);
+  // The rows were pulled up over its foot; with nothing to overlap, that
+  // negative margin would slide the first row under the navigation bar.
+  assert.match(css, /\.cinema-rails \{ position: relative; z-index: 1; \}/);
+  // A course still has its banner on its own screen, which keeps one.
+  const coursePage = await file("app/content/category/[category]/page.tsx");
+  assert.match(coursePage, /cinema-hero/);
 });
