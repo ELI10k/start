@@ -6,6 +6,7 @@ export type ContentCategoryDto = Readonly<{
   name: string;
   slug: string;
   description: string | null;
+  coverUrl: string | null;
   sortOrder: number;
   active: boolean;
 }>;
@@ -38,7 +39,7 @@ export async function listContentCategories(
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("content_categories")
-    .select("id,name,slug,description,sort_order,active")
+    .select("id,name,slug,description,cover_url,sort_order,active")
     .order("sort_order")
     .order("name");
   if (!includeInactive) query = query.eq("active", true);
@@ -49,6 +50,7 @@ export async function listContentCategories(
     name: category.name,
     slug: category.slug,
     description: category.description,
+    coverUrl: category.cover_url,
     sortOrder: category.sort_order,
     active: category.active,
   }));

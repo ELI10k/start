@@ -11,10 +11,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export default function CinemaRail({
   title,
   href,
+  id,
   children,
 }: {
   title: string;
   href?: string;
+  id?: string;
   children: React.ReactNode;
 }) {
   const track = useRef<HTMLDivElement>(null);
@@ -58,7 +60,7 @@ export default function CinemaRail({
   );
 
   return (
-    <section className="cinema-rail">
+    <section className="cinema-rail" id={id}>
       <div className="cinema-rail__head cinema-gutter">
         {href ? <Link href={href}>{heading}</Link> : heading}
       </div>

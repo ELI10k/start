@@ -1,5 +1,53 @@
 import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutProgram } from "./types.ts";
-export function getTodayWorkoutDay(program:WorkoutProgram,completedWorkouts:readonly CompletedWorkout[],clientId:string):WorkoutDay|undefined{if(!program.days.length)return undefined;const completed=completedWorkouts.filter((item)=>item.clientId===clientId&&item.programId===program.id).length;return [...program.days].sort((a,b)=>a.order-b.order)[completed%program.days.length]}
+/**
+ * The training week starts on Sunday, and so does the programme.
+ *
+ * The week the client and the coach both mean when they say "this week".
+ */
+const dateOnly=(value:string)=>value.slice(0,10);
+
+export function trainingWeekStart(dateKey: string): string {
+  const day = new Date(`${dateKey}T00:00:00Z`);
+  day.setUTCDate(day.getUTCDate() - day.getUTCDay());
+  return day.toISOString().slice(0, 10);
+}
+
+/**
+ * Which day of the programme is due, counted inside this week only.
+ *
+ * It used to index on every session the client had ever completed - `days[total
+ * % days.length]` - so the programme was one endless rotation with no idea what
+ * a week is. Two consequences, both reported: a workout declared missed came
+ * straight back the next day because nothing had advanced past it, and a client
+ * who finished all three of their days could not begin the week again on Sunday
+ * because the counter had already rolled on into the next slot.
+ *
+ * Counting within the week fixes both. Sunday opens on day one whatever
+ * happened last week; a workout done or declared missed advances the week by
+ * one; and a client who has answered for all of them is offered the first again
+ * rather than being locked out - answering twice is theirs to decide, running
+ * out of week is not.
+ */
+export function getTodayWorkoutDay(
+  program:WorkoutProgram,
+  completedWorkouts:readonly CompletedWorkout[],
+  clientId:string,
+  // Optional so every existing caller keeps working; when absent the week is
+  // taken from the machine's own date, which is what all of them meant.
+  today:string=new Date().toISOString().slice(0,10),
+  // Days the client declared missed. They advance the week exactly as a
+  // completed one does - that is the whole point of declaring it.
+  skippedDates:readonly string[]=[],
+):WorkoutDay|undefined{
+  if(!program.days.length)return undefined;
+  const opened=trainingWeekStart(today);
+  const answered=completedWorkouts.filter((item)=>
+    item.clientId===clientId&&item.programId===program.id&&dateOnly(item.completedAt)>=opened&&dateOnly(item.completedAt)<=today).length
+    +skippedDates.filter((date)=>date>=opened&&date<=today).length;
+  const ordered=[...program.days].sort((a,b)=>a.order-b.order);
+  return ordered[answered%ordered.length];
+}
+
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
 export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
 export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>entry.exerciseId===exerciseId)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>entry.exerciseId===exerciseId)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
@@ -9,7 +57,6 @@ export function activeAssignmentFor(assignments:readonly ClientWorkoutAssignment
 // instead of replacing the running one.
 export function activeAssignmentsFor(assignments:readonly ClientWorkoutAssignment[],clientId:string,date:string):ClientWorkoutAssignment[]{return[...assignments].reverse().filter((item)=>item.clientId===clientId&&item.status==="active"&&item.startDate<=date&&(!item.endDate||item.endDate>=date))}
 export function assignmentState(assignment:ClientWorkoutAssignment,date:string):"not-started"|"expired"|"paused"|"completed"|"active"{if(assignment.status==="paused")return"paused";if(assignment.status==="completed"||assignment.status==="archived")return"completed";if(assignment.startDate>date)return"not-started";if(assignment.endDate&&assignment.endDate<date)return"expired";return"active"}
-const dateOnly=(value:string)=>value.slice(0,10);
 export function adherenceSummary(assignmentOrWorkouts:ClientWorkoutAssignment|readonly CompletedWorkout[],workoutsOrAssignment:readonly CompletedWorkout[]|ClientWorkoutAssignment|undefined,todayValue:string|Date){const legacy=Array.isArray(assignmentOrWorkouts);const assignment=(legacy?workoutsOrAssignment:assignmentOrWorkouts) as ClientWorkoutAssignment|undefined;const workouts=(legacy?assignmentOrWorkouts:workoutsOrAssignment) as readonly CompletedWorkout[];if(!assignment)return{completed:0,expected:0,missed:0,percent:0};const today=typeof todayValue==="string"?todayValue:todayValue.toISOString().slice(0,10);const start=new Date(`${assignment.startDate}T00:00:00Z`);const end=new Date(`${today}T00:00:00Z`);const elapsedDays=Math.max(1,Math.floor((end.getTime()-start.getTime())/86400000)+1);const expected=Math.max(1,Math.ceil(elapsedDays/7*assignment.weeklyFrequency));const completed=workouts.filter((item)=>item.assignmentId===assignment.id&&dateOnly(item.completedAt)>=assignment.startDate&&dateOnly(item.completedAt)<=today).length;return{completed,expected,missed:Math.max(0,expected-completed),percent:Math.min(100,Math.round(completed/expected*100))}}
 export function workoutStreak(workouts:readonly CompletedWorkout[],clientId:string):number{const dates=[...new Set(workouts.filter((item)=>item.clientId===clientId).map((item)=>dateOnly(item.completedAt)))].sort((a,b)=>b.localeCompare(a));if(!dates.length)return 0;let streak=1;for(let i=1;i<dates.length;i++){const previous=new Date(`${dates[i-1]}T00:00:00Z`);const current=new Date(`${dates[i]}T00:00:00Z`);if((previous.getTime()-current.getTime())/86400000>7)break;streak++}return streak}
 export function trend(current?:number,previous?:number):"up"|"down"|"stable"|"insufficient-data"{if(current===undefined||previous===undefined)return"insufficient-data";if(current>previous)return"up";if(current<previous)return"down";return"stable"}

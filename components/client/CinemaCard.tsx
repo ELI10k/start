@@ -22,12 +22,6 @@ export default function CinemaCard({
   badge,
   progressPercent = 0,
   priority = false,
-  /* A lesson's artwork is a video still: a photograph, with nothing on it, and
-     the title reads well laid over the foot of it. A course's artwork is not -
-     it is a designed banner that already carries its own headline. Printing our
-     title over that covers the artwork we were asked to show, so a course card
-     keeps its picture clean and puts the caption underneath. */
-  variant = "lesson",
 }: {
   href: string;
   title: string;
@@ -36,10 +30,9 @@ export default function CinemaCard({
   badge?: { label: string; done?: boolean } | null;
   progressPercent?: number;
   priority?: boolean;
-  variant?: "lesson" | "course";
 }) {
   return (
-    <Link href={href} className={`cinema-card cinema-card--${variant}`}>
+    <Link href={href} className="cinema-card cinema-card--lesson">
       <span className="cinema-card__art">
         {artUrl ? (
           <Image

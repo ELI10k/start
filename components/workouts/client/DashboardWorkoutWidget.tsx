@@ -14,7 +14,7 @@ export default function DashboardWorkoutWidget() {
   const { snapshot, currentClientId, loading, persistenceError } = useWorkouts();
   const assignment = activeAssignmentFor(snapshot.assignments, currentClientId, israelDateKey());
   const program = snapshot.programs.find((item) => item.id === assignment?.programId);
-  const today = program ? getTodayWorkoutDay(program, snapshot.completedWorkouts, currentClientId) : undefined;
+  const today = program ? getTodayWorkoutDay(program, snapshot.completedWorkouts, currentClientId, israelDateKey(), snapshot.scheduleChanges.filter((c) => c.clientId === currentClientId && c.status === "skipped").map((c) => c.originalDate)) : undefined;
   const active = snapshot.activeSessions.find((item) => item.clientId === currentClientId);
   return (
     <Link
