@@ -1,4 +1,6 @@
 import type { ClientWorkoutAssignment, CompletedWorkout, WorkoutDay, WorkoutProgram } from "./types.ts";
+import { trainingWeekStart } from "./progress.ts";
+import { israelDateKey } from "../date-time.ts";
 export function currentTrainingWeek(startDate:string,today:string):number{const start=new Date(`${startDate}T00:00:00Z`);const end=new Date(`${today}T00:00:00Z`);return Math.max(1,Math.floor((end.getTime()-start.getTime())/(7*86400000))+1)}
 
 export type ScheduledSession = Readonly<{ day: WorkoutDay; occurrence: number; completed: boolean }>;
@@ -17,7 +19,10 @@ export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAs
   // FBW of the week ticks the second row, not the first one over again.
   const completedByDay=new Map<string,number>();
   for(const workout of completedWorkouts){
-    if(workout.clientId!==clientId||workout.completedAt.slice(0,10)<start)continue;
+    // The Israeli calendar day, not the UTC one: a workout finished at 01:00
+    // on Sunday is stored as Saturday 22:00Z and would be read into the week
+    // that had already closed.
+    if(workout.clientId!==clientId||israelDateKey(new Date(workout.completedAt))<start)continue;
     completedByDay.set(workout.dayId,(completedByDay.get(workout.dayId)??0)+1);
   }
   const seen=new Map<string,number>();
@@ -30,7 +35,6 @@ export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAs
 }
 
 function weekStart(todayValue:string|Date):string{
-  const today=typeof todayValue==="string"?new Date(`${todayValue}T00:00:00Z`):new Date(Date.UTC(todayValue.getUTCFullYear(),todayValue.getUTCMonth(),todayValue.getUTCDate()));
-  today.setUTCDate(today.getUTCDate()-today.getUTCDay());
-  return today.toISOString().slice(0,10);
+  const dateKey=typeof todayValue==="string"?todayValue:israelDateKey(todayValue);
+  return trainingWeekStart(dateKey);
 }

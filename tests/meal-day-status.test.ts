@@ -87,19 +87,41 @@ test("only the negative state is red, and eating and skipping need no dialog", a
   assert.match(control, /setSubstituting\(true\)/);
 });
 
+test("one chosen macro is enough to mark a meal eaten", async () => {
+  const page = await source("app/nutrition/page.tsx");
+  const actions = await source("app/actions/product.ts");
+  assert.match(page, /meal\.groups\.some\(\(group\) => group\.selectedItemId\)/);
+  assert.match(page, /אפשר לסמן לאחר בחירת פריט אחד לפחות/);
+  assert.match(actions, /p_quantity: 0/);
+  assert.match(actions, /refresh_meal_intake already excludes zero/);
+});
+
+test("tapping the selected meal item again clears it", async () => {
+  const page = await source("app/nutrition/page.tsx");
+  const actions = await source("app/actions/product.ts");
+  assert.match(page, /name="selected" value=\{group\.selectedItemId===item\.id\?"true":"false"\}/);
+  assert.match(page, /לחיצה נוספת מבטלת בחירה/);
+  assert.match(actions, /meal_group_selections"\)\.delete\(\)/);
+  assert.match(actions, /refresh_meal_intake/);
+});
+
 test("saying what was eaten instead offers all three ways", async () => {
   const sheet = await source("components/client/AteSomethingElse.tsx");
-  // A sentence carries no figures, a barcode carries the catalog's own scaled
-  // to the amount eaten, and a photograph carries none either but tells a coach
-  // more in two seconds than a paragraph does.
+  // Text and photos are estimated by AI; catalogue and barcode values stay
+  // deterministic. All four entry paths therefore count in today's totals.
   assert.match(sheet, /source="text"|setTab\("text"\)/);
   assert.match(sheet, /setTab\("scan"\)/);
   assert.match(sheet, /setTab\("photo"\)/);
   assert.match(sheet, /\/api\/foods\/barcode\//);
-  // Only the scanned figures are ever counted, and the other two say so.
+  // Scans explain their deterministic count; text/photo explain their estimate.
   assert.match(sheet, /הערכים האלה כן ייספרו ביום שלך/);
-  assert.match(sheet, /הארוחה לא תיספר בקלוריות של היום/);
+  assert.match(sheet, /ה־AI יעריך קלוריות ואבות מזון/);
   assert.match(sheet, /name="photo"/);
+  assert.match(sheet, /name="cameraPhoto"/);
+  assert.match(sheet, /בחירה מהגלריה/);
+  assert.match(sheet, /פתיחת מצלמה/);
+  assert.match(sheet, /formRef\.current\?\.reset\(\)/);
+  assert.match(sheet, /setCode\(""\)/);
 });
 
 test("the coach can see which meals were skipped", async () => {

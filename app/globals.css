@@ -359,6 +359,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 
 @media (min-width: 768px) {
+  .cinema { --cine-headroom: 4.25rem; }
   .client-app-shell { padding-bottom: 0; }
   .mobile-app-header, .bottom-app-nav { display: none; }
   .desktop-app-nav {
@@ -1666,7 +1667,96 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.session-exercise__chips { margin-top: .5rem; }
+.session-exercise__chips { margin-top: .5rem; flex-wrap: wrap; overflow-x: visible; }
+.workout-quick-actions { display:grid; gap:.65rem; margin-top:-.15rem; }
+.workout-quick-actions .app-list { overflow:hidden; border-radius:1.15rem; }
+.app-list__emoji { display:grid; place-items:center; width:2.4rem; height:2.4rem; font-size:1.35rem; flex:none; }
+.app-list__emoji--alarm { border-radius:.75rem; background:#FEF2F2; color:#DC2626; }
+.workout-challenge { display:grid; gap:.2rem; padding:.8rem 1rem; border:1px solid rgba(22,163,74,.3); border-radius:1rem; background:var(--green-tint); }
+.workout-challenge span { font-size:.72rem; color:var(--green-press); font-weight:800; }
+.workout-challenge strong { font-size:1.05rem; }
+.workout-challenge small { color:var(--ink-muted); line-height:1.4; }
+
+.workout-history-missed {
+  color: #B42318;
+  background: #FFF1F0 !important;
+  border-color: #FDA29B !important;
+}
+.workout-history-missed .app-list__icon,
+.workout-history-missed .app-list__meta strong { color: #B42318; }
+.workout-history-weeks { display: grid; gap: var(--space-6); }
+.workout-history-weeks .section-heading { margin-bottom: var(--space-2); }
+.workout-history-list > * {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.workout-history-list .app-list__main span { white-space: normal; overflow-wrap: anywhere; }
+.workout-history-list .workout-history-facts {
+  margin-top: .35rem;
+  color: var(--ink-muted);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+.workout-history-list .workout-history-facts b { color: var(--ink); font-weight: 800; }
+.workout-history-list .workout-history-missed .workout-history-facts b { color: #B42318; }
+.pill--red { color: #B42318; border-color: #FDA29B; background: #FFF1F0; }
+
+.outside-menu-card {
+  width: 100%;
+  margin-block-end: var(--space-4);
+  min-height: 5.25rem;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: start;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+.outside-menu-card .app-list__main { flex: 1; }
+.outside-menu-card:hover { border-color: var(--green); }
+
+/* A workout programme is scanned, not read like an article. Keep the exercise
+   identity and controls together and the three prescription values on one row. */
+.workout-exercise-card { padding: .9rem; }
+.workout-exercise-card h2,
+.workout-exercise-card h3 {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workout-exercise-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .35rem .75rem;
+}
+.workout-exercise-card > .compact-data-list {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: .35rem;
+}
+.workout-exercise-card > .compact-data-list > div {
+  min-height: 2.6rem;
+  padding: .35rem .45rem;
+  border: 1px solid var(--line);
+  border-radius: .7rem;
+  flex-direction: column;
+  justify-content: center;
+  gap: .1rem;
+  text-align: center;
+}
+@media (max-width: 600px) {
+  .workout-exercise-card > div:first-child { flex-wrap: wrap; }
+  .workout-exercise-card__actions { width: 100%; justify-content: flex-start; }
+  .workout-exercise-card__actions > * { min-height: 2.5rem; }
+}
 
 /* Four figures, one row, no sideways scroll. dashboard-metrics is a scroller,
    which is why the fourth tile was sliced down the middle. */
@@ -1820,7 +1910,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .workout-insight[data-tone="praise"] { border-inline-start-color: var(--green); }
 .workout-insight[data-tone="note"] { border-inline-start-color: var(--line-strong); }
 .workout-insight strong { font-size: .95rem; }
-.workout-insight p { margin: 0; font-size: .87rem; line-height: 1.55; color: var(--ink-strong); }
+.workout-insight p { margin: .3rem 0 0; font-size: .87rem; line-height: 1.65; color: var(--ink-strong); }
 
 /* One meal at a time. Six meals in a single scroll is a page nobody reads to
    the end, and the marking controls live at the bottom of each one - so the
@@ -1863,6 +1953,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   --cine-green: #22C55E;
   --cine-green-lift: #3BDD79;
   --cine-gutter: clamp(1rem, 4.2vw, 3.75rem);
+  /* What the fixed app header occupies, so the navigation bar can clear it. */
+  --cine-headroom: calc(3.5rem + env(safe-area-inset-top));
   background: var(--cine-bg);
   color: var(--cine-ink);
 }
@@ -1930,7 +2022,6 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   /* Short enough that a 16:9 designed banner is not cropped down to a strip of
      its middle, tall enough to still open the screen. */
   min-height: min(74svh, 34rem);
-  padding-block-start: 5rem;
 }
 .cinema-hero__art { position: absolute; inset: 0; z-index: -2; overflow: hidden; }
 .cinema-hero__art img {
@@ -2028,16 +2119,34 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* ── Rails ───────────────────────────────────────────────────────────────────
    The first rail is pulled up over the foot of the hero so the artwork carries
    on behind it. */
-.cinema-rails { position: relative; z-index: 1; margin-top: -3.5rem; }
+/* The rails used to be pulled up over the foot of the banner. The banner is
+   gone from the library screen, so there is nothing to overlap - and the old
+   negative margin would slide the first row up under the navigation bar. */
+.cinema-rails { position: relative; z-index: 1; }
 .cinema-rail { margin-top: clamp(1.5rem, 3.6vw, 2.4rem); }
+/* Headings sit on the reading edge - the right, in Hebrew - in line with the
+   first card of the row beneath them. Centred, a heading floats away from the
+   row it names and every row starts in a different place down the page. */
 .cinema-rail__head {
   display: flex;
-  align-items: center;
-  gap: .5rem;
-  margin-bottom: .8rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: .2rem;
+  margin-bottom: .9rem;
+  text-align: start;
+}
+/* One line, and no more: the row underneath is the point, and a blurb that
+   pushes it off the screen has cost more than it explained. */
+.cinema-rail__blurb {
+  max-width: 46rem;
+  font-size: .88rem;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--cine-muted);
 }
 .cinema-rail__head h2 {
-  font-size: clamp(1.05rem, 3.6vw, 1.45rem);
+  font-size: clamp(1.35rem, 5.2vw, 1.9rem);
   font-weight: 900;
   letter-spacing: -.01em;
 }
@@ -2218,13 +2327,21 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .cinema-hero__body { animation: none; }
 }
 
-/* ── Episode list ────────────────────────────────────────────────────────── */
+/* ── Episode list ──────────────────────────────────────────────────────────
+   A chapter heading rides its own black pill. Loose white type stopped being
+   readable the moment it landed on one of the bright course banners, and the
+   pill also reads as a label rather than as a stray line. No letter-spacing:
+   Hebrew has no lowercase to open up, and tracking only breaks the joins. */
 .cinema-chapter {
-  margin: 1.9rem 0 .7rem;
-  font-size: .74rem;
-  font-weight: 900;
-  letter-spacing: .12em;
-  color: var(--cine-faint);
+  display: inline-block;
+  margin: 1.9rem 0 .8rem;
+  padding: .42rem 1rem;
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  background: #000000;
+  color: #FFFFFF;
+  font-size: .82rem;
+  font-weight: 800;
 }
 .cinema-episode {
   display: flex;
@@ -2292,8 +2409,67 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   text-align: center;
   color: var(--cine-muted);
 }
+/* The one control in the library that leaves the app, set to look like what it
+   is: a reference, not the point of the screen. */
+.cinema-outlink {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: 1.15rem;
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--cine-green);
+  text-decoration: underline;
+  text-underline-offset: .28em;
+}
+.cinema-outlink:hover { color: var(--cine-green-lift); }
 .cinema-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.4rem; }
 .cinema-actions form { display: contents; }
+/* Everywhere else in the library the header floats over artwork on purpose.
+   On a lesson the artwork is the player, and floating over it covers the top of
+   the film - so here, and only here, the page starts below the header. */
+/* The same measurement as the navigation bar's, and taken from the same token:
+   two copies of one number is how the next person changes the header height and
+   moves only half the page. */
+.cinema-topgap { height: var(--cine-headroom); }
+
+/* Inside a course you move to the next lesson far more often than you go
+   anywhere else, so the two neighbours sit directly under the player instead of
+   at the foot of the page. A missing neighbour holds its place rather than
+   collapsing, so the row does not reshuffle between one lesson and the next. */
+.cinema-steps {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding-block: .85rem;
+}
+.cinema-steps > * {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  min-height: 2.75rem;
+  padding-inline: .9rem;
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  color: var(--cine-ink);
+  font-size: .87rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.cinema-steps a:hover { background: rgba(255, 255, 255, .17); }
+.cinema-steps [aria-disabled="true"] { opacity: .35; }
+.cinema-steps__up {
+  flex: 1;
+  min-width: 0;
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--cine-green) !important;
+}
+.cinema-steps__up span,
+.cinema-steps__up { overflow: hidden; text-overflow: ellipsis; }
+
 .cinema-viewed {
   display: inline-flex;
   align-items: center;
@@ -2323,18 +2499,234 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   background: #FFFFFF;
 }
 
-/* A course card shows the banner and nothing else on it. The caption sits in a
-   strip beneath the picture - the way the school itself presents these courses -
-   because the artwork is a designed graphic with its own headline, and laying a
-   second headline over it hides the thing the card exists to show. */
-.cinema-card--course { background: var(--cine-raised); }
-.cinema-card--course .cinema-card__art { border-end-start-radius: 0; border-end-end-radius: 0; }
-.cinema-card--course .cinema-card__art img { object-fit: contain; background: #0E0F12; }
-.cinema-card--course .cinema-card__art::after { content: none; }
-.cinema-card--course .cinema-card__body {
-  position: static;
-  padding: .7rem .8rem .85rem;
+
+
+
+/* ── Course picker ───────────────────────────────────────────────────────────
+   Eleven rows is a long page. This stays put under the header so the row a
+   client wants is always one tap away, wherever they have scrolled to. */
+/* A plain sticky bar: the space it takes in the flow is the space it paints.
+   It used to carry the app header's clearance as its own top padding and then
+   claw that back with an equal negative margin. The arithmetic looks sound and
+   is not: the negative margin removes the height from the flow, but the sticky
+   offset puts the bar back down the screen, so the bar ended up painting over
+   a strip of page the browser believed was free - and the first course's
+   heading, which is exactly what lands there, was hidden underneath it. The
+   clearance belongs to the page above the bar, and `.cinema-topgap` provides
+   it, the same way it does on the lesson screen. */
+.cinema-picker {
+  position: sticky;
+  inset-block-start: var(--cine-headroom);
+  z-index: 20;
+  padding-block: .55rem;
+  background: rgba(8, 8, 10, .97);
+  backdrop-filter: blur(14px);
 }
-.cinema-card--course .cinema-card__body strong { text-shadow: none; font-size: .95rem; }
-.cinema-card--course .cinema-card__body small { color: var(--cine-muted); }
-.cinema-card--course .cinema-card__play { inset-block-end: 3.9rem; }
+.cinema-picker__bar { display: flex; align-items: center; gap: .5rem; }
+.cinema-picker__bar .cinema-picker__button { flex: 1; }
+.cinema-picker__step {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: var(--cine-ink);
+}
+.cinema-picker__step:hover { background: rgba(255, 255, 255, .17); }
+.cinema-picker__button {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  width: 100%;
+  min-height: 3rem;
+  padding-inline: 1rem;
+  border: 1px solid var(--cine-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  color: var(--cine-ink);
+  font-size: .95rem;
+  font-weight: 800;
+}
+.cinema-picker__button > span { flex: 1; text-align: start; }
+.cinema-picker__button svg { flex-shrink: 0; transition: transform var(--duration-fast) ease; }
+.cinema-picker__button:hover { background: rgba(255, 255, 255, .17); }
+.cinema-picker__menu { padding-block: .5rem .7rem; }
+.cinema-picker__menu ul {
+  max-height: min(58svh, 26rem);
+  overflow-y: auto;
+  border: 1px solid var(--cine-line);
+  border-radius: 1rem;
+  background: var(--cine-raised);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, .6);
+}
+.cinema-picker__menu li + li { border-block-start: 1px solid var(--cine-line); }
+.cinema-picker__menu button {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  width: 100%;
+  min-height: 3.1rem;
+  padding-inline: 1rem;
+  color: var(--cine-ink);
+  font-size: .93rem;
+  font-weight: 700;
+  text-align: start;
+}
+.cinema-picker__menu button > span { flex: 1; }
+.cinema-picker__menu button small { color: var(--cine-faint); font-weight: 700; }
+.cinema-picker__menu button:hover { background: rgba(255, 255, 255, .08); }
+.cinema-picker__menu button[aria-selected="true"] { color: var(--cine-green); }
+
+/* ── Legibility over artwork ─────────────────────────────────────────────────
+   These banners are photographs and bright designed graphics, not the dark
+   film stills the overlay style assumes. White type laid straight on a plate of
+   salmon or a wall of books cannot be read at any weight, so the caption gets a
+   solid dark plate of its own rather than a gradient that only works when the
+   picture underneath happens to be dark. */
+.cinema-card--lesson .cinema-card__body {
+  inset-inline: .45rem;
+  inset-block-end: .45rem;
+  padding: .5rem .6rem .55rem;
+  border-radius: .6rem;
+  background: rgba(6, 6, 8, .82);
+  backdrop-filter: blur(6px);
+}
+.cinema-card--lesson .cinema-card__body strong { text-shadow: none; }
+.cinema-card--lesson .cinema-card__body small { color: rgba(255, 255, 255, .72); }
+
+
+
+/* ── The player ──────────────────────────────────────────────────────────────
+   Built to look like nobody else's. The frame underneath runs without YouTube's
+   controls, so everything visible here - the poster, the button, the bar - is
+   ours, and a client watching a course they paid for is never shown a channel
+   name, a logo, or a way out to somebody else's video. */
+.cinema-player {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
+}
+/* Filling the screen for real.
+   The header and the tab bar are fixed and would otherwise sit on top of the
+   picture, so they are taken out while the player is up - which is exactly what
+   Eli was seeing when he said the banner was covering it. */
+.cinema-player[data-full="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  aspect-ratio: auto;
+  width: 100vw;
+  height: 100svh;
+  background: #000;
+}
+body:has(.cinema-player[data-full="true"]) .cinema-topgap { display: none; }
+body:has(.cinema-player[data-full="true"]) :is(.mobile-app-header, .desktop-app-nav, .bottom-app-nav, .cinema-picker) {
+  display: none;
+}
+/* No CSS rotation here, deliberately. Turning the player on its side looks
+   right until the client turns the handset too - then the page rotates with the
+   device, the two rotations compound, and the lesson ends up lying on its side
+   with the controls running up the edge of the screen. A phone already knows
+   how to go landscape; the player's job is only to fill whatever shape it is
+   handed, which the rule above does. */
+@media (prefers-reduced-motion: reduce) {
+  .cinema-player[data-full="true"] { transition: none; }
+}
+.cinema-player__frame,
+.cinema-player__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* In fullscreen the frame keeps the video's own shape and sits in the middle of
+   the black, so a portrait phone letterboxes the lesson rather than cropping its
+   sides away. */
+.cinema-player[data-full="true"] .cinema-player__frame {
+  inset: 0;
+  margin: auto;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 100%;
+  max-width: calc(100% * 16 / 9);
+}
+
+/* Covers the frame completely: every tap is ours, and nothing inside can be
+   clicked through to YouTube. */
+.cinema-player__surface { position: absolute; inset: 0; width: 100%; cursor: pointer; }
+
+.cinema-player__poster { position: absolute; inset: 0; width: 100%; cursor: pointer; }
+.cinema-player__poster img { width: 100%; height: 100%; object-fit: cover; }
+.cinema-player__poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, .34);
+}
+.cinema-player__start {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 4.6rem;
+  height: 4.6rem;
+  border-radius: 999px;
+  background: var(--cine-green);
+  color: #04120A;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .55);
+  transition: transform var(--duration-fast) ease;
+}
+.cinema-player__poster:hover .cinema-player__start { transform: translate(50%, -50%) scale(1.08); }
+
+.cinema-player__bar {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: 1.6rem .8rem .7rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, .88), transparent);
+  opacity: 1;
+  transition: opacity var(--duration-base) ease;
+}
+/* The bar steps out of the way during playback and comes back on any touch, so
+   the picture is not permanently framed by furniture. */
+.cinema-player[data-chrome="false"] .cinema-player__bar { opacity: 0; pointer-events: none; }
+.cinema-player__bar button {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  color: #FFFFFF;
+}
+.cinema-player__bar button:hover { background: rgba(255, 255, 255, .18); }
+.cinema-player__time {
+  flex-shrink: 0;
+  font-size: .76rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, .82);
+  font-variant-numeric: tabular-nums;
+}
+.cinema-player__bar input[type="range"] {
+  flex: 1;
+  min-width: 3rem;
+  height: 4px;
+  accent-color: var(--cine-green);
+  cursor: pointer;
+}
+@media (max-width: 420px) {
+  .cinema-player__bar { gap: .35rem; padding-inline: .5rem; }
+  .cinema-player__bar button { width: 2.1rem; height: 2.1rem; }
+}

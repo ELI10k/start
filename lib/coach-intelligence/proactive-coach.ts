@@ -43,14 +43,10 @@ export function buildDailyCoachMessage(input: DailyCoachInput): DailyCoachMessag
     return { tone: "missing", title: "חסרים נתונים להמלצה יומית", summary: "START לא תנחש מה נכון עבורך בלי תפריט ויעדים מלאים.", action: "לבדיקת התפריט והיעדים", href: "/nutrition", evidence };
   }
 
-  const proteinMissing = rounded(input.proteinTarget - input.protein);
-  const caloriesOver = rounded(input.calories - input.calorieTarget);
   const remainingMeals = Math.max(0, input.mealsPlanned - input.mealsCompleted);
 
-  if (proteinMissing >= 20) return { tone: "focus", title: "הפוקוס שלך עכשיו: חלבון", summary: `חסרים לך ${proteinMissing} גרם חלבון כדי להגיע ליעד היומי.`, action: "לבחירת ארוחת החלבון הבאה", href: "/nutrition", evidence };
-  if (caloriesOver >= Math.max(100, input.calorieTarget * 0.1)) return { tone: "focus", title: "הפוקוס שלך עכשיו: חזרה למסגרת", summary: `נרשמו היום ${caloriesOver} קלוריות מעל היעד. אין צורך לנחש שינוי בתוכנית.`, action: "לבדיקת מה שנרשם היום", href: "/nutrition", evidence };
-  if (remainingMeals > 0) return { tone: "focus", title: "הפעולה החשובה הבאה", summary: `נשארו ${remainingMeals} ארוחות לסימון היום.`, action: "להמשך היום התזונתי", href: "/nutrition", evidence };
-  return { tone: "success", title: "סגרת את המשימה המרכזית להיום", summary: "הארוחות סומנו ויעד החלבון הושג. ממשיכים בעקביות, בלי שינוי מיותר.", action: "לסיכום היום", href: "/nutrition", evidence };
+  if (remainingMeals > 0) return { tone: "focus", title: "נשאר לסמן את התפריט היומי", summary: `סומנו ${input.mealsCompleted} מתוך ${input.mealsPlanned} ארוחות. נשארו ${remainingMeals} לסיום היום.`, action: "לסימון הארוחות", href: "/nutrition", evidence };
+  return { tone: "success", title: "התפריט היומי הושלם", summary: "כל הארוחות של היום סומנו. אין עוד פעולה תזונתית שמחכה לך היום.", action: "לצפייה בסיכום היום", href: "/nutrition", evidence };
 }
 
 export type PersistedRiskSignal = Readonly<{ clientId: string; clientName: string; weekEnd: string; risk: number; retentionRisk: number; health: number }>;

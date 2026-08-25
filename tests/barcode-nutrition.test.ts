@@ -125,4 +125,9 @@ test("the lookup prefers START's own catalogue and survives a slow community API
   assert.match(route, /OFF_TIMEOUT_MS/);
   assert.match(route, /lookup_unavailable/);
   assert.match(route, /if \(!auth\) return NextResponse\.json\(\{ error: "unauthorized" \}/);
+  // Once OFF resolves a valid product it becomes shared catalogue data. The
+  // database function normalizes and de-duplicates the barcode.
+  assert.match(route, /rpc\("upsert_scanned_food"/);
+  assert.match(route, /p_source:"openfoodfacts"/);
+  assert.match(route, /catalog_save_failed/);
 });

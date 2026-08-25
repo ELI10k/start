@@ -38,6 +38,19 @@ export default function ProgressPhotoGallery({
     return <StateBlock tone="error" icon={<AlertTriangle aria-hidden="true" size={22}/>} title="לא ניתן לטעון את גלריית התמונות כרגע" description="הקישורים לתמונות פגי תוקף. רענון הדף ייצור קישורים חדשים."/>;
   if (!sessions.length)
     return <StateBlock icon={<Images aria-hidden="true" size={22}/>} title="עדיין אין תמונות התקדמות" description="תמונות שתצרף לצ׳ק־אין יופיעו כאן ויהיה אפשר להשוות בין מועדים."/>;
+  if (sessions.length === 1) {
+    const onlySession = sessions[0];
+    return (
+      <section className="premium-card" aria-labelledby="progress-photos">
+        <h2 id="progress-photos" className="text-xl font-black">תמונות התקדמות</h2>
+        <p className="mt-1 text-sm text-[#5B5F5B]">נשמר מועד אחד. לאחר העלאה נוספת יהיה אפשר להשוות בין שני מועדים.</p>
+        <article className="mt-5 rounded-2xl border border-[#E5E7E5] p-4">
+          <h3 className="font-black">{dateLabel(onlySession.submittedAt)}</h3>
+          <CheckInPhotoGallery photos={onlySession.photos}/>
+        </article>
+      </section>
+    );
+  }
   const first = byId.get(firstId) ?? sessions[0];
   const second = byId.get(secondId) ?? sessions[0];
   return (

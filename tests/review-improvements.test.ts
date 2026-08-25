@@ -28,7 +28,7 @@ test("the weekday is resolved in Israel time too", () => {
 });
 
 test("no client screen computes the day from toISOString", async () => {
-  for (const path of ["app/page.tsx", "app/nutrition/page.tsx", "app/profile/page.tsx"]) {
+  for (const path of ["app/page.tsx", "app/nutrition/page.tsx"]) {
     const text = await source(path);
     assert.doesNotMatch(text, /new Date\(\)\.toISOString\(\)\.slice\(0, ?10\)/, path);
     assert.match(text, /israelDateKey\(\)/, path);

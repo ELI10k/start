@@ -11,6 +11,7 @@ export type InAppNotification = Readonly<{
   href: string;
   createdAt: string;
   readAt: string | null;
+  actorName: string | null;
 }>;
 
 export type NotificationPreferences = Readonly<{
@@ -54,11 +55,17 @@ export async function getNotificationCenter() {
 
   await supabase.rpc("ensure_in_app_reminders");
   const [{ data: notifications, error: notificationError }, { data: preferences, error: preferenceError }] = await Promise.all([
-    supabase.from("notifications").select("id,category,type,title,body,href,created_at,read_at").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(80),
+    supabase.from("notifications").select("id,actor_id,category,type,title,body,href,created_at,read_at").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(80),
     supabase.from("notification_preferences").select("nutrition,workouts,check_ins,content,reminders,workout_morning_reminder,workout_evening_reminder,workout_morning_reminder_time,workout_evening_reminder_time,meal_reminders,meal_reminder_delay_minutes,end_of_day_reminder,end_of_day_reminder_time").eq("user_id", user.id).maybeSingle(),
   ]);
   if (notificationError) throw notificationError;
   if (preferenceError) throw preferenceError;
+  const actorIds=[...new Set((notifications??[]).map((item)=>item.actor_id).filter((id):id is string=>Boolean(id)))];
+  const {data:actors,error:actorsError}=actorIds.length
+    ?await supabase.from("profiles").select("id,full_name").in("id",actorIds)
+    :{data:[],error:null};
+  if(actorsError)throw actorsError;
+  const actorNames=new Map((actors??[]).map((actor)=>[actor.id,actor.full_name]));
   const rows = (notifications ?? []).map((item) => ({
     id: item.id,
     category: item.category,
@@ -68,6 +75,7 @@ export async function getNotificationCenter() {
     href: item.href,
     createdAt: item.created_at,
     readAt: item.read_at,
+    actorName: item.actor_id?actorNames.get(item.actor_id)?.trim()||null:null,
   }));
   return {
     notifications: rows,

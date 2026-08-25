@@ -45,13 +45,19 @@ function editableGroups(meal:StoredDay["meals"][number]){
 }
 export default async function EditMenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  // Set by the redirect that follows a save. It is the only thing that survives
+  // the route change from /coach/menus/new, and it is what the editor uses to
+  // put the confirmation back on the screen.
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "coach") redirect("/unauthorized");
   const { id } = await params;
+  const { saved } = await searchParams;
   const [menu, clients, rows, usageRows] = await Promise.all([
     getCoachMenu(auth.id, id),
     listCoachMenuClients(auth.id),
@@ -113,6 +119,7 @@ export default async function EditMenuPage({
   return (
     <PersistentMenuEditor
       initial={initial}
+      justSaved={saved === "1"}
       foods={foods}
       clients={clients}
       initialUsage={usageRows.map((row) => ({

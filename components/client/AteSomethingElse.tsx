@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Barcode, Camera, Database, PencilLine } from "lucide-react";
+import { useActionState, useRef, useState } from "react";
+import Image from "next/image";
+import { Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -36,11 +37,9 @@ const round = (value: number) => Math.round(value * 10) / 10;
 /**
  * "I ate something else" - in whichever of three ways is true.
  *
- * A sentence is the fastest and carries no figures. A barcode carries the
- * catalog's own figures, scaled to the amount actually eaten, and is the only
- * one of the three that can put calories back into the day. A photograph
- * carries no figures either and tells a coach more in two seconds than a
- * paragraph does.
+ * A barcode or catalogue item carries deterministic figures. Text and photos
+ * are estimated on the server and clearly labelled as such, so every honest
+ * entry contributes to the day without pretending an estimate is a label.
  *
  * None of them touch the plan. The meal is marked eaten-something-else and this
  * is what was eaten instead.
@@ -57,7 +56,7 @@ export default function AteSomethingElse({
   // Empty until the screen has loaded the catalogue; the tab hides itself rather
   // than offering a search with nothing behind it.
   foods = [],
-  unmeasuredNote = "הארוחה לא תיספר בקלוריות של היום — אין דרך לגזור אותן מתיאור או מתמונה. המאמן יראה בדיוק מה אכלת, וזה עוזר לו הרבה יותר מ״לא נאכל״.",
+  unmeasuredNote = "ה־AI יעריך קלוריות ואבות מזון לפי התיאור או התמונה, והערכים יתווספו לסיכום של היום.",
 }: {
   mealId: string;
   date: string;
@@ -70,7 +69,6 @@ export default function AteSomethingElse({
   const [tab, setTab] = useState<"text" | "food" | "scan" | "photo">("text");
   // Shares the barcode tab's gram field: it is the same question, asked once.
   const [pickedId, setPickedId] = useState("");
-  const [state, action] = useActionState(logClientFood, initial);
   const [code, setCode] = useState("");
   const [looking, setLooking] = useState(false);
   const [found, setFound] = useState<Scanned | null>(null);
@@ -78,6 +76,26 @@ export default function AteSomethingElse({
   const [grams, setGrams] = useState("100");
   // Whether a chosen photograph is still being downscaled.
   const [preparing, setPreparing] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState("");
+  const cameraPhoto = useRef<HTMLInputElement>(null);
+  const galleryPhoto = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // A successful entry is one item, not the end of the meal. Leave the sheet
+  // open but return every input to a clean state so the next barcode cannot
+  // inherit the previous product, weight or photograph.
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
+
+  const preparePhoto = async (input: HTMLInputElement) => {
+    const chosen = input.files?.[0];
+    if (!chosen) return;
+    setPreparing(true);
+    const prepared = await shrinkImage(chosen);
+    if (prepared !== chosen) replaceInputFile(input, prepared);
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    setPhotoPreview(URL.createObjectURL(prepared));
+    setPreparing(false);
+  };
 
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
@@ -112,7 +130,7 @@ export default function AteSomethingElse({
     fat: found.fat === null ? null : round(found.fat * factor),
   } : null;
 
-  const close = () => { setFound(null); setMiss(""); setCode(""); onClose(); };
+  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null); setMiss(""); setCode(""); onClose(); };
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
@@ -148,7 +166,7 @@ export default function AteSomethingElse({
         </div>
       )}
 
-      <form action={action} className="mt-4 grid gap-3">
+      <form ref={formRef} action={action} className="mt-4 grid gap-3">
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="mealId" value={mealId} />
         {/* The catalogue reports itself as "scan".
@@ -227,9 +245,8 @@ export default function AteSomethingElse({
         {/* The catalogue, with a weight - the one path here that produces numbers
             without a barcode.
             
-            "תיאור" writes down what was eaten and counts nothing, because there
-            is no way to get calories out of a sentence. Most of what a client
-            eats instead is an ordinary food that is already in the database with
+            Most of what a client eats instead is an ordinary food that is
+            already in the database with
             approved figures beside it; all that was missing was a way to say
             which one and how much of it. Same arithmetic the menu builder uses,
             so the coach's screen and this one cannot disagree about a portion. */}
@@ -290,37 +307,48 @@ export default function AteSomethingElse({
 
         {tab === "photo" && (
           <>
-            <label className="text-sm font-bold">תמונה של הארוחה
-              {/* Downscaled here, before it is uploaded. This path accepts a
-                  photograph per meal with no cadence limit, and it was sending
-                  whatever the camera produced - up to 5MB a picture, which is
-                  ten times what the same photograph is worth to a coach. */}
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-bold">תמונה של הארוחה</legend>
               <input
-                name="photo"
+                ref={cameraPhoto}
+                name="cameraPhoto"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
                 capture="environment"
-                required
-                className="nutrition-input mt-2"
-                onChange={async (event) => {
-                  const input = event.target;
-                  const chosen = input.files?.[0];
-                  if (!chosen) return;
-                  setPreparing(true);
-                  const prepared = await shrinkImage(chosen);
-                  if (prepared !== chosen) replaceInputFile(input, prepared);
-                  setPreparing(false);
-                }}
+                className="sr-only"
+                onChange={(event) => void preparePhoto(event.currentTarget)}
               />
-            </label>
+              <input
+                ref={galleryPhoto}
+                name="photo"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(event) => void preparePhoto(event.currentTarget)}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => cameraPhoto.current?.click()} className="premium-secondary-button">
+                  <Camera aria-hidden="true" size={17} />פתיחת מצלמה
+                </button>
+                <button type="button" onClick={() => galleryPhoto.current?.click()} className="premium-secondary-button">
+                  <Images aria-hidden="true" size={17} />בחירה מהגלריה
+                </button>
+              </div>
+            </fieldset>
             {preparing && <p role="status" className="text-xs text-[#5B5F5B]">מכינים את התמונה…</p>}
+            {photoPreview && !preparing ? (
+              <div className="overflow-hidden rounded-2xl border border-[#16A34A] bg-[#ECFDF3] p-2">
+                <Image src={photoPreview} alt="התמונה שנבחרה לניתוח" width={640} height={420} unoptimized className="max-h-72 w-full rounded-xl object-contain" />
+                <p role="status" className="mt-2 text-center text-sm font-bold text-[#15803D]">התמונה צורפה ותישלח לחישוב</p>
+              </div>
+            ) : null}
             <label className="text-sm font-bold">תיאור <span className="font-normal text-[#5B5F5B]">(רשות)</span>
               <input name="name" maxLength={200} className="nutrition-input mt-2" placeholder="מה יש בצלחת" />
             </label>
           </>
         )}
 
-        {tab !== "scan" && <p className="text-xs text-[#5B5F5B]">{unmeasuredNote}</p>}
+        {(tab === "text" || tab === "photo") && <p className="text-xs text-[#5B5F5B]">{unmeasuredNote}</p>}
 
         {state.message && (
           <p role={state.ok ? "status" : "alert"} className={`rounded-2xl p-3 text-sm font-bold ${state.ok ? "bg-[#ECFDF3] text-[#15803D]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>{state.message}</p>
@@ -331,7 +359,7 @@ export default function AteSomethingElse({
         <div className="sheet__actions" hidden={tab === "food" && !pickedId}>
           <SubmitButton
             idle="שמירה"
-            pending="שומרים…"
+            pending={tab === "text" || tab === "photo" ? "מחשבים ושומרים…" : "שומרים…"}
             className="premium-primary-button w-full"
             event="meal_marked"
             eventProperties={{ status: "other", via: tab }}

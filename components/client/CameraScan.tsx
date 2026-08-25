@@ -23,6 +23,7 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
   const video = useRef<HTMLVideoElement>(null);
   const [live, setLive] = useState(false);
   const [error, setError] = useState("");
+  const [scanState, setScanState] = useState<"align" | "found">("align");
   // The torch, where the browser has one.
   //
   // A barcode in a dim kitchen or a supermarket aisle simply does not decode,
@@ -47,6 +48,7 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
     let cancelled = false;
     let timer = 0;
     let controls: { stop: () => void } | null = null;
+    let resolved = false;
 
     const run = async () => {
       if (!hasCamera()) {
@@ -58,7 +60,13 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
         return;
       }
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+          },
+        });
         if (cancelled) return;
         if (video.current) {
           video.current.srcObject = stream;
@@ -74,8 +82,15 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
       }
 
       const found = (value: string) => {
-        handler.current(value);
-        setLive(false);
+        if (resolved) return;
+        resolved = true;
+        setScanState("found");
+        // Leave the green confirmation visible briefly. Without it the camera
+        // disappeared on the successful frame and felt like it had failed.
+        timer = window.setTimeout(() => {
+          handler.current(value);
+          setLive(false);
+        }, 550);
       };
 
       if (hasNativeDetector()) {
@@ -144,7 +159,7 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
   if (!live) {
     return (
       <>
-        <button type="button" onClick={() => setLive(true)} className="premium-secondary-button">
+        <button type="button" onClick={() => { setScanState("align"); setError(""); setLive(true); }} className="premium-secondary-button">
           <Camera aria-hidden="true" size={17} />סריקה במצלמה
         </button>
         {error && <p role="alert" className="text-sm text-[#DC2626]">{error}</p>}
@@ -154,7 +169,20 @@ export default function CameraScan({ onDetected }: { onDetected: (code: string) 
 
   return (
     <div className="grid gap-2">
-      <video ref={video} muted playsInline className="w-full rounded-2xl border border-[#E5E7E5]" />
+      <div className="relative overflow-hidden rounded-2xl bg-black">
+        <video ref={video} muted playsInline className="block aspect-[4/3] w-full object-cover" />
+        <div className="pointer-events-none absolute inset-0 grid place-items-center bg-black/10 p-8">
+          <div
+            role="status"
+            aria-live="polite"
+            className={`relative h-[52%] w-[78%] rounded-xl border-[4px] transition-colors ${scanState === "found" ? "border-[#16A34A] shadow-[0_0_0_999px_rgba(22,163,74,.08)]" : "border-[#DC2626] shadow-[0_0_0_999px_rgba(0,0,0,.18)]"}`}
+          >
+            <span className={`absolute -bottom-8 right-1/2 translate-x-1/2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-black text-white ${scanState === "found" ? "bg-[#16A34A]" : "bg-[#DC2626]"}`}>
+              {scanState === "found" ? "הברקוד נקלט" : "מקמו את הברקוד במסגרת"}
+            </span>
+          </div>
+        </div>
+      </div>
       {/* A barcode on a curved bottle needs to fill the frame to decode, and
           nothing on screen said so - the camera just sat there. */}
       <p className="text-xs text-[#5B5F5B]">להחזיק את הברקוד ישר וקרוב, שימלא את רוחב המסגרת. אם לא נקרא תוך כמה שניות — אפשר להקליד אותו.</p>

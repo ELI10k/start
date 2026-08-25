@@ -60,12 +60,7 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
     {previous&&<p className="mt-4 rounded-xl border border-[#E5E7E5] p-3 text-sm text-[#5B5F5B]">לעומת האימון הקודם: {workout.totalVolume-previous.totalVolume>=0?"+":""}{workout.totalVolume-previous.totalVolume} ק״ג נפח</p>}
 
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      {editing
-        ? <>
-            <button type="button" onClick={save} disabled={saving} className="min-h-12 rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF] disabled:opacity-40">{saving?"שומרים…":"שמירת השינויים"}</button>
-            <button type="button" onClick={()=>{setDraft(null);setMessage("")}} disabled={saving} className="min-h-12 rounded-2xl border border-[#E5E7E5] px-5 font-bold">ביטול</button>
-          </>
-        : <button type="button" onClick={()=>{setDraft(workout);setMessage("")}} className="min-h-12 rounded-2xl border border-[#16A34A] px-5 font-bold text-[#16A34A]">מילוי או תיקון של האימון</button>}
+      {!editing&&<button type="button" onClick={()=>{setDraft(workout);setMessage("")}} className="min-h-12 rounded-2xl border border-[#16A34A] px-5 font-bold text-[#16A34A]">מילוי או תיקון של האימון</button>}
       {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
     </div>
 
@@ -113,6 +108,11 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
         <Link href={`/workouts/exercises/${result.exerciseId}`} className="mt-3 inline-flex min-h-11 items-center text-sm text-[#16A34A]">היסטוריית התרגיל</Link>
       </article>;
     })}</div>
+
+    {editing&&<div className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] gap-3">
+      <button type="button" onClick={save} disabled={saving} className="min-h-12 rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF] disabled:opacity-40">{saving?"שומרים…":"שמירת השינויים"}</button>
+      <button type="button" onClick={()=>{setDraft(null);setMessage("")}} disabled={saving} className="min-h-12 rounded-2xl border border-[#E5E7E5] px-5 font-bold">ביטול</button>
+    </div>}
 
     <Link href="/workouts/history" className="mt-6 inline-flex min-h-11 items-center">חזרה להיסטוריה</Link>
   </div></main>;

@@ -1,10 +1,21 @@
 import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutProgram } from "./types.ts";
+import { israelDateKey } from "../date-time.ts";
 /**
- * The training week starts on Sunday, and so does the programme.
+ * The client-facing training week starts on Sunday and ends on Saturday.
  *
  * The week the client and the coach both mean when they say "this week".
  */
-const dateOnly=(value:string)=>value.slice(0,10);
+// The calendar day a workout belongs to, as Israel reckons it.
+//
+// `completedAt` is a UTC instant, and slicing its first ten characters gives the
+// UTC day. Israel runs two or three hours ahead, so a workout finished at 01:00
+// on Sunday is stored as Saturday 22:00Z - and every question asked here is
+// asked about the Israeli week. The client who trained late on Sunday night had
+// it counted into the week that had already closed: the day stayed "due", the
+// adherence figure did not move and the streak broke.
+//
+// A bare date key (no time) is already a calendar day and is passed through.
+const dateOnly=(value:string)=>value.length<=10?value:israelDateKey(new Date(value));
 
 export function trainingWeekStart(dateKey: string): string {
   const day = new Date(`${dateKey}T00:00:00Z`);
@@ -35,7 +46,7 @@ export function getTodayWorkoutDay(
   clientId:string,
   // Optional so every existing caller keeps working; when absent the week is
   // taken from the machine's own date, which is what all of them meant.
-  today:string=new Date().toISOString().slice(0,10),
+  today:string=israelDateKey(),
   // Days declared missed, as {dayId, date} - the date so the week can be
   // bounded, the day so the right one is crossed off.
   skipped:readonly {dayId:string;date:string}[]=[],
@@ -54,16 +65,33 @@ export function getTodayWorkoutDay(
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
-export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
-export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>entry.exerciseId===exerciseId)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>entry.exerciseId===exerciseId)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
+export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.filter((exercise)=>exercise.completed).flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
+export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>entry.exerciseId===exerciseId&&entry.completed)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>entry.exerciseId===exerciseId&&entry.completed)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
 export function activeAssignmentFor(assignments:readonly ClientWorkoutAssignment[],clientId:string,date:string):ClientWorkoutAssignment|undefined{return[...assignments].reverse().find((item)=>item.clientId===clientId&&item.status==="active"&&item.startDate<=date&&(!item.endDate||item.endDate>=date))}
 // Every programme the client is running right now, newest first. A client may
 // hold more than one active assignment since the coach can add a programme
 // instead of replacing the running one.
 export function activeAssignmentsFor(assignments:readonly ClientWorkoutAssignment[],clientId:string,date:string):ClientWorkoutAssignment[]{return[...assignments].reverse().filter((item)=>item.clientId===clientId&&item.status==="active"&&item.startDate<=date&&(!item.endDate||item.endDate>=date))}
 export function assignmentState(assignment:ClientWorkoutAssignment,date:string):"not-started"|"expired"|"paused"|"completed"|"active"{if(assignment.status==="paused")return"paused";if(assignment.status==="completed"||assignment.status==="archived")return"completed";if(assignment.startDate>date)return"not-started";if(assignment.endDate&&assignment.endDate<date)return"expired";return"active"}
-export function adherenceSummary(assignmentOrWorkouts:ClientWorkoutAssignment|readonly CompletedWorkout[],workoutsOrAssignment:readonly CompletedWorkout[]|ClientWorkoutAssignment|undefined,todayValue:string|Date){const legacy=Array.isArray(assignmentOrWorkouts);const assignment=(legacy?workoutsOrAssignment:assignmentOrWorkouts) as ClientWorkoutAssignment|undefined;const workouts=(legacy?assignmentOrWorkouts:workoutsOrAssignment) as readonly CompletedWorkout[];if(!assignment)return{completed:0,expected:0,missed:0,percent:0};const today=typeof todayValue==="string"?todayValue:todayValue.toISOString().slice(0,10);const start=new Date(`${assignment.startDate}T00:00:00Z`);const end=new Date(`${today}T00:00:00Z`);const elapsedDays=Math.max(1,Math.floor((end.getTime()-start.getTime())/86400000)+1);const expected=Math.max(1,Math.ceil(elapsedDays/7*assignment.weeklyFrequency));const completed=workouts.filter((item)=>item.assignmentId===assignment.id&&dateOnly(item.completedAt)>=assignment.startDate&&dateOnly(item.completedAt)<=today).length;return{completed,expected,missed:Math.max(0,expected-completed),percent:Math.min(100,Math.round(completed/expected*100))}}
-export function workoutStreak(workouts:readonly CompletedWorkout[],clientId:string):number{const dates=[...new Set(workouts.filter((item)=>item.clientId===clientId).map((item)=>dateOnly(item.completedAt)))].sort((a,b)=>b.localeCompare(a));if(!dates.length)return 0;let streak=1;for(let i=1;i<dates.length;i++){const previous=new Date(`${dates[i-1]}T00:00:00Z`);const current=new Date(`${dates[i]}T00:00:00Z`);if((previous.getTime()-current.getTime())/86400000>7)break;streak++}return streak}
+export function adherenceSummary(assignmentOrWorkouts:ClientWorkoutAssignment|readonly CompletedWorkout[],workoutsOrAssignment:readonly CompletedWorkout[]|ClientWorkoutAssignment|undefined,todayValue:string|Date){const legacy=Array.isArray(assignmentOrWorkouts);const assignment=(legacy?workoutsOrAssignment:assignmentOrWorkouts) as ClientWorkoutAssignment|undefined;const workouts=(legacy?assignmentOrWorkouts:workoutsOrAssignment) as readonly CompletedWorkout[];if(!assignment)return{completed:0,expected:0,missed:0,percent:0};const today=typeof todayValue==="string"?todayValue:israelDateKey(todayValue);const weekStart=trainingWeekStart(today);const completed=workouts.filter((item)=>item.assignmentId===assignment.id&&dateOnly(item.completedAt)>=weekStart&&dateOnly(item.completedAt)<=today).length;const expected=Math.max(1,assignment.weeklyFrequency);return{completed,expected,missed:Math.max(0,expected-completed),percent:Math.min(100,Math.round(completed/expected*100))}}
+
+export function monthlyWorkoutSummary(workouts:readonly CompletedWorkout[],clientId:string,today:string=israelDateKey()){const month=today.slice(0,7);const completed=workouts.filter((item)=>item.clientId===clientId&&dateOnly(item.completedAt).startsWith(month)).length;return{completed}}
+/**
+ * The run of training days that is still going.
+ *
+ * A gap of more than a week ends it - that is what "still going" means here,
+ * and it is deliberately generous, because a client who trains twice a week has
+ * not broken anything by taking Tuesday off.
+ *
+ * The same test has to be applied at the front of the run as between its days.
+ * It was not: the streak was counted backwards from the most recent workout
+ * whenever that was, so a client who trained twenty times and then stopped for
+ * three months kept reading "רצף · 20 אימונים" on their home screen, and the
+ * coach read it on their file. A streak that cannot break is not a streak; it
+ * is a lifetime total wearing the wrong label, and it says "you are doing well"
+ * to exactly the person who has stopped.
+ */
+export function workoutStreak(workouts:readonly CompletedWorkout[],clientId:string,today:string=israelDateKey()):number{const dates=[...new Set(workouts.filter((item)=>item.clientId===clientId).map((item)=>dateOnly(item.completedAt)))].sort((a,b)=>b.localeCompare(a));if(!dates.length)return 0;const gapDays=(from:string,to:string)=>(new Date(`${from}T00:00:00Z`).getTime()-new Date(`${to}T00:00:00Z`).getTime())/86400000;if(gapDays(today,dates[0])>7)return 0;let streak=1;for(let i=1;i<dates.length;i++){if(gapDays(dates[i-1],dates[i])>7)break;streak++}return streak}
 export function trend(current?:number,previous?:number):"up"|"down"|"stable"|"insufficient-data"{if(current===undefined||previous===undefined)return"insufficient-data";if(current>previous)return"up";if(current<previous)return"down";return"stable"}
 
 // The best set that is actually comparable to what is being lifted today.

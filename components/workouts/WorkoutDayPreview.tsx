@@ -114,7 +114,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
     <div className="mt-6 space-y-4">
       {ordered.map((entry) => {
         const exercise = getExercise(entry.exerciseId);
-        return <article key={entry.id} className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
+        return <article key={entry.id} className="workout-exercise-card rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
               <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
@@ -128,7 +128,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
                 {exercise?.equipment && <span className="pill">{exercise.equipment}</span>}
               </div></div>
             </div>
-            <div className="flex shrink-0 flex-col items-end gap-2">
+            <div className="workout-exercise-card__actions">
               {exercise?.video
                 ? <a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink size={15} /></a>
                 : <span className="pill">אין סרטון</span>}

@@ -15,6 +15,7 @@ import { israelDateKey } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
+import { trainingWeekStart } from "@/lib/workouts/progress";
 
 export default async function Home() {
   const auth = await getAuthContext();
@@ -54,6 +55,10 @@ export default async function Home() {
   const completedWorkouts = data.workouts.completed;
   const eatenCalories = Math.round(totals.calories);
   const remainingCalories = calorieTarget ? Math.max(0, Math.round(calorieTarget - totals.calories)) : 0;
+  const currentWeek = trainingWeekStart(today);
+  const checkInDue = !data.checkIns.some((checkIn) =>
+    trainingWeekStart(israelDateKey(new Date(checkIn.submitted_at))) === currentWeek
+  );
 
   return (
     <ClientShell className="client-app-shell--home">
@@ -125,7 +130,9 @@ export default async function Home() {
           <Link href="/check-in" className="quick-action-card">
             <span className="quick-action-card__icon"><ClipboardCheck aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">צ׳ק אין</span>
-            <span className="quick-action-card__meta">דיווח שבועי</span>
+            <span className={`quick-action-card__meta${checkInDue ? " quick-action-card__meta--error" : ""}`}>
+              {checkInDue ? "הגיע זמן צ׳ק אין" : "דיווח שבועי"}
+            </span>
           </Link>
           <Link href="/progress" className="quick-action-card">
             <span className="quick-action-card__icon"><LineChart aria-hidden="true" size={22} /></span>

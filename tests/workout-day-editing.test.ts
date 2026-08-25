@@ -211,3 +211,13 @@ test("the guidance sheet closes three ways and gives the page back", async () =>
   const button = await source("components/workouts/ExerciseGuidanceButton.tsx");
   assert.match(button, /onClick=\{\(\) => setOpen\(false\)\}/);
 });
+
+test("coach exercise cards stay inside the coach-authorized route", async () => {
+  const directory = await source("components/workouts/coach/ExerciseDirectory.tsx");
+  const detail = await source("app/coach/workouts/exercises/[exerciseId]/page.tsx");
+  assert.match(directory, /`\/coach\/workouts\/exercises\/\$\{exercise\.id\}`/);
+  assert.doesNotMatch(directory, /href=\{`\/workouts\/exercises\//);
+  assert.match(directory, /aria-label=\{`פתיחת פרטי \$\{exercise\.name\}`\}/);
+  assert.match(detail, /ExerciseDetail exerciseId=\{exerciseId\}/);
+  assert.match(detail, /href="\/coach\/workouts\/exercises"/);
+});

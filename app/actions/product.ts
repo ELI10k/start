@@ -384,6 +384,57 @@ export async function setMealStatus(form: FormData): Promise<void> {
   if (!MEAL_STATUSES.has(status)) throw new Error("invalid_meal_status");
   if (status === "other" && !note) throw new Error("substitution_requires_note");
 
+  // The legacy database function expects one selection in every group. A
+  // client, however, may genuinely eat only the protein or only the
+  // carbohydrate. Preserve that truth by filling every unchosen group with its
+  // primary item at a zero amount; refresh_meal_intake already excludes zero
+  // portions, so only the foods the client actually chose reach today's totals.
+  if (status === "eaten") {
+    const { data: groups, error: groupsError } = await supabase
+      .from("meal_food_groups")
+      .select("id")
+      .eq("meal_id", id);
+    if (groupsError) throw groupsError;
+    const groupIds = (groups ?? []).map((group) => String(group.id));
+    if (groupIds.length) {
+      const { data: selections, error: selectionsError } = await supabase
+        .from("meal_group_selections")
+        .select("group_id")
+        .in("group_id", groupIds)
+        .eq("selection_date", date);
+      if (selectionsError) throw selectionsError;
+      const selected = new Set((selections ?? []).map((row) => String(row.group_id)));
+      if (!selected.size) throw new Error("יש לבחור לפחות פריט אחד לפני סימון הארוחה.");
+      const missing = groupIds.filter((groupId) => !selected.has(groupId));
+      if (missing.length) {
+        const { data: items, error: itemsError } = await supabase
+          .from("meal_items")
+          .select("id,group_id,item_role,sort_order")
+          .in("group_id", missing)
+          .order("sort_order");
+        if (itemsError) throw itemsError;
+        const primaryByGroup = new Map<string, string>();
+        for (const item of items ?? []) {
+          const groupId = String(item.group_id);
+          if (!primaryByGroup.has(groupId) || item.item_role === "primary")
+            primaryByGroup.set(groupId, String(item.id));
+        }
+        await Promise.all(missing.map(async (groupId) => {
+          const itemId = primaryByGroup.get(groupId);
+          if (!itemId) throw new Error("meal_group_has_no_food");
+          const { error: selectError } = await supabase.rpc("select_meal_group_alternative", {
+            p_group_id: groupId, p_meal_item_id: itemId, p_date: date,
+          });
+          if (selectError) throw selectError;
+          const { error: amountError } = await supabase.rpc("set_meal_group_amount", {
+            p_group_id: groupId, p_date: date, p_quantity: 0,
+          });
+          if (amountError) throw amountError;
+        }));
+      }
+    }
+  }
+
   const { error } = await supabase.rpc("set_meal_day_status", {
     p_meal_id: id,
     p_date: date,
@@ -420,9 +471,19 @@ export async function repeatYesterdaySelections(form: FormData): Promise<void> {
 export async function selectMealGroupAlternative(form:FormData):Promise<void>{
   const supabase=await requireClient();
   const groupId=String(form.get("groupId")??"");
+  const mealId=String(form.get("mealId")??"");
   const itemId=String(form.get("itemId")??"");
   const date=String(form.get("date")??"");
-  if(!/^[0-9a-f-]{36}$/i.test(groupId)||!/^[0-9a-f-]{36}$/i.test(itemId)||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error("invalid_alternative");
+  const selected=form.get("selected")==="true";
+  if(!/^[0-9a-f-]{36}$/i.test(groupId)||!/^[0-9a-f-]{36}$/i.test(mealId)||!/^[0-9a-f-]{36}$/i.test(itemId)||!/^\d{4}-\d{2}-\d{2}$/.test(date))throw new Error("invalid_alternative");
+  if(selected){
+    const{error}=await supabase.from("meal_group_selections").delete().eq("group_id",groupId).eq("selection_date",date);
+    if(error)throw error;
+    const{error:refreshError}=await supabase.rpc("refresh_meal_intake",{p_meal_id:mealId,p_date:date});
+    if(refreshError)throw refreshError;
+    revalidateNutrition();
+    return;
+  }
   const{error}=await supabase.rpc("select_meal_group_alternative",{p_group_id:groupId,p_meal_item_id:itemId,p_date:date});
   if(error)throw error;
   revalidateNutrition();

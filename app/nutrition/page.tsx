@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { Fragment } from "react";
 import ClientShell from "@/components/client/ClientShell";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
@@ -19,8 +20,9 @@ import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
+import OutsideMenuFood from "@/components/client/OutsideMenuFood";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
-import { addTotals, eatenFromMenu, mealStanding, remainingInMenu } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, remainingInMenu } from "@/lib/nutrition/menu-intake";
 
 export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const auth = await getAuthContext();
@@ -61,16 +63,6 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // part joins the day's totals; the rest is shown as unmeasured rather than
   // counted as zero.
   const loggedTotals=sumLoggedFood(logged);
-  const freeCalories=menu?.meals.reduce((sum,meal)=>sum+(meal.freeCalorieTarget??0),0)??0;
-  // Before any choice is made the summary used to read 0 against the target,
-  // which looks like a broken screen rather than "you have not started". Where a
-  // group has no chosen alternative yet the primary stands in for it, so the
-  // number opens as the day the coach planned and then follows the real choices.
-  // What one meal costs as it stands: the chosen alternative in each group, or
-  // the primary where nothing is chosen yet. Shared with the dashboard and the
-  // coach's client file - three screens quoting the same day had three copies of
-  // this and did not agree.
-  const summaryItems = menu?.meals.flatMap(mealStanding) ?? [];
   // Eaten and still to come, kept apart. A single number cannot answer "how am I
   // doing" and "what is left", and a slash between two figures says neither: it
   // reads as a fraction, a score or a ratio depending on who is looking.
@@ -114,17 +106,6 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
   const remainingTotals = remainingInMenu(menu?.meals ?? []);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
-  const menuTotals = menu
-    ? summaryItems.reduce(
-      (sum, item) => ({
-        calories: sum.calories + item.calories,
-        protein: sum.protein + item.protein,
-        carbs: sum.carbs + item.carbs,
-        fat: sum.fat + item.fat,
-      }),
-      { calories: freeCalories + loggedTotals.calories, protein: loggedTotals.protein, carbs: loggedTotals.carbs, fat: loggedTotals.fat },
-    )
-    : undefined;
   // Which meal it is now. The fixed meal titles map to the day, so the screen can
   // open on the meal the client came to mark instead of at the top of a list of
   // six. Free text from onboarding is not used for this - it cannot be relied on
@@ -136,6 +117,14 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     : hour < 16 ? "ארוחת צהריים"
     : hour < 18 ? "ארוחת ביניים 2"
     : "ארוחת ערב";
+  // The catch-all food logger belongs at the end of the eating flow: directly
+  // after free calories when that window exists, otherwise after dinner. A
+  // custom menu without either title still gets it after its final meal.
+  const outsideMenuAfterMealId = menu
+    ? (menu.meals.find((meal) => meal.title === "קלוריות חופשיות")
+      ?? menu.meals.find((meal) => meal.title === "ארוחת ערב")
+      ?? menu.meals.at(-1))?.id
+    : null;
 
   return (
     <ClientShell>
@@ -169,14 +158,13 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
         {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
       </div>
 
-      {freeMenu ? <FreeMenu date={today} day={freeMenu} foods={foods}/> : menu ? (
+      {freeMenu ? <div className="space-y-4"><FreeMenu date={today} day={freeMenu} foods={foods}/><OutsideMenuFood date={today} foods={pickableFoods}/></div> : menu ? (
         <div className="space-y-4">
           {menu.meals.map((meal) => {
-            // The database refuses to mark a meal eaten until every group has a
-            // chosen alternative. That rule was only discoverable by pressing the
-            // button and landing on the error screen, so the button now states the
-            // condition and waits for it.
-            const missingChoice = !meal.freeCalorieTarget && meal.groups.some((group) => !group.selectedItemId);
+            // Eating one part of a meal is still eating. The button becomes
+            // available after any macro group is chosen; unchosen groups are
+            // recorded as zero intake by the server.
+            const noChoice = !meal.freeCalorieTarget && meal.groups.length > 0 && !meal.groups.some((group) => group.selectedItemId);
             // Marked, not reordered: the day still reads in its own order, and
             // the meal that is due right now says so.
             const isNow = isToday && meal.title === currentMealTitle && !meal.status && !meal.completed;
@@ -192,11 +180,10 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             const mark = meal.status === "not_eaten" ? "לא נאכל"
               : meal.status === "other" ? "נאכל משהו אחר"
               : (meal.status === "eaten" || meal.completed) ? "נאכל"
-              : missingChoice ? "ממתין לבחירה"
+              : noChoice ? "ממתין לבחירה"
               : "טרם סומן";
-            return (
+            return <Fragment key={meal.id}>
             <details
-              key={meal.id}
               id={isNow ? "current-meal" : undefined}
               // Six meals in one scroll is a page nobody reads to the end. Each
               // one is a closed row carrying what it costs and where it stands,
@@ -213,7 +200,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               <div className="meal-card__body">
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
-                  {meal.freeCalorieTarget?<p className="text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="text-xs text-[#5B5F5B]">יש לבחור חלופה אחת מכל קבוצה</p>}
+                  {meal.freeCalorieTarget?<p className="text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="text-xs text-[#5B5F5B]">אפשר לסמן לאחר בחירת פריט אחד לפחות</p>}
                 </div>
                 <MealStatusControl
                   mealId={meal.id}
@@ -221,7 +208,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   status={meal.status}
                   statusNote={meal.statusNote}
                   completed={meal.completed}
-                  blocked={missingChoice}
+                  blocked={noChoice}
                   foods={pickableFoods}
                 />
               </div>
@@ -239,8 +226,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   unmeasured={mine.length-measured.length}
                 />;
               })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
-                {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
-                    <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/>
+                {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}. לחיצה נוספת מבטלת בחירה.</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
+                    <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="mealId" value={meal.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/><input type="hidden" name="selected" value={group.selectedItemId===item.id?"true":"false"}/>
                     <MealOptionButton
                       selected={group.selectedItemId===item.id}
                       name={item.name}
@@ -264,7 +251,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               </div>}
               </div>
             </details>
-          );})}
+            {meal.id === outsideMenuAfterMealId ? <OutsideMenuFood date={today} foods={pickableFoods}/> : null}
+          </Fragment>;})}
           {orphanedLogs.length ? (
             <section className="start-surface rounded-[24px] p-5 sm:p-6" aria-labelledby="orphaned-logs">
               <h2 id="orphaned-logs" className="text-lg font-black">נרשם היום, מחוץ לתפריט הנוכחי</h2>
@@ -282,7 +270,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               figures and the meals began below the fold - and the figures are a
               summary of what is underneath them, which is not something to read
               first. Nothing about it changed but where it is. */}
-          {menuTotals ? (
+          {(
             <section
               aria-labelledby="daily-macro-summary"
               className="start-surface rounded-[24px] p-5 sm:p-6"
@@ -294,7 +282,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                 {anyChoiceMade
                   ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו — מה שנשאר בתפריט להיום."
                   : "עדיין לא סומנה אף ארוחה. המספרים יתמלאו ככל שתסמנו."}
-                {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שסרקת.` : ""}
+                {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שנרשמו מחוץ לתפריט.` : ""}
                 {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
               </p>
               {/* No targets here. A target is the coach's instrument, and a menu
@@ -310,14 +298,17 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                 <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} unit="גרם" />
               </dl>
             </section>
-          ) : null}
+          )}
         </div>
       ) : (
-        <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
-          <h2 className="font-black">{isToday ? "עדיין אין תפריט פעיל" : "לא היה תפריט פעיל ביום הזה"}</h2>
-          <p className="mt-2 text-sm text-[#5B5F5B]">
-            {isToday ? "לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן." : "אפשר לחזור להיום ולהמשיך משם."}
-          </p>
+        <div className="space-y-4">
+          <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
+            <h2 className="font-black">{isToday ? "עדיין אין תפריט פעיל" : "לא היה תפריט פעיל ביום הזה"}</h2>
+            <p className="mt-2 text-sm text-[#5B5F5B]">
+              {isToday ? "לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן." : "אפשר לחזור להיום ולהמשיך משם."}
+            </p>
+          </div>
+          <OutsideMenuFood date={today} foods={pickableFoods}/>
         </div>
       )}
     </ClientShell>

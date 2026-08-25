@@ -2,21 +2,22 @@
 import { israelDateKey } from "@/lib/date-time";
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, SkipForward, Target } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, SkipForward, Target, XCircle } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
+import TechniqueVideoButton from "@/components/workouts/client/TechniqueVideoButton";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
-import { activeAssignmentsFor, adherenceSummary, assignmentState, getTodayWorkoutDay, workoutStreak } from "@/lib/workouts/progress";
+import { activeAssignmentsFor, adherenceSummary, assignmentState, getTodayWorkoutDay, monthlyWorkoutSummary, trainingWeekStart } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
 
 const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,skipScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);const[message,setMessage]=useState("");const[pending,setPending]=useState(false);const[missed,setMissed]=useState(false);const[missedReason,setMissedReason]=useState("");
+  const{snapshot,currentClientId,loading,persistenceError,skipScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[message,setMessage]=useState("");const[pending,setPending]=useState(false);const[missed,setMissed]=useState(false);const[missedReason,setMissedReason]=useState("");
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -27,9 +28,7 @@ export default function TodayWorkout(){
   if(state!=="active")return <StateBlock icon={<CalendarDays aria-hidden="true" size={22}/>} title="התוכנית אינה פעילה כרגע" description="לא ניתן להזיז אימון מתוכנית שאינה פעילה."/>;
   const day=getTodayWorkoutDay(program,snapshot.completedWorkouts,currentClientId,today,snapshot.scheduleChanges.filter((c)=>c.clientId===currentClientId&&c.status==="skipped").map((c)=>({dayId:c.dayId,date:c.originalDate})));
   if(!day)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="לתוכנית אין ימי אימון" description="מקור התוכנית אינו כולל יום אימון תקין."/>;
-  const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&item.completedAt.startsWith(today));const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
-  const submit=async(confirmConflict:boolean)=>{if(completed||activeSession||pending)return;setPending(true);try{const result=await moveScheduledWorkout(assignment.id,day.id,today,date,confirmConflict);if(result.conflict&&!confirmConflict){setConflict(true);return}if(result.ok){setMessage(`האימון הועבר בהצלחה ל-${new Date(`${date}T00:00:00`).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}`);setConfirm(false);setConflict(false)}else setMessage("לא ניתן היה להעביר את האימון. נסה שוב.")}finally{setPending(false)}};
-
+  const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&israelDateKey(new Date(item.completedAt))===today);const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const monthly=monthlyWorkoutSummary(snapshot.completedWorkouts,currentClientId,today);const monthlyMissed=snapshot.scheduleChanges.filter((item)=>item.clientId===currentClientId&&item.status==="skipped"&&item.originalDate.startsWith(today.slice(0,7))).length;const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
   const sessionHref=`/workouts/${program.id}/${activeSession?.dayId??day.id}`;
   const startLabel=activeSession?"המשך אימון":"התחלת אימון";
   // Already declared missed today, so the offer to declare it is withdrawn -
@@ -69,13 +68,22 @@ export default function TodayWorkout(){
       </div>
     </section>
 
+    <section className="workout-quick-actions" aria-label="פעולות לאימון">
+      <div className="app-list">
+        <Link href="/workouts/progress">
+          <span className="app-list__emoji" aria-hidden="true">💪</span>
+          <span className="app-list__main"><strong>התקדמות בתרגילים</strong><span>נפח, משקלים ושיאים אישיים</span></span>
+        </Link>
+      </div>
+    </section>
+
     <section className="dashboard-metrics" aria-label="מדדי אימון">
       {/* "2/1" in an RTL column reads as one-of-two, which is the opposite of
           what it says. Spelled out, it cannot be read backwards. */}
       <MetricTile label="הושלמו" value={`${adherence.completed} מתוך ${adherence.expected}`} icon={<CheckCircle2 aria-hidden="true" size={18}/>}/>
       <MetricTile label="התמדה" value={`${adherence.percent}%`} icon={<Target aria-hidden="true" size={18}/>}/>
-      <MetricTile label="פיספסת" value={String(adherence.missed)} accent={adherence.missed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
-      <MetricTile label="רצף" value={`${workoutStreak(snapshot.completedWorkouts,currentClientId)} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
+      <MetricTile label="פיספסת החודש" value={String(monthlyMissed)} accent={monthlyMissed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
+      <MetricTile label="אימונים החודש" value={`${monthly.completed} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
     </section>
 
     {/* What today actually contains. The screen used to name the day and jump
@@ -91,7 +99,7 @@ export default function TodayWorkout(){
       <div className="grid gap-3">
         {[...day.exercises].sort((a,b)=>a.order-b.order).map((entry)=>{
           const exercise=getExercise(entry.exerciseId);
-          return <article key={entry.id} className="premium-card">
+          return <article key={entry.id} className="premium-card workout-exercise-card">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
@@ -102,9 +110,10 @@ export default function TodayWorkout(){
                   {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
                 </div></div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
+              <div className="workout-exercise-card__actions">
                 {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink aria-hidden="true" size={14}/></a>}
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>
+                {exercise&&<TechniqueVideoButton exerciseId={exercise.id} exerciseName={exercise.name}/>}
               </div>
             </div>
             <dl className="compact-data-list mt-3">
@@ -124,13 +133,13 @@ export default function TodayWorkout(){
         <span>{assignment.weeklyFrequency} אימונים בשבוע</span>
       </div>
       <div className="app-list">
-        {schedule.map(({day:item,occurrence,completed:itemCompleted})=>
-          <div key={`${item.id}-${occurrence}`}>
-            <span className="app-list__icon">{itemCompleted?<CheckCircle2 aria-hidden="true" size={17}/>:<Circle aria-hidden="true" size={17}/>}</span>
+        {schedule.map(({day:item,occurrence,completed:itemCompleted})=>{const itemMissed=snapshot.scheduleChanges.some((change)=>change.assignmentId===assignment.id&&change.dayId===item.id&&change.status==="skipped"&&change.originalDate>=trainingWeekStart(today)&&change.originalDate<=today);return (
+          <div key={`${item.id}-${occurrence}`} className={itemMissed?"workout-history-missed":""}>
+            <span className="app-list__icon">{itemCompleted?<CheckCircle2 aria-hidden="true" size={17}/>:itemMissed?<XCircle aria-hidden="true" size={17}/>:<Circle aria-hidden="true" size={17}/>}</span>
             <span className="app-list__main"><strong>{item.name}</strong><span>{item.exercises.length} תרגילים</span></span>
-            <span className={`pill${itemCompleted?" pill--green":""}`}>{itemCompleted?"הושלם":"מתוכנן"}</span>
-          </div>
-        )}
+            <span className={`pill${itemCompleted?" pill--green":itemMissed?" pill--red":""}`}>{itemCompleted?"הושלם":itemMissed?"פוספס":"מתוכנן"}</span>
+          </div>)
+        })}
       </div>
     </section>
 
@@ -151,11 +160,6 @@ export default function TodayWorkout(){
         </div>
         :<StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="עדיין אין אימונים שהושלמו" description="האימון הראשון שתסיים יופיע כאן."/>}
     </section>
-
-    {!completed&&!activeSession&&
-      <button type="button" onClick={()=>setConfirm(true)} className="premium-secondary-button w-full">
-        <Repeat aria-hidden="true" size={17}/>העבר ליום אחר
-      </button>}
 
     {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
 
@@ -193,15 +197,5 @@ export default function TodayWorkout(){
       </div>
     </BottomSheet>
 
-    <BottomSheet open={confirm} title="העברת האימון ליום אחר" onClose={()=>{setConfirm(false);setConflict(false)}}>
-      <label className="block text-sm font-bold">תאריך חדש
-        <input type="date" min={today} value={date} onChange={(event)=>{setDate(event.target.value);setConflict(false)}} className="nutrition-input mt-2"/>
-      </label>
-      {conflict&&<p role="alert" className="mt-3 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">כבר קיים אימון אחר ביום הזה. אפשר להשאיר את שני האימונים באותו יום או לבחור יום אחר.</p>}
-      <div className="sheet__actions">
-        <button onClick={()=>submit(conflict)} disabled={pending||!date||date===today} className="premium-primary-button">{pending?"שומרים…":conflict?"השאר את שני האימונים":"אישור העברה"}</button>
-        <button onClick={()=>{setConfirm(false);setConflict(false)}} disabled={pending} className="premium-secondary-button">ביטול</button>
-      </div>
-    </BottomSheet>
   </div>;
 }

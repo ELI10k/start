@@ -39,7 +39,7 @@ export default function LoggedFoodList({
             {readOnly ? null : (
               <form action={deleteClientFoodLog}>
                 <input type="hidden" name="id" value={entry.id} />
-                <button aria-label={`מחיקת ${entry.name}`} className="rounded-lg p-1 text-[#DC2626]">
+                <button aria-label={`מחיקת ${entry.name}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-[#DC2626]">
                   <Trash2 aria-hidden="true" size={15} />
                 </button>
               </form>
@@ -55,6 +55,9 @@ export default function LoggedFoodList({
               {entry.quantity ? `${entry.quantity} ${entry.unit ?? "גרם"} · ` : ""}
               {entry.calories} קל׳
               {entry.protein !== null ? ` · ${entry.protein} ג׳ חלבון` : ""}
+              {entry.carbs !== null ? ` · ${entry.carbs} ג׳ פחמימות` : ""}
+              {entry.fat !== null ? ` · ${entry.fat} ג׳ שומן` : ""}
+              {entry.nutritionEstimated ? " · הערכת AI" : ""}
             </p>
           ) : (
             <p className="mt-2 text-xs text-[#5B5F5B]">לא נספר בקלוריות — אין ערכים מאושרים לתיאור או לתמונה.</p>

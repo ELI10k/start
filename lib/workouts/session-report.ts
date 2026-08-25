@@ -25,6 +25,8 @@ export type ReportExercise = Readonly<{
   /** The same exercise's most recent previous session, if there is one. */
   previousSets: readonly ExerciseSetResult[];
   skipped: boolean;
+  completed?: boolean;
+  difficulty?: "easy" | "hard";
 }>;
 
 export type WorkoutReportInput = Readonly<{
@@ -56,7 +58,7 @@ export function expectedSeconds(exercises: readonly ReportExercise[]) {
 
 export function buildWorkoutReport(input: WorkoutReportInput): readonly WorkoutInsight[] {
   const insights: WorkoutInsight[] = [];
-  const trained = input.exercises.filter((exercise) => !exercise.skipped);
+  const trained = input.exercises.filter((exercise) => !exercise.skipped&&exercise.completed!==false);
 
   // ── Pace ────────────────────────────────────────────────────────────────
   const expected = expectedSeconds(input.exercises);
@@ -81,24 +83,16 @@ export function buildWorkoutReport(input: WorkoutReportInput): readonly WorkoutI
     // Same weight as last time, and every set was completed.
     return before > 0 && now > 0 && now === before && done.length === exercise.sets.length;
   });
-  if (ready.length)
-    insights.push({
-      tone: "action",
-      title: ready.length === 1 ? "אפשר לעלות במשקל" : "אפשר לעלות במשקל בכמה תרגילים",
-      detail: `${ready.map((exercise) => exercise.name).join(", ")} - השלמת את כל הסטים באותו משקל כמו בפעם הקודמת. בפעם הבאה כדאי לנסות עלייה קטנה.`,
-    });
+  ready.forEach((exercise)=>insights.push({tone:"action",title:`${exercise.name} · אפשר לעלות`,detail:"כל הסטים הושלמו במשקל הקודם. באימון הבא כדאי לנסות את העלייה הקטנה שמוצגת בכרטיס האתגר."}));
 
   const improved = trained.filter((exercise) => {
     const now = heaviest(exercise.sets);
     const before = heaviest(exercise.previousSets);
     return before > 0 && now > before;
   });
-  if (improved.length)
-    insights.push({
-      tone: "praise",
-      title: "עלית במשקל",
-      detail: `${improved.map((exercise) => `${exercise.name} (${heaviest(exercise.previousSets)} → ${heaviest(exercise.sets)} ק״ג)`).join(", ")}. זו בדיוק ההתקדמות שמחפשים.`,
-    });
+  improved.forEach((exercise)=>insights.push({tone:"praise",title:`${exercise.name} · עלייה במשקל`,detail:`${heaviest(exercise.previousSets)} → ${heaviest(exercise.sets)} ק״ג.`}));
+
+  trained.filter((exercise)=>exercise.difficulty).forEach((exercise)=>insights.push({tone:exercise.difficulty==="hard"?"note":"action",title:`${exercise.name} · ${exercise.difficulty==="hard"?"היה קשה":"היה קל"}`,detail:exercise.difficulty==="hard"?"באימון הבא ההמלצה תישאר זהירה יותר.":"באימון הבא ההמלצה תאפשר התקדמות קטנה."}));
 
   // ── What did not get finished ───────────────────────────────────────────
   const skipped = input.exercises.filter((exercise) => exercise.skipped);

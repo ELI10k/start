@@ -10,6 +10,15 @@ import PushRegistration from "@/components/client/PushRegistration";
 const when = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem", day: "numeric", month: "short" });
 
+export const notificationTitle=(notification:InAppNotification)=>{
+  const name=notification.actorName;
+  if(!name)return notification.title;
+  if(notification.type==="workout_skipped")return `הלקוח ${name} סימן שפיספס אימון`;
+  if(notification.type==="progress_updated")return `${name} הוסיף מדידת משקל`;
+  if(notification.type==="check_in_submitted")return `${name} שלח צ׳ק־אין חדש`;
+  return `${name} · ${notification.title}`;
+};
+
 export default function NotificationsCenter({ notifications, unreadCount, preferences }: { notifications: readonly InAppNotification[]; unreadCount: number; preferences: NotificationPreferences }) {
   return <div className="grid gap-4">
     <header className="premium-page-header">
@@ -29,7 +38,7 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
       {notifications.map((notification) =>
         <div key={notification.id} data-unread={notification.readAt ? undefined : "true"}>
           <Link href={notification.href} className="app-list__main">
-            <strong>{notification.title}</strong>
+            <strong>{notificationTitle(notification)}</strong>
             <span>{notification.body}</span>
           </Link>
           <span className="app-list__meta">{when(notification.createdAt)}</span>

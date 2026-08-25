@@ -8,6 +8,7 @@ import {
   foodLogPhotoPath,
   validateFoodLogPhoto,
 } from "@/lib/nutrition/food-log";
+import { estimateFoodNutrition } from "@/lib/nutrition/food-estimator";
 
 export type FoodLogState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -39,10 +40,9 @@ const uuid = (value: FormDataEntryValue | null) => {
 /**
  * Records what the client actually ate, when it was not what the plan said.
  *
- * Three shapes arrive here and they differ only in what they carry. A sentence
- * carries no figures and never pretends to. A scan carries the catalog's own
- * numbers, scaled to the amount the client says they had. A photograph carries
- * neither, and is worth more than both to a coach reading it.
+ * Catalogue and barcode entries carry deterministic figures. A sentence or a
+ * photograph is estimated by the server-side model, validated, and labelled as
+ * an estimate before it is allowed into the day's totals.
  *
  * The entry stands beside the meal rather than inside it: the plan is what the
  * coach wrote and does not change because a person ate something else.
@@ -58,12 +58,48 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   if (!["text", "scan", "photo"].includes(source)) return { ok: false, message: RULES.invalid_food_source };
 
   const name = String(form.get("name") ?? "").trim().slice(0, 200);
-  const photo = form.get("photo");
+  const galleryPhoto = form.get("photo");
+  const cameraPhoto = form.get("cameraPhoto");
+  const photo = galleryPhoto instanceof File && galleryPhoto.size > 0 ? galleryPhoto : cameraPhoto;
   const hasPhoto = photo instanceof File && photo.size > 0;
+  if (source === "photo" && !hasPhoto) return { ok: false, message: "יש לצלם את הארוחה או לבחור תמונה מהגלריה." };
   // A photograph is its own description. Requiring a sentence beside it is the
   // kind of small tax that stops people logging anything at all.
-  const resolvedName = name || (hasPhoto ? "תמונה של הארוחה" : "");
+  let resolvedName = name || (hasPhoto ? "תמונה של הארוחה" : "");
   if (!resolvedName) return { ok: false, message: RULES.food_name_required };
+
+  let calories = number(form, "calories");
+  let protein = number(form, "protein");
+  let carbs = number(form, "carbs");
+  let fat = number(form, "fat");
+  const needsEstimate = source === "text" || source === "photo";
+  // An estimate that does not arrive is not a reason to lose the entry.
+  //
+  // The estimator is one HTTP call to an external gateway, and it fails for
+  // reasons that have nothing to do with the client: an expired deployment
+  // token, a provider outage, a slow answer past the twenty-second cut-off.
+  // Refusing the save on any of those threw away the one thing that cannot be
+  // reconstructed later - what the person actually ate - and told them to pick
+  // something from a catalogue that does not contain their mother's cooking.
+  //
+  // So the row is written either way. With figures it joins the day's totals;
+  // without them it is stored unmeasured, which the screens already understand
+  // and already say out loud ("אינם נספרים - אין להם ערכים מאושרים"), and the
+  // coach still sees the sentence the client wrote.
+  let estimateFailed = false;
+  if (needsEstimate) {
+    const estimate = await estimateFoodNutrition({ description: name, photo: hasPhoto ? photo : undefined });
+    if (estimate) {
+      resolvedName = name || estimate.name;
+      ({ calories, protein, carbs, fat } = estimate);
+    } else {
+      estimateFailed = true;
+      calories = null;
+      protein = null;
+      carbs = null;
+      fat = null;
+    }
+  }
 
   const supabase = await createSupabaseServerClient();
 
@@ -86,10 +122,10 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     p_food_id: String(form.get("foodId") ?? "").trim() || null,
     p_quantity: number(form, "quantity"),
     p_unit: String(form.get("unit") ?? "").trim() || null,
-    p_calories: number(form, "calories"),
-    p_protein: number(form, "protein"),
-    p_carbs: number(form, "carbs"),
-    p_fat: number(form, "fat"),
+    p_calories: calories,
+    p_protein: protein,
+    p_carbs: carbs,
+    p_fat: fat,
     p_photo_path: photoPath,
   });
 
@@ -133,7 +169,11 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
 
   revalidatePath("/nutrition");
   revalidatePath("/");
-  return { ok: true, message: "נרשם. המאמן יראה בדיוק מה אכלת." };
+  return { ok: true, message: estimateFailed
+    ? "נרשם — אבל לא הצלחנו להעריך את הערכים כרגע, אז הפריט לא נספר בסיכום של היום. המאמן רואה מה נכתב."
+    : needsEstimate
+      ? `נרשם עם הערכה: ${calories} קל׳ · ${protein} ג׳ חלבון · ${carbs} ג׳ פחמימות · ${fat} ג׳ שומן.`
+      : "נרשם ונוסף לסיכום של היום." };
 }
 
 export async function deleteClientFoodLog(form: FormData): Promise<void> {

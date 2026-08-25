@@ -6,8 +6,10 @@ import type { ExerciseSetResult } from "./types.ts";
 // so they either guessed low and wasted a set or guessed high and warmed up on
 // their working weight. The numbers below are Eli's protocol, given 2026-08-19:
 //
-//   50% x 10, then 70% x 5
-//   a third at 85% x 3 for the heavy compounds
+//   The load ramps through 50%, 70% (and 85% for heavy compounds), while the
+//   repetitions follow the prescription of the workout being performed. This
+//   keeps a 12-rep day at 12 reps instead of leaking the old 10/5 protocol into
+//   a programme that asks the client for something else.
 //   and for easy work - RPE 6 or below - one set is enough
 //
 // Everything is derived from what the client actually lifted last time. With no
@@ -28,8 +30,6 @@ export type WarmupPlan = Readonly<{
 // Gyms have 1.25 kg plates a side at best, so 2.5 kg is the smallest jump that
 // is actually loadable on a bar.
 const toLoadable = (value: number) => roundToPlate(value);
-
-const parseRpe = (effort?: string) => parseEffort(effort);
 
 /**
  * The heaviest weight completed for this exercise in the most recent session
@@ -57,30 +57,31 @@ export function workingWeightFrom(
  */
 export function planWarmup(
   workingWeightKg: number | null,
-  options: { effort?: string; compound?: boolean } = {},
+  options: { effort?: string; compound?: boolean; repetitions?: number } = {},
 ): WarmupPlan | null {
+  void options.effort;
+  void options.compound;
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
+  // Repetitions are never invented here. The warm-up follows the prescription
+  // of the exercise in the workout currently being performed; if that
+  // prescription is missing, there is no honest repetition recommendation.
+  if (!options.repetitions || !Number.isFinite(options.repetitions) || options.repetitions <= 0) return null;
 
-  const rpe = parseRpe(options.effort);
-  const steps: readonly { percent: number; repetitions: number }[] =
-    rpe !== null && rpe <= 6
-      ? [{ percent: 50, repetitions: 10 }]
-      : options.compound
-        ? [
-            { percent: 50, repetitions: 10 },
-            { percent: 70, repetitions: 5 },
-            { percent: 85, repetitions: 3 },
-          ]
-        : [
-            { percent: 50, repetitions: 10 },
-            { percent: 70, repetitions: 5 },
-          ];
+  const repetitions = Math.round(options.repetitions);
+  const steps: readonly { percent: number; repetitions: number }[] = [
+    { percent: 50, repetitions },
+    { percent: 70, repetitions },
+  ];
+
+  const first=toLoadable(workingWeightKg*.5);
+  let second=toLoadable(workingWeightKg*.7);
+  if(second<=first)second=Math.min(workingWeightKg,first+2.5);
 
   return {
     workingWeightKg,
-    sets: steps.map((step) => ({
+    sets: steps.map((step,index) => ({
       percent: step.percent,
-      weightKg: toLoadable((workingWeightKg * step.percent) / 100),
+      weightKg: index===0?first:second,
       repetitions: step.repetitions,
     })),
   };
@@ -117,7 +118,6 @@ export const warmupPlan = planWarmup;
 
 /** How many warm-up sets the protocol calls for, without computing the weights. */
 export const warmupStepCount = (options: { effort?: string; compound?: boolean } = {}) => {
-  const rpe = parseEffort(options.effort);
-  if (rpe !== null && rpe <= 6) return 1;
-  return options.compound ? 3 : 2;
+  void options;
+  return 2;
 };

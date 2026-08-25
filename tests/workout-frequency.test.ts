@@ -26,7 +26,7 @@ const assignment = (weeklyFrequency: number): ClientWorkoutAssignment => ({
   status: "active",
 });
 
-// Sunday 2026-08-09 starts the week; Tuesday 2026-08-11 is inside it.
+// Sunday 2026-08-09 starts the client training week; Tuesday is inside it.
 const TODAY = "2026-08-11";
 const completed = (dayId: string, date: string): CompletedWorkout => ({
   id: `workout-${dayId}-${date}`,

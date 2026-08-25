@@ -44,7 +44,7 @@ export default function MealOptionButton({
         {household ? <span className="text-xs text-[#5B5F5B]">{household}</span> : null}
         {/* The coach's own words, in their own colour so they do not read as
             another measurement. */}
-        {note ? <span className="truncate text-xs font-bold text-[#16A34A]">{note}</span> : null}
+        {note ? <span className="mt-1 rounded-lg bg-[#FEF2F2] px-2 py-1 text-xs font-bold leading-5 text-[#DC2626]">הערה: {note}</span> : null}
       </span>
       {/* The figures were being pushed off the edge of a phone. They keep their
           own column, they are allowed to sit on two lines, and they never wrap

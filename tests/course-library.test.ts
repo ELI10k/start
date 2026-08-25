@@ -319,14 +319,21 @@ test("the navigation bar sits at the top and clears the app header", async () =>
   // banner; Eli has since had the banner taken off this screen, so what has to
   // hold now is that the bar is the first element of the page and that no
   // banner has crept back in above it.
-  assert.match(page, /<CinemaChrome \/>\s*<CoursePicker/);
+  // Nothing but the header clearance stands between the shell and the bar.
+  assert.match(page, /<CinemaChrome \/>\s*<div className="cinema-topgap"[^>]*\/>\s*<CoursePicker/);
   assert.equal(/cinema-hero/.test(page), false);
   const bar = css.match(/\.cinema-picker \{[^}]*\}/s)?.[0] ?? "";
   assert.match(bar, /position: sticky/);
   assert.match(bar, /inset-block-start: var\(--cine-headroom\)/);
-  // The headroom is padding that the sticky bar gives back, so it cannot travel
-  // down the page as a band of empty black.
-  assert.match(bar, /margin-block-start: calc\(var\(--cine-headroom\) \* -1\)/);
+  /* The bar must take exactly the space it paints. It used to carry the app
+     header's clearance as its own top padding and claw it back with an equal
+     negative margin - which removes the height from the flow while the sticky
+     offset puts the bar back down the screen, so the bar painted over a strip
+     of page the browser believed was free. The first course's heading is what
+     lands there, and it was invisible underneath it. The clearance is the
+     page's now, above the bar. */
+  assert.equal(/margin-block-start: calc\(var\(--cine-headroom\) \* -1\)/.test(bar), false);
+  assert.match(page, /<div className="cinema-topgap" aria-hidden="true" \/>\s*<CoursePicker/);
   // And it carries the way back, which a home-screen app has no chrome for.
   assert.match(picker, /router\.back\(\)/);
   assert.match(picker, /router\.forward\(\)/);
@@ -471,4 +478,22 @@ test("the library opens on the rows, with no banner above them", async () => {
   // A course still has its banner on its own screen, which keeps one.
   const coursePage = await file("app/content/category/[category]/page.tsx");
   assert.match(coursePage, /cinema-hero/);
+});
+
+test("a course row says what the course is, above the row", async () => {
+  const [rail, page, css] = await Promise.all([
+    file("components/client/CinemaRail.tsx"),
+    file("app/content/page.tsx"),
+    file("app/globals.css"),
+  ]);
+  // The line that used to live in the banner, now above the cards it describes.
+  assert.match(rail, /description\?: string \| null;/);
+  assert.match(rail, /className="cinema-rail__blurb"/);
+  assert.match(page, /description=\{course\.description\}/);
+  // A course with no description shows no empty line.
+  assert.match(rail, /\{description \? \(/);
+  // Heading and blurb stack on the reading edge rather than sitting side by side.
+  const head = css.match(/\.cinema-rail__head \{[^}]*\}/s)?.[0] ?? "";
+  assert.match(head, /flex-direction: column/);
+  assert.match(head, /align-items: flex-start/);
 });

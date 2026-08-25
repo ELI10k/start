@@ -3,7 +3,7 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import { normalizeExerciseName, stableWorkoutId } from "../lib/workouts/normalization.ts";
 import { archiveWorkoutProgram, assignWorkout, createMemoryWorkoutRepository, duplicateWorkoutProgram, saveCompletedWorkout, startWorkoutSession } from "../lib/workouts/storage.ts";
-import { exercisePerformance, getTodayWorkoutDay, workoutCompletionPercent, workoutVolume } from "../lib/workouts/progress.ts";
+import { exercisePerformance, getTodayWorkoutDay, trainingWeekStart, workoutCompletionPercent, workoutStreak, workoutVolume } from "../lib/workouts/progress.ts";
 import type { ActiveWorkoutSession, ClientWorkoutAssignment, CompletedWorkout, WorkoutProgram, WorkoutRepositorySnapshot } from "../lib/workouts/types.ts";
 
 const fixture:WorkoutProgram={id:"program-test",name:"TEST ONLY",sourceWorkbook:"test.xlsx",status:"active",official:true,equipment:[],days:[{id:"day-a",name:"A",order:0,exercises:[{id:"we-1",exerciseId:"ex-1",order:0,sets:"3",reps:"10"}]},{id:"day-b",name:"B",order:1,exercises:[]}]};
@@ -17,6 +17,7 @@ test("assignment replacement keeps one active assignment",()=>{const first=assig
 test("program duplication keeps content order and creates an editable copy",()=>{const copy=duplicateWorkoutProgram(fixture,"copy");assert.equal(copy.official,false);assert.equal(copy.duplicatedFromId,fixture.id);assert.deepEqual(copy.days.map((day)=>day.order),[0,1]);assert.equal(copy.days[0].exercises[0].exerciseId,"ex-1")});
 test("official programs cannot be archived",()=>{assert.equal(archiveWorkoutProgram([fixture],fixture.id)[0].status,"active");const custom={...fixture,id:"custom",official:false};assert.equal(archiveWorkoutProgram([custom],custom.id)[0].status,"archived")});
 test("only one active workout can exist per client",()=>{const once=startWorkoutSession(initial,session);const twice=startWorkoutSession(once,{...session,id:"other"});assert.equal(twice.activeSessions.length,1)});
+test("the client training week runs Sunday through Saturday",()=>{assert.equal(trainingWeekStart("2026-08-23"),"2026-08-23");assert.equal(trainingWeekStart("2026-08-29"),"2026-08-23");assert.equal(trainingWeekStart("2026-08-30"),"2026-08-30")});
 test("completion is idempotent, closes active session and updates performance",()=>{const started=startWorkoutSession({...initial,assignments:[assignment("a1",fixture.id)]},session);const saved=saveCompletedWorkout(started,completion);const repeated=saveCompletedWorkout(saved,completion);assert.equal(repeated.completedWorkouts.length,1);assert.equal(repeated.activeSessions.length,0);assert.equal(workoutVolume(completion),200);assert.equal(exercisePerformance(repeated.completedWorkouts,"client","ex-1").sessions.length,1);// Within the training week the completion belongs to. The programme counts
   // per week now, so a date is part of the question rather than implied.
   assert.equal(getTodayWorkoutDay(fixture,repeated.completedWorkouts,"client","2026-07-20")?.id,"day-b");
@@ -39,3 +40,36 @@ test("direct workout sessions wait for Supabase before returning not found",asyn
 test("all direct workout detail routes defer record checks until Supabase has loaded",async()=>{for(const path of ["app/workouts/history/[workoutId]/page.tsx","app/workouts/exercises/[exerciseId]/page.tsx","app/workouts/program/[programId]/page.tsx","app/workouts/[programId]/[dayId]/page.tsx","app/coach/workouts/[id]/page.tsx","app/coach/workouts/[id]/days/[dayId]/page.tsx"]){const source=await readFile(new URL(`../${path}`,import.meta.url),"utf8");assert.match(source,/WorkoutRouteReady/)}})
 test("workout history and progress wait for Supabase and expose load errors",async()=>{for(const path of ["app/workouts/history/page.tsx","app/workouts/progress/page.tsx"]){const source=await readFile(new URL(`../${path}`,import.meta.url),"utf8");assert.match(source,/WorkoutRouteReady/)}const guard=await readFile(new URL("../components/workouts/WorkoutRouteReady.tsx",import.meta.url),"utf8");assert.match(guard,/persistenceError/);assert.match(guard,/role="alert"/)});
 test("scheduled workout moves persist one date override and protect completed or conflicting sessions",async()=>{const sql=await readFile(new URL("../supabase/migrations/202607210001_workout_schedule_changes.sql",import.meta.url),"utf8");const guard=await readFile(new URL("../supabase/migrations/202607270004_prevent_same_day_workout_moves.sql",import.meta.url),"utf8");const today=await readFile(new URL("../components/workouts/client/TodayWorkout.tsx",import.meta.url),"utf8");for(const item of ["workout_schedule_changes","original_date","scheduled_date","moved_at","move_scheduled_workout","completed_workout_cannot_move","p_confirm_conflict","workout-morning-","workout-evening-"])assert.match(sql,new RegExp(item));assert.match(sql,/unique \(assignment_id, original_date\)/);assert.match(guard,/p_new_date <= p_original_date/);assert.match(today,/scheduledDate!==item\.originalDate/);assert.match(today,/העבר ליום אחר/);assert.match(today,/כבר קיים אימון אחר ביום הזה/);assert.match(today,/האימון הועבר בהצלחה/);assert.match(today,/האימון הושלם ולכן אינו ניתן להעברה/)});
+
+// A workout finished late on a Sunday night in Israel is stored as Saturday
+// 22:00Z. Read as a UTC day it lands in the week that had already closed: the
+// day it answered stayed due, the adherence figure did not move, and the streak
+// broke on a night the client actually trained. Every question about a training
+// week is asked about the Israeli calendar, so the instant is resolved there.
+test("a workout finished after midnight in Israel belongs to the Israeli day",()=>{
+  const lateSunday:CompletedWorkout={...completion,id:"workout-late",completedAt:"2026-07-25T22:30:00Z"};
+  // 2026-07-25 22:30Z is 2026-07-26 01:30 in Israel - a Sunday, which opens its
+  // own training week.
+  assert.equal(trainingWeekStart("2026-07-26"),"2026-07-26");
+  // day-a was answered by that workout, so day-b is what is due.
+  assert.equal(getTodayWorkoutDay(fixture,[lateSunday],"client","2026-07-26")?.id,"day-b");
+  // And it does not answer anything in the week that had already closed.
+  assert.equal(getTodayWorkoutDay(fixture,[lateSunday],"client","2026-07-25")?.id,"day-a");
+});
+
+// A streak is a run that is still going. Counting backwards from the most recent
+// workout, whenever that was, produced a lifetime total that could never fall -
+// so the client who had stopped three months ago was the one being told "רצף ·
+// 3 אימונים" on the screen meant to get them back.
+test("a streak that has been abandoned is no longer a streak",()=>{
+  const on=(date:string,id:string):CompletedWorkout=>({...completion,id,completedAt:`${date}T09:00:00Z`});
+  const run=[on("2026-07-20","w1"),on("2026-07-23","w2"),on("2026-07-26","w3")];
+  // Read the day after the last one: three training days, no gap over a week.
+  assert.equal(workoutStreak(run,"client","2026-07-27"),3);
+  // Still counted a week later - the tolerance is deliberately generous.
+  assert.equal(workoutStreak(run,"client","2026-08-02"),3);
+  // And gone once nothing has happened for more than a week.
+  assert.equal(workoutStreak(run,"client","2026-08-10"),0);
+  // A gap inside the run still ends it where it broke.
+  assert.equal(workoutStreak([...run,on("2026-06-01","w0")],"client","2026-07-27"),3);
+});

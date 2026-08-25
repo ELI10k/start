@@ -7,6 +7,7 @@ import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, Repeat2, R
 import BottomSheet from "@/components/client/BottomSheet";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
+import TechniqueVideoButton from "@/components/workouts/client/TechniqueVideoButton";
 import { track } from "@/lib/analytics/client";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
@@ -15,6 +16,7 @@ import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompl
 import { isCompoundLift, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
+import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
 const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);return Number.isFinite(count)&&count>0?Math.min(count,20):0};
@@ -59,7 +61,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     id:`session-${currentClientId}-${Date.now()}`,clientId:currentClientId,assignmentId:assignment?.id??"",programId,dayId,
     startedAt:new Date().toISOString(),currentExerciseIndex:0,sleepHours:startingSleepHours,energy:startingEnergy,
     exerciseResults:ordered.map((entry):ActiveExerciseResult=>{
-      const last=exercisePerformance(snapshot.completedWorkouts,currentClientId,entry.exerciseId).sessions[0];
+      // Compare like with like: workout 1 is based on workout 1 from the
+      // previous week, never on workout 2 merely because it happened later.
+      const comparable=snapshot.completedWorkouts.filter((workout)=>workout.programId===programId&&workout.dayId===dayId);
+      const last=exercisePerformance(comparable,currentClientId,entry.exerciseId).sessions[0];
       return{workoutExerciseId:entry.id,exerciseId:entry.exerciseId,skipped:false,completed:false,
         sets:Array.from({length:setCount(entry.sets)},(_,index):ExerciseSetResult=>{
           const previous=last?.sets[index];
@@ -86,6 +91,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         sets:entry.sets,
         previousSets:history[0]?.sets??[],
         skipped:entry.skipped,
+        completed:entry.completed,
+        difficulty:entry.difficulty,
       };
     });
     return <Finished workout={saved} insights={buildWorkoutReport({
@@ -101,7 +108,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // What is on screen is what is being done. The prescribed exercise is still
   // recorded and is named below when the two differ.
   const performedId=result.performedExerciseId??result.exerciseId;
-  const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);const performance=exercisePerformance(snapshot.completedWorkouts,currentClientId,performedId);const previous=performance.sessions[0];// The best set that is comparable to today's work, not the heaviest weight ever
+  const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);
+  const comparableWorkouts=snapshot.completedWorkouts.filter((workout)=>workout.programId===programId&&workout.dayId===dayId);
+  const performance=exercisePerformance(comparableWorkouts,currentClientId,performedId);const previous=performance.sessions[0];// The best set that is comparable to today's work, not the heaviest weight ever
   // moved on the exercise: a 12-rep back-off set is not a benchmark for a 10-rep
   // working set, and offering it as one is how a client ends up chasing a number
   // from a different job.
@@ -109,8 +118,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const best=bestComparableSet(performance.sessions,repTarget);
   // What to load before the working sets, worked out from what was actually
   // lifted last time. No previous session means no honest percentage of anything.
-  const warmup=planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name)});
-  const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
+  const firstForMuscle=ordered.findIndex((entry)=>getExercise(entry.exerciseId)?.primaryMuscleGroup===exercise?.primaryMuscleGroup)===session.currentExerciseIndex;
+  const warmup=firstForMuscle?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
+  const challenge=previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment}):null;
+  const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
   // A replacement has to train the same thing, so the list is the catalogue
   // filtered to the prescribed exercise's primary muscle group. Both fields are
@@ -119,7 +130,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     .filter((item)=>item.id!==performedId&&item.status!=="archived"&&prescribed?.primaryMuscleGroup&&item.primaryMuscleGroup===prescribed.primaryMuscleGroup)
     .slice(0,40);
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
-  const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item),completed:result.sets.every((item)=>item.id===set.id?nextSet.completed:item.completed)};const restSeconds=patch.completed?Number.parseInt(current.rest??"",10):0;replaceResult(nextResult,Number.isFinite(restSeconds)&&restSeconds>0?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
+  const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item)};const restSeconds=patch.completed?Number.parseInt(current.rest??"",10):0;replaceResult(nextResult,Number.isFinite(restSeconds)&&restSeconds>0?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
   // Marking an exercise done used to leave the client staring at the exercise
   // they had just finished, with nothing saying what to do next; the only way on
   // was the arrow in the footer. Completing it now carries them to the next
@@ -209,6 +220,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
           ?<a href={exercise.video.url} target="_blank" rel="noreferrer" className="chip">סרטון הסבר טכניקה<ExternalLink aria-hidden="true" size={14}/></a>
           :<span className="pill">אין סרטון</span>}
         <ExerciseGuidanceButton exercise={exercise}/>
+        {exercise&&<TechniqueVideoButton exerciseId={exercise.id} exerciseName={exercise.name}/>}
         {/* Not the same as skipping. Skipping records that nothing was done;
             this records that the same muscle was trained on something else,
             which is what actually happened when the rack was busy. */}
@@ -228,6 +240,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       {warmup?<Warmup plan={warmup}/>:null}
 
       <PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>
+      {challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
 
       {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
           instance. Rendering an empty table header for those left the client with
@@ -251,6 +264,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       <div className="mt-4 grid grid-cols-2 gap-3">
         <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="premium-secondary-button">{result.skipped?"החזרת התרגיל":"דילוג על התרגיל"}</button>
         <button onClick={completeExercise} className="premium-primary-button">השלמת התרגיל</button>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-3" role="group" aria-label="איך הרגיש התרגיל">
+        <button type="button" aria-pressed={result.difficulty==="easy"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="easy"?undefined:"easy"})} className={result.difficulty==="easy"?"premium-primary-button":"premium-secondary-button"}>קל</button>
+        <button type="button" aria-pressed={result.difficulty==="hard"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="hard"?undefined:"hard"})} className={result.difficulty==="hard"?"premium-primary-button":"premium-secondary-button"}>קשה</button>
       </div>
       <Link href={`/workouts/exercises/${result.exerciseId}?programId=${programId}&dayId=${dayId}`} className="mt-3 flex items-center justify-center text-sm text-[#5B5F5B]">כל היסטוריית התרגיל</Link>
     </article>
@@ -353,7 +370,7 @@ function PreviousPerformance({previous,best,targetReps,recent}:{previous?:{date:
 // actually lifted last time, so the first set is not a guess and not the working
 // weight itself.
 function Warmup({plan}:{plan:{workingWeightKg:number;sets:readonly {percent:number;weightKg:number;repetitions:number}[]}}){
-  return <details className="disclosure mt-4">
+  return <details className="disclosure mt-4" open>
     <summary>חימום<span className="pill">{plan.sets.length} {plan.sets.length===1?"סט":"סטים"}</span></summary>
     <div className="disclosure__body">
       <p className="text-xs text-[#5B5F5B]">מחושב מ־{plan.workingWeightKg} ק״ג, המשקל הכבד ביותר שהשלמת בתרגיל הזה באימון הקודם.</p>
@@ -446,7 +463,7 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
 
 function Finished({workout,insights}:{workout:CompletedWorkout;insights:readonly {tone:"praise"|"action"|"note";title:string;detail:string}[]}){
   const exercises=workout.exerciseResults.filter((item)=>item.completed).length;
-  const sets=workout.exerciseResults.flatMap((item)=>item.sets).filter((item)=>item.completed).length;
+  const sets=workout.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;
   const skipped=workout.exerciseResults.filter((item)=>item.skipped).length;
   return <main className="client-app-content">
     <StateBlock tone="success" icon={<CheckCircle2 aria-hidden="true" size={22}/>} title="האימון נשמר" description="הנתונים נשמרו ויופיעו בהיסטוריה ובהתקדמות."/>

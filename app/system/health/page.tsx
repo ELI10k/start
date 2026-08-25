@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getAuthContext } from "@/lib/data/product-repository";
 import { readSupabaseHealth } from "@/lib/supabase/health";
 
 export const metadata: Metadata = {
   title: "START Backend",
 };
 
+// Signed-in only. The healthy branch says one word, but the failing branch
+// prints the Postgres error code and message, which is operational detail about
+// somebody else's database and not something an anonymous visitor is owed.
 export default async function SystemHealthPage() {
+  const auth = await getAuthContext();
+  if (!auth) redirect("/login");
   const health = await readSupabaseHealth();
 
   return (

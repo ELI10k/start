@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, Sparkles } from "lucide-react";
 import { getAuthContext, getCoachCheckInDashboard, listCoachClients, listCoachMenus } from "@/lib/data/product-repository";
 import DashboardWorkoutActivity from "@/components/workouts/coach/DashboardWorkoutActivity";
 import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 import { getCoachAttention } from "@/lib/coach-intelligence/proactive-repository";
 import { listCoachThreads } from "@/lib/messages/repository";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import CoachAttentionPanel from "@/components/coach/CoachAttentionPanel";
 
 /**
@@ -22,14 +23,21 @@ export default async function CoachDashboard() {
   if (!auth) redirect("/login");
   if (auth.role !== "coach") redirect("/unauthorized");
 
-  const [clients, menus, unreadNotifications, checkIns, attention, threads] = await Promise.all([
+  const supabase = await createSupabaseServerClient();
+  const [clients, menus, unreadNotifications, checkIns, attention, threads, nutritionProposals] = await Promise.all([
     listCoachClients(auth.id),
     listCoachMenus(auth.id),
     getUnreadNotificationCount(),
     getCoachCheckInDashboard(auth.id),
     getCoachAttention(auth.id),
     listCoachThreads(),
+    // A count, not the rows: this screen only has to say whether there is
+    // something to read, and the proposals screen is one tap away.
+    supabase.from("nutrition_adaptation_proposals")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
   ]);
+  const pendingProposals = nutritionProposals.count ?? 0;
 
   const nameById = new Map(clients.map((client) => [client.id, client.full_name]));
   // Whose turn it is, not what is unread.
@@ -80,6 +88,21 @@ export default async function CoachDashboard() {
       </section>}
 
       <CoachAttentionPanel items={attention.items} measured={attention.measured}/>
+
+      {/* Only when the last fortnight actually asked for something. A quiet week
+          writes no proposals, and a panel that is always there saying "0" is a
+          panel a coach stops seeing. */}
+      {pendingProposals > 0 && <section className="mt-6 rounded-[26px] border border-[#16A34A]/30 bg-[#F0FDF4] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="flex items-center gap-2 text-xl font-black"><Sparkles aria-hidden="true" size={19}/>התפריט מבקש עדכון</h2>
+            <p className="mt-1 text-sm text-[#5B5F5B]">
+              {pendingProposals} הצעות שנגזרו מ־14 הימים האחרונים — כמויות שתוקנו, ארוחות שלא נאכלות ומגמת משקל.
+            </p>
+          </div>
+          <Link href="/coach/nutrition/proposals" className="text-sm font-bold text-[#16A34A]">לעיון ואישור</Link>
+        </div>
+      </section>}
 
       <section className="mt-6 rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
         <div className="flex items-center justify-between gap-4">

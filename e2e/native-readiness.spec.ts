@@ -102,7 +102,12 @@ test.describe("native readiness", () => {
     await signIn(page, requireIdentity("client"));
     await page.goto("/");
 
-    const nav = page.locator("nav").filter({ hasText: "אימונים" }).last();
+    // The bottom bar by its class, not by a label it happens to carry. It was
+    // matched on the word "אימונים", and once the workouts tab left the bar for
+    // a home-screen tile the only nav still holding that word was the desktop
+    // one - which is not fixed to the bottom of anything and has no inset to
+    // clear, so the assertion read a real zero off the wrong element.
+    const nav = page.locator("nav.bottom-app-nav");
     if (await nav.count()) {
       const padding = await nav.evaluate((node) => getComputedStyle(node).paddingBottom);
       // The rule is max(.5rem, env(safe-area-inset-bottom)), so it is never zero

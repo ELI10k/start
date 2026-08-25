@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowRight, ExternalLink, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, List, Play } from "lucide-react";
 import ClientShell from "@/components/client/ClientShell";
 import CinemaChrome from "@/components/client/CinemaChrome";
 import LessonActions from "@/components/client/LessonActions";
+import LessonPlayer from "@/components/client/LessonPlayer";
 import PdfViewer from "@/components/client/PdfViewer";
 import { KindIcon, kindLabel } from "@/components/client/CinemaCard";
 import { getAuthContext } from "@/lib/data/product-repository";
@@ -18,7 +19,8 @@ import {
   instagramEmbedUrl,
   lessonThumbnail,
   mediaKind,
-  youtubeEmbedUrl,
+  youtubeId,
+  youtubeStart,
 } from "@/lib/content/library";
 
 export default async function ContentDetailPage({
@@ -44,26 +46,35 @@ export default async function ContentDetailPage({
   const siblings = course?.lessons ?? [item];
   const index = siblings.findIndex((entry) => entry.id === item.id);
   const next = index >= 0 ? siblings[index + 1] : undefined;
+  const previous = index > 0 ? siblings[index - 1] : undefined;
 
   const kind = mediaKind(item);
-  const embed =
-    kind === "youtube"
-      ? youtubeEmbedUrl(item.mediaUrl)
-      : kind === "instagram"
-        ? instagramEmbedUrl(item.mediaUrl)
-        : null;
+  /* A video gets our own player, which shows none of YouTube's furniture. A reel
+     keeps the plain frame - Instagram offers no such control, and a reel is a
+     short vertical clip that nobody is going to scrub through anyway. */
+  const video = kind === "youtube" && item.mediaUrl ? youtubeId(item.mediaUrl) : null;
+  const embed = kind === "instagram" ? instagramEmbedUrl(item.mediaUrl) : null;
   const duration = formatDuration(item.estimatedMinutes);
   const art = lessonThumbnail(item, course?.coverUrl);
 
   return (
     <ClientShell className="cinema">
       <CinemaChrome />
-      {embed ? (
+      <div className="cinema-topgap" aria-hidden="true" />
+      {video ? (
+        <LessonPlayer
+          contentItemId={item.id}
+          videoId={video}
+          title={item.title}
+          posterUrl={art}
+          startSeconds={youtubeStart(item.mediaUrl)}
+        />
+      ) : embed ? (
         <div className={`cinema-stage${kind === "instagram" ? " cinema-stage--instagram" : ""}`}>
           <iframe
             src={embed}
             title={item.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
           />
         </div>
@@ -80,18 +91,48 @@ export default async function ContentDetailPage({
         </div>
       ) : null}
 
-      <div className="cinema-gutter pb-10 pt-5">
+      {/* In a course you move forwards and backwards far more often than you go
+          anywhere else, so the two neighbouring lessons sit directly under the
+          player rather than at the foot of the page. A missing neighbour keeps
+          its place as a disabled control, so the row does not reshuffle itself
+          between the first lesson and the second. */}
+      <nav className="cinema-steps cinema-gutter" aria-label="ניווט בין שיעורים">
+        {previous ? (
+          <Link href={`/content/${previous.id}`}>
+            <ArrowRight aria-hidden="true" size={17} />
+            הקודם
+          </Link>
+        ) : (
+          <span aria-disabled="true">
+            <ArrowRight aria-hidden="true" size={17} />
+            הקודם
+          </span>
+        )}
         <Link
           href={
             course
               ? `/content/category/${encodeURIComponent(course.slug)}`
               : "/content"
           }
-          className="cinema-hero__eyebrow"
+          className="cinema-steps__up"
         >
-          <ArrowRight aria-hidden="true" size={15} />
+          <List aria-hidden="true" size={17} />
           {item.categoryName}
         </Link>
+        {next ? (
+          <Link href={`/content/${next.id}`}>
+            הבא
+            <ArrowLeft aria-hidden="true" size={17} />
+          </Link>
+        ) : (
+          <span aria-disabled="true">
+            הבא
+            <ArrowLeft aria-hidden="true" size={17} />
+          </span>
+        )}
+      </nav>
+
+      <div className="cinema-gutter pb-10 pt-4">
         <h1 className="mt-2 text-[1.65rem] font-black leading-[1.1] tracking-tight sm:text-4xl">
           {item.title}
         </h1>
@@ -115,21 +156,28 @@ export default async function ContentDetailPage({
           <div className="cinema-panel cinema-note mt-5">{item.body}</div>
         ) : null}
 
-        {/* A guide opens in place. Anything else that cannot be framed - a shop
-            listing, a shared document - is handed over, because there is nothing
-            to gain from pretending to play it. A video we did embed needs
-            neither. */}
+        {/* A guide opens in place. A shop listing or a shared document is handed
+            over, because there is nothing to gain from pretending to play it.
+            Anything we do play - a video, a reel - needs neither, and testing
+            the kind rather than the absence of an embed is what keeps this
+            button off a lesson that is already playing. */}
         {kind === "pdf" && item.mediaUrl ? (
           <PdfViewer url={item.mediaUrl} title={item.title} />
-        ) : item.mediaUrl && !embed ? (
+        ) : kind === "link" && item.mediaUrl ? (
+          /* Five lessons are a shop listing or a shared document - there is
+             nothing to embed and nothing to play. They used to get a full-width
+             green button, which read as the main action of the screen when it is
+             the smallest thing on it, and it is the one control here that takes
+             a client out of the app. It stays, because without it those five
+             lessons are empty, but it is set as a quiet line of text. */
           <a
             href={item.mediaUrl}
             target="_blank"
             rel="noreferrer"
-            className="cinema-button cinema-button--play mt-5 w-full"
+            className="cinema-outlink"
           >
-            <ExternalLink aria-hidden="true" size={19} />
-            פתיחת הקישור
+            <ExternalLink aria-hidden="true" size={16} />
+            מעבר לקישור
           </a>
         ) : null}
 

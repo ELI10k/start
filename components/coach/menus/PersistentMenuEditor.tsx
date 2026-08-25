@@ -51,7 +51,16 @@ const emptyGroups=():Group[]=>[{type:"protein",items:[]},{type:"carbohydrate",it
 const emptyMeal=():Meal=>({title:"ארוחת בוקר",notes:"",freeCalorieTarget:"",groups:emptyGroups()});
 const groupLabels:Record<GroupType,string>={protein:"קבוצת חלבון",carbohydrate:"קבוצת פחמימה",fat:"קבוצת שומן",vegetables:"קבוצת ירקות"};
 
-export default function PersistentMenuEditor({initial,foods,clients,initialUsage}:{initial:EditableMenu;foods:FoodOption[];clients:readonly ClientOption[];initialUsage:FoodUsage[]}){
+/**
+ * `justSaved` is how the confirmation survives the save.
+ *
+ * Saving a new menu redirects /coach/menus/new to /coach/menus/{id}, which is a
+ * different route, so the editor unmounts and takes "התפריט נשמר" with it. The
+ * coach was left on a screen whose save pill read "אין שינויים" and no message
+ * at all - the one moment they most need to be told it worked. The redirect now
+ * carries a marker and the message is restored on the other side.
+ */
+export default function PersistentMenuEditor({initial,foods,clients,initialUsage,justSaved=false}:{initial:EditableMenu;foods:FoodOption[];clients:readonly ClientOption[];initialUsage:FoodUsage[];justSaved?:boolean}){
   const[menu,setMenu]=useState<EditableMenu>(()=>{
     const client=clients.find(item=>item.id===initial.clientId);
     const plan=planMacros({calories:Number(initial.calorieTarget),weightKg:client?.weight??Number.NaN,sources:planSources(initial.macroSources),current:{}});
@@ -89,7 +98,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     return next;
   });
   const showDay=(dayIndex:number)=>{setActiveDay(dayIndex);setCollapsed(new Set())};
-  const[message,setMessage]=useState("");
+  const[message,setMessage]=useState(justSaved?"התפריט נשמר במסד הנתונים.":"");
   // Whether the last message was a refusal. A save that failed and a save that
   // worked used to look identical - the same grey box - which is no way to find
   // out that nothing was stored.
@@ -588,7 +597,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
       setSavedAt(new Date().toLocaleTimeString("he-IL",{timeZone:"Asia/Jerusalem",hour:"2-digit",minute:"2-digit"}));
       try{window.localStorage.removeItem(draftKey)}catch{/* nothing to clear */}
     }
-    if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}`);router.refresh()}
+    if(result.ok&&result.id){router.replace(`/coach/menus/${result.id}?saved=1`);router.refresh()}
     }catch{
       // A save that fails without saying so loses the whole menu. The usual cause
       // is a page loaded before a deploy posting to the build that replaced it -

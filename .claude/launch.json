@@ -2,16 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "start-qa",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/dev-e2e.mjs", "--port", "3100"],
-      "port": 3100
-    },
-    {
-      "name": "start-verify",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["scripts/dev-e2e.mjs", "--port", "3111"],
-      "port": 3111
+      "name": "start-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "autoPort": true
     }
   ]
 }

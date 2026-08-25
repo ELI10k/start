@@ -10,11 +10,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
    sitting there dead, which is how the row says it has run out. */
 export default function CinemaRail({
   title,
+  description,
   href,
   id,
   children,
 }: {
   title: string;
+  description?: string | null;
   href?: string;
   id?: string;
   children: React.ReactNode;
@@ -63,6 +65,11 @@ export default function CinemaRail({
     <section className="cinema-rail" id={id}>
       <div className="cinema-rail__head cinema-gutter">
         {href ? <Link href={href}>{heading}</Link> : heading}
+        {/* What the course is, above the course - the line that used to live in
+            the banner and had nowhere to go once the banner came off. */}
+        {description ? (
+          <p className="cinema-rail__blurb">{description}</p>
+        ) : null}
       </div>
       <div className="cinema-rail__viewport">
         <button

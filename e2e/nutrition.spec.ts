@@ -156,11 +156,22 @@ test.describe("nutrition", () => {
     await expect(page.getByRole("button", { name: "קיפול הארוחה" }).first()).toBeVisible();
   });
 
-  test("an empty menu is refused with a readable message", async ({ page }) => {
+  // An empty menu is no longer refused outright: targets with no rows is a
+  // freestyle menu, which is a real thing a coach builds, and rejecting it made
+  // the emptiness that is its whole point look like an unfinished draft. The
+  // rule moved to the other end - a menu on its way to a client has to have
+  // something in it, because an active menu with no meals serves nothing.
+  test("an empty menu saves as a draft, and is refused only on its way to a client", async ({ page }) => {
     await page.goto("/coach/menus/new");
     await (await menuTitle(page)).fill(`E2E ריק ${Date.now()}`);
+    await page.getByLabel("סטטוס").selectOption("active");
     await page.getByRole("button", { name: /שמירה/ }).first().click();
-    await expect(page.getByText("יש למלא לפחות ארוחה אחת לפני שמירה.").first()).toBeVisible();
+    await expect(page.getByText(/יש למלא לפחות ארוחה אחת/).first()).toBeVisible({ timeout: 10_000 });
+
+    // Back to a draft, the same empty menu is allowed through.
+    await page.getByLabel("סטטוס").selectOption("draft");
+    await page.getByRole("button", { name: /שמירה/ }).first().click();
+    await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 30_000 });
   });
 
   test("a menu survives save, reload and edit", async ({ page }) => {

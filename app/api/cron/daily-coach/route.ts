@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildDailyCoachMessage } from "@/lib/coach-intelligence/proactive-coach";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
+import { generateWorkoutCycleProposals } from "@/lib/workouts/cycle-proposals";
+import { generateNutritionProposals } from "@/lib/nutrition/adaptation-generator";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -82,7 +84,14 @@ export async function GET(request: Request) {
   // shortfall is worth naming.
   const failed = batch.length - delivered;
   if (failed) console.error("daily coach skipped rows", { failed, size: batch.length });
-  return NextResponse.json({ ok: failed === 0, date, delivered, failed, declined });
+  let workoutCycleProposals=0;
+  try{workoutCycleProposals=await generateWorkoutCycleProposals(supabase,date)}catch(error){console.error("workout cycle proposals failed",error)}
+  // The nutrition side of the same idea. Its own try/catch for the same reason
+  // the evening cron gives each step one: a client who misses a menu proposal
+  // should still get their daily message.
+  let nutritionProposals=0;
+  try{nutritionProposals=await generateNutritionProposals(supabase,date)}catch(error){console.error("nutrition proposals failed",error)}
+  return NextResponse.json({ ok: failed === 0, date, delivered, failed, declined, workoutCycleProposals, nutritionProposals });
 }
 
 type DailyInput = ReturnType<typeof emptyInput>;

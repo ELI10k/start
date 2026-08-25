@@ -81,9 +81,7 @@ export default function MealStatusControl({
   return (
     <div className="flex flex-wrap items-center gap-2">
       {blocked ? (
-        // The database refuses "eaten" until every group has a choice, so the
-        // screen says so rather than offering a button that would be refused.
-        <span className="pill">בחרו חלופה בכל קבוצה</span>
+        <span className="pill">בחרו לפחות פריט אחד</span>
       ) : (
         <Action
           mealId={mealId}

@@ -60,7 +60,27 @@ export async function GET(_request: Request, context: { params: Promise<{ barcod
     const payload = (await response.json()) as { status?: number; product?: unknown };
     const food = payload.status === 1 ? parseOpenFoodFactsProduct(barcode, payload.product as never) : null;
     if (!food) return NextResponse.json({ found: false, reason: "not_found" });
-    return NextResponse.json({ found: true, food });
+    // A product that passed barcode and nutrition validation becomes part of
+    // START's shared catalogue immediately. The RPC owns de-duplication and
+    // provenance: a known curated product is preserved, while a community
+    // product is stored once under its normalized barcode. Consequently the
+    // next client gets the local result above instead of another external call.
+    const {data:foodId,error:saveError}=await supabase.rpc("upsert_scanned_food",{
+      p_barcode:food.barcode,
+      p_name:food.name,
+      p_brand:food.brand??"",
+      p_serving_label:food.servingLabel,
+      p_package_unit:food.packageUnit??"גרם",
+      p_unit_weight_grams:food.unitWeightGrams,
+      p_calories:food.calories,
+      p_protein:food.protein,
+      p_carbs:food.carbs,
+      p_fat:food.fat,
+      p_source:"openfoodfacts",
+      p_source_url:food.sourceUrl??"",
+    });
+    if(saveError)return NextResponse.json({error:"catalog_save_failed"},{status:500});
+    return NextResponse.json({ found: true, food:{...food,id:String(foodId)} });
   } catch {
     return NextResponse.json({ found: false, reason: "lookup_unavailable" });
   } finally {

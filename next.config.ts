@@ -34,6 +34,11 @@ const nextConfig: NextConfig = {
         hostname: "i.pravatar.cc",
         pathname: "/150",
       },
+      // Lesson artwork. Every video in the course library is a YouTube upload
+      // and its still frame is served from here; the PDFs and the course covers
+      // that came from the school keep their original host.
+      { protocol: "https", hostname: "img.youtube.com", pathname: "/vi/**" },
+      { protocol: "https", hostname: "i.ytimg.com", pathname: "/vi/**" },
     ],
   },
 };

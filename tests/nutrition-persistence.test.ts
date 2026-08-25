@@ -183,3 +183,34 @@ test("the client sees the day's totals, and no targets beside them", async () =>
   assert.doesNotMatch(page, /target=\{menu\./);
   assert.doesNotMatch(page, /יעד:/);
 });
+
+// The database runs in UTC and the product runs in Asia/Jerusalem. Every write
+// in the nutrition engine is already dated by the app, but the four SELECT
+// policies that decide whether a client may read their plan compared the
+// assignment against bare current_date - so between midnight and 03:00 Israel
+// time a menu activated for "today" was one day in the future as far as the
+// database was concerned, and the client's screen said "עדיין אין תפריט פעיל".
+test("the client's menu is read on the Israeli calendar day", async () => {
+  const sql = await readFile(new URL("../supabase/migrations/202608250010_the_menu_is_read_on_the_israeli_day.sql", import.meta.url), "utf8");
+  assert.match(sql, /create or replace function public\.israel_today\(\)/);
+  assert.match(sql, /now\(\) at time zone 'Asia\/Jerusalem'/);
+  // Evaluated once per query, not once per row.
+  assert.match(sql, /returns date\s*\nlanguage sql\s*\nstable/);
+  for (const policy of ["meal_plans_client_select", "meals_plan_visible", "meal_items_plan_visible", "meal_food_groups_visible"])
+    assert.match(sql, new RegExp(`create policy ${policy} on`), policy);
+  // Not one bare current_date is left in what this migration installs.
+  assert.doesNotMatch(sql.split("begin;")[1] ?? "", /[^_]current_date/);
+});
+
+// The policy on meal_plans has to reach the assignment through a security
+// definer function, not inline. Inline, it reads client_meal_plan_assignments
+// while the policy on that table reads meal_plans back - a cycle Postgres
+// refuses - and its unqualified `id` binds to the assignment's own primary key.
+// 202608250010 rewrote it from the pre-fix source and every client lost their
+// menu until 202608250011 put the function back.
+test("the meal_plans policy reaches the assignment through the definer function", async () => {
+  const sql = await readFile(new URL("../supabase/migrations/202608250011_restore_the_plan_policy_to_its_function.sql", import.meta.url), "utf8");
+  assert.match(sql, /using \(public\.has_active_meal_plan_assignment\(id\)\)/);
+  // Nothing inline: no second reading of the assignments table from this policy.
+  assert.doesNotMatch(sql.split("begin;")[1] ?? "", /client_meal_plan_assignments/);
+});

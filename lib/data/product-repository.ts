@@ -80,6 +80,13 @@ function foodRelationName(value: unknown): string {
     : "מזון";
 }
 
+function foodRelationNotes(value: unknown): string | null {
+  const relation = Array.isArray(value) ? value[0] : value;
+  return relation && typeof relation === "object" && "notes" in relation && relation.notes
+    ? String(relation.notes).trim() || null
+    : null;
+}
+
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -520,7 +527,7 @@ export async function getActiveClientMenu(
         ? supabase
             .from("meal_items")
             .select(
-              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
+              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name,notes)",
             )
             .in("meal_id", mealIds)
             .order("sort_order")
@@ -581,7 +588,7 @@ export async function getActiveClientMenu(
           amountSource:(item.amount_source==="auto"?"auto":"manual") as "auto"|"manual",
           // Written by the coach against this food. It was stored and shown back
           // in the builder, and never once reached the person it was written for.
-          note: ("note" in item ? (item.note as string | null) : null) || null,
+          note: (("note" in item ? (item.note as string | null) : null) || foodRelationNotes(item.foods)) ?? null,
           calories: Number(item.calculated_calories),
           protein: Number(item.calculated_protein),
           carbs: Number(item.calculated_carbohydrates),
@@ -735,6 +742,7 @@ export async function listClientFoodLog(clientId: string, date: string): Promise
     fat: figure(row.fat),
     source: (["text", "scan", "photo"].includes(String(row.source)) ? row.source : "text") as LoggedFood["source"],
     photoUrl: row.photo_path ? urlByPath.get(String(row.photo_path)) ?? null : null,
+    nutritionEstimated: (row.source === "text" || row.source === "photo") && row.calories !== null,
   }));
 }
 

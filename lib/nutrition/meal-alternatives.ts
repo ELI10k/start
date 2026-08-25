@@ -152,6 +152,11 @@ function roundQuantity(value:number,unit:string){
   if(unit!==GRAM_UNIT)return Math.max(1,Math.round(value*2)/2);
   return Math.max(1,Math.round(value/5)*5);
 }
+
+// The same rounding, for anything outside this module that has to land on a
+// quantity a menu could actually be written with. The adaptation engine proposes
+// portions and they have to read like the ones a coach types, not like a median.
+export const roundPortionQuantity=roundQuantity;
 function round(value:number){return Math.round(value*10)/10}
 
 // The quantity of a food that costs a given number of calories, rounded the same

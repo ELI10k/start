@@ -7,6 +7,7 @@ import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
+import TechniqueVideoButton from "@/components/workouts/client/TechniqueVideoButton";
 import { exercisePerformance } from "@/lib/workouts/progress";
 
 export default function AssignedProgram({programId}:{programId:string}){
@@ -56,7 +57,7 @@ export default function AssignedProgram({programId}:{programId:string}){
           const exercise=getExercise(entry.exerciseId);
           const previous=exercisePerformance(snapshot.completedWorkouts,currentClientId,entry.exerciseId).sessions[0];
           const completed=snapshot.completedWorkouts.some((item)=>item.clientId===currentClientId&&item.dayId===day.id);
-          return <article key={entry.id} className="premium-card">
+          return <article key={entry.id} className="premium-card workout-exercise-card">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-3">
                 <ExerciseThumbnail exercise={exercise}/><div className="min-w-0">
@@ -69,9 +70,10 @@ export default function AssignedProgram({programId}:{programId:string}){
                   {exercise?.equipment&&<span className="pill">{exercise.equipment}</span>}
                 </div></div>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
+              <div className="workout-exercise-card__actions">
                 {exercise?.video&&<a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink aria-hidden="true" size={14}/></a>}
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>
+                {exercise&&<TechniqueVideoButton exerciseId={exercise.id} exerciseName={exercise.name}/>}
               </div>
             </div>
             <dl className="compact-data-list mt-3">

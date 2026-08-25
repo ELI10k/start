@@ -38,6 +38,7 @@ export type LoggedFood = Readonly<{
   fat: number | null;
   source: "text" | "scan" | "photo";
   photoUrl: string | null;
+  nutritionEstimated?: boolean;
 }>;
 
 /**

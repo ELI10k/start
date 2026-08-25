@@ -1,6 +1,7 @@
 import { Ruler, Scale, TrendingDown, TrendingUp } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
+import { averageWeightChangeRates } from "@/lib/progress/rates";
 
 type ProgressEntry = Readonly<{
   id: string;
@@ -67,6 +68,12 @@ function TrendChart({ title, unit, points }: { title: string; unit: string; poin
   );
 }
 
+function rateText(value: number | null) {
+  if (value === null) return "אין מספיק נתונים";
+  if (value === 0) return "ללא שינוי";
+  return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
+}
+
 export default function PersistedProgressHistory({ entries }: { entries: readonly ProgressEntry[] }) {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const weights = ordered.flatMap((entry) => {
@@ -92,6 +99,7 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
   const navelChange = changeOf(navelCircumferences);
   const latestWeight = weights.at(-1)?.value;
   const latestNavel = navelCircumferences.at(-1)?.value;
+  const weightRates = averageWeightChangeRates(weights);
 
   return (
     <div className="grid gap-4">
@@ -117,6 +125,35 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
         <TrendChart title="מגמת משקל" unit="ק״ג" points={weights} />
         <TrendChart title="מגמת היקף טבור" unit="ס״מ" points={navelCircumferences} />
       </div>
+
+
+      <section className="premium-card" aria-labelledby="average-weight-rate">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 id="average-weight-rate" className="font-black">קצב שינוי ממוצע במשקל</h2>
+            <p className="mt-1 text-sm text-[#5B5F5B]">מחושב לפי הזמן שעבר בין המדידה הראשונה לאחרונה.</p>
+          </div>
+          <span className="pill">{weights.length} מדידות</span>
+        </div>
+        {weightRates ? (
+          <div className="mt-5 overflow-hidden rounded-2xl border border-[#E5E7E5]">
+            <div className="grid grid-cols-2 border-b border-[#E5E7E5] bg-[#F7F9F7] px-4 py-3 text-xs font-bold text-[#5B5F5B]">
+              <span>תקופה</span>
+              <span>קצב ממוצע</span>
+            </div>
+            <div className="grid grid-cols-2 px-4 py-4 text-sm">
+              <strong>שבועי</strong>
+              <strong className={weightRates.weeklyKg !== null && weightRates.weeklyKg > 0 ? "text-red-600" : weightRates.weeklyKg === null ? "text-[#5B5F5B]" : "text-green-700"}>{rateText(weightRates.weeklyKg)}</strong>
+            </div>
+            <div className="grid grid-cols-2 border-t border-[#E5E7E5] px-4 py-4 text-sm">
+              <strong>חודשי</strong>
+              <strong className={weightRates.monthlyKg !== null && weightRates.monthlyKg > 0 ? "text-red-600" : weightRates.monthlyKg === null ? "text-[#5B5F5B]" : "text-green-700"}>{rateText(weightRates.monthlyKg)}</strong>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשות לפחות שתי מדידות בתאריכים שונים לחישוב הקצב.</p>
+        )}
+      </section>
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}
