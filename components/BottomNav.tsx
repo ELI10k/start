@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, BookOpen, Home, ShoppingBasket, UserRound } from "lucide-react";
+import UnreadNotificationBadge from "@/components/notifications/UnreadNotificationBadge";
 
 // Five, and every one of them is somewhere the home screen does not already go.
 //
@@ -26,7 +27,7 @@ const items = [
   { href: "/profile", label: "פרופיל", icon: UserRound },
 ];
 
-export default function BottomNav({ unreadCount = 0 }: { unreadCount?: number }) {
+export default function BottomNav({ unreadCount }: { unreadCount?: number }) {
   const pathname = usePathname();
   if (pathname.startsWith("/coach") || pathname.startsWith("/foods") || pathname.startsWith("/import")) return null;
   return (
@@ -47,11 +48,12 @@ export default function BottomNav({ unreadCount = 0 }: { unreadCount?: number })
             <Link key={href} href={href} aria-current={active ? "page" : undefined} data-active={active || undefined}>
               <span className="bottom-app-nav__icon">
                 <Icon aria-hidden="true" size={21} />
-                {isInbox && unreadCount > 0 && (
+                {isInbox && typeof unreadCount === "number" && unreadCount > 0 && (
                   <span className="bottom-app-nav__badge" aria-label={`${unreadCount} עדכונים שלא נקראו`}>
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
+                {isInbox && typeof unreadCount !== "number" && <UnreadNotificationBadge />}
               </span>
               <span>{label}</span>
             </Link>

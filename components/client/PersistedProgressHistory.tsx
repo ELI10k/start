@@ -97,22 +97,22 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
 
   const weightChange = changeOf(weights);
   const navelChange = changeOf(navelCircumferences);
-  const latestWeight = weights.at(-1)?.value;
-  const latestNavel = navelCircumferences.at(-1)?.value;
+  const startingWeight = weights[0]?.value;
+  const startingNavel = navelCircumferences[0]?.value;
   const weightRates = averageWeightChangeRates(weights);
 
   return (
     <div className="grid gap-4">
       {/* The two numbers a client actually opens this screen for, before any chart. */}
       <section className="dashboard-metrics" aria-label="מדדי התקדמות">
-        <MetricTile label="משקל אחרון" value={latestWeight !== undefined ? `${latestWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
+        <MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
         <MetricTile
           label="שינוי במשקל"
           value={`${weightChange > 0 ? "+" : ""}${weightChange} ק״ג`}
           accent={weightChange > 0 ? "down" : "green"}
           icon={weightChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
         />
-        <MetricTile label="היקף טבור" value={latestNavel !== undefined ? `${latestNavel} ס״מ` : "—"} icon={<Ruler aria-hidden="true" size={18} />} />
+        <MetricTile label="היקף טבור התחלה" value={startingNavel !== undefined ? `${startingNavel} ס״מ` : "—"} icon={<Ruler aria-hidden="true" size={18} />} />
         <MetricTile
           label="שינוי בהיקף"
           value={`${navelChange > 0 ? "+" : ""}${navelChange} ס״מ`}
@@ -120,12 +120,6 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
           icon={navelChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
         />
       </section>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <TrendChart title="מגמת משקל" unit="ק״ג" points={weights} />
-        <TrendChart title="מגמת היקף טבור" unit="ס״מ" points={navelCircumferences} />
-      </div>
-
 
       <section className="premium-card" aria-labelledby="average-weight-rate">
         <div className="flex items-start justify-between gap-4">
@@ -154,6 +148,11 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
           <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשות לפחות שתי מדידות בתאריכים שונים לחישוב הקצב.</p>
         )}
       </section>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <TrendChart title="מגמת משקל" unit="ק״ג" points={weights} />
+        <TrendChart title="מגמת היקף טבור" unit="ס״מ" points={navelCircumferences} />
+      </div>
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}

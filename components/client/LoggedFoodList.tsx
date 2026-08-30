@@ -39,7 +39,7 @@ export default function LoggedFoodList({
             {readOnly ? null : (
               <form action={deleteClientFoodLog}>
                 <input type="hidden" name="id" value={entry.id} />
-                <button aria-label={`מחיקת ${entry.name}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-[#DC2626]">
+                <button type="submit" aria-label={`מחיקת ${entry.name}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-[#DC2626]">
                   <Trash2 aria-hidden="true" size={15} />
                 </button>
               </form>

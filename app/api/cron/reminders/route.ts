@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { dispatchPushDeliveries } from "@/lib/push/dispatch";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+// The sweep plus a round of push sends. Ten seconds is the default budget and
+// this run legitimately needs more than that.
+export const maxDuration = 60;
 
 // Vercel Cron calls this on a schedule so reminders exist whether or not the
 // client ever opens the app. The heavy lifting is public.run_scheduled_reminders,
@@ -43,8 +47,19 @@ export async function GET(request: Request) {
     // of the run and tidying is not worth losing them over.
     const { data: pruned, error: pruneError } = await supabase.rpc("prune_notifications");
     if (pruneError) console.error("notification prune failed", { code: pruneError.code, message: pruneError.message });
-    console.info("reminder scheduler ran", { clients, pruned: Number(pruned ?? 0), ms: Date.now() - startedAt });
-    return NextResponse.json({ ok: true, clients, pruned: Number(pruned ?? 0), ms: Date.now() - startedAt });
+
+    // The reminders this run just wrote are sitting in the push outbox. Nothing
+    // else will be along for hours - there are two cron slots for the whole
+    // product - so they are sent from here, in the same run that created them.
+    // The evening pass drains again afterwards; claiming is what makes running
+    // it twice cost one query rather than send anything twice.
+    const push = await dispatchPushDeliveries().catch((cause) => {
+      console.error("push dispatch after reminders failed", { message: cause instanceof Error ? cause.message : "unknown" });
+      return null;
+    });
+
+    console.info("reminder scheduler ran", { clients, pruned: Number(pruned ?? 0), push, ms: Date.now() - startedAt });
+    return NextResponse.json({ ok: true, clients, pruned: Number(pruned ?? 0), push, ms: Date.now() - startedAt });
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : "unknown error";
     console.error("reminder scheduler threw", { message });

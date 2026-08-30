@@ -244,7 +244,7 @@ test("the client is told where to start and when photos are due", async () => {
   assert.match(nutrition, /<RepeatYesterday date=\{today\}/);
   // The cycle already knew; the screen never said.
   assert.match(checkIn, /cycle\.nextCheckInNumber/);
-  assert.match(checkIn, /cycle\.remainingUntilPhotos/);
+  assert.match(checkIn, /תמונות ההשוואה יצולמו בצ׳ק־אין הרביעי/);
 });
 
 // ==================================================== units alongside grams
@@ -595,12 +595,36 @@ test("the day opens one meal at a time", async () => {
   const [page, css] = await Promise.all([source("app/nutrition/page.tsx"), source("app/globals.css")]);
   // Six meals in a single scroll is a page nobody reads to the end, and the
   // marking controls live at the bottom of each one.
-  assert.match(page, /<details\s*\n\s*key=\{meal\.id\}/);
-  assert.match(page, /open=\{isNow\}/);
+  // The key sits on the Fragment now - the meal renders as a card plus, after
+  // one of them, the outside-the-menu logger - but the collapsed row is the
+  // same one.
+  assert.match(page, /<Fragment key=\{meal\.id\}>\s*\n\s*<MealCard/);
+  // And which one starts open is still the meal that is due now.
+  assert.match(page, /defaultOpen=\{isNow\}/);
   // The closed row has to carry enough to decide whether to open it.
   assert.match(page, /const mealCalories = Math\.round\(/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);
+});
+
+// A card the client opened stayed open until anything on the screen saved.
+// Every save here ends in revalidatePath, React re-renders with the same `open`
+// prop and React 19 writes it back onto the element - so recording what you ate
+// closed the meal you recorded it into, and what you had just written left the
+// screen. The state belongs to the person looking at it.
+test("a card the client opened is not closed by the next save", async () => {
+  const [page, card] = await Promise.all([
+    source("app/nutrition/page.tsx"),
+    source("components/client/MealCard.tsx"),
+  ]);
+  assert.match(card, /"use client"/);
+  assert.match(card, /const \[open, setOpen\] = useState\(defaultOpen\)/);
+  // Kept in step with the element, which a person can also open and close
+  // without React being involved.
+  assert.match(card, /onToggle=\{\(event\) => setOpen\(event\.currentTarget\.open\)\}/);
+  // The server no longer states `open` on every render, which is what was
+  // undoing the tap.
+  assert.doesNotMatch(page, /open=\{isNow\}/);
 });
 
 // ============================ zero, the free window, and a camera that stays open
@@ -643,4 +667,18 @@ test("the camera is not torn down by its own parent re-rendering", async () => {
   assert.match(camera, /useEffect\(\(\) => \{ handler\.current = onDetected; \}, \[onDetected\]\)/);
   assert.match(camera, /\}, \[live\]\);/);
   assert.doesNotMatch(camera, /\}, \[live, onDetected\]\);/);
+});
+
+// A control smaller than 44px is hard to hit with a thumb, and this rule applied
+// only under 600px - so the three controls on an exercise card were below the
+// minimum on a phone, which is the only device the rule exists for. It was more
+// specific than both `.chip` and the `min-h-11` on the video link, so it was the
+// one that decided.
+test("the exercise card's controls stay hittable on a phone", async () => {
+  const css = await source("app/globals.css");
+  const mobile = css.slice(css.indexOf("@media (max-width: 600px)"));
+  assert.match(mobile, /\.workout-exercise-card__actions > \* \{ min-height: 2\.75rem; \}/);
+  assert.doesNotMatch(mobile.slice(0, 600), /\.workout-exercise-card__actions > \* \{ min-height: 2\.5rem/);
+  // The same figure the global floor uses, so there is one minimum in the system.
+  assert.match(css, /:where\(a, button, \[role="button"\], summary\):not\(\.is-inline\) \{ min-height: 2\.75rem; \}/);
 });

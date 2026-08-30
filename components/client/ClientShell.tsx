@@ -6,7 +6,6 @@ import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
 import NativeBridge from "@/components/native/NativeBridge";
-import { getUnreadNotificationCount } from "@/lib/notifications/repository";
 
 const links = [
   { href: "/", label: "בית" },
@@ -18,7 +17,7 @@ const links = [
   { href: "/profile", label: "פרופיל" },
 ];
 
-export default async function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export default function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   // One inbox, one figure.
   //
   // The bar's badge used to sit on the profile tab and count notifications plus
@@ -28,8 +27,6 @@ export default async function ClientShell({ children, className = "" }: { childr
   // and is handed the same count the bell shows, which is the count of the
   // screen they both open. Messages are not lost from it: every one of them puts
   // a row in the notification centre.
-  const unreadNotifications = await getUnreadNotificationCount();
-  const unreadCount = unreadNotifications;
   return (
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
@@ -51,7 +48,7 @@ export default async function ClientShell({ children, className = "" }: { childr
             {links.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>
           <div className="desktop-app-nav__actions">
-            <NotificationBell unreadCount={unreadNotifications} />
+            <NotificationBell />
             <form action="/auth/logout" method="post">
               <button>התנתקות</button>
             </form>
@@ -66,7 +63,7 @@ export default async function ClientShell({ children, className = "" }: { childr
       {/* Hands the container's capabilities to the app. No-op on the web. */}
       <NativeBridge />
       <div className="client-app-content">{children}</div>
-      <BottomNav unreadCount={unreadCount} />
+      <BottomNav />
     </main>
   );
 }

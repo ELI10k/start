@@ -120,7 +120,6 @@ export async function getUnreadNotificationCount(excludeTypes: readonly string[]
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return 0;
-  await supabase.rpc("ensure_in_app_reminders");
   let query = supabase
     .from("notifications")
     .select("id", { count: "exact", head: true })

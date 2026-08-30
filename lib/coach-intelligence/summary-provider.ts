@@ -36,7 +36,11 @@ export function allowedNumbers(facts: WeeklyFacts): ReadonlySet<string> {
   };
   const { workouts, nutrition, steps, weight, measurements, checkIns } = facts;
   if (workouts) { add(workouts.completed); add(workouts.planned); add(workouts.skipped); add(workouts.volumeKg); add(workouts.previousCompleted); add(Math.round((workouts.completed / Math.max(1, workouts.planned)) * 100)); }
-  if (nutrition) { add(nutrition.daysReported); add(nutrition.mealsEaten); add(nutrition.mealsPlanned); add(nutrition.freeCalorieDays); add(Math.round((nutrition.mealsEaten / Math.max(1, nutrition.mealsPlanned)) * 100)); }
+  if (nutrition) {
+    add(nutrition.daysReported); add(nutrition.mealsEaten); add(nutrition.mealsPlanned); add(nutrition.freeCalorieDays);
+    add(nutrition.outsideMenuItems); add(nutrition.measuredOutsideMenuItems); add(nutrition.unmeasuredOutsideMenuItems);
+    add(Math.round((nutrition.mealsEaten / Math.max(1, nutrition.mealsPlanned)) * 100));
+  }
   if (steps) { add(steps.daysReported); add(steps.average); add(steps.goal); add(steps.daysMetGoal); add(steps.previousAverage); }
   if (weight) { add(weight.entries); add(weight.latestKg); add(weight.changeKg); }
   if (measurements) add(measurements.entries);

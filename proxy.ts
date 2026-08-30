@@ -17,6 +17,15 @@ const clientPrefixes = [
   "/content",
   "/workouts",
   "/onboarding",
+  // These three were reachable without passing through here at all. Each page
+  // does its own `getAuthContext` check, so nothing leaked - but the middleware
+  // is where the client device lock lives, and a client whose device was
+  // replaced kept reading the coach conversation and their notifications from
+  // the old phone. It is also where `Cache-Control: private, no-store` is set,
+  // and a screen carrying one person's messages must never be cacheable.
+  "/messages",
+  "/notifications",
+  "/shopping",
 ];
 
 const isSharedPath = (path: string) => path === "/foods" || path.startsWith("/foods/");

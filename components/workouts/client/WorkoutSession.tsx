@@ -12,6 +12,7 @@ import { track } from "@/lib/analytics/client";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
+import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
 import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
 import { isCompoundLift, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
@@ -261,13 +262,14 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
           moment it starts. */}
       {rest>0&&<RestTimer seconds={rest} onAdd={()=>persist({restEndsAt:new Date(Date.now()+(rest+30)*1000).toISOString()})} onSkip={()=>persist({restEndsAt:undefined})}/>}
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="premium-secondary-button">{result.skipped?"החזרת התרגיל":"דילוג על התרגיל"}</button>
-        <button onClick={completeExercise} className="premium-primary-button">השלמת התרגיל</button>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="min-h-10 rounded-xl border border-[#D7DAD7] bg-white px-3 py-2 text-sm font-black">{result.skipped?"החזרת התרגיל":"דילוג"}</button>
+        <button onClick={completeExercise} className="min-h-10 rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white">השלמה</button>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-3" role="group" aria-label="איך הרגיש התרגיל">
-        <button type="button" aria-pressed={result.difficulty==="easy"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="easy"?undefined:"easy"})} className={result.difficulty==="easy"?"premium-primary-button":"premium-secondary-button"}>קל</button>
-        <button type="button" aria-pressed={result.difficulty==="hard"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="hard"?undefined:"hard"})} className={result.difficulty==="hard"?"premium-primary-button":"premium-secondary-button"}>קשה</button>
+      <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="איך הרגיש התרגיל">
+        <button type="button" aria-pressed={result.difficulty==="easy"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="easy"?undefined:"easy"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="easy"?"border-[#16A34A] bg-[#ECFDF3] text-[#15803D]":"border-[#D7DAD7] bg-white"}`}>קל</button>
+        <button type="button" aria-pressed={result.difficulty==="medium"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="medium"?undefined:"medium"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="medium"?"border-[#D97706] bg-[#FFFBEB] text-[#B45309]":"border-[#D7DAD7] bg-white"}`}>בינוני</button>
+        <button type="button" aria-pressed={result.difficulty==="hard"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="hard"?undefined:"hard"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="hard"?"border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]":"border-[#D7DAD7] bg-white"}`}>קשה</button>
       </div>
       <Link href={`/workouts/exercises/${result.exerciseId}?programId=${programId}&dayId=${dayId}`} className="mt-3 flex items-center justify-center text-sm text-[#5B5F5B]">כל היסטוריית התרגיל</Link>
     </article>
@@ -467,6 +469,7 @@ function Finished({workout,insights}:{workout:CompletedWorkout;insights:readonly
   const skipped=workout.exerciseResults.filter((item)=>item.skipped).length;
   return <main className="client-app-content">
     <StateBlock tone="success" icon={<CheckCircle2 aria-hidden="true" size={22}/>} title="האימון נשמר" description="הנתונים נשמרו ויופיעו בהיסטוריה ובהתקדמות."/>
+    <WorkoutPreserveImprove insights={insights}/>
     <dl className="dashboard-metrics mt-4">
       <Value label="משך" value={clock(workout.durationSeconds)}/>
       <Value label="תרגילים" value={String(exercises)}/>

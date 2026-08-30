@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { checkInPhotoCycle } from "../lib/check-ins/photo-cycle.ts";
 
-test("photos are required on the first check-in and then on every fourth", () => {
+test("photos are required only on check-ins one and four", () => {
   // The first one is the baseline: a new client used to send three check-ins
   // before the app asked for a single picture, so the fourth set had nothing to
   // be compared against.
@@ -12,8 +12,8 @@ test("photos are required on the first check-in and then on every fourth", () =>
   assert.equal(checkInPhotoCycle(2).photosRequired, false);
   assert.equal(checkInPhotoCycle(3).photosRequired, true);
   assert.equal(checkInPhotoCycle(4).photosRequired, false);
-  assert.equal(checkInPhotoCycle(7).photosRequired, true);
-  assert.equal(checkInPhotoCycle(11).photosRequired, true);
+  assert.equal(checkInPhotoCycle(7).photosRequired, false);
+  assert.equal(checkInPhotoCycle(11).photosRequired, false);
 });
 
 test("only the very first check-in is marked as the first", () => {
@@ -43,7 +43,7 @@ test("server, form, migration and progress gallery enforce the photo flow", asyn
     readFile(new URL("../components/client/ProgressPhotoGallery.tsx", import.meta.url), "utf8"),
   ]);
   assert.match(action, /files\.length!==3/);
-  assert.match(action, /בצ׳ק־אין הראשון ובכל צ׳ק־אין רביעי חובה/);
+  assert.match(action, /בצ׳ק־אין הראשון ובצ׳ק־אין הרביעי חובה/);
   assert.match(page, /photosRequired=\{cycle\.photosRequired\}/);
   assert.match(page, /firstCheckIn=\{cycle\.isFirst\}/);
   assert.match(inputs, /הגיע הזמן לעדכן תמונות התקדמות/);

@@ -3,6 +3,8 @@ import { Fragment } from "react";
 import ClientShell from "@/components/client/ClientShell";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
+import MealGroupSubstitution from "@/components/client/MealGroupSubstitution";
+import MealCard from "@/components/client/MealCard";
 import { selectMealGroupAlternative } from "@/app/actions/product";
 import {
   getActiveClientMenu,
@@ -10,6 +12,7 @@ import {
   getFreeMenuDay,
   listClientFoodLog,
   listDatabaseFoods,
+  getClientNutritionBehavior,
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
@@ -23,6 +26,16 @@ import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import OutsideMenuFood from "@/components/client/OutsideMenuFood";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { addTotals, eatenFromMenu, remainingInMenu } from "@/lib/nutrition/menu-intake";
+import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
+
+// "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
+// server action executes on the route segment that hosts it. Vercel's default
+// budget for a Node function is ten seconds, which a vision model does not
+// finish in - the save was being killed by the platform rather than by the
+// estimator's own cut-off, so the client got an error instead of the unmeasured
+// row the action is written to fall back to. Sixty is the ceiling on the plan
+// this runs on; the estimator itself gives up well before it.
+export const maxDuration = 60;
 
 export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const auth = await getAuthContext();
@@ -58,7 +71,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // A day this week that has already happened. Anything else falls back to today.
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
-  const [menu, freeMenu, foods, logged] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today)]);
+  const [menu, freeMenu, foods, logged, behavior] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today),getClientNutritionBehavior(auth.id,today)]);
   // What was eaten instead, and what of it carries figures. Only the measured
   // part joins the day's totals; the rest is shown as unmeasured rather than
   // counted as zero.
@@ -101,11 +114,32 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // if it was a mistake, taken back.
   const orphanedLogs = logged.filter((entry) =>
     entry.mealId && !(menu?.meals ?? []).some((meal) => meal.id === entry.mealId));
+  // Entries created from the global "outside the menu" card deliberately have
+  // no meal id. They used to affect the totals without being rendered anywhere,
+  // so the client could neither see what moved the numbers nor delete a mistake.
+  const outsideMenuLogs = logged.filter((entry) => !entry.mealId);
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
   const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
   const remainingTotals = remainingInMenu(menu?.meals ?? []);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
+  const answeredMeals = menu?.meals.filter((meal) => Boolean(meal.status || meal.completed)).length ?? 0;
+  const unansweredMeals = Math.max(0, (menu?.meals.length ?? 0) - answeredMeals);
+  const nutritionInsights = dailyNutritionInsights({
+    eaten: eatenTotals,
+    targets: {
+      calories: menu?.calorieTarget,
+      protein: menu?.proteinTarget,
+      carbs: menu?.carbohydrateTarget,
+      fat: menu?.fatTarget,
+    },
+    answeredMeals,
+    unansweredMeals,
+    measuredOutsideItems: loggedTotals.measured,
+    unmeasuredOutsideItems: loggedTotals.unmeasured,
+    isToday,
+    behavior,
+  });
   // Which meal it is now. The fixed meal titles map to the day, so the screen can
   // open on the meal the client came to mark instead of at the top of a list of
   // six. Free text from onboarding is not used for this - it cannot be relied on
@@ -117,14 +151,17 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     : hour < 16 ? "ארוחת צהריים"
     : hour < 18 ? "ארוחת ביניים 2"
     : "ארוחת ערב";
-  // The catch-all food logger belongs at the end of the eating flow: directly
-  // after free calories when that window exists, otherwise after dinner. A
-  // custom menu without either title still gets it after its final meal.
   const outsideMenuAfterMealId = menu
     ? (menu.meals.find((meal) => meal.title === "קלוריות חופשיות")
       ?? menu.meals.find((meal) => meal.title === "ארוחת ערב")
       ?? menu.meals.at(-1))?.id
     : null;
+  const outsideMenuSection = (
+    <section className="space-y-3">
+      <OutsideMenuFood date={today} foods={pickableFoods}/>
+      <LoggedFoodList entries={outsideMenuLogs}/>
+    </section>
+  );
 
   return (
     <ClientShell>
@@ -158,7 +195,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
         {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
       </div>
 
-      {freeMenu ? <div className="space-y-4"><FreeMenu date={today} day={freeMenu} foods={foods}/><OutsideMenuFood date={today} foods={pickableFoods}/></div> : menu ? (
+      {freeMenu ? <div className="space-y-4"><FreeMenu date={today} day={freeMenu} foods={foods}/>{outsideMenuSection}</div> : menu ? (
         <div className="space-y-4">
           {menu.meals.map((meal) => {
             // Eating one part of a meal is still eating. The button becomes
@@ -183,20 +220,22 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               : noChoice ? "ממתין לבחירה"
               : "טרם סומן";
             return <Fragment key={meal.id}>
-            <details
+            <MealCard
               id={isNow ? "current-meal" : undefined}
               // Six meals in one scroll is a page nobody reads to the end. Each
               // one is a closed row carrying what it costs and where it stands,
               // and the meal that is due right now is the one already open.
-              open={isNow}
+              // Which card is open after that is the client's business, not this
+              // render's - see the component.
+              defaultOpen={isNow}
               className={`start-surface meal-card rounded-[24px]${isNow ? " border-2 border-[#16A34A]" : ""}`}
-            >
-              <summary className="meal-card__summary">
+              summary={
                 <span className="min-w-0">
                   <strong className="block text-lg font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</strong>
                   <span className="mt-1 block text-xs text-[#5B5F5B]">{mealCalories} קל׳ · {mark}</span>
                 </span>
-              </summary>
+              }
+            >
               <div className="meal-card__body">
               <div className="flex flex-wrap justify-between gap-3">
                 <div>
@@ -247,11 +286,12 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                     unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
                     current={group.amountOverride}
                   />:null})()}
+                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} foods={pickableFoods}/>
                   </fieldset>)}
               </div>}
               </div>
-            </details>
-            {meal.id === outsideMenuAfterMealId ? <OutsideMenuFood date={today} foods={pickableFoods}/> : null}
+            </MealCard>
+            {meal.id === outsideMenuAfterMealId ? outsideMenuSection : null}
           </Fragment>;})}
           {orphanedLogs.length ? (
             <section className="start-surface rounded-[24px] p-5 sm:p-6" aria-labelledby="orphaned-logs">
@@ -292,13 +332,23 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   they appear to have missed. The coach still sees both sides,
                   in the builder and on the client file. */}
               <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} unit="קל׳" />
-                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} unit="גרם" />
-                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} unit="גרם" />
-                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} unit="גרם" />
+                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} target={menu.calorieTarget} unit="קל׳" />
+                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} target={menu.proteinTarget} unit="גרם" />
+                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} target={menu.carbohydrateTarget} unit="גרם" />
+                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} target={menu.fatTarget} unit="גרם" />
               </dl>
             </section>
           )}
+          {(nutritionInsights.preserve.length || nutritionInsights.improve.length) ? (
+            <section aria-labelledby="nutrition-improvement" className="start-surface rounded-[24px] p-5 sm:p-6">
+              <h2 id="nutrition-improvement" className="text-lg font-black">שיפור ושימור</h2>
+              <p className="mt-1 text-xs text-[#5B5F5B]">דוח לפי ההתנהגות שנרשמה היום, בשבוע האחרון וב־30 הימים האחרונים.</p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <NutritionInsightList title="לשמר" items={nutritionInsights.preserve} tone="positive" />
+                <NutritionInsightList title="לשפר" items={nutritionInsights.improve} tone="attention" />
+              </div>
+            </section>
+          ) : null}
         </div>
       ) : (
         <div className="space-y-4">
@@ -308,10 +358,32 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               {isToday ? "לאחר שהמאמן יפעיל תפריט, הארוחות יופיעו כאן." : "אפשר לחזור להיום ולהמשיך משם."}
             </p>
           </div>
-          <OutsideMenuFood date={today} foods={pickableFoods}/>
+          {outsideMenuSection}
         </div>
       )}
     </ClientShell>
+  );
+}
+
+function NutritionInsightList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: readonly string[];
+  tone: "positive" | "attention";
+}) {
+  const positive = tone === "positive";
+  return (
+    <div className={`rounded-2xl border p-4 ${positive ? "border-[#BBF7D0] bg-[#F0FDF4]" : "border-[#FECACA] bg-[#FEF2F2]"}`}>
+      <h3 className={`font-black ${positive ? "text-[#15803D]" : "text-[#B91C1C]"}`}>{title}</h3>
+      {items.length ? (
+        <ul className="mt-2 space-y-2 text-sm">
+          {items.map((item) => <li key={item}>• {item}</li>)}
+        </ul>
+      ) : <p className="mt-2 text-sm text-[#5B5F5B]">אין עדיין מספיק נתונים.</p>}
+    </div>
   );
 }
 
@@ -321,12 +393,14 @@ function MacroTotal({
   label,
   value,
   left,
+  target,
   unit,
 }: {
   label: string;
   value: number;
   /** Still on the plan for today, in meals not yet answered. */
   left: number;
+  target?: number | null;
   unit: string;
 }) {
   return (
@@ -336,8 +410,14 @@ function MacroTotal({
       <dd className="mt-1 font-black">
         {Math.round(value)} {unit}
       </dd>
-      <p className="mt-1 text-xs text-[#5B5F5B]">
-        {left > 0.5 ? `נותרו ${Math.round(left)} בתפריט` : "אין עוד ארוחות לסמן"}
+      <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
+        {target && target > 0
+          ? value - target > 0.5
+            ? `חריגה של ${Math.round(value - target)} ${unit}`
+            : target - value > 0.5
+              ? `נותרו ${Math.round(target - value)} ${unit} ליעד`
+              : "היעד הושלם"
+          : left > 0.5 ? `נותרו ${Math.round(left)} בתפריט` : "אין עוד ארוחות לסמן"}
       </p>
     </div>
   );

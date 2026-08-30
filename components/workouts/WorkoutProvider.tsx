@@ -45,6 +45,13 @@ const Context=createContext<ContextValue|null>(null);
 export function WorkoutProvider({children}:{children:React.ReactNode}){
   const pathname=usePathname();
   const authScope=pathname==="/login"||pathname.startsWith("/auth/")?"auth":pathname.startsWith("/coach")?"coach":"client";
+  // The workout snapshot is intentionally large: programmes, exercises,
+  // assignments and history are all needed while training. Loading that whole
+  // graph on nutrition, profile, content and check-in screens made every visit
+  // pay for workout data it never rendered. Coaches use workout widgets across
+  // their area; clients only need it on home and workout routes.
+  const needsWorkoutData=authScope==="coach"||pathname==="/"||pathname.startsWith("/workouts");
+  const dataScope=needsWorkoutData?`${authScope}:workouts`:`${authScope}:shell`;
   const repository=useMemo(()=>createSupabaseWorkoutRepository(),[]);
   const[snapshot,setSnapshot]=useState<WorkoutRepositorySnapshot>(emptyWorkoutSnapshot);
   const[currentClientId,setCurrentClientId]=useState("");
@@ -102,7 +109,15 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     setPersistenceError(isOfflineError(error)?"אין חיבור לאינטרנט ואין נתוני אימון שמורים במכשיר.":"יש להתחבר כדי לטעון את נתוני האימונים.");
   },[]);
 
-  useEffect(()=>{let active=true;repository.load().then((loaded)=>{if(active)adopt(loaded)}).catch((error)=>{if(active)fallBackToCache(error)}).finally(()=>{if(active){setLoadedAuthScope(authScope);setLoading(false)}});return()=>{active=false}},[adopt,authScope,fallBackToCache,repository]);
+  // Nothing is set here for the screens that do not want the data: `loading` is
+  // already reported as false for them below, so the effect simply does not run
+  // and no state is written synchronously during a render pass.
+  useEffect(()=>{
+    if(!needsWorkoutData)return;
+    let active=true;
+    repository.load().then((loaded)=>{if(active)adopt(loaded)}).catch((error)=>{if(active)fallBackToCache(error)}).finally(()=>{if(active){setLoadedAuthScope(dataScope);setLoading(false)}});
+    return()=>{active=false};
+  },[adopt,dataScope,fallBackToCache,needsWorkoutData,repository]);
   useEffect(()=>connectionStore.start(),[]);
 
   const fail=useCallback((error?:unknown)=>{
@@ -135,7 +150,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     if(connectionStore.getSnapshot().online&&pendingSession.current)flushSession();
   }),[flushSession]);
   const value=useMemo<ContextValue>(()=>({
-    snapshot,currentClientId,role,loading:loading||loadedAuthScope!==authScope,persistenceError,offlineData:offline,pendingSync,
+    snapshot,currentClientId,role,loading:needsWorkoutData&&(loading||loadedAuthScope!==dataScope),persistenceError,offlineData:offline,pendingSync,
     // Replacing the running programme is now the coach's explicit choice on the
     // assignment form, not a browser confirm() the form cannot phrase. A client
     // may train on more than one programme at a time; only the same programme
@@ -162,7 +177,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     snoozeScheduledWorkout:async(assignmentId,date)=>{try{await repository.snoozeScheduledWorkout(assignmentId,date);return true}catch{return fail()}},
     getProgram:(id)=>snapshot.programs.find((program)=>program.id===id),
     getExercise:(id)=>snapshot.exercises.find((exercise)=>exercise.id===id),
-  }),[authScope,cache,currentClientId,fail,flushSession,loadedAuthScope,loading,offline,pendingSync,persistenceError,refresh,repository,role,snapshot]);
+  }),[cache,currentClientId,dataScope,fail,flushSession,loadedAuthScope,loading,needsWorkoutData,offline,pendingSync,persistenceError,refresh,repository,role,snapshot]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 export function useWorkouts(){const value=useContext(Context);if(!value)throw new Error("useWorkouts must be inside WorkoutProvider");return value}

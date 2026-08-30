@@ -135,9 +135,18 @@ test("one unread message counts once", async () => {
   // adding the two counts every message twice. Since the bar's badge moved to
   // the notifications tab it opens the same screen the bell does, so it is
   // handed the bell's own figure and there is nothing left to add up.
+  // The figure is now asked for by the browser rather than awaited in front of
+  // every client screen, so the shell counts nothing at all - but there is
+  // still exactly one place it comes from, and it is still the count of the
+  // screen the bell and the tab both open.
   assert.doesNotMatch(shell, /getUnreadMessageCount/);
-  assert.match(shell, /const unreadCount = unreadNotifications;/);
+  assert.doesNotMatch(shell, /getUnreadNotificationCount/);
   assert.match(bar, /const isInbox = href === "\/notifications";/);
+  const badge = await source("components/notifications/UnreadNotificationBadge.tsx");
+  assert.match(badge, /\/api\/notifications\/unread/);
+  // revalidatePath cannot reach a client component, so the badge re-asks on
+  // every navigation - which is when the server-rendered figure used to change.
+  assert.match(badge, /\}, \[pathname\]\)/);
 });
 
 test("counting unread notifications does not fetch a page of them", async () => {

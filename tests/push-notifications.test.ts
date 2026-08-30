@@ -37,8 +37,11 @@ test("a browser has no push transport, and says so", async () => {
   assert.equal(await unavailablePushProvider.isAvailable(), false);
   assert.equal(await unavailablePushProvider.getPermission(), "unavailable");
   assert.equal(await unavailablePushProvider.getRegistration(), undefined);
+  // Off a browser entirely - there is no window here - and with no VAPID key
+  // configured, which is the other way a deployment ends up with no transport.
   assert.equal(resolvePushProvider().platform, "none");
-  assert.match(pushReason("unavailable"), /בדפדפן/);
+  assert.equal(resolvePushProvider("   ").platform, "none");
+  assert.match(pushReason("unavailable"), /פעמון/);
   assert.match(pushReason("denied"), /נדחו/);
   assert.equal(pushReason("granted"), "");
 });
@@ -103,10 +106,73 @@ test("two overlapping dispatch runs cannot send the same notification twice", as
 });
 
 test("with no credentials the dispatcher records a skip, never a false send", async () => {
+  const dispatch = await source("lib/push/dispatch.ts");
+  assert.match(dispatch, /credentials are not configured/);
+  // APNs and FCM are still absent rather than stubbed: a fake success would mark
+  // the row sent and lose the notification for good.
+  assert.match(dispatch, /transport is not implemented/);
+  // The route is a wrapper now, and still not callable from the open internet.
   const route = await source("app/api/push/dispatch/route.ts");
-  assert.match(route, /credentials are not configured/);
-  assert.match(route, /transport is not implemented/);
-  assert.doesNotMatch(route, /p_status: "sent"/);
-  // And it is not callable from the open internet.
   assert.match(route, /Bearer \$\{secret\}/);
+});
+
+test("web push has real credentials, and they are this deployment's own", async () => {
+  const dispatch = await source("lib/push/dispatch.ts");
+  // A VAPID pair is generated locally; no Apple or Google account is involved,
+  // so web-push is the one provider that can be credentialled today.
+  assert.match(dispatch, /provider === "web-push"[\s\S]{0,80}Boolean\(vapidKeysFromEnv\(\)\)/);
+  assert.match(dispatch, /sendWebPush\(/);
+  // A subscription the transport cannot read is not retried three times.
+  assert.match(dispatch, /"failed", "unregistered: malformed subscription"/);
+});
+
+test("a dead subscription disables the device instead of being retried forever", async () => {
+  const transport = await source("lib/push/web-push.ts");
+  // 404 and 410 are the push service saying the subscription is gone. The word
+  // "unregistered" is what mark_push_delivery keys the disable off.
+  assert.match(transport, /status === 404 \|\| response\.status === 410/);
+  assert.match(transport, /unregistered: \$\{response\.status\}/);
+  const migration = await source("supabase/migrations/202608110003_push_devices.sql");
+  assert.match(migration, /ilike '%unregistered%'/);
+});
+
+test("a push is sent the moment the notification is written, not on the next cron", async () => {
+  // Two cron slots exist for the whole product. A reminder that goes out when
+  // the scheduler next happens to run is a reminder about something that has
+  // already passed.
+  for (const path of ["app/actions/messages.ts", "app/actions/coach.ts"]) {
+    assert.match(await source(path), /dispatchPushSoon\(\)/, path);
+  }
+  // And it can never be the reason the thing it accompanies fails to save.
+  const dispatch = await source("lib/push/dispatch.ts");
+  // `after`, not a floating promise: a serverless function may stop the moment
+  // it has answered, and an unawaited send started just before that never runs.
+  assert.match(dispatch, /import \{ after \} from "next\/server"/);
+  assert.match(dispatch, /after\(drain\)/);
+  // The scheduled runs drain too, so nothing a write-time attempt missed is lost.
+  assert.match(await source("app/api/cron/reminders/route.ts"), /dispatchPushDeliveries\(\)/);
+  assert.match(await source("app/api/cron/evening/route.ts"), /steps\.pushDispatch = await dispatchPushDeliveries\(\)/);
+});
+
+test("the service worker shows every push it is handed, and taps stay in the app", async () => {
+  const worker = await source("public/sw.js");
+  assert.match(worker, /self\.addEventListener\("push"/);
+  assert.match(worker, /self\.addEventListener\("notificationclick"/);
+  // A payload it cannot read is still a real notification. Swallowing one is
+  // how a browser decides to revoke the permission.
+  assert.match(worker, /NOTIFICATION_FALLBACK/);
+  // The same guard the in-app deep link has: an absolute URL in a payload must
+  // not take a tap to another site.
+  assert.match(worker, /startsWith\("\/"\) && !data\.href\.startsWith\("\/\/"\)/);
+  // A new worker has to be published for any of this to reach an installed app.
+  assert.match(worker, /const VERSION = "v3"/);
+});
+
+test("a web subscription is stored whole, and the column is wide enough for it", async () => {
+  const migration = await source("supabase/migrations/202608300001_web_push_carries_a_subscription.sql");
+  assert.match(migration, /between 8 and 4096/);
+  // The endpoint plus two keys, JSON-encoded into the token the row already has.
+  const transport = await source("lib/push/web-push.ts");
+  assert.match(transport, /export function parseWebPushSubscription/);
+  assert.match(transport, /endpoint\.startsWith\("https:\/\/"\)/);
 });

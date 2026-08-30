@@ -16,6 +16,20 @@ const eslintConfig = defineConfig([
     // linting it drowns the real findings in thousands of vendor warnings.
     "reports/**",
   ]),
+  {
+    // An underscore is how this repository says "destructured only so it is
+    // dropped". Without it the omit-by-rest idiom - `({ id: _id, ...row })` -
+    // is reported four times in one diagnostic script and the real findings
+    // scroll off the top.
+    rules: {
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+      }],
+    },
+  },
 ]);
 
 export default eslintConfig;

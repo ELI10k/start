@@ -77,7 +77,7 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   //
   // The estimator is one HTTP call to an external gateway, and it fails for
   // reasons that have nothing to do with the client: an expired deployment
-  // token, a provider outage, a slow answer past the twenty-second cut-off.
+  // token, a provider outage, a slow answer past the estimator's own deadline.
   // Refusing the save on any of those threw away the one thing that cannot be
   // reconstructed later - what the person actually ate - and told them to pick
   // something from a catalogue that does not contain their mother's cooking.
@@ -152,7 +152,7 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   //     the window IS the plan, and calling it a substitution both mislabels it
   //     on the client's screen and tells the coach the frame was missed.
   const mealId = uuid(form.get("mealId"));
-  if (mealId) {
+  if (mealId && String(form.get("preserveMealStatus")) !== "true") {
     const [{ data: meal }, { data: existing }] = await Promise.all([
       supabase.from("meals").select("free_calorie_target").eq("id", mealId).maybeSingle(),
       supabase.from("meal_day_status").select("status").eq("client_id", auth.id).eq("meal_id", mealId).eq("status_date", date).maybeSingle(),
@@ -183,8 +183,12 @@ export async function deleteClientFoodLog(form: FormData): Promise<void> {
   if (!id) return;
   const supabase = await createSupabaseServerClient();
   // The picture goes with the row it belonged to.
-  const { data } = await supabase.from("client_food_log").select("photo_path").eq("id", id).maybeSingle();
-  await supabase.rpc("delete_client_food_log", { p_id: id });
+  const { data } = await supabase.from("client_food_log").select("photo_path").eq("id", id).eq("client_id", auth.id).maybeSingle();
+  const { data: deleted, error } = await supabase.rpc("delete_client_food_log", { p_id: id });
+  if (error || deleted !== true) {
+    console.error("food_log_delete_failed", { id, code: error?.code, message: error?.message });
+    return;
+  }
   const path = data?.photo_path;
   if (path) await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([String(path)]);
   revalidatePath("/nutrition");

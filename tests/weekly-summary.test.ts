@@ -56,7 +56,7 @@ test("no line anywhere invents a figure, including the fallback action", () => {
   // Every branch of the composer, exercised together.
   const everything = facts({
     workouts: { completed: 1, planned: 4, skipped: 2, volumeKg: 8000, previousCompleted: 3 },
-    nutrition: { daysReported: 2, mealsEaten: 4, mealsPlanned: 12, freeCalorieDays: 5 },
+    nutrition: { daysReported: 2, mealsEaten: 4, mealsPlanned: 12, freeCalorieDays: 5, outsideMenuItems: 2, measuredOutsideMenuItems: 1, unmeasuredOutsideMenuItems: 1 },
     steps: { daysReported: 5, average: 4200, goal: 10000, daysMetGoal: 0, previousAverage: 3000 },
     weight: { entries: 0, latestKg: 0 },
     measurements: { entries: 1, changedSites: ["מותן"] },
@@ -70,6 +70,14 @@ test("no line anywhere invents a figure, including the fallback action", () => {
       assert.ok(isFreeOfMedicalClaims(line), `medical claim: ${line}`);
     }
   }
+});
+
+test("the coach weekly report includes measured and unmeasured outside-menu food", () => {
+  const summary = composeWeeklySummary(facts({
+    nutrition: { daysReported: 4, mealsEaten: 8, mealsPlanned: 10, freeCalorieDays: 0, outsideMenuItems: 3, measuredOutsideMenuItems: 2, unmeasuredOutsideMenuItems: 1 },
+  }));
+  assert.ok(summary.wentWell.some((line) => line.includes("2") && line.includes("מחוץ לתפריט")));
+  assert.ok(summary.needsWork.some((line) => line.includes("1") && line.includes("ללא ערכים")));
 });
 
 test("a missed target is criticised, and turned into a specific action", () => {

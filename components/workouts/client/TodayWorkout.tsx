@@ -2,7 +2,7 @@
 import { israelDateKey } from "@/lib/date-time";
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, SkipForward, Target, XCircle } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, Circle, Dumbbell, ExternalLink, Flame, Play, Repeat, SkipForward, Target, XCircle } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import { SkeletonCard, SkeletonList, StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
@@ -17,7 +17,7 @@ const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
 
 export default function TodayWorkout(){
-  const{snapshot,currentClientId,loading,persistenceError,skipScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[message,setMessage]=useState("");const[pending,setPending]=useState(false);const[missed,setMissed]=useState(false);const[missedReason,setMissedReason]=useState("");
+  const{snapshot,currentClientId,loading,persistenceError,moveScheduledWorkout,skipScheduledWorkout,getExercise}=useWorkouts();const today=israelDateKey();const[programChoice,setProgramChoice]=useState("");const assignments=activeAssignmentsFor(snapshot.assignments,currentClientId,today);const assignment=assignments.find((item)=>item.id===programChoice)??assignments[0];const program=assignment?snapshot.programs.find((item)=>item.id===assignment.programId):undefined;const[message,setMessage]=useState("");const[failed,setFailed]=useState(false);const[pending,setPending]=useState(false);const[missed,setMissed]=useState(false);const[missedReason,setMissedReason]=useState("");const[date,setDate]=useState(today);const[confirm,setConfirm]=useState(false);const[conflict,setConflict]=useState(false);
 
   // While the snapshot loads the page keeps its shape, so nothing jumps when the
   // real programme arrives.
@@ -35,10 +35,23 @@ export default function TodayWorkout(){
   // the same test the daily-actions sheet applies, against the same rows.
   const skippedToday=snapshot.scheduleChanges.some((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.status==="skipped");
   const submitMissed=async()=>{if(pending)return;setPending(true);try{
-    setMessage(await skipScheduledWorkout(assignment.id,day.id,today,missedReason)
+    const saved=await skipScheduledWorkout(assignment.id,day.id,today,missedReason);
+    setFailed(!saved);
+    setMessage(saved
       ?"האימון סומן כמפוספס. הוא נשאר בהיסטוריה ולא נספר כהושלם."
       :"לא הצלחנו לסמן את האימון. נסה שוב.");
     setMissed(false);setMissedReason("");
+  }finally{setPending(false)}};
+  // The workout that did not happen today but will happen this week. The RPC,
+  // its unique (assignment_id, original_date) row and its same-day guard have
+  // been in the database since 202607210001; between f6548e6 and now the only
+  // thing missing was the button that calls them.
+  const submit=async(confirmConflict:boolean)=>{if(completed||activeSession||pending)return;setPending(true);try{
+    const result=await moveScheduledWorkout(assignment.id,day.id,today,date,confirmConflict);
+    if(result.conflict&&!confirmConflict){setConflict(true);return}
+    setFailed(!result.ok);
+    if(result.ok){setMessage(`האימון הועבר בהצלחה ל-${hebrewDate(`${date}T00:00:00`)}`);setConfirm(false);setConflict(false)}
+    else setMessage("לא ניתן היה להעביר את האימון. נסה שוב.");
   }finally{setPending(false)}};
 
   return <div className="grid gap-4">
@@ -161,7 +174,20 @@ export default function TodayWorkout(){
         :<StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="עדיין אין אימונים שהושלמו" description="האימון הראשון שתסיים יופיע כאן."/>}
     </section>
 
-    {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
+    {/* A workout is not only done or missed - it is often just moved. The date
+        the client picks is written as one override row, the completed and the
+        already-started sessions are refused, and a day that already holds a
+        workout asks before it takes a second. */}
+    {!completed&&!activeSession&&
+      <button type="button" onClick={()=>setConfirm(true)} className="premium-secondary-button w-full">
+        <Repeat aria-hidden="true" size={17}/>העבר ליום אחר
+      </button>}
+
+    {/* Two regions, both mounted from the first render, because a screen reader
+        registers a live region when it appears - not when its role changes. A
+        confirmation is announced politely; "we could not save that" interrupts. */}
+    <p role="status" className="text-sm font-bold text-[#16A34A]">{failed?"":message}</p>
+    <p role="alert" className="text-sm font-bold text-[#DC2626]">{failed?message:""}</p>
 
     {/* The two answers to "what happened to today's workout", in thumb reach and
         in the order they are true in: it is starting, or it did not happen.
@@ -194,6 +220,17 @@ export default function TodayWorkout(){
           {pending?"שומרים…":"סימון כמפוספס"}
         </button>
         <button type="button" onClick={()=>setMissed(false)} disabled={pending} className="premium-secondary-button">ביטול</button>
+      </div>
+    </BottomSheet>
+
+    <BottomSheet open={confirm} title="העברת האימון ליום אחר" onClose={()=>{setConfirm(false);setConflict(false)}}>
+      <label className="block text-sm font-bold">תאריך חדש
+        <input type="date" min={today} value={date} onChange={(event)=>{setDate(event.target.value);setConflict(false)}} className="nutrition-input mt-2"/>
+      </label>
+      {conflict&&<p role="alert" className="mt-3 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3 text-sm">כבר קיים אימון אחר ביום הזה. אפשר להשאיר את שני האימונים באותו יום או לבחור יום אחר.</p>}
+      <div className="sheet__actions">
+        <button type="button" onClick={()=>submit(conflict)} disabled={pending||!date||date===today} className="premium-primary-button">{pending?"שומרים…":conflict?"השאר את שני האימונים":"אישור העברה"}</button>
+        <button type="button" onClick={()=>{setConfirm(false);setConflict(false)}} disabled={pending} className="premium-secondary-button">ביטול</button>
       </div>
     </BottomSheet>
 

@@ -95,7 +95,7 @@ export async function GET(request: Request) {
 }
 
 type DailyInput = ReturnType<typeof emptyInput>;
-const emptyInput = () => ({ mealsCompleted: 0, mealsPlanned: 0, calories: 0, protein: 0, calorieTarget: undefined as number | undefined, proteinTarget: undefined as number | undefined });
+const emptyInput = () => ({ mealsCompleted: 0, mealsPlanned: 0, calories: 0, protein: 0, unmeasuredItems: 0, calorieTarget: undefined as number | undefined, proteinTarget: undefined as number | undefined });
 
 /**
  * Everything the evening message needs, for every client, in six queries.
@@ -135,10 +135,15 @@ async function gatherDailyInputs(supabase: SupabaseClient, clientIds: readonly s
   const withPlan = [...planByClient.keys()];
   if (!planIds.length) return (id: string) => byClient.get(id) ?? emptyInput();
 
-  const [{ data: allMeals }, { data: statuses }, { data: logs }] = await Promise.all([
+  const [{ data: allMeals }, { data: statuses }, { data: logs }, { data: foodLog }] = await Promise.all([
     supabase.from("meals").select("id,meal_plan_id,day_index").in("meal_plan_id", planIds),
     supabase.from("meal_day_status").select("client_id,meal_id,status").in("client_id", withPlan).eq("status_date", date),
     supabase.from("nutrition_logs").select("id,client_id").in("client_id", withPlan).eq("log_date", date),
+    // What was eaten instead of, or beside, the menu. The nutrition screen has
+    // counted these into the day's totals since 202608200007; this message did
+    // not, so a client who logged their food through "אכלתי משהו אחר" was told
+    // every evening that they had eaten almost nothing.
+    supabase.from("client_food_log").select("client_id,calories,protein").in("client_id", withPlan).eq("log_date", date),
   ]);
 
   const logByClient = new Map(rows(logs).map((row) => [String(row.client_id), String(row.id)]));
@@ -146,6 +151,18 @@ async function gatherDailyInputs(supabase: SupabaseClient, clientIds: readonly s
   const { data: eaten } = logIds.length
     ? await supabase.from("eaten_meal_items").select("nutrition_log_id,calculated_calories,calculated_protein").in("nutrition_log_id", logIds)
     : { data: [] };
+
+  // Only rows that carry figures join the totals. A sentence or a photograph is
+  // real food with no macros attached, and it is counted separately so the
+  // message can say the day is partial rather than quietly treat it as zero.
+  const outsideByClient = new Map<string, { calories: number; protein: number; unmeasured: number }>();
+  for (const row of rows(foodLog)) {
+    const key = String(row.client_id);
+    const total = outsideByClient.get(key) ?? { calories: 0, protein: 0, unmeasured: 0 };
+    if (row.calories === null || row.calories === undefined) total.unmeasured += 1;
+    else { total.calories += num(row.calories); total.protein += num(row.protein); }
+    outsideByClient.set(key, total);
+  }
 
   const eatenByLog = new Map<string, { calories: number; protein: number }>();
   for (const row of rows(eaten)) {
@@ -178,8 +195,10 @@ async function gatherDailyInputs(supabase: SupabaseClient, clientIds: readonly s
     input.mealsCompleted = rows(statuses).filter((row) =>
       String(row.client_id) === clientId && row.status === "eaten" && mealIds.has(String(row.meal_id))).length;
     const totals = eatenByLog.get(logByClient.get(clientId) ?? "");
-    input.calories = totals?.calories ?? 0;
-    input.protein = totals?.protein ?? 0;
+    const outside = outsideByClient.get(clientId);
+    input.calories = (totals?.calories ?? 0) + (outside?.calories ?? 0);
+    input.protein = (totals?.protein ?? 0) + (outside?.protein ?? 0);
+    input.unmeasuredItems = outside?.unmeasured ?? 0;
   }
 
   return (id: string) => byClient.get(id) ?? emptyInput();

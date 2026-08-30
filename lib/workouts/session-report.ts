@@ -26,7 +26,7 @@ export type ReportExercise = Readonly<{
   previousSets: readonly ExerciseSetResult[];
   skipped: boolean;
   completed?: boolean;
-  difficulty?: "easy" | "hard";
+  difficulty?: "easy" | "medium" | "hard";
 }>;
 
 export type WorkoutReportInput = Readonly<{
@@ -92,7 +92,10 @@ export function buildWorkoutReport(input: WorkoutReportInput): readonly WorkoutI
   });
   improved.forEach((exercise)=>insights.push({tone:"praise",title:`${exercise.name} · עלייה במשקל`,detail:`${heaviest(exercise.previousSets)} → ${heaviest(exercise.sets)} ק״ג.`}));
 
-  trained.filter((exercise)=>exercise.difficulty).forEach((exercise)=>insights.push({tone:exercise.difficulty==="hard"?"note":"action",title:`${exercise.name} · ${exercise.difficulty==="hard"?"היה קשה":"היה קל"}`,detail:exercise.difficulty==="hard"?"באימון הבא ההמלצה תישאר זהירה יותר.":"באימון הבא ההמלצה תאפשר התקדמות קטנה."}));
+  trained.filter((exercise)=>exercise.difficulty).forEach((exercise)=>{
+    if(exercise.difficulty==="medium") insights.push({tone:"praise",title:`${exercise.name} · קושי מתאים`,detail:"העומס היה מאתגר במידה הנכונה; כדאי לשמר את איכות הביצוע."});
+    else insights.push({tone:exercise.difficulty==="hard"?"note":"action",title:`${exercise.name} · ${exercise.difficulty==="hard"?"היה קשה":"היה קל"}`,detail:exercise.difficulty==="hard"?"באימון הבא ההמלצה תישאר זהירה יותר.":"באימון הבא ההמלצה תאפשר התקדמות קטנה."});
+  });
 
   // ── What did not get finished ───────────────────────────────────────────
   const skipped = input.exercises.filter((exercise) => exercise.skipped);

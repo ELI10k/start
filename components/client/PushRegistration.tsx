@@ -11,7 +11,11 @@ import type { PushPermissionState, PushRegistration as Registration } from "@/li
 // notification. Rendered once inside the client shell; it draws nothing unless
 // there is something to say.
 export default function PushRegistration({ showPrompt = false }: { showPrompt?: boolean }) {
-  const provider = useMemo(() => resolvePushProvider(), []);
+  // Inlined into the bundle at build time. It is the public half of the VAPID
+  // pair and is meant to be public - the browser needs it to subscribe, and a
+  // subscription made against it is only usable by whoever holds the private
+  // half. Absent, and the browser has no push provider at all.
+  const provider = useMemo(() => resolvePushProvider(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY), []);
   const router = useRouter();
   const [permission, setPermission] = useState<PushPermissionState>("unknown");
   const [busy, setBusy] = useState(false);

@@ -3,7 +3,7 @@ import type { ExerciseSetResult } from "./types.ts";
 const heaviest=(sets:readonly ExerciseSetResult[])=>Math.max(0,...sets.filter((set)=>set.completed).map((set)=>set.weightKg??0));
 const roundTo=(value:number,step:number)=>Math.max(step,Math.round(value/step)*step);
 
-export function nextWorkoutChallenge(input:{sets:readonly ExerciseSetResult[];targetReps?:number;rpe?:number;difficulty?:"easy"|"hard";exerciseName?:string;equipment?:string}){
+export function nextWorkoutChallenge(input:{sets:readonly ExerciseSetResult[];targetReps?:number;rpe?:number;difficulty?:"easy"|"medium"|"hard";exerciseName?:string;equipment?:string}){
   const weight=heaviest(input.sets);
   if(!weight)return null;
   const allDone=input.sets.length>0&&input.sets.every((set)=>set.completed&&(input.targetReps===undefined||(set.repetitions??0)>=input.targetReps));

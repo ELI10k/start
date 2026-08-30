@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { GET as runReminders } from "../reminders/route";
 import { GET as runDailyCoach } from "../daily-coach/route";
 import { GET as runWeeklySummary } from "../weekly-summary/route";
+import { dispatchPushDeliveries } from "@/lib/push/dispatch";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -56,6 +57,16 @@ export async function GET(request: Request) {
       steps[name] = { ok: false, message: cause instanceof Error ? cause.message : "unknown" };
       console.error("evening cron step failed", { step: name, message: cause instanceof Error ? cause.message : "unknown" });
     }
+  }
+
+  // Last, because the three steps above are what put rows in the outbox. Each
+  // of them is written to drain what it created, so by here there is usually
+  // nothing left - this catches whatever a failed drain left behind, and costs
+  // one query when there is nothing to do.
+  try {
+    steps.pushDispatch = await dispatchPushDeliveries();
+  } catch (cause) {
+    steps.pushDispatch = { ok: false, message: cause instanceof Error ? cause.message : "unknown" };
   }
 
   console.info("evening cron ran", steps);

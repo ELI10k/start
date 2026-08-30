@@ -44,7 +44,13 @@ test.describe("portion override", () => {
 
     const option = card.locator("fieldset button[aria-pressed]").first();
     if (!(await option.count())) return null;
-    await option.click();
+    // Only where it is not already chosen. The option row is a toggle - a second
+    // tap clears the choice - and the case above this one leaves its option
+    // selected, so clicking unconditionally turned the selection OFF before the
+    // amount was ever typed. The group then had nothing to hang an amount on,
+    // the update was refused, and the row read as prescribed: a green test that
+    // had been silently reporting the wrong thing about a working feature.
+    if ((await option.getAttribute("aria-pressed")) !== "true") await option.click();
 
     // The control is collapsed until it has been used and stays open afterwards,
     // so the earlier case in this file can leave it in either state. Its

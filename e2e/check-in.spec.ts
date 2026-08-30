@@ -35,11 +35,24 @@ test.describe("check-in and progress", () => {
     }
   });
 
-  test("all three photo slots are offered", async ({ page }) => {
+  // Photos are a baseline and one follow-up, not a weekly chore: check-in 1 and
+  // check-in 4 ask for them and the ones in between deliberately do not. This
+  // asserted three slots on every check-in, so it failed the moment the test
+  // account reached its second week - reporting a working rule as a defect.
+  // Both states are checked, because "no photos this week" is a claim the screen
+  // has to make out loud rather than by leaving the step out.
+  test("photos are asked for exactly when the cycle says, and said so when not", async ({ page }) => {
     await page.goto("/check-in");
-    for (const view of [/קדימה|חזית/, /צד/, /גב/]) {
-      await expect(page.getByText(view).first()).toBeVisible();
+    const askedFor = await page.getByText(/צריך גם שלוש תמונות/).count();
+    if (askedFor) {
+      for (const view of [/קדימה|חזית/, /צד/, /גב/]) {
+        await expect(page.getByText(view).first()).toBeVisible();
+      }
+      return;
     }
+    // Named, so a client is not left wondering where the step went.
+    await expect(page.getByText(/אין צורך בתמונות/).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/קדימה|חזית/)).toHaveCount(0);
   });
 
   test("weight and navel measurements are required", async ({ page }) => {

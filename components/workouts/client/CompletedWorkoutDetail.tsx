@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { useState } from "react";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { workoutVolume } from "@/lib/workouts/progress";
+import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
+import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
 import type { ActiveExerciseResult, CompletedWorkout } from "@/lib/workouts/types";
 
 const numberOrUndefined=(value:string)=>{const parsed=Number(value);return value.trim()===""||Number.isNaN(parsed)?undefined:parsed};
@@ -23,6 +25,14 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
   const previous=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId&&item.dayId===workout.dayId&&item.completedAt<workout.completedAt).sort((a,b)=>b.completedAt.localeCompare(a.completedAt))[0];
   const editing=draft!==null;
   const shown=draft??workout;
+  const reportExercises:ReportExercise[]=shown.exerciseResults.map((result)=>{
+    const exercise=getExercise(result.performedExerciseId??result.exerciseId);
+    const prior=previous?.exerciseResults.find((item)=>(item.performedExerciseId??item.exerciseId)===(result.performedExerciseId??result.exerciseId));
+    const prescribed=day?.exercises.find((item)=>item.id===result.workoutExerciseId);
+    const restMatch=prescribed?.rest?.match(/\d+/)?.[0];
+    return{name:exercise?.name??"תרגיל",restSeconds:restMatch?Number(restMatch):null,sets:result.sets,previousSets:prior?.sets??[],skipped:result.skipped,completed:result.completed,difficulty:result.difficulty};
+  });
+  const insights=buildWorkoutReport({durationSeconds:shown.durationSeconds,exercises:reportExercises,sleepHours:shown.sleepHours,perceivedDifficulty:shown.perceivedDifficulty});
 
   const patchSet=(workoutExerciseId:string,setId:string,value:{weightKg?:number;repetitions?:number})=>{
     if(!draft)return;
@@ -48,6 +58,7 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
     <p className="text-xs font-bold text-[#16A34A]">{new Date(workout.completedAt).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</p>
     <h1 className="mt-2 text-3xl font-black">{day?.name??"אימון שהושלם"}</h1>
     <p className="mt-2 text-[#5B5F5B]">{program?.name??"תוכנית לא זמינה"}</p>
+    <WorkoutPreserveImprove insights={insights}/>
 
     <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
       <Info label="משך" value={`${Math.round(workout.durationSeconds/60)} דק׳`}/>

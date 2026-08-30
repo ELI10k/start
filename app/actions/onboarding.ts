@@ -283,6 +283,10 @@ export async function resendClientInvite(form: FormData) {
   redirect(`/coach/clients/${clientId}?invite=resent`);
 }
 
+/** Fifteen minutes. Long enough that a loop is pointless, short enough that a
+ *  genuine "it never arrived" is not made to wait. */
+const REPLACEMENT_INVITE_INTERVAL_MS = 15 * 60 * 1000;
+
 export async function requestReplacementInvite(
   _: ReplacementInviteState,
   form: FormData,
@@ -313,6 +317,25 @@ export async function requestReplacementInvite(
       !relationship ||
       intake?.onboarding_completed
     ) return generic;
+    // One invitation per address per window.
+    //
+    // This action is deliberately unauthenticated - somebody whose invitation
+    // expired has no way to sign in and ask for another - and it answers the
+    // same sentence whether or not it did anything, so it cannot be used to
+    // find out who has an account. What it could be used for is mail-bombing
+    // one person who does, by posting the same address in a loop.
+    //
+    // The limit is read from the invitations already recorded rather than from
+    // a counter somewhere: an invitation sent minutes ago is still in the
+    // inbox, and sending a second one helps nobody.
+    const {data:recent}=await admin
+      .from("client_invitations")
+      .select("sent_at")
+      .eq("client_id",profile.id)
+      .order("sent_at",{ascending:false})
+      .limit(1)
+      .maybeSingle();
+    if(recent?.sent_at && Date.now()-new Date(String(recent.sent_at)).getTime() < REPLACEMENT_INVITE_INTERVAL_MS) return generic;
     const {error}=await admin.auth.admin.inviteUserByEmail(authUser.user.email,{
       data:{full_name:profile.full_name},
       redirectTo:await inviteRedirect(),

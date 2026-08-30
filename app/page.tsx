@@ -11,11 +11,34 @@ import { listContentCategories, listPublishedContent } from "@/lib/data/content-
 import { lessonForWeek } from "@/lib/content/weekly-lesson";
 import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
 import ProgressPulse from "@/components/client/ProgressPulse";
-import { israelDateKey } from "@/lib/date-time";
+import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
+import { Suspense } from "react";
+
+async function HomeWeeklySummary({ clientId }: { clientId: string }) {
+  const [latestSummary] = await getWeeklySummaries(clientId, 1);
+  return <WeeklySummaryCard summary={latestSummary} />;
+}
+
+async function HomeWeeklyLesson({ clientId, today }: { clientId: string; today: string }) {
+  const [lessons, categories] = await Promise.all([
+    listPublishedContent(clientId),
+    listContentCategories(),
+  ]);
+  const weeklyLesson = lessonForWeek(lessons, categories.map((category) => category.id), today);
+  if (!weeklyLesson) return null;
+  return (
+    <section aria-labelledby="weekly-lesson-heading">
+      <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
+        השיעור שלך השבוע
+      </h2>
+      <WeeklyLessonCard lesson={weeklyLesson} />
+    </section>
+  );
+}
 
 export default async function Home() {
   const auth = await getAuthContext();
@@ -25,16 +48,10 @@ export default async function Home() {
   const today = israelDateKey();
   // The same three reads the nutrition screen makes, because this screen quotes
   // its figures back and the two disagreeing is worse than either being wrong.
-  const [data, [latestSummary], logged, lessons, categories] = await Promise.all([
+  const [data, logged] = await Promise.all([
     getClientOverview(auth.id, today),
-    // RLS returns sent summaries only, so the newest row is the newest release.
-    getWeeklySummaries(auth.id, 1),
     listClientFoodLog(auth.id, today),
-    listPublishedContent(auth.id),
-    listContentCategories(),
   ]);
-  // The library, in course order, advanced by one lesson a week.
-  const weeklyLesson = lessonForWeek(lessons, categories.map((category) => category.id), today);
   const meals = data.menu?.meals ?? [];
   // Marked eaten, or every choice in it logged - the same test the nutrition
   // screen applies. `meal.completed` alone missed nothing today, but it is one
@@ -56,7 +73,7 @@ export default async function Home() {
   const eatenCalories = Math.round(totals.calories);
   const remainingCalories = calorieTarget ? Math.max(0, Math.round(calorieTarget - totals.calories)) : 0;
   const currentWeek = trainingWeekStart(today);
-  const checkInDue = !data.checkIns.some((checkIn) =>
+  const checkInDue = israelWeekday(today) === 5 && !data.checkIns.some((checkIn) =>
     trainingWeekStart(israelDateKey(new Date(checkIn.submitted_at))) === currentWeek
   );
 
@@ -80,7 +97,9 @@ export default async function Home() {
 
         {/* Only ever renders in the days after the coach releases one, which is
             also the only time this screen is allowed to grow past the fold. */}
-        <WeeklySummaryCard summary={latestSummary} />
+        <Suspense fallback={null}>
+          <HomeWeeklySummary clientId={auth.id} />
+        </Suspense>
 
         <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
           <MetricTile
@@ -148,14 +167,9 @@ export default async function Home() {
             course that was not written. This asks for one decision a week
             instead of thirty, and it is last on the screen because it is the
             one thing here that is not today's business. */}
-        {weeklyLesson ? (
-          <section aria-labelledby="weekly-lesson-heading">
-            <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
-              השיעור שלך השבוע
-            </h2>
-            <WeeklyLessonCard lesson={weeklyLesson} />
-          </section>
-        ) : null}
+        <Suspense fallback={null}>
+          <HomeWeeklyLesson clientId={auth.id} today={today} />
+        </Suspense>
 
         {/* Where they have got to, in the space the screen had left over.
             

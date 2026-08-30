@@ -10,7 +10,15 @@ export type WeeklyFacts = Readonly<{
   weekStart: string;
   weekEnd: string;
   workouts?: Readonly<{ completed: number; planned: number; skipped: number; volumeKg: number; previousCompleted?: number }>;
-  nutrition?: Readonly<{ daysReported: number; mealsEaten: number; mealsPlanned: number; freeCalorieDays: number }>;
+  nutrition?: Readonly<{
+    daysReported: number;
+    mealsEaten: number;
+    mealsPlanned: number;
+    freeCalorieDays: number;
+    outsideMenuItems: number;
+    measuredOutsideMenuItems: number;
+    unmeasuredOutsideMenuItems: number;
+  }>;
   steps?: Readonly<{ daysReported: number; average: number; goal: number; daysMetGoal: number; previousAverage?: number }>;
   weight?: Readonly<{ entries: number; latestKg: number; changeKg?: number }>;
   measurements?: Readonly<{ entries: number; changedSites: readonly string[] }>;

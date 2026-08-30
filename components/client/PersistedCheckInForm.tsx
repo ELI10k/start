@@ -29,7 +29,10 @@ const DRAFT_KEY = "start:check-in-draft";
 export default function PersistedCheckInForm({ photosRequired = false, firstCheckIn = false }: { photosRequired?: boolean; firstCheckIn?: boolean }) {
   const [state, action] = useActionState(saveCheckIn, initial);
   const form = useRef<HTMLFormElement>(null);
-  const [done, setDone] = useState<readonly boolean[]>([false, false, false, false, false, false]);
+  const emptySteps = () => photosRequired
+    ? [false, false, false, false, false, false]
+    : [false, false, false, false, false];
+  const [done, setDone] = useState<readonly boolean[]>(emptySteps);
   // Whether what is on screen was typed here or came back from a previous visit.
   const [restored, setRestored] = useState(false);
 
@@ -61,7 +64,7 @@ export default function PersistedCheckInForm({ photosRequired = false, firstChec
     clearDraft();
     form.current?.reset();
     setRestored(false);
-    setDone([false, false, false, false, false, false]);
+    setDone(emptySteps());
   };
 
   const recompute = () => {
@@ -74,14 +77,15 @@ export default function PersistedCheckInForm({ photosRequired = false, firstChec
       const value = data.get(name);
       return value instanceof File && value.size > 0;
     };
-    setDone([
+    const nextDone = [
       filled("weight"),
       filled("navelCircumference"),
       filled("workoutsCompleted") && filled("mealPlanDays"),
       ratings.every((item) => filled(item.name)),
       filled("notes"),
-      ["photo_front", "photo_side", "photo_back"].every(hasPhoto),
-    ]);
+    ];
+    if (photosRequired) nextDone.push(["photo_front", "photo_side", "photo_back"].every(hasPhoto));
+    setDone(nextDone);
   };
 
   // Six steps, five ratings and a weight, and until now a closed tab or a stray
@@ -178,9 +182,9 @@ export default function PersistedCheckInForm({ photosRequired = false, firstChec
           <label className="block text-sm font-bold">הערות<textarea name="notes" className="nutrition-input mt-2 min-h-28" /></label>
         </Step>
 
-        <Step number={6} title="תמונות" done={done[5]} hint={photosRequired ? (firstCheckIn ? "חובה בצ׳ק־אין הראשון" : "חובה השבוע") : "רשות"}>
-          <CheckInPhotoInputs required={photosRequired} first={firstCheckIn} />
-        </Step>
+        {photosRequired && <Step number={6} title="תמונות" done={done[5]} hint={firstCheckIn ? "תמונות התחלה" : "תמונות אחרי חודש"}>
+          <CheckInPhotoInputs required first={firstCheckIn} />
+        </Step>}
       </div>
 
       {/* Sending a check-in and hearing nothing back reads as "it did not go".

@@ -57,6 +57,7 @@ export default function AteSomethingElse({
   // than offering a search with nothing behind it.
   foods = [],
   unmeasuredNote = "ה־AI יעריך קלוריות ואבות מזון לפי התיאור או התמונה, והערכים יתווספו לסיכום של היום.",
+  preserveMealStatus = false,
 }: {
   mealId: string;
   date: string;
@@ -65,6 +66,7 @@ export default function AteSomethingElse({
   title?: string;
   unmeasuredNote?: string;
   foods?: readonly PickableFood[];
+  preserveMealStatus?: boolean;
 }) {
   const [tab, setTab] = useState<"text" | "food" | "scan" | "photo">("text");
   // Shares the barcode tab's gram field: it is the same question, asked once.
@@ -169,6 +171,7 @@ export default function AteSomethingElse({
       <form ref={formRef} action={action} className="mt-4 grid gap-3">
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="mealId" value={mealId} />
+        <input type="hidden" name="preserveMealStatus" value={preserveMealStatus ? "true" : "false"} />
         {/* The catalogue reports itself as "scan".
             
             The database's own check accepts text, scan or photo, so a fourth

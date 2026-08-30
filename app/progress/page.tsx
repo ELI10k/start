@@ -13,7 +13,9 @@ export default async function ProgressPage() {
   if (auth.role !== "client") redirect("/unauthorized");
   const today = israelDateKey();
   const [data,checkInHistory] = await Promise.all([getClientOverview(auth.id, today),getClientCheckInHistory(auth.id)]);
+  const photoCheckInIds = new Set([...checkInHistory.checkIns].reverse().flatMap((checkIn,index)=>index===0||index===3?[checkIn.id]:[]));
   const photoSessions=checkInHistory.checkIns.flatMap((checkIn)=>{
+    if(!photoCheckInIds.has(checkIn.id))return [];
     const photos=checkInHistory.photosByCheckIn[checkIn.id]??[];
     return photos.length?[{checkInId:checkIn.id,submittedAt:checkIn.submitted_at,photos}]:[];
   });

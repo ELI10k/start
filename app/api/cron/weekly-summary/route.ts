@@ -194,11 +194,12 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
   if (!clientIds.length) return (): FactsWithLogins => empty();
   const ids = [...clientIds];
 
-  const [sessions, previousSessions, mealStatus, steps, previousSteps, progress, earlierProgress, checkIns, assignments, stepGoals, deviceSessions] =
+  const [sessions, previousSessions, mealStatus, foodLogs, steps, previousSteps, progress, earlierProgress, checkIns, assignments, stepGoals, deviceSessions] =
     await Promise.all([
       supabase.from("workout_sessions").select("client_id,id,status,completed_at,total_volume,assignment_id").in("client_id", ids).eq("status", "completed").gte("completed_at", `${week.start}T00:00:00Z`).lte("completed_at", `${week.end}T23:59:59Z`),
       supabase.from("workout_sessions").select("client_id,id").in("client_id", ids).eq("status", "completed").gte("completed_at", `${week.previousStart}T00:00:00Z`).lt("completed_at", `${week.start}T00:00:00Z`),
       supabase.from("meal_day_status").select("client_id,status,status_date").in("client_id", ids).gte("status_date", week.start).lte("status_date", week.end),
+      supabase.from("client_food_log").select("client_id,meal_id,log_date,calories,protein,carbs,fat").in("client_id", ids).gte("log_date", week.start).lte("log_date", week.end),
       supabase.from("health_steps").select("client_id,day,steps").in("client_id", ids).gte("day", week.start).lte("day", week.end),
       supabase.from("health_steps").select("client_id,day,steps").in("client_id", ids).gte("day", week.previousStart).lt("day", week.start),
       supabase.from("progress_entries").select("client_id,date,weight,waist,chest,hips").in("client_id", ids).gte("date", week.start).lte("date", week.end).order("date"),
@@ -224,7 +225,7 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
     }
     return byClient;
   };
-  const sessionsBy = group(sessions), previousSessionsBy = group(previousSessions), mealBy = group(mealStatus);
+  const sessionsBy = group(sessions), previousSessionsBy = group(previousSessions), mealBy = group(mealStatus), foodLogsBy = group(foodLogs);
   const stepsBy = group(steps), previousStepsBy = group(previousSteps), progressBy = group(progress);
   const earlierProgressBy = group(earlierProgress), checkInsBy = group(checkIns);
   const assignmentBy = group(assignments), goalBy = group(stepGoals);
@@ -242,6 +243,7 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
     sessions: of(sessionsBy, clientId),
     previousSessions: of(previousSessionsBy, clientId),
     mealStatus: of(mealBy, clientId),
+    foodLogs: of(foodLogsBy, clientId),
     steps: of(stepsBy, clientId),
     previousSteps: of(previousStepsBy, clientId),
     progress: of(progressBy, clientId),
@@ -257,7 +259,7 @@ async function gatherAllFacts(supabase: SupabaseClient, clientIds: readonly stri
 /** The arithmetic, on rows that have already been fetched and grouped. */
 function buildFacts(input: {
   week: ReturnType<typeof israelWeek>;
-  sessions: Row[]; previousSessions: Row[]; mealStatus: Row[];
+  sessions: Row[]; previousSessions: Row[]; mealStatus: Row[]; foodLogs: Row[];
   steps: Row[]; previousSteps: Row[]; progress: Row[]; earlierProgress: Row[];
   checkIns: Row[]; plannedFrequency: number; stepGoal: number;
 }): WeeklyFacts {
@@ -281,8 +283,21 @@ function buildFacts(input: {
         mealsEaten: statusRows.filter((row) => row.status === "eaten").length,
         mealsPlanned: statusRows.length,
         freeCalorieDays: 0,
+        outsideMenuItems: input.foodLogs.filter((row) => !row.meal_id).length,
+        measuredOutsideMenuItems: input.foodLogs.filter((row) => !row.meal_id && row.calories !== null).length,
+        unmeasuredOutsideMenuItems: input.foodLogs.filter((row) => !row.meal_id && row.calories === null).length,
       }
-    : undefined;
+    : input.foodLogs.length
+      ? {
+          daysReported: new Set(input.foodLogs.map((row) => String(row.log_date))).size,
+          mealsEaten: 0,
+          mealsPlanned: 0,
+          freeCalorieDays: 0,
+          outsideMenuItems: input.foodLogs.filter((row) => !row.meal_id).length,
+          measuredOutsideMenuItems: input.foodLogs.filter((row) => !row.meal_id && row.calories !== null).length,
+          unmeasuredOutsideMenuItems: input.foodLogs.filter((row) => !row.meal_id && row.calories === null).length,
+        }
+      : undefined;
 
   const goal = input.stepGoal;
   const average = (source: Row[]) => (source.length ? Math.round(source.reduce((total, row) => total + num(row.steps), 0) / source.length) : 0);

@@ -30,7 +30,9 @@ const cycle=checkInPhotoCycle(count??0);// Which check-in this is, and when phot
 // for - and a client with no photos on them had to abandon the form.
 const description=cycle.photosRequired
   ?`צ׳ק־אין מספר ${cycle.nextCheckInNumber}. בצ׳ק־אין הזה צריך גם שלוש תמונות: קדימה, צד וגב.`
-  :`צ׳ק־אין מספר ${cycle.nextCheckInNumber}. תמונות יידרשו שוב בעוד ${cycle.remainingUntilPhotos} ${cycle.remainingUntilPhotos===1?"צ׳ק־אין":"צ׳ק־אינים"}.`;
+  :cycle.nextCheckInNumber<4
+    ?`צ׳ק־אין מספר ${cycle.nextCheckInNumber}. אין צורך בתמונות השבוע; תמונות ההשוואה יצולמו בצ׳ק־אין הרביעי.`
+    :`צ׳ק־אין מספר ${cycle.nextCheckInNumber}. אין צורך בתמונות בצ׳ק־אין הזה.`;
 return <ClientShell><PageHeader eyebrow="עדכון שבועי" title="איך עבר עליך השבוע?" description={submittedThisWeek?"הצ׳ק־אין של השבוע כבר נשלח.":description} action={{href:"/check-in/history",label:"היסטוריה"}}/>
 {submittedThisWeek
   ? <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">

@@ -80,13 +80,6 @@ function foodRelationName(value: unknown): string {
     : "מזון";
 }
 
-function foodRelationNotes(value: unknown): string | null {
-  const relation = Array.isArray(value) ? value[0] : value;
-  return relation && typeof relation === "object" && "notes" in relation && relation.notes
-    ? String(relation.notes).trim() || null
-    : null;
-}
-
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createSupabaseServerClient();
   const {
@@ -480,24 +473,60 @@ export async function getActiveClientMenu(
   date: string,
 ): Promise<PersistedMenu | null> {
   const supabase = await createSupabaseServerClient();
-  const { data: assignment, error: assignmentError } = await supabase
-    .from("client_meal_plan_assignments")
-    .select("id,meal_plan_id")
+  // Once the client interacted with a menu on a given date, that day's
+  // nutrition log is the authoritative historical snapshot. Assignment end
+  // dates can subsequently change when a coach reassigns a plan; using only
+  // the current assignment range made already-used menus disappear backwards.
+  const { data: existingLog, error: existingLogError } = await supabase
+    .from("nutrition_logs")
+    .select("id,assignment_id,meal_plan_id")
     .eq("client_id", clientId)
-    .eq("status", "active")
-    .lte("assigned_from", date)
-    .or(`assigned_until.is.null,assigned_until.gte.${date}`)
+    .eq("log_date", date)
     .maybeSingle();
-  if (assignmentError) throw assignmentError;
-  if (!assignment) return null;
+  if (existingLogError) throw existingLogError;
 
-  const { data: plan, error: planError } = await supabase
-    .from("meal_plans")
-    .select("*")
-    .eq("id", assignment.meal_plan_id)
-    .maybeSingle();
-  if (planError) throw planError;
-  if (!plan) return null;
+  const currentAssignment = async () => {
+    let assignmentQuery = supabase
+      .from("client_meal_plan_assignments")
+      .select("id,meal_plan_id")
+      .eq("client_id", clientId)
+      .lte("assigned_from", date)
+      .or(`assigned_until.is.null,assigned_until.gte.${date}`)
+      .order("assigned_from", { ascending: false })
+      .limit(1);
+    if (date >= israelDateKey()) assignmentQuery = assignmentQuery.eq("status", "active");
+    const { data: assignments, error: assignmentError } = await assignmentQuery;
+    if (assignmentError) throw assignmentError;
+    return assignments?.[0] ?? null;
+  };
+  const readPlan = async (mealPlanId: string) => {
+    const { data, error } = await supabase.from("meal_plans").select("*").eq("id", mealPlanId).maybeSingle();
+    if (error) throw error;
+    return data;
+  };
+
+  let assignment: { id: string; meal_plan_id: string } | null = existingLog?.meal_plan_id
+    ? { id: existingLog.assignment_id, meal_plan_id: existingLog.meal_plan_id }
+    : await currentAssignment();
+  let plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
+
+  // The snapshot is a preference, not a requirement.
+  //
+  // The day's log pins the menu the client was actually reading, so a coach who
+  // reassigns does not rewrite what already happened. But the plan it points at
+  // can stop being readable - it is deleted, or the assignment that granted the
+  // read is ended when the replacement is activated - and the branch above then
+  // returned null with a live, active menu sitting in the assignments table.
+  //
+  // A coach replacing a client's menu during the day left that client on
+  // "עדיין אין תפריט פעיל" until midnight: no meals, no marks, nothing to
+  // report against, and nothing on the screen to explain it. So an unreadable
+  // snapshot falls through to whatever is assigned now rather than to nothing.
+  if (!plan && existingLog?.meal_plan_id) {
+    assignment = await currentAssignment();
+    plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
+  }
+  if (!assignment || !plan) return null;
 
   const { data: allMeals, error: mealError } = await supabase
     .from("meals")
@@ -527,17 +556,12 @@ export async function getActiveClientMenu(
         ? supabase
             .from("meal_items")
             .select(
-              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name,notes)",
+              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
             )
             .in("meal_id", mealIds)
             .order("sort_order")
         : Promise.resolve({ data: [], error: null }),
-      supabase
-        .from("nutrition_logs")
-        .select("id")
-        .eq("client_id", clientId)
-        .eq("log_date", date)
-        .maybeSingle(),
+      Promise.resolve({ data: existingLog ? { id: existingLog.id } : null, error: null }),
     ]);
   if(groupError)throw groupError;
   if (itemError) throw itemError;
@@ -586,9 +610,13 @@ export async function getActiveClientMenu(
           measurementUnit:item.measurement_unit??"גרם",
           itemRole:(item.item_role==="primary"?"primary":"alternative") as "primary"|"alternative",
           amountSource:(item.amount_source==="auto"?"auto":"manual") as "auto"|"manual",
-          // Written by the coach against this food. It was stored and shown back
-          // in the builder, and never once reached the person it was written for.
-          note: (("note" in item ? (item.note as string | null) : null) || foodRelationNotes(item.foods)) ?? null,
+          // Only the note the coach wrote on this specific menu item belongs in
+          // the client's menu. Master-food/source notes are catalogue metadata
+          // and must never be presented as personal instructions.
+          note:
+            "note" in item && typeof item.note === "string"
+              ? item.note.trim() || null
+              : null,
           calories: Number(item.calculated_calories),
           protein: Number(item.calculated_protein),
           carbs: Number(item.calculated_carbohydrates),
@@ -637,6 +665,59 @@ export async function getActiveClientMenu(
       };
     }),
   };
+}
+
+export type NutritionBehaviorWindow = Readonly<{
+  days: number;
+  daysReported: number;
+  mealsMarked: number;
+  mealsEaten: number;
+  mealsSkipped: number;
+  outsideItems: number;
+  measuredOutsideItems: number;
+  unmeasuredOutsideItems: number;
+}>;
+
+/** Actual nutrition behaviour for the last week and month, ending on `date`. */
+export async function getClientNutritionBehavior(clientId: string, date: string): Promise<Readonly<{
+  week: NutritionBehaviorWindow;
+  month: NutritionBehaviorWindow;
+}>> {
+  const supabase = await createSupabaseServerClient();
+  const shift = (days: number) => {
+    const value = new Date(`${date}T12:00:00Z`);
+    value.setUTCDate(value.getUTCDate() - days);
+    return value.toISOString().slice(0, 10);
+  };
+  const monthStart = shift(29);
+  const [{ data: statuses, error: statusError }, { data: logs, error: logError }] = await Promise.all([
+    supabase.from("meal_day_status").select("status,status_date").eq("client_id", clientId).gte("status_date", monthStart).lte("status_date", date),
+    supabase.from("client_food_log").select("log_date,calories").eq("client_id", clientId).gte("log_date", monthStart).lte("log_date", date),
+  ]);
+  if (statusError && !MISSING_RELATION.has(statusError.code ?? "")) throw statusError;
+  if (logError && !MISSING_RELATION.has(logError.code ?? "")) throw logError;
+  const statusRows = statuses ?? [];
+  const logRows = logs ?? [];
+  const summarize = (days: number): NutritionBehaviorWindow => {
+    const start = shift(days - 1);
+    const selectedStatuses = statusRows.filter((row) => String(row.status_date) >= start);
+    const selectedLogs = logRows.filter((row) => String(row.log_date) >= start);
+    const reportedDates = new Set([
+      ...selectedStatuses.map((row) => String(row.status_date)),
+      ...selectedLogs.map((row) => String(row.log_date)),
+    ]);
+    return {
+      days,
+      daysReported: reportedDates.size,
+      mealsMarked: selectedStatuses.length,
+      mealsEaten: selectedStatuses.filter((row) => row.status === "eaten").length,
+      mealsSkipped: selectedStatuses.filter((row) => row.status === "not_eaten").length,
+      outsideItems: selectedLogs.length,
+      measuredOutsideItems: selectedLogs.filter((row) => row.calories !== null).length,
+      unmeasuredOutsideItems: selectedLogs.filter((row) => row.calories === null).length,
+    };
+  };
+  return { week: summarize(7), month: summarize(30) };
 }
 
 // The same food, at the amount the client says they ate. Scaling is linear in
@@ -1018,15 +1099,24 @@ export async function listCoachMenus(coachId: string) {
 // `for select to authenticated`, and a Supabase server client reads cookies(),
 // which Next forbids inside unstable_cache. Measured at ~345ms for 389 rows, it
 // was never the slow leg here; correctness is worth more than the round trip.
+/** Every food, in one read. The picker and the client's search both work over it. */
 export async function listDatabaseFoods() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("foods")
     .select("id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package")
-    .order("name");
+    .order("name")
+    // PostgREST caps an unbounded select at a thousand rows and says nothing
+    // about it. The catalogue is 417 products today, so nothing is missing yet -
+    // and the day it passes a thousand, the picker would quietly stop offering
+    // everything after ט׳ in the alphabet, with no error anywhere to explain it.
+    .range(0, FOOD_CATALOG_LIMIT - 1);
   if (error) throw error;
   return data ?? [];
 }
+
+/** Well above the catalogue's size, and well below anything a phone struggles with. */
+const FOOD_CATALOG_LIMIT = 5000;
 
 export async function listCoachFoodUsage(coachId:string){
   const supabase=await createSupabaseServerClient();

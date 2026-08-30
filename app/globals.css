@@ -1755,7 +1755,13 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 @media (max-width: 600px) {
   .workout-exercise-card > div:first-child { flex-wrap: wrap; }
   .workout-exercise-card__actions { width: 100%; justify-content: flex-start; }
-  .workout-exercise-card__actions > * { min-height: 2.5rem; }
+  /* 2.75rem, not 2.5rem. This rule is more specific than both `.chip` and the
+     `min-h-11` on the video link, so it was the one that decided - and it set
+     44px controls to 40px on screens under 600px wide. Every one of the three
+     controls in this row (the video, the guidance sheet, the technique upload)
+     was under the minimum touch target, on a phone, which is the only place
+     this rule applies at all. */
+  .workout-exercise-card__actions > * { min-height: 2.75rem; }
 }
 
 /* Four figures, one row, no sideways scroll. dashboard-metrics is a scroller,

@@ -403,7 +403,9 @@ test("the workout report reads off what was recorded, and never fills space", as
     exercises: [{ name: "לחיצת חזה", restSeconds: 60, skipped: false,
       sets: [set("a", 60), set("b", 60)], previousSets: [set("x", 60)] }],
   });
-  assert.ok(ready.some((item) => item.title === "אפשר לעלות במשקל"));
+  // Named per exercise, because a report that lists four exercises has to say
+  // which one is ready.
+  assert.ok(ready.some((item) => item.title === "לחיצת חזה · אפשר לעלות"));
 
   // Beating it is praised, with both numbers.
   const improved = buildWorkoutReport({

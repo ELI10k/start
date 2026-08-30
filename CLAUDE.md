@@ -29,8 +29,16 @@ Before editing code:
 8. Do not make product changes until the audit is complete.
 
 ## Non-negotiable safety rules
-- Never deploy to Production without Eli explicitly saying: "אשר העלאה לפרודקשן".
-- Use Preview deployments for review.
+- Deploy to Production without asking. Eli lifted the approval rule on 2026-08-30:
+  "תמיד תעלה לפרודקשן אל תחכה להוראות ממני". He does not look at Preview
+  deployments - he checks start-snowy-eight - so waiting for approval left
+  finished work sitting in a branch he never saw.
+- What replaces the approval is the gate, not a question: TypeScript, lint, the
+  unit tests, the build and both E2E projects must be green on the tree being
+  deployed. A red gate is fixed before deploying, never shipped and reported.
+- Migrations and anything that deletes or rewrites existing data are NOT covered
+  by this. Those are still explained to Eli, with impact and rollback, before
+  they run.
 - Never delete production data.
 - Never weaken Auth, RLS, Storage policies or tenant isolation.
 - Never expose private check-in photos publicly. Use signed URLs and enforce ownership/coach assignment.

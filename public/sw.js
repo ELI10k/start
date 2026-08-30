@@ -18,7 +18,7 @@
 // Bump this to publish a new offline page. The activate step deletes every
 // start-public-* cache that is not this one, so an old shell cannot survive a
 // deploy - which is the failure mode a version-less cache name produces.
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE = `start-public-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
@@ -100,4 +100,71 @@ self.addEventListener("fetch", (event) => {
 
   // Everything else - /api, /_next, RSC payloads, uploads - is not answered here
   // and therefore never enters Cache Storage.
+});
+
+// ---------------------------------------------------------------------- push
+//
+// A push arrives while START is closed, so this is the only code that runs. The
+// body is the same four fields the in-app notification row carries - title,
+// body, href, category - encrypted end to end, which is why the push service
+// that relayed it could not read them.
+//
+// The browser requires a notification to be shown for every push it delivers.
+// A payload that cannot be read is still a real notification that was sent, so
+// it is shown plainly rather than swallowed - swallowing it is what makes a
+// browser revoke the permission.
+
+const NOTIFICATION_FALLBACK = { title: "START", body: "יש עדכון חדש", href: "/notifications" };
+
+self.addEventListener("push", (event) => {
+  let payload = NOTIFICATION_FALLBACK;
+  try {
+    const data = event.data ? event.data.json() : null;
+    if (data && typeof data.title === "string" && data.title.trim()) {
+      payload = {
+        title: data.title.trim().slice(0, 120),
+        body: typeof data.body === "string" ? data.body.slice(0, 300) : "",
+        // Only an in-app path is ever followed. An absolute URL in a payload
+        // would send a tap to another site from inside the app.
+        href: typeof data.href === "string" && data.href.startsWith("/") && !data.href.startsWith("//")
+          ? data.href
+          : NOTIFICATION_FALLBACK.href,
+      };
+    }
+  } catch {
+    // Left as the fallback.
+  }
+
+  event.waitUntil(self.registration.showNotification(payload.title, {
+    body: payload.body,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    dir: "rtl",
+    lang: "he",
+    data: { href: payload.href },
+    // One notification per destination. A client who did not open the app does
+    // not need four rows saying the same thing.
+    tag: payload.href,
+    renotify: true,
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const href = event.notification.data && event.notification.data.href;
+  const target = typeof href === "string" && href.startsWith("/") && !href.startsWith("//") ? href : "/notifications";
+  const url = new URL(target, self.location.origin).href;
+
+  // Focus a tab that is already open rather than stacking another one, and take
+  // it to the screen the notification was about.
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      for (const client of windows) {
+        if (new URL(client.url).origin !== self.location.origin) continue;
+        if ("navigate" in client) return client.navigate(url).then((navigated) => navigated && navigated.focus());
+        return client.focus();
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
 });

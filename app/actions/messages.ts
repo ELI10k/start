@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAuthContext } from "@/lib/data/product-repository";
+import { dispatchPushSoon } from "@/lib/push/dispatch";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type MessageState = Readonly<{ ok: boolean; message?: string }>;
@@ -60,6 +61,10 @@ export async function sendMessage(_state: MessageState, form: FormData): Promise
   });
   if (error) return { ok: false, message: describe(error) };
 
+  // The row is written and the outbox is filled by a trigger; this is what
+  // takes it off the outbox and onto the other person's phone. Not awaited: a
+  // push that cannot be sent is never the reason a message fails to send.
+  dispatchPushSoon();
   paths(clientId);
   return { ok: true, message: "ההודעה נשלחה." };
 }

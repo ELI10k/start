@@ -38,7 +38,7 @@ export default function FreeCalorieMeal({
       <p className="text-sm text-[#16A34A]">
         אפשר לבחור כל מזון, כל עוד הסך נשאר במסגרת {frame} קלוריות.
       </p>
-      <p className="mt-2 text-sm font-bold">
+      <p className={`mt-2 text-sm font-bold ${left < 0 ? "text-[#DC2626]" : ""}`}>
         {logged > 0
           ? left >= 0
             ? `נרשמו ${Math.round(logged)} קל׳ · נותרו ${left}`
@@ -61,7 +61,7 @@ export default function FreeCalorieMeal({
         open={adding}
         onClose={() => setAdding(false)}
         title="מה אכלת במסגרת הזו?"
-        unmeasuredNote="פריט שנרשם בתיאור או בתמונה לא ייספר במסגרת — רק סריקת ברקוד נושאת ערכים. המאמן יראה בדיוק מה אכלת."
+        unmeasuredNote="התיאור או התמונה יישלחו לחישוב אוטומטי. אם לא ניתן לזהות בוודאות, הפריט יישמר לעיון המאמן בלי להוסיף ערכים שגויים."
       />
     </div>
   );

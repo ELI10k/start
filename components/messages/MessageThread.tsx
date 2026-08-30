@@ -6,6 +6,7 @@ import { sendMessage, type MessageState } from "@/app/actions/messages";
 import { StateBlock } from "@/components/client/AppPatterns";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { TOPIC_LABELS, type DirectMessage } from "@/lib/messages/types";
+import { useLiveRows } from "@/lib/supabase/use-live-rows";
 
 const initial: MessageState = { ok: false };
 
@@ -43,6 +44,18 @@ export default function MessageThread({
   const [state, action] = useActionState(sendMessage, initial);
   const form = useRef<HTMLFormElement>(null);
   const end = useRef<HTMLDivElement>(null);
+
+  // The other side's message arrives on its own. Without this the thread is
+  // correct when it loads and wrong from the first reply onwards - which is how
+  // a conversation reads as a form you submit and then reload to see.
+  //
+  // The filter is the conversation, and the coach's client id is the same value
+  // the server used to build this list. A client passes none: their own row-level
+  // security already limits the stream to their own thread.
+  useLiveRows("coach_client_messages", {
+    event: "*",
+    filter: clientId ? `client_id=eq.${clientId}` : undefined,
+  });
 
   // A sent message should leave the box empty and be on screen. React resets the
   // form itself after a successful action; the scroll is ours to do.

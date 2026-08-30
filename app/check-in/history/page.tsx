@@ -12,6 +12,7 @@ export default async function CheckInHistoryPage(){
   if(!auth)redirect("/login");
   if(auth.role!=="client")redirect("/unauthorized");
   const data=await getClientCheckInHistory(auth.id);
+  const photoCheckInIds=new Set([...data.checkIns].reverse().flatMap((entry,index)=>index===0||index===3?[entry.id]:[]));
 
   return <ClientShell>
     <PageHeader eyebrow="צ׳ק-אין" title="עדכונים קודמים" description="היסטוריה, תמונות ותגובות המאמן." action={{href:"/check-in",label:"עדכון חדש"}}/>
@@ -34,7 +35,7 @@ export default async function CheckInHistoryPage(){
                 <div><span>אנרגיה</span><strong>{entry.energy}/10</strong></div>
                 <div><span>שינה</span><strong>{entry.sleep}/10</strong></div>
               </dl>
-              <CheckInPhotoGallery photos={data.photosByCheckIn[entry.id] ?? []} error={data.photoError}/>
+              {photoCheckInIds.has(entry.id)?<CheckInPhotoGallery photos={data.photosByCheckIn[entry.id] ?? []} error={data.photoError}/>:null}
               {/* A response used to be the end of the exchange - it could be read
                   and nothing else. Now it can be answered. */}
               {entry.coach_response&&<div className="mt-4 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4">

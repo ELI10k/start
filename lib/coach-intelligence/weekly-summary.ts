@@ -61,6 +61,13 @@ export function composeWeeklySummary(facts: WeeklyFacts, provider = "rules"): We
       actions.push("לבחור את הארוחה אחת שנפלה הכי הרבה פעמים השבוע ולהכין אותה מראש.");
     }
     if (nutrition.freeCalorieDays >= 4) needsWork.push(`קלוריות חופשיות נוצלו ב-${countPhrase(nutrition.freeCalorieDays, "יום", "ימים")}.`);
+    if (nutrition.measuredOutsideMenuItems > 0) {
+      wentWell.push(`${nutrition.measuredOutsideMenuItems} פריטים שנאכלו מחוץ לתפריט נרשמו עם ערכים תזונתיים.`);
+    }
+    if (nutrition.unmeasuredOutsideMenuItems > 0) {
+      needsWork.push(`${nutrition.unmeasuredOutsideMenuItems} פריטים מחוץ לתפריט נרשמו ללא ערכים תזונתיים.`);
+      actions.push("להוסיף תיאור וכמות מדויקים לפריט מחוץ לתפריט, או לבחור אותו ממאגר המזון.");
+    }
   }
 
   if (steps) {
@@ -100,7 +107,7 @@ export function composeWeeklySummary(facts: WeeklyFacts, provider = "rules"): We
     if (checkIns.submitted > 0) wentWell.push(`הוגש צ׳ק-אין${checkIns.reviewed > 0 ? " והמאמן הגיב עליו" : ", ממתין לתגובת המאמן"}.`);
     else {
       needsWork.push("לא הוגש צ׳ק-אין השבוע.");
-      actions.push("להגיש צ׳ק-אין עד יום ראשון, כדי שהשבוע הבא ייבנה על נתונים עדכניים.");
+      actions.push("להגיש צ׳ק-אין ביום שישי, כדי שהשבוע הבא ייבנה על נתונים עדכניים.");
     }
   }
 
