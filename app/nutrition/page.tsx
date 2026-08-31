@@ -82,7 +82,12 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     getClientNutritionBehavior(auth.id,today),
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
   ]);
-  if (favoriteResult.error) throw favoriteResult.error;
+  // Favourites only reorder the food picker. This screen is the client's plan,
+  // the day's log and today's totals, and none of that should disappear
+  // because one convenience table was briefly unreachable - which is the rule
+  // the rest of the codebase already follows for optional reads.
+  if (favoriteResult.error)
+    console.error("food favourites unavailable", { code: favoriteResult.error.code });
   const favoriteIds = new Set((favoriteResult.data ?? []).map((row) => String(row.food_id)));
   // What was eaten instead, and what of it carries figures. Only the measured
   // part joins the day's totals; the rest is shown as unmeasured rather than

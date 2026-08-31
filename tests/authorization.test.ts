@@ -91,3 +91,45 @@ test("only one rate limiter exists", () => {
 test("the tree type-checks", () => {
   execFileSync("npx", ["tsc", "--noEmit"], { stdio: "pipe" });
 });
+
+// --- fixes from the code review of b169902 -------------------------------
+
+test("the metadata sync repairs the race without overturning a decision", () => {
+  const sql = readFileSync(
+    "supabase/migrations/202608310006_the_sync_repairs_a_race_not_a_decision.sql", "utf8");
+  // Activation is scoped: only a row still in its provisioning state, and only
+  // moments after the user was created.
+  assert.match(sql, /when status = 'disabled'/);
+  assert.match(sql, /new\.created_at > now\(\) - interval '5 minutes'/);
+  // The flag is written only when there is a key to write it from.
+  assert.match(sql, /new\.raw_app_meta_data \? 'is_test_account'/);
+  assert.match(sql, /else is_test_account end/);
+  // And a malformed value cannot fail the UPDATE that carries the trigger.
+  assert.match(sql, /exception when others then/);
+});
+
+test("a food log over its allowance is still saved, unmeasured", () => {
+  const source = readFileSync("app/actions/food-log.ts", "utf8");
+  // The ceiling sets a flag; it must not return before the row is written.
+  assert.match(source, /estimateRateLimited = !minuteAllowed \|\| !dailyAllowed/);
+  assert.doesNotMatch(
+    source,
+    /if \(!minuteAllowed \|\| !dailyAllowed\) \{\s*\n\s*return \{ ok: false/,
+    "a rate-limited entry must not be discarded",
+  );
+  assert.match(source, /estimateRateLimited\s*\n?\s*\?/);
+});
+
+test("an optional read cannot take the nutrition screen down", () => {
+  const source = readFileSync("app/nutrition/page.tsx", "utf8");
+  assert.doesNotMatch(source, /throw favoriteResult\.error/);
+  assert.match(source, /console\.error\("food favourites unavailable"/);
+});
+
+test("a missing forwarded address skips the per-address limit", () => {
+  const source = readFileSync("app/login/actions.ts", "utf8");
+  assert.doesNotMatch(source, /\?\?"unknown"/, 'every caller would share one bucket');
+  assert.match(source, /forwarded\?consumeRateLimit/);
+  // The per-email limit is the one that must always run.
+  assert.match(source, /action:"magic_link_email"/);
+});

@@ -89,15 +89,23 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   // and already say out loud ("אינם נספרים - אין להם ערכים מאושרים"), and the
   // coach still sees the sentence the client wrote.
   let estimateFailed = false;
+  let estimateRateLimited = false;
   if (needsEstimate) {
+    // The ceiling belongs on the paid call, not on the save. Refusing the whole
+    // action here threw away the sentence the client had written - the one
+    // thing the paragraph above says cannot be reconstructed later - and
+    // because consumeRateLimit fails closed, a missing service key or a brief
+    // database problem stopped food logging altogether rather than stopping
+    // the estimator. So a client over their allowance takes the same path as
+    // an unreachable gateway: the row is written, unmeasured.
     const [minuteAllowed, dailyAllowed] = await Promise.all([
       consumeRateLimit({ action: "food_ai_minute", subject: auth.id, windowSeconds: 60, limit: 5 }),
       consumeRateLimit({ action: "food_ai_day", subject: auth.id, windowSeconds: 86_400, limit: 50 }),
     ]);
-    if (!minuteAllowed || !dailyAllowed) {
-      return { ok: false, message: "בוצעו יותר מדי הערכות. אפשר לנסות שוב מאוחר יותר." };
-    }
-    const estimate = await estimateFoodNutrition({ description: name, photo: hasPhoto ? photo : undefined });
+    estimateRateLimited = !minuteAllowed || !dailyAllowed;
+    const estimate = estimateRateLimited
+      ? null
+      : await estimateFoodNutrition({ description: name, photo: hasPhoto ? photo : undefined });
     if (estimate) {
       resolvedName = name || estimate.name;
       ({ calories, protein, carbs, fat } = estimate);
@@ -181,8 +189,10 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
 
   revalidatePath("/nutrition");
   revalidatePath("/");
-  return { ok: true, message: estimateFailed
-    ? "נרשם — אבל לא הצלחנו להעריך את הערכים כרגע, אז הפריט לא נספר בסיכום של היום. המאמן רואה מה נכתב."
+  return { ok: true, message: estimateRateLimited
+    ? "נרשם — הגעת למספר ההערכות המרבי לעכשיו, אז הפריט נשמר בלי ערכים. אפשר להזין אותם ידנית או לנסות שוב מאוחר יותר."
+    : estimateFailed
+      ? "נרשם — אבל לא הצלחנו להעריך את הערכים כרגע, אז הפריט לא נספר בסיכום של היום. המאמן רואה מה נכתב."
     : needsEstimate
       ? `נרשם עם הערכה: ${calories} קל׳ · ${protein} ג׳ חלבון · ${carbs} ג׳ פחמימות · ${fat} ג׳ שומן.`
       : "נרשם ונוסף לסיכום של היום." };
