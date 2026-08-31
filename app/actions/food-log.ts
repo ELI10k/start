@@ -9,6 +9,8 @@ import {
   validateFoodLogPhoto,
 } from "@/lib/nutrition/food-log";
 import { estimateFoodNutrition } from "@/lib/nutrition/food-estimator";
+import { detectImageFormat } from "@/lib/images/signature";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
 
 export type FoodLogState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -88,6 +90,13 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   // coach still sees the sentence the client wrote.
   let estimateFailed = false;
   if (needsEstimate) {
+    const [minuteAllowed, dailyAllowed] = await Promise.all([
+      consumeRateLimit({ action: "food_ai_minute", subject: auth.id, windowSeconds: 60, limit: 5 }),
+      consumeRateLimit({ action: "food_ai_day", subject: auth.id, windowSeconds: 86_400, limit: 50 }),
+    ]);
+    if (!minuteAllowed || !dailyAllowed) {
+      return { ok: false, message: "בוצעו יותר מדי הערכות. אפשר לנסות שוב מאוחר יותר." };
+    }
     const estimate = await estimateFoodNutrition({ description: name, photo: hasPhoto ? photo : undefined });
     if (estimate) {
       resolvedName = name || estimate.name;
@@ -107,6 +116,9 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   if (hasPhoto) {
     const problem = validateFoodLogPhoto(photo);
     if (problem) return { ok: false, message: problem };
+    // photo.type is the browser's word for it; these are the bytes.
+    if ((await detectImageFormat(photo)) !== photo.type)
+      return { ok: false, message: "התמונה אינה קובץ JPG, PNG או WebP תקין." };
     photoPath = foodLogPhotoPath(auth.id, date, photo.type);
     const { error: uploadError } = await supabase.storage
       .from(FOOD_LOG_PHOTO_BUCKET)

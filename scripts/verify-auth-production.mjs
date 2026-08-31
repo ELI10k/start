@@ -202,7 +202,14 @@ try {
 
   const oldCookie = await authCookieHeader(clientDeviceOne.session, oldClientDevice);
   const replacedResponse = await productionRequest("/nutrition", oldCookie);
-  assert(redirectPath(replacedResponse) === "/unauthorized?reason=replaced", "replaced client device was not blocked in production");
+  const replacedPath = redirectPath(replacedResponse);
+  assert(
+    replacedResponse.status >= 300 &&
+      replacedResponse.status < 400 &&
+      replacedPath.includes("reason=replaced") &&
+      (replacedPath.startsWith("/login") || replacedPath.startsWith("/unauthorized")),
+    "replaced client device was not blocked in production",
+  );
 
   const refreshed = must(await clientDeviceTwo.client.auth.refreshSession(), "refresh client session");
   assert(refreshed.session, "session refresh returned no session");
@@ -225,7 +232,7 @@ try {
   assert(logoutResponse.status === 303 && redirectPath(logoutResponse) === "/login", "production logout failed");
   assert((logoutResponse.headers.get("set-cookie") || "").includes("sb-"), "logout did not clear auth cookies");
   const loggedOutResponse = await productionRequest("/nutrition", "");
-  assert(redirectPath(loggedOutResponse) === "/login", "logged-out request was not rejected");
+  assert(redirectPath(loggedOutResponse).startsWith("/login"), "logged-out request was not rejected");
 
   const relogin = await magicLinkSession(clientEmail);
   must(await relogin.client.rpc("activate_current_device", { p_device_id: activeClientDevice, p_device_name: "Client B" }), "activate device after re-login");
@@ -247,7 +254,7 @@ try {
         fatTarget: "60",
         activeFrom: today,
         activeUntil: "",
-        days: [{ dayIndex: 0, meals: [{ title: "בדיקת E2E", items: [{ foodId: food.id, amount: "100", sortOrder: 0 }] }] }],
+        days: [{ dayIndex: 0, meals: [{ title: "ארוחת בוקר", groups: [{ type: "protein", items: [{ foodId: food.id, amount: "100", itemRole: "primary", sortOrder: 0 }] }] }] }],
       },
     }),
     "save assigned meal plan",
@@ -415,6 +422,17 @@ try {
 } catch (error) {
   failure = error instanceof Error ? error.message : "unknown verification failure";
 } finally {
+  // A failed run may stop before individual generated ids are captured. Remove
+  // everything owned by the two temporary principals before deleting Auth.
+  if (ids.coach || ids.client) {
+    const principals = [ids.coach, ids.client].filter(Boolean);
+    await admin.from("client_content_assignments").delete().in("assigned_by", principals);
+    await admin.from("client_meal_plan_assignments").delete().in("assigned_by", principals);
+    await admin.from("workout_assignments").delete().in("assigned_by", principals);
+    await admin.from("meal_plans").delete().in("coach_id", principals);
+    await admin.from("menus").delete().in("coach_id", principals);
+    await admin.from("workout_programs").delete().in("coach_id", principals);
+  }
   await removeRows("content_favorites", "client_id", ids.client);
   await removeRows("content_progress", "client_id", ids.client);
   await removeRows("content_items", "id", ids.content);

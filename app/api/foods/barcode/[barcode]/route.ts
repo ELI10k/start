@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthContext } from "@/lib/data/product-repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { normalizeBarcode, parseOpenFoodFactsProduct } from "@/lib/nutrition/open-food-facts";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
 
 // START's own catalogue first, Open Food Facts second. A barcode someone has
 // already scanned resolves without leaving the building, which is both faster and
@@ -17,6 +18,12 @@ export async function GET(_request: Request, context: { params: Promise<{ barcod
   const { barcode: raw } = await context.params;
   const barcode = normalizeBarcode(raw);
   if (!barcode) return NextResponse.json({ error: "invalid_barcode" }, { status: 400 });
+
+  // START's own catalogue is checked below and costs nothing, but a barcode
+  // that misses goes out to Open Food Facts in this deployment's name and
+  // writes a row on the way back. That is the part worth a ceiling.
+  if (!(await consumeRateLimit({ action: "barcode_lookup", subject: auth.id, windowSeconds: 3600, limit: 120 })))
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
 
   const supabase = await createSupabaseServerClient();
   const { data: known, error } = await supabase

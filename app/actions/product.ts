@@ -10,6 +10,7 @@ import {
 } from "@/lib/check-ins/photo-storage";
 import { validateMealPlanPayload } from "@/lib/nutrition/menu-validation";
 import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
+import { detectImageFormat } from "@/lib/images/signature";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { israelDateKey } from "@/lib/date-time";
 
@@ -49,7 +50,7 @@ export async function saveProgress(
       date,
       weight,
       navel_circumference: navelCircumference,
-      notes: String(form.get("notes") ?? "").trim() || null,
+      notes: String(form.get("notes") ?? "").trim().slice(0, 4000) || null,
     },
     { onConflict: "client_id,date" },
   );
@@ -100,6 +101,11 @@ export async function saveCheckIn(
     return {ok:false,message:"בצ׳ק־אין הראשון ובצ׳ק־אין הרביעי חובה לצרף תמונות קדימה, צד וגב."};
   const photoError = files.map(({ file }) => validateCheckInPhoto(file)).find(Boolean);
   if (photoError) return { ok: false, message: photoError };
+  // The declared type is whatever the browser attached. Confirm the bytes agree
+  // before any of this reaches storage.
+  const formats = await Promise.all(files.map(({ file }) => detectImageFormat(file)));
+  if (formats.some((format, index) => format === null || format !== files[index].file.type))
+    return { ok: false, message: "אחת התמונות אינה קובץ JPG, PNG או WebP תקין." };
   // One a week. The guard is a trigger, so this is the message rather than the
   // rule - but catching it here means the client is told plainly instead of
   // reading a Postgres exception.
@@ -115,7 +121,7 @@ export async function saveCheckIn(
     navel_circumference: navelCircumference,
     workouts_completed: wholeCount(form, "workoutsCompleted"),
     meal_plan_days: wholeCount(form, "mealPlanDays"),
-    notes: String(form.get("notes") ?? "").trim() || null,
+    notes: String(form.get("notes") ?? "").trim().slice(0, 4000) || null,
     status: "submitted",
   }).select("id").single();
   if (error||!checkIn)

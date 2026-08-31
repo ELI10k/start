@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getAuthContext } from "@/lib/data/product-repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { normalizeBarcode, scannedFoodId, validateManualFood } from "@/lib/nutrition/open-food-facts";
+import { consumeRateLimit } from "@/lib/security/rate-limit";
 
 export type ScanState = Readonly<{ ok: boolean; message?: string; foodId?: string }>;
 
@@ -35,6 +36,12 @@ const RULES: Record<string, string> = {
 export async function saveScannedFood(_: ScanState, form: FormData): Promise<ScanState> {
   const auth = await getAuthContext();
   if (!auth) return { ok: false, message: "אין הרשאה." };
+
+  // The catalogue is shared and a barcode-less entry creates a new row every
+  // time, so this writes into something everybody reads. Forty an hour is far
+  // above anyone entering their own food and well below a loop.
+  if (!(await consumeRateLimit({ action: "catalog_write", subject: auth.id, windowSeconds: 3600, limit: 40 })))
+    return { ok: false, message: "נשמרו יותר מדי מזונות חדשים. אפשר לנסות שוב מאוחר יותר." };
 
   const manual = String(form.get("source") ?? "manual") === "manual";
   const barcode = normalizeBarcode(String(form.get("barcode") ?? "")) ?? "";

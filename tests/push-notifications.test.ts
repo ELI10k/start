@@ -113,7 +113,7 @@ test("with no credentials the dispatcher records a skip, never a false send", as
   assert.match(dispatch, /transport is not implemented/);
   // The route is a wrapper now, and still not callable from the open internet.
   const route = await source("app/api/push/dispatch/route.ts");
-  assert.match(route, /Bearer \$\{secret\}/);
+  assert.match(route, /isAuthorizedCronRequest\(request, secret\)/);
 });
 
 test("web push has real credentials, and they are this deployment's own", async () => {

@@ -8,6 +8,15 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const statuses = new Set(["draft", "published", "archived"]);
 const contentTypes = new Set(["article", "video"]);
+const safeUrl = (value: string) => {
+  if (!value) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 async function requireRole(role: "coach" | "client") {
   const auth = await getAuthContext();
@@ -32,6 +41,7 @@ export async function saveContentItem(form: FormData): Promise<void> {
   if (
     (id && !uuidPattern.test(id)) ||
     !title ||
+    title.length > 200 ||
     !uuidPattern.test(categoryId) ||
     !statuses.has(status) ||
     !contentTypes.has(contentType) ||
@@ -41,6 +51,12 @@ export async function saveContentItem(form: FormData): Promise<void> {
       (!Number.isInteger(estimatedMinutes) ||
         estimatedMinutes < 1 ||
         estimatedMinutes > 1440)) ||
+    body.length > 100_000 ||
+    mediaUrl.length > 2_048 ||
+    !safeUrl(mediaUrl) ||
+    String(form.get("description") ?? "").trim().length > 2_000 ||
+    String(form.get("thumbnailUrl") ?? "").trim().length > 2_048 ||
+    !safeUrl(String(form.get("thumbnailUrl") ?? "").trim()) ||
     (status === "published" && !body && !mediaUrl)
   )
     throw new Error("invalid_content_item");

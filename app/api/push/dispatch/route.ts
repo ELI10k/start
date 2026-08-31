@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthorizedCronRequest } from "@/lib/security/cron-auth";
 import { dispatchPushDeliveries } from "@/lib/push/dispatch";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export const GET = (request: Request) => POST(request);
 export async function POST(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!isAuthorizedCronRequest(request, secret)) return NextResponse.json({ ok: false }, { status: 401 });
 
   const result = await dispatchPushDeliveries();
   return NextResponse.json(result, { status: result.ok ? 200 : 500 });

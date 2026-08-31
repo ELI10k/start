@@ -13,7 +13,8 @@ test("daily coach cron creates one deduplicated next-best-action notification pe
   // once. The weekday helper is what keeps a multi-day menu counted as one day.
   assert.match(route, /israelDateKey\(\)/);
   assert.match(route, /israelWeekday\(date\)/);
-  assert.match(route, /Bearer \$\{secret\}/);
+  // Constant-time now, but the requirement is unchanged: no secret, no run.
+  assert.match(route, /isAuthorizedCronRequest\(request, secret\)/);
   // The daily coach no longer has a cron entry of its own: the Hobby plan
   // registers two jobs and silently drops the rest, so it runs inside the
   // evening job instead. An entry here would push a working one out.

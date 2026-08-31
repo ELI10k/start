@@ -345,8 +345,9 @@ test("the warm-up and the household reading are on the screens that need them", 
   ]);
   assert.match(session, /planWarmup\(workingWeightFrom\(performance\.sessions\)/);
   assert.match(session, /compound:isCompoundLift\(exercise\?\.name\)/);
-  // Warm-up sets are guidance, not logged work - they must not reach the volume.
-  assert.match(session, /סטי החימום אינם נרשמים ואינם נספרים בנפח/);
+  // Warm-up sets can be checked, but are stored separately and never reach volume.
+  assert.match(session, /warmupCompletedPercents/);
+  assert.match(session, /לא נספרים בנפח האימון/);
 
   assert.match(option, /household\?: string/);
   // The meal is part of the reading now: the spoon rule is a lunch rule, and a

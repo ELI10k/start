@@ -91,7 +91,16 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     .select("id,role,full_name,status")
     .eq("id", user.id)
     .single();
-  if (!data || (data.role !== "coach" && data.role !== "client")) return null;
+  // status was selected here and never read, so a paused or disabled account
+  // kept a valid context everywhere except the proxy - and the proxy only
+  // guards the paths it lists. A coach who pauses a client expects the writing
+  // to stop, not to stop on some routes.
+  if (
+    !data ||
+    data.status !== "active" ||
+    (data.role !== "coach" && data.role !== "client")
+  )
+    return null;
   return {
     id: data.id,
     role: data.role,
@@ -1104,7 +1113,7 @@ export async function listDatabaseFoods() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("foods")
-    .select("id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package")
+    .select("id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package,source,created_by")
     .order("name")
     // PostgREST caps an unbounded select at a thousand rows and says nothing
     // about it. The catalogue is 417 products today, so nothing is missing yet -

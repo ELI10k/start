@@ -49,7 +49,7 @@ test("one failing client cannot stop the run",()=>{
 
 test("the cron route refuses anything without the shared secret",()=>{
   assert.match(route,/process\.env\.CRON_SECRET/);
-  assert.match(route,/authorization"\) !== `Bearer \$\{secret\}`/);
+  assert.match(route,/isAuthorizedCronRequest\(request, secret\)/);
   assert.match(route,/status: 401/);
   assert.match(route,/run_scheduled_reminders/);
 });

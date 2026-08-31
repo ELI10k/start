@@ -27,6 +27,49 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "16mb",
     },
   },
+  // Nothing here existed: no CSP, no HSTS, no frame or referrer policy. The
+  // session cookie is readable by JavaScript - that is @supabase/ssr's design,
+  // because the browser client has to read it - so the second layer matters.
+  //
+  // The CSP is Report-Only on purpose. Next injects inline scripts and inline
+  // style, and a blocking policy without nonces takes the app down. Violations
+  // surface in the browser console, so the enforcing version can be written
+  // from what actually fires rather than from a guess. Everything else is
+  // enforced now, because none of it can break a page.
+  async headers() {
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      // Supabase for data, storage and the realtime socket; the two YouTube
+      // hosts are the lesson artwork already declared under images below.
+      "img-src 'self' data: blob: https://*.supabase.co https://img.youtube.com https://i.ytimg.com https://i.pravatar.cc",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+      "media-src 'self' blob: https://*.supabase.co",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; ");
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Content-Security-Policy-Report-Only", value: csp },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

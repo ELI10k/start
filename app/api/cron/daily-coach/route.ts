@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthorizedCronRequest } from "@/lib/security/cron-auth";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { buildDailyCoachMessage } from "@/lib/coach-intelligence/proactive-coach";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
@@ -15,7 +16,7 @@ const num = (value: unknown) => value === null || value === undefined ? 0 : Numb
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!isAuthorizedCronRequest(request, secret)) return NextResponse.json({ ok: false }, { status: 401 });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return NextResponse.json({ ok: false, message: "Supabase is not configured." }, { status: 500 });
@@ -23,7 +24,10 @@ export async function GET(request: Request) {
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
   const date = israelDateKey();
   const { data: clients, error } = await supabase.from("profiles").select("id").eq("role", "client").eq("status", "active");
-  if (error) return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+  if (error) {
+    console.error("daily coach client list failed", { code: error.code, message: error.message });
+    return NextResponse.json({ ok: false, error: "daily_coach_failed" }, { status: 500 });
+  }
 
   const clientIds = rows(clients).map((client) => String(client.id));
   const dailyInput = await gatherDailyInputs(supabase, clientIds, date);
@@ -77,7 +81,7 @@ export async function GET(request: Request) {
     : { data: 0, error: null };
   if (writeError) {
     console.error("daily coach batch failed", { message: writeError.message, size: batch.length });
-    return NextResponse.json({ ok: false, date, message: writeError.message }, { status: 500 });
+    return NextResponse.json({ ok: false, date, error: "daily_coach_failed" }, { status: 500 });
   }
   const delivered = Number(written ?? 0);
   // The function skips a row it cannot use rather than failing the batch, so a

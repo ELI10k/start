@@ -190,7 +190,7 @@ test("the schedule stays inside what the hosting plan allows", async () => {
   // accepts 18:00-21:00 on a Saturday, so both land inside it.
   const route = await source("app/api/cron/weekly-summary/route.ts");
   assert.match(route, /isSummaryHour/);
-  assert.match(route, /Bearer \$\{secret\}/);
+  assert.match(route, /isAuthorizedCronRequest\(request, secret\)/);
   // One client's failure must not take the rest of the run down.
   assert.match(route, /weekly summary failed for client/);
 });

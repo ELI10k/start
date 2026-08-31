@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthorizedCronRequest } from "@/lib/security/cron-auth";
 import { GET as runReminders } from "../reminders/route";
 import { GET as runDailyCoach } from "../daily-coach/route";
 import { GET as runWeeklySummary } from "../weekly-summary/route";
@@ -36,7 +37,7 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) return NextResponse.json({ ok: false }, { status: 401 });
+  if (!isAuthorizedCronRequest(request, secret)) return NextResponse.json({ ok: false }, { status: 401 });
 
   const steps: Record<string, unknown> = {};
   let ok = true;
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
       if (!response.ok || body?.ok === false) ok = false;
     } catch (cause) {
       ok = false;
-      steps[name] = { ok: false, message: cause instanceof Error ? cause.message : "unknown" };
+      steps[name] = { ok: false, error: "cron_step_failed" };
       console.error("evening cron step failed", { step: name, message: cause instanceof Error ? cause.message : "unknown" });
     }
   }
@@ -65,8 +66,8 @@ export async function GET(request: Request) {
   // one query when there is nothing to do.
   try {
     steps.pushDispatch = await dispatchPushDeliveries();
-  } catch (cause) {
-    steps.pushDispatch = { ok: false, message: cause instanceof Error ? cause.message : "unknown" };
+  } catch (_cause) {
+    steps.pushDispatch = { ok: false, error: "push_dispatch_failed" };
   }
 
   console.info("evening cron ran", steps);

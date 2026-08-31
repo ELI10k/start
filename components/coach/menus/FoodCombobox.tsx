@@ -2,8 +2,19 @@
 import { useMemo,useRef,useState } from "react";
 import { Search, Star } from "lucide-react";
 import { foodSearchRelevance,normalizeFoodText } from "@/lib/foods/repository";
+import { foodMacroGroup } from "@/lib/nutrition/food-groups";
+import type { GroupType } from "@/lib/nutrition/adaptation";
 
-export type ComboboxFood={id:string;name:string;brand:string|null;category?:string;isMaster?:boolean};
+export type ComboboxFood={
+  id:string;name:string;brand:string|null;category?:string;isMaster?:boolean;
+  // foodMacroGroup classifies from the macros when a food carries no curated
+  // group, so the three numbers it reads belong in the type handed to it.
+  protein?:number|null;carbs?:number|null;fat?:number|null;
+  /** Client picker metadata. Omitted by the coach menu editor. */
+  // GroupType rather than MacroGroup: the menu editor's own options carry
+  // "vegetables", which is a real group there and not one of the three macros.
+  clientAdded?:boolean;personalFavorite?:boolean;masterGroup?:GroupType|null;
+};
 // favorite is null when the coach has said nothing either way - a usage row
 // exists because the food was selected, which is not an opinion about it.
 type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean|null};
@@ -12,13 +23,15 @@ type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean|null};
 // list hanging off a 150px input inside a wrapping row - on a phone that put the
 // results over the row they belonged to. It now fills a bottom sheet, so the
 // search field is at the top and the whole list is scrollable.
-export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void}){
+export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose,clientCatalogueOrder=false}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void;clientCatalogueOrder?:boolean}){
   const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
   // Only an explicit star or unstar overrides the curated status. Merely having
   // been chosen before does not, which is what "u ? u.favorite : ..." meant and
   // is how the curated list emptied itself through use.
-  const isFavorite=(food:ComboboxFood,u?:Usage)=>u?.favorite??Boolean(food.isMaster);
+  const isFavorite=(food:ComboboxFood,u?:Usage)=>clientCatalogueOrder
+    ? Boolean(food.personalFavorite)
+    : u?.favorite??Boolean(food.isMaster);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
@@ -33,6 +46,37 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
       const usageCount=(b.u?.count??0)-(a.u?.count??0);
       return usageCount||a.food.name.localeCompare(b.food.name,"he");
     };
+    if(clientCatalogueOrder){
+      const macroLabel=(food:ComboboxFood)=>{
+        // "vegetables" is not one of the three columns this label names, so a
+        // vegetable falls through to classification by its macros - which is
+        // what happened before the type let it through at all.
+        const group=food.masterGroup&&food.masterGroup!=="vegetables"
+          ?food.masterGroup
+          :foodMacroGroup({
+              id:food.id,name:food.name,category:food.category,
+              protein:food.protein??null,carbs:food.carbs??null,fat:food.fat??null,
+            });
+        return group==="protein"?"חלבון":group==="carbohydrate"?"פחמימה":"שומן";
+      };
+      const ordered=matching.slice().sort(byRelevance);
+      const included=new Set<string>();
+      const take=(predicate:(food:ComboboxFood)=>boolean,group:(food:ComboboxFood)=>string)=>ordered
+        .filter(({food})=>!included.has(food.id)&&predicate(food))
+        .map(item=>{included.add(item.food.id);return{...item,group:group(item.food)}});
+      const clientFoods=take(food=>Boolean(food.clientAdded),()=>"נוספו על ידך");
+      const macroGroups=["חלבון","פחמימה","שומן"] as const;
+      const favorites=macroGroups.flatMap(label=>take(
+        food=>Boolean(food.personalFavorite)&&macroLabel(food)===label,
+        ()=>`מועדפים · ${label}`,
+      ));
+      const masters=macroGroups.flatMap(label=>take(
+        food=>Boolean(food.isMaster)&&macroLabel(food)===label,
+        ()=>`מזונות מאסטר · ${label}`,
+      ));
+      const rest=take(()=>true,()=>q?"תוצאות נוספות":"מזונות נוספים");
+      return[...clientFoods,...favorites,...masters,...rest].slice(0,q?100:180);
+    }
     if(q){
       const searchFavorites=matching.filter(item=>isFavorite(item.food,item.u)).sort(byRelevance).map(item=>({...item,group:"⭐ מאכלים מועדפים"}));
       const searchFavoriteIds=new Set(searchFavorites.map(item=>item.food.id));
@@ -46,7 +90,7 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
     const included=new Set([...favoriteIds,...recent.map(item=>item.food.id)]);
     const rest=candidates.filter(item=>!included.has(item.food.id)).sort((a,b)=>a.food.name.localeCompare(b.food.name,"he")).slice(0,Math.max(0,100-favorites.length-recent.length)).map(item=>({...item,group:"כל המזונות"}));
     return[...favorites,...recent,...rest];
-  },[foods,query,usageMap]);
+  },[clientCatalogueOrder,foods,query,usageMap]);
   const choose=(id:string)=>{onSelect(id);setQuery("");setActive(0)};
 
   return <div className="food-picker">

@@ -27,6 +27,8 @@ import OutsideMenuFood from "@/components/client/OutsideMenuFood";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { addTotals, eatenFromMenu, remainingInMenu } from "@/lib/nutrition/menu-intake";
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 
 // "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
 // server action executes on the route segment that hosts it. Vercel's default
@@ -71,7 +73,17 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // A day this week that has already happened. Anything else falls back to today.
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
-  const [menu, freeMenu, foods, logged, behavior] = await Promise.all([getActiveClientMenu(auth.id, today),getFreeMenuDay(auth.id, today),listDatabaseFoods(),listClientFoodLog(auth.id, today),getClientNutritionBehavior(auth.id,today)]);
+  const supabase = await createSupabaseServerClient();
+  const [menu, freeMenu, foods, logged, behavior, favoriteResult] = await Promise.all([
+    getActiveClientMenu(auth.id, today),
+    getFreeMenuDay(auth.id, today),
+    listDatabaseFoods(),
+    listClientFoodLog(auth.id, today),
+    getClientNutritionBehavior(auth.id,today),
+    supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
+  ]);
+  if (favoriteResult.error) throw favoriteResult.error;
+  const favoriteIds = new Set((favoriteResult.data ?? []).map((row) => String(row.food_id)));
   // What was eaten instead, and what of it carries figures. Only the measured
   // part joins the day's totals; the rest is shown as unmeasured rather than
   // counted as zero.
@@ -99,6 +111,10 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     protein: food.protein === null ? null : Number(food.protein),
     carbs: food.carbs === null ? null : Number(food.carbs),
     fat: food.fat === null ? null : Number(food.fat),
+    clientAdded: food.created_by === auth.id,
+    personalFavorite: favoriteIds.has(String(food.id)),
+    isMaster: Boolean(masterFoodGroup(String(food.id))),
+    masterGroup: masterFoodGroup(String(food.id)),
   }));
   // What was logged against a meal that is no longer in the menu.
   //

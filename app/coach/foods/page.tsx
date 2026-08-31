@@ -3,8 +3,10 @@ import { getAuthContext, listDatabaseFoods } from "@/lib/data/product-repository
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 import { catalogueServingNutrition } from "@/lib/nutrition/catalogue-serving";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireCoach } from "@/lib/auth/guards";
 
 export default async function CoachFoodsPage() {
+  await requireCoach();
   const [rows, auth] = await Promise.all([listDatabaseFoods(), getAuthContext()]);
   const supabase = await createSupabaseServerClient();
   const [{ data: favorites }, { data: menuUsage }] = auth

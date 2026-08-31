@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
@@ -11,6 +11,7 @@ import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
 import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
 import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
+import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
 export type PickableFood = ComboboxFood & {
@@ -82,6 +83,37 @@ export default function AteSomethingElse({
   const cameraPhoto = useRef<HTMLInputElement>(null);
   const galleryPhoto = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const [favoriteIds, setFavoriteIds] = useState(
+    () => new Set(foods.filter((food) => food.personalFavorite).map((food) => food.id)),
+  );
+  const [, startFavoriteTransition] = useTransition();
+  const orderedFoods = useMemo(() => foods.map((food) => ({
+    ...food,
+    personalFavorite: favoriteIds.has(food.id),
+  })), [favoriteIds, foods]);
+  const toggleFavorite = (foodId: string, favorite: boolean) => {
+    setFavoriteIds((current) => {
+      const next = new Set(current);
+      if (favorite) next.add(foodId); else next.delete(foodId);
+      return next;
+    });
+    startFavoriteTransition(async () => {
+      try {
+        const result = await toggleFoodFavorite(foodId, favorite);
+        setFavoriteIds((current) => {
+          const next = new Set(current);
+          if (result.favorite) next.add(foodId); else next.delete(foodId);
+          return next;
+        });
+      } catch {
+        setFavoriteIds((current) => {
+          const next = new Set(current);
+          if (favorite) next.delete(foodId); else next.add(foodId);
+          return next;
+        });
+      }
+    });
+  };
 
   // A successful entry is one item, not the end of the meal. Leave the sheet
   // open but return every input to a clean state so the next barcode cannot
@@ -254,7 +286,7 @@ export default function AteSomethingElse({
             which one and how much of it. Same arithmetic the menu builder uses,
             so the coach's screen and this one cannot disagree about a portion. */}
         {tab === "food" && (() => {
-          const picked = foods.find((food) => food.id === pickedId) ?? null;
+          const picked = orderedFoods.find((food) => food.id === pickedId) ?? null;
           const weight = Number(grams);
           const macros = picked && Number.isFinite(weight) && weight > 0
             ? calculateFoodNutrition({
@@ -270,7 +302,14 @@ export default function AteSomethingElse({
                   then it gets out of the way: a list still open under the
                   answer invites a second answer over the first. */}
               {picked ? null : (
-                <FoodCombobox foods={foods} value={pickedId} usage={[]} onSelect={(id) => setPickedId(id)} />
+                <FoodCombobox
+                  foods={orderedFoods}
+                  value={pickedId}
+                  usage={[]}
+                  clientCatalogueOrder
+                  onSelect={(id) => setPickedId(id)}
+                  onToggleFavorite={toggleFavorite}
+                />
               )}
               {picked ? (
                 <>

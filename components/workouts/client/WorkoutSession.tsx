@@ -66,7 +66,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       // previous week, never on workout 2 merely because it happened later.
       const comparable=snapshot.completedWorkouts.filter((workout)=>workout.programId===programId&&workout.dayId===dayId);
       const last=exercisePerformance(comparable,currentClientId,entry.exerciseId).sessions[0];
-      return{workoutExerciseId:entry.id,exerciseId:entry.exerciseId,skipped:false,completed:false,
+      return{workoutExerciseId:entry.id,exerciseId:entry.exerciseId,skipped:false,completed:false,warmupCompletedPercents:[],
         sets:Array.from({length:setCount(entry.sets)},(_,index):ExerciseSetResult=>{
           const previous=last?.sets[index];
           return{id:`${entry.id}-set-${index+1}`,prescriptionId:entry.setPrescriptions?.[index]?.id,order:index,completed:false,
@@ -225,7 +225,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         {/* Not the same as skipping. Skipping records that nothing was done;
             this records that the same muscle was trained on something else,
             which is what actually happened when the rack was busy. */}
-        <button type="button" onClick={()=>setSwapping(true)} className="chip"><Repeat2 aria-hidden="true" size={14}/>החלפה</button>
+        <button type="button" onClick={()=>setSwapping(true)} className="chip"><Repeat2 aria-hidden="true" size={14}/>החלפת תרגיל</button>
         </div>
       </div>
 
@@ -238,16 +238,27 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
 
       {(current.notes||exercise?.executionNotes)&&<p className="mt-3 rounded-2xl bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">{current.notes||exercise?.executionNotes}</p>}
 
-      {warmup?<Warmup plan={warmup}/>:null}
-
       <PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>
       {challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
 
       {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
           instance. Rendering an empty table header for those left the client with
           a column heading and nothing to fill in. */}
-      {result.sets.length?
+      {result.sets.length||warmup?
         <section className="mt-4" aria-label="רישום סטים">
+          {warmup?<>
+            <div className="mb-1 mt-2 flex items-center justify-between gap-3 text-sm font-black">
+              <span>סטי חימום</span><span className="text-xs font-normal text-[#5B5F5B]">לא נספרים בנפח האימון</span>
+            </div>
+            <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
+              <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
+            </div>
+            {warmup.sets.map((set)=><WarmupSetEditor key={set.percent} set={set} completed={result.warmupCompletedPercents?.includes(set.percent)??false} onToggle={()=>{
+              const current=result.warmupCompletedPercents??[];
+              replaceResult({...result,warmupCompletedPercents:current.includes(set.percent)?current.filter((percent)=>percent!==set.percent):[...current,set.percent]});
+            }}/>) }
+            <div className="mb-1 mt-4 text-sm font-black">סטים עובדים</div>
+          </>:null}
           <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
             <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
           </div>
@@ -371,20 +382,13 @@ function PreviousPerformance({previous,best,targetReps,recent}:{previous?:{date:
 // What to load before the working sets. Percentages of the weight the client
 // actually lifted last time, so the first set is not a guess and not the working
 // weight itself.
-function Warmup({plan}:{plan:{workingWeightKg:number;sets:readonly {percent:number;weightKg:number;repetitions:number}[]}}){
-  return <details className="disclosure mt-4" open>
-    <summary>חימום<span className="pill">{plan.sets.length} {plan.sets.length===1?"סט":"סטים"}</span></summary>
-    <div className="disclosure__body">
-      <p className="text-xs text-[#5B5F5B]">מחושב מ־{plan.workingWeightKg} ק״ג, המשקל הכבד ביותר שהשלמת בתרגיל הזה באימון הקודם.</p>
-      <ol className="mt-2 grid gap-1 text-sm">
-        {plan.sets.map((set)=><li key={set.percent} className="flex items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] px-3 py-2">
-          <span className="text-[#5B5F5B]">{set.percent}%</span>
-          <strong className="tabular-nums">{set.weightKg} ק״ג × {set.repetitions}</strong>
-        </li>)}
-      </ol>
-      <p className="mt-2 text-xs text-[#5B5F5B]">סטי החימום אינם נרשמים ואינם נספרים בנפח.</p>
-    </div>
-  </details>;
+function WarmupSetEditor({set,completed,onToggle}:{set:{percent:number;weightKg:number;repetitions:number};completed:boolean;onToggle:()=>void}){
+  return <div className="set-row" data-done={completed||undefined}>
+    <span className="set-row__index text-[10px]" aria-label={`חימום ${set.percent}%`}>{set.percent}%</span>
+    <div className="nutrition-input grid place-items-center tabular-nums" aria-label={`משקל חימום ${set.weightKg} קילוגרם`}>{set.weightKg}</div>
+    <div className="nutrition-input grid place-items-center tabular-nums" aria-label={`${set.repetitions} חזרות חימום`}>{set.repetitions}</div>
+    <button type="button" aria-label={completed?`ביטול השלמת חימום ${set.percent}%`:`השלמת חימום ${set.percent}%`} aria-pressed={completed} onClick={onToggle} className={`grid size-11 place-items-center rounded-full ${completed?"border border-[#16A34A] text-[#16A34A]":"bg-[#16A34A] text-white"}`}>{completed?<RotateCcw aria-hidden="true" size={17}/>:<CheckCircle2 aria-hidden="true" size={18}/>}</button>
+  </div>;
 }
 
 // One row per set: number, weight, reps, done. Everything a client touches
@@ -477,19 +481,6 @@ function Finished({workout,insights}:{workout:CompletedWorkout;insights:readonly
       <Value label="נפח" value={`${workout.totalVolume} ק״ג`}/>
       <Value label="דולגו" value={String(skipped)}/>
     </dl>
-    {/* What this session said, and what to do with it next time. Every line is
-        read off what was recorded - a session with nothing notable in it gets
-        one line saying so rather than an invented observation. */}
-    <section className="mt-5" aria-labelledby="workout-report">
-      <h2 id="workout-report" className="section-heading section-heading--compact">איך להשתפר לאימון הבא</h2>
-      <div className="grid gap-2">
-        {insights.map((insight)=><article key={insight.title} className="workout-insight" data-tone={insight.tone}>
-          <strong>{insight.title}</strong>
-          <p>{insight.detail}</p>
-        </article>)}
-      </div>
-    </section>
-
     <div className="mt-5 grid gap-3">
       <Link href="/workouts" className="premium-primary-button">בית האימונים</Link>
       <Link href={`/workouts/history/${workout.id}`} className="premium-secondary-button">פרטי האימון</Link>

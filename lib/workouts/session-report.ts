@@ -94,7 +94,7 @@ export function buildWorkoutReport(input: WorkoutReportInput): readonly WorkoutI
 
   trained.filter((exercise)=>exercise.difficulty).forEach((exercise)=>{
     if(exercise.difficulty==="medium") insights.push({tone:"praise",title:`${exercise.name} · קושי מתאים`,detail:"העומס היה מאתגר במידה הנכונה; כדאי לשמר את איכות הביצוע."});
-    else insights.push({tone:exercise.difficulty==="hard"?"note":"action",title:`${exercise.name} · ${exercise.difficulty==="hard"?"היה קשה":"היה קל"}`,detail:exercise.difficulty==="hard"?"באימון הבא ההמלצה תישאר זהירה יותר.":"באימון הבא ההמלצה תאפשר התקדמות קטנה."});
+    else insights.push({tone:exercise.difficulty==="hard"?"note":"action",title:`${exercise.name} · ${exercise.difficulty==="hard"?"היה קשה":"היה קל"}`,detail:exercise.difficulty==="hard"?"באימון הבא מומלץ לשמור על אותו משקל או להפחית מעט.":"באימון הבא ההמלצה תאפשר התקדמות קטנה."});
   });
 
   // ── What did not get finished ───────────────────────────────────────────

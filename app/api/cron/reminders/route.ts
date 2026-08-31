@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isAuthorizedCronRequest } from "@/lib/security/cron-auth";
 import { createClient } from "@supabase/supabase-js";
 import { dispatchPushDeliveries } from "@/lib/push/dispatch";
 
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
   }
   // Vercel Cron sends the secret as a bearer token. Reject anything else so the
   // route cannot be triggered from the open internet.
-  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!isAuthorizedCronRequest(request, secret)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.rpc("run_scheduled_reminders");
     if (error) {
       console.error("reminder scheduler failed", { code: error.code, message: error.message });
-      return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "reminder_scheduler_failed" }, { status: 500 });
     }
     const clients = typeof data === "number" ? data : 0;
     // Nothing had ever deleted a notification, and this job writes up to four a
@@ -63,6 +64,6 @@ export async function GET(request: Request) {
   } catch (cause) {
     const message = cause instanceof Error ? cause.message : "unknown error";
     console.error("reminder scheduler threw", { message });
-    return NextResponse.json({ ok: false, message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: "reminder_scheduler_failed" }, { status: 500 });
   }
 }
