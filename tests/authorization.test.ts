@@ -133,3 +133,24 @@ test("a missing forwarded address skips the per-address limit", () => {
   // The per-email limit is the one that must always run.
   assert.match(source, /action:"magic_link_email"/);
 });
+
+test("the swap notice cannot roll back the workout", () => {
+  const sql = readFileSync(
+    "supabase/migrations/202608310007_a_swap_notice_cannot_cost_the_workout.sql", "utf8");
+  // notifications.body is check(length <= 2000); the body must be cut to fit.
+  assert.match(sql, /left\(v_swap_body, 1997\)/);
+  // And the whole notice is wrapped, so no future failure of it costs the hour
+  // of training that was already saved above it.
+  assert.match(sql, /exception when others then\s*\n\s*--[\s\S]*?raise warning 'exercise swap notice failed/);
+  // Warm-up percentages are a percentage, and there are not fifty of them.
+  assert.match(sql, /value::integer between 0 and 100/);
+  assert.match(sql, /limit 20/);
+});
+
+test("upgrade-insecure-requests is enforced, not report-only", () => {
+  const config = readFileSync("next.config.ts", "utf8");
+  // A report-only policy ignores the directive and logs that on every page
+  // load, which buries the violations the report-only policy exists to surface.
+  assert.doesNotMatch(config, /"upgrade-insecure-requests",\n\s*\]\.join/);
+  assert.match(config, /key: "Content-Security-Policy", value: "upgrade-insecure-requests"/);
+});

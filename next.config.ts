@@ -51,13 +51,18 @@ const nextConfig: NextConfig = {
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'",
-      "upgrade-insecure-requests",
     ].join("; ");
     return [
       {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy-Report-Only", value: csp },
+          // Enforced on its own, because a report-only policy drops it and says
+          // so in the console on every page load - and a console with a
+          // standing complaint in it is a console nobody reads the real
+          // violations out of. Safe to enforce today: nothing in the app is
+          // served over http, so there is nothing for it to break.
+          { key: "Content-Security-Policy", value: "upgrade-insecure-requests" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
