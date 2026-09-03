@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useRef, useState, useTransition } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
@@ -14,6 +14,8 @@ import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
+type SheetTab = "text" | "food" | "scan" | "photo";
+
 export type PickableFood = ComboboxFood & {
   calories: number | null;
   protein: number | null;
@@ -59,6 +61,10 @@ export default function AteSomethingElse({
   foods = [],
   unmeasuredNote = "ה־AI יעריך קלוריות ואבות מזון לפי התיאור או התמונה, והערכים יתווספו לסיכום של היום.",
   preserveMealStatus = false,
+  // Which way in the sheet opens on. A meal photographed from its own row is
+  // not a substitution being described, so it opens on the camera rather than
+  // making the client find it behind two other tabs.
+  initialTab = "text",
 }: {
   mealId: string;
   date: string;
@@ -68,8 +74,17 @@ export default function AteSomethingElse({
   unmeasuredNote?: string;
   foods?: readonly PickableFood[];
   preserveMealStatus?: boolean;
+  initialTab?: SheetTab;
 }) {
-  const [tab, setTab] = useState<"text" | "food" | "scan" | "photo">("text");
+  const [tab, setTab] = useState<SheetTab>(initialTab);
+  // Back to the tab it was opened for, every time it opens. Without this the
+  // sheet remembers the last tab used anywhere on the screen, so a client who
+  // scanned a barcode for breakfast opened the camera on lunch and got the
+  // scanner instead.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (open) setTab(initialTab);
+  }, [open, initialTab]);
   // Shares the barcode tab's gram field: it is the same question, asked once.
   const [pickedId, setPickedId] = useState("");
   const [code, setCode] = useState("");
