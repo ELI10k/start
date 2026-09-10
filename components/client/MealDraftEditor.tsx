@@ -55,9 +55,11 @@ export default function MealDraftEditor({mealId,date,groups,foods,usage=[]}:{mea
         const step=Math.max(1,round((selectedItem?.quantity??4)/4));
         const calories=selectedItem&&selected&&selectedItem.quantity>0?round(selectedItem.calories*selected.quantity/selectedItem.quantity):0;
         return <section key={group.id} className="rounded-2xl border border-[#E5E7E5] p-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1"><p className="text-xs font-bold text-[#15803D]">{group.label}</p>
-              <div className="mt-2 grid gap-2" role="group" aria-label={`בחירת ${group.label}`}>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs font-bold text-[#15803D]">{group.label}</p>
+            <div className="shrink-0 text-left text-sm"><strong>{calories} קל׳</strong><span className="mr-2 text-xs text-[#5B5F5B]">{selected?.quantity??0} {selectedItem?.unit}</span></div>
+          </div>
+          <div className="mt-2 grid w-full gap-2" role="group" aria-label={`בחירת ${group.label}`}>
                 {group.items.map(item=>{
                   const chosen=selected?.itemId===item.id;
                   return <button key={item.id} type="button" aria-pressed={chosen} onClick={()=>setDraft(current=>({...current,[group.id]:{itemId:item.id,quantity:item.quantity}}))} className={`flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border px-3 py-2 text-start ${chosen?"border-[#16A34A] bg-[#F0FDF4]":"border-[#E5E7E5] bg-white"}`}>
@@ -65,11 +67,8 @@ export default function MealDraftEditor({mealId,date,groups,foods,usage=[]}:{mea
                     <span className="shrink-0 text-xs text-[#5B5F5B]">{item.quantity} {item.unit} · {round(item.calories)} קל׳</span>
                   </button>;
                 })}
-              </div>
-              {selectedItem?.household?<p className="mt-1 text-xs text-[#5B5F5B]">{selectedItem.household}</p>:null}
-            </div>
-            <div className="shrink-0 text-left"><strong>{calories} קל׳</strong><p className="text-xs text-[#5B5F5B]">{selected?.quantity??0} {selectedItem?.unit}</p></div>
           </div>
+          {selectedItem?.household?<p className="mt-2 text-xs text-[#5B5F5B]">{selectedItem.household}</p>:null}
           <div className="mt-3 flex items-center gap-2">
             <button type="button" className="chip !min-h-10 !px-3" onClick={()=>updateQuantity(group,(selected?.quantity??0)-step)} aria-label="הפחתת כמות"><Minus size={16}/></button>
             <input aria-label={`כמות ${group.label}`} className="min-w-0 flex-1 rounded-xl border border-[#D7D9D7] px-3 py-2 text-center text-base" type="number" inputMode="decimal" min="0" step="any" value={selected?.quantity??0} onChange={event=>updateQuantity(group,Number(event.target.value))}/>
