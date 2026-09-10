@@ -383,9 +383,10 @@ function PreviousPerformance({previous,best,targetReps,recent}:{previous?:{date:
 // actually lifted last time, so the first set is not a guess and not the working
 // weight itself.
 function WarmupSetEditor({set,completed,onToggle}:{set:{percent:number;weightKg:number;repetitions:number};completed:boolean;onToggle:()=>void}){
+  const [weight,setWeight]=useState(String(set.weightKg));
   return <div className="set-row" data-done={completed||undefined}>
     <span className="set-row__index text-[10px]" aria-label={`חימום ${set.percent}%`}>{set.percent}%</span>
-    <div className="nutrition-input grid place-items-center tabular-nums" aria-label={`משקל חימום ${set.weightKg} קילוגרם`}>{set.weightKg}</div>
+    <input aria-label={`משקל בחימום ${set.percent}% (ק״ג)`} className="nutrition-input" type="number" min="0" step="0.1" value={weight} onChange={(event)=>setWeight(event.target.value)}/>
     <div className="nutrition-input grid place-items-center tabular-nums" aria-label={`${set.repetitions} חזרות חימום`}>{set.repetitions}</div>
     <button type="button" aria-label={completed?`ביטול השלמת חימום ${set.percent}%`:`השלמת חימום ${set.percent}%`} aria-pressed={completed} onClick={onToggle} className={`grid size-11 place-items-center rounded-full ${completed?"border border-[#16A34A] text-[#16A34A]":"bg-[#16A34A] text-white"}`}>{completed?<RotateCcw aria-hidden="true" size={17}/>:<CheckCircle2 aria-hidden="true" size={18}/>}</button>
   </div>;

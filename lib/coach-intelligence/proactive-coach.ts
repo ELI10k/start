@@ -60,9 +60,7 @@ export function buildDailyCoachMessage(input: DailyCoachInput): DailyCoachMessag
   // a guess, and this message is written at 18:30 - late enough that a client
   // reads it as the verdict on the day.
   if (!unmeasured) {
-    const proteinMissing = rounded(input.proteinTarget - input.protein);
     const caloriesOver = rounded(input.calories - input.calorieTarget);
-    if (proteinMissing >= 20) return { tone: "focus", title: "הפוקוס שלך עכשיו: חלבון", summary: `חסרים לך ${proteinMissing} גרם חלבון כדי להגיע ליעד היומי.`, action: "לבחירת ארוחת החלבון הבאה", href: "/nutrition", evidence };
     if (caloriesOver >= Math.max(100, input.calorieTarget * 0.1)) return { tone: "focus", title: "הפוקוס שלך עכשיו: חזרה למסגרת", summary: `נרשמו היום ${caloriesOver} קלוריות מעל היעד. אין צורך לנחש שינוי בתוכנית.`, action: "לבדיקת מה שנרשם היום", href: "/nutrition", evidence };
   }
 

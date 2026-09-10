@@ -5,8 +5,8 @@ import { buildDailyCoachMessage, prioritiseCoachAttention } from "../lib/coach-i
 
 test("daily coach chooses one data-backed action and cites its numbers", () => {
   const message = buildDailyCoachMessage({ mealsCompleted: 2, mealsPlanned: 4, calories: 1200, calorieTarget: 2200, protein: 80, proteinTarget: 150 });
-  assert.match(message.title, /חלבון/);
-  assert.match(message.summary, /70/);
+  assert.match(message.title, /נשאר לסמן/);
+  assert.doesNotMatch(message.title + message.summary, /הפוקוס שלך עכשיו: חלבון/);
   assert.equal(message.href, "/nutrition");
   assert.equal(message.evidence.length, 3);
 });

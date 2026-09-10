@@ -91,6 +91,7 @@ export default function AteSomethingElse({
   const [looking, setLooking] = useState(false);
   const [found, setFound] = useState<Scanned | null>(null);
   const [miss, setMiss] = useState("");
+  const [manualScan, setManualScan] = useState(false);
   const [grams, setGrams] = useState("100");
   // Whether a chosen photograph is still being downscaled.
   const [preparing, setPreparing] = useState(false);
@@ -133,7 +134,7 @@ export default function AteSomethingElse({
   // A successful entry is one item, not the end of the meal. Leave the sheet
   // open but return every input to a clean state so the next barcode cannot
   // inherit the previous product, weight or photograph.
-  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
 
   const preparePhoto = async (input: HTMLInputElement) => {
     const chosen = input.files?.[0];
@@ -149,7 +150,7 @@ export default function AteSomethingElse({
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
     if (!barcode) { setMiss("ברקוד מוצר הוא 8, 12 או 13 ספרות."); return; }
-    setLooking(true); setMiss(""); setFound(null);
+    setLooking(true); setMiss(""); setFound(null); setManualScan(false);
     try {
       const response = await fetch(`/api/foods/barcode/${barcode}`);
       const payload = await response.json();
@@ -160,7 +161,7 @@ export default function AteSomethingElse({
         // than any other, and it is still one tap to change.
         if (food.unitWeightGrams && food.unitWeightGrams > 0) setGrams(String(Math.round(food.unitWeightGrams)));
       }
-      else setMiss("המוצר לא נמצא. אפשר לתאר אותו במילים או לצלם אותו.");
+      else setMiss("המוצר לא נמצא. אפשר להזין את הערכים שלו ידנית.");
     } catch {
       setMiss("החיפוש נכשל. אפשר לתאר במילים או לצלם.");
     } finally {
@@ -179,7 +180,7 @@ export default function AteSomethingElse({
     fat: found.fat === null ? null : round(found.fat * factor),
   } : null;
 
-  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null); setMiss(""); setCode(""); onClose(); };
+  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null);setMiss("");setManualScan(false);setCode("");onClose(); };
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
@@ -211,7 +212,7 @@ export default function AteSomethingElse({
           {/* Reading thirteen digits off a curved bottle and typing them in is
               not a feature. The camera is the way in; the field is the fallback. */}
           <CameraScan onDetected={(value) => { setCode(value); void lookupFor(value); }} />
-          {miss && <p role="status" className="rounded-2xl bg-[#F7F8F7] p-3 text-sm">{miss}</p>}
+          {miss && <><p role="status" className="rounded-2xl bg-[#F7F8F7] p-3 text-sm">{miss}</p><button type="button" onClick={()=>setManualScan(true)} className="chip w-fit">הזנת ערכים ידנית</button></>}
         </div>
       )}
 
@@ -290,6 +291,21 @@ export default function AteSomethingElse({
             )}
             <button type="button" onClick={() => setFound(null)} className="chip w-fit">מוצר אחר</button>
           </>
+        )}
+
+        {tab === "scan" && !found && manualScan && (
+          <fieldset className="grid gap-3 rounded-2xl border border-[#E5E7E5] p-3">
+            <legend className="px-2 text-sm font-black">ערכים למנה שאכלת</legend>
+            <label className="text-sm font-bold">שם המזון<input name="name" required maxLength={200} className="nutrition-input mt-2" /></label>
+            <label className="text-sm font-bold">קלוריות<input name="calories" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
+            <div className="grid grid-cols-3 gap-2">
+              <label className="text-xs font-bold">חלבון (ג׳)<input name="protein" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
+              <label className="text-xs font-bold">פחמימות (ג׳)<input name="carbs" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
+              <label className="text-xs font-bold">שומן (ג׳)<input name="fat" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
+            </div>
+            <input type="hidden" name="quantity" value="1" />
+            <input type="hidden" name="unit" value="מנה" />
+          </fieldset>
         )}
 
         {/* The catalogue, with a weight - the one path here that produces numbers
@@ -413,7 +429,7 @@ export default function AteSomethingElse({
 
         {/* Nothing to save until a food is chosen, and the sticky bar was sitting
             on top of the results while the client was still scrolling them. */}
-        <div className="sheet__actions" hidden={tab === "food" && !pickedId}>
+        <div className="sheet__actions" hidden={(tab === "food" && !pickedId) || (tab === "scan" && !found && !manualScan)}>
           <SubmitButton
             idle="שמירה"
             pending={tab === "text" || tab === "photo" ? "מחשבים ושומרים…" : "שומרים…"}
