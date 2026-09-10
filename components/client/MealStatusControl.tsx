@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Camera, Check, PencilLine, Plus, Undo2, X } from "lucide-react";
+import { Check, PencilLine, Plus, Undo2, X } from "lucide-react";
 import AteSomethingElse, { type PickableFood } from "@/components/client/AteSomethingElse";
+import MealPhotoControl from "@/components/client/MealPhotoControl";
 import { setMealStatus } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
+import type { FoodUsage } from "@/components/coach/menus/FoodCombobox";
 
 // A meal is unmarked, eaten, eaten-as-something-else, or not eaten. Each state is
 // one tap from the others and every mark is reversible.
@@ -23,9 +25,12 @@ export default function MealStatusControl({
   statusNote,
   completed,
   blocked,
+  mealPhotoUrl,
   // Passed straight through to the sheet, which is the only thing here that
   // needs it.
   foods = [],
+  usage = [],
+  hideEatenAction = false,
 }: {
   mealId: string;
   date: string;
@@ -33,50 +38,27 @@ export default function MealStatusControl({
   statusNote?: string | null;
   completed: boolean;
   blocked: boolean;
+  mealPhotoUrl?: string | null;
   foods?: readonly PickableFood[];
+  usage?: readonly FoodUsage[];
+  hideEatenAction?: boolean;
 }) {
   const [substituting, setSubstituting] = useState(false);
-  const [photographing, setPhotographing] = useState(false);
-
-  // A photograph of the meal, on the meal, whatever else it has been answered.
-  //
-  // The camera lived inside "אכלתי משהו אחר", which frames it as describing a
-  // substitution - so a client who ate exactly what was written had no way to
-  // show it, and one who had already marked the meal eaten had no way at all.
-  // It is its own action on every state of the row, and it preserves the status:
-  // photographing a meal is not a statement that it was replaced.
-  const photoButton = (
-    <button type="button" onClick={() => setPhotographing(true)} className="chip">
-      <Camera aria-hidden="true" size={15} />
-      צילום
-    </button>
-  );
-  const photoSheet = (
-    <AteSomethingElse
-      mealId={mealId}
-      date={date}
-      foods={foods}
-      open={photographing}
-      onClose={() => setPhotographing(false)}
-      initialTab="photo"
-      preserveMealStatus
-      title="צילום הארוחה"
-    />
-  );
+  const photo = <MealPhotoControl mealId={mealId} date={date} photoUrl={mealPhotoUrl}/>;
   const eaten = status === "eaten" || completed;
 
   if (status === "not_eaten") {
     return (
-      <div className="flex items-center gap-2">
+      <div className="space-y-3"><div className="flex items-center gap-2">
         <span className="pill pill--red">לא נאכל</span>
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-      </div>
+      </div>{photo}</div>
     );
   }
 
   if (status === "other") {
     return (
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="space-y-3"><div className="flex flex-wrap items-center justify-end gap-2">
         <span className="pill">נאכל משהו אחר</span>
         {statusNote && <span className="text-xs text-[#5B5F5B]">{statusNote}</span>}
         {/* A meal is rarely one thing.
@@ -90,28 +72,24 @@ export default function MealStatusControl({
           <Plus aria-hidden="true" size={15} />
           הוספת פריט
         </button>
-        {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-        <AteSomethingElse mealId={mealId} date={date} foods={foods} open={substituting} onClose={() => setSubstituting(false)} />
-        {photoSheet}
-      </div>
+        <AteSomethingElse mealId={mealId} date={date} foods={foods} usage={usage} open={substituting} onClose={() => setSubstituting(false)} />
+      </div>{photo}</div>
     );
   }
 
   if (eaten) {
     return (
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="space-y-3"><div className="flex flex-wrap items-center gap-2">
         <span className="pill pill--green">נאכל</span>
-        {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול השלמה" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-        {photoSheet}
-      </div>
+      </div>{photo}</div>
     );
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {blocked ? (
+    <div className="space-y-3"><div className="flex flex-wrap items-center gap-2">
+      {hideEatenAction ? null : blocked ? (
         <span className="pill">בחרו לפחות פריט אחד</span>
       ) : (
         <Action
@@ -128,7 +106,6 @@ export default function MealStatusControl({
         <PencilLine aria-hidden="true" size={15} />
         אכלתי משהו אחר
       </button>
-      {photoButton}
       <Action
         mealId={mealId}
         date={date}
@@ -138,9 +115,8 @@ export default function MealStatusControl({
         className="chip border-[#DC2626] text-[#DC2626]"
       />
 
-      <AteSomethingElse mealId={mealId} date={date} foods={foods} open={substituting} onClose={() => setSubstituting(false)} />
-      {photoSheet}
-    </div>
+      <AteSomethingElse mealId={mealId} date={date} foods={foods} usage={usage} open={substituting} onClose={() => setSubstituting(false)} />
+    </div>{photo}</div>
   );
 }
 

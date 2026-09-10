@@ -41,5 +41,8 @@ export async function POST(request: NextRequest) {
     await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:now}).eq("client_id",user.id).in("status",["sent","opened"]);
     return redirect("/");
   }
+  const { data: subscription, error: subscriptionError }=await supabase.rpc("subscription_access",{p_user_id:user.id});
+  const paidPlan=subscription&&typeof subscription==="object"&&!Array.isArray(subscription)&&typeof (subscription as Record<string,unknown>).plan==="string";
+  if(!subscriptionError&&!paidPlan) return redirect("/billing/start");
   return redirect("/onboarding");
 }

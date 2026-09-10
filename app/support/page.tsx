@@ -7,6 +7,8 @@ import PageHeader from "@/components/client/PageHeader";
 import MessageThread from "@/components/messages/MessageThread";
 import { getAuthContext } from "@/lib/data/product-repository";
 import { listThread } from "@/lib/messages/repository";
+import { hasEntitlement } from "@/lib/subscriptions/access";
+import { getSubscriptionAccess } from "@/lib/subscriptions/server";
 
 export const metadata: Metadata = { title: "תמיכה | START" };
 
@@ -15,12 +17,15 @@ export default async function SupportPage() {
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
 
+  const access = await getSubscriptionAccess();
+  const canMessageCoach = hasEntitlement(access, "coach_messaging");
+
   // This screen used to announce itself as "a demo shell" and offer nothing at
   // all - no form, no address, no link - while the profile linked to it as
   // "תמיכה". A client who was stuck arrived here and left with nowhere to go.
   // It is now the same thread as /messages, tagged so the coach can see at a
   // glance that this one is a support question rather than a chat.
-  const messages = await listThread(auth.id);
+  const messages = canMessageCoach ? await listThread(auth.id) : [];
   const supportMessages = messages.filter((message) => message.topic === "support");
 
   return (
@@ -28,23 +33,28 @@ export default async function SupportPage() {
       <PageHeader
         eyebrow="עזרה"
         title="תמיכה ויצירת קשר"
-        description="כותבים כאן, והמאמן מקבל התראה."
-        action={{ href: "/messages", label: "כל ההודעות" }}
+        description={canMessageCoach ? "כותבים כאן, והמאמן מקבל התראה." : "קיצורי דרך לפעולות הנפוצות באפליקציה."}
+        action={canMessageCoach ? { href: "/messages", label: "כל ההודעות" } : undefined}
       />
 
-      <MessageThread
+      {canMessageCoach && <MessageThread
         messages={supportMessages}
         topic="support"
         emptyTitle="במה אפשר לעזור?"
         emptyDescription="בעיה באפליקציה, שאלה על התוכנית או משהו שלא עובד - כתבו כאן והפנייה תגיע למאמן עם התראה."
         placeholder="מה קרה?"
-      />
+      />}
+
+      {!canMessageCoach && <section className="rounded-3xl border border-[#DDE7E1] bg-white p-6">
+        <h2 className="text-lg font-extrabold text-[#10271D]">תמיכה במסלול Digital</h2>
+        <p className="mt-2 text-sm leading-6 text-[#5B6F65]">היסטוריית המדידות, הצ׳ק־אין וההתראות זמינים כאן תמיד. ערוץ תמיכה טכני יתחבר לפני פתיחת הבטא; הודעות אישיות למאמן הן חלק ממסלולי Coach ו־VIP.</p>
+      </section>}
 
       <h2 className="section-heading section-heading--compact mt-6">אולי זה מה שחיפשתם</h2>
       <div className="settings-group">
-        <Link href="/messages">
+        {canMessageCoach && <Link href="/messages">
           <span className="settings-group__label"><MessageSquare aria-hidden="true" size={18} />שאלה למאמן על התוכנית</span>
-        </Link>
+        </Link>}
         <Link href="/check-in">
           <span className="settings-group__label"><ClipboardCheck aria-hidden="true" size={18} />שליחת צ׳ק־אין שבועי</span>
         </Link>

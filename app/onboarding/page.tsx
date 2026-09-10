@@ -15,13 +15,12 @@ export default async function Onboarding() {
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/coach");
   const supabase = await createSupabaseServerClient();
-  const { data: relationship } = await supabase
-    .from("coach_client_relationships")
-    .select("coach_id")
-    .eq("client_id", auth.id)
-    .eq("status", "active")
-    .maybeSingle();
+  const [{ data: relationship }, { data: clientProfile }] = await Promise.all([
+    supabase.from("coach_client_relationships").select("coach_id").eq("client_id", auth.id).eq("status", "active").maybeSingle(),
+    supabase.from("client_profiles").select("onboarding_completed").eq("user_id", auth.id).maybeSingle(),
+  ]);
   if (relationship) redirect("/");
+  if (clientProfile?.onboarding_completed) redirect("/");
 
   return <main className="px-4 py-8 sm:px-6"><div className="mx-auto max-w-3xl">
     <form action="/auth/logout" method="post" className="flex justify-end">
@@ -31,23 +30,23 @@ export default async function Onboarding() {
     <form action={completeClientOnboarding}>
       <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START</p>
       <h1 className="mt-2 text-3xl font-black">כמה פרטים לפני שמתחילים</h1>
-      <p className="mt-2 text-[#5B5F5B]">המידע נשמר רק עבורך ועבור המאמן המשויך אליך.</p>
+      <p className="mt-2 text-[#5B5F5B]">המידע משמש לחישוב התוכנית האישית שלך. במסלול עם מאמן הוא זמין גם למאמן המשויך.</p>
 
       <section className="mt-6 grid gap-4 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <h2 className="text-sm font-black text-[#3F433F]">נתונים לחישוב התזונה</h2>
           <p className="mt-1 text-xs text-[#5B5F5B]">מהם מחושבים הקלוריות והמאקרו שלך. שדה שתשאיר ריק פשוט יסומן כחסר.</p>
         </div>
-        <Field label="גיל" name="ageYears" type="number" min="12" max="100" />
-        <Select label="מין" name="sex" options={[["male", "זכר"], ["female", "נקבה"]]} />
-        <Field label="משקל נוכחי (ק״ג)" name="weight" type="number" step="0.1" />
-        <Field label="גובה (ס״מ)" name="height" type="number" />
+        <Field label="גיל" name="ageYears" type="number" min="12" max="100" required />
+        <Select label="מין" name="sex" required options={[["male", "זכר"], ["female", "נקבה"]]} />
+        <Field label="משקל נוכחי (ק״ג)" name="weight" type="number" step="0.1" required />
+        <Field label="גובה (ס״מ)" name="height" type="number" required />
         <Field label="היקף טבור (ס״מ)" name="navelCircumference" type="number" min={INITIAL_NAVEL_MIN_CM} max={INITIAL_NAVEL_MAX_CM} step="0.1" inputMode="decimal" />
         <Field label="יעד משקל (ק״ג)" name="targetWeight" type="number" step="0.1" />
         <Field label="ממוצע צעדים יומי" name="dailySteps" type="number" min="0" max="60000" step="100" />
-        <Field label="אימונים בשבוע" name="weeklyWorkouts" type="number" min="1" max="14" />
-        <Select label="מטרה" name="nutritionGoal" options={NUTRITION_GOALS.map((goal) => [goal, GOAL_LABELS[goal]])} />
-        <Select label="רמת מתאמן" name="traineeLevel" options={TRAINEE_LEVELS.map((level) => [level, TRAINEE_LEVEL_LABELS[level]])} />
+        <Field label="אימונים בשבוע" name="weeklyWorkouts" type="number" min="1" max="14" required />
+        <Select label="מטרה" name="nutritionGoal" required options={NUTRITION_GOALS.map((goal) => [goal, GOAL_LABELS[goal]])} />
+        <Select label="רמת מתאמן" name="traineeLevel" required options={TRAINEE_LEVELS.map((level) => [level, TRAINEE_LEVEL_LABELS[level]])} />
       </section>
 
       <section className="mt-4 grid gap-4 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
@@ -65,7 +64,7 @@ export default async function Onboarding() {
 
       <label className="mt-5 flex gap-3 text-sm">
         <input required name="terms" type="checkbox" />
-        אני מאשר/ת את תנאי השימוש ושמירת המידע לצורך הליווי.
+        אני מאשר/ת את תנאי השימוש ושמירת המידע לצורך הפעלת התוכנית.
       </label>
       <button className="mt-6 min-h-14 w-full rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF]">שמירה והמשך</button>
     </form>
@@ -81,9 +80,9 @@ function Field({ label, name, type = "text", ...props }: { label: string; name: 
 // The select carries its own aria-label: wrapping one in a label makes its
 // accessible name the label text plus every option, so a screen reader announces
 // the whole list as the field's name.
-function Select({ label, name, options }: { label: string; name: string; options: readonly (readonly [string, string])[] }) {
+function Select({ label, name, options, required = false }: { label: string; name: string; options: readonly (readonly [string, string])[]; required?: boolean }) {
   return <label className="block text-sm font-bold">{label}
-    <select name={name} aria-label={label} className="nutrition-input mt-2" defaultValue="">
+    <select name={name} aria-label={label} className="nutrition-input mt-2" defaultValue="" required={required}>
       <option value="">לא נבחר</option>
       {options.map(([value, text]) => <option key={value} value={value}>{text}</option>)}
     </select>

@@ -172,7 +172,7 @@ test("the schedule stays inside what the hosting plan allows", async () => {
   assert.equal(vercel.crons.length, 2, "more than two entries means some are silently dropped");
   assert.ok(vercel.crons.some((entry) => entry.path === "/api/cron/reminders"));
   assert.ok(vercel.crons.some((entry) => entry.path === "/api/cron/evening"));
-  assert.equal(vercel.crons.find((entry) => entry.path === "/api/cron/evening")?.schedule, "30 18 * * *");
+  assert.equal(vercel.crons.find((entry) => entry.path === "/api/cron/evening")?.schedule, "0 17 * * *");
   // A cron that fires more than once a day is rejected at deploy time on the
   // current plan - which means a bad schedule here breaks every deployment, not
   // just the job. None of these may use a step or a range in the hour field.

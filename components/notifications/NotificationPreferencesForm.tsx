@@ -59,7 +59,7 @@ export default function NotificationPreferencesForm({ preferences }: { preferenc
               so a time typed here changed nothing. The value is still submitted -
               unchanged - so the preference row keeps whatever it holds. */}
           <input type="hidden" name="endOfDayReminderTime" value={preferences.endOfDayReminderTime.slice(0, 5)} />
-          <p className="self-center text-xs text-[#5B5F5B]">הסיכום נשלח פעם ביום, בסביבות 21:30. הכיבוי כאן עוצר אותו לגמרי.</p>
+          <p className="self-center text-xs text-[#5B5F5B]">התזכורת נשלחת פעם ביום בשעה 20:00, ורק אם נשארו ארוחות לסימון. הכיבוי כאן עוצר אותה לגמרי.</p>
         </div>
       </fieldset>
 

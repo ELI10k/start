@@ -17,6 +17,7 @@ const clientPrefixes = [
   "/content",
   "/workouts",
   "/onboarding",
+  "/billing",
   // These three were reachable without passing through here at all. Each page
   // does its own `getAuthContext` check, so nothing leaked - but the middleware
   // is where the client device lock lives, and a client whose device was
@@ -144,12 +145,18 @@ export async function proxy(request: NextRequest) {
   if (profileError || !profile) return redirect(loginPathFor(requestedPath));
   if (profile.status !== "active") return redirect("/unauthorized");
 
-  if (profile.role === "client" && path !== "/onboarding") {
-    const [{ data: onboarding }, { data: relationship }] = await Promise.all([
+  if (profile.role === "client" && !path.startsWith("/billing/")) {
+    const [{ data: onboarding }, { data: relationship }, { data: subscription, error: subscriptionError }] = await Promise.all([
       supabase.from("client_profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle(),
       supabase.from("coach_client_relationships").select("coach_id").eq("client_id", user.id).eq("status", "active").maybeSingle(),
+      supabase.rpc("subscription_access", { p_user_id: user.id }),
     ]);
-    if (!relationship && !onboarding?.onboarding_completed) return redirect("/onboarding");
+    const paidPlan = subscription && typeof subscription === "object" && !Array.isArray(subscription) && typeof (subscription as Record<string, unknown>).plan === "string";
+    // Before the additive subscriptions migration exists, preserve the old
+    // preview behaviour. Once it exists, an independent account cannot reach
+    // onboarding or product data until billing has granted a plan.
+    if (!relationship && !subscriptionError && !paidPlan) return redirect("/billing/start");
+    if (!relationship && !onboarding?.onboarding_completed && path !== "/onboarding") return redirect("/onboarding");
   }
 
   const coachPath = path === "/coach" || path.startsWith("/coach/");

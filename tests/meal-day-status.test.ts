@@ -96,13 +96,13 @@ test("one chosen macro is enough to mark a meal eaten", async () => {
   assert.match(actions, /refresh_meal_intake already excludes zero/);
 });
 
-test("tapping the selected meal item again clears it", async () => {
-  const page = await source("app/nutrition/page.tsx");
+test("the coach's foods stay visible before the atomic save", async () => {
+  const editor = await source("components/client/MealDraftEditor.tsx");
   const actions = await source("app/actions/product.ts");
-  assert.match(page, /name="selected" value=\{group\.selectedItemId===item\.id\?"true":"false"\}/);
-  assert.match(page, /לחיצה נוספת מבטלת בחירה/);
-  assert.match(actions, /meal_group_selections"\)\.delete\(\)/);
-  assert.match(actions, /refresh_meal_intake/);
+  assert.match(editor, /group\.items\.find\(entry=>entry\.id===group\.selectedItemId\) \?\? group\.items\[0\]/);
+  assert.match(editor, /group\.items\.map\(item=>/);
+  assert.doesNotMatch(editor, /<option value="">לא נבחר מאכל<\/option>/);
+  assert.match(actions, /rpc\("save_meal_draft"/);
 });
 
 test("saying what was eaten instead offers all three ways", async () => {

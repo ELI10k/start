@@ -6,6 +6,9 @@ import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
 import NativeBridge from "@/components/native/NativeBridge";
+import { hasEntitlement } from "@/lib/subscriptions/access";
+import { getSubscriptionAccess } from "@/lib/subscriptions/server";
+import { SubscriptionAccessProvider } from "@/components/subscriptions/SubscriptionAccessProvider";
 
 const links = [
   { href: "/", label: "בית" },
@@ -17,7 +20,9 @@ const links = [
   { href: "/profile", label: "פרופיל" },
 ];
 
-export default function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+export default async function ClientShell({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const access = await getSubscriptionAccess();
+  const visibleLinks = links.filter((item) => item.href !== "/messages" || hasEntitlement(access, "coach_messaging"));
   // One inbox, one figure.
   //
   // The bar's badge used to sit on the profile tab and count notifications plus
@@ -28,6 +33,7 @@ export default function ClientShell({ children, className = "" }: { children: Re
   // screen they both open. Messages are not lost from it: every one of them puts
   // a row in the notification centre.
   return (
+    <SubscriptionAccessProvider access={access}>
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
         <Link href="/" className="start-wordmark" aria-label="START — מסך הבית">START</Link>
@@ -45,7 +51,7 @@ export default function ClientShell({ children, className = "" }: { children: Re
         <div className="desktop-app-nav__inner">
           <Link href="/" className="start-wordmark">START</Link>
           <div className="desktop-app-nav__links">
-            {links.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+            {visibleLinks.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>
           <div className="desktop-app-nav__actions">
             <NotificationBell />
@@ -65,5 +71,6 @@ export default function ClientShell({ children, className = "" }: { children: Re
       <div className="client-app-content">{children}</div>
       <BottomNav />
     </main>
+    </SubscriptionAccessProvider>
   );
 }

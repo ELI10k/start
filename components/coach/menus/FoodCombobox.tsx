@@ -1,5 +1,5 @@
 "use client";
-import { useMemo,useRef,useState } from "react";
+import { useCallback,useMemo,useRef,useState } from "react";
 import { Search, Star } from "lucide-react";
 import { foodSearchRelevance,normalizeFoodText } from "@/lib/foods/repository";
 import { foodMacroGroup } from "@/lib/nutrition/food-groups";
@@ -10,6 +10,7 @@ export type ComboboxFood={
   // foodMacroGroup classifies from the macros when a food carries no curated
   // group, so the three numbers it reads belong in the type handed to it.
   protein?:number|null;carbs?:number|null;fat?:number|null;
+  calories?:number|null;servingLabel?:string|null;packageUnit?:string|null;unitWeightGrams?:number|null;
   /** Client picker metadata. Omitted by the coach menu editor. */
   // GroupType rather than MacroGroup: the menu editor's own options carry
   // "vegetables", which is a real group there and not one of the three macros.
@@ -17,21 +18,21 @@ export type ComboboxFood={
 };
 // favorite is null when the coach has said nothing either way - a usage row
 // exists because the food was selected, which is not an opinion about it.
-type Usage={foodId:string;count:number;lastUsedAt:string;favorite:boolean|null};
+export type FoodUsage={foodId:string;count:number;lastUsedAt:string;favorite?:boolean|null};
 
 // The picker is a panel, not a dropdown. It used to be an absolutely positioned
 // list hanging off a 150px input inside a wrapping row - on a phone that put the
 // results over the row they belonged to. It now fills a bottom sheet, so the
 // search field is at the top and the whole list is scrollable.
-export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose,clientCatalogueOrder=false}:{foods:readonly ComboboxFood[];value:string;usage:Usage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void;clientCatalogueOrder?:boolean}){
+export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorite,onClose,clientCatalogueOrder=false,macroGroup}:{foods:readonly ComboboxFood[];value:string;usage:readonly FoodUsage[];onSelect:(id:string)=>void;onToggleFavorite?:(id:string,favorite:boolean)=>void;onClose?:()=>void;clientCatalogueOrder?:boolean;macroGroup?:GroupType}){
   const[query,setQuery]=useState("");const[active,setActive]=useState(0);const input=useRef<HTMLInputElement>(null);
   const usageMap=useMemo(()=>new Map(usage.map(item=>[item.foodId,item])),[usage]);
   // Only an explicit star or unstar overrides the curated status. Merely having
   // been chosen before does not, which is what "u ? u.favorite : ..." meant and
   // is how the curated list emptied itself through use.
-  const isFavorite=(food:ComboboxFood,u?:Usage)=>clientCatalogueOrder
+  const isFavorite=useCallback((food:ComboboxFood,u?:FoodUsage)=>clientCatalogueOrder
     ? Boolean(food.personalFavorite)
-    : u?.favorite??Boolean(food.isMaster);
+    : u?.favorite??Boolean(food.isMaster),[clientCatalogueOrder]);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
@@ -39,7 +40,10 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
     // fall in among the rest as soon as anything was typed, ranked purely by
     // relevance - so the curated shortlist stopped being a shortlist exactly
     // when the coach was looking for something.
-    const matching=q?candidates.filter(item=>item.relevance>=0):candidates;
+    const classify=(food:ComboboxFood):GroupType=>food.masterGroup
+      ?? foodMacroGroup({id:food.id,name:food.name,category:food.category,protein:food.protein??null,carbs:food.carbs??null,fat:food.fat??null});
+    const scoped=macroGroup?candidates.filter(({food})=>classify(food)===macroGroup):candidates;
+    const matching=q?scoped.filter(item=>item.relevance>=0):scoped;
     const byRelevance=(a:typeof candidates[number],b:typeof candidates[number])=>{
       const relevance=b.relevance-a.relevance;
       if(relevance)return relevance;
@@ -64,6 +68,15 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
       const take=(predicate:(food:ComboboxFood)=>boolean,group:(food:ComboboxFood)=>string)=>ordered
         .filter(({food})=>!included.has(food.id)&&predicate(food))
         .map(item=>{included.add(item.food.id);return{...item,group:group(item.food)}});
+      if(macroGroup){
+        const label=macroGroup==="protein"?"חלבון":macroGroup==="carbohydrate"?"פחמימה":macroGroup==="fat"?"שומן":"ירקות";
+        const masters=take(food=>Boolean(food.isMaster),()=>`מזונות מאסטר · ${label}`);
+        const favorites=take(food=>Boolean(food.personalFavorite),()=>`מועדפים · ${label}`);
+        const recent=take(food=>Boolean(usageMap.get(food.id)),()=>`נאכלו לאחרונה · ${label}`);
+        const clientFoods=take(food=>Boolean(food.clientAdded),()=>`נוספו על ידך · ${label}`);
+        const rest=take(()=>true,()=>`כל מאכלי ה${label}`);
+        return [...masters,...favorites,...recent,...clientFoods,...rest].slice(0,q?100:180);
+      }
       const clientFoods=take(food=>Boolean(food.clientAdded),()=>"נוספו על ידך");
       const macroGroups=["חלבון","פחמימה","שומן"] as const;
       const favorites=macroGroups.flatMap(label=>take(
@@ -90,7 +103,7 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
     const included=new Set([...favoriteIds,...recent.map(item=>item.food.id)]);
     const rest=candidates.filter(item=>!included.has(item.food.id)).sort((a,b)=>a.food.name.localeCompare(b.food.name,"he")).slice(0,Math.max(0,100-favorites.length-recent.length)).map(item=>({...item,group:"כל המזונות"}));
     return[...favorites,...recent,...rest];
-  },[clientCatalogueOrder,foods,query,usageMap]);
+  },[clientCatalogueOrder,foods,isFavorite,macroGroup,query,usageMap]);
   const choose=(id:string)=>{onSelect(id);setQuery("");setActive(0)};
 
   return <div className="food-picker">
@@ -134,6 +147,10 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
             <button type="button" className="food-picker__choose" onMouseDown={event=>event.preventDefault()} onClick={event=>{event.stopPropagation();choose(item.food.id)}}>
               <strong>{item.food.name}</strong>
               {item.food.brand&&<span>{item.food.brand}</span>}
+              {(item.food.calories!=null||item.food.servingLabel||item.food.packageUnit)&&<small>{[
+                item.food.calories!=null?`${Math.round(item.food.calories*10)/10} קל׳`:null,
+                item.food.servingLabel||item.food.packageUnit||null,
+              ].filter(Boolean).join(" · ")}</small>}
               {item.u&&<small>נבחר {item.u.count} פעמים</small>}
             </button>
             <button

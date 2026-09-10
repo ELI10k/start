@@ -227,8 +227,8 @@ test("the end-of-day summary obeys its own switch", async () => {
   // A once-nightly job cannot honour a per-client hour, so the hour is stated
   // rather than offered as a control that does nothing.
   assert.doesNotMatch(form, /name="endOfDayReminderTime" type="time"/);
-  assert.match(form, /בסביבות 21:30/);
-  assert.match(crons, /"schedule": "30 18 \* \* \*"/);
+  assert.match(form, /בשעה 20:00/);
+  assert.match(crons, /"schedule": "0 17 \* \* \*"/);
 });
 
 // ------------------------------------------------- taking a check-in back

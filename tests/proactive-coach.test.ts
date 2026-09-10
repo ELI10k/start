@@ -5,10 +5,15 @@ import { buildDailyCoachMessage, prioritiseCoachAttention } from "../lib/coach-i
 
 test("daily coach chooses one data-backed action and cites its numbers", () => {
   const message = buildDailyCoachMessage({ mealsCompleted: 2, mealsPlanned: 4, calories: 1200, calorieTarget: 2200, protein: 80, proteinTarget: 150 });
-  assert.match(message.title, /חלבון/);
-  assert.match(message.summary, /70/);
+  assert.equal(message.title, "נשאר לך לסמן את התפריט היומי");
+  assert.match(message.summary, /נשארו 2/);
   assert.equal(message.href, "/nutrition");
   assert.equal(message.evidence.length, 3);
+});
+
+test("daily reminder never sends the repetitive protein focus message", () => {
+  const message = buildDailyCoachMessage({ mealsCompleted: 1, mealsPlanned: 3, calories: 500, calorieTarget: 2200, protein: 10, proteinTarget: 150 });
+  assert.doesNotMatch(message.title + message.summary, /הפוקוס שלך עכשיו|חסרים לך.*חלבון/);
 });
 
 test("daily coach refuses to invent advice when targets are missing", () => {

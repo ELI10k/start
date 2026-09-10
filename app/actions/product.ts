@@ -13,6 +13,7 @@ import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
 import { detectImageFormat } from "@/lib/images/signature";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { israelDateKey } from "@/lib/date-time";
+import { FOOD_LOG_PHOTO_BUCKET, validateFoodLogPhoto } from "@/lib/nutrition/food-log";
 
 export type SaveState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -268,6 +269,10 @@ export async function reviewCheckIn(
   const response = String(form.get("response") ?? "").trim();
   if (!/^[0-9a-f-]{36}$/i.test(checkInId) || !/^[0-9a-f-]{36}$/i.test(clientId) || !response || response.length > 4000)
     return { ok: false, message: "יש להזין תגובה תקינה." };
+  const { hasEntitlement } = await import("@/lib/subscriptions/access");
+  const { getSubscriptionAccess } = await import("@/lib/subscriptions/server");
+  if (!hasEntitlement(await getSubscriptionAccess(clientId), "human_checkin_review"))
+    return { ok: false, message: "בדיקת צ׳ק־אין אנושית אינה כלולה במסלול הלקוח." };
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc("review_check_in", {
     p_check_in_id: checkInId,
@@ -358,6 +363,70 @@ async function requireClient() {
 function revalidateNutrition() {
   revalidatePath("/");
   revalidatePath("/nutrition");
+}
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Saves one visual record for a meal without treating the image as food.
+ * A photograph is evidence alongside the mark; it must never silently add
+ * estimated calories or change whether the meal was eaten. */
+export async function saveMealPhoto(_previous: SaveState, form: FormData): Promise<SaveState> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "client") return { ok: false, message: "אין הרשאה לשמירת התמונה." };
+  const mealId = String(form.get("mealId") ?? "");
+  const date = String(form.get("date") ?? "");
+  const file = form.get("photo");
+  if (!uuidPattern.test(mealId) || !/^\d{4}-\d{2}-\d{2}$/.test(date) || date > israelDateKey())
+    return { ok: false, message: "הארוחה או התאריך אינם תקינים." };
+  if (!(file instanceof File) || !file.size) return { ok: false, message: "יש לבחור תמונה." };
+  const fileError = validateFoodLogPhoto(file);
+  if (fileError) return { ok: false, message: fileError };
+  const format = await detectImageFormat(file);
+  if (!format || format !== file.type) return { ok: false, message: "התמונה אינה קובץ JPG, PNG או WebP תקין." };
+
+  const supabase = await createSupabaseServerClient();
+  const { data: meal } = await supabase.from("meals").select("meal_plan_id").eq("id", mealId).maybeSingle();
+  if (!meal?.meal_plan_id) return { ok: false, message: "הארוחה לא נמצאה בתפריט שלך." };
+  const { data: assignment } = await supabase.from("client_meal_plan_assignments").select("id")
+    .eq("client_id", auth.id).eq("meal_plan_id", meal.meal_plan_id).lte("assigned_from", date)
+    .or(`assigned_until.is.null,assigned_until.gte.${date}`).limit(1).maybeSingle();
+  if (!assignment) return { ok: false, message: "הארוחה לא הייתה משויכת אליך בתאריך הזה." };
+
+  const extension = format === "image/jpeg" ? "jpg" : format === "image/png" ? "png" : "webp";
+  const path = `${auth.id}/${date}/meals/${mealId}-${crypto.randomUUID()}.${extension}`;
+  const { data: previous } = await supabase.from("meal_photos").select("storage_path")
+    .eq("client_id", auth.id).eq("meal_id", mealId).eq("photo_date", date).maybeSingle();
+  const { error: uploadError } = await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET)
+    .upload(path, new Uint8Array(await file.arrayBuffer()), { contentType: format, upsert: false });
+  if (uploadError) return { ok: false, message: "התמונה לא נשמרה. אפשר לנסות שוב." };
+  const { error } = await supabase.from("meal_photos").upsert({
+    client_id: auth.id, meal_id: mealId, photo_date: date, storage_path: path,
+  }, { onConflict: "client_id,meal_id,photo_date" });
+  if (error) {
+    await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([path]);
+    return { ok: false, message: "התמונה לא חוברה לארוחה. אפשר לנסות שוב." };
+  }
+  if (previous?.storage_path && previous.storage_path !== path)
+    await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([previous.storage_path]);
+  revalidateNutrition();
+  return { ok: true, message: "תמונת הארוחה נשמרה." };
+}
+
+export async function deleteMealPhoto(_previous: SaveState, form: FormData): Promise<SaveState> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "client") return { ok: false, message: "אין הרשאה למחיקת התמונה." };
+  const mealId = String(form.get("mealId") ?? "");
+  const date = String(form.get("date") ?? "");
+  if (!uuidPattern.test(mealId) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, message: "הארוחה או התאריך אינם תקינים." };
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.from("meal_photos").select("storage_path")
+    .eq("client_id", auth.id).eq("meal_id", mealId).eq("photo_date", date).maybeSingle();
+  const { error } = await supabase.from("meal_photos").delete()
+    .eq("client_id", auth.id).eq("meal_id", mealId).eq("photo_date", date);
+  if (error) return { ok: false, message: "התמונה לא נמחקה. אפשר לנסות שוב." };
+  if (data?.storage_path) await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([data.storage_path]);
+  revalidateNutrition();
+  return { ok: true, message: "התמונה נמחקה." };
 }
 
 // The nutrition rules live in the database and are raised as named exceptions.
@@ -522,6 +591,53 @@ export async function setMealGroupAmount(form: FormData): Promise<void> {
   });
   if (error) throw nutritionRule(error) ?? error;
   revalidateNutrition();
+}
+
+/** Saves every choice and quantity in a meal as one database transaction. */
+export async function saveMealDraft(form: FormData): Promise<void> {
+  const supabase = await requireClient();
+  const mealId = String(form.get("mealId") ?? "");
+  const date = String(form.get("date") ?? "");
+  if (!/^[0-9a-f-]{36}$/i.test(mealId) || !/^\d{4}-\d{2}-\d{2}$/.test(date))
+    throw new Error("invalid_meal_draft");
+
+  let groups: Array<{ groupId: string; itemId: string; quantity: number }>;
+  try {
+    const parsed = JSON.parse(String(form.get("groups") ?? "[]"));
+    if (!Array.isArray(parsed) || parsed.length > 20)
+      throw new Error("invalid_meal_draft");
+    groups = parsed.map((row) => ({
+      groupId: String(row.groupId ?? ""),
+      itemId: String(row.itemId ?? ""),
+      quantity: Number(row.quantity),
+    }));
+  } catch {
+    throw new Error("invalid_meal_draft");
+  }
+  if (groups.some((row) =>
+    !/^[0-9a-f-]{36}$/i.test(row.groupId) ||
+    !/^[0-9a-f-]{36}$/i.test(row.itemId) ||
+    !Number.isFinite(row.quantity) || row.quantity < 0
+  )) throw new Error("invalid_meal_draft");
+
+  const { error } = await supabase.rpc("save_meal_draft", {
+    p_meal_id: mealId,
+    p_date: date,
+    p_groups: groups,
+    p_status: "eaten",
+  });
+  if (error) throw nutritionRule(error) ?? error;
+  revalidateNutrition();
+}
+
+export type MealDraftSaveState={ok:boolean;message:string};
+export async function saveMealDraftState(_previous:MealDraftSaveState,form:FormData):Promise<MealDraftSaveState>{
+  try{
+    await saveMealDraft(form);
+    return{ok:true,message:"הארוחה נשמרה בהצלחה."};
+  }catch{
+    return{ok:false,message:"לא הצלחנו לשמור את הארוחה. נסו שוב."};
+  }
 }
 
 export async function resetClientDevice(form: FormData): Promise<void> {

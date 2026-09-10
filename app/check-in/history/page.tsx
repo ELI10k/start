@@ -6,16 +6,20 @@ import PageHeader from "@/components/client/PageHeader";
 import CheckInPhotoGallery from "@/components/client/CheckInPhotoGallery";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { getAuthContext, getClientCheckInHistory } from "@/lib/data/product-repository";
+import {hasEntitlement} from "@/lib/subscriptions/access";
+import {getSubscriptionAccess} from "@/lib/subscriptions/server";
 
 export default async function CheckInHistoryPage(){
   const auth=await getAuthContext();
   if(!auth)redirect("/login");
   if(auth.role!=="client")redirect("/unauthorized");
+  const access=await getSubscriptionAccess();
+  const humanReview=hasEntitlement(access,"human_checkin_review");
   const data=await getClientCheckInHistory(auth.id);
   const photoCheckInIds=new Set([...data.checkIns].reverse().flatMap((entry,index)=>index===0||index===3?[entry.id]:[]));
 
   return <ClientShell>
-    <PageHeader eyebrow="צ׳ק-אין" title="עדכונים קודמים" description="היסטוריה, תמונות ותגובות המאמן." action={{href:"/check-in",label:"עדכון חדש"}}/>
+    <PageHeader eyebrow="צ׳ק-אין" title="עדכונים קודמים" description={humanReview?"היסטוריה, תמונות ותגובות המאמן.":"היסטוריה ותמונות מהתהליך שלך."} action={{href:"/check-in",label:"עדכון חדש"}}/>
     {data.checkIns.length?
       <div className="grid gap-3">
         {data.checkIns.map((entry,index)=>
@@ -41,12 +45,20 @@ export default async function CheckInHistoryPage(){
               {entry.coach_response&&<div className="mt-4 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4">
                 <strong className="text-sm text-[#15803D]">תגובת המאמן</strong>
                 <p className="mt-2 text-sm">{entry.coach_response}</p>
-                <Link href="/messages" className="premium-secondary-button mt-3">תשובה למאמן</Link>
+                {humanReview&&<Link href="/messages" className="premium-secondary-button mt-3">תשובה למאמן</Link>}
               </div>}
             </div>
           </details>
         )}
       </div>
-      :<StateBlock icon={<ClipboardCheck aria-hidden="true" size={22}/>} title="עדיין אין צ׳ק-אינים" description="הצ׳ק־אין הראשון שתשלח יופיע כאן יחד עם תגובת המאמן."/>}
+      : (
+        <StateBlock
+          icon={<ClipboardCheck aria-hidden="true" size={22}/>}
+          title="עדיין אין צ׳ק-אינים"
+          description={humanReview
+            ? "הצ׳ק־אין הראשון שתשלח יופיע כאן יחד עם תגובת המאמן."
+            : "הצ׳ק־אין הראשון שתשלח יופיע כאן וישמש להתאמה השבועית."}
+        />
+      )}
   </ClientShell>;
 }

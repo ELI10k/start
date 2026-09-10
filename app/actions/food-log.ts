@@ -59,6 +59,8 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   const source = String(form.get("source") ?? "text");
   if (!["text", "scan", "photo"].includes(source)) return { ok: false, message: RULES.invalid_food_source };
 
+  const foodId = uuid(form.get("foodId"));
+  const quantityGrams = number(form, "quantityGrams");
   const name = String(form.get("name") ?? "").trim().slice(0, 200);
   const galleryPhoto = form.get("photo");
   const cameraPhoto = form.get("cameraPhoto");
@@ -74,7 +76,26 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   let protein = number(form, "protein");
   let carbs = number(form, "carbs");
   let fat = number(form, "fat");
-  const needsEstimate = source === "text" || source === "photo";
+  const supabase = await createSupabaseServerClient();
+  let authoritativeFood = false;
+  if (foodId && quantityGrams && quantityGrams > 0) {
+    const { data: food } = await supabase
+      .from("foods")
+      .select("name,brand,calories,protein,carbs,fat")
+      .eq("id", foodId)
+      .maybeSingle();
+    if (food && food.calories != null) {
+      const factor = quantityGrams / 100;
+      const scaled = (value: unknown) => Math.round(Number(value ?? 0) * factor * 100) / 100;
+      resolvedName = [food.name, food.brand].filter(Boolean).join(" — ");
+      calories = scaled(food.calories);
+      protein = scaled(food.protein);
+      carbs = scaled(food.carbs);
+      fat = scaled(food.fat);
+      authoritativeFood = true;
+    }
+  }
+  const needsEstimate = !authoritativeFood && (source === "text" || source === "photo");
   // An estimate that does not arrive is not a reason to lose the entry.
   //
   // The estimator is one HTTP call to an external gateway, and it fails for
@@ -118,8 +139,6 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     }
   }
 
-  const supabase = await createSupabaseServerClient();
-
   let photoPath: string | null = null;
   if (hasPhoto) {
     const problem = validateFoodLogPhoto(photo);
@@ -139,7 +158,7 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     p_name: resolvedName,
     p_source: source,
     p_meal_id: uuid(form.get("mealId")),
-    p_food_id: String(form.get("foodId") ?? "").trim() || null,
+    p_food_id: foodId,
     p_quantity: number(form, "quantity"),
     p_unit: String(form.get("unit") ?? "").trim() || null,
     p_calories: calories,
@@ -213,6 +232,23 @@ export async function deleteClientFoodLog(form: FormData): Promise<void> {
   }
   const path = data?.photo_path;
   if (path) await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([String(path)]);
+  revalidatePath("/nutrition");
+  revalidatePath("/");
+}
+
+/** Renames only this client's logged occurrence, never the shared catalogue row. */
+export async function renameClientFoodLog(form: FormData): Promise<void> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "client") return;
+  const id = uuid(form.get("id"));
+  const name = String(form.get("name") ?? "").trim().slice(0, 200);
+  if (!id || !name) return;
+  const supabase = await createSupabaseServerClient();
+  const { data: renamed, error } = await supabase.rpc("rename_client_food_log", { p_id: id, p_name: name });
+  if (error || renamed !== true) {
+    console.error("food_log_rename_failed", { id, code: error?.code, message: error?.message });
+    return;
+  }
   revalidatePath("/nutrition");
   revalidatePath("/");
 }

@@ -1,16 +1,15 @@
 import { redirect } from "next/navigation";
 import { Fragment } from "react";
 import ClientShell from "@/components/client/ClientShell";
-import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
-import MealGroupSubstitution from "@/components/client/MealGroupSubstitution";
+import MealDraftEditor from "@/components/client/MealDraftEditor";
 import MealCard from "@/components/client/MealCard";
-import { selectMealGroupAlternative } from "@/app/actions/product";
 import {
   getActiveClientMenu,
   getAuthContext,
   getFreeMenuDay,
   listClientFoodLog,
+  listClientFoodUsage,
   listDatabaseFoods,
   getClientNutritionBehavior,
 } from "@/lib/data/product-repository";
@@ -20,15 +19,15 @@ import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, israelWeekday, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
-import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import OutsideMenuFood from "@/components/client/OutsideMenuFood";
-import { sumLoggedFood } from "@/lib/nutrition/food-log";
+import { FOOD_LOG_PHOTO_BUCKET, FOOD_LOG_PHOTO_URL_TTL_SECONDS, sumLoggedFood } from "@/lib/nutrition/food-log";
 import { addTotals, eatenFromMenu, remainingInMenu } from "@/lib/nutrition/menu-intake";
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { masterFoodGroup } from "@/lib/nutrition/master-foods";
+import { isDefaultFavoriteFood, masterFoodGroup } from "@/lib/nutrition/master-foods";
+import type { GroupType } from "@/lib/nutrition/adaptation";
 
 // "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
 // server action executes on the route segment that hosts it. Vercel's default
@@ -74,13 +73,15 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
   const supabase = await createSupabaseServerClient();
-  const [menu, freeMenu, foods, logged, behavior, favoriteResult] = await Promise.all([
+  const [menu, freeMenu, foods, logged, behavior, foodUsage, favoriteResult, mealPhotoResult] = await Promise.all([
     getActiveClientMenu(auth.id, today),
     getFreeMenuDay(auth.id, today),
     listDatabaseFoods(),
     listClientFoodLog(auth.id, today),
     getClientNutritionBehavior(auth.id,today),
+    listClientFoodUsage(auth.id),
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
+    supabase.from("meal_photos").select("meal_id,storage_path").eq("client_id", auth.id).eq("photo_date", today),
   ]);
   // Favourites only reorder the food picker. This screen is the client's plan,
   // the day's log and today's totals, and none of that should disappear
@@ -89,6 +90,13 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   if (favoriteResult.error)
     console.error("food favourites unavailable", { code: favoriteResult.error.code });
   const favoriteIds = new Set((favoriteResult.data ?? []).map((row) => String(row.food_id)));
+  if (mealPhotoResult.error)
+    console.error("meal photos unavailable", { code: mealPhotoResult.error.code });
+  const mealPhotoRows = mealPhotoResult.data ?? [];
+  const signedMealPhotos = mealPhotoRows.length
+    ? await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).createSignedUrls(mealPhotoRows.map((row) => row.storage_path), FOOD_LOG_PHOTO_URL_TTL_SECONDS)
+    : { data: [] as { signedUrl: string }[] };
+  const mealPhotoUrls = new Map(mealPhotoRows.map((row, index) => [String(row.meal_id), signedMealPhotos.data?.[index]?.signedUrl ?? null]));
   // What was eaten instead, and what of it carries figures. Only the measured
   // part joins the day's totals; the rest is shown as unmeasured rather than
   // counted as zero.
@@ -116,8 +124,12 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     protein: food.protein === null ? null : Number(food.protein),
     carbs: food.carbs === null ? null : Number(food.carbs),
     fat: food.fat === null ? null : Number(food.fat),
+    servingLabel: food.serving_label ? String(food.serving_label) : null,
+    packageUnit: food.package_unit ? String(food.package_unit) : null,
+    unitWeightGrams: food.unit_weight_grams == null ? null : Number(food.unit_weight_grams),
+    source: food.source ? String(food.source) : null,
     clientAdded: food.created_by === auth.id,
-    personalFavorite: favoriteIds.has(String(food.id)),
+    personalFavorite: favoriteIds.has(String(food.id)) || isDefaultFavoriteFood(String(food.id)),
     isMaster: Boolean(masterFoodGroup(String(food.id))),
     masterGroup: masterFoodGroup(String(food.id)),
   }));
@@ -179,7 +191,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     : null;
   const outsideMenuSection = (
     <section className="space-y-3">
-      <OutsideMenuFood date={today} foods={pickableFoods}/>
+      <OutsideMenuFood date={today} foods={pickableFoods} usage={foodUsage}/>
       <LoggedFoodList entries={outsideMenuLogs}/>
     </section>
   );
@@ -270,6 +282,9 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   completed={meal.completed}
                   blocked={noChoice}
                   foods={pickableFoods}
+                  usage={foodUsage}
+                  mealPhotoUrl={mealPhotoUrls.get(meal.id) ?? null}
+                  hideEatenAction={!meal.freeCalorieTarget}
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
@@ -284,32 +299,31 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   frame={meal.freeCalorieTarget}
                   logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
                   unmeasured={mine.length-measured.length}
+                  foods={pickableFoods}
+                  usage={foodUsage}
                 />;
-              })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
-                {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}. לחיצה נוספת מבטלת בחירה.</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
-                    <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="mealId" value={meal.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/><input type="hidden" name="selected" value={group.selectedItemId===item.id?"true":"false"}/>
-                    <MealOptionButton
-                      selected={group.selectedItemId===item.id}
-                      name={item.name}
-                      quantity={String(item.displayQuantity)}
-                      unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
-                      calories={String(item.calories)}
-                      household={householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label}
-                      note={item.note}
-                    />
-                  </form>)}</div>
-                  {/* Only where something is chosen: an amount with nothing
-                      chosen is an amount of nothing. */}
-                  {(()=>{const chosen=group.items.find(item=>item.id===group.selectedItemId);return chosen?<PortionOverride
-                    groupId={group.id}
-                    date={today}
-                    planned={String(chosen.displayQuantity)}
-                    unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
-                    current={group.amountOverride}
-                  />:null})()}
-                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} foods={pickableFoods}/>
-                  </fieldset>)}
-              </div>}
+              })():<MealDraftEditor
+                mealId={meal.id}
+                date={today}
+                foods={pickableFoods}
+                usage={foodUsage}
+                groups={meal.groups.map(group=>({
+                  id:group.id,
+                  type:group.type as GroupType,
+                  label:groupLabel(group.type),
+                  selectedItemId:group.selectedItemId,
+                  amountOverride:group.amountOverride == null ? null : Number(group.amountOverride),
+                  items:group.items.map(item=>({
+                    id:item.id,
+                    name:item.name,
+                    quantity:Number(item.displayQuantity),
+                    unit:unitLabel(item.measurementUnit,Number(item.displayQuantity)),
+                    calories:Number(item.calories),
+                    household:householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label,
+                    note:item.note,
+                  })),
+                }))}
+              />}
               </div>
             </MealCard>
             {meal.id === outsideMenuAfterMealId ? outsideMenuSection : null}

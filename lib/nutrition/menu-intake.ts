@@ -89,11 +89,9 @@ export function sumItems(items: readonly Item[]): IntakeTotals {
  * 300 קל׳" as eaten watched their day's total not move, which reads as the app
  * not having heard them.
  *
- * Netted against whatever was logged into the window, never below zero: items
- * scanned or written into it are counted by the food log, and adding the target
- * on top of them would count the same food twice. Marked and unlogged, the
- * target is the only estimate there is, and it is the number the client was
- * given and answered against.
+ * A measured item replaces the allowance estimate; it does not cause the rest
+ * of the allowance to be counted as eaten. Only a marked window with no
+ * measured items uses the full target as an estimate.
  */
 export function freeCalorieIntake(
   meals: readonly IntakeMeal[],
@@ -101,7 +99,7 @@ export function freeCalorieIntake(
 ): IntakeTotals {
   const calories = meals
     .filter((meal) => Boolean(meal.freeCalorieTarget) && isMealEaten(meal))
-    .reduce((sum, meal) => sum + Math.max(0, (meal.freeCalorieTarget ?? 0) - loggedCaloriesIn(meal.id)), 0);
+    .reduce((sum, meal) => sum + (loggedCaloriesIn(meal.id) > 0 ? 0 : (meal.freeCalorieTarget ?? 0)), 0);
   // Only calories: a free window is a calorie allowance, and the coach did not
   // say what it is made of. Inventing a macro split would be inventing data.
   return { ...ZERO_TOTALS, calories };

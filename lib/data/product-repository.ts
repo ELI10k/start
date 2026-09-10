@@ -283,15 +283,26 @@ export type CoachClientListItem = Awaited<ReturnType<typeof listCoachClients>>[n
   lastCheckInAt: string | null;
   lastLoginAt: string | null;
   dashboardStatus: "active" | "waiting" | "inactive";
+  subscriptionPlan: "digital" | "coach" | "vip" | null;
+  subscriptionStatus: string | null;
+  subscriptionSource: string | null;
 }>;
 
 export async function listCoachDashboardClients(
   coachId: string,
-  options: Readonly<{ query?: string; sort?: "name" | "checkin" | "weight"; page?: number; pageSize?: number }> = {},
+  options: Readonly<{
+    query?: string;
+    sort?: "name" | "checkin" | "weight";
+    page?: number;
+    pageSize?: number;
+    plan?: "digital" | "coach" | "vip" | "pending";
+  }> = {},
 ): Promise<Readonly<{ items: readonly CoachClientListItem[]; total: number; page: number; pageSize: number }>> {
   const clients = await listCoachClients(coachId);
   const ids = clients.map((client) => client.id);
   const supabase = await createSupabaseServerClient();
+  const { getClientSubscriptionAccesses } = await import("@/lib/subscriptions/server");
+  const accessByClient = await getClientSubscriptionAccesses(ids);
   const [progressResult, checkInResult, deviceResult] = ids.length
     ? await Promise.all([
         supabase.from("progress_entries").select("client_id,weight,date").in("client_id", ids).order("date", { ascending: false }),
@@ -316,18 +327,26 @@ export async function listCoachDashboardClients(
         lastCheckInAt: checkIn?.submitted_at ?? null,
         lastLoginAt: device?.last_seen_at ?? null,
         dashboardStatus: client.status !== "active" ? "inactive" : waiting ? "waiting" : "active",
+        subscriptionPlan: accessByClient.get(client.id)?.plan ?? null,
+        subscriptionStatus: accessByClient.get(client.id)?.status ?? null,
+        subscriptionSource: accessByClient.get(client.id)?.source ?? null,
       } satisfies CoachClientListItem;
     });
+  const filtered = options.plan
+    ? enriched.filter((client) => options.plan === "pending"
+      ? client.subscriptionPlan === null
+      : client.subscriptionPlan === options.plan)
+    : enriched;
   const sort = options.sort ?? "name";
-  enriched.sort((left, right) => sort === "checkin"
+  filtered.sort((left, right) => sort === "checkin"
     ? (right.lastCheckInAt ?? "").localeCompare(left.lastCheckInAt ?? "")
     : sort === "weight"
       ? (right.latestWeight ?? -Infinity) - (left.latestWeight ?? -Infinity)
       : left.full_name.localeCompare(right.full_name, "he"));
   const pageSize = Math.min(50, Math.max(5, options.pageSize ?? 12));
-  const total = enriched.length;
+  const total = filtered.length;
   const page = Math.min(Math.max(1, options.page ?? 1), Math.max(1, Math.ceil(total / pageSize)));
-  return { items: enriched.slice((page - 1) * pageSize, page * pageSize), total, page, pageSize };
+  return { items: filtered.slice((page - 1) * pageSize, page * pageSize), total, page, pageSize };
 }
 
 export async function getCoachClient(coachId: string, clientId: string) {
@@ -834,6 +853,40 @@ export async function listClientFoodLog(clientId: string, date: string): Promise
     photoUrl: row.photo_path ? urlByPath.get(String(row.photo_path)) ?? null : null,
     nutritionEstimated: (row.source === "text" || row.source === "photo") && row.calories !== null,
   }));
+}
+
+export type ClientFoodUsage = Readonly<{
+  foodId: string;
+  count: number;
+  lastUsedAt: string;
+}>;
+
+/** Recent catalogue foods actually chosen by this client, newest first. */
+export async function listClientFoodUsage(clientId: string): Promise<readonly ClientFoodUsage[]> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("client_food_log")
+    .select("food_id,created_at")
+    .eq("client_id", clientId)
+    .not("food_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(300);
+  if (error) {
+    if (MISSING_RELATION.has(error.code ?? "")) return [];
+    throw error;
+  }
+  const byFood = new Map<string, ClientFoodUsage>();
+  for (const row of data ?? []) {
+    if (!row.food_id) continue;
+    const foodId = String(row.food_id);
+    const previous = byFood.get(foodId);
+    byFood.set(foodId, {
+      foodId,
+      count: (previous?.count ?? 0) + 1,
+      lastUsedAt: previous?.lastUsedAt ?? String(row.created_at),
+    });
+  }
+  return [...byFood.values()];
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {

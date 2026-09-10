@@ -6,7 +6,13 @@ import { StateBlock } from "@/components/client/AppPatterns";
 import { getAuthContext, listArchivedCoachClients, listCoachDashboardClients } from "@/lib/data/product-repository";
 import { RestoreClientButton } from "@/components/coach/client-file/ArchiveClient";
 
-type Search = { q?: string; sort?: "name" | "checkin" | "weight"; page?: string; view?: string };
+type Search = {
+  q?: string;
+  sort?: "name" | "checkin" | "weight";
+  page?: string;
+  view?: string;
+  plan?: "digital" | "coach" | "vip" | "pending";
+};
 const labels = { active: "פעיל", waiting: "ממתין", inactive: "לא פעיל" } as const;
 const pills = { active: "pill pill--green", waiting: "pill", inactive: "pill" } as const;
 const sorts = [
@@ -15,6 +21,8 @@ const sorts = [
   { value: "weight", label: "משקל אחרון" },
 ] as const;
 const date = (value: string | null) => value ? new Intl.DateTimeFormat("he-IL", { dateStyle: "medium", timeZone: "Asia/Jerusalem" }).format(new Date(value)) : "אין נתון";
+const planLabels = { digital: "Digital", coach: "Coach", vip: "VIP" } as const;
+const planFilterLabels = { ...planLabels, pending: "ממתינים להפעלה" } as const;
 
 export default async function CoachClientsPage({ searchParams }: { searchParams: Promise<Search> }) {
   const auth = await getAuthContext();
@@ -67,9 +75,16 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
 
   const sort = params.sort === "checkin" || params.sort === "weight" ? params.sort : "name";
   const page = Math.max(1, Number(params.page) || 1);
-  const result = await listCoachDashboardClients(auth.id, { query: params.q, sort, page });
-  const pageHref = (target: number) => `/coach/clients?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), sort, page: String(target) })}`;
-  const sortHref = (target: string) => `/coach/clients?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), sort: target })}`;
+  const plan = params.plan === "digital" || params.plan === "coach" || params.plan === "vip" || params.plan === "pending"
+    ? params.plan
+    : undefined;
+  const result = await listCoachDashboardClients(auth.id, { query: params.q, sort, page, plan });
+  const planCounts = result.items.reduce((counts, client) => {
+    if (client.subscriptionPlan) counts[client.subscriptionPlan] += 1;
+    return counts;
+  }, { digital: 0, coach: 0, vip: 0 });
+  const pageHref = (target: number) => `/coach/clients?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(plan ? { plan } : {}), sort, page: String(target) })}`;
+  const sortHref = (target: string) => `/coach/clients?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(plan ? { plan } : {}), sort: target })}`;
 
   return <main className="client-app-content">
     <header className="premium-page-header">
@@ -78,7 +93,7 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
         <h1>לקוחות</h1>
         <span>נתונים חיים מ־Supabase, לפי ההרשאות שלך בלבד.</span>
       </div>
-      <span className="pill pill--green">{result.total} לקוחות</span>
+      <span className="pill pill--green">{result.total} {plan ? `במסלול ${planFilterLabels[plan]}` : "לקוחות"}</span>
     </header>
 
     {/* Search stays a plain GET form so the screen keeps working without JS, and
@@ -90,13 +105,21 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
         <input id="q" name="q" defaultValue={params.q} className="nutrition-input" placeholder="שם, אימייל או טלפון"/>
       </div>
       <input type="hidden" name="sort" value={sort}/>
+      {plan && <input type="hidden" name="plan" value={plan}/>}
       <button className="premium-secondary-button">חיפוש</button>
     </form>
 
     <div className="chip-row mt-3">
       {sorts.map((item) => <Link key={item.value} href={sortHref(item.value)} className="chip" aria-current={sort === item.value ? "page" : undefined}>{item.label}</Link>)}
       <Link href="/coach/clients?view=archived" className="chip">לקוחות בארכיון</Link>
+      {plan && <Link href="/coach/clients" className="chip">הצגת כל הלקוחות</Link>}
     </div>
+
+    <section className="mt-5 grid grid-cols-3 gap-3" aria-label="לקוחות לפי מסלול בעמוד זה">
+      <Metric label="Digital" value={planCounts.digital}/>
+      <Metric label="Coach" value={planCounts.coach}/>
+      <Metric label="VIP" value={planCounts.vip}/>
+    </section>
 
     {result.items.length ?
       <div className="app-list">
@@ -108,6 +131,10 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
             <span className="app-list__main">
               <strong>{client.full_name}</strong>
               <span>{client.latestWeight ? `${client.latestWeight} ק״ג` : "אין מדידה"} · צ׳ק־אין {date(client.lastCheckInAt)}</span>
+              <span className="mt-1 text-xs font-bold text-[#16A34A]">
+                מסלול {client.subscriptionPlan ? planLabels[client.subscriptionPlan] : "ממתין להפעלה"}
+                {client.subscriptionSource === "legacy" || client.subscriptionSource === "manual" ? " · הוגדר ידנית" : ""}
+              </span>
             </span>
             <span className={pills[client.dashboardStatus]}>{labels[client.dashboardStatus]}</span>
             {/* The whole row is one link, so the name, this label and the chevron
@@ -134,4 +161,11 @@ export default async function CoachClientsPage({ searchParams }: { searchParams:
       <Plus aria-hidden="true" size={18}/>לקוח חדש
     </Link>
   </main>;
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return <div className="start-surface rounded-[18px] p-3 text-center">
+    <strong className="block text-xl">{value}</strong>
+    <span className="text-xs text-[#5B5F5B]">{label}</span>
+  </div>;
 }

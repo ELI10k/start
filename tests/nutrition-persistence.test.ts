@@ -92,7 +92,8 @@ test("production nutrition repository reads Supabase canonical tables", async ()
   assert.match(actions, /rpc\("set_meal_day_status"/);
   assert.match(actions, /rpc\("select_meal_group_alternative"/);
   assert.doesNotMatch(actions, /rpc\("set_meal_eaten"/);
-  assert.match(page, /selectMealGroupAlternative/);
+  assert.match(page, /MealDraftEditor/);
+  assert.match(actions, /rpc\("save_meal_draft"/);
 });
 
 test("client menu shows only the coach note saved on the menu item", async () => {

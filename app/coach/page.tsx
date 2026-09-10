@@ -8,6 +8,7 @@ import { getCoachAttention } from "@/lib/coach-intelligence/proactive-repository
 import { listCoachThreads } from "@/lib/messages/repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import CoachAttentionPanel from "@/components/coach/CoachAttentionPanel";
+import { getClientSubscriptionAccesses } from "@/lib/subscriptions/server";
 
 /**
  * The coach's morning screen.
@@ -38,6 +39,13 @@ export default async function CoachDashboard() {
       .eq("status", "pending"),
   ]);
   const pendingProposals = nutritionProposals.count ?? 0;
+  const accessByClient = await getClientSubscriptionAccesses(clients.map((client) => client.id));
+  const subscriptionCounts = { digital: 0, coach: 0, vip: 0, pending: 0 };
+  for (const client of clients) {
+    const plan = accessByClient.get(client.id)?.plan;
+    if (plan) subscriptionCounts[plan] += 1;
+    else subscriptionCounts.pending += 1;
+  }
 
   const nameById = new Map(clients.map((client) => [client.id, client.full_name]));
   // Whose turn it is, not what is unread.
@@ -87,6 +95,42 @@ export default async function CoachDashboard() {
         </div>
       </section>}
 
+      {/* Primary coach actions and the practice snapshot belong together,
+          immediately before the attention queue. */}
+      <section className="mt-8">
+        <h2 className="sr-only">פעולות מהירות</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
+          <Quick href="/coach/menus/new" label="תפריט חדש"/>
+          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
+        </div>
+      </section>
+
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
+        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
+        <Metric href="/coach/check-ins" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
+        <Metric href="/coach/check-ins/review" label="ממתינים לטיפול" value={pendingCheckIns}/>
+        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
+      </section>
+
+      <section className="mt-6 rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-black tracking-[.16em] text-[#16A34A]">START MEMBERSHIPS</p>
+            <h2 className="mt-1 text-xl font-black">מסלולי הלקוחות</h2>
+            <p className="mt-1 text-sm text-[#5B5F5B]">אפשר לראות ליד כל לקוח באיזה מסלול הוא נמצא ומי הוגדר ידנית.</p>
+          </div>
+          <Link href="/coach/clients" className="text-sm font-bold text-[#16A34A]">ניהול וצפייה</Link>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Metric href="/coach/clients?plan=digital" label="Digital" value={subscriptionCounts.digital}/>
+          <Metric href="/coach/clients?plan=coach" label="Coach" value={subscriptionCounts.coach}/>
+          <Metric href="/coach/clients?plan=vip" label="VIP" value={subscriptionCounts.vip}/>
+          <Metric href="/coach/clients?plan=pending" label="ממתינים להפעלה" value={subscriptionCounts.pending}/>
+        </div>
+      </section>
+
       <CoachAttentionPanel items={attention.items} measured={attention.measured}/>
 
       {/* Only when the last fortnight actually asked for something. A quiet week
@@ -130,26 +174,6 @@ export default async function CoachDashboard() {
 
       <DashboardWorkoutActivity/>
 
-      {/* Three shortcuts, not eight. The other five were all reachable from the
-          navigation directly above them. */}
-      <section className="mt-8">
-        <h2 className="sr-only">פעולות מהירות</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
-          <Quick href="/coach/menus/new" label="תפריט חדש"/>
-          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
-        </div>
-      </section>
-
-      {/* The counters last: they describe the practice, they do not ask for
-          anything. */}
-      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Metric label="לקוחות פעילים" value={clients.length}/>
-        <Metric label="תפריטים" value={menus.length}/>
-        <Metric label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
-        <Metric label="ממתינים לטיפול" value={pendingCheckIns}/>
-        <Metric label="התראות פתוחות" value={unreadNotifications}/>
-      </section>
     </div>
   </main>;
 }
@@ -165,11 +189,11 @@ function waitedFor(value: string) {
   return `לפני ${days} ${days === 1 ? "יום" : "ימים"}`;
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="start-surface rounded-[22px] p-4">
+function Metric({ label, value, href }: { label: string; value: number; href: string }) {
+  return <Link href={href} className="start-surface start-action block rounded-[22px] p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16A34A]" aria-label={`${label}: ${value} — פתיחת הרשימה`}>
     <strong className="text-2xl">{value}</strong>
     <span className="mt-1 block text-xs text-[#5B5F5B]">{label}</span>
-  </div>;
+  </Link>;
 }
 
 function Quick({ href, label, primary = false }: { href: string; label: string; primary?: boolean }) {
