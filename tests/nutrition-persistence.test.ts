@@ -92,10 +92,7 @@ test("production nutrition repository reads Supabase canonical tables", async ()
   assert.match(actions, /rpc\("set_meal_day_status"/);
   assert.match(actions, /rpc\("select_meal_group_alternative"/);
   assert.doesNotMatch(actions, /rpc\("set_meal_eaten"/);
-  // Keep the established client menu: every planned food is a visible row and
-  // each group retains its add/replace-food action.
-  assert.match(page, /MealOptionButton/);
-  assert.match(page, /MealGroupSubstitution/);
+  assert.match(page, /MealDraftEditor/);
   assert.match(actions, /rpc\("save_meal_draft"/);
 });
 

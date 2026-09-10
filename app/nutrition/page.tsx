@@ -1,11 +1,9 @@
 import { redirect } from "next/navigation";
 import { Fragment } from "react";
 import ClientShell from "@/components/client/ClientShell";
-import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
-import MealGroupSubstitution from "@/components/client/MealGroupSubstitution";
+import MealDraftEditor from "@/components/client/MealDraftEditor";
 import MealCard from "@/components/client/MealCard";
-import { selectMealGroupAlternative } from "@/app/actions/product";
 import {
   getActiveClientMenu,
   getAuthContext,
@@ -21,7 +19,6 @@ import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, israelWeekday, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
-import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import OutsideMenuFood from "@/components/client/OutsideMenuFood";
@@ -305,29 +302,28 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   foods={pickableFoods}
                   usage={foodUsage}
                 />;
-              })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
-                {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}. לחיצה נוספת מבטלת בחירה.</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
-                    <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="mealId" value={meal.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/><input type="hidden" name="selected" value={group.selectedItemId===item.id?"true":"false"}/>
-                    <MealOptionButton
-                      selected={group.selectedItemId===item.id}
-                      name={item.name}
-                      quantity={String(item.displayQuantity)}
-                      unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
-                      calories={String(item.calories)}
-                      household={householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label}
-                      note={item.note}
-                    />
-                  </form>)}</div>
-                  {(()=>{const chosen=group.items.find(item=>item.id===group.selectedItemId);return chosen?<PortionOverride
-                    groupId={group.id}
-                    date={today}
-                    planned={String(chosen.displayQuantity)}
-                    unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
-                    current={group.amountOverride}
-                  />:null})()}
-                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} groupType={group.type as GroupType} foods={pickableFoods} usage={foodUsage}/>
-                  </fieldset>)}
-              </div>}
+              })():<MealDraftEditor
+                mealId={meal.id}
+                date={today}
+                foods={pickableFoods}
+                usage={foodUsage}
+                groups={meal.groups.map(group=>({
+                  id:group.id,
+                  type:group.type as GroupType,
+                  label:groupLabel(group.type),
+                  selectedItemId:group.selectedItemId,
+                  amountOverride:group.amountOverride == null ? null : Number(group.amountOverride),
+                  items:group.items.map(item=>({
+                    id:item.id,
+                    name:item.name,
+                    quantity:Number(item.displayQuantity),
+                    unit:unitLabel(item.measurementUnit,Number(item.displayQuantity)),
+                    calories:Number(item.calories),
+                    household:householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label,
+                    note:item.note,
+                  })),
+                }))}
+              />}
               </div>
             </MealCard>
             {meal.id === outsideMenuAfterMealId ? outsideMenuSection : null}
