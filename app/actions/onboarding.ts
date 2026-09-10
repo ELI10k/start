@@ -10,8 +10,7 @@ import {
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { siteUrlForRedirect } from "@/lib/auth/site-url";
-import { calculateEnergy, GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
-import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
+import { GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
 import { assignmentsToAdd, isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
 
 /**
@@ -231,8 +230,6 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
     if(traineeLevel&&autoAssign)await assignLevelProgrammes(admin,clientId,traineeLevel as TraineeLevel,chosenProgrammes);
     const { error: relationError }=await admin.from("coach_client_relationships").upsert({coach_id:coach.id,client_id:clientId,status:"active"},{onConflict:"coach_id,client_id"});
     if(relationError) throw new Error("client_relationship_failed");
-    const {error:subscriptionError}=await admin.rpc("grant_coached_client_subscription",{p_client_id:clientId,p_coach_id:coach.id});
-    if(subscriptionError&&!(["PGRST202","42883"] as const).includes(subscriptionError.code as "PGRST202"|"42883")) throw new Error("client_subscription_failed");
     const { error: invitationHistoryError }=await admin.from("client_invitations").insert({client_id:clientId,coach_id:coach.id,status:"sent",expires_at:inviteExpiry()});
     if(invitationHistoryError) throw new Error("client_invitation_history_failed");
     if(initialWeight){
@@ -408,24 +405,15 @@ export async function completeClientOnboarding(form:FormData) {
   const preferences={allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),training_location:value(form,"trainingLocation"),equipment:value(form,"equipment"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),training_type:value(form,"trainingType")};
   const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal"):null;
   const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel"):null;
-  const ageYears=positive(form,"ageYears"),weight=positive(form,"weight"),height=positive(form,"height");
-  const sex=value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex") as "male"|"female":undefined;
-  const weeklyWorkouts=positive(form,"weeklyWorkouts")??undefined,dailySteps=nonNegative(form,"dailySteps")??undefined;
-  const energy=calculateEnergy({ageYears:ageYears??undefined,weightKg:weight??undefined,heightCm:height??undefined,sex,weeklyWorkouts,dailySteps,goal:(nutritionGoal as NutritionGoal|null)??undefined});
-  if(!energy.ok||!traineeLevel)throw new Error("onboarding_incomplete");
-  const macros=calculateMacroTargetResult(weight as number,energy.calorieTarget);
-  if(!macros.ok)throw new Error("onboarding_targets_failed");
   const {error}=await supabase.from("client_profiles").update({
     goal:nutritionGoal?GOAL_LABELS[nutritionGoal as NutritionGoal]:null,
     nutrition_goal:nutritionGoal,
     trainee_level:traineeLevel,
-    age_years:ageYears,
-    sex:sex??null,
-    daily_steps:dailySteps??null,
+    age_years:positive(form,"ageYears"),
+    sex:value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex"):null,
+    daily_steps:positive(form,"dailySteps"),
     target_weight:positive(form,"targetWeight"),
-    height,
-    calorie_target:energy.calorieTarget,
-    protein_target:macros.targets.protein,
+    height:positive(form,"height"),
     preferences,
     notes:value(form,"medicalNotes")||null,
     onboarding_completed:true,
@@ -436,8 +424,8 @@ export async function completeClientOnboarding(form:FormData) {
   // A client who told us their level gets the matching programmes, exactly as
   // one created by the coach does.
   if(traineeLevel)await assignLevelProgrammes(createSupabaseAdminClient(),auth.id,traineeLevel as TraineeLevel);
-  if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:positive(form,"navelCircumference")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
+  const weight=positive(form,"weight");if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:positive(form,"navelCircumference")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
   const admin=createSupabaseAdminClient();
   await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:new Date().toISOString()}).eq("client_id",auth.id).in("status",["sent","opened"]);
-  revalidatePath("/");redirect("/onboarding/complete");
+  revalidatePath("/");redirect("/");
 }

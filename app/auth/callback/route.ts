@@ -60,13 +60,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (profile.role === "client") {
-      const [{ data: onboarding }, { data: relationship }, { data: subscription, error: subscriptionError }] = await Promise.all([
+      const [{ data: onboarding }, { data: relationship }] = await Promise.all([
         supabase.from("client_profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle(),
         supabase.from("coach_client_relationships").select("coach_id").eq("client_id", user.id).eq("status", "active").maybeSingle(),
-        supabase.rpc("subscription_access", { p_user_id: user.id }),
       ]);
-      const paidPlan=subscription&&typeof subscription==="object"&&!Array.isArray(subscription)&&typeof (subscription as Record<string,unknown>).plan==="string";
-      if(!relationship&&!subscriptionError&&!paidPlan) return redirect("/billing/start");
       if (!relationship && !onboarding?.onboarding_completed) return redirect("/onboarding");
     }
     return redirect(

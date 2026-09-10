@@ -3,25 +3,21 @@ import {useState} from "react";
 import {Camera} from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import {createSupabaseBrowserClient} from "@/lib/supabase/browser";
-import {useSubscriptionAccess} from "@/components/subscriptions/SubscriptionAccessProvider";
-import {hasEntitlement} from "@/lib/subscriptions/access";
 
 const MAX_BYTES=100*1024*1024;
 const allowed=new Set(["video/mp4","video/quicktime","video/webm"]);
 
-export default function TechniqueVideoButton({exerciseId,exerciseName,enabled=true}:{exerciseId:string;exerciseName:string;enabled?:boolean}){
-  const access=useSubscriptionAccess();
+export default function TechniqueVideoButton({exerciseId,exerciseName}:{exerciseId:string;exerciseName:string}){
   const[open,setOpen]=useState(false);const[file,setFile]=useState<File|null>(null);const[note,setNote]=useState("");const[status,setStatus]=useState("");const[sending,setSending]=useState(false);
   const send=async()=>{if(!file||sending)return;if(!allowed.has(file.type)){setStatus("אפשר לשלוח סרטון MP4, MOV או WebM.");return}if(file.size>MAX_BYTES){setStatus("הסרטון גדול מ־100MB. יש לקצר אותו ולנסות שוב.");return}setSending(true);setStatus("");
     const supabase=createSupabaseBrowserClient();const{data:{user}}=await supabase.auth.getUser();if(!user){setStatus("החיבור פג. יש להתחבר מחדש.");setSending(false);return}
     const extension=file.name.split(".").pop()?.toLowerCase()||"mp4";const path=`${user.id}/${crypto.randomUUID()}.${extension}`;
     const{error:uploadError}=await supabase.storage.from("technique-videos").upload(path,file,{contentType:file.type,upsert:false});
     if(uploadError){setStatus("העלאת הסרטון נכשלה. אפשר לנסות שוב.");setSending(false);return}
-    const{error}=await supabase.rpc("submit_technique_video",{p_exercise_id:exerciseId,p_exercise_name:exerciseName,p_storage_path:path,p_note:note.trim()||null});
-    if(error){await supabase.storage.from("technique-videos").remove([path]);const message=error.message.includes("limit_reached")?"מכסת סרטוני הטכניקה החודשית נוצלה.":error.message.includes("upgrade_required")?"בדיקת טכניקה זמינה במסלולי Coach ו־VIP.":"שליחת הסרטון נכשלה. אפשר לנסות שוב.";setStatus(message);setSending(false);return}
+    const{error}=await supabase.from("exercise_technique_videos").insert({client_id:user.id,exercise_id:exerciseId,exercise_name:exerciseName,storage_path:path,note:note.trim()||null});
+    if(error){await supabase.storage.from("technique-videos").remove([path]);setStatus("שליחת הסרטון נכשלה. אפשר לנסות שוב.");setSending(false);return}
     setStatus("הסרטון נשלח למאמן.");setFile(null);setNote("");setSending(false);
   };
-  if(!enabled||!hasEntitlement(access,"technique_review"))return null;
   return <><button type="button" onClick={()=>setOpen(true)} className="chip"><Camera aria-hidden="true" size={15}/>שליחת סרטון טכניקה</button>
     <BottomSheet open={open} title={`סרטון טכניקה · ${exerciseName}`} onClose={()=>setOpen(false)}>
       <p className="text-sm text-[#5B5F5B]">צלמו או בחרו סרטון קצר שבו רואים את ביצוע התרגיל. הסרטון יישלח למאמן בלבד.</p>

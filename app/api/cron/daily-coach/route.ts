@@ -61,11 +61,7 @@ export async function GET(request: Request) {
   for (const client of rows(clients)) {
     const clientId = String(client.id);
     if (!(wantsSummary.get(clientId) ?? true)) { declined += 1; continue; }
-    const input = dailyInput(clientId);
-    // No generic "focus" message and no congratulations every night. This job
-    // exists for the one action that can still be completed at 20:00.
-    if (!input.mealsPlanned || input.mealsCompleted >= input.mealsPlanned) continue;
-    const message = buildDailyCoachMessage(input);
+    const message = buildDailyCoachMessage(dailyInput(clientId));
     batch.push({
       recipient_id: clientId,
       actor_id: null,

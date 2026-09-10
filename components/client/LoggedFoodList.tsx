@@ -1,5 +1,5 @@
-import { Barcode, Camera, Check, PencilLine, Trash2 } from "lucide-react";
-import { deleteClientFoodLog, renameClientFoodLog } from "@/app/actions/food-log";
+import { Barcode, Camera, PencilLine, Trash2 } from "lucide-react";
+import { deleteClientFoodLog } from "@/app/actions/food-log";
 import type { LoggedFood } from "@/lib/nutrition/food-log";
 
 /* eslint-disable @next/next/no-img-element -- signed Supabase storage URLs, short-lived and not optimisable. */
@@ -37,26 +37,12 @@ export default function LoggedFoodList({
               <span className="truncate">{entry.name}</span>
             </span>
             {readOnly ? null : (
-              <div className="flex items-start gap-1">
-                <details className="group">
-                  <summary aria-label={`שינוי השם ${entry.name}`} className="inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-lg text-[#168A48] [&::-webkit-details-marker]:hidden">
-                    <PencilLine aria-hidden="true" size={15} />
-                  </summary>
-                  <form action={renameClientFoodLog} className="mt-1 flex max-w-full items-center gap-1 rounded-xl bg-[#F6F8F6] p-2">
-                    <input type="hidden" name="id" value={entry.id} />
-                    <input name="name" required maxLength={200} defaultValue={entry.name} aria-label="שם חדש למאכל" className="min-w-0 flex-1 rounded-lg border border-[#D8DDD8] bg-white px-3 py-2 text-sm" />
-                    <button type="submit" aria-label="שמירת השם" className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#16A34A] text-white">
-                      <Check aria-hidden="true" size={16} />
-                    </button>
-                  </form>
-                </details>
-                <form action={deleteClientFoodLog}>
-                  <input type="hidden" name="id" value={entry.id} />
-                  <button type="submit" aria-label={`מחיקת ${entry.name}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-[#DC2626]">
-                    <Trash2 aria-hidden="true" size={15} />
-                  </button>
-                </form>
-              </div>
+              <form action={deleteClientFoodLog}>
+                <input type="hidden" name="id" value={entry.id} />
+                <button type="submit" aria-label={`מחיקת ${entry.name}`} className="inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-[#DC2626]">
+                  <Trash2 aria-hidden="true" size={15} />
+                </button>
+              </form>
             )}
           </div>
 

@@ -12,7 +12,6 @@ export default function MealOptionButton({
   calories,
   household,
   note,
-  onSelect,
 }: {
   selected: boolean;
   name: string;
@@ -24,14 +23,12 @@ export default function MealOptionButton({
   /** The coach's instruction for this food. Written for the client and, until
       now, shown only to the coach who wrote it. */
   note?: string | null;
-  onSelect?: () => void;
 }) {
   const status = useFormStatus();
   return (
     <button
-      type={onSelect ? "button" : "submit"}
-      onClick={onSelect}
-      disabled={!onSelect && status.pending}
+      type="submit"
+      disabled={status.pending}
       aria-pressed={selected}
       className={`flex min-h-12 w-full items-center gap-2 rounded-xl border px-3 text-right text-sm transition disabled:opacity-50 sm:gap-3 ${selected ? "border-[#16A34A] bg-[#16A34A]/[.07]" : "border-[#E5E7E5] hover:border-[#E5E7E5]"}`}
     >

@@ -58,7 +58,7 @@ export async function saveNotificationPreferences(
   try {
     morningTime = reminderTime(form, "workoutMorningReminderTime", "08:00");
     eveningTime = reminderTime(form, "workoutEveningReminderTime", "19:30");
-    endOfDayTime = reminderTime(form, "endOfDayReminderTime", "20:00");
+    endOfDayTime = reminderTime(form, "endOfDayReminderTime", "21:30");
   } catch {
     return { ok: false, message: "יש להזין שעה תקינה בכל שדות התזכורות." };
   }

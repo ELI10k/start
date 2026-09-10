@@ -117,7 +117,7 @@ try {
     await admin.auth.admin.createUser({
       email: coachEmail,
       email_confirm: true,
-      app_metadata: { role: "coach", full_name: "START Auth Coach", is_test_account: true },
+      app_metadata: { role: "coach", full_name: "START Auth Coach" },
       user_metadata: { full_name: "START Auth Coach" },
     }),
     "create coach",
@@ -128,7 +128,7 @@ try {
     await admin.auth.admin.createUser({
       email: clientEmail,
       email_confirm: true,
-      app_metadata: { role: "client", full_name: "START Auth Client", is_test_account: true },
+      app_metadata: { role: "client", full_name: "START Auth Client" },
       user_metadata: { full_name: "START Auth Client" },
     }),
     "create client",
@@ -435,7 +435,6 @@ try {
   }
   await removeRows("content_favorites", "client_id", ids.client);
   await removeRows("content_progress", "client_id", ids.client);
-  await removeRows("notifications", "source_id", ids.content);
   await removeRows("content_items", "id", ids.content);
   await removeRows("nutrition_logs", "client_id", ids.client);
   await removeRows("client_meal_plan_assignments", "client_id", ids.client);

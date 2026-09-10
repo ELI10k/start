@@ -52,7 +52,6 @@ export default function NutritionDayStrip({
           <Link
             key={day}
             href={isToday ? "/nutrition" : `/nutrition?date=${day}`}
-            prefetch={true}
             aria-current={isActive ? "page" : undefined}
             // Two glyphs and a number are enough to pick a day by, and not
             // enough to be read out by. The label spells the day in full.

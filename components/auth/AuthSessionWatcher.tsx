@@ -10,15 +10,8 @@ export default function AuthSessionWatcher() {
   const router = useRouter();
 
   useEffect(() => {
-    // Configuration problems are surfaced by the login form itself. A global
-    // session observer must never replace that useful screen with an error
-    // boundary before the user can see it.
-    let supabase: ReturnType<typeof createSupabaseBrowserClient>;
-    try {
-      supabase = createSupabaseBrowserClient();
-    } catch {
-      return;
-    }
+    const supabase = createSupabaseBrowserClient();
+    if (!supabase) return;
 
     const {
       data: { subscription },
@@ -28,7 +21,7 @@ export default function AuthSessionWatcher() {
         // take it off the device, or the next person to use the phone could read
         // it straight out of the offline fallback.
         clearSnapshotCache();
-        router.replace("/login");
+        window.location.assign("/login");
       } else if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         router.refresh();
       }

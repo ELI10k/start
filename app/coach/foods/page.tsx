@@ -40,8 +40,6 @@ export default async function CoachFoodsPage() {
   ];
   const foods = rows.map((food) => {
     const nutrition = catalogueServingNutrition({
-      name: food.name,
-      category: food.category,
       calories: Number(food.calories),
       protein: food.protein === null ? null : Number(food.protein),
       carbs: food.carbs === null ? null : Number(food.carbs),
@@ -49,7 +47,6 @@ export default async function CoachFoodsPage() {
       packageUnit: food.package_unit,
       unitWeightGrams: food.unit_weight_grams === null ? null : Number(food.unit_weight_grams),
       servingLabel: food.serving_label,
-      source: food.source,
     });
     return {
       id: food.id,

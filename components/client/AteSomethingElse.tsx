@@ -9,9 +9,8 @@ import SubmitButton from "@/components/forms/SubmitButton";
 import { logClientFood, type FoodLogState } from "@/app/actions/food-log";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
 import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
-import FoodCombobox, { type ComboboxFood, type FoodUsage } from "@/components/coach/menus/FoodCombobox";
-import { defaultPortionQuantity, foodUnit, portionFor, unitLabel } from "@/lib/nutrition/meal-alternatives";
-import type { GroupType } from "@/lib/nutrition/adaptation";
+import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
+import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
@@ -22,10 +21,6 @@ export type PickableFood = ComboboxFood & {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
-  servingLabel?: string | null;
-  packageUnit?: string | null;
-  unitWeightGrams?: number | null;
-  source?: string | null;
 };
 
 const initial: FoodLogState = { ok: false };
@@ -64,15 +59,12 @@ export default function AteSomethingElse({
   // Empty until the screen has loaded the catalogue; the tab hides itself rather
   // than offering a search with nothing behind it.
   foods = [],
-  usage = [],
   unmeasuredNote = "ה־AI יעריך קלוריות ואבות מזון לפי התיאור או התמונה, והערכים יתווספו לסיכום של היום.",
   preserveMealStatus = false,
-  groupType,
   // Which way in the sheet opens on. A meal photographed from its own row is
   // not a substitution being described, so it opens on the camera rather than
   // making the client find it behind two other tabs.
   initialTab = "text",
-  onSaved,
 }: {
   mealId: string;
   date: string;
@@ -81,11 +73,8 @@ export default function AteSomethingElse({
   title?: string;
   unmeasuredNote?: string;
   foods?: readonly PickableFood[];
-  usage?: readonly FoodUsage[];
   preserveMealStatus?: boolean;
-  groupType?: GroupType;
   initialTab?: SheetTab;
-  onSaved?: () => void;
 }) {
   const [tab, setTab] = useState<SheetTab>(initialTab);
   // Back to the tab it was opened for, every time it opens. Without this the
@@ -102,7 +91,6 @@ export default function AteSomethingElse({
   const [looking, setLooking] = useState(false);
   const [found, setFound] = useState<Scanned | null>(null);
   const [miss, setMiss] = useState("");
-  const [manualScan, setManualScan] = useState(false);
   const [grams, setGrams] = useState("100");
   // Whether a chosen photograph is still being downscaled.
   const [preparing, setPreparing] = useState(false);
@@ -145,7 +133,7 @@ export default function AteSomethingElse({
   // A successful entry is one item, not the end of the meal. Leave the sheet
   // open but return every input to a clean state so the next barcode cannot
   // inherit the previous product, weight or photograph.
-  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""});onSaved?.()}return result},initial);
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
 
   const preparePhoto = async (input: HTMLInputElement) => {
     const chosen = input.files?.[0];
@@ -161,7 +149,7 @@ export default function AteSomethingElse({
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
     if (!barcode) { setMiss("ברקוד מוצר הוא 8, 12 או 13 ספרות."); return; }
-    setLooking(true); setMiss(""); setFound(null); setManualScan(false);
+    setLooking(true); setMiss(""); setFound(null);
     try {
       const response = await fetch(`/api/foods/barcode/${barcode}`);
       const payload = await response.json();
@@ -172,9 +160,9 @@ export default function AteSomethingElse({
         // than any other, and it is still one tap to change.
         if (food.unitWeightGrams && food.unitWeightGrams > 0) setGrams(String(Math.round(food.unitWeightGrams)));
       }
-      else setMiss("המוצר לא נמצא. אפשר להזין את הערכים שלו ידנית.");
+      else setMiss("המוצר לא נמצא. אפשר לתאר אותו במילים או לצלם אותו.");
     } catch {
-      setMiss("החיפוש נכשל. אפשר להזין את הערכים ידנית או לנסות שוב.");
+      setMiss("החיפוש נכשל. אפשר לתאר במילים או לצלם.");
     } finally {
       setLooking(false);
     }
@@ -191,7 +179,7 @@ export default function AteSomethingElse({
     fat: found.fat === null ? null : round(found.fat * factor),
   } : null;
 
-  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null); setMiss(""); setManualScan(false); setCode(""); onClose(); };
+  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null); setMiss(""); setCode(""); onClose(); };
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
@@ -223,7 +211,7 @@ export default function AteSomethingElse({
           {/* Reading thirteen digits off a curved bottle and typing them in is
               not a feature. The camera is the way in; the field is the fallback. */}
           <CameraScan onDetected={(value) => { setCode(value); void lookupFor(value); }} />
-          {miss && <><p role="status" className="rounded-2xl bg-[#F7F8F7] p-3 text-sm">{miss}</p><button type="button" className="chip w-fit" onClick={()=>setManualScan(true)}>הזנת ערכים ידנית</button></>}
+          {miss && <p role="status" className="rounded-2xl bg-[#F7F8F7] p-3 text-sm">{miss}</p>}
         </div>
       )}
 
@@ -304,22 +292,6 @@ export default function AteSomethingElse({
           </>
         )}
 
-        {tab === "scan" && !found && manualScan && (
-          <fieldset className="grid gap-3 rounded-2xl border border-[#E5E7E5] p-3">
-            <legend className="px-2 text-sm font-black">ערכים למנה שאכלת</legend>
-            <label className="text-sm font-bold">שם המזון<input name="name" required maxLength={200} className="nutrition-input mt-2" /></label>
-            <label className="text-sm font-bold">קלוריות<input name="calories" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
-            <div className="grid grid-cols-3 gap-2">
-              <label className="text-xs font-bold">חלבון (ג׳)<input name="protein" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
-              <label className="text-xs font-bold">פחמימות (ג׳)<input name="carbs" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
-              <label className="text-xs font-bold">שומן (ג׳)<input name="fat" required type="number" min="0" step="0.1" className="nutrition-input mt-2" /></label>
-            </div>
-            <input type="hidden" name="quantity" value="1" />
-            <input type="hidden" name="unit" value="מנה" />
-            <p className="text-xs text-[#5B5F5B]">יש להזין את הערכים של הכמות שאכלת, לא ל־100 גרם.</p>
-          </fieldset>
-        )}
-
         {/* The catalogue, with a weight - the one path here that produces numbers
             without a barcode.
             
@@ -330,17 +302,15 @@ export default function AteSomethingElse({
             so the coach's screen and this one cannot disagree about a portion. */}
         {tab === "food" && (() => {
           const picked = orderedFoods.find((food) => food.id === pickedId) ?? null;
-          const amount = Number(grams);
-          const foodValues = picked ? {
-            calories: picked.calories ?? 0,
-            protein: picked.protein,
-            carbs: picked.carbs,
-            fat: picked.fat,
-            packageUnit: picked.packageUnit ?? null,
-            unitWeightGrams: picked.unitWeightGrams ?? null,
-          } : null;
-          const nativeUnit = foodValues ? foodUnit(foodValues) : null;
-          const macros = foodValues && Number.isFinite(amount) && amount > 0 ? portionFor(foodValues, amount) : null;
+          const weight = Number(grams);
+          const macros = picked && Number.isFinite(weight) && weight > 0
+            ? calculateFoodNutrition({
+                calories: picked.calories ?? 0,
+                protein: picked.protein ?? 0,
+                carbs: picked.carbs ?? 0,
+                fat: picked.fat ?? 0,
+              }, weight)
+            : null;
           return (
             <>
               {/* The catalogue is the whole panel until something is chosen, and
@@ -350,24 +320,9 @@ export default function AteSomethingElse({
                 <FoodCombobox
                   foods={orderedFoods}
                   value={pickedId}
-                  usage={usage}
+                  usage={[]}
                   clientCatalogueOrder
-                  macroGroup={groupType}
-                  onSelect={(id) => {
-                    setPickedId(id);
-                    const selected = orderedFoods.find((food) => food.id === id);
-                    if (!selected) return;
-                    const values = {
-                      calories: selected.calories ?? 0,
-                      protein: selected.protein,
-                      carbs: selected.carbs,
-                      fat: selected.fat,
-                      packageUnit: selected.packageUnit ?? null,
-                      unitWeightGrams: selected.unitWeightGrams ?? null,
-                    };
-                    const unit = foodUnit(values);
-                    setGrams(String(unit.unit === "גרם" ? defaultPortionQuantity(values) : 1));
-                  }}
+                  onSelect={(id) => setPickedId(id)}
                   onToggleFavorite={toggleFavorite}
                 />
               )}
@@ -378,11 +333,9 @@ export default function AteSomethingElse({
               ) : null}
               {picked ? (
                 <>
-                  <input type="hidden" name="foodId" value={picked.id} />
                   <input type="hidden" name="name" value={picked.brand ? `${picked.name} — ${picked.brand}` : picked.name} />
-                  <input type="hidden" name="unit" value={macros?.unit ?? nativeUnit?.unit ?? "גרם"} />
-                  <input type="hidden" name="quantityGrams" value={macros?.grams ?? ""} />
-                  <label className="text-sm font-bold">כמה {nativeUnit ? unitLabel(nativeUnit.unit, amount) : "גרם"} אכלת?
+                  <input type="hidden" name="unit" value="גרם" />
+                  <label className="text-sm font-bold">כמה גרם אכלת?
                     <input name="quantity" type="number" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
                   </label>
                   {macros ? (
@@ -402,16 +355,6 @@ export default function AteSomethingElse({
                   ) : (
                     <p className="text-xs text-[#5B5F5B]">יש להזין כמות כדי לחשב את הערכים.</p>
                   )}
-                  <fieldset className="grid gap-2">
-                    <legend className="text-sm font-bold">אפשר לצרף תמונה</legend>
-                    <input ref={cameraPhoto} name="cameraPhoto" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" onChange={(event) => void preparePhoto(event.currentTarget)} />
-                    <input ref={galleryPhoto} name="photo" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => void preparePhoto(event.currentTarget)} />
-                    <div className="grid grid-cols-2 gap-2">
-                      <button type="button" onClick={() => cameraPhoto.current?.click()} className="premium-secondary-button"><Camera aria-hidden="true" size={17} />פתיחת מצלמה</button>
-                      <button type="button" onClick={() => galleryPhoto.current?.click()} className="premium-secondary-button"><Images aria-hidden="true" size={17} />בחירה מהגלריה</button>
-                    </div>
-                  </fieldset>
-                  {photoPreview && !preparing ? <Image src={photoPreview} alt="התמונה שצורפה" width={640} height={420} unoptimized className="max-h-64 w-full rounded-xl object-contain" /> : null}
                   <button type="button" onClick={() => setPickedId("")} className="chip w-fit">מזון אחר</button>
                 </>
               ) : null}
@@ -470,7 +413,7 @@ export default function AteSomethingElse({
 
         {/* Nothing to save until a food is chosen, and the sticky bar was sitting
             on top of the results while the client was still scrolling them. */}
-        <div className="sheet__actions" hidden={(tab === "food" && !pickedId) || (tab === "scan" && !found && !manualScan)}>
+        <div className="sheet__actions" hidden={tab === "food" && !pickedId}>
           <SubmitButton
             idle="שמירה"
             pending={tab === "text" || tab === "photo" ? "מחשבים ושומרים…" : "שומרים…"}

@@ -1,7 +1,5 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 export type UserRole = "coach" | "client";
-export type SubscriptionPlanCode = "digital" | "coach" | "vip";
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "paused" | "canceled" | "expired";
 export type UserRoleRow = { user_id: string; role: UserRole; assigned_by: string | null; assigned_at: string; updated_at: string };
 export type ProfileRow = { id: string; email: string; full_name: string; phone: string | null; role: UserRole; avatar_url: string | null; status: "active" | "paused" | "disabled"; is_test_account: boolean; created_at: string; updated_at: string };
 export type ClientProfileRow = { user_id: string; goal: string | null; target_weight: number | null; height: number | null; birth_date: string | null; activity_level: string | null; calorie_target: number | null; protein_target: number | null; preferences: Json; notes: string | null; age_years: number | null; sex: "male" | "female" | null; daily_steps: number | null; nutrition_goal: string | null; trainee_level: string | null };

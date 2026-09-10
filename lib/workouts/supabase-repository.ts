@@ -21,12 +21,7 @@ function mapExercise(row:Row):Exercise{return{id:text(row.id),name:text(row.name
 function mapSet(row:Row):ExerciseSetResult{return{id:text(row.id),prescriptionId:optionalText(row.prescription_id),order:Number(row.sort_order),weightKg:numberValue(row.weight_kg),repetitions:numberValue(row.repetitions),notes:optionalText(row.notes),completed:Boolean(row.completed),completedAt:optionalText(row.completed_at)}}
 
 export function createSupabaseWorkoutRepository(){
-  // The provider lives in the root layout, including on public auth screens.
-  // Resolve the browser client only when workout data is actually requested so
-  // a missing deployment configuration can be reported by the auth UI instead
-  // of crashing the entire page during render.
-  type BrowserClient=ReturnType<typeof createSupabaseBrowserClient>;
-  const supabase=new Proxy({} as BrowserClient,{get:(_target,key)=>{const client=createSupabaseBrowserClient();const value=client[key as keyof BrowserClient];return typeof value==="function"?value.bind(client):value}});
+  const supabase=createSupabaseBrowserClient();
   const load=async():Promise<WorkoutLoadResult>=>{
     const{data:{user},error:userError}=await supabase.auth.getUser();if(userError||!user)throw new Error("workout_auth_required");
     const profileResult=await supabase.from("profiles").select("id,full_name,role").eq("id",user.id).single();

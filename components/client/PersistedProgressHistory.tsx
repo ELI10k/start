@@ -98,9 +98,7 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
   const weightChange = changeOf(weights);
   const navelChange = changeOf(navelCircumferences);
   const startingWeight = weights[0]?.value;
-  const currentWeight = weights.at(-1)?.value;
   const startingNavel = navelCircumferences[0]?.value;
-  const currentNavel = navelCircumferences.at(-1)?.value;
   const weightRates = averageWeightChangeRates(weights);
 
   return (
@@ -111,7 +109,6 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
         <MetricTile
           label="שינוי במשקל"
           value={`${weightChange > 0 ? "+" : ""}${weightChange} ק״ג`}
-          detail={`משקל נוכחי: ${currentWeight !== undefined ? `${currentWeight} ק״ג` : "—"}`}
           accent={weightChange > 0 ? "down" : "green"}
           icon={weightChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
         />
@@ -119,7 +116,6 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
         <MetricTile
           label="שינוי בהיקף"
           value={`${navelChange > 0 ? "+" : ""}${navelChange} ס״מ`}
-          detail={`היקף נוכחי: ${currentNavel !== undefined ? `${currentNavel} ס״מ` : "—"}`}
           accent={navelChange > 0 ? "down" : "green"}
           icon={navelChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
         />

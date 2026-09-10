@@ -12,7 +12,6 @@ export default function SubmitButton({
   event,
   eventProperties,
   formAction,
-  disabled = false,
 }: {
   idle: string;
   pending?: string;
@@ -23,12 +22,11 @@ export default function SubmitButton({
   event?: AnalyticsEvent;
   eventProperties?: Record<string, unknown>;
   formAction?: (formData: FormData) => void | Promise<void>;
-  disabled?: boolean;
 }) {
   const status = useFormStatus();
   return (
     <button
-      disabled={disabled || status.pending}
+      disabled={status.pending}
       className={className}
       onClick={event ? () => track(event, eventProperties) : undefined}
       formAction={formAction}

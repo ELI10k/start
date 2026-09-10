@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { ChevronLeft, Utensils } from "lucide-react";
 import AteSomethingElse, { type PickableFood } from "@/components/client/AteSomethingElse";
-import type { FoodUsage } from "@/components/coach/menus/FoodCombobox";
 
-export default function OutsideMenuFood({date,foods,usage=[]}:{date:string;foods:readonly PickableFood[];usage?:readonly FoodUsage[]}){
+export default function OutsideMenuFood({date,foods}:{date:string;foods:readonly PickableFood[]}){
   const[open,setOpen]=useState(false);
   return <>
     <button type="button" onClick={()=>setOpen(true)} className="outside-menu-card">
@@ -20,7 +19,6 @@ export default function OutsideMenuFood({date,foods,usage=[]}:{date:string;foods
       mealId=""
       date={date}
       foods={foods}
-      usage={usage}
       open={open}
       onClose={()=>setOpen(false)}
       title="מה אכלת מחוץ לתפריט?"

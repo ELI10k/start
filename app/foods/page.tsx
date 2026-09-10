@@ -1,6 +1,6 @@
 import FoodDatabase from "@/components/FoodDatabase";
 import { getAuthContext, listDatabaseFoods } from "@/lib/data/product-repository";
-import { isDefaultFavoriteFood, masterFoodGroup } from "@/lib/nutrition/master-foods";
+import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 import { catalogueServingNutrition } from "@/lib/nutrition/catalogue-serving";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -30,7 +30,7 @@ export default async function FoodsPage() {
           : Boolean(manual);
         return favorite ? [food.id] : [];
       })
-    : rows.flatMap((food) => isDefaultFavoriteFood(food.id) ? [food.id] : []);
+    : [];
   const favoriteIds = [
     ...new Set([
       ...(favorites ?? []).map((row) => String(row.food_id)),
@@ -39,8 +39,6 @@ export default async function FoodsPage() {
   ];
   const foods = rows.map((food) => {
     const nutrition = catalogueServingNutrition({
-      name: food.name,
-      category: food.category,
       calories: Number(food.calories),
       protein: food.protein === null ? null : Number(food.protein),
       carbs: food.carbs === null ? null : Number(food.carbs),
@@ -48,7 +46,6 @@ export default async function FoodsPage() {
       packageUnit: food.package_unit,
       unitWeightGrams: food.unit_weight_grams === null ? null : Number(food.unit_weight_grams),
       servingLabel: food.serving_label,
-      source: food.source,
     });
     return {
       id: food.id,

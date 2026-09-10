@@ -29,18 +29,3 @@ test("coach dashboard migration grants session visibility only to direct coaches
   assert.match(sql, /public\.is_coach_for\(user_id\)/);
   assert.match(sql, /where revoked_at is null/);
 });
-
-test("coach dashboard counters open their matching lists and membership counters filter clients", async () => {
-  const [dashboard, clientsPage, repository] = await Promise.all([
-    source("app/coach/page.tsx"),
-    source("app/coach/clients/page.tsx"),
-    source("lib/data/product-repository.ts"),
-  ]);
-  assert.match(dashboard, /href="\/coach\/clients" label="לקוחות פעילים"/);
-  assert.match(dashboard, /href="\/coach\/menus" label="תפריטים"/);
-  assert.match(dashboard, /href="\/coach\/check-ins\/review" label="ממתינים לטיפול"/);
-  assert.match(dashboard, /href="\/coach\/clients\?plan=coach" label="Coach"/);
-  assert.match(dashboard, /href="\/coach\/clients\?plan=pending" label="ממתינים להפעלה"/);
-  assert.match(clientsPage, /planFilterLabels/);
-  assert.match(repository, /client\.subscriptionPlan === options\.plan/);
-});

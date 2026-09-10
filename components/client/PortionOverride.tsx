@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Pencil, Plus, Undo2 } from "lucide-react";
+import { Pencil, Undo2 } from "lucide-react";
 import { setMealGroupAmount } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
 
@@ -29,29 +29,11 @@ export default function PortionOverride({
   current?: number;
 }) {
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(String(current ?? planned));
   const changed = current !== undefined;
-  const step = /גרם|מ[״\"]?ל|ml/i.test(unit)
-    ? 10
-    : /יחיד|ביצה|פרוס|פיתה|גביע|בקבוק/.test(unit)
-      ? 1
-      : 0.5;
-  const adjust = (direction: -1 | 1) => {
-    const parsed = Number(draft);
-    const next = Math.max(0, (Number.isFinite(parsed) ? parsed : 0) + direction * step);
-    setDraft(String(Math.round(next * 100) / 100));
-  };
 
   if (!open && !changed) {
     return (
-      <button
-        type="button"
-        onClick={() => {
-          setDraft(String(current ?? planned));
-          setOpen(true);
-        }}
-        className="chip mt-2 w-fit text-xs"
-      >
+      <button type="button" onClick={() => setOpen(true)} className="chip mt-2 w-fit text-xs">
         <Pencil aria-hidden="true" size={13} />אכלתי כמות אחרת
       </button>
     );
@@ -64,9 +46,6 @@ export default function PortionOverride({
         <input type="hidden" name="date" value={date} />
         <label className="flex items-center gap-2 text-xs text-[#5B5F5B]">
           אכלתי
-          <button type="button" onClick={() => adjust(-1)} className="chip h-9 w-9 justify-center p-0" aria-label={`הפחת ${step} ${unit}`}>
-            <Minus aria-hidden="true" size={15} />
-          </button>
           <input
             name="quantity"
             type="number"
@@ -76,16 +55,11 @@ export default function PortionOverride({
             // mismatch, and refuses it silently: the form never submits and the
             // action never runs, so the number simply does not save.
             step="any"
-            inputMode="decimal"
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            defaultValue={current ?? planned}
             placeholder="0"
             aria-label={`כמות שנאכלה ב${unit}`}
             className="nutrition-input w-20 py-1 text-sm"
           />
-          <button type="button" onClick={() => adjust(1)} className="chip h-9 w-9 justify-center p-0" aria-label={`הוסף ${step} ${unit}`}>
-            <Plus aria-hidden="true" size={15} />
-          </button>
           {unit}
         </label>
         <SubmitButton idle="עדכון" pending="שומרים…" className="chip text-xs" event="portion_adjusted" />

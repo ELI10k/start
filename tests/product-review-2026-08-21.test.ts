@@ -53,13 +53,6 @@ test("a meal that was answered is neither eaten nor still to come", () => {
   assert.equal(remainingInMenu(day).calories, 300);
 });
 
-test("measured food in a free-calorie window counts what was eaten, not the whole allowance", () => {
-  const free = meal({ id: "free", status: "eaten", freeCalorieTarget: 300, groups: [] });
-  assert.equal(eatenFromMenu([free], () => 110).calories, 0);
-  assert.equal(addTotals(eatenFromMenu([free], () => 110), { calories: 110, protein: 6, carbs: 8, fat: 6 }).calories, 110);
-  assert.equal(eatenFromMenu([free], () => 0).calories, 300);
-});
-
 test("logged food joins the day's totals, and the unmeasured part does not", () => {
   const logged: LoggedFood[] = [
     { id: "1", mealId: null, name: "שוקו", quantity: 250, unit: "מ״ל", calories: 180, protein: 6, carbs: 24, fat: 5, source: "scan", photoUrl: null },

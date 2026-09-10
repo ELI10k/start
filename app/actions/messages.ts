@@ -4,8 +4,6 @@ import { revalidatePath } from "next/cache";
 import { getAuthContext } from "@/lib/data/product-repository";
 import { dispatchPushSoon } from "@/lib/push/dispatch";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { hasEntitlement } from "@/lib/subscriptions/access";
-import { getSubscriptionAccess } from "@/lib/subscriptions/server";
 
 export type MessageState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -19,7 +17,6 @@ const FAILURES: Readonly<Record<string, string>> = {
   no_active_coach: "עדיין לא שויך אליך מאמן, ולכן אין למי לשלוח.",
   not_authorized: "אין הרשאה לשלוח בשיחה הזו.",
   client_required: "יש לבחור לקוח.",
-  upgrade_required: "הודעות אישיות למאמן זמינות במסלולי START Coach ו-START VIP.",
 };
 
 function describe(error: { message?: string; code?: string } | null) {
@@ -55,10 +52,6 @@ export async function sendMessage(_state: MessageState, form: FormData): Promise
   const clientId = auth.role === "coach" ? String(form.get("clientId") ?? "") : auth.id;
   if (auth.role === "coach" && !/^[0-9a-f-]{36}$/i.test(clientId))
     return { ok: false, message: FAILURES.client_required };
-
-  const access = await getSubscriptionAccess(clientId);
-  if (!hasEntitlement(access, "coach_messaging"))
-    return { ok: false, message: FAILURES.upgrade_required };
 
   const supabase = await createSupabaseServerClient();
   const { error } = await supabase.rpc("send_coach_client_message", {

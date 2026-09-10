@@ -8,10 +8,7 @@ import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatIsraelDate } from "@/lib/date-time";
 import WithdrawCheckIn from "@/components/client/WithdrawCheckIn";
-import {hasEntitlement} from "@/lib/subscriptions/access";
-import {getSubscriptionAccess} from "@/lib/subscriptions/server";
 export default async function CheckInPage(){const auth=await getAuthContext();if(!auth)redirect("/login");if(auth.role!=="client")redirect("/unauthorized");const supabase=await createSupabaseServerClient();
-const access=await getSubscriptionAccess();const humanReview=hasEntitlement(access,"human_checkin_review");
 const[{count},{data:weekState}]=await Promise.all([
   supabase.from("check_ins").select("id",{count:"exact",head:true}).eq("client_id",auth.id),
   // Whether this week already has one, and when the next may be filed. The rule
@@ -41,11 +38,11 @@ return <ClientShell><PageHeader eyebrow="עדכון שבועי" title="איך ע
   ? <div className="start-empty rounded-[24px] p-10 text-center sm:p-12">
       <h2 className="font-black">הצ׳ק־אין של השבוע נשלח</h2>
       <p className="mt-2 text-sm text-[#5B5F5B]">
-        {humanReview?"המאמן קיבל אותו.":"העדכון נשמר וישמש להתאמה השבועית."}{nextOpens?` הצ׳ק־אין הבא נפתח ב${nextOpens}.`:""}
+        המאמן קיבל אותו.{nextOpens?` הצ׳ק־אין הבא נפתח ב${nextOpens}.`:""} רוצה לעדכן משהו לפני כן — אפשר לכתוב למאמן.
       </p>
       <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
         <Link href="/check-in/history" className="premium-primary-button">לצפייה בצ׳ק־אין</Link>
-        {humanReview&&<Link href="/messages" className="premium-secondary-button">הודעה למאמן</Link>}
+        <Link href="/messages" className="premium-secondary-button">הודעה למאמן</Link>
         {/* Only while it is still the client's to take back. Once the coach has
             replied or closed it, the database refuses and the button would be an
             offer the product cannot keep. */}
@@ -54,5 +51,5 @@ return <ClientShell><PageHeader eyebrow="עדכון שבועי" title="איך ע
           : null}
       </div>
     </div>
-  : <PersistedCheckInForm photosRequired={cycle.photosRequired} firstCheckIn={cycle.isFirst} humanReview={humanReview}/>}
+  : <PersistedCheckInForm photosRequired={cycle.photosRequired} firstCheckIn={cycle.isFirst}/>}
 </ClientShell>}

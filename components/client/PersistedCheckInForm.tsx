@@ -26,7 +26,7 @@ const DRAFT_FIELDS = [
 ] as const;
 const DRAFT_KEY = "start:check-in-draft";
 
-export default function PersistedCheckInForm({ photosRequired = false, firstCheckIn = false, humanReview = false }: { photosRequired?: boolean; firstCheckIn?: boolean; humanReview?: boolean }) {
+export default function PersistedCheckInForm({ photosRequired = false, firstCheckIn = false }: { photosRequired?: boolean; firstCheckIn?: boolean }) {
   const [state, action] = useActionState(saveCheckIn, initial);
   const form = useRef<HTMLFormElement>(null);
   const emptySteps = () => photosRequired
@@ -190,7 +190,7 @@ export default function PersistedCheckInForm({ photosRequired = false, firstChec
       {/* Sending a check-in and hearing nothing back reads as "it did not go".
           Success gets its own panel, not a line of small print. */}
       {state.ok
-        ? <p role="status" className="mt-5 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-center text-base font-black text-[#15803D]">{humanReview ? "הצ׳ק אין נשלח למאמן" : "הצ׳ק אין נשמר וייכלל בהתאמה השבועית"}</p>
+        ? <p role="status" className="mt-5 rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-center text-base font-black text-[#15803D]">הצ׳ק אין נשלח למאמן</p>
         : state.message
           ? <p role="alert" className="mt-4 rounded-2xl bg-[#FEF2F2] p-3 text-sm font-bold text-[#DC2626]">{state.message}</p>
           : null}

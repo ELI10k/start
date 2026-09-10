@@ -43,10 +43,8 @@ const defaultPreferences: NotificationPreferences = {
   mealReminders: true,
   mealReminderDelayMinutes: 60,
   endOfDayReminder: true,
-  endOfDayReminderTime: "20:00:00",
+  endOfDayReminderTime: "21:30:00",
 };
-
-const RETIRED_NOTIFICATION_TITLE = "הפוקוס שלך עכשיו: חלבון";
 
 export async function getNotificationCenter() {
   const supabase = await createSupabaseServerClient();
@@ -57,7 +55,7 @@ export async function getNotificationCenter() {
 
   await supabase.rpc("ensure_in_app_reminders");
   const [{ data: notifications, error: notificationError }, { data: preferences, error: preferenceError }] = await Promise.all([
-    supabase.from("notifications").select("id,actor_id,category,type,title,body,href,created_at,read_at").eq("recipient_id", user.id).neq("title", RETIRED_NOTIFICATION_TITLE).order("created_at", { ascending: false }).limit(80),
+    supabase.from("notifications").select("id,actor_id,category,type,title,body,href,created_at,read_at").eq("recipient_id", user.id).order("created_at", { ascending: false }).limit(80),
     supabase.from("notification_preferences").select("nutrition,workouts,check_ins,content,reminders,workout_morning_reminder,workout_evening_reminder,workout_morning_reminder_time,workout_evening_reminder_time,meal_reminders,meal_reminder_delay_minutes,end_of_day_reminder,end_of_day_reminder_time").eq("user_id", user.id).maybeSingle(),
   ]);
   if (notificationError) throw notificationError;
@@ -126,7 +124,6 @@ export async function getUnreadNotificationCount(excludeTypes: readonly string[]
     .from("notifications")
     .select("id", { count: "exact", head: true })
     .eq("recipient_id", user.id)
-    .neq("title", RETIRED_NOTIFICATION_TITLE)
     .is("read_at", null);
   if (excludeTypes.length) query = query.not("type", "in", `(${excludeTypes.join(",")})`);
   const { count, error } = await query;

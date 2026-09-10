@@ -43,8 +43,7 @@ test("the daily coach writes once for the roster, not once per client", async ()
   // No single-row write left inside the loop.
   assert.doesNotMatch(route, /await supabase\.rpc\("create_in_app_notification",/);
   // The message is still built per client, in the language the product speaks.
-  assert.match(route, /const input = dailyInput\(clientId\)/);
-  assert.match(route, /buildDailyCoachMessage\(input\)/);
+  assert.match(route, /buildDailyCoachMessage\(dailyInput\(clientId\)\)/);
   // Per-row behaviour is unchanged because the same function still does it.
   assert.match(migration, /perform public\.create_in_app_notification\(/);
   // One unusable row must not cost every other client their message.

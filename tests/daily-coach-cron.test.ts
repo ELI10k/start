@@ -8,7 +8,6 @@ test("daily coach cron creates one deduplicated next-best-action notification pe
   assert.match(route, /buildDailyCoachMessage/);
   assert.match(route, /create_in_app_notification/);
   assert.match(route, /daily-coach-\$\{date\}/);
-  assert.match(route, /input\.mealsCompleted >= input\.mealsPlanned/);
   // The day has to be Israel's, not UTC's. It used to be a local copy of the
   // formatter; it is now the shared helper, which is the same guarantee stated
   // once. The weekday helper is what keeps a multi-day menu counted as one day.

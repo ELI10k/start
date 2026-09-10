@@ -7,7 +7,7 @@
     },
     {
       "path": "/api/cron/evening",
-      "schedule": "0 17 * * *"
+      "schedule": "30 18 * * *"
     }
   ]
 }
