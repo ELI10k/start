@@ -949,6 +949,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .app-list__meta strong { display: block; color: var(--ink); font-size: .85rem; }
 .app-list > [data-unread="true"],
 .app-list > *[data-unread="true"] { background: var(--green-tint); }
+.notification-row { min-width: 0; }
+@media (max-width: 639px) {
+  .notification-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .notification-row .app-list__main { grid-column: 1 / -1; width: 100%; }
+  .notification-row .app-list__main strong,
+  .notification-row .app-list__main span { overflow-wrap: anywhere; white-space: normal; }
+  .notification-row .app-list__meta { min-width: 0; }
+}
 
 /* A square icon-only control. The workout builder referenced this class before it
    existed, which left reorder and delete as 18px-wide targets. */

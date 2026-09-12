@@ -26,6 +26,7 @@ export type PickableFood = ComboboxFood & {
 const initial: FoodLogState = { ok: false };
 
 type Scanned = Readonly<{
+  id?: string;
   name: string; brand: string | null;
   calories: number; protein: number | null; carbs: number | null; fat: number | null;
   // What the package weighs, when the catalogue knows. The lookup has always
@@ -240,6 +241,7 @@ export default function AteSomethingElse({
         {tab === "scan" && found && (
           <>
             <input type="hidden" name="name" value={found.brand ? `${found.name} — ${found.brand}` : found.name} />
+            {found.id ? <input type="hidden" name="foodId" value={found.id} /> : null}
             <input type="hidden" name="unit" value="גרם" />
             <p className="sheet__product-name font-bold">{found.name}{found.brand ? ` — ${found.brand}` : ""}</p>
             {/* The common answers first, typing second. A barcode identifies a
@@ -350,9 +352,10 @@ export default function AteSomethingElse({
               {picked ? (
                 <>
                   <input type="hidden" name="name" value={picked.brand ? `${picked.name} — ${picked.brand}` : picked.name} />
+                  <input type="hidden" name="foodId" value={picked.id} />
                   <input type="hidden" name="unit" value="גרם" />
                   <label className="text-sm font-bold">כמה גרם אכלת?
-                    <input name="quantity" type="number" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
+                    <input name="quantity" type="number" inputMode="decimal" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
                   </label>
                   {macros ? (
                     <>

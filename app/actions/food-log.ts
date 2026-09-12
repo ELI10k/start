@@ -157,6 +157,19 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     return { ok: false, message: describe(error.message) };
   }
 
+  // A catalogue food the client actually chose becomes available in their
+  // personal favourites as well. The food already exists in the shared
+  // catalogue; keeping its id on the log row and its star on the client avoids
+  // turning the same item into anonymous free text on the next visit.
+  const foodId = String(form.get("foodId") ?? "").trim();
+  if (foodId) {
+    const { error: favoriteError } = await supabase
+      .from("food_favorites")
+      .upsert({ user_id: auth.id, food_id: foodId }, { onConflict: "user_id,food_id" });
+    if (favoriteError)
+      console.error("logged_food_favorite_failed", { foodId, code: favoriteError.code });
+  }
+
   // Logging against a meal is also the answer to "did you eat it?" - so an
   // unanswered meal is marked as eaten-something-else, carrying this entry's own
   // words. Without it the client would have to say the same thing twice, in two
@@ -189,6 +202,7 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
 
   revalidatePath("/nutrition");
   revalidatePath("/");
+  revalidatePath("/foods");
   return { ok: true, message: estimateRateLimited
     ? "נרשם — הגעת למספר ההערכות המרבי לעכשיו, אז הפריט נשמר בלי ערכים. אפשר להזין אותם ידנית או לנסות שוב מאוחר יותר."
     : estimateFailed

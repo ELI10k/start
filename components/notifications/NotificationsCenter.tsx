@@ -36,7 +36,7 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
         per notification made twenty of them twenty screens. */}
     {notifications.length ? <div className="app-list">
       {notifications.map((notification) =>
-        <div key={notification.id} data-unread={notification.readAt ? undefined : "true"}>
+        <div key={notification.id} className="notification-row" data-unread={notification.readAt ? undefined : "true"}>
           <Link href={notification.href} className="app-list__main">
             <strong>{notificationTitle(notification)}</strong>
             <span>{notification.body}</span>

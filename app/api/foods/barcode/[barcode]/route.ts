@@ -37,6 +37,7 @@ export async function GET(_request: Request, context: { params: Promise<{ barcod
     return NextResponse.json({
       found: true,
       food: {
+        id: String(known.id),
         barcode,
         name: known.name,
         brand: known.brand,
