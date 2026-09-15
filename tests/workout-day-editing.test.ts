@@ -159,6 +159,15 @@ test("video and guidance sit together everywhere an exercise is named", async ()
   }
 });
 
+test("the workout day editor can replace an exercise without resetting its prescription", async () => {
+  const preview = await source("components/workouts/WorkoutDayPreview.tsx");
+  assert.match(preview, /החלפת תרגיל/);
+  assert.match(preview, /snapshot\.exercises/);
+  assert.match(preview, /exerciseId: patch\.exerciseId \?\? entry\.exerciseId/);
+  assert.match(preview, /\[entry\.id\]:\{\.\.\.current\[entry\.id\],exerciseId:event\.target\.value\}/);
+  assert.match(preview, /הסטים, החזרות, המנוחה ורמת המאמץ יישמרו/);
+});
+
 test("exercise cards use a technique label and a compact catalogue image",async()=>{
   const thumbnail=await source("components/workouts/ExerciseThumbnail.tsx");
   assert.match(thumbnail,/buildGuidanceView/);

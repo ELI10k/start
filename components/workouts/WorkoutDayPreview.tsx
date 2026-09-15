@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { notFound, useRouter } from "next/navigation";
-import { Copy, ExternalLink, Save } from "lucide-react";
+import { Copy, ExternalLink, Repeat2, Save } from "lucide-react";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
@@ -17,7 +17,7 @@ type EditableField = "sets" | "reps" | "rest" | "effort" | "notes";
 // so changing "3×12" to "4×10" meant going back to the builder - and for the
 // approved programmes there was no route at all.
 export default function WorkoutDayPreview({ programId, dayId }: { programId: string; dayId: string }) {
-  const { getProgram, getExercise, saveProgram, duplicate } = useWorkouts();
+  const { getProgram, getExercise, saveProgram, duplicate, snapshot } = useWorkouts();
   const router = useRouter();
   const program = getProgram(programId);
   const day = program?.days.find((item) => item.id === dayId);
@@ -28,6 +28,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
   const [copying, setCopying] = useState(false);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [replacing, setReplacing] = useState<string | null>(null);
 
   const ordered = useMemo(() => [...(day?.exercises ?? [])].sort((a, b) => a.order - b.order), [day]);
   if (!program || !day) notFound();
@@ -65,6 +66,7 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
           const sets = (patch.sets ?? entry.sets ?? "").trim();
           return {
             ...entry,
+            exerciseId: patch.exerciseId ?? entry.exerciseId,
             sets: sets || undefined,
             reps: (patch.reps ?? entry.reps ?? "").trim() || undefined,
             rest: (patch.rest ?? entry.rest ?? "").trim() || undefined,
@@ -113,7 +115,9 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
 
     <div className="mt-6 space-y-4">
       {ordered.map((entry) => {
-        const exercise = getExercise(entry.exerciseId);
+        const exerciseId = draft[entry.id]?.exerciseId ?? entry.exerciseId;
+        const exercise = getExercise(exerciseId);
+        const isReplacing = replacing === entry.id;
         return <article key={entry.id} className="workout-exercise-card rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
@@ -133,8 +137,34 @@ export default function WorkoutDayPreview({ programId, dayId }: { programId: str
                 ? <a href={exercise.video.url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#16A34A]/30 px-3 text-sm font-bold text-[#16A34A]">סרטון הסבר טכניקה<ExternalLink size={15} /></a>
                 : <span className="pill">אין סרטון</span>}
               <ExerciseGuidanceButton exercise={exercise} />
+              <button type="button" onClick={()=>setReplacing(isReplacing?null:entry.id)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#E5E7E5] px-3 text-sm font-bold">
+                <Repeat2 aria-hidden="true" size={15}/>החלפת תרגיל
+              </button>
             </div>
           </div>
+
+          {isReplacing && (
+            <label className="mt-4 block rounded-xl bg-[#F7F8F7] p-3 text-xs font-bold">בחירת תרגיל חלופי
+              <select
+                aria-label={`בחירת תרגיל חלופי ל${exercise?.name ?? "תרגיל"}`}
+                className="nutrition-input mt-2"
+                value=""
+                onChange={(event)=>{
+                  if(!event.target.value)return;
+                  setDraft((current)=>({...current,[entry.id]:{...current[entry.id],exerciseId:event.target.value}}));
+                  setReplacing(null);
+                  setStatus("");
+                }}
+              >
+                <option value="">בחרו תרגיל מהמאגר…</option>
+                {snapshot.exercises
+                  .filter((item)=>item.status==="active"&&item.id!==exerciseId)
+                  .sort((a,b)=>a.name.localeCompare(b.name,"he"))
+                  .map((item)=><option key={item.id} value={item.id}>{item.name}</option>)}
+              </select>
+              <small className="mt-2 block font-normal text-[#5B5F5B]">הסטים, החזרות, המנוחה ורמת המאמץ יישמרו.</small>
+            </label>
+          )}
 
           {/* Editable in place. Short fields beat a sheet here: a coach adjusting
               a programme usually changes several exercises in a row. */}
