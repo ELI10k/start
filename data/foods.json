@@ -6115,5 +6115,27 @@
     "unitWeightGrams": 200,
     "caloriesPerUnit": 130,
     "unitsPerPackage": 1
+  },
+  {
+    "id": "341",
+    "name": "דנונה PRO יוגורט 20 גרם חלבון 1.5% שומן",
+    "brand": "דנונה",
+    "category": "יוגורטים ומעדנים",
+    "calories": 70,
+    "protein": 10,
+    "carbs": 3.4,
+    "fat": 1.5,
+    "sugars": 3.4,
+    "sodiumMg": 35,
+    "calciumMg": 99,
+    "packageQuantity": 200,
+    "packageUnit": "גביע",
+    "servingLabel": "גביע 200 גרם",
+    "verificationStatus": "מאושר",
+    "notes": "ערכים ל-100 גרם לפי דנונה; סה״כ לגביע: 140 קלוריות, 20 גרם חלבון, 6.8 גרם פחמימות, 3 גרם שומן, 6.8 גרם סוכרים, 70 מ״ג נתרן ו-198 מ״ג סידן.",
+    "sourceUrl": "https://danone.strauss-group.com/product/%d7%93%d7%a0%d7%95%d7%a0%d7%94-pro/",
+    "unitWeightGrams": 200,
+    "caloriesPerUnit": 140,
+    "unitsPerPackage": 1
   }
 ]
