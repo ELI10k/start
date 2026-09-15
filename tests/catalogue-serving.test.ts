@@ -37,3 +37,15 @@ test("a countable product labelled per 100 grams stays per 100 grams", () => {
     servingLabel: "ל-100 גרם מוכן",
   }), { calories: 155, protein: 12.58, carbs: 1.12, fat: 10.61, servingLabel: "ל-100 גרם מוכן" });
 });
+
+test("the Muller protein yogurt displays one 200 gram cup in Hebrew", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 65,
+    protein: 12.5,
+    carbs: 2.5,
+    fat: 0,
+    packageUnit: "גביע",
+    unitWeightGrams: 200,
+    servingLabel: "גביע 200 גרם",
+  }), { calories: 130, protein: 25, carbs: 5, fat: 0, servingLabel: "גביע 200 גרם" });
+});
