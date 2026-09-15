@@ -9,11 +9,11 @@ import { validateMealPlanPayload } from "../lib/nutrition/menu-validation.ts";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-// The 341 products from the imported workbook keep their numeric ids and
+// The 358 products from the imported workbook keep their numeric ids and
 // must all still be there; produce and the coach's own portions were added on top
 // and carry "coach-" ids, so the catalogue grows without the import being lost.
 test("nutrition catalog keeps every imported product and stays distinct", () => {
-  assert.equal(foods.filter((food) => /^\d+$/.test(food.id)).length, 341);
+  assert.equal(foods.filter((food) => /^\d+$/.test(food.id)).length, 358);
   assert.ok(foods.length > 339);
   assert.equal(new Set(foods.map((food) => food.id)).size, foods.length);
   assert.equal(

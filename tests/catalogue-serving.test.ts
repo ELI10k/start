@@ -62,6 +62,17 @@ test("Danone PRO 1.5% displays nutrition for the full 200 gram cup", () => {
   }), { calories: 140, protein: 20, carbs: 6.8, fat: 3, servingLabel: "גביע 200 גרם" });
 });
 
+test("Danone PRO variants display nutrition for their full packages", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 56, protein: 9.3, carbs: 3.9, fat: 0,
+    packageUnit: "גביע", unitWeightGrams: 215, servingLabel: "גביע 215 גרם",
+  }), { calories: 120.4, protein: 20, carbs: 8.4, fat: 0, servingLabel: "גביע 215 גרם" });
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 61, protein: 8, carbs: 4.2, fat: 1,
+    packageUnit: "בקבוק", unitWeightGrams: 250, servingLabel: "בקבוק 250 מ״ל",
+  }), { calories: 152.5, protein: 20, carbs: 10.5, fat: 2.5, servingLabel: "בקבוק 250 מ״ל" });
+});
+
 test("both Yoplait GO yogurts display a full 200 gram cup", () => {
   const common = { packageUnit: "גביע", unitWeightGrams: 200, servingLabel: "גביע 200 גרם" };
   assert.deepEqual(catalogueServingNutrition({

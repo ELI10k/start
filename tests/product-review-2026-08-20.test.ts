@@ -380,6 +380,9 @@ test("the two breads Eli asked for are master carbohydrates with real units", as
   assert.equal(masterFoodGroup("master-c-020"), "carbohydrate");
   assert.equal(masterFoodGroup("340"), "protein");
   assert.equal(masterFoodGroup("341"), "protein");
+  for (let id = 342; id <= 358; id += 1) {
+    assert.equal(masterFoodGroup(String(id)), "protein");
+  }
   assert.match(migration, /'master-c-019', 'לחמנייה'/);
   assert.match(migration, /'master-c-020', 'בגט'/);
   assert.match(migration, /on conflict \(id\) do update set/);
