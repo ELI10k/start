@@ -378,6 +378,7 @@ test("the two breads Eli asked for are master carbohydrates with real units", as
   // The id prefix is what files them under carbohydrate and stars them.
   assert.equal(masterFoodGroup("master-c-019"), "carbohydrate");
   assert.equal(masterFoodGroup("master-c-020"), "carbohydrate");
+  assert.equal(masterFoodGroup("340"), "protein");
   assert.match(migration, /'master-c-019', 'לחמנייה'/);
   assert.match(migration, /'master-c-020', 'בגט'/);
   assert.match(migration, /on conflict \(id\) do update set/);
