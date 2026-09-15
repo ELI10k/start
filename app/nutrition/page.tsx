@@ -307,7 +307,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                     unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
                     current={group.amountOverride}
                   />:null})()}
-                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} foods={pickableFoods}/>
+                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} groupType={group.type} foods={pickableFoods}/>
                   </fieldset>)}
               </div>}
               </div>

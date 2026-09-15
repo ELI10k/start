@@ -64,6 +64,13 @@ test("combobox exposes keyboard controls and favorite-first 30-item recent limit
   assert.match(source,/foodSearchRelevance/);
 });
 
+test("client meal substitution only offers foods from the selected group",()=>{
+  const source=readFileSync(new URL("../components/client/MealGroupSubstitution.tsx",import.meta.url),"utf8");
+  assert.match(source,/isGroupType\(groupType\)\?foodsForGroup\(foods,groupType\):\[\]/);
+  assert.match(source,/foodsForGroup\(foods,groupType\)/);
+  assert.match(source,/foods=\{groupFoods\}/);
+});
+
 test("menu editor preserves manual targets until explicit recalculation",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
   // The guarantee, not the wording: a figure the coach typed is marked as
