@@ -59,3 +59,15 @@ test("both Yoplait GO yogurts display a full 200 gram cup", () => {
     ...common, calories: 86, protein: 12.5, carbs: 4.4, fat: 2,
   }), { calories: 172, protein: 25, carbs: 8.8, fat: 4, servingLabel: "גביע 200 גרם" });
 });
+
+test("protein powder displays the requested 34 gram scoop", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 352.941176,
+    protein: 73.529412,
+    carbs: 8.823529,
+    fat: 4.117647,
+    packageUnit: "סקופ",
+    unitWeightGrams: 34,
+    servingLabel: "סקופ 34 גרם",
+  }), { calories: 120, protein: 25, carbs: 3, fat: 1.4, servingLabel: "סקופ 34 גרם" });
+});
