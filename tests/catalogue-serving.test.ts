@@ -49,3 +49,13 @@ test("the Muller protein yogurt displays one 200 gram cup in Hebrew", () => {
     servingLabel: "גביע 200 גרם",
   }), { calories: 130, protein: 25, carbs: 5, fat: 0, servingLabel: "גביע 200 גרם" });
 });
+
+test("both Yoplait GO yogurts display a full 200 gram cup", () => {
+  const common = { packageUnit: "גביע", unitWeightGrams: 200, servingLabel: "גביע 200 גרם" };
+  assert.deepEqual(catalogueServingNutrition({
+    ...common, calories: 72, protein: 10, carbs: 3.5, fat: 2,
+  }), { calories: 144, protein: 20, carbs: 7, fat: 4, servingLabel: "גביע 200 גרם" });
+  assert.deepEqual(catalogueServingNutrition({
+    ...common, calories: 86, protein: 12.5, carbs: 4.4, fat: 2,
+  }), { calories: 172, protein: 25, carbs: 8.8, fat: 4, servingLabel: "גביע 200 גרם" });
+});

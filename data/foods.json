@@ -571,11 +571,15 @@
     "sodiumMg": 65,
     "calciumMg": 175,
     "packageQuantity": 200,
-    "packageUnit": "גרם",
+    "packageUnit": "גביע",
     "barcode": "7290110321031",
-    "servingLabel": "ל-100 גרם",
+    "servingLabel": "גביע 200 גרם",
     "verificationStatus": "מאושר",
-    "sourceUrl": "https://www.tnuva.co.il/products/%D7%99%D7%95%D7%A4%D7%9C%D7%94-%D7%92%D7%95-%D7%99%D7%95%D7%92%D7%95%D7%A8%D7%98-%D7%9E%D7%95%D7%A2%D7%A9%D7%A8-%D7%91%D7%97%D7%9C%D7%91%D7%95%D7%9F-%D7%98%D7%91%D7%A2%D7%99/"
+    "notes": "גביע אחד של 200 גרם; סה״כ לגביע: 144 קלוריות, 20 גרם חלבון, 7 גרם פחמימות ו-4 גרם שומן",
+    "sourceUrl": "https://www.tnuva.co.il/products/%D7%99%D7%95%D7%A4%D7%9C%D7%94-%D7%92%D7%95-%D7%99%D7%95%D7%92%D7%95%D7%A8%D7%98-%D7%9E%D7%95%D7%A2%D7%A9%D7%A8-%D7%91%D7%97%D7%9C%D7%91%D7%95%D7%9F-%D7%98%D7%91%D7%A2%D7%99/",
+    "unitWeightGrams": 200,
+    "caloriesPerUnit": 144,
+    "unitsPerPackage": 1
   },
   {
     "id": "32",
@@ -590,11 +594,15 @@
     "sodiumMg": 72,
     "calciumMg": 156,
     "packageQuantity": 200,
-    "packageUnit": "גרם",
+    "packageUnit": "גביע",
     "barcode": "7290116935614",
-    "servingLabel": "ל-100 גרם",
+    "servingLabel": "גביע 200 גרם",
     "verificationStatus": "מאושר",
-    "sourceUrl": "https://www.tnuva.co.il/products/%D7%99%D7%95%D7%92%D7%95%D7%A8%D7%98-%D7%97%D7%9C%D7%91%D7%95%D7%9F-25-%D7%92%D7%A8%D7%9D-%D7%99%D7%95%D7%A4%D7%9C%D7%94-go-%D7%91%D7%98%D7%A2%D7%9D-%D7%98%D7%91%D7%A2%D7%99/"
+    "notes": "גביע אחד של 200 גרם; סה״כ לגביע: 172 קלוריות, 25 גרם חלבון, 8.8 גרם פחמימות ו-4 גרם שומן",
+    "sourceUrl": "https://www.tnuva.co.il/products/%D7%99%D7%95%D7%92%D7%95%D7%A8%D7%98-%D7%97%D7%9C%D7%91%D7%95%D7%9F-25-%D7%92%D7%A8%D7%9D-%D7%99%D7%95%D7%A4%D7%9C%D7%94-go-%D7%91%D7%98%D7%A2%D7%9D-%D7%98%D7%91%D7%A2%D7%99/",
+    "unitWeightGrams": 200,
+    "caloriesPerUnit": 172,
+    "unitsPerPackage": 1
   },
   {
     "id": "33",
