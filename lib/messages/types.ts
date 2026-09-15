@@ -5,6 +5,7 @@
 export type DirectMessage = Readonly<{
   id: string;
   body: string;
+  imageUrl: string | null;
   topic: "general" | "support" | "profile_update";
   createdAt: string;
   readAt: string | null;

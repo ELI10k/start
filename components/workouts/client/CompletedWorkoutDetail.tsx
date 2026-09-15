@@ -10,9 +10,10 @@ import type { ActiveExerciseResult, CompletedWorkout } from "@/lib/workouts/type
 
 const numberOrUndefined=(value:string)=>{const parsed=Number(value);return value.trim()===""||Number.isNaN(parsed)?undefined:parsed};
 
-export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
-  const{snapshot,currentClientId,getExercise,updateCompletedSession}=useWorkouts();
-  const workout=snapshot.completedWorkouts.find((item)=>item.id===workoutId&&item.clientId===currentClientId);
+export default function CompletedWorkoutDetail({workoutId,clientId,readOnly=false,backHref="/workouts/history"}:{workoutId:string;clientId?:string;readOnly?:boolean;backHref?:string}){
+  const{snapshot,currentClientId,role,getExercise,updateCompletedSession}=useWorkouts();
+  const viewedClientId=clientId??currentClientId;
+  const workout=snapshot.completedWorkouts.find((item)=>item.id===workoutId&&(role==="coach"&&!clientId||item.clientId===viewedClientId));
   // A workout can be filled in after the fact: a client who trained without the
   // phone in hand closes the session with the sets ticked and the numbers empty,
   // and the numbers are the whole point of the record.
@@ -20,9 +21,10 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
   const[saving,setSaving]=useState(false);
   const[message,setMessage]=useState("");
   if(!workout)notFound();
+  const effectiveClientId=clientId??workout.clientId;
   const program=snapshot.programs.find((item)=>item.id===workout.programId);
   const day=program?.days.find((item)=>item.id===workout.dayId);
-  const previous=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId&&item.dayId===workout.dayId&&item.completedAt<workout.completedAt).sort((a,b)=>b.completedAt.localeCompare(a.completedAt))[0];
+  const previous=[...snapshot.completedWorkouts].filter((item)=>item.clientId===effectiveClientId&&item.dayId===workout.dayId&&item.completedAt<workout.completedAt).sort((a,b)=>b.completedAt.localeCompare(a.completedAt))[0];
   const editing=draft!==null;
   const shown=draft??workout;
   const reportExercises:ReportExercise[]=shown.exerciseResults.map((result)=>{
@@ -71,7 +73,7 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
     {previous&&<p className="mt-4 rounded-xl border border-[#E5E7E5] p-3 text-sm text-[#5B5F5B]">לעומת האימון הקודם: {workout.totalVolume-previous.totalVolume>=0?"+":""}{workout.totalVolume-previous.totalVolume} ק״ג נפח</p>}
 
     <div className="mt-4 flex flex-wrap items-center gap-3">
-      {!editing&&<button type="button" onClick={()=>{setDraft(workout);setMessage("")}} className="min-h-12 rounded-2xl border border-[#16A34A] px-5 font-bold text-[#16A34A]">מילוי או תיקון של האימון</button>}
+      {!readOnly&&role!=="coach"&&!editing&&<button type="button" onClick={()=>{setDraft(workout);setMessage("")}} className="min-h-12 rounded-2xl border border-[#16A34A] px-5 font-bold text-[#16A34A]">מילוי או תיקון של האימון</button>}
       {message&&<p role="status" className="text-sm font-bold text-[#16A34A]">{message}</p>}
     </div>
 
@@ -116,7 +118,7 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
             </tbody>
           </table>
         </div>
-        <Link href={`/workouts/exercises/${result.exerciseId}`} className="mt-3 inline-flex min-h-11 items-center text-sm text-[#16A34A]">היסטוריית התרגיל</Link>
+        {!readOnly&&role!=="coach"&&<Link href={`/workouts/exercises/${result.exerciseId}`} className="mt-3 inline-flex min-h-11 items-center text-sm text-[#16A34A]">היסטוריית התרגיל</Link>}
       </article>;
     })}</div>
 
@@ -125,7 +127,7 @@ export default function CompletedWorkoutDetail({workoutId}:{workoutId:string}){
       <button type="button" onClick={()=>{setDraft(null);setMessage("")}} disabled={saving} className="min-h-12 rounded-2xl border border-[#E5E7E5] px-5 font-bold">ביטול</button>
     </div>}
 
-    <Link href="/workouts/history" className="mt-6 inline-flex min-h-11 items-center">חזרה להיסטוריה</Link>
+    <Link href={backHref} className="mt-6 inline-flex min-h-11 items-center">חזרה להיסטוריה</Link>
   </div></main>;
 }
 

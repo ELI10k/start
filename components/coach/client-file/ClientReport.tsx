@@ -1,4 +1,5 @@
 import type { ClientReport } from "@/lib/coach-intelligence/client-report";
+import ClientReportMessage from "@/components/coach/client-file/ClientReportMessage";
 
 // Eight sections, and a visual line between the three kinds of statement.
 //
@@ -11,6 +12,11 @@ const TONE = {
   fact: "border-[#E5E7E5] bg-[#FFFFFF]",
   positive: "border-[#16A34A]/30 bg-[#ECFDF3]",
   attention: "border-[#DC2626]/30 bg-[#FEF2F2]",
+} as const;
+const TREND_TONE = {
+  positive: "text-[#15803D]",
+  negative: "text-[#DC2626]",
+  neutral: "text-[#5B5F5B]",
 } as const;
 
 function Block({ title, kind = "fact", children }: { title: string; kind?: keyof typeof TONE; children: React.ReactNode }) {
@@ -38,9 +44,12 @@ function Points({ points, empty }: { points: readonly { text: string; basis: str
   );
 }
 
-export default function ClientReportView({ report }: { report: ClientReport }) {
+export default function ClientReportView({ report, clientId }: { report: ClientReport; clientId: string }) {
   return (
     <div className="grid gap-3">
+      <p className="rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-sm font-bold text-[#166534]">
+        ניתוח התנהגות מצטבר של 30 הימים האחרונים — לא סיכום של ה־Check-in האחרון.
+      </p>
       {report.referral && (
         <p role="alert" className="rounded-2xl border border-[#DC2626] bg-[#FEF2F2] p-4 text-sm font-bold text-[#DC2626]">
           {report.referral}
@@ -63,12 +72,13 @@ export default function ClientReportView({ report }: { report: ClientReport }) {
         )}
       </Block>
 
-      <Block title="2 · מגמות לעומת התקופה הקודמת">
+      <Block title="2 · מגמות במהלך 30 הימים">
         {report.trends.length ? (
           <ul className="grid gap-2">
             {report.trends.map((trend) => (
               <li key={trend.label} className="text-sm">
-                <strong>{trend.label}:</strong> {trend.detail}
+                <strong>{trend.label}:</strong>{" "}
+                <strong className={TREND_TONE[trend.outcome]}>{trend.detail}</strong>
                 <span className="mt-0.5 block text-xs text-[#5B5F5B]">{trend.basis}</span>
               </li>
             ))}
@@ -101,9 +111,21 @@ export default function ClientReportView({ report }: { report: ClientReport }) {
         ) : <p className="text-sm text-[#5B5F5B]">אין שאלות שעולות מהנתונים הקיימים.</p>}
       </Block>
 
-      <Block title="8 · פעולות מוצעות לשבוע הבא">
+      <Block title="8 · פעולות מוצעות לחודש הבא">
         <Points points={report.actions} empty="אין פעולות מוצעות בהיעדר נתונים."/>
       </Block>
+      {report.weeklyClientMessage && <ClientReportMessage
+        clientId={clientId}
+        message={report.weeklyClientMessage}
+        title="משוב שבועי בעקבות הצ׳ק־אין האחרון"
+        description="מתעדכן מיד עם קבלת צ׳ק־אין חדש ומסכם את הצ׳ק־אין ואת נתוני שבעת הימים האחרונים. אפשר לערוך לפני השליחה."
+      />}
+      <ClientReportMessage
+        clientId={clientId}
+        message={report.clientMessage}
+        title="סיכום חודשי ללקוח — בניסוח של אלי"
+        description="מסכם את 30 הימים האחרונים ומתעדכן ככל שנכנסים נתונים חדשים. אפשר לערוך לפני השליחה."
+      />
     </div>
   );
 }

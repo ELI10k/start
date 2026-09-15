@@ -4,6 +4,8 @@ import { Bell, BookOpen, ChevronLeft, ClipboardCheck, LifeBuoy, LogOut, MessageS
 import ClientShell from "@/components/client/ClientShell";
 import { getAuthContext } from "@/lib/data/product-repository";
 import RequestProfileUpdate from "@/components/client/RequestProfileUpdate";
+import DeleteAccountForm from "@/components/client/DeleteAccountForm";
+import LegalLinks from "@/components/legal/LegalLinks";
 
 export default async function ProfilePage() {
   const auth = await getAuthContext();
@@ -48,6 +50,12 @@ export default async function ProfilePage() {
           <span className="settings-group__label"><LogOut aria-hidden="true" size={18} />התנתקות מהחשבון</span>
         </button>
       </form>
+
+      <section className="mt-4 rounded-2xl border border-[#E5E7E5] bg-white p-4">
+        <DeleteAccountForm />
+      </section>
+
+      <LegalLinks className="mt-8 pb-4" />
     </ClientShell>
   );
 }

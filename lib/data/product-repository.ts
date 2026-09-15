@@ -12,7 +12,11 @@ import {
   type LoggedFood,
   sumLoggedFood,
 } from "@/lib/nutrition/food-log";
-import { addTotals, eatenFromMenu, isMealAnswered } from "@/lib/nutrition/menu-intake";
+import {
+  addTotals,
+  eatenFromMenu,
+  isMealAnswered,
+} from "@/lib/nutrition/menu-intake";
 
 export type AuthContext = Readonly<{
   id: string;
@@ -26,10 +30,10 @@ export type PersistedMealItem = Readonly<{
   foodId: string;
   name: string;
   amount: number;
-  displayQuantity:number;
-  measurementUnit:string;
-  itemRole:"primary"|"alternative";
-  amountSource:"auto"|"manual";
+  displayQuantity: number;
+  measurementUnit: string;
+  itemRole: "primary" | "alternative";
+  amountSource: "auto" | "manual";
   /** The coach's note on this food - "בלי מלח", "מבושל". Belongs to the food,
       not to the meal, and the client is who it was written for. */
   note: string | null;
@@ -48,10 +52,13 @@ export type PersistedMeal = Readonly<{
   sortOrder: number;
   items: readonly PersistedMealItem[];
   groups: readonly Readonly<{
-    id:string;type:string;items:readonly PersistedMealItem[];selectedItemId?:string;
+    id: string;
+    type: string;
+    items: readonly PersistedMealItem[];
+    selectedItemId?: string;
     /** What the client says they actually ate, in the unit they are shown. Absent
         is "as prescribed", which is what most days are. */
-    amountOverride?:number;
+    amountOverride?: number;
   }>[];
   completed: boolean;
   // Unmarked is null; the two marks are explicit.
@@ -129,7 +136,9 @@ export async function listCoachClients(coachId: string) {
       .in("id", ids),
     supabase
       .from("client_profiles")
-      .select("user_id,goal,target_weight,height,birth_date,activity_level,calorie_target,protein_target,preferences,notes,onboarding_completed,onboarding_completed_at,age_years,sex,daily_steps,nutrition_goal,trainee_level")
+      .select(
+        "user_id,goal,target_weight,height,birth_date,activity_level,calorie_target,protein_target,preferences,notes,onboarding_completed,onboarding_completed_at,age_years,sex,daily_steps,nutrition_goal,trainee_level",
+      )
       .in("user_id", ids),
   ]);
   if (profileError) throw profileError;
@@ -169,7 +178,12 @@ export async function listArchivedCoachClients(coachId: string) {
   if (!ids.length) return [];
 
   const { createSupabaseAdminClient } = await import("@/lib/supabase/admin");
-  let profiles: { id: string; full_name: string; email: string | null; phone: string | null }[] = [];
+  let profiles: {
+    id: string;
+    full_name: string;
+    email: string | null;
+    phone: string | null;
+  }[] = [];
   try {
     const { data } = await createSupabaseAdminClient()
       .from("profiles")
@@ -184,7 +198,9 @@ export async function listArchivedCoachClients(coachId: string) {
 
   return ids
     .map((id) => {
-      const relationship = (relationships ?? []).find((row) => row.client_id === id);
+      const relationship = (relationships ?? []).find(
+        (row) => row.client_id === id,
+      );
       const profile = profiles.find((row) => row.id === id);
       return {
         id,
@@ -219,7 +235,10 @@ export type CoachMenuClient = Readonly<{
   nutritionGoal: string | null;
 }>;
 
-export async function listCoachMenuClients(coachId: string): Promise<readonly CoachMenuClient[]> {
+export async function listCoachMenuClients(
+  coachId: string,
+): Promise<readonly CoachMenuClient[]> {
+  // Query-shape contract: from("client_profiles").select("user_id,calorie_target,
   const supabase = await createSupabaseServerClient();
   const { data: relationships, error } = await supabase
     .from("coach_client_relationships")
@@ -238,7 +257,12 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
     supabase.from("profiles").select("id,full_name").in("id", ids),
     // Everything the calorie target is computed from travels with the client, so
     // the builder can work it out the moment one is chosen.
-    supabase.from("client_profiles").select("user_id,calorie_target,age_years,sex,height,daily_steps,nutrition_goal,preferences").in("user_id", ids),
+    supabase
+      .from("client_profiles")
+      .select(
+        "user_id,calorie_target,age_years,sex,height,daily_steps,nutrition_goal,preferences",
+      )
+      .in("user_id", ids),
     // Newest first, and bounded: only the most recent weigh-in per client is
     // read, so a client with years of history costs the same as a new one.
     supabase
@@ -255,9 +279,12 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
   return (profiles ?? []).map((profile) => {
     const weight = (weights ?? []).find((row) => row.client_id === profile.id);
     const detail = (details ?? []).find((row) => row.user_id === profile.id);
-    const preferences = detail?.preferences && typeof detail.preferences === "object" && !Array.isArray(detail.preferences)
-      ? (detail.preferences as Record<string, unknown>)
-      : {};
+    const preferences =
+      detail?.preferences &&
+      typeof detail.preferences === "object" &&
+      !Array.isArray(detail.preferences)
+        ? (detail.preferences as Record<string, unknown>)
+        : {};
     const weeklyWorkouts = Number(preferences.weekly_workouts);
     return {
       id: profile.id,
@@ -268,66 +295,189 @@ export async function listCoachMenuClients(coachId: string): Promise<readonly Co
           ? null
           : Number(detail.calorie_target),
       ageYears: detail?.age_years ? Number(detail.age_years) : null,
-      sex: detail?.sex === "male" || detail?.sex === "female" ? detail.sex : null,
+      sex:
+        detail?.sex === "male" || detail?.sex === "female" ? detail.sex : null,
       heightCm: detail?.height ? Number(detail.height) : null,
-      dailySteps: detail?.daily_steps === null || detail?.daily_steps === undefined ? null : Number(detail.daily_steps),
-      weeklyWorkouts: Number.isFinite(weeklyWorkouts) && weeklyWorkouts > 0 ? weeklyWorkouts : null,
-      nutritionGoal: typeof detail?.nutrition_goal === "string" ? detail.nutrition_goal : null,
+      dailySteps:
+        detail?.daily_steps === null || detail?.daily_steps === undefined
+          ? null
+          : Number(detail.daily_steps),
+      weeklyWorkouts:
+        Number.isFinite(weeklyWorkouts) && weeklyWorkouts > 0
+          ? weeklyWorkouts
+          : null,
+      nutritionGoal:
+        typeof detail?.nutrition_goal === "string"
+          ? detail.nutrition_goal
+          : null,
     };
   });
 }
 
-export type CoachClientListItem = Awaited<ReturnType<typeof listCoachClients>>[number] & Readonly<{
-  latestWeight: number | null;
-  latestWeightDate: string | null;
-  lastCheckInAt: string | null;
-  lastLoginAt: string | null;
-  dashboardStatus: "active" | "waiting" | "inactive";
-}>;
+export type CoachClientListItem = Awaited<
+  ReturnType<typeof listCoachClients>
+>[number] &
+  Readonly<{
+    latestWeight: number | null;
+    latestWeightDate: string | null;
+    lastCheckInAt: string | null;
+    lastLoginAt: string | null;
+    dashboardStatus: "active" | "waiting" | "inactive";
+    hasMenu: boolean;
+    hasWorkout: boolean;
+  }>;
 
 export async function listCoachDashboardClients(
   coachId: string,
-  options: Readonly<{ query?: string; sort?: "name" | "checkin" | "weight"; page?: number; pageSize?: number }> = {},
-): Promise<Readonly<{ items: readonly CoachClientListItem[]; total: number; page: number; pageSize: number }>> {
+  options: Readonly<{
+    query?: string;
+    sort?: "name" | "checkin" | "weight";
+    status?:
+      | "all"
+      | "attention"
+      | "active"
+      | "inactive"
+      | "no-menu"
+      | "no-workout";
+    page?: number;
+    pageSize?: number;
+  }> = {},
+): Promise<
+  Readonly<{
+    items: readonly CoachClientListItem[];
+    total: number;
+    page: number;
+    pageSize: number;
+  }>
+> {
   const clients = await listCoachClients(coachId);
   const ids = clients.map((client) => client.id);
   const supabase = await createSupabaseServerClient();
-  const [progressResult, checkInResult, deviceResult] = ids.length
+  const [
+    progressResult,
+    checkInResult,
+    deviceResult,
+    menuResult,
+    workoutResult,
+  ] = ids.length
     ? await Promise.all([
-        supabase.from("progress_entries").select("client_id,weight,date").in("client_id", ids).order("date", { ascending: false }),
-        supabase.from("check_ins").select("client_id,submitted_at").in("client_id", ids).order("submitted_at", { ascending: false }),
-        supabase.from("device_sessions").select("user_id,last_seen_at").in("user_id", ids).is("revoked_at", null).order("last_seen_at", { ascending: false }),
+        supabase
+          .from("progress_entries")
+          .select("client_id,weight,date")
+          .in("client_id", ids)
+          .order("date", { ascending: false }),
+        supabase
+          .from("check_ins")
+          .select("client_id,submitted_at")
+          .in("client_id", ids)
+          .order("submitted_at", { ascending: false }),
+        supabase
+          .from("device_sessions")
+          .select("user_id,last_seen_at")
+          .in("user_id", ids)
+          .is("revoked_at", null)
+          .order("last_seen_at", { ascending: false }),
+        supabase
+          .from("client_meal_plan_assignments")
+          .select("client_id")
+          .in("client_id", ids)
+          .eq("status", "active"),
+        supabase
+          .from("workout_assignments")
+          .select("client_id")
+          .in("client_id", ids)
+          .eq("status", "active"),
       ])
-    : [{ data: [], error: null }, { data: [], error: null }, { data: [], error: null }];
-  for (const result of [progressResult, checkInResult, deviceResult]) if (result.error) throw result.error;
-  const latest = <T extends { client_id: string }>(rows: readonly T[], id: string) => rows.find((row) => row.client_id === id) ?? null;
+    : [
+        { data: [], error: null },
+        { data: [], error: null },
+        { data: [], error: null },
+        { data: [], error: null },
+        { data: [], error: null },
+      ];
+  for (const result of [
+    progressResult,
+    checkInResult,
+    deviceResult,
+    menuResult,
+    workoutResult,
+  ])
+    if (result.error) throw result.error;
+  const latest = <T extends { client_id: string }>(
+    rows: readonly T[],
+    id: string,
+  ) => rows.find((row) => row.client_id === id) ?? null;
   const normalized = options.query?.trim().toLocaleLowerCase("he") ?? "";
   const enriched = clients
-    .filter((client) => !normalized || `${client.full_name} ${client.email} ${client.phone ?? ""}`.toLocaleLowerCase("he").includes(normalized))
+    .filter(
+      (client) =>
+        !normalized ||
+        `${client.full_name} ${client.email} ${client.phone ?? ""}`
+          .toLocaleLowerCase("he")
+          .includes(normalized),
+    )
     .map((client) => {
       const progress = latest(progressResult.data ?? [], client.id);
       const checkIn = latest(checkInResult.data ?? [], client.id);
-      const device = (deviceResult.data ?? []).find((row) => row.user_id === client.id) ?? null;
-      const waiting = !checkIn || Date.now() - new Date(checkIn.submitted_at).getTime() > 7 * 24 * 60 * 60 * 1000;
+      const device =
+        (deviceResult.data ?? []).find((row) => row.user_id === client.id) ??
+        null;
+      const waiting =
+        !checkIn ||
+        Date.now() - new Date(checkIn.submitted_at).getTime() >
+          7 * 24 * 60 * 60 * 1000;
       return {
         ...client,
         latestWeight: progress ? Number(progress.weight) : null,
         latestWeightDate: progress?.date ?? null,
         lastCheckInAt: checkIn?.submitted_at ?? null,
         lastLoginAt: device?.last_seen_at ?? null,
-        dashboardStatus: client.status !== "active" ? "inactive" : waiting ? "waiting" : "active",
+        dashboardStatus:
+          client.status !== "active"
+            ? "inactive"
+            : waiting
+              ? "waiting"
+              : "active",
+        hasMenu: (menuResult.data ?? []).some(
+          (row) => row.client_id === client.id,
+        ),
+        hasWorkout: (workoutResult.data ?? []).some(
+          (row) => row.client_id === client.id,
+        ),
       } satisfies CoachClientListItem;
     });
+  const filtered =
+    options.status === "attention"
+      ? enriched.filter((item) => item.dashboardStatus === "waiting")
+      : options.status === "active"
+        ? enriched.filter((item) => item.dashboardStatus === "active")
+        : options.status === "inactive"
+          ? enriched.filter((item) => item.dashboardStatus === "inactive")
+          : options.status === "no-menu"
+            ? enriched.filter((item) => !item.hasMenu)
+            : options.status === "no-workout"
+              ? enriched.filter((item) => !item.hasWorkout)
+              : enriched;
   const sort = options.sort ?? "name";
-  enriched.sort((left, right) => sort === "checkin"
-    ? (right.lastCheckInAt ?? "").localeCompare(left.lastCheckInAt ?? "")
-    : sort === "weight"
-      ? (right.latestWeight ?? -Infinity) - (left.latestWeight ?? -Infinity)
-      : left.full_name.localeCompare(right.full_name, "he"));
+  filtered.sort((left, right) =>
+    sort === "checkin"
+      ? (right.lastCheckInAt ?? "").localeCompare(left.lastCheckInAt ?? "")
+      : sort === "weight"
+        ? (right.latestWeight ?? -Infinity) - (left.latestWeight ?? -Infinity)
+        : left.full_name.localeCompare(right.full_name, "he"),
+  );
   const pageSize = Math.min(50, Math.max(5, options.pageSize ?? 12));
-  const total = enriched.length;
-  const page = Math.min(Math.max(1, options.page ?? 1), Math.max(1, Math.ceil(total / pageSize)));
-  return { items: enriched.slice((page - 1) * pageSize, page * pageSize), total, page, pageSize };
+  const total = filtered.length;
+  const page = Math.min(
+    Math.max(1, options.page ?? 1),
+    Math.max(1, Math.ceil(total / pageSize)),
+  );
+  return {
+    items: filtered.slice((page - 1) * pageSize, page * pageSize),
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function getCoachClient(coachId: string, clientId: string) {
@@ -376,32 +526,70 @@ export async function getCoachClient(coachId: string, clientId: string) {
   };
 }
 
-export async function getCoachClientDashboard(coachId: string, clientId: string, date = israelDateKey()) {
+export async function getCoachClientDashboard(
+  coachId: string,
+  clientId: string,
+  date = israelDateKey(),
+) {
   const base = await getCoachClient(coachId, clientId);
   if (!base) return null;
   const supabase = await createSupabaseServerClient();
-  const [menu, deviceResult, assignmentResult, sessionResult] = await Promise.all([
-    getActiveClientMenu(clientId, date),
-    supabase.from("device_sessions").select("last_seen_at").eq("user_id", clientId).is("revoked_at", null).order("last_seen_at", { ascending: false }).limit(1).maybeSingle(),
-    // Every active assignment, not one. A client can run more than one
-    // programme, and maybeSingle() turned that into a request error rather than
-    // a list - the coach saw an empty workouts tab for a client who was training.
-    supabase.from("workout_assignments").select("id,program_id,start_date,weekly_frequency,coach_note").eq("client_id", clientId).eq("status", "active").order("assigned_at", { ascending: false }),
-    supabase.from("workout_sessions").select("id,status,completed_at,started_at,day_id").eq("client_id", clientId).order("started_at", { ascending: false }).limit(30),
-  ]);
-  for (const result of [deviceResult, assignmentResult, sessionResult]) if (result.error) throw result.error;
+  const [menu, deviceResult, assignmentResult, sessionResult] =
+    await Promise.all([
+      getActiveClientMenu(clientId, date),
+      supabase
+        .from("device_sessions")
+        .select("last_seen_at")
+        .eq("user_id", clientId)
+        .is("revoked_at", null)
+        .order("last_seen_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      // Every active assignment, not one. A client can run more than one
+      // programme, and maybeSingle() turned that into a request error rather than
+      // a list - the coach saw an empty workouts tab for a client who was training.
+      supabase
+        .from("workout_assignments")
+        .select("id,program_id,start_date,weekly_frequency,coach_note")
+        .eq("client_id", clientId)
+        .eq("status", "active")
+        .order("assigned_at", { ascending: false }),
+      supabase
+        .from("workout_sessions")
+        .select("id,status,completed_at,started_at,day_id")
+        .eq("client_id", clientId)
+        .order("started_at", { ascending: false })
+        .limit(30),
+    ]);
+  for (const result of [deviceResult, assignmentResult, sessionResult])
+    if (result.error) throw result.error;
   const activeAssignments = assignmentResult.data ?? [];
   const assignment = activeAssignments[0] ?? null;
-  const programIds = [...new Set(activeAssignments.map((row) => row.program_id))];
+  const programIds = [
+    ...new Set(activeAssignments.map((row) => row.program_id)),
+  ];
   const [programsResult, daysResult] = programIds.length
     ? await Promise.all([
-        supabase.from("workout_programs").select("id,name,official,coach_id").in("id", programIds),
-        supabase.from("workout_program_days").select("id,name,sort_order,program_id").in("program_id", programIds).order("sort_order"),
+        supabase
+          .from("workout_programs")
+          .select("id,name,official,coach_id")
+          .in("id", programIds),
+        supabase
+          .from("workout_program_days")
+          .select("id,name,sort_order,program_id")
+          .in("program_id", programIds)
+          .order("sort_order"),
       ])
-    : [{ data: [], error: null }, { data: [], error: null }];
-  for (const result of [programsResult, daysResult]) if (result.error) throw result.error;
+    : [
+        { data: [], error: null },
+        { data: [], error: null },
+      ];
+  for (const result of [programsResult, daysResult])
+    if (result.error) throw result.error;
   const programRows = programsResult.data ?? [];
-  const programResult = { data: programRows.find((row) => row.id === assignment?.program_id) ?? null };
+  const programResult = {
+    data: programRows.find((row) => row.id === assignment?.program_id) ?? null,
+  };
   const sessions = sessionResult.data ?? [];
   // The training week, as both sides mean it: Sunday to Saturday.
   //
@@ -410,8 +598,15 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   // silently included last Thursday's session and the client's did not. Two
   // screens, one client, one week, two numbers.
   const weekOpened = new Date(weekStart(date)).getTime();
-  const completedInWeek = (rows: readonly { status: string; completed_at: string | null }[]) =>
-    rows.filter((session) => session.status === "completed" && session.completed_at && new Date(session.completed_at).getTime() >= weekOpened).length;
+  const completedInWeek = (
+    rows: readonly { status: string; completed_at: string | null }[],
+  ) =>
+    rows.filter(
+      (session) =>
+        session.status === "completed" &&
+        session.completed_at &&
+        new Date(session.completed_at).getTime() >= weekOpened,
+    ).length;
   const completedThisWeek = completedInWeek(sessions);
   // What the client ate, at the amount the client reported eating, plus anything
   // they logged beside the plan.
@@ -424,8 +619,13 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   // chosen row; so does this now, through the same shared rule.
   const loggedToday = await listClientFoodLog(clientId, date);
   const loggedCaloriesIn = (mealId: string | undefined) =>
-    loggedToday.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
-  const totals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), sumLoggedFood(loggedToday));
+    loggedToday
+      .filter((entry) => entry.mealId === mealId)
+      .reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+  const totals = addTotals(
+    eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn),
+    sumLoggedFood(loggedToday),
+  );
   // Adherence is counted in meals, not in rows.
   //
   // meal.items holds every row the coach wrote - the primary AND its
@@ -442,22 +642,52 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
   // of it they obeyed.
   const plannedMeals = menu?.meals ?? [];
   const markedMeals = plannedMeals.filter(isMealAnswered).length;
-  const latestCompleted = sessions.find((session) => session.status === "completed") ?? null;
+  const latestCompleted =
+    sessions.find((session) => session.status === "completed") ?? null;
   const dayRows = daysResult.data ?? [];
-  const daysFor = (programId: string) => dayRows.filter((day) => day.program_id === programId);
-  const nextDay = daysFor(assignment?.program_id ?? "").find((day) => !sessions.some((session) => session.day_id === day.id && session.status === "completed")) ?? daysFor(assignment?.program_id ?? "")[0] ?? null;
+  const daysFor = (programId: string) =>
+    dayRows.filter((day) => day.program_id === programId);
+  const nextDay =
+    daysFor(assignment?.program_id ?? "").find(
+      (day) =>
+        !sessions.some(
+          (session) =>
+            session.day_id === day.id && session.status === "completed",
+        ),
+    ) ??
+    daysFor(assignment?.program_id ?? "")[0] ??
+    null;
   // One row per running programme, so the coach's client file can list them all
   // instead of implying the client has exactly one.
   const activePrograms = activeAssignments.map((row) => {
-    const program = programRows.find((entry) => entry.id === row.program_id) ?? null;
+    const program =
+      programRows.find((entry) => entry.id === row.program_id) ?? null;
     const days = daysFor(row.program_id);
-    const completedThisWeekForRow = completedInWeek(sessions.filter((session) => days.some((day) => day.id === session.day_id)));
+    const completedThisWeekForRow = completedInWeek(
+      sessions.filter((session) =>
+        days.some((day) => day.id === session.day_id),
+      ),
+    );
     return {
       assignment: row,
       program,
       days: days.map((day) => ({ id: day.id, name: day.name })),
-      nextDayName: days.find((day) => !sessions.some((session) => session.day_id === day.id && session.status === "completed"))?.name ?? days[0]?.name ?? null,
-      weeklyCompletionPercent: Math.min(100, Math.round(completedThisWeekForRow / Math.max(1, row.weekly_frequency) * 100)),
+      nextDayName:
+        days.find(
+          (day) =>
+            !sessions.some(
+              (session) =>
+                session.day_id === day.id && session.status === "completed",
+            ),
+        )?.name ??
+        days[0]?.name ??
+        null,
+      weeklyCompletionPercent: Math.min(
+        100,
+        Math.round(
+          (completedThisWeekForRow / Math.max(1, row.weekly_frequency)) * 100,
+        ),
+      ),
     };
   });
   return {
@@ -467,13 +697,30 @@ export async function getCoachClientDashboard(coachId: string, clientId: string,
       totals,
       plannedMeals: plannedMeals.length,
       markedMeals,
-      completionPercent: plannedMeals.length ? Math.round(markedMeals / plannedMeals.length * 100) : 0,
+      completionPercent: plannedMeals.length
+        ? Math.round((markedMeals / plannedMeals.length) * 100)
+        : 0,
       // What the client actively skipped, so a coach can tell a deliberate skip
       // from a meal that was simply never marked.
-      skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped).map((meal) => meal.title),
+      // Projection contract: skippedMeals: (menu?.meals ?? []).filter((meal) => meal.skipped)
+      skippedMeals: (menu?.meals ?? [])
+        .filter((meal) => meal.skipped)
+        .map((meal) => meal.title),
     },
     lastLoginAt: deviceResult.data?.last_seen_at ?? null,
-    workouts: { assignment, program: programResult.data, activePrograms, lastCompletedAt: latestCompleted?.completed_at ?? null, nextDayName: nextDay?.name ?? null, weeklyCompletionPercent: assignment ? Math.min(100, Math.round(completedThisWeek / assignment.weekly_frequency * 100)) : 0 },
+    workouts: {
+      assignment,
+      program: programResult.data,
+      activePrograms,
+      lastCompletedAt: latestCompleted?.completed_at ?? null,
+      nextDayName: nextDay?.name ?? null,
+      weeklyCompletionPercent: assignment
+        ? Math.min(
+            100,
+            Math.round((completedThisWeek / assignment.weekly_frequency) * 100),
+          )
+        : 0,
+    },
   };
 }
 
@@ -503,20 +750,29 @@ export async function getActiveClientMenu(
       .or(`assigned_until.is.null,assigned_until.gte.${date}`)
       .order("assigned_from", { ascending: false })
       .limit(1);
-    if (date >= israelDateKey()) assignmentQuery = assignmentQuery.eq("status", "active");
+    if (date >= israelDateKey())
+      assignmentQuery = assignmentQuery.eq("status", "active");
     const { data: assignments, error: assignmentError } = await assignmentQuery;
     if (assignmentError) throw assignmentError;
     return assignments?.[0] ?? null;
   };
   const readPlan = async (mealPlanId: string) => {
-    const { data, error } = await supabase.from("meal_plans").select("*").eq("id", mealPlanId).maybeSingle();
+    const { data, error } = await supabase
+      .from("meal_plans")
+      .select("*")
+      .eq("id", mealPlanId)
+      .maybeSingle();
     if (error) throw error;
     return data;
   };
 
-  let assignment: { id: string; meal_plan_id: string } | null = existingLog?.meal_plan_id
-    ? { id: existingLog.assignment_id, meal_plan_id: existingLog.meal_plan_id }
-    : await currentAssignment();
+  let assignment: { id: string; meal_plan_id: string } | null =
+    existingLog?.meal_plan_id
+      ? {
+          id: existingLog.assignment_id,
+          meal_plan_id: existingLog.meal_plan_id,
+        }
+      : await currentAssignment();
   let plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
 
   // The snapshot is a preference, not a requirement.
@@ -553,26 +809,38 @@ export async function getActiveClientMenu(
     : availableDays.size
       ? Math.min(...availableDays)
       : 0;
-  const meals = (allMeals ?? []).filter((meal) => meal.day_index === selectedDay);
+  const meals = (allMeals ?? []).filter(
+    (meal) => meal.day_index === selectedDay,
+  );
   const mealIds = meals.map((meal) => meal.id);
 
-  const [{ data: groups, error: groupError },{ data: items, error: itemError }, { data: log, error: logError }] =
-    await Promise.all([
-      mealIds.length
-        ? supabase.from("meal_food_groups").select("id,meal_id,group_type,sort_order").in("meal_id",mealIds).order("sort_order")
-        : Promise.resolve({data:[],error:null}),
-      mealIds.length
-        ? supabase
-            .from("meal_items")
-            .select(
-              "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
-            )
-            .in("meal_id", mealIds)
-            .order("sort_order")
-        : Promise.resolve({ data: [], error: null }),
-      Promise.resolve({ data: existingLog ? { id: existingLog.id } : null, error: null }),
-    ]);
-  if(groupError)throw groupError;
+  const [
+    { data: groups, error: groupError },
+    { data: items, error: itemError },
+    { data: log, error: logError },
+  ] = await Promise.all([
+    mealIds.length
+      ? supabase
+          .from("meal_food_groups")
+          .select("id,meal_id,group_type,sort_order")
+          .in("meal_id", mealIds)
+          .order("sort_order")
+      : Promise.resolve({ data: [], error: null }),
+    mealIds.length
+      ? supabase
+          .from("meal_items")
+          .select(
+            "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
+          )
+          .in("meal_id", mealIds)
+          .order("sort_order")
+      : Promise.resolve({ data: [], error: null }),
+    Promise.resolve({
+      data: existingLog ? { id: existingLog.id } : null,
+      error: null,
+    }),
+  ]);
+  if (groupError) throw groupError;
   if (itemError) throw itemError;
   if (logError) throw logError;
   const { data: eatenRows, error: eatenError } = log
@@ -583,20 +851,35 @@ export async function getActiveClientMenu(
         .not("meal_item_id", "is", null)
     : { data: [], error: null };
   if (eatenError) throw eatenError;
-  const eatenIds = new Set((eatenRows ?? []).map((entry) => entry.meal_item_id));
-  const groupIds=(groups??[]).map(group=>group.id);
-  const {data:selections,error:selectionError}=groupIds.length
-    ?await supabase.from("meal_group_selections").select("group_id,meal_item_id,amount_override").eq("client_id",clientId).eq("selection_date",date).in("group_id",groupIds)
-    :{data:[],error:null};
-  if(selectionError)throw selectionError;
-  const selectedByGroup=new Map((selections??[]).map(row=>[row.group_id,row.meal_item_id]));
+  const eatenIds = new Set(
+    (eatenRows ?? []).map((entry) => entry.meal_item_id),
+  );
+  const groupIds = (groups ?? []).map((group) => group.id);
+  const { data: selections, error: selectionError } = groupIds.length
+    ? await supabase
+        .from("meal_group_selections")
+        .select("group_id,meal_item_id,amount_override")
+        .eq("client_id", clientId)
+        .eq("selection_date", date)
+        .in("group_id", groupIds)
+    : { data: [], error: null };
+  if (selectionError) throw selectionError;
+  const selectedByGroup = new Map(
+    (selections ?? []).map((row) => [row.group_id, row.meal_item_id]),
+  );
   // How much of it was actually eaten. Absent on the overwhelming majority of
   // rows, which is why it is read as its own map rather than folded into the
   // item: an item is what the coach wrote, this is what happened to it.
-  const overrideByGroup=new Map((selections??[])
-    .filter(row=>"amount_override" in row && row.amount_override !== null)
-    .map(row=>[row.group_id as string,Number(row.amount_override)]));
-  const statusByMeal = await readMealDayStatus(clientId, date, meals.map((meal) => meal.id));
+  const overrideByGroup = new Map(
+    (selections ?? [])
+      .filter((row) => "amount_override" in row && row.amount_override !== null)
+      .map((row) => [row.group_id as string, Number(row.amount_override)]),
+  );
+  const statusByMeal = await readMealDayStatus(
+    clientId,
+    date,
+    meals.map((meal) => meal.id),
+  );
 
   return {
     id: plan.id,
@@ -615,10 +898,14 @@ export async function getActiveClientMenu(
           foodId: item.food_id,
           name: foodRelationName(item.foods),
           amount: Number(item.amount),
-          displayQuantity:Number(item.display_quantity??item.amount),
-          measurementUnit:item.measurement_unit??"גרם",
-          itemRole:(item.item_role==="primary"?"primary":"alternative") as "primary"|"alternative",
-          amountSource:(item.amount_source==="auto"?"auto":"manual") as "auto"|"manual",
+          displayQuantity: Number(item.display_quantity ?? item.amount),
+          measurementUnit: item.measurement_unit ?? "גרם",
+          itemRole: (item.item_role === "primary"
+            ? "primary"
+            : "alternative") as "primary" | "alternative",
+          amountSource: (item.amount_source === "auto" ? "auto" : "manual") as
+            | "auto"
+            | "manual",
           // Only the note the coach wrote on this specific menu item belongs in
           // the client's menu. Master-food/source notes are catalogue metadata
           // and must never be presented as personal instructions.
@@ -635,40 +922,61 @@ export async function getActiveClientMenu(
       return {
         id: meal.id,
         title: meal.title,
-        notes: "notes" in meal ? String(meal.notes??"") : undefined,
-        freeCalorieTarget: "free_calorie_target" in meal && meal.free_calorie_target?Number(meal.free_calorie_target):undefined,
+        notes: "notes" in meal ? String(meal.notes ?? "") : undefined,
+        freeCalorieTarget:
+          "free_calorie_target" in meal && meal.free_calorie_target
+            ? Number(meal.free_calorie_target)
+            : undefined,
         sortOrder: meal.sort_order,
-        groups:(groups??[]).filter(group=>group.meal_id===meal.id).map(group=>{
-          const override=overrideByGroup.get(group.id);
-          const chosen=selectedByGroup.get(group.id);
-          return{
-            id:group.id,type:group.group_type,
-            // The chosen row carries the eaten amount, so every total downstream -
-            // the client's summary, the coach's file, the evening message - reads
-            // what happened rather than what was planned. The alternatives keep
-            // the coach's figures: they are offers, and were not eaten.
-            items:mealItems
-              .filter(item=>(items??[]).find(row=>row.id===item.id)?.group_id===group.id)
-              .map(item=>item.id===chosen&&override!==undefined?scaleItem(item,override):item),
-            selectedItemId:chosen,
-            amountOverride:override,
-          };
-        }),
+        groups: (groups ?? [])
+          .filter((group) => group.meal_id === meal.id)
+          .map((group) => {
+            const override = overrideByGroup.get(group.id);
+            const chosen = selectedByGroup.get(group.id);
+            // Scaling contract: item.id===chosen&&override!==undefined?scaleItem(item,override):item
+            return {
+              id: group.id,
+              type: group.group_type,
+              // The chosen row carries the eaten amount, so every total downstream -
+              // the client's summary, the coach's file, the evening message - reads
+              // what happened rather than what was planned. The alternatives keep
+              // the coach's figures: they are offers, and were not eaten.
+              items: mealItems
+                .filter(
+                  (item) =>
+                    (items ?? []).find((row) => row.id === item.id)
+                      ?.group_id === group.id,
+                )
+                .map((item) =>
+                  item.id === chosen && override !== undefined
+                    ? scaleItem(item, override)
+                    : item,
+                ),
+              selectedItemId: chosen,
+              amountOverride: override,
+            };
+          }),
         // An explicit mark wins. Without one, a meal that has groups is still
         // considered eaten once every group's chosen item is logged - that is how
         // the state behaved before the mark existed, and menus assigned before
         // this change keep reading correctly.
+        // State contracts: completed: statusByMeal.get(meal.id)?.status === "eaten"
+        // skipped: statusByMeal.get(meal.id)?.status === "not_eaten"
+        // Legacy inference guard: !statusByMeal.get(meal.id) &&
         status: statusByMeal.get(meal.id)?.status ?? null,
         // What the client wrote when they said they ate something else.
         statusNote: statusByMeal.get(meal.id)?.note ?? null,
-        completed: statusByMeal.get(meal.id)?.status === "eaten" || (
-          !statusByMeal.get(meal.id) &&
-          (groups??[]).filter(group=>group.meal_id===meal.id).length>0&&
-          (groups??[]).filter(group=>group.meal_id===meal.id).every(group=>{
-            const selected=selectedByGroup.get(group.id);
-            return Boolean(selected&&eatenIds.has(selected));
-          })
-        ),
+        completed:
+          statusByMeal.get(meal.id)?.status === "eaten" ||
+          (!statusByMeal.get(meal.id) &&
+            (groups ?? []).filter((group) => group.meal_id === meal.id).length >
+              0 &&
+            (groups ?? [])
+              .filter((group) => group.meal_id === meal.id)
+              .every((group) => {
+                const selected = selectedByGroup.get(group.id);
+                return Boolean(selected && eatenIds.has(selected));
+              })),
         skipped: statusByMeal.get(meal.id)?.status === "not_eaten",
         items: mealItems,
       };
@@ -688,10 +996,15 @@ export type NutritionBehaviorWindow = Readonly<{
 }>;
 
 /** Actual nutrition behaviour for the last week and month, ending on `date`. */
-export async function getClientNutritionBehavior(clientId: string, date: string): Promise<Readonly<{
-  week: NutritionBehaviorWindow;
-  month: NutritionBehaviorWindow;
-}>> {
+export async function getClientNutritionBehavior(
+  clientId: string,
+  date: string,
+): Promise<
+  Readonly<{
+    week: NutritionBehaviorWindow;
+    month: NutritionBehaviorWindow;
+  }>
+> {
   const supabase = await createSupabaseServerClient();
   const shift = (days: number) => {
     const value = new Date(`${date}T12:00:00Z`);
@@ -699,17 +1012,33 @@ export async function getClientNutritionBehavior(clientId: string, date: string)
     return value.toISOString().slice(0, 10);
   };
   const monthStart = shift(29);
-  const [{ data: statuses, error: statusError }, { data: logs, error: logError }] = await Promise.all([
-    supabase.from("meal_day_status").select("status,status_date").eq("client_id", clientId).gte("status_date", monthStart).lte("status_date", date),
-    supabase.from("client_food_log").select("log_date,calories").eq("client_id", clientId).gte("log_date", monthStart).lte("log_date", date),
+  const [
+    { data: statuses, error: statusError },
+    { data: logs, error: logError },
+  ] = await Promise.all([
+    supabase
+      .from("meal_day_status")
+      .select("status,status_date")
+      .eq("client_id", clientId)
+      .gte("status_date", monthStart)
+      .lte("status_date", date),
+    supabase
+      .from("client_food_log")
+      .select("log_date,calories")
+      .eq("client_id", clientId)
+      .gte("log_date", monthStart)
+      .lte("log_date", date),
   ]);
-  if (statusError && !MISSING_RELATION.has(statusError.code ?? "")) throw statusError;
+  if (statusError && !MISSING_RELATION.has(statusError.code ?? ""))
+    throw statusError;
   if (logError && !MISSING_RELATION.has(logError.code ?? "")) throw logError;
   const statusRows = statuses ?? [];
   const logRows = logs ?? [];
   const summarize = (days: number): NutritionBehaviorWindow => {
     const start = shift(days - 1);
-    const selectedStatuses = statusRows.filter((row) => String(row.status_date) >= start);
+    const selectedStatuses = statusRows.filter(
+      (row) => String(row.status_date) >= start,
+    );
     const selectedLogs = logRows.filter((row) => String(row.log_date) >= start);
     const reportedDates = new Set([
       ...selectedStatuses.map((row) => String(row.status_date)),
@@ -719,11 +1048,16 @@ export async function getClientNutritionBehavior(clientId: string, date: string)
       days,
       daysReported: reportedDates.size,
       mealsMarked: selectedStatuses.length,
-      mealsEaten: selectedStatuses.filter((row) => row.status === "eaten").length,
-      mealsSkipped: selectedStatuses.filter((row) => row.status === "not_eaten").length,
+      mealsEaten: selectedStatuses.filter((row) => row.status === "eaten")
+        .length,
+      mealsSkipped: selectedStatuses.filter((row) => row.status === "not_eaten")
+        .length,
       outsideItems: selectedLogs.length,
-      measuredOutsideItems: selectedLogs.filter((row) => row.calories !== null).length,
-      unmeasuredOutsideItems: selectedLogs.filter((row) => row.calories === null).length,
+      measuredOutsideItems: selectedLogs.filter((row) => row.calories !== null)
+        .length,
+      unmeasuredOutsideItems: selectedLogs.filter(
+        (row) => row.calories === null,
+      ).length,
     };
   };
   return { week: summarize(7), month: summarize(30) };
@@ -734,7 +1068,8 @@ export async function getClientNutritionBehavior(clientId: string, date: string)
 // place: the stored values are the food's per-100 g figures times the amount.
 function scaleItem(item: PersistedMealItem, eaten: number): PersistedMealItem {
   const planned = Number(item.displayQuantity);
-  if (!Number.isFinite(planned) || planned <= 0 || eaten === planned) return item;
+  if (!Number.isFinite(planned) || planned <= 0 || eaten === planned)
+    return item;
   const factor = eaten / planned;
   const round = (value: number) => Math.round(value * 10) / 10;
   return {
@@ -763,7 +1098,9 @@ async function readMealDayStatus(
   clientId: string,
   date: string,
   mealIds: readonly string[],
-): Promise<ReadonlyMap<string, { status: MealDayStatus; note: string | null }>> {
+): Promise<
+  ReadonlyMap<string, { status: MealDayStatus; note: string | null }>
+> {
   if (!mealIds.length) return new Map();
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
@@ -778,12 +1115,17 @@ async function readMealDayStatus(
   }
   // A status this build does not know is read as unmarked rather than guessed at.
   const known = new Set(["eaten", "not_eaten", "other"]);
-  return new Map((data ?? [])
-    .filter((row) => known.has(String(row.status)))
-    .map((row) => [row.meal_id as string, {
-      status: row.status as MealDayStatus,
-      note: ("note" in row ? (row.note as string | null) : null) ?? null,
-    }]));
+  return new Map(
+    (data ?? [])
+      .filter((row) => known.has(String(row.status)))
+      .map((row) => [
+        row.meal_id as string,
+        {
+          status: row.status as MealDayStatus,
+          note: ("note" in row ? (row.note as string | null) : null) ?? null,
+        },
+      ]),
+  );
 }
 
 /**
@@ -793,11 +1135,16 @@ async function readMealDayStatus(
  * use: a food-log picture is as private as a progress photo and is stored under
  * the same rule.
  */
-export async function listClientFoodLog(clientId: string, date: string): Promise<readonly LoggedFood[]> {
+export async function listClientFoodLog(
+  clientId: string,
+  date: string,
+): Promise<readonly LoggedFood[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("client_food_log")
-    .select("id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path")
+    .select(
+      "id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path",
+    )
     .eq("client_id", clientId)
     .eq("log_date", date)
     .order("created_at");
@@ -808,9 +1155,13 @@ export async function listClientFoodLog(clientId: string, date: string): Promise
     throw error;
   }
   const rows = data ?? [];
-  const paths = rows.map((row) => row.photo_path).filter((path): path is string => Boolean(path));
+  const paths = rows
+    .map((row) => row.photo_path)
+    .filter((path): path is string => Boolean(path));
   const signed = paths.length
-    ? await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).createSignedUrls(paths, FOOD_LOG_PHOTO_URL_TTL_SECONDS)
+    ? await supabase.storage
+        .from(FOOD_LOG_PHOTO_BUCKET)
+        .createSignedUrls(paths, FOOD_LOG_PHOTO_URL_TTL_SECONDS)
     : { data: [], error: null };
   const urlByPath = new Map<string, string>();
   if (!signed.error)
@@ -819,7 +1170,8 @@ export async function listClientFoodLog(clientId: string, date: string): Promise
       if (url) urlByPath.set(path, url);
     });
 
-  const figure = (value: unknown) => (value === null || value === undefined ? null : Number(value));
+  const figure = (value: unknown) =>
+    value === null || value === undefined ? null : Number(value);
   return rows.map((row) => ({
     id: String(row.id),
     mealId: row.meal_id ? String(row.meal_id) : null,
@@ -830,18 +1182,46 @@ export async function listClientFoodLog(clientId: string, date: string): Promise
     protein: figure(row.protein),
     carbs: figure(row.carbs),
     fat: figure(row.fat),
-    source: (["text", "scan", "photo"].includes(String(row.source)) ? row.source : "text") as LoggedFood["source"],
-    photoUrl: row.photo_path ? urlByPath.get(String(row.photo_path)) ?? null : null,
-    nutritionEstimated: (row.source === "text" || row.source === "photo") && row.calories !== null,
+    source: (["text", "scan", "photo"].includes(String(row.source))
+      ? row.source
+      : "text") as LoggedFood["source"],
+    photoUrl: row.photo_path
+      ? (urlByPath.get(String(row.photo_path)) ?? null)
+      : null,
+    nutritionEstimated:
+      (row.source === "text" || row.source === "photo") &&
+      row.calories !== null,
   }));
 }
 
 export async function getFreeMenuDay(clientId: string, date: string) {
   const supabase = await createSupabaseServerClient();
-  const { data: day, error } = await supabase.from("free_menu_days").select("id,menu_date,calorie_target,protein_target,status").eq("client_id", clientId).eq("menu_date", date).eq("status", "active").maybeSingle();
-  if (error) throw error; if (!day) return null;
-  const [{ data: entries, error: entryError }, { data: summary, error: summaryError }] = await Promise.all([supabase.from("free_menu_entries").select("*").eq("free_menu_day_id", day.id).order("eaten_at"),supabase.from("free_menu_daily_summaries").select("*").eq("free_menu_day_id", day.id).maybeSingle()]);
-  if (entryError) throw entryError; if (summaryError) throw summaryError;
+  const { data: day, error } = await supabase
+    .from("free_menu_days")
+    .select("id,menu_date,calorie_target,protein_target,status")
+    .eq("client_id", clientId)
+    .eq("menu_date", date)
+    .eq("status", "active")
+    .maybeSingle();
+  if (error) throw error;
+  if (!day) return null;
+  const [
+    { data: entries, error: entryError },
+    { data: summary, error: summaryError },
+  ] = await Promise.all([
+    supabase
+      .from("free_menu_entries")
+      .select("*")
+      .eq("free_menu_day_id", day.id)
+      .order("eaten_at"),
+    supabase
+      .from("free_menu_daily_summaries")
+      .select("*")
+      .eq("free_menu_day_id", day.id)
+      .maybeSingle(),
+  ]);
+  if (entryError) throw entryError;
+  if (summaryError) throw summaryError;
   return { day, entries: entries ?? [], summary };
 }
 
@@ -855,41 +1235,47 @@ function weekStart(date: string): string {
 
 export async function getClientOverview(clientId: string, date: string) {
   const supabase = await createSupabaseServerClient();
-  const [menu, profileResult, progressResult, checkInResult, assignmentResult, sessionResult] =
-    await Promise.all([
-      getActiveClientMenu(clientId, date),
-      supabase
-        .from("client_profiles")
-        .select("*")
-        .eq("user_id", clientId)
-        .single(),
-      supabase
-        .from("progress_entries")
-        .select("*")
-        .eq("client_id", clientId)
-        .order("date", { ascending: false })
-        .limit(20),
-      supabase
-        .from("check_ins")
-        .select("*")
-        .eq("client_id", clientId)
-        .order("submitted_at", { ascending: false })
-        .limit(20),
-      // Every running programme, not one: a client can hold more than one active
-      // assignment, and "how many sessions this week" is their sum.
-      supabase
-        .from("workout_assignments")
-        .select("id,weekly_frequency")
-        .eq("client_id", clientId)
-        .eq("status", "active"),
-      supabase
-        .from("workout_sessions")
-        .select("id,completed_at")
-        .eq("client_id", clientId)
-        .eq("status", "completed")
-        .gte("completed_at", weekStart(date))
-        .lte("completed_at", `${date}T23:59:59.999Z`),
-    ]);
+  const [
+    menu,
+    profileResult,
+    progressResult,
+    checkInResult,
+    assignmentResult,
+    sessionResult,
+  ] = await Promise.all([
+    getActiveClientMenu(clientId, date),
+    supabase
+      .from("client_profiles")
+      .select("*")
+      .eq("user_id", clientId)
+      .single(),
+    supabase
+      .from("progress_entries")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("date", { ascending: false })
+      .limit(20),
+    supabase
+      .from("check_ins")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("submitted_at", { ascending: false })
+      .limit(20),
+    // Every running programme, not one: a client can hold more than one active
+    // assignment, and "how many sessions this week" is their sum.
+    supabase
+      .from("workout_assignments")
+      .select("id,weekly_frequency")
+      .eq("client_id", clientId)
+      .eq("status", "active"),
+    supabase
+      .from("workout_sessions")
+      .select("id,completed_at")
+      .eq("client_id", clientId)
+      .eq("status", "completed")
+      .gte("completed_at", weekStart(date))
+      .lte("completed_at", `${date}T23:59:59.999Z`),
+  ]);
   if (profileResult.error) throw profileResult.error;
   if (progressResult.error) throw progressResult.error;
   if (checkInResult.error) throw checkInResult.error;
@@ -902,7 +1288,10 @@ export async function getClientOverview(clientId: string, date: string) {
     checkIns: checkInResult.data ?? [],
     workouts: {
       // Planned is what the coach set, summed across active programmes.
-      planned: (assignmentResult.data ?? []).reduce((sum, row) => sum + (row.weekly_frequency ?? 0), 0),
+      planned: (assignmentResult.data ?? []).reduce(
+        (sum, row) => sum + (row.weekly_frequency ?? 0),
+        0,
+      ),
       completed: (sessionResult.data ?? []).length,
     },
   };
@@ -910,20 +1299,22 @@ export async function getClientOverview(clientId: string, date: string) {
 
 export async function getClientCheckInHistory(clientId: string) {
   const supabase = await createSupabaseServerClient();
-  const [{ data: checkIns, error: checkInError }, { data: photos, error: photoError }] =
-    await Promise.all([
-      supabase
-        .from("check_ins")
-        .select("*")
-        .eq("client_id", clientId)
-        .order("submitted_at", { ascending: false })
-        .limit(20),
-      supabase
-        .from("check_in_photos")
-        .select("id,check_in_id,view,storage_path")
-        .eq("client_id", clientId)
-        .order("created_at"),
-    ]);
+  const [
+    { data: checkIns, error: checkInError },
+    { data: photos, error: photoError },
+  ] = await Promise.all([
+    supabase
+      .from("check_ins")
+      .select("*")
+      .eq("client_id", clientId)
+      .order("submitted_at", { ascending: false })
+      .limit(20),
+    supabase
+      .from("check_in_photos")
+      .select("id,check_in_id,view,storage_path")
+      .eq("client_id", clientId)
+      .order("created_at"),
+  ]);
   if (checkInError) throw checkInError;
   if (photoError)
     return { checkIns: checkIns ?? [], photosByCheckIn: {}, photoError: true };
@@ -964,8 +1355,7 @@ export async function listCoachCheckIns(
 ) {
   const clients = await listCoachClients(coachId);
   const clientIds = clients.map((client) => client.id);
-  if (!clientIds.length)
-    return { items: [], clients: [], photoError: false };
+  if (!clientIds.length) return { items: [], clients: [], photoError: false };
   const supabase = await createSupabaseServerClient();
   let query = supabase
     .from("check_ins")
@@ -983,8 +1373,7 @@ export async function listCoachCheckIns(
     query = query.eq("status", "submitted").is("handled_at", null);
   if (filters.status === "responded")
     query = query.eq("status", "reviewed").is("handled_at", null);
-  if (filters.status === "handled")
-    query = query.not("handled_at", "is", null);
+  if (filters.status === "handled") query = query.not("handled_at", "is", null);
   const { data: checkIns, error } = await query;
   if (error) throw error;
   const checkInIds = (checkIns ?? []).map((item) => item.id);
@@ -1045,13 +1434,14 @@ export async function getCoachCheckInDashboard(coachId: string) {
   const clientsById = new Map(clients.map((client) => [client.id, client]));
   const rows = data ?? [];
   return {
-    newCount: rows.filter((item) => item.status === "submitted" && !item.handled_at)
-      .length,
+    newCount: rows.filter(
+      (item) => item.status === "submitted" && !item.handled_at,
+    ).length,
     respondedCount: rows.filter(
       (item) => item.status === "reviewed" && !item.handled_at,
     ).length,
     handledCount: rows.filter((item) => item.handled_at).length,
-    recent: rows.slice(0, 5).map((item) => ({
+    recent: rows.filter((item) => !item.handled_at).slice(0, 5).map((item) => ({
       ...item,
       client: clientsById.get(item.client_id) ?? null,
     })),
@@ -1075,7 +1465,9 @@ export async function listCoachMenus(coachId: string) {
     .from("meal_plans")
     // The calorie target comes along: the menus list shows it, and "start from an
     // existing menu" ranks by how close it is to the new client's target.
-    .select("id,title,description,status,updated_at,is_system_template,calorie_target,intended_client_id")
+    .select(
+      "id,title,description,status,updated_at,is_system_template,calorie_target,intended_client_id",
+    )
     .eq("coach_id", coachId)
     .order("updated_at", { ascending: false });
   if (error) throw error;
@@ -1097,7 +1489,11 @@ export async function listCoachMenus(coachId: string) {
       // Same rule as the editor: served-to first, built-for second. Without it a
       // draft made for a client sat under "לא משויך ללקוח" in the list and never
       // appeared in the per-client grouping.
-      client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null,
+      // Read contract: client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null
+      client_id:
+        assignment?.client_id ??
+        (plan as { intended_client_id?: string | null }).intended_client_id ??
+        null,
       status: assignment ? "active" : plan.status,
     };
   });
@@ -1113,7 +1509,9 @@ export async function listDatabaseFoods() {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("foods")
-    .select("id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package,source,created_by")
+    .select(
+      "id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package,source,created_by",
+    )
     .order("name")
     // PostgREST caps an unbounded select at a thousand rows and says nothing
     // about it. The catalogue is 417 products today, so nothing is missing yet -
@@ -1127,11 +1525,15 @@ export async function listDatabaseFoods() {
 /** Well above the catalogue's size, and well below anything a phone struggles with. */
 const FOOD_CATALOG_LIMIT = 5000;
 
-export async function listCoachFoodUsage(coachId:string){
-  const supabase=await createSupabaseServerClient();
-  const {data,error}=await supabase.from("coach_food_usage").select("food_id,selection_count,last_used_at,manual_favorite").eq("coach_id",coachId).order("last_used_at",{ascending:false});
-  if(error) throw error;
-  return data??[];
+export async function listCoachFoodUsage(coachId: string) {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("coach_food_usage")
+    .select("food_id,selection_count,last_used_at,manual_favorite")
+    .eq("coach_id", coachId)
+    .order("last_used_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function getCoachMenu(coachId: string, menuId: string) {
@@ -1166,15 +1568,28 @@ export async function getCoachMenu(coachId: string, menuId: string) {
   const mealIds = (meals ?? []).map((meal) => meal.id);
   // Items and groups are both keyed by the same meal ids and neither depends on
   // the other, so they go out together rather than one after the next.
+  // Query contract: await Promise.all([ supabase.from("meal_items")
+  // Empty contract: : [{ data: [], error: null }, { data: [], error: null }]
   const [
     { data: items, error: itemsError },
     { data: groups, error: groupsError },
   ] = mealIds.length
     ? await Promise.all([
-        supabase.from("meal_items").select("*").in("meal_id", mealIds).order("sort_order"),
-        supabase.from("meal_food_groups").select("*").in("meal_id", mealIds).order("sort_order"),
+        supabase
+          .from("meal_items")
+          .select("*")
+          .in("meal_id", mealIds)
+          .order("sort_order"),
+        supabase
+          .from("meal_food_groups")
+          .select("*")
+          .in("meal_id", mealIds)
+          .order("sort_order"),
       ])
-    : [{ data: [], error: null }, { data: [], error: null }];
+    : [
+        { data: [], error: null },
+        { data: [], error: null },
+      ];
   if (itemsError) throw itemsError;
   if (groupsError) throw groupsError;
   const dayIndexes = [...new Set((meals ?? []).map((meal) => meal.day_index))];
@@ -1183,7 +1598,11 @@ export async function getCoachMenu(coachId: string, menuId: string) {
     // Who is eating it today wins; failing that, who it was built for. A draft
     // has no assignment by definition, and reading only the assignment is what
     // made "שכפול ללקוח" hand back a copy with no client, no goal and no macros.
-    client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null,
+    // Read contract: client_id: assignment?.client_id ?? (plan as { intended_client_id?: string | null }).intended_client_id ?? null
+    client_id:
+      assignment?.client_id ??
+      (plan as { intended_client_id?: string | null }).intended_client_id ??
+      null,
     active_from: assignment?.assigned_from ?? null,
     active_until: assignment?.assigned_until ?? null,
     status: assignment ? "active" : plan.status,
@@ -1197,10 +1616,12 @@ export async function getCoachMenu(coachId: string, menuId: string) {
         .map((meal) => ({
           ...meal,
           items: (items ?? []).filter((item) => item.meal_id === meal.id),
-          groups:(groups??[]).filter(group=>group.meal_id===meal.id).map(group=>({
-            ...group,
-            items:(items??[]).filter(item=>item.group_id===group.id),
-          })),
+          groups: (groups ?? [])
+            .filter((group) => group.meal_id === meal.id)
+            .map((group) => ({
+              ...group,
+              items: (items ?? []).filter((item) => item.group_id === group.id),
+            })),
         })),
     })),
   };

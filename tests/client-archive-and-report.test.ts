@@ -110,6 +110,20 @@ test("two measurements make a trend, and it carries both points", () => {
   assert.match(weight.basis, /2026-08-01 \(80\.5 ק״ג\).*2026-08-08 \(79 ק״ג\)/);
 });
 
+test("weight trend color follows the client's goal, not the mathematical sign", () => {
+  const weighIns = [{ date: "2026-09-15", weight: 82, navel: null }, { date: "2026-08-17", weight: 80, navel: null }];
+  const cut = buildClientReport({ ...EMPTY, weighIns, goalLabel: "חיטוב עדין" });
+  const bulk = buildClientReport({ ...EMPTY, weighIns, goalLabel: "מסה עדינה" });
+  assert.equal(cut.trends.find((trend) => trend.label === "משקל")?.outcome, "negative");
+  assert.equal(bulk.trends.find((trend) => trend.label === "משקל")?.outcome, "positive");
+
+  const weightLoss = [...weighIns].reverse();
+  const cutLoss = buildClientReport({ ...EMPTY, weighIns: weightLoss, goalLabel: "חיטוב מהיר" });
+  const bulkLoss = buildClientReport({ ...EMPTY, weighIns: weightLoss, goalLabel: "מסה מלוכלכת" });
+  assert.equal(cutLoss.trends.find((trend) => trend.label === "משקל")?.outcome, "positive");
+  assert.equal(bulkLoss.trends.find((trend) => trend.label === "משקל")?.outcome, "negative");
+});
+
 test("every recommendation carries the figures it came from", () => {
   const report = buildClientReport({
     ...EMPTY,
@@ -148,15 +162,90 @@ test("a reported pain becomes a referral, never a diagnosis", () => {
 test("the report view separates a number, a direction and a suggestion", async () => {
   const view = await source("components/coach/client-file/ClientReport.tsx");
   assert.match(view, /1 · נתונים שנאספו/);
-  assert.match(view, /2 · מגמות לעומת התקופה הקודמת/);
+  assert.match(view, /2 · מגמות במהלך 30 הימים/);
   assert.match(view, /3 · נקודות חיוביות/);
   assert.match(view, /4 · דורש תשומת לב/);
   assert.match(view, /5 · המלצות תזונה/);
   assert.match(view, /6 · המלצות אימונים/);
   assert.match(view, /7 · שאלות ללקוח/);
-  assert.match(view, /8 · פעולות מוצעות לשבוע הבא/);
+  assert.match(view, /8 · פעולות מוצעות לחודש הבא/);
   assert.match(view, /מבוסס על: \{point\.basis\}/);
   assert.match(view, /אין עדיין שתי נקודות זמן להשוואה/);
+});
+
+test("the improvement report analyzes thirty days instead of the latest check-in", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-08-17", end: "2026-09-15", days: 30 },
+    checkIns: [
+      { submittedAt: "2026-09-14", adherence: 8, energy: 7, sleep: 3, hunger: 6, workoutsCompleted: 2, mealPlanDays: 5, notes: null },
+      { submittedAt: "2026-09-07", adherence: 7, energy: 6, sleep: 4, hunger: 7, workoutsCompleted: 2, mealPlanDays: 4, notes: null },
+      { submittedAt: "2026-08-31", adherence: 6, energy: 5, sleep: 3, hunger: 8, workoutsCompleted: 1, mealPlanDays: 3, notes: null },
+    ],
+    hasMenu: true,
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    monthlyNutrition: { daysReported: 12, mealsMarked: 38, mealsEaten: 31, mealsSkipped: 7, outsideItems: 4 },
+    monthlyWorkouts: { completed: 5, skipped: 4, expected: 13, completionPercent: 38 },
+  });
+  assert.ok(report.facts.some((fact) => fact.label === "תקופת הניתוח" && fact.value.includes("30 ימים")));
+  assert.ok(report.attention.some((point) => point.basis.includes("על פני 3 צ׳ק־אינים")));
+  assert.ok(report.attention.some((point) => point.text.includes("אימוני החודש")));
+  assert.ok(report.attention.some((point) => point.basis.includes("12 ימי דיווח")));
+  assert.doesNotMatch(JSON.stringify(report.attention), /בדיווח האחרון|השבועיים/);
+});
+
+test("the monthly report creates an editable Eli-style message from its findings", async () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    clientName: "דני כהן",
+    goalLabel: "חיטוב מהיר",
+    period: { start: "2026-08-17", end: "2026-09-15", days: 30 },
+    checkIns: [{ submittedAt: "2026-09-14", adherence: 8, energy: 8, sleep: 3, hunger: 6, workoutsCompleted: 2, mealPlanDays: 5, notes: null }],
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    monthlyWorkouts: { completed: 11, skipped: 1, expected: 13, completionPercent: 85 },
+    lifetimeProgress: { startDate: "2026-06-01", latestDate: "2026-09-15", startWeight: 94, latestWeight: 87.6, weightChange: -6.4, startNavel: 101, latestNavel: 94, navelChange: -7 },
+  });
+  assert.match(report.clientMessage, /היי דני/);
+  assert.match(report.clientMessage, /דברים לשימור:/);
+  assert.match(report.clientMessage, /כל הכבוד/);
+  assert.match(report.clientMessage, /מתחילת התהליך ב־01\.06\.2026 ירדת 6\.4 ק״ג/);
+  assert.match(report.clientMessage, /מ־94 ל־87\.6 ק״ג/);
+  assert.match(report.clientMessage, /ירדת 7 ס״מ בהיקף הטבור/);
+  assert.match(report.clientMessage, /דברים לשיפור:/);
+  assert.match(report.clientMessage, /עקביות מנצחת הכול/);
+  assert.match(report.clientMessage, /אלי$/);
+  assert.doesNotMatch(report.clientMessage, /לשקול|שינוי בקלוריות|להתאים את תדירות|לשייך תוכנית/);
+
+  const composer = await source("components/coach/client-file/ClientReportMessage.tsx");
+  assert.match(composer, /העתקת ההודעה/);
+  assert.match(composer, /שליחה ללקוח/);
+  assert.match(composer, /sendMessage/);
+});
+
+test("the report prepares a separate weekly check-in reply and monthly summary", async () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    clientName: "דני כהן",
+    checkIns: [{ submittedAt: "2026-09-15T08:00:00Z", adherence: 6, energy: 8, sleep: 4, hunger: 8, workoutsCompleted: 2, mealPlanDays: 4, notes: null }],
+    hasProgram: true,
+    weeklyCompletionPercent: 67,
+    weeklyNutrition: { daysReported: 4, mealsMarked: 16, mealsEaten: 14, mealsSkipped: 2, outsideItems: 1 },
+    period: { start: "2026-08-17", end: "2026-09-15", days: 30 },
+  });
+  assert.match(report.weeklyClientMessage ?? "", /הצ׳ק־אין שמילאת ב־15\.09\.2026/);
+  assert.match(report.weeklyClientMessage ?? "", /נתוני השבוע האחרון/);
+  assert.match(report.weeklyClientMessage ?? "", /לשינה.*4\/10/);
+  assert.match(report.weeklyClientMessage ?? "", /מולאו 4 מתוך 7 ימים/);
+  assert.match(report.clientMessage, /החודש האחרון/);
+
+  const view = await source("components/coach/client-file/ClientReport.tsx");
+  assert.match(view, /משוב שבועי בעקבות הצ׳ק־אין האחרון/);
+  assert.match(view, /סיכום חודשי ללקוח/);
+  assert.match(view, /מתעדכן מיד עם קבלת צ׳ק־אין חדש/);
 });
 
 test("the versions migration is additive and freezes an approved version", async () => {

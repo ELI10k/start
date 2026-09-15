@@ -1,12 +1,14 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- private signed Supabase URLs are short-lived and intentionally unoptimized. */
 
-import { useActionState, useEffect, useRef } from "react";
-import { MessageSquare, Send } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Camera, MessageSquare, Send, X } from "lucide-react";
 import { sendMessage, type MessageState } from "@/app/actions/messages";
 import { StateBlock } from "@/components/client/AppPatterns";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { TOPIC_LABELS, type DirectMessage } from "@/lib/messages/types";
 import { useLiveRows } from "@/lib/supabase/use-live-rows";
+import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 
 const initial: MessageState = { ok: false };
 
@@ -44,6 +46,7 @@ export default function MessageThread({
   const [state, action] = useActionState(sendMessage, initial);
   const form = useRef<HTMLFormElement>(null);
   const end = useRef<HTMLDivElement>(null);
+  const [preview,setPreview]=useState("");
 
   // The other side's message arrives on its own. Without this the thread is
   // correct when it loads and wrong from the first reply onwards - which is how
@@ -60,9 +63,13 @@ export default function MessageThread({
   // A sent message should leave the box empty and be on screen. React resets the
   // form itself after a successful action; the scroll is ours to do.
   useEffect(() => {
-    if (state.ok) form.current?.reset();
+    if (state.ok) {
+      form.current?.reset();
+      if(preview)URL.revokeObjectURL(preview);
+      window.setTimeout(()=>setPreview(""),0);
+    }
     end.current?.scrollIntoView({ block: "nearest" });
-  }, [state.ok, messages.length]);
+  }, [state.ok, messages.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="message-thread">
@@ -75,6 +82,7 @@ export default function MessageThread({
                   <span className="message-bubble__topic">{TOPIC_LABELS[message.topic]}</span>
                 )}
                 <p>{message.body}</p>
+                {message.imageUrl&&<a href={message.imageUrl} target="_blank" rel="noreferrer"><img src={message.imageUrl} alt="תמונה שצורפה להודעה" className="mt-2 max-h-80 w-full rounded-xl object-contain"/></a>}
                 <span className="message-bubble__time">
                   {time(message.createdAt)}
                   {message.fromMe && message.readAt ? " · נקראה" : ""}
@@ -99,12 +107,13 @@ export default function MessageThread({
         <textarea
           id="message-body"
           name="body"
-          required
           maxLength={4000}
           rows={2}
           className="nutrition-input"
           placeholder={placeholder}
         />
+        {preview&&<div className="relative w-fit"><img src={preview} alt="תצוגה מקדימה של התמונה" className="max-h-32 rounded-xl"/><button type="button" aria-label="הסרת התמונה" onClick={()=>{if(preview)URL.revokeObjectURL(preview);setPreview("");const input=form.current?.elements.namedItem("image") as HTMLInputElement|null;if(input)input.value="";}} className="absolute -left-2 -top-2 rounded-full bg-black p-1 text-white"><X size={14}/></button></div>}
+        <label className="chip w-fit cursor-pointer"><Camera aria-hidden="true" size={17}/>צירוף תמונה<input name="image" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={async(event)=>{const input=event.currentTarget;const file=input.files?.[0];if(!file)return;const prepared=await shrinkImage(file);replaceInputFile(input,prepared);if(preview)URL.revokeObjectURL(preview);setPreview(URL.createObjectURL(prepared));}}/></label>
         <SubmitButton idle="שליחה" pending="שולחים…" icon={<Send aria-hidden="true" size={17} />} />
       </form>
 

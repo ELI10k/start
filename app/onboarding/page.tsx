@@ -5,6 +5,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GOAL_LABELS, NUTRITION_GOALS } from "@/lib/nutrition/energy";
 import { TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS } from "@/lib/workouts/trainee-level";
 import { INITIAL_NAVEL_MAX_CM, INITIAL_NAVEL_MIN_CM } from "@/lib/progress/measurements";
+import Link from "next/link";
+import LegalLinks from "@/components/legal/LegalLinks";
 
 // The client's own intake. It asks for exactly what the coach's form asks for,
 // because both write the same columns - a client who filled this in must be as
@@ -65,10 +67,11 @@ export default async function Onboarding() {
 
       <label className="mt-5 flex gap-3 text-sm">
         <input required name="terms" type="checkbox" />
-        אני מאשר/ת את תנאי השימוש ושמירת המידע לצורך הליווי.
+        <span>קראתי ואני מאשר/ת את <Link href="/terms" target="_blank" className="font-bold text-[#15803D] underline underline-offset-4">תנאי השימוש</Link> ואת <Link href="/privacy" target="_blank" className="font-bold text-[#15803D] underline underline-offset-4">מדיניות הפרטיות</Link>, לרבות שמירת המידע לצורך הליווי.</span>
       </label>
       <button className="mt-6 min-h-14 w-full rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF]">שמירה והמשך</button>
     </form>
+    <LegalLinks className="mt-8" />
   </div></main>;
 }
 

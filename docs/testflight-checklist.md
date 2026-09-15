@@ -90,3 +90,19 @@ which need those entitlements to function at all.
 `scripts/native-sync.mjs` prints it on every run. A TestFlight build pointed at a
 Preview URL is the easiest mistake here to make and the hardest to notice
 afterwards.
+
+## App Review readiness
+
+The in-app compliance surfaces are now part of the build:
+
+- public privacy policy at `/privacy`;
+- public terms at `/terms`;
+- public support page at `/app-support`;
+- permanent client account deletion in Profile;
+- allowlisted password login for the dedicated reviewer account.
+
+The submission notes, privacy-data inventory, external values and final device
+pass are tracked in `docs/app-store-review-package.md` and
+`docs/app-privacy-disclosure.md`. Those checklists are not optional: the code
+cannot supply a monitored support inbox, Apple membership, reviewer credentials,
+screenshots, or truthful App Store Connect answers by itself.

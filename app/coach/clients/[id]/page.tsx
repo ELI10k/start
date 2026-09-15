@@ -7,14 +7,14 @@ import ReviewCheckInForm from "@/components/coach/ReviewCheckInForm";
 import { listResponseTemplates } from "@/app/actions/response-templates";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { resetClientDevice } from "@/app/actions/product";
-import { getAuthContext, getCoachClientDashboard } from "@/lib/data/product-repository";
+import { getActiveClientMenu, getAuthContext, getClientNutritionBehavior, getCoachClientDashboard } from "@/lib/data/product-repository";
 import { bodyMassIndex, calculateEnergy, GOAL_LABELS, isNutritionGoal, MISSING_LABELS, type NutritionGoal, type Sex } from "@/lib/nutrition/energy";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-level";
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { daysSince, formatIsraelDateTime, israelDateKey, israelHour, israelWeekday } from "@/lib/date-time";
+import { daysSince, formatIsraelDate, formatIsraelDateTime, israelDateKey, israelHour, israelWeekday } from "@/lib/date-time";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
@@ -24,6 +24,7 @@ import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailE
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
 import ClientTabs from "@/components/coach/client-file/ClientTabs";
 import CheckInPhotoGallery from "@/components/client/CheckInPhotoGallery";
+import ProgressPhotoGallery from "@/components/client/ProgressPhotoGallery";
 import { CHECK_IN_PHOTO_BUCKET, CHECK_IN_PHOTO_URL_TTL_SECONDS } from "@/lib/check-ins/photo-storage";
 import { ArchiveClientPanel } from "@/components/coach/client-file/ArchiveClient";
 import ClientReportView from "@/components/coach/client-file/ClientReport";
@@ -31,15 +32,16 @@ import { buildClientReport } from "@/lib/coach-intelligence/client-report";
 import { CLIENT_TABS, isClientTab } from "@/lib/coach/client-tabs";
 import MessageThread from "@/components/messages/MessageThread";
 import { listThread, markThreadRead } from "@/lib/messages/repository";
-import WeeklySummaryPanel from "@/components/coach/WeeklySummaryPanel";
-import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 
 const date = (value: string | null) => value ? formatIsraelDateTime(value) : "אין נתון";
 const number = (value: number) => Math.round(value).toLocaleString("he-IL");
 
-export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string; tab?: string }> }) {
+export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string; tab?: string; date?: string }> }) {
   const auth = await getAuthContext(); if (!auth) redirect("/login"); if (auth.role !== "coach") redirect("/unauthorized");
-  const { id } = await params; const query=await searchParams; const data = await getCoachClientDashboard(auth.id, id); if (!data) notFound();
+  const { id } = await params; const query=await searchParams;
+  const todayKey=israelDateKey();
+  const selectedDate=/^\d{4}-\d{2}-\d{2}$/.test(query.date??"")&&(query.date??"")<=todayKey ? query.date! : todayKey;
+  const data = await getCoachClientDashboard(auth.id, id, selectedDate); if (!data) notFound();
   const lastCheckIn = data.checkIns[0] ?? null;
   const latestNavelMeasurement=data.progress.find((entry)=>entry.navel_circumference!==null);
   // "Requires attention" has to be able to be empty, or it is furniture.
@@ -68,6 +70,9 @@ export default async function CoachClientPage({ params, searchParams }: { params
   // overview tab, which shows no photos at all, was the one on screen. Each
   // query now belongs to the tab that renders it.
   const tab = isClientTab(query.tab) ? query.tab : "overview";
+  const weekStartDate=new Date(`${todayKey}T12:00:00Z`);weekStartDate.setUTCDate(weekStartDate.getUTCDate()-israelWeekday(todayKey));
+  const weekDates=Array.from({length:israelWeekday(todayKey)+1},(_,index)=>{const value=new Date(weekStartDate);value.setUTCDate(value.getUTCDate()+index);return value.toISOString().slice(0,10)});
+  const weekNutrition=tab==="overview"?await Promise.all(weekDates.map(async(day)=>{const[menu,logs]=await Promise.all([getActiveClientMenu(id,day),listClientFoodLog(id,day)]);const meals=menu?.meals??[];const answered=meals.filter((meal)=>Boolean(meal.status||meal.completed)).length;return{day,planned:meals.length,answered,skipped:meals.filter((meal)=>meal.status==="not_eaten").length,photos:logs.filter((entry)=>entry.photoUrl).length}})):[];
   const none = <T,>() => Promise.resolve({ data: [] as T[] });
   const [{ data: invitations }, { data: contentRows }, { data: contentAssignments }, { data: clientNotifications }, { data: coachNotes }]=await Promise.all([
     // The pill under the client's name needs the newest invitation on every tab.
@@ -104,6 +109,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
       if (!signedUrl) return;
       (photosByCheckIn[photo.check_in_id] ??= []).push({ id: photo.id, view: photo.view, signedUrl });
     });
+  const progressPhotoSessions = tab === "progress" ? data.checkIns.flatMap((entry) => {
+    const photos=photosByCheckIn[entry.id]??[];
+    return photos.length?[{checkInId:entry.id,submittedAt:entry.submitted_at,photos}]:[];
+  }) : [];
 
   // Whether the client has actually opened what the coach sent. The review
   // notification carries the check-in's id, and notifications already record
@@ -122,12 +131,9 @@ export default async function CoachClientPage({ params, searchParams }: { params
   // were missed.
   // What the client says they actually ate today, in their own words and their
   // own photographs. Read on the tab that shows it and nowhere else.
-  const loggedFood = tab === "nutrition" ? await listClientFoodLog(id, israelDateKey()) : [];
+  const loggedFood = tab === "nutrition" ? await listClientFoodLog(id, selectedDate) : [];
   const loggedTotals = sumLoggedFood(loggedFood);
-  const [weeklySummaries, responseTemplates] = await Promise.all([
-    tab === "report" ? getWeeklySummaries(id) : Promise.resolve([]),
-    tab === "progress" ? listResponseTemplates() : Promise.resolve([]),
-  ]);
+  const responseTemplates = tab === "progress" ? await listResponseTemplates() : [];
   // Only when the tab is open: loading a conversation to render a tab nobody
   // clicked is the same waste as signing every photo for the overview.
   const messages = tab === "messages" ? await listThread(id) : [];
@@ -139,6 +145,9 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const weightChange = latestWeighIn && previousWeighIn
     ? Number(latestWeighIn.weight) - Number(previousWeighIn.weight)
     : null;
+  const selectedDateValue=new Date(`${selectedDate}T12:00:00Z`);
+  const selectedWeekday=israelWeekday(selectedDate);
+  const coachNutritionDays=Array.from({length:7},(_,index)=>{const day=new Date(selectedDateValue);day.setUTCDate(day.getUTCDate()-selectedWeekday+index);return day.toISOString().slice(0,10)}).filter((day)=>day<=todayKey);
   // Whether the account is verified is one line on one card. Reaching for the
   // admin key to read it should not be able to take the whole client file down -
   // it does exactly that on any deployment without the service role key, which
@@ -182,14 +191,35 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const macros=energy.ok && latestWeighIn?.weight
     ? calculateMacroTargetResult(Number(latestWeighIn.weight), energy.calorieTarget)
     : null;
+  const reportStartDate=new Date(`${todayKey}T12:00:00Z`);
+  reportStartDate.setUTCDate(reportStartDate.getUTCDate()-29);
+  const reportStart=reportStartDate.toISOString().slice(0,10);
+  const reportBehavior=tab==="report"?await Promise.all([
+    getClientNutritionBehavior(id,todayKey),
+    supabase.from("workout_sessions").select("id,completed_at").eq("client_id",id).eq("status","completed").gte("completed_at",`${reportStart}T00:00:00Z`).lte("completed_at",`${todayKey}T23:59:59Z`),
+    supabase.from("workout_schedule_changes").select("id,original_date").eq("client_id",id).eq("status","skipped").gte("original_date",reportStart).lte("original_date",todayKey),
+  ]):null;
+  if (reportBehavior?.[1].error) throw reportBehavior[1].error;
+  if (reportBehavior?.[2].error) throw reportBehavior[2].error;
+  const assignmentStart=data.workouts.assignment?.start_date && data.workouts.assignment.start_date>reportStart?data.workouts.assignment.start_date:reportStart;
+  const activeReportDays=Math.min(30,Math.max(1,Math.floor((new Date(`${todayKey}T12:00:00Z`).getTime()-new Date(`${assignmentStart}T12:00:00Z`).getTime())/86_400_000)+1));
+  const monthlyExpected=data.workouts.assignment?Math.max(1,Math.round(Number(data.workouts.assignment.weekly_frequency)*activeReportDays/7)):0;
+  const monthlyCompleted=reportBehavior?.[1].data?.length??0;
+  const monthlySkipped=reportBehavior?.[2].data?.length??0;
+  const processStartWeighIn=data.progress.at(-1)??null;
+  const processLatestWeighIn=data.progress[0]??null;
+  const processNavelEntries=data.progress.filter((entry)=>entry.navel_circumference!==null);
+  const processStartNavel=processNavelEntries.at(-1)??null;
+  const processLatestNavel=processNavelEntries[0]??null;
   // Assembled from the client's own records. Every figure below is one the
   // database holds; nothing is generated here.
   // Built on the tab that prints it. It reads no database of its own, but it
   // walks every weigh-in and every check-in the client has ever filed, on every
   // load of a screen that shows it one time in eight.
   const report=tab==="report"?buildClientReport({
-    weighIns: data.progress.map((entry) => ({ date: entry.date, weight: Number(entry.weight), navel: entry.navel_circumference === null ? null : Number(entry.navel_circumference) })),
-    checkIns: data.checkIns.map((entry) => ({
+    clientName:data.profile.full_name,
+    weighIns: data.progress.filter((entry)=>entry.date>=reportStart&&entry.date<=todayKey).map((entry) => ({ date: entry.date, weight: Number(entry.weight), navel: entry.navel_circumference === null ? null : Number(entry.navel_circumference) })),
+    checkIns: data.checkIns.filter((entry)=>entry.submitted_at.slice(0,10)>=reportStart&&entry.submitted_at.slice(0,10)<=todayKey).map((entry) => ({
       submittedAt: entry.submitted_at, adherence: entry.adherence ?? null, energy: entry.energy ?? null,
       sleep: entry.sleep ?? null, hunger: entry.hunger ?? null,
       workoutsCompleted: entry.workouts_completed ?? null, mealPlanDays: entry.meal_plan_days ?? null,
@@ -205,6 +235,25 @@ export default async function CoachClientPage({ params, searchParams }: { params
     lastWorkoutAt: data.workouts.lastCompletedAt,
     goalLabel: isNutritionGoal(intake?.nutrition_goal) ? GOAL_LABELS[intake.nutrition_goal] : null,
     calorieTarget: energy.ok ? energy.calorieTarget : null,
+    period:{start:reportStart,end:todayKey,days:30},
+    weeklyNutrition:reportBehavior?.[0].week,
+    monthlyNutrition:reportBehavior?.[0].month,
+    monthlyWorkouts:data.workouts.assignment?{
+      completed:monthlyCompleted,
+      skipped:monthlySkipped,
+      expected:monthlyExpected,
+      completionPercent:Math.min(100,Math.round(monthlyCompleted/Math.max(1,monthlyExpected)*100)),
+    }:undefined,
+    lifetimeProgress:processStartWeighIn&&processLatestWeighIn?{
+      startDate:processStartWeighIn.date,
+      latestDate:processLatestWeighIn.date,
+      startWeight:Number(processStartWeighIn.weight),
+      latestWeight:Number(processLatestWeighIn.weight),
+      weightChange:Number((Number(processLatestWeighIn.weight)-Number(processStartWeighIn.weight)).toFixed(1)),
+      startNavel:processStartNavel?Number(processStartNavel.navel_circumference):null,
+      latestNavel:processLatestNavel?Number(processLatestNavel.navel_circumference):null,
+      navelChange:processStartNavel&&processLatestNavel?Number((Number(processLatestNavel.navel_circumference)-Number(processStartNavel.navel_circumference)).toFixed(1)):null,
+    }:undefined,
   }):null;
 
   return <main className="client-app-content">
@@ -240,6 +289,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
     <ClientTabs clientId={id} active={tab}/>
 
     {tab === "overview" && <div className="mt-5 grid gap-4">
+      <section className="premium-card"><div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-black">השבוע של הלקוח</h2><span className="text-xs text-[#5B5F5B]">מיום ראשון ועד היום</span></div><dl className="compact-data-list mt-3"><div><span>אימונים</span><strong>{data.workouts.weeklyCompletionPercent}% הושלמו</strong></div><div><span>ימי תזונה מלאים</span><strong>{weekNutrition.filter((day)=>day.planned>0&&day.answered===day.planned).length} מתוך {weekNutrition.filter((day)=>day.planned>0).length}</strong></div><div><span>ארוחות שלא נאכלו</span><strong>{weekNutrition.reduce((sum,day)=>sum+day.skipped,0)}</strong></div><div><span>תמונות אוכל</span><strong>{weekNutrition.reduce((sum,day)=>sum+day.photos,0)}</strong></div><div><span>שינוי במשקל</span><strong>{weightChange===null?"אין מספיק מדידות":`${weightChange>0?"+":""}${weightChange.toFixed(1)} ק״ג`}</strong></div><div><span>צ׳ק־אין אחרון</span><strong>{lastCheckIn?date(lastCheckIn.submitted_at):"טרם הוגש"}</strong></div></dl><div className="mt-3 flex gap-2"><Link href={`/coach/clients/${id}?tab=nutrition`} className="chip">פירוט תזונה</Link><Link href={`/coach/clients/${id}?tab=workouts`} className="chip">פירוט אימונים</Link></div></section>
       <section className="premium-card">
         <h2 className="font-black">מצב הלקוח</h2>
         <dl className="compact-data-list mt-3">
@@ -280,6 +330,16 @@ export default async function CoachClientPage({ params, searchParams }: { params
 
       {tab === "nutrition" && <>
       <Section title="תזונה" summary={data.menu ? data.menu.title : "אין תפריט פעיל"} open>
+        <form method="get" className="mb-4 flex flex-wrap items-end gap-3 rounded-2xl bg-[#F7F8F7] p-3">
+          <input type="hidden" name="tab" value="nutrition"/>
+          <label className="min-w-52 flex-1 text-sm font-bold">יום לצפייה<input name="date" type="date" max={todayKey} defaultValue={selectedDate} className="nutrition-input mt-1"/></label>
+          <button className="premium-secondary-button">הצגת יום</button>
+          {selectedDate!==todayKey&&<Link href={`/coach/clients/${id}?tab=nutrition`} className="chip">חזרה להיום</Link>}
+        </form>
+        <nav aria-label="ימי התזונה בשבוע" className="mb-4 grid grid-cols-7 gap-1">
+          {coachNutritionDays.map((day)=><Link key={day} href={`/coach/clients/${id}?tab=nutrition&date=${day}`} aria-current={day===selectedDate?"date":undefined} className={`rounded-xl px-1 py-2 text-center text-xs font-bold ${day===selectedDate?"bg-[#16A34A] text-white":"border border-[#E5E7E5] bg-white text-[#5B5F5B]"}`}>{formatIsraelDate(`${day}T12:00:00Z`,{weekday:"short",day:"numeric"})}</Link>)}
+        </nav>
+        <p className="mb-4 text-sm font-bold text-[#3F433F]">{formatIsraelDate(`${selectedDate}T12:00:00Z`,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</p>
         {data.menu ? <>
           <dl className="compact-data-list">
             <div><span>ארוחות שסומנו היום</span><strong>{data.nutrition.completionPercent}%</strong></div>
@@ -289,7 +349,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
           </dl>
           {/* Meals, not rows: a meal holds a primary and its alternatives, and
               only one of them is ever eaten. */}
-          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו היום (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
+          <p className="mt-3 text-sm text-[#5B5F5B]">{data.nutrition.markedMeals} מתוך {data.nutrition.plannedMeals} ארוחות נענו ביום זה (נאכלה, לא נאכלה או נאכל משהו אחר).</p>
           {/* The figures above already read what the client reported eating. This
               says where that differs from what was written - which is the part
               that changes what a coach does next. A day eaten as prescribed
@@ -330,6 +390,17 @@ export default async function CoachClientPage({ params, searchParams }: { params
               {data.nutrition.skippedMeals.map((title) => <span key={title} className="pill pill--red">{title}</span>)}
             </p>
           )}
+          <div className="mt-5 border-t border-[#E5E7E5] pt-4">
+            <h3 className="text-sm font-black text-[#3F433F]">התפריט והדיווח בפועל</h3>
+            <div className="mt-3 grid gap-3">
+              {data.menu.meals.map((meal) => <article key={meal.id} className="rounded-2xl border border-[#E5E7E5] p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="font-black">{meal.title}</h4><span className={`pill ${meal.status==="not_eaten"?"pill--red":meal.status||meal.completed?"pill--green":""}`}>{meal.status==="not_eaten"?"לא נאכלה":meal.status==="other"?"נאכל משהו אחר":meal.status==="eaten"||meal.completed?"נאכלה":"לא סומנה"}</span></div>
+                {meal.groups.length?<div className="mt-3 grid gap-2">{meal.groups.map((group,index)=>{const chosen=group.items.find((item)=>item.id===group.selectedItemId)??group.items.find((item)=>item.itemRole==="primary")??group.items[0];return <div key={`${meal.id}-${index}`} className="rounded-xl bg-[#F7F8F7] px-3 py-2 text-sm"><strong>{chosen?.name??"לא נבחר מאכל"}</strong>{chosen&&<span className="mr-2 text-[#5B5F5B]">{group.amountOverride??chosen.displayQuantity} {chosen.measurementUnit} · {Math.round(chosen.calories??0)} קל׳</span>}</div>})}</div>:meal.freeCalorieTarget?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.freeCalorieTarget} קל׳ חופשיות</p>:null}
+                {meal.notes&&<p className="mt-2 text-xs text-[#5B5F5B]">{meal.notes}</p>}
+                <LoggedFoodList entries={loggedFood.filter((entry)=>entry.mealId===meal.id)} readOnly/>
+              </article>)}
+            </div>
+          </div>
         </> : <Empty text="ללקוח עדיין לא שויך תפריט פעיל."/>}
 
         {/* The target itself, from the same engine the builder uses. Adherence
@@ -434,14 +505,12 @@ export default async function CoachClientPage({ params, searchParams }: { params
           <Link href={`/coach/clients/${id}/check-ins`} className="chip">כל הצ׳ק־אינים</Link>
         </div>
       </Section>
+      <ProgressPhotoGallery sessions={progressPhotoSessions} error={Boolean(signedPhotos.error)}/>
       </>}
 
       {tab === "report" && <div className="grid gap-4">
-        {report && <ClientReportView report={report}/>}
-        {/* The weekly summary the AI coach writes, under its own heading, so a
-            coach can always tell the counted lines from the written ones. */}
-        <WeeklySummaryPanel summaries={weeklySummaries}/>
-        <p className="text-xs text-[#5B5F5B]">הדוח אינו נשלח ללקוח אוטומטית. עריכה ושמירת גרסה מאושרת דורשות עמודות שעדיין אינן קיימות — ראו את המיגרציה המוכנה ב־<code>202608120002</code>.</p>
+        {report && <ClientReportView report={report} clientId={id}/>}
+        <p className="text-xs text-[#5B5F5B]">הדוח אינו נשלח ללקוח אוטומטית ונשאר פרטי למאמן.</p>
       </div>}
 
       {/* Only the notes. Content assignment and push notifications are coach

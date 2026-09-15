@@ -24,7 +24,7 @@ export default async function CoachDashboard() {
   if (auth.role !== "coach") redirect("/unauthorized");
 
   const supabase = await createSupabaseServerClient();
-  const [clients, menus, unreadNotifications, checkIns, attention, threads, nutritionProposals] = await Promise.all([
+  const [clients, menus, unreadNotifications, checkIns, attention, threads, nutritionProposals, handledWorkouts] = await Promise.all([
     listCoachClients(auth.id),
     listCoachMenus(auth.id),
     getUnreadNotificationCount(),
@@ -36,6 +36,7 @@ export default async function CoachDashboard() {
     supabase.from("nutrition_adaptation_proposals")
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
+    supabase.from("coach_workout_reviews").select("workout_session_id").eq("coach_id",auth.id),
   ]);
   const pendingProposals = nutritionProposals.count ?? 0;
 
@@ -50,6 +51,7 @@ export default async function CoachDashboard() {
   // them have not even been read yet.
   const waitingThreads = threads.filter((thread) => thread.awaitingReply);
   const pendingCheckIns = checkIns.newCount + checkIns.respondedCount;
+  const openCheckIns = checkIns.recent.filter((item) => !item.handled_at);
 
   return <main className="px-4 py-10 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-7xl">
@@ -112,23 +114,23 @@ export default async function CoachDashboard() {
           </div>
           <Link href="/coach/check-ins" className="text-sm font-bold text-[#16A34A]">לכל הצ׳ק־אינים</Link>
         </div>
-        {checkIns.recent.length
+        {openCheckIns.length
           ? <div className="mt-4 grid gap-2">
-              {checkIns.recent.map((item) =>
+              {openCheckIns.map((item) =>
                 <Link key={item.id} href={`/coach/check-ins#check-in-${item.id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] p-3 text-sm">
                   <span>
                     <strong>{item.client?.full_name ?? "לקוח"}</strong>
                     <span className="mr-2 text-[#5B5F5B]">{new Date(item.submitted_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</span>
                   </span>
-                  <span className={item.handled_at ? "text-[#16A34A]" : "text-[#0B0B0B]"}>
-                    {item.handled_at ? "טופל" : item.status === "reviewed" ? "נענתה" : "חדש"}
+                  <span className="text-[#0B0B0B]">
+                    {item.status === "reviewed" ? "נענתה — ממתין לטיפול" : "חדש"}
                   </span>
                 </Link>)}
             </div>
           : <p className="mt-4 rounded-xl border border-dashed border-[#E5E7E5] p-8 text-center text-[#5B5F5B]">אין צ׳ק־אינים להצגה.</p>}
       </section>
 
-      <DashboardWorkoutActivity/>
+      <DashboardWorkoutActivity handledIds={(handledWorkouts.data??[]).map((row)=>row.workout_session_id)}/>
 
       {/* Three shortcuts, not eight. The other five were all reachable from the
           navigation directly above them. */}
@@ -144,11 +146,11 @@ export default async function CoachDashboard() {
       {/* The counters last: they describe the practice, they do not ask for
           anything. */}
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Metric label="לקוחות פעילים" value={clients.length}/>
-        <Metric label="תפריטים" value={menus.length}/>
-        <Metric label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
-        <Metric label="ממתינים לטיפול" value={pendingCheckIns}/>
-        <Metric label="התראות פתוחות" value={unreadNotifications}/>
+        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
+        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
+        <Metric href="/coach/check-ins?status=new" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
+        <Metric href="/coach/check-ins" label="ממתינים לטיפול" value={pendingCheckIns}/>
+        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
       </section>
     </div>
   </main>;
@@ -165,11 +167,11 @@ function waitedFor(value: string) {
   return `לפני ${days} ${days === 1 ? "יום" : "ימים"}`;
 }
 
-function Metric({ label, value }: { label: string; value: number }) {
-  return <div className="start-surface rounded-[22px] p-4">
+function Metric({ label, value, href }: { label: string; value: number; href: string }) {
+  return <Link href={href} className="start-surface rounded-[22px] p-4 transition hover:border-[#16A34A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#16A34A]">
     <strong className="text-2xl">{value}</strong>
     <span className="mt-1 block text-xs text-[#5B5F5B]">{label}</span>
-  </div>;
+  </Link>;
 }
 
 function Quick({ href, label, primary = false }: { href: string; label: string; primary?: boolean }) {

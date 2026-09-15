@@ -41,8 +41,12 @@ export async function sendMessage(_state: MessageState, form: FormData): Promise
   if (!auth) return { ok: false, message: "יש להתחבר מחדש." };
 
   const body = String(form.get("body") ?? "").trim();
-  if (!body) return { ok: false, message: FAILURES.empty_message };
+  const image=form.get("image");
+  const photo=image instanceof File&&image.size>0?image:null;
+  if (!body&&!photo) return { ok: false, message: FAILURES.empty_message };
   if (body.length > 4000) return { ok: false, message: FAILURES.message_too_long };
+  if(photo&&(!["image/jpeg","image/png","image/webp"].includes(photo.type)||photo.size>5*1024*1024))
+    return {ok:false,message:"אפשר לצרף תמונת JPEG, PNG או WebP בגודל של עד 5MB."};
 
   const topic = String(form.get("topic") ?? "general");
   if (!TOPICS.has(topic)) return { ok: false, message: "נושא לא מוכר." };
@@ -54,11 +58,18 @@ export async function sendMessage(_state: MessageState, form: FormData): Promise
     return { ok: false, message: FAILURES.client_required };
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.rpc("send_coach_client_message", {
-    p_body: body,
-    p_topic: topic,
-    p_client_id: auth.role === "coach" ? clientId : null,
-  });
+  let imagePath:string|null=null;
+  if(photo){
+    const extension=photo.type==="image/png"?"png":photo.type==="image/webp"?"webp":"jpg";
+    imagePath=`${clientId}/${crypto.randomUUID()}.${extension}`;
+    const{error:uploadError}=await supabase.storage.from("message-images").upload(imagePath,photo,{contentType:photo.type,upsert:false});
+    if(uploadError)return{ok:false,message:"התמונה לא עלתה. יש לנסות שוב."};
+  }
+  const payload={p_body:body,p_topic:topic,p_client_id:auth.role==="coach"?clientId:null};
+  const { error } = imagePath
+    ?await supabase.rpc("send_coach_client_message_with_image",{...payload,p_image_path:imagePath})
+    :await supabase.rpc("send_coach_client_message",payload);
+  if(error&&imagePath)await supabase.storage.from("message-images").remove([imagePath]);
   if (error) return { ok: false, message: describe(error) };
 
   // The row is written and the outbox is filled by a trigger; this is what

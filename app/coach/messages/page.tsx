@@ -12,6 +12,7 @@ const filters = [
   // Whose turn it is, which is the only question that produces work. Unread is
   // a different question and gets its own view rather than being the default.
   { value: "waiting", label: "ממתינות לתשובה" },
+  { value: "client", label: "ממתינות ללקוח" },
   { value: "unread", label: "לא נקראו" },
   { value: "all", label: "הכול" },
 ] as const;
@@ -47,6 +48,7 @@ export default async function CoachMessagesPage({ searchParams }: { searchParams
   const visible = named.filter((thread) => {
     if (needle && !`${thread.name} ${thread.lastBody}`.toLocaleLowerCase("he").includes(needle)) return false;
     if (filter === "waiting") return thread.awaitingReply;
+    if (filter === "client") return !thread.awaitingReply;
     if (filter === "unread") return thread.unread > 0;
     return true;
   });
@@ -67,7 +69,10 @@ export default async function CoachMessagesPage({ searchParams }: { searchParams
         <h1>הודעות</h1>
         <span>כל השיחות עם הלקוחות שלך, ומי מחכה לתשובה.</span>
       </div>
-      <span className="pill pill--green">{named.filter((thread) => thread.awaitingReply).length}</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link href="/coach/messages/new" className="premium-primary-button">שליחת הודעה ללקוח</Link>
+        <span className="pill pill--green">{named.filter((thread) => thread.awaitingReply).length}</span>
+      </div>
     </header>
 
     {/* A plain GET form, like the clients and menus screens: it works without JS
@@ -119,7 +124,7 @@ export default async function CoachMessagesPage({ searchParams }: { searchParams
       </div>
     )}
 
-    {neverWritten.length > 0 && <section className="mt-8">
+    {filter === "all" && neverWritten.length > 0 && <section className="mt-8">
       <h2 className="section-heading section-heading--compact">לקוחות שעוד לא התחלת איתם שיחה</h2>
       <ul className="mt-3 grid gap-2">
         {neverWritten.map((client) =>

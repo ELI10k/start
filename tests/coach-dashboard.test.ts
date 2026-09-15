@@ -29,3 +29,23 @@ test("coach dashboard migration grants session visibility only to direct coaches
   assert.match(sql, /public\.is_coach_for\(user_id\)/);
   assert.match(sql, /where revoked_at is null/);
 });
+
+test("handled check-ins and workouts leave the coach dashboard queue", async () => {
+  const [repository, dashboard, activity, action, migration, nav] = await Promise.all([
+    source("lib/data/product-repository.ts"),
+    source("app/coach/page.tsx"),
+    source("components/workouts/coach/DashboardWorkoutActivity.tsx"),
+    source("app/actions/workout-reviews.ts"),
+    source("supabase/migrations/202609150001_coach_workout_reviews.sql"),
+    source("components/coach/CoachNav.tsx"),
+  ]);
+  assert.match(repository, /rows\.filter\(\(item\) => !item\.handled_at\)\.slice\(0, 5\)/);
+  assert.match(dashboard, /openCheckIns/);
+  assert.match(activity, /markWorkoutHandled/);
+  assert.match(activity, /if \(result\.ok\) onHandled\(\)/);
+  assert.match(activity, /new Set\(\[\.\.\.current, item\.id\]\)/);
+  assert.match(activity, /אין אימונים שממתינים לטיפול/);
+  assert.match(action, /coach_workout_reviews/);
+  assert.match(migration, /public\.is_coach_for\(s\.client_id\)/);
+  assert.match(nav, /label: "מעקב לקוחות"/);
+});

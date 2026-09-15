@@ -17,7 +17,7 @@ export default async function CoachFoodsPage() {
         // omitted that entire set from the catalogue's Favorites tab.
         supabase
           .from("coach_food_usage")
-          .select("food_id,manual_favorite")
+          .select("food_id,manual_favorite,selection_count,last_used_at")
           .eq("coach_id", auth.id),
       ])
     : [{ data: [] }, { data: [] }];
@@ -58,6 +58,7 @@ export default async function CoachFoodsPage() {
       carbs: nutrition.carbs ?? undefined,
       fat: nutrition.fat ?? undefined,
       servingLabel: nutrition.servingLabel,
+      usageCount: Number((menuUsage ?? []).find((row)=>row.food_id===food.id)?.selection_count??0),
     };
   });
   return <main className="foods-page"><FoodDatabase foods={foods} initialFavorites={favoriteIds}/></main>;

@@ -61,10 +61,13 @@ test("the intake tab reuses the one intake form", async () => {
   assert.equal((page.match(/<ClientIntakeForm/g) ?? []).length, 1);
 });
 
-test("the report tab wires the existing weekly summary and builds no second engine", async () => {
+test("the report tab builds a deterministic thirty-day analysis", async () => {
   const page = await source("app/coach/clients/[id]/page.tsx");
-  assert.match(page, /<WeeklySummaryPanel summaries=\{weeklySummaries\}\/>/);
-  // No model call, no prompt, no second generator on this screen.
+  assert.match(page, /getClientNutritionBehavior\(id,todayKey\)/);
+  assert.match(page, /gte\("completed_at",`\$\{reportStart\}T00:00:00Z`\)/);
+  assert.match(page, /period:\{start:reportStart,end:todayKey,days:30\}/);
+  assert.doesNotMatch(page, /WeeklySummaryPanel/);
+  // No model call or prompt: every conclusion remains traceable to stored data.
   assert.doesNotMatch(page, /anthropic|openai|generateSummary|prompt/i);
   assert.match(page, /הדוח אינו נשלח ללקוח אוטומטית/);
 });

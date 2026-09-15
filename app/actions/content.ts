@@ -108,6 +108,20 @@ export async function setContentItemStatus(form: FormData): Promise<void> {
   revalidatePath(`/content/${contentItemId}`);
 }
 
+export async function saveContentCategory(form: FormData): Promise<void> {
+  const { supabase } = await requireRole("coach");
+  const id=String(form.get("id")??"");
+  const name=String(form.get("name")??"").trim();
+  const description=String(form.get("description")??"").trim();
+  const sortOrder=Number(form.get("sortOrder")??0);
+  const active=form.get("active")==="on";
+  if(!uuidPattern.test(id)||!name||name.length>120||description.length>2000||!Number.isInteger(sortOrder)||sortOrder<0) throw new Error("invalid_content_category");
+  const {error}=await supabase.from("content_categories").update({name,description:description||null,sort_order:sortOrder,active}).eq("id",id);
+  if(error) throw error;
+  revalidatePath("/coach/content");
+  revalidatePath("/content");
+}
+
 export async function recordContentView(contentItemId: string): Promise<void> {
   const { supabase } = await requireRole("client");
   if (!uuidPattern.test(contentItemId)) throw new Error("invalid_content_id");

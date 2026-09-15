@@ -45,6 +45,18 @@ test("notification center is Supabase-backed and exposes read, preferences and b
   assert.doesNotMatch(repository, /localStorage/);
 });
 
+test("coach navigation shows a numeric badge on unread messages", async () => {
+  const [layout, nav] = await Promise.all([
+    readFile(new URL("../app/coach/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/coach/CoachNav.tsx", import.meta.url), "utf8"),
+  ]);
+  assert.match(layout, /getUnreadMessageCount/);
+  assert.match(layout, /unreadMessageCount=\{unreadMessageCount\}/);
+  assert.match(nav, /href === "\/coach\/messages"/);
+  assert.match(nav, /הודעות שלא נקראו/);
+  assert.match(nav, /count > 99 \? "99\+" : count/);
+});
+
 test("workout reminders use planned days, completion checks and independent morning/evening dedupe", async () => {
   const sql = await readFile(new URL("../supabase/migrations/202607200013_workout_day_reminders.sql", import.meta.url), "utf8");
   for (const preference of ["workout_morning_reminder", "workout_evening_reminder", "workout_morning_reminder_time", "workout_evening_reminder_time"]) assert.match(sql, new RegExp(preference));

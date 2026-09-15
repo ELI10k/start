@@ -121,7 +121,7 @@ function curatedMasterNames() {
 }
 
 function readCoachPortions() {
-  const workbook = XLSX.readFile(COACH_WORKBOOK);
+  const workbook = XLSX.read(readFileSync(COACH_WORKBOOK), { type: "buffer" });
   const rows = XLSX.utils.sheet_to_json(workbook.Sheets["קלוריות מאכלים"], { defval: null });
   const curated = curatedMasterNames();
   const foods = [];

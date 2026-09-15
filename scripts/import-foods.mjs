@@ -5,7 +5,7 @@ import XLSX from "xlsx";
 const sourcePath = path.resolve("data/source/foods.xlsx");
 const outputPath = path.resolve("data/foods.json");
 const reportPath = path.resolve("data/foods.import-report.json");
-const workbook = XLSX.readFile(sourcePath, { cellDates: true });
+const workbook = XLSX.read(fs.readFileSync(sourcePath), { type: "buffer", cellDates: true });
 
 const text = (value) => String(value ?? "").replace(/\s+/g, " ").trim();
 const optionalText = (value) => text(value) || undefined;

@@ -39,7 +39,8 @@ export default async function CoachCheckInsPage({
   };
   const [data, templates] = await Promise.all([listCoachCheckIns(auth.id, filters), listResponseTemplates()]);
   const compareA = data.items.find((item) => item.id === params.compareA);
-  const compareB = data.items.find((item) => item.id === params.compareB);
+  const requestedCompareB = data.items.find((item) => item.id === params.compareB);
+  const compareB = requestedCompareB?.client_id === compareA?.client_id ? requestedCompareB : undefined;
 
   // Each check-in's predecessor for the same client. The list already arrives
   // newest-first, so the next entry with the same client id is the one before it.
@@ -111,7 +112,7 @@ export default async function CoachCheckInsPage({
           </Filter>
           <Filter label="השוואה ב׳" name="compareB" defaultValue={params.compareB}>
             <option value="">בחירת צ׳ק־אין</option>
-            {data.items.map((item) => (
+            {data.items.filter((item)=>!compareA||item.client_id===compareA.client_id).map((item) => (
               <option key={item.id} value={item.id}>
                 {item.client?.full_name} · {new Date(item.submitted_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}
               </option>
@@ -124,6 +125,7 @@ export default async function CoachCheckInsPage({
 
         <section id="comparison" className="mt-6">
           <h2 className="mb-3 text-xl font-black">השוואת צ׳ק־אינים</h2>
+          {compareA&&requestedCompareB&&!compareB&&<p role="alert" className="mb-3 rounded-xl bg-[#FEF2F2] p-3 text-sm text-[#B91C1C]">אפשר להשוות רק בין צ׳ק־אינים של אותו לקוח.</p>}
           <CheckInComparison left={compareA} right={compareB} />
         </section>
 

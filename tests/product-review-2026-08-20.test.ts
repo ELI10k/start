@@ -15,6 +15,34 @@ const EMPTY: ReportInput = {
 };
 
 // ------------------------------------------------------------------- messages
+test("direct messages support private image attachments from either side", async () => {
+  const [migration, thread, action, repository] = await Promise.all([
+    source("supabase/migrations/202609150002_message_image_attachments.sql"),
+    source("components/messages/MessageThread.tsx"),
+    source("app/actions/messages.ts"),
+    source("lib/messages/repository.ts"),
+  ]);
+  assert.match(migration, /message-images/);
+  assert.match(migration, /public\.is_coach_for/);
+  assert.match(migration, /invalid_image_path/);
+  assert.match(thread, /accept="image\/jpeg,image\/png,image\/webp"/);
+  assert.match(thread, /shrinkImage/);
+  assert.match(action, /send_coach_client_message_with_image/);
+  assert.match(action, /5\*1024\*1024/);
+  assert.match(repository, /createSignedUrls\(paths,3600\)/);
+});
+
+test("the coach can start a message with any client from the inbox", async () => {
+  const [inbox, picker] = await Promise.all([
+    source("app/coach/messages/page.tsx"),
+    source("app/coach/messages/new/page.tsx"),
+  ]);
+  assert.match(inbox, /שליחת הודעה ללקוח/);
+  assert.match(inbox, /\/coach\/messages\/new/);
+  assert.match(picker, /listCoachClients\(auth\.id\)/);
+  assert.match(picker, /\?tab=messages/);
+  assert.match(picker, /טקסט או תמונה/);
+});
 
 test("a thread is marked read without revalidating from inside a render", async () => {
   const [clientPage, coachPage, repository, actions] = await Promise.all([
@@ -230,8 +258,8 @@ test("a coach can see which clients have no menu, and land in the builder", asyn
 
 test("the client file loads only what the open tab renders", async () => {
   const page = await source("app/coach/clients/[id]/page.tsx");
-  assert.match(page, /tab === "report" \? getWeeklySummaries\(id\) : Promise\.resolve\(\[\]\)/);
-  assert.match(page, /tab === "progress" \? listResponseTemplates\(\) : Promise\.resolve\(\[\]\)/);
+  assert.match(page, /const reportBehavior=tab==="report"\?await Promise\.all/);
+  assert.match(page, /const responseTemplates = tab === "progress" \? await listResponseTemplates\(\) : \[\]/);
 });
 
 test("the client is told where to start and when photos are due", async () => {

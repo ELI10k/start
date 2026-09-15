@@ -22,6 +22,7 @@ export default function StoredMenuActions({
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
   const [picking, setPicking] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const duplicate = async (clientId?: string) => {
     setPending(true);
@@ -33,11 +34,10 @@ export default function StoredMenuActions({
   };
 
   const remove = async () => {
-    if (!window.confirm(`למחוק את התפריט „${title}”? תפריט שמשויך ללקוח לא יימחק.`)) return;
     setPending(true);
     const result = await deleteCoachMealPlan(id);
     setPending(false);
-    if (result.ok) router.refresh();
+    if (result.ok) { setConfirmingDelete(false); router.refresh(); }
     else setMessage(result.message ?? "המחיקה נכשלה.");
   };
 
@@ -56,7 +56,7 @@ export default function StoredMenuActions({
         <Copy aria-hidden="true" size={15} />{isSystemTemplate ? "שכפול לעריכה" : "שכפול"}
       </button>
       {!isSystemTemplate && (
-        <button type="button" disabled={pending} onClick={remove} className="chip border-[#DC2626] text-[#DC2626]">
+        <button type="button" disabled={pending} onClick={()=>setConfirmingDelete(true)} className="chip border-[#DC2626] text-[#DC2626]">
           <Trash2 aria-hidden="true" size={15} />מחיקה
         </button>
       )}
@@ -84,6 +84,10 @@ export default function StoredMenuActions({
             </button>
           ))}
         </div>
+      </BottomSheet>
+      <BottomSheet open={confirmingDelete} title={`מחיקת „${title}”`} onClose={()=>setConfirmingDelete(false)}>
+        <p className="text-sm leading-6 text-[#5B5F5B]">המחיקה קבועה. תפריט שמשויך ללקוח מוגן ולא יימחק; במקרה כזה תוצג הודעה ולא ייעשה שינוי.</p>
+        <div className="mt-5 grid grid-cols-2 gap-2"><button type="button" onClick={()=>setConfirmingDelete(false)} className="premium-secondary-button">ביטול</button><button type="button" disabled={pending} onClick={remove} className="min-h-12 rounded-2xl bg-[#DC2626] px-5 font-black text-white disabled:opacity-50">{pending?"מוחקים…":"מחיקה לצמיתות"}</button></div>
       </BottomSheet>
     </div>
   );

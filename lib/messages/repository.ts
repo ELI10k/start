@@ -23,16 +23,20 @@ export async function listThread(clientId: string): Promise<readonly DirectMessa
   if (!user) return [];
   const { data, error } = await supabase
     .from("coach_client_messages")
-    .select("id,body,topic,created_at,read_at,sender_id")
+    .select("id,body,topic,created_at,read_at,sender_id,image_path")
     .eq("client_id", clientId)
     .order("created_at");
   if (error) {
     if (isMissing(error.code)) return [];
     throw error;
   }
+  const paths=(data??[]).flatMap((row)=>row.image_path?[String(row.image_path)]:[]);
+  const signed=paths.length?await supabase.storage.from("message-images").createSignedUrls(paths,3600):{data:[],error:null};
+  const urls=new Map(paths.map((path,index)=>[path,signed.data?.[index]?.signedUrl??null]));
   return (data ?? []).map((row) => ({
     id: row.id as string,
     body: row.body as string,
+    imageUrl: row.image_path ? urls.get(String(row.image_path)) ?? null : null,
     topic: row.topic as DirectMessage["topic"],
     createdAt: row.created_at as string,
     readAt: (row.read_at as string | null) ?? null,

@@ -69,3 +69,38 @@ test("the shell is pinned to a deployment at sync time", async () => {
     assert.ok(checklist.includes(item), `checklist does not mention ${item}`);
   }
 });
+
+test("App Review compliance surfaces are public and linked from account entry points", async () => {
+  const [privacy, terms, support, login, onboarding, profile] = await Promise.all([
+    source("app/privacy/page.tsx"),
+    source("app/terms/page.tsx"),
+    source("app/app-support/page.tsx"),
+    source("app/login/page.tsx"),
+    source("app/onboarding/page.tsx"),
+    source("app/profile/page.tsx"),
+  ]);
+  assert.match(privacy, /Apple Health/);
+  assert.match(privacy, /OpenAI/);
+  assert.match(terms, /לא ייעוץ רפואי/);
+  assert.match(support, /NEXT_PUBLIC_SUPPORT_EMAIL/);
+  assert.match(support, /start\.elicohenfitness@gmail\.com/);
+  assert.match(login, /LegalLinks/);
+  assert.match(onboarding, /href="\/terms"/);
+  assert.match(onboarding, /href="\/privacy"/);
+  assert.match(profile, /DeleteAccountForm/);
+});
+
+test("self-service deletion removes private blobs before the auth cascade", async () => {
+  const deletion = await source("lib/account/delete-account.ts");
+  for (const bucket of ["check-in-photos", "food-log-photos", "technique-videos"]) {
+    assert.ok(deletion.includes(bucket), `account deletion misses ${bucket}`);
+  }
+  assert.ok(
+    deletion.indexOf("await removeStorageReferences") < deletion.indexOf("admin.auth.admin.deleteUser"),
+    "private files must be removed before the account is reported deleted",
+  );
+  const action = await source("app/actions/account.ts");
+  assert.match(action, /supabase\.auth\.getUser\(\)/);
+  assert.match(action, /confirmation/);
+  assert.match(action, /understood/);
+});
