@@ -56,7 +56,7 @@ export default async function CoachDashboard() {
   return <main className="px-4 py-10 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-7xl">
       <header className="border-b border-[#E5E7E5] pb-7">
-        <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START COACH</p>
+        <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START LIFE FIT COACH</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">שלום, {auth.fullName.split(" ")[0]}</h1>
         <p className="mt-2 text-[#5B5F5B]">
           {pendingCheckIns || waitingThreads.length

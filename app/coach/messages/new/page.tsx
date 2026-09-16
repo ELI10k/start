@@ -15,7 +15,7 @@ export default async function NewCoachMessagePage({searchParams}:{searchParams:P
   return <main className="client-app-content">
     <Link href="/coach/messages" className="text-sm font-bold text-[#16A34A]">חזרה להודעות</Link>
     <header className="premium-page-header mt-3">
-      <div><p>START COACH</p><h1>שליחת הודעה ללקוח</h1><span>בחר לקוח כדי לפתוח את השיחה ולשלוח טקסט או תמונה.</span></div>
+      <div><p>START LIFE FIT COACH</p><h1>שליחת הודעה ללקוח</h1><span>בחר לקוח כדי לפתוח את השיחה ולשלוח טקסט או תמונה.</span></div>
     </header>
     <form className="flex gap-2" role="search">
       <div className="food-picker__search flex-1">

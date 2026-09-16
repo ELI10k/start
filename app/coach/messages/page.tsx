@@ -65,7 +65,7 @@ export default async function CoachMessagesPage({ searchParams }: { searchParams
   return <main className="client-app-content">
     <header className="premium-page-header">
       <div>
-        <p>START COACH</p>
+        <p>START LIFE FIT COACH</p>
         <h1>הודעות</h1>
         <span>כל השיחות עם הלקוחות שלך, ומי מחכה לתשובה.</span>
       </div>

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/legal/LegalPage";
 
-export const metadata: Metadata = { title: "תנאי שימוש | START" };
+export const metadata: Metadata = { title: "תנאי שימוש | START LIFE FIT" };
 
 export default function TermsPage() {
   return (
-    <LegalPage eyebrow="תנאים" title="תנאי השימוש של START" updated="15 בספטמבר 2026">
+    <LegalPage eyebrow="תנאים" title="תנאי השימוש של START LIFE FIT" updated="15 בספטמבר 2026">
       <section>
         <h2>השירות</h2>
-        <p className="mt-2">START מספקת כלים לליווי אישי בנושאי כושר ותזונה, לרבות תוכניות, מעקב, תוכן ותקשורת עם מאמן. הגישה מיועדת למשתמשים שהוגדרו מראש על ידי START או על ידי מאמן מורשה.</p>
+        <p className="mt-2">START LIFE FIT מספקת כלים לליווי אישי בנושאי כושר ותזונה, לרבות תוכניות, מעקב, תוכן ותקשורת עם מאמן. הגישה מיועדת למשתמשים שהוגדרו מראש על ידי START LIFE FIT או על ידי מאמן מורשה.</p>
       </section>
 
       <section>
@@ -29,7 +29,7 @@ export default function TermsPage() {
 
       <section>
         <h2>תוכן ונתוני משתמש</h2>
-        <p className="mt-2">המשתמש שומר על זכויותיו בתוכן שהעלה. הוא מעניק ל־START הרשאה מוגבלת לעבד ולאחסן את התוכן רק לצורך הפעלת השירות ומתן הליווי. אין להעלות תוכן שאין למשתמש זכות למסור או תוכן הכולל מידע של אדם אחר ללא הסכמתו.</p>
+        <p className="mt-2">המשתמש שומר על זכויותיו בתוכן שהעלה. הוא מעניק ל־START LIFE FIT הרשאה מוגבלת לעבד ולאחסן את התוכן רק לצורך הפעלת השירות ומתן הליווי. אין להעלות תוכן שאין למשתמש זכות למסור או תוכן הכולל מידע של אדם אחר ללא הסכמתו.</p>
       </section>
 
       <section>
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
       <section>
         <h2>סיום ומחיקה</h2>
-        <p className="mt-2">המשתמש רשאי להפסיק להשתמש בשירות ולמחוק את חשבונו מתוך מסך הפרופיל. START רשאית להגביל גישה במקרה של שימוש מסוכן, בלתי חוקי או מפר תנאים, תוך שמירה על זכויות המשתמש במידע בהתאם למדיניות הפרטיות ולדין.</p>
+        <p className="mt-2">המשתמש רשאי להפסיק להשתמש בשירות ולמחוק את חשבונו מתוך מסך הפרופיל. START LIFE FIT רשאית להגביל גישה במקרה של שימוש מסוכן, בלתי חוקי או מפר תנאים, תוך שמירה על זכויות המשתמש במידע בהתאם למדיניות הפרטיות ולדין.</p>
       </section>
 
       <section>

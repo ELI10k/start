@@ -7,7 +7,7 @@ import { createSupabaseBrowserClient } from "./client";
 /**
  * Re-render the server tree when a row this screen is built from changes.
  *
- * Every screen in START is server-rendered per request: the thread, the bell,
+ * Every screen in START LIFE FIT is server-rendered per request: the thread, the bell,
  * the day's meals. Holding a second copy of any of it in the browser is how two
  * places end up disagreeing about the same number, so nothing here builds one.
  * A change arrives, `router.refresh()` asks the server for the screen again, and

@@ -8,7 +8,7 @@ import MessageThread from "@/components/messages/MessageThread";
 import { getAuthContext } from "@/lib/data/product-repository";
 import { listThread } from "@/lib/messages/repository";
 
-export const metadata: Metadata = { title: "תמיכה | START" };
+export const metadata: Metadata = { title: "תמיכה | START LIFE FIT" };
 
 export default async function SupportPage() {
   const auth = await getAuthContext();

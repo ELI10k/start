@@ -94,7 +94,7 @@ export default async function MenusPage({ searchParams }: { searchParams: Promis
   return <main className="client-app-content">
     <header className="premium-page-header">
       <div>
-        <p>START COACH</p>
+        <p>START LIFE FIT COACH</p>
         <h1>תפריטים</h1>
         <span>התפריטים שאתה בונה. תפריט ששויך ללקוח עובר ללשונית „לקוחות”.</span>
       </div>

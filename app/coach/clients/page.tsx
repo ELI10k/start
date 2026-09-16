@@ -70,7 +70,7 @@ export default async function CoachClientsPage({
       <main className="client-app-content">
         <header className="premium-page-header">
           <div>
-            <p>START COACH</p>
+            <p>START LIFE FIT COACH</p>
             <h1>לקוחות בארכיון</h1>
             <span>
               הליווי הסתיים. שום נתון לא נמחק — התפריטים, האימונים, המדידות
@@ -166,7 +166,7 @@ export default async function CoachClientsPage({
     <main className="client-app-content">
       <header className="premium-page-header">
         <div>
-          <p>START COACH</p>
+          <p>START LIFE FIT COACH</p>
           <h1>לקוחות</h1>
           <span>נתונים חיים מ־Supabase, לפי ההרשאות שלך בלבד.</span>
         </div>

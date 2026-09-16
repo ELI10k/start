@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>START</string>
+        <string>START LIFE FIT</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -72,9 +72,9 @@
 	     the moment the system asks - so each one names the feature it unlocks
 	     rather than describing the permission. -->
 	<key>NSHealthShareUsageDescription</key>
-	<string>START מציג את הצעדים היומיים שלך מתוך אפליקציית הבריאות, כדי לעקוב אחרי היעד היומי ואחרי המגמה השבועית.</string>
+	<string>START LIFE FIT מציג את הצעדים היומיים שלך מתוך אפליקציית הבריאות, כדי לעקוב אחרי היעד היומי ואחרי המגמה השבועית.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>START אינו כותב נתונים לאפליקציית הבריאות. ההרשאה נדרשת רק לקריאת הצעדים.</string>
+	<string>START LIFE FIT אינו כותב נתונים לאפליקציית הבריאות. ההרשאה נדרשת רק לקריאת הצעדים.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>המצלמה משמשת לסריקת ברקוד של מוצרי מזון ולצילום תמונות מעקב שנשמרות בחשבון הפרטי שלך.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

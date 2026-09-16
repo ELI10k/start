@@ -23,7 +23,7 @@ export default function NotificationsCenter({ notifications, unreadCount, prefer
   return <div className="grid gap-4">
     <header className="premium-page-header">
       <div>
-        <p>START</p>
+        <p>START LIFE FIT</p>
         <h1>התראות</h1>
         <span>{unreadCount ? `${unreadCount} התראות ממתינות לקריאה` : "הכול מעודכן"}</span>
       </div>

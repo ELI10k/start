@@ -15,7 +15,7 @@ test("the manifest is installable, in Hebrew, and points at icons that exist", a
   assert.match(manifest, /scope: "\/"/);
   assert.match(manifest, /lang: "he"/);
   assert.match(manifest, /dir: "rtl"/);
-  assert.match(manifest, /short_name: "START"/);
+  assert.match(manifest, /short_name: "START LIFE FIT"/);
   assert.match(manifest, /theme_color: "#FFFFFF"/);
   assert.match(manifest, /background_color: "#FFFFFF"/);
   for (const size of ["192x192", "512x512"]) assert.match(manifest, new RegExp(size));
@@ -35,7 +35,7 @@ test("every icon the manifest and the head name is actually in public/", async (
 test("the apple touch icon is declared rather than left to be discovered", async () => {
   const layout = await source("app/layout.tsx");
   assert.match(layout, /apple: \[\{ url: "\/apple-touch-icon\.png"/);
-  assert.match(layout, /appleWebApp: \{ capable: true, title: "START"/);
+  assert.match(layout, /appleWebApp: \{ capable: true, title: "START LIFE FIT"/);
   // Safe areas only resolve when the viewport is told to extend under them.
   assert.match(layout, /viewportFit: "cover"/);
   assert.match(layout, /themeColor: "#FFFFFF"/);
@@ -122,11 +122,11 @@ test("the offline page shows no stored data and never signs anyone out", async (
   assert.doesNotMatch(offline, /localStorage|sessionStorage|indexedDB|document\.cookie/);
   assert.doesNotMatch(offline, /\/logout|signOut/);
   // And it says what it is rather than implying the app works offline.
-  assert.match(offline, /START דורש חיבור לאינטרנט/);
+  assert.match(offline, /START LIFE FIT דורש חיבור לאינטרנט/);
   assert.doesNotMatch(offline, /עובד ללא אינטרנט|זמין במצב לא מקוון/);
 });
 
-test("no screen promises that START works without a connection", async () => {
+test("no screen promises that START LIFE FIT works without a connection", async () => {
   for (const path of ["public/offline.html", "app/manifest.ts"]) {
     const text = await source(path);
     assert.doesNotMatch(text, /עובדת? ללא אינטרנט|ללא חיבור לאינטרנט אפשר/);

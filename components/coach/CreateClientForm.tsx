@@ -44,7 +44,7 @@ export default function CreateClientForm(){
     onChange={(event)=>setInputs(Object.fromEntries([...new FormData(event.currentTarget).entries()].map(([key,value])=>[key,String(value)])))}
     className="mx-auto max-w-3xl"
   >
-    <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START COACH</p>
+    <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START LIFE FIT COACH</p>
     <h1 className="mt-2 text-3xl font-black">לקוח חדש</h1>
     <p className="mt-2 text-[#5B5F5B]">הלקוח יקבל הזמנה מאובטחת להשלמת הכניסה והקליטה.</p>
     {state.status==="error"&&<p role="alert" className="mt-5 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-4 text-sm text-[#DC2626]">{state.message}</p>}

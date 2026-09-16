@@ -99,7 +99,7 @@ export default function FoodDatabase({
     <section className="food-database" aria-busy={search !== deferredSearch}>
       <header className="food-database__header">
         <div>
-          <span className="food-database__eyebrow">START FOOD DATABASE</span>
+          <span className="food-database__eyebrow">START LIFE FIT FOOD DATABASE</span>
           <h1 className="food-database__title">מאגר מזונות</h1>
           <p className="food-database__description">
             חיפוש לפי שם, מותג, קטגוריה או ברקוד

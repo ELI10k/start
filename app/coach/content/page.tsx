@@ -28,12 +28,12 @@ export default async function CoachContentPage() {
   return <main className="px-4 py-8 sm:px-6">
     <div className="mx-auto max-w-[1500px]">
       <header className="flex flex-wrap items-end justify-between gap-5 border-b border-[#E5E7E5] pb-8">
-        <div><p className="text-xs font-black tracking-[0.28em] text-[#16A34A]">START CONTENT</p><h1 className="mt-2 text-4xl font-black sm:text-5xl">ספריית הקורסים</h1><p className="mt-3 max-w-2xl text-[#5B5F5B]">כל קורס הוא עולם תוכן אחד. נכנסים לקורס ומנהלים את כל השיעורים שלו לפי הסדר.</p></div>
+        <div><p className="text-xs font-black tracking-[0.28em] text-[#16A34A]">START LIFE FIT CONTENT</p><h1 className="mt-2 text-4xl font-black sm:text-5xl">ספריית הקורסים</h1><p className="mt-3 max-w-2xl text-[#5B5F5B]">כל קורס הוא עולם תוכן אחד. נכנסים לקורס ומנהלים את כל השיעורים שלו לפי הסדר.</p></div>
         <Link href="/coach/content/new" className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-[#16A34A] px-5 font-black text-[#FFFFFF]"><Plus size={19}/>יצירת שיעור</Link>
       </header>
 
       {courses.length ? <section className="mt-9">
-        <div className="mb-5 flex items-center justify-between"><h2 className="text-2xl font-black">הקורסים של START</h2><span className="text-sm text-[#5B5F5B]">{courses.length} קורסים</span></div>
+        <div className="mb-5 flex items-center justify-between"><h2 className="text-2xl font-black">הקורסים של START LIFE FIT</h2><span className="text-sm text-[#5B5F5B]">{courses.length} קורסים</span></div>
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {courses.map((course, courseIndex) => <article key={course.id} className="group overflow-hidden rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF]">
             <div className="relative aspect-video overflow-hidden bg-[#ECFDF3]">

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-// Universal Links, and the reason START needs them.
+// Universal Links, and the reason START LIFE FIT needs them.
 //
 // The native shell loads the deployed site in a web view with its own cookie
 // store. A magic-link email tapped on the phone opens in Safari, so the session

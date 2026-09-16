@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { normalizeBarcode, parseOpenFoodFactsProduct } from "@/lib/nutrition/open-food-facts";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 
-// START's own catalogue first, Open Food Facts second. A barcode someone has
+// START LIFE FIT's own catalogue first, Open Food Facts second. A barcode someone has
 // already scanned resolves without leaving the building, which is both faster and
 // means a correction made here is not overwritten by the community's version.
 
@@ -19,7 +19,7 @@ export async function GET(_request: Request, context: { params: Promise<{ barcod
   const barcode = normalizeBarcode(raw);
   if (!barcode) return NextResponse.json({ error: "invalid_barcode" }, { status: 400 });
 
-  // START's own catalogue is checked below and costs nothing, but a barcode
+  // START LIFE FIT's own catalogue is checked below and costs nothing, but a barcode
   // that misses goes out to Open Food Facts in this deployment's name and
   // writes a row on the way back. That is the part worth a ceiling.
   if (!(await consumeRateLimit({ action: "barcode_lookup", subject: auth.id, windowSeconds: 3600, limit: 120 })))
@@ -69,7 +69,7 @@ export async function GET(_request: Request, context: { params: Promise<{ barcod
     const food = payload.status === 1 ? parseOpenFoodFactsProduct(barcode, payload.product as never) : null;
     if (!food) return NextResponse.json({ found: false, reason: "not_found" });
     // A product that passed barcode and nutrition validation becomes part of
-    // START's shared catalogue immediately. The RPC owns de-duplication and
+    // START LIFE FIT's shared catalogue immediately. The RPC owns de-duplication and
     // provenance: a known curated product is preserved, while a community
     // product is stored once under its normalized barcode. Consequently the
     // next client gets the local result above instead of another external call.

@@ -50,7 +50,7 @@ export function buildDailyCoachMessage(input: DailyCoachInput): DailyCoachMessag
   ];
 
   if (!input.mealsPlanned || !input.calorieTarget || !input.proteinTarget) {
-    return { tone: "missing", title: "חסרים נתונים להמלצה יומית", summary: "START לא תנחש מה נכון עבורך בלי תפריט ויעדים מלאים.", action: "לבדיקת התפריט והיעדים", href: "/nutrition", evidence };
+    return { tone: "missing", title: "חסרים נתונים להמלצה יומית", summary: "START LIFE FIT לא תנחש מה נכון עבורך בלי תפריט ויעדים מלאים.", action: "לבדיקת התפריט והיעדים", href: "/nutrition", evidence };
   }
 
   const remainingMeals = Math.max(0, input.mealsPlanned - input.mealsCompleted);

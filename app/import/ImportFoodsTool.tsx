@@ -67,7 +67,7 @@ export default function ImportFoodsTool() {
         <div style={headerStyle}>
           <div>
             <span style={eyebrowStyle}>
-              START FOOD IMPORT
+              START LIFE FIT FOOD IMPORT
             </span>
 
             <h1 style={titleStyle}>

@@ -1,6 +1,6 @@
 // Steps come from the platform's own health store - Apple HealthKit on iOS,
 // Health Connect on Android. Both already merge phone, watch and ring into one
-// figure per day, so START reads that figure rather than assembling its own.
+// figure per day, so START LIFE FIT reads that figure rather than assembling its own.
 
 export type HealthSource = "healthkit" | "health-connect" | "manual" | "test";
 
