@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { ArrowRight, Barcode, Camera, Database, Images, Minus, PencilLine, Plus } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -357,9 +357,8 @@ export default function AteSomethingElse({
                   <input type="hidden" name="foodId" value={picked.id} />
                   <input type="hidden" name="unit" value="גרם" />
                   <label className="text-sm font-bold">כמה גרם אכלת?
-                    <input name="quantity" type="number" inputMode="decimal" enterKeyHint="done" min="1" step="any" value={grams} onFocus={(event)=>event.currentTarget.select()} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
+                    <input name="quantity" type="text" inputMode="decimal" enterKeyHint="done" dir="ltr" value={grams} onFocus={(event)=>event.currentTarget.select()} onChange={(event) => setGrams(event.target.value.replace(",",".").replace(/[^\d.]/g,""))} className="nutrition-input mt-2 text-left" />
                   </label>
-                  <div className="flex flex-wrap items-center gap-2" aria-label="קיצורי כמות בגרמים"><button type="button" aria-label="הפחתת 10 גרם" onClick={()=>setGrams(String(Math.max(1,(Number(grams)||0)-10)))} className="chip"><Minus aria-hidden="true" size={14}/>10</button>{[50,100,150,200,250,300].map(value=><button key={value} type="button" aria-pressed={Number(grams)===value} onClick={()=>setGrams(String(value))} className={`chip${Number(grams)===value?" pill--green":""}`}>{value}</button>)}<button type="button" aria-label="הוספת 10 גרם" onClick={()=>setGrams(String((Number(grams)||0)+10))} className="chip"><Plus aria-hidden="true" size={14}/>10</button></div>
                   {macros ? (
                     <>
                       <input type="hidden" name="calories" value={macros.calories} />
