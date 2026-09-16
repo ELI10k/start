@@ -30,7 +30,7 @@ export default function ClientShell({ children, className = "" }: { children: Re
   return (
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
-        <Link href="/" className="start-wordmark" aria-label="START — מסך הבית">START</Link>
+        <Link href="/" className="start-wordmark" aria-label="START LIFE FIT — מסך הבית">START LIFE FIT</Link>
         {/* No bell here. The bottom bar now has a notifications tab, and on a
             phone that puts the same screen a thumb-width apart from a header
             icon nobody reaches for - the bar tab is the one that gets pressed.
@@ -43,7 +43,7 @@ export default function ClientShell({ children, className = "" }: { children: Re
       </header>
       <nav aria-label="ניווט ראשי ללקוח" className="desktop-app-nav">
         <div className="desktop-app-nav__inner">
-          <Link href="/" className="start-wordmark">START</Link>
+          <Link href="/" className="start-wordmark">START LIFE FIT</Link>
           <div className="desktop-app-nav__links">
             {links.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>

@@ -81,7 +81,7 @@ export async function GET(request: Request) {
       const coachId = coachByClient.get(clientId);
       if (coachId) coachNotices.push({
         recipient_id: coachId, actor_id: null, category: "check_ins", type: "coach_message",
-        title: "דוח שבועי מוכן לאישור", body: "START הכינה טיוטה חדשה. יש לבדוק ולאשר לפני שהלקוח יראה אותה.",
+        title: "דוח שבועי מוכן לאישור", body: "START LIFE FIT הכינה טיוטה חדשה. יש לבדוק ולאשר לפני שהלקוח יראה אותה.",
         href: `/coach/clients/${clientId}?tab=improvement`, source_table: "weekly_summaries",
         source_id: `${clientId}-${week.start}`, dedupe_key: `weekly-summary-ready-${clientId}-${week.start}`,
       });

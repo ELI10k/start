@@ -55,7 +55,7 @@ export default async function CoachCheckInsPage({
         <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#E5E7E5] pb-7">
           <div>
             <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">
-              START COACH
+              START LIFE FIT COACH
             </p>
             <h1 className="mt-2 text-3xl font-black">צ׳ק־אינים</h1>
             <p className="mt-2 text-sm text-[#5B5F5B]">

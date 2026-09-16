@@ -27,11 +27,11 @@ const RULES: Record<string, string> = {
 };
 
 /**
- * Saves a food that arrived from a scan or from manual entry into the START
+ * Saves a food that arrived from a scan or from manual entry into the START LIFE FIT
  * catalogue, so the next scan of the same barcode resolves locally.
  *
  * Provenance is decided here rather than taken from the form: a client cannot
- * claim their typed-in food is curated START data.
+ * claim their typed-in food is curated START LIFE FIT data.
  */
 export async function saveScannedFood(_: ScanState, form: FormData): Promise<ScanState> {
   const auth = await getAuthContext();

@@ -9,9 +9,9 @@ export const dynamic = "force-dynamic";
 const assistant = Assistant({ subsets: ["hebrew", "latin"], display: "swap", variable: "--font-assistant" });
 
 export const metadata: Metadata = {
-  title: "START by Eli Cohen",
-  description: "מערכת הליווי של START",
-  appleWebApp: { capable: true, title: "START", statusBarStyle: "default" },
+  title: "START LIFE FIT",
+  description: "מערכת הליווי של START LIFE FIT",
+  appleWebApp: { capable: true, title: "START LIFE FIT", statusBarStyle: "default" },
   // iOS finds /apple-touch-icon.png by convention, but only when it can crawl
   // for it. Declaring it means the home-screen icon is right on the first
   // install rather than after a re-visit, and stops a future move of the file

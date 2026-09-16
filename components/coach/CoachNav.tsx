@@ -50,7 +50,7 @@ export default function CoachNav({
             href="/coach"
             className="flex shrink-0 items-center gap-2 py-4 text-lg font-black tracking-wider text-[#16A34A]"
           >
-            START
+            START LIFE FIT
             {preview && (
               <span
                 data-testid="preview-badge"

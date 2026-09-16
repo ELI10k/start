@@ -93,9 +93,9 @@ test("onboarding does not reintroduce the fields the intake dropped", async () =
   }
 });
 
-test("the manifest makes START installable, in Hebrew and standalone", async () => {
+test("the manifest makes START LIFE FIT installable, in Hebrew and standalone", async () => {
   const manifest = await source("app/manifest.ts");
-  assert.match(manifest, /short_name: "START"/);
+  assert.match(manifest, /short_name: "START LIFE FIT"/);
   assert.match(manifest, /display: "standalone"/);
   assert.match(manifest, /dir: "rtl"/);
   assert.match(manifest, /lang: "he"/);

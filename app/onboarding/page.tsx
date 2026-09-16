@@ -31,7 +31,7 @@ export default async function Onboarding() {
     </form>
 
     <form action={completeClientOnboarding}>
-      <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START</p>
+      <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START LIFE FIT</p>
       <h1 className="mt-2 text-3xl font-black">כמה פרטים לפני שמתחילים</h1>
       <p className="mt-2 text-[#5B5F5B]">המידע נשמר רק עבורך ועבור המאמן המשויך אליך.</p>
 

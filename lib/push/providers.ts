@@ -67,7 +67,7 @@ export function nativePushProvider(bridge: NativePushBridge): PushProvider {
  *
  * No account with Apple or Google is involved here: the subscription is signed
  * with this deployment's VAPID key pair, and the push service is whichever one
- * the browser already talks to. On iOS it works from 16.4, and only once START
+ * the browser already talks to. On iOS it works from 16.4, and only once START LIFE FIT
  * has been added to the home screen - which is what `isAvailable` is really
  * testing when it looks for PushManager.
  *
@@ -165,7 +165,7 @@ export function resolvePushProvider(publicKey?: string): PushProvider {
 
 const REASONS: Record<PushPermissionState, string> = {
   unknown: "",
-  unavailable: "הדפדפן הזה לא תומך בהתראות. באייפון צריך להוסיף את START למסך הבית; בינתיים ההתראות מופיעות בפעמון.",
+  unavailable: "הדפדפן הזה לא תומך בהתראות. באייפון צריך להוסיף את START LIFE FIT למסך הבית; בינתיים ההתראות מופיעות בפעמון.",
   prompt: "אפשר לאשר התראות כדי לקבל תזכורות גם כשהאפליקציה סגורה.",
   granted: "",
   denied: "ההתראות נדחו. אפשר לאשר אותן מחדש בהגדרות המכשיר.",

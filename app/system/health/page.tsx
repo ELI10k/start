@@ -4,7 +4,7 @@ import { getAuthContext } from "@/lib/data/product-repository";
 import { readSupabaseHealth } from "@/lib/supabase/health";
 
 export const metadata: Metadata = {
-  title: "START Backend",
+  title: "START LIFE FIT Backend",
 };
 
 // Signed-in only. The healthy branch says one word, but the failing branch
@@ -22,7 +22,7 @@ export default async function SystemHealthPage() {
         className="w-full rounded-2xl border border-[#E5E7E5] bg-[#FFFFFF] p-6 text-[#0B0B0B] shadow-xl"
       >
         <h1 id="backend-health-title" className="text-2xl font-bold text-[#0B0B0B]">
-          START Backend
+          START LIFE FIT Backend
         </h1>
         {health.connected ? (
           <p className="mt-4 text-lg" role="status">

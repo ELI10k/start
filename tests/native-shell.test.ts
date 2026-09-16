@@ -7,7 +7,7 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 test("the shell loads the deployed app rather than bundling a rewrite", async () => {
   const config = await source("capacitor.config.ts");
   assert.match(config, /appId: "co\.il\.startcoaching\.app"/);
-  assert.match(config, /appName: "START"/);
+  assert.match(config, /appName: "START LIFE FIT"/);
   assert.match(config, /process\.env\.START_NATIVE_SERVER_URL/);
   // Never plain HTTP: the session cookies travel over this connection.
   assert.match(config, /cleartext: false/);
@@ -69,7 +69,7 @@ test("iOS declares why it asks for each permission", async () => {
     assert.match(plist, new RegExp(key), `${key} is missing - App Review rejects this`);
   }
   // Hebrew strings, because that is what the client reads in the system dialog.
-  assert.match(plist, /START מציג את הצעדים היומיים/);
+  assert.match(plist, /START LIFE FIT מציג את הצעדים היומיים/);
   assert.match(plist, /<string>start<\/string>/);
   assert.match(plist, /remote-notification/);
   // APNs hands the token to the app delegate; without this push is silent.

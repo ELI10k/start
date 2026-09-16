@@ -11,8 +11,8 @@ test("the app is named and identified the same way everywhere", async () => {
   const plist = await source("ios/App/App/Info.plist");
   assert.match(config, /co\.il\.startcoaching\.app/);
   assert.match(strings, /<string name="package_name">co\.il\.startcoaching\.app<\/string>/);
-  assert.match(strings, /<string name="app_name">START<\/string>/);
-  assert.match(plist, /<key>CFBundleDisplayName<\/key>\s*<string>START<\/string>/);
+  assert.match(strings, /<string name="app_name">START LIFE FIT<\/string>/);
+  assert.match(plist, /<key>CFBundleDisplayName<\/key>\s*<string>START LIFE FIT<\/string>/);
 });
 
 test("the icon exists at every density the stores ask for", async () => {

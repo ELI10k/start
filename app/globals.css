@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   START — one palette, one system.
+   START LIFE FIT — one palette, one system.
 
    White surfaces. Black text. One green for anything positive or actionable,
    one red for anything wrong. No gold, no blue, no grey as a brand colour, and
@@ -1953,10 +1953,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 
 /* ═══ Cinema — the course library ══════════════════════════════════════════════
-   The rest of START is white because it is a workspace: numbers, forms and
+   The rest of START LIFE FIT is white because it is a workspace: numbers, forms and
    lists, read in daylight. The library is not a workspace. It is a shelf of
    films, and cover art only reads as cover art when the room is dark. This one
-   section inverts end to end - header, rails, player - and keeps START's green
+   section inverts end to end - header, rails, player - and keeps START LIFE FIT's green
    for anything actionable. Everything below is scoped to `.cinema` and reaches
    no screen on either side of it. */
 .cinema {

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<!--
-	  The two capabilities START actually uses. Both are required for the feature
+	  The two capabilities START LIFE FIT actually uses. Both are required for the feature
 	  to work at all: without aps-environment the push registration fails at
 	  runtime rather than at build time, and without the HealthKit entitlement
 	  the store returns no steps however the permission dialog is answered.

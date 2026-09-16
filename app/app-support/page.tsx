@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LegalPage from "@/components/legal/LegalPage";
 
-export const metadata: Metadata = { title: "תמיכה | START" };
+export const metadata: Metadata = { title: "תמיכה | START LIFE FIT" };
 
 const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "start.elicohenfitness@gmail.com";
 

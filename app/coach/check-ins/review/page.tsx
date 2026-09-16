@@ -57,7 +57,7 @@ export default async function ReviewQueuePage({
     <main className="client-app-content">
       <header className="premium-page-header">
         <div>
-          <p>START COACH</p>
+          <p>START LIFE FIT COACH</p>
           <h1>מעבר על צ׳ק־אינים</h1>
           <span>{queue.length ? `${position + 1} מתוך ${queue.length} שממתינים לטיפול` : "אין צ׳ק־אינים שממתינים"}</span>
         </div>

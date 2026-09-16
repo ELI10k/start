@@ -1,7 +1,7 @@
 import { registerPlugin } from "@capacitor/core";
 import type { HealthPermissionState } from "@/lib/health/types";
 
-// The one custom plugin START needs. Apple HealthKit and Android Health Connect
+// The one custom plugin START LIFE FIT needs. Apple HealthKit and Android Health Connect
 // have almost nothing in common at the API level, so the contract is written in
 // terms of what the app actually wants: whether steps are readable, whether the
 // user has agreed, and a range of calendar days.

@@ -14,7 +14,7 @@ export default function LegalPage({
   return (
     <main className="min-h-screen bg-[#F7F8F7] px-4 py-8 text-[#0B0B0B] sm:px-6">
       <article className="mx-auto max-w-3xl rounded-[28px] border border-[#E5E7E5] bg-white p-6 shadow-sm sm:p-10">
-        <Link href="/login" className="text-sm font-black text-[#15803D]">START</Link>
+        <Link href="/login" className="text-sm font-black text-[#15803D]">START LIFE FIT</Link>
         <p className="mt-8 text-xs font-black tracking-[.16em] text-[#16A34A]">{eyebrow}</p>
         <h1 className="mt-2 text-3xl font-black sm:text-4xl">{title}</h1>
         <p className="mt-2 text-sm text-[#5B5F5B]">עודכן לאחרונה: {updated}</p>

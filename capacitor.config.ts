@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 import { KeyboardResize } from "@capacitor/keyboard";
 
-// START is a server-rendered Next.js app: server components, server actions and
+// START LIFE FIT is a server-rendered Next.js app: server components, server actions and
 // a proxy that refreshes the Supabase session on every request. Exporting it to
 // static files for the shell would mean giving all of that up, so the shell
 // loads the deployed app instead and contributes what only a native container
@@ -18,7 +18,7 @@ const serverUrl = process.env.START_NATIVE_SERVER_URL;
 
 const config: CapacitorConfig = {
   appId: "co.il.startcoaching.app",
-  appName: "START",
+  appName: "START LIFE FIT",
   // Only a fallback: an offline splash for when the device cannot reach the
   // server at all. The real UI comes from serverUrl.
   webDir: "native/www",
