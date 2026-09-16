@@ -116,6 +116,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     protein: food.protein === null ? null : Number(food.protein),
     carbs: food.carbs === null ? null : Number(food.carbs),
     fat: food.fat === null ? null : Number(food.fat),
+    unitWeightGrams: food.unit_weight_grams === null ? null : Number(food.unit_weight_grams),
     clientAdded: food.created_by === auth.id,
     personalFavorite: favoriteIds.has(String(food.id)),
     isMaster: Boolean(masterFoodGroup(String(food.id))),

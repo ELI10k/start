@@ -122,6 +122,8 @@ test("saying what was eaten instead offers all three ways", async () => {
   assert.match(sheet, /פתיחת מצלמה/);
   assert.match(sheet, /formRef\.current\?\.reset\(\)/);
   assert.match(sheet, /setCode\(""\)/);
+  assert.match(sheet, /selected\?\.unitWeightGrams/);
+  assert.match(sheet, /String\(Math\.round\(selected\.unitWeightGrams\)\)/);
 });
 
 test("the coach can see which meals were skipped", async () => {

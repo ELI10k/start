@@ -21,6 +21,7 @@ export type PickableFood = ComboboxFood & {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  unitWeightGrams: number | null;
 };
 
 const initial: FoodLogState = { ok: false };
@@ -342,7 +343,14 @@ export default function AteSomethingElse({
                   value={pickedId}
                   usage={[]}
                   clientCatalogueOrder
-                  onSelect={(id) => {const selected=orderedFoods.find((food)=>food.id===id);setPickedId(id);setLoggedName(selected?.name??"")}}
+                  onSelect={(id) => {
+                    const selected = orderedFoods.find((food) => food.id === id);
+                    setPickedId(id);
+                    setLoggedName(selected?.name ?? "");
+                    setGrams(selected?.unitWeightGrams && selected.unitWeightGrams > 0
+                      ? String(Math.round(selected.unitWeightGrams))
+                      : "100");
+                  }}
                   onToggleFavorite={toggleFavorite}
                 />
               )}
