@@ -2,6 +2,7 @@
 // products can also be promoted explicitly without duplicating the food row.
 const MASTER_ID=/^master-(p|c|f)-\d+$/;
 const PROMOTED_MASTER_FOODS:Readonly<Record<string,"protein"|"carbohydrate"|"fat">>={
+  "31":"protein",
   "340":"protein",
   "341":"protein",
   "342":"protein",
