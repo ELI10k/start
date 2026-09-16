@@ -77,7 +77,7 @@ export default function MealStatusControl({
   if (status === "other") {
     return (
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <span className="pill">נאכל משהו אחר</span>
+        <span className="pill pill--green">נאכל משהו אחר</span>
         {statusNote && <span className="text-xs text-[#5B5F5B]">{statusNote}</span>}
         {/* A meal is rarely one thing.
             

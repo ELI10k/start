@@ -16,6 +16,6 @@ export default function MealGroupSubstitution({mealId,date,groupLabel,groupType,
   const groupFoods=isGroupType(groupType)?foodsForGroup(foods,groupType):[];
   return <>
     <button type="button" onClick={()=>setOpen(true)} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#16A34A] px-3 py-2 text-sm font-black text-[#15803D]"><PencilLine aria-hidden="true" size={15}/>אכלתי {groupLabel} אחר</button>
-    <AteSomethingElse mealId={mealId} date={date} foods={groupFoods} open={open} onClose={()=>setOpen(false)} preserveMealStatus title={`איזה ${groupLabel} אכלת?`}/>
+    <AteSomethingElse mealId={mealId} date={date} foods={groupFoods} open={open} onClose={()=>setOpen(false)} title={`איזה ${groupLabel} אכלת?`}/>
   </>;
 }

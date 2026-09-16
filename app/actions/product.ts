@@ -410,7 +410,6 @@ export async function setMealStatus(form: FormData): Promise<void> {
         .eq("selection_date", date);
       if (selectionsError) throw selectionsError;
       const selected = new Set((selections ?? []).map((row) => String(row.group_id)));
-      if (!selected.size) throw new Error("יש לבחור לפחות פריט אחד לפני סימון הארוחה.");
       const missing = groupIds.filter((groupId) => !selected.has(groupId));
       if (missing.length) {
         const { data: items, error: itemsError } = await supabase
@@ -432,10 +431,6 @@ export async function setMealStatus(form: FormData): Promise<void> {
             p_group_id: groupId, p_meal_item_id: itemId, p_date: date,
           });
           if (selectError) throw selectError;
-          const { error: amountError } = await supabase.rpc("set_meal_group_amount", {
-            p_group_id: groupId, p_date: date, p_quantity: 0,
-          });
-          if (amountError) throw amountError;
         }));
       }
     }
