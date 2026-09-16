@@ -119,6 +119,19 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   }
 
   const supabase = await createSupabaseServerClient();
+  const foodId = String(form.get("foodId") ?? "").trim();
+  const quantity = number(form, "quantity");
+  if (foodId && quantity !== null && quantity > 0) {
+    const { data: food } = await supabase.from("foods").select("calories,protein,carbs,fat").eq("id", foodId).maybeSingle();
+    if (food) {
+      const factor = quantity / 100;
+      const rounded = (value:number) => Math.round(value * 10) / 10;
+      calories = rounded(Number(food.calories ?? 0) * factor);
+      protein = food.protein === null ? null : rounded(Number(food.protein) * factor);
+      carbs = food.carbs === null ? null : rounded(Number(food.carbs) * factor);
+      fat = food.fat === null ? null : rounded(Number(food.fat) * factor);
+    }
+  }
 
   let photoPath: string | null = null;
   if (hasPhoto) {
@@ -139,8 +152,8 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     p_name: resolvedName,
     p_source: source,
     p_meal_id: uuid(form.get("mealId")),
-    p_food_id: String(form.get("foodId") ?? "").trim() || null,
-    p_quantity: number(form, "quantity"),
+    p_food_id: foodId || null,
+    p_quantity: quantity,
     p_unit: String(form.get("unit") ?? "").trim() || null,
     p_calories: calories,
     p_protein: protein,
@@ -161,7 +174,6 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   // personal favourites as well. The food already exists in the shared
   // catalogue; keeping its id on the log row and its star on the client avoids
   // turning the same item into anonymous free text on the next visit.
-  const foodId = String(form.get("foodId") ?? "").trim();
   if (foodId) {
     const { error: favoriteError } = await supabase
       .from("food_favorites")

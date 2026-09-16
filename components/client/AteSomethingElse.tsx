@@ -95,6 +95,7 @@ export default function AteSomethingElse({
   const [miss, setMiss] = useState("");
   const [manualScan, setManualScan] = useState(false);
   const [grams, setGrams] = useState("100");
+  const gramsTimer = useRef<number | null>(null);
   const [loggedName, setLoggedName] = useState("");
   // Whether a chosen photograph is still being downscaled.
   const [preparing, setPreparing] = useState(false);
@@ -138,6 +139,8 @@ export default function AteSomethingElse({
   // open but return every input to a clean state so the next barcode cannot
   // inherit the previous product, weight or photograph.
   const resetPickedFood=()=>{setPickedId("");setLoggedName("");setGrams("100")};
+  const commitGrams=(value:string)=>{const clean=value.replace(",",".").replace(/[^\d.]/g,"");if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);setGrams(clean)};
+  const scheduleGrams=(value:string)=>{if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);gramsTimer.current=window.setTimeout(()=>commitGrams(value),450)};
   const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood();setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
 
   const preparePhoto = async (input: HTMLInputElement) => {
@@ -365,7 +368,7 @@ export default function AteSomethingElse({
                   <input type="hidden" name="foodId" value={picked.id} />
                   <input type="hidden" name="unit" value="גרם" />
                   <label className="text-sm font-bold">כמה גרם אכלת?
-                    <input name="quantity" type="text" inputMode="decimal" enterKeyHint="done" dir="ltr" value={grams} onFocus={(event)=>event.currentTarget.select()} onChange={(event) => setGrams(event.target.value.replace(",",".").replace(/[^\d.]/g,""))} className="nutrition-input mt-2 text-left" />
+                    <input key={picked.id} name="quantity" type="text" inputMode="decimal" enterKeyHint="done" dir="ltr" defaultValue={grams} onInput={(event)=>scheduleGrams(event.currentTarget.value)} onBlur={(event)=>commitGrams(event.currentTarget.value)} className="nutrition-input mt-2 text-left" />
                   </label>
                   {macros ? (
                     <>
