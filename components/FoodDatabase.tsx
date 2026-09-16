@@ -5,6 +5,7 @@ import type { Food, FoodSort } from "@/lib/foods";
 import { ALL_CATEGORIES, queryFoods } from "@/lib/foods/repository";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { foodMacroGroup, type MacroGroup } from "@/lib/nutrition/food-groups";
+import { displayCalories } from "@/lib/nutrition/display";
 
 type DisplayFood = Food & Readonly<{ usageCount?: number }>;
 
@@ -261,7 +262,7 @@ export function FoodCard({
           </button>
           <div className="min-w-24 rounded-2xl border border-[#B7E4C7] bg-[#ECFDF3] px-4 py-3 text-center text-[#15803D]">
             <strong className="block text-2xl leading-none">
-              {food.calories}
+              {displayCalories(food.calories)}
             </strong>
             <span className="mt-1 block text-xs">קלוריות</span>
           </div>

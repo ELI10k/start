@@ -52,7 +52,7 @@ export default async function FoodsPage() {
       name: food.name,
       brand: food.brand ?? undefined,
       category: food.category,
-      calories: nutrition.calories,
+      calories: Math.ceil(nutrition.calories),
       protein: nutrition.protein ?? undefined,
       carbs: nutrition.carbs ?? undefined,
       fat: nutrition.fat ?? undefined,
