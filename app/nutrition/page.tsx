@@ -116,6 +116,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     protein: food.protein === null ? null : Number(food.protein),
     carbs: food.carbs === null ? null : Number(food.carbs),
     fat: food.fat === null ? null : Number(food.fat),
+    unitWeightGrams: food.unit_weight_grams === null ? null : Number(food.unit_weight_grams),
+    packageUnit: food.package_unit ? String(food.package_unit) : null,
     clientAdded: food.created_by === auth.id,
     personalFavorite: favoriteIds.has(String(food.id)),
     isMaster: Boolean(masterFoodGroup(String(food.id))),
@@ -229,11 +231,26 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             // What this meal costs as it currently stands: the chosen alternative
             // in each group, or the primary where nothing is chosen yet - the same
             // rule the daily summary uses, so the two never disagree.
-            const mealCalories = Math.round(meal.groups.reduce((sum, group) => {
+            const plannedMealCalories = Math.round(meal.groups.reduce((sum, group) => {
               const chosen = group.items.find((item) => item.id === group.selectedItemId);
-              const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
-              return sum + ((chosen ?? primary)?.calories ?? 0);
+              const standing = chosen
+                ? [chosen]
+                : group.items.filter((item) => item.itemRole === "primary");
+              const items = standing.length ? standing : group.items.slice(0, 1);
+              return sum + items.reduce((groupSum, item) => groupSum + (item.calories ?? 0), 0);
             }, meal.freeCalorieTarget ?? 0));
+            const mealLogs = logged.filter((entry) => entry.mealId === meal.id);
+            const measuredMealLogs = mealLogs.filter((entry) => entry.calories !== null);
+            const loggedMealCalories = Math.round(measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0));
+            // "Ate something else" replaces the written meal. Its card must show
+            // what was actually logged, not the calories of the meal it replaced.
+            // An extra item added after a normal eaten mark is additive instead.
+            const mealCalories = meal.status === "other" || (meal.freeCalorieTarget && measuredMealLogs.length > 0)
+              ? loggedMealCalories
+              : plannedMealCalories + loggedMealCalories;
+            const calorieLabel = meal.status === "other" && mealLogs.length > 0 && measuredMealLogs.length === 0
+              ? "קלוריות לא נמדדו"
+              : `${mealCalories} קל׳`;
             // Where the meal stands, in one word, for the closed row.
             const mark = meal.status === "not_eaten" ? "לא נאכל"
               : meal.status === "other" ? "נאכל משהו אחר"
@@ -253,7 +270,11 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               summary={
                 <span className="min-w-0">
                   <strong className="block text-lg font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</strong>
-                  <span className="mt-1 block text-xs text-[#5B5F5B]">{mealCalories} קל׳ · {mark}</span>
+                  <span className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#5B5F5B]">
+                    <span>{calorieLabel}</span>
+                    <span aria-hidden="true">·</span>
+                    <span className={meal.status === "other" || meal.status === "eaten" || meal.completed ? "pill pill--green" : undefined}>{mark}</span>
+                  </span>
                 </span>
               }
             >
@@ -268,13 +289,13 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   status={meal.status}
                   statusNote={meal.statusNote}
                   completed={meal.completed}
-                  blocked={noChoice}
+                  blocked={false}
                   foods={pickableFoods}
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {/* What was eaten instead of this meal, under the meal it replaced. */}
-              <LoggedFoodList entries={logged.filter((entry)=>entry.mealId===meal.id)}/>
+              <LoggedFoodList entries={mealLogs}/>
               {meal.freeCalorieTarget?(()=>{
                 const mine=logged.filter((entry)=>entry.mealId===meal.id);
                 const measured=mine.filter((entry)=>entry.calories!==null);

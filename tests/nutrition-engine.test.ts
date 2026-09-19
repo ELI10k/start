@@ -219,3 +219,12 @@ test("the protein group never offers a carbohydrate, and the reverse", () => {
   assert.ok(!carbs.includes("food-chicken"), "chicken must not appear under carbohydrate");
   assert.ok(!carbs.includes("master-p-1"));
 });
+
+test("a whole dish sold by the serving is offered under protein and under carbohydrate", () => {
+  const falafel = { id: "685", name: "פלאפל בפיתה (מנה)", protein: 30, carbs: 81, fat: 33, packageUnit: "מנה", unitWeightGrams: 100 };
+  const plate = { id: "684", name: "שווארמה בצלחת (מנה)", protein: 42, carbs: 3, fat: 25, packageUnit: "מנה", unitWeightGrams: 100 };
+  const rice = { id: "r", name: "אורז", protein: 3, carbs: 28, fat: 0.3, packageUnit: "גרם", unitWeightGrams: null };
+  const catalogue = [falafel, plate, rice];
+  assert.deepEqual(foodsForGroup(catalogue, "protein").map((food) => food.id), ["685", "684"]);
+  assert.deepEqual(foodsForGroup(catalogue, "carbohydrate").map((food) => food.id), ["685", "r"]);
+});

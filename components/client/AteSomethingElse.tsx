@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -12,6 +12,8 @@ import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
 import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
+import { displayCalories } from "@/lib/nutrition/display";
+import { foodUnit, hasNaturalUnit, unitLabel } from "@/lib/nutrition/meal-alternatives";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
 type SheetTab = "text" | "food" | "scan" | "photo";
@@ -21,6 +23,10 @@ export type PickableFood = ComboboxFood & {
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  unitWeightGrams: number | null;
+  // "מנה", "יחידה", "כוס"... A food sold by the serving is counted, not weighed:
+  // a client eating falafel on the street has no scale to put it on.
+  packageUnit?: string | null;
 };
 
 const initial: FoodLogState = { ok: false };
@@ -94,6 +100,9 @@ export default function AteSomethingElse({
   const [miss, setMiss] = useState("");
   const [manualScan, setManualScan] = useState(false);
   const [grams, setGrams] = useState("100");
+  const [servings, setServings] = useState("1");
+  const gramsTimer = useRef<number | null>(null);
+  const [loggedName, setLoggedName] = useState("");
   // Whether a chosen photograph is still being downscaled.
   const [preparing, setPreparing] = useState(false);
   const [photoPreview, setPhotoPreview] = useState("");
@@ -135,7 +144,17 @@ export default function AteSomethingElse({
   // A successful entry is one item, not the end of the meal. Leave the sheet
   // open but return every input to a clean state so the next barcode cannot
   // inherit the previous product, weight or photograph.
-  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);setPickedId("");setGrams("100");setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
+  const resetPickedFood=()=>{setPickedId("");setLoggedName("");setGrams("100");setServings("1")};
+  const commitGrams=(value:string)=>{
+    const clean=value.replace(",",".").replace(/[^\d.]/g,"");
+    if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);
+    setGrams(clean);
+  };
+  const scheduleGrams=(value:string)=>{
+    if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);
+    gramsTimer.current=window.setTimeout(()=>commitGrams(value),450);
+  };
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood();setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
 
   const preparePhoto = async (input: HTMLInputElement) => {
     const chosen = input.files?.[0];
@@ -181,7 +200,17 @@ export default function AteSomethingElse({
     fat: found.fat === null ? null : round(found.fat * factor),
   } : null;
 
-  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);setPhotoPreview("");setFound(null);setMiss("");setManualScan(false);setCode("");onClose(); };
+  const close = () => {
+    if (photoPreview) URL.revokeObjectURL(photoPreview);
+    formRef.current?.reset();
+    setPhotoPreview("");
+    setFound(null);
+    setMiss("");
+    setManualScan(false);
+    setCode("");
+    resetPickedFood();
+    onClose();
+  };
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
@@ -283,7 +312,7 @@ export default function AteSomethingElse({
                 <input type="hidden" name="carbs" value={macros.carbs ?? ""} />
                 <input type="hidden" name="fat" value={macros.fat ?? ""} />
                 <dl className="compact-data-list">
-                  <div><span>קלוריות</span><strong>{macros.calories}</strong></div>
+                  <div><span>קלוריות</span><strong>{displayCalories(macros.calories)}</strong></div>
                   <div><span>חלבון</span><strong>{macros.protein ?? "—"}</strong></div>
                   <div><span>פחמימות</span><strong>{macros.carbs ?? "—"}</strong></div>
                   <div><span>שומן</span><strong>{macros.fat ?? "—"}</strong></div>
@@ -320,7 +349,12 @@ export default function AteSomethingElse({
             so the coach's screen and this one cannot disagree about a portion. */}
         {tab === "food" && (() => {
           const picked = orderedFoods.find((food) => food.id === pickedId) ?? null;
-          const weight = Number(grams);
+          const unitFood = picked ? { ...picked, calories: picked.calories ?? 0, packageUnit: picked.packageUnit ?? null } : null;
+          const counted = unitFood !== null && hasNaturalUnit(unitFood);
+          const count = Number(servings.replace(",", "."));
+          const weight = counted && unitFood
+            ? count * foodUnit(unitFood).gramsPerUnit
+            : Number(grams);
           const macros = picked && Number.isFinite(weight) && weight > 0
             ? calculateFoodNutrition({
                 calories: picked.calories ?? 0,
@@ -340,23 +374,66 @@ export default function AteSomethingElse({
                   value={pickedId}
                   usage={[]}
                   clientCatalogueOrder
-                  onSelect={(id) => setPickedId(id)}
+                  onSelect={(id) => {
+                    const selected = orderedFoods.find((food) => food.id === id);
+                    setPickedId(id);
+                    setLoggedName(selected?.name ?? "");
+                    setGrams(selected?.unitWeightGrams && selected.unitWeightGrams > 0
+                      ? String(Math.round(selected.unitWeightGrams))
+                      : "100");
+                  }}
                   onToggleFavorite={toggleFavorite}
                 />
               )}
               {picked ? (
                 <>
-                <p className="font-bold">{picked.brand ? `${picked.name} — ${picked.brand}` : picked.name}</p>
+                  <div className="flex items-center justify-between gap-3 rounded-2xl bg-[#F7F8F7] p-3">
+                    <p className="min-w-0 truncate font-bold">{picked.brand ? `${picked.name} — ${picked.brand}` : picked.name}</p>
+                    <button
+                      type="button"
+                      onClick={resetPickedFood}
+                      className="chip shrink-0"
+                    >
+                      <ArrowRight aria-hidden="true" size={15}/>
+                      שינוי מוצר
+                    </button>
+                  </div>
                 </>
               ) : null}
               {picked ? (
                 <>
-                  <input type="hidden" name="name" value={picked.brand ? `${picked.name} — ${picked.brand}` : picked.name} />
-                  <input type="hidden" name="foodId" value={picked.id} />
-                  <input type="hidden" name="unit" value="גרם" />
-                  <label className="text-sm font-bold">כמה גרם אכלת?
-                    <input name="quantity" type="number" inputMode="decimal" min="1" step="any" value={grams} onChange={(event) => setGrams(event.target.value)} className="nutrition-input mt-2" />
+                  <label className="text-sm font-bold">שם המאכל שיופיע בארוחה
+                    <input name="name" required maxLength={200} value={loggedName} onChange={(event)=>setLoggedName(event.target.value)} className="nutrition-input mt-2" />
                   </label>
+                  <input type="hidden" name="foodId" value={picked.id} />
+                  {counted && unitFood ? (
+                    <>
+                      <input type="hidden" name="unit" value={unitFood.packageUnit?.trim() ?? ""} />
+                      <input type="hidden" name="quantity" value={servings} />
+                      <p className="text-sm font-bold">כמה {foodUnit(unitFood).unit} אכלת?</p>
+                      <div className="chip-row">
+                        {["0.5", "1", "1.5", "2"].map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setServings(value)}
+                            aria-pressed={servings === value}
+                            className={`chip${servings === value ? " pill--green" : ""}`}
+                          >
+                            {value === "0.5" ? "חצי" : value === "1.5" ? "1½" : value} {unitLabel(foodUnit(unitFood).unit, Number(value) > 1 ? 2 : 1)}
+                          </button>
+                        ))}
+                      </div>
+                      <input aria-label={`מספר ${foodUnit(unitFood).unit}`} type="text" inputMode="decimal" enterKeyHint="done" dir="ltr" value={servings} onChange={(event)=>setServings(event.target.value.replace(/[^\d.,]/g,""))} className="nutrition-input text-left" />
+                    </>
+                  ) : (
+                    <>
+                      <input type="hidden" name="unit" value="גרם" />
+                      <label className="text-sm font-bold">כמה גרם אכלת?
+                        <input key={picked.id} name="quantity" type="text" inputMode="decimal" enterKeyHint="done" dir="ltr" defaultValue={grams} onInput={(event)=>scheduleGrams(event.currentTarget.value)} onBlur={(event)=>commitGrams(event.currentTarget.value)} className="nutrition-input mt-2 text-left" />
+                      </label>
+                    </>
+                  )}
                   {macros ? (
                     <>
                       <input type="hidden" name="calories" value={macros.calories} />
@@ -364,7 +441,7 @@ export default function AteSomethingElse({
                       <input type="hidden" name="carbs" value={macros.carbs} />
                       <input type="hidden" name="fat" value={macros.fat} />
                       <dl className="compact-data-list">
-                        <div><span>קלוריות</span><strong>{macros.calories}</strong></div>
+                        <div><span>קלוריות</span><strong>{displayCalories(macros.calories)}</strong></div>
                         <div><span>חלבון</span><strong>{macros.protein}</strong></div>
                         <div><span>פחמימות</span><strong>{macros.carbs}</strong></div>
                         <div><span>שומן</span><strong>{macros.fat}</strong></div>
@@ -374,7 +451,6 @@ export default function AteSomethingElse({
                   ) : (
                     <p className="text-xs text-[#5B5F5B]">יש להזין כמות כדי לחשב את הערכים.</p>
                   )}
-                  <button type="button" onClick={() => setPickedId("")} className="chip w-fit">מזון אחר</button>
                 </>
               ) : null}
             </>
@@ -440,7 +516,7 @@ export default function AteSomethingElse({
             event="meal_marked"
             eventProperties={{ status: "other", via: tab }}
           />
-          <button type="button" onClick={close} className="premium-secondary-button">סגירה</button>
+          <button type="button" onClick={close} className="premium-secondary-button">{state.ok?"סגירה":"ביטול ללא שמירה"}</button>
         </div>
       </form>
     </BottomSheet>

@@ -22,7 +22,25 @@ export type ClassifiableFood = Readonly<{
   protein: number | null;
   carbs: number | null;
   fat: number | null;
+  packageUnit?: string | null;
+  unitWeightGrams?: number | null;
 }>;
+
+// A whole dish sold by the serving - falafel in a pita, a shawarma lafa, a
+// sandwich - is a protein and a carbohydrate at once. Its dominant macro put it
+// in one group only, so a client who ate shawarma in a pita for the protein of
+// a meal could not find it under "מנת חלבון". Enough of both in one serving
+// lists it under both; single ingredients are unaffected.
+const COMPOSITE_MIN_GRAMS = 20;
+
+function isCompositeDish(food: ClassifiableFood): boolean {
+  const unit = food.packageUnit?.trim();
+  const grams = Number(food.unitWeightGrams ?? 0);
+  if ((unit !== "מנה" && unit !== "יחידה") || grams <= 0) return false;
+  const factor = grams / 100;
+  return Number(food.protein ?? 0) * factor >= COMPOSITE_MIN_GRAMS
+    && Number(food.carbs ?? 0) * factor >= COMPOSITE_MIN_GRAMS;
+}
 
 export function foodMacroGroup(food: ClassifiableFood): MacroGroup {
   // A curated master food carries its group in its id and is authoritative:
@@ -52,5 +70,6 @@ export function foodsForGroup<T extends ClassifiableFood>(foods: readonly T[], g
     const label=`${food.name??""} ${food.category??""}`.toLocaleLowerCase("he");
     return /ירק|ירקות|סלט|מלפפון|עגבני|פלפל|חסה|כרוב|קישוא|ברוקולי|כרובית|פטרי|גזר|סלרי|תרד|חציל/.test(label);
   });
-  return foods.filter((food) => foodMacroGroup(food) === group);
+  return foods.filter((food) => foodMacroGroup(food) === group
+    || ((group === "protein" || group === "carbohydrate") && isCompositeDish(food)));
 }

@@ -1,6 +1,8 @@
 import { Barcode, Camera, PencilLine, Trash2 } from "lucide-react";
 import { deleteClientFoodLog } from "@/app/actions/food-log";
 import type { LoggedFood } from "@/lib/nutrition/food-log";
+import { displayCalories } from "@/lib/nutrition/display";
+import { unitLabel } from "@/lib/nutrition/meal-alternatives";
 
 /* eslint-disable @next/next/no-img-element -- signed Supabase storage URLs, short-lived and not optimisable. */
 
@@ -52,8 +54,8 @@ export default function LoggedFoodList({
 
           {entry.calories !== null ? (
             <p className="mt-2 text-xs text-[#5B5F5B]">
-              {entry.quantity ? `${entry.quantity} ${entry.unit ?? "גרם"} · ` : ""}
-              {entry.calories} קל׳
+              {entry.quantity ? `${entry.quantity} ${unitLabel(entry.unit ?? "גרם", Number(entry.quantity))} · ` : ""}
+              {displayCalories(entry.calories)} קל׳
               {entry.protein !== null ? ` · ${entry.protein} ג׳ חלבון` : ""}
               {entry.carbs !== null ? ` · ${entry.carbs} ג׳ פחמימות` : ""}
               {entry.fat !== null ? ` · ${entry.fat} ג׳ שומן` : ""}

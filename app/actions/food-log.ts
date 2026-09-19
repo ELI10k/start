@@ -120,6 +120,29 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
 
   const supabase = await createSupabaseServerClient();
 
+  // Catalogue/barcode nutrition is recalculated from the stored food and the
+  // final quantity. The mobile field deliberately does not re-render on every
+  // digit, so hidden preview values may briefly lag behind what the client is
+  // typing; they must never become the value saved to the nutrition log.
+  const foodId = String(form.get("foodId") ?? "").trim();
+  const quantity = number(form, "quantity");
+  if (foodId && quantity !== null && quantity > 0) {
+    const { data: food } = await supabase.from("foods").select("calories,protein,carbs,fat,package_unit,unit_weight_grams").eq("id", foodId).maybeSingle();
+    if (food) {
+      // A food sold by the serving is logged as "1 מנה", not in grams; the
+      // stored figures are per 100 g, so the count is turned back into weight.
+      const unit = String(form.get("unit") ?? "").trim();
+      const unitWeight = Number(food.unit_weight_grams ?? 0);
+      const counted = unit !== "" && unit !== "גרם" && unit === String(food.package_unit ?? "").trim() && unitWeight > 0;
+      const factor = (counted ? quantity * unitWeight : quantity) / 100;
+      const rounded = (value:number) => Math.round(value * 10) / 10;
+      calories = rounded(Number(food.calories ?? 0) * factor);
+      protein = food.protein === null ? null : rounded(Number(food.protein) * factor);
+      carbs = food.carbs === null ? null : rounded(Number(food.carbs) * factor);
+      fat = food.fat === null ? null : rounded(Number(food.fat) * factor);
+    }
+  }
+
   let photoPath: string | null = null;
   if (hasPhoto) {
     const problem = validateFoodLogPhoto(photo);
@@ -139,8 +162,8 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     p_name: resolvedName,
     p_source: source,
     p_meal_id: uuid(form.get("mealId")),
-    p_food_id: String(form.get("foodId") ?? "").trim() || null,
-    p_quantity: number(form, "quantity"),
+    p_food_id: foodId || null,
+    p_quantity: quantity,
     p_unit: String(form.get("unit") ?? "").trim() || null,
     p_calories: calories,
     p_protein: protein,
@@ -161,7 +184,6 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   // personal favourites as well. The food already exists in the shared
   // catalogue; keeping its id on the log row and its star on the client avoids
   // turning the same item into anonymous free text on the next visit.
-  const foodId = String(form.get("foodId") ?? "").trim();
   if (foodId) {
     const { error: favoriteError } = await supabase
       .from("food_favorites")
