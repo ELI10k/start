@@ -379,6 +379,7 @@ test("the two breads Eli asked for are master carbohydrates with real units", as
   assert.equal(masterFoodGroup("master-c-019"), "carbohydrate");
   assert.equal(masterFoodGroup("master-c-020"), "carbohydrate");
   assert.equal(masterFoodGroup("340"), "protein");
+  assert.equal(masterFoodGroup("341"), "protein");
   assert.match(migration, /'master-c-019', 'לחמנייה'/);
   assert.match(migration, /'master-c-020', 'בגט'/);
   assert.match(migration, /on conflict \(id\) do update set/);
@@ -630,8 +631,11 @@ test("the day opens one meal at a time", async () => {
   assert.match(page, /<Fragment key=\{meal\.id\}>\s*\n\s*<MealCard/);
   // And which one starts open is still the meal that is due now.
   assert.match(page, /defaultOpen=\{isNow\}/);
-  // The closed row has to carry enough to decide whether to open it.
-  assert.match(page, /const mealCalories = Math\.round\(/);
+  // The closed row has to carry enough to decide whether to open it: what was
+  // planned plus what was logged, or only what was logged when the client ate
+  // something else.
+  assert.match(page, /const mealCalories = meal\.status === "other"/);
+  assert.match(page, /: plannedMealCalories \+ loggedMealCalories;/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);
 });

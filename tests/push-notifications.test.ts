@@ -165,7 +165,7 @@ test("the service worker shows every push it is handed, and taps stay in the app
   // not take a tap to another site.
   assert.match(worker, /startsWith\("\/"\) && !data\.href\.startsWith\("\/\/"\)/);
   // A new worker has to be published for any of this to reach an installed app.
-  assert.match(worker, /const VERSION = "v3"/);
+  assert.match(worker, /const VERSION = "v4"/);
 });
 
 test("a web subscription is stored whole, and the column is wide enough for it", async () => {
