@@ -1,7 +1,19 @@
 // Builds a restaurant's food rows from fuder.co.il item pages, using the
 // per-serving columns rather than the per-100 g one.
 //
-//   node scripts/generate-fuder-restaurant-migration.mjs <parsed.json> <brand> <first-id>
+//   node scripts/generate-fuder-restaurant-migration.mjs <parsed.json> <category> <first-id> [options]
+//
+// Options:
+//   --suffix <text>      appended to every name and used as the brand
+//                        (defaults to the category; "" for generic foods)
+//   --min-calories <n>   drop servings under n calories
+//   --per-100            keep items the site gives only per-100 g figures for,
+//                        as a "ל-100 גרם" row rather than skipping them
+//   --plain-unit         drop a bare "יחידה" size label from the name, so two
+//                        sizes read "(90 גרם)" and "(150 גרם)"
+//
+// A serving with no weight ("מנה") is stored as one מנה of a nominal 100 g, so
+// its figures are the serving's and the unit arithmetic still counts one.
 //
 // parsed.json is [{ u, title, head: [label, "ב-100 גרם", "מנה (325 גרם)", ...],
 // rows: [[label, per100, serving1, ...], ...] }], the energy/protein/carbs/fat
@@ -12,8 +24,14 @@
 
 import { readFileSync } from "node:fs";
 
-const [file, brand, firstIdArg] = process.argv.slice(2);
+const [file, category, firstIdArg, ...rest] = process.argv.slice(2);
+const option = (name) => { const i = rest.indexOf(name); return i < 0 ? undefined : rest[i + 1]; };
+const brand = option("--suffix") ?? category;
+const minCalories = Number(option("--min-calories") ?? 0);
+const keepPer100 = rest.includes("--per-100");
+const plainUnit = rest.includes("--plain-unit");
 const items = JSON.parse(readFileSync(file, "utf8"));
+const seen = new Set();
 let id = Number(firstIdArg);
 
 const per100 = (value, amount) => Math.round((value / amount) * 100 * 1000) / 1000;
@@ -27,27 +45,38 @@ const packageUnitFor = (label, drink) =>
 
 const values = [];
 for (const item of items) {
-  const base = item.title.replace(/,\s*מקדונלדס$/, "").trim();
-  const sizes = item.head.slice(2);
+  // "ביג מק, מקדונלדס" -> "ביג מק"; the category or suffix says whose it is.
+  const base = item.title.replace(/,\s*[^,]+$/, "").replaceAll("`", "'").trim();
+  if (seen.has(base)) continue;
+  seen.add(base);
+  const per100Only = item.head.length === 2;
+  if (per100Only && !keepPer100) continue;
+  const sizes = per100Only ? ["ל-100 גרם (100 גרם)"] : item.head.slice(2);
   for (const [index, head] of sizes.entries()) {
-    const match = head.match(/^(.*?)\s*\(\s*([\d.]+)\s*(גרם|מ"ל|מ״ל)\s*\)/);
+    const match = head.match(/^(.*?)\s*\(\s*([\d.]+)\s*(גרם|מ"ל|מ״ל)\s*\)/)
+      ?? (head.trim() === "מנה" ? [head, "מנה", "100", "מנה"] : null);
     if (!match) throw new Error(`unreadable serving "${head}" for ${item.title}`);
     const [, label, rawAmount, measure] = match;
-    const drink = measure !== "גרם";
+    const nominal = measure === "מנה";
+    const drink = measure !== "גרם" && !nominal;
     const unit = drink ? "מ״ל" : "גרם";
     const amount = Math.round(Number(rawAmount));
-    const [kcal, protein, carbs, fat] = item.rows.slice(0, 4).map((row) => figure(row[index + 2]));
+    const [kcal, protein, carbs, fat] = item.rows.slice(0, 4).map((row) => figure(row[per100Only ? 1 : index + 2]));
     const calories = Math.round(kcal);
+    if (calories < minCalories) continue;
     // Espresso, water, diet soda: nothing to count, and Eli asked for them out.
     if (calories <= 1) continue;
     const [p, c, f] = [protein, carbs, fat].map(Math.round);
     // One size: the item's own name. Several: the name before any " – " gloss,
     // then the size as the site words it ("קטן", "כוס גדולה", "9 נאגטס").
-    const title = sizes.length === 1 ? base : `${base.split(" – ")[0]} ${label.replace(/^מנה\s*-\s*/, "")}`;
-    const name = `${title} ${brand} (${amount} ${unit})`;
-    const packageUnit = packageUnitFor(label, drink);
+    const size = label.replace(/^מנה(\s*-\s*|$)/, "").replace(plainUnit ? /^יחידה\s*/ : /^$/, "");
+    const title = sizes.length === 1 ? base : `${base.split(" – ")[0]} ${size}`.trim();
+    const amountText = nominal ? "מנה" : per100Only ? "100 גרם" : `${amount} ${unit}`;
+    const name = `${title}${brand ? ` ${brand}` : ""} (${amountText})`;
+    const packageUnit = per100Only ? "גרם" : packageUnitFor(label, drink);
+    const servingLabel = nominal ? "מנה" : per100Only ? "ל-100 גרם" : `${packageUnit} (${amount} ${unit})`;
     const notes = `לפי Fuder, ${head}: ${kcal} קלוריות, ${protein} גרם חלבון, ${carbs} גרם פחמימות, ${fat} גרם שומן.`;
-    values.push(`  (${q(String(id++))}, ${q(name)}, ${q(brand)}, ${q(brand)}, ${per100(calories, amount)}, ${per100(p, amount)}, ${per100(c, amount)}, ${per100(f, amount)}, 1, ${q(packageUnit)}, ${q(`${packageUnit} (${amount} ${unit})`)}, 'מאושר', ${q(notes)}, ${q(item.u)}, ${amount}, ${calories}, 1)`);
+    values.push(`  (${q(String(id++))}, ${q(name)}, ${brand ? q(brand) : "null"}, ${q(category)}, ${per100(calories, amount)}, ${per100(p, amount)}, ${per100(c, amount)}, ${per100(f, amount)}, 1, ${q(packageUnit)}, ${q(servingLabel)}, 'מאושר', ${q(notes)}, ${q(item.u)}, ${per100Only ? "null" : amount}, ${calories}, 1)`);
   }
 }
 
@@ -80,7 +109,7 @@ on conflict (id) do update set
 
 do $$
 begin
-  if (select count(*) from public.foods where category = ${q(brand)}) <> ${values.length} then
+  if (select count(*) from public.foods where category = ${q(category)}) <> ${values.length} then
     raise exception 'fuder_restaurant_upsert_failed';
   end if;
 end $$;
