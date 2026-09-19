@@ -4,7 +4,7 @@
 //   node scripts/generate-aroma-pastries-migration.mjs <aroma.json> <first-id>
 //
 // Rounding, as Eli asked: the serving weight to a whole gram (whole weights stay
-// as published), calories up to the next ten, macros to whole grams. The rounded
+// as published), calories and macros to the nearest whole number. The rounded
 // serving values are what the card shows; the per-100 g columns are derived back
 // from them so the unit arithmetic reproduces exactly those numbers.
 
@@ -21,7 +21,7 @@ const slug = (name) => encodeURIComponent(name.replaceAll(" ", "-")).toLowerCase
 
 const values = rows.map(([title, serving, kcal, protein, carbs, fat, sugars, sodium]) => {
   const grams = roundWeight(Number(serving));
-  const calories = Math.ceil(Number(kcal) / 10) * 10;
+  const calories = Math.round(Number(kcal));
   const p = Math.round(Number(protein));
   const c = Math.round(Number(carbs));
   const f = Math.round(Number(fat));
