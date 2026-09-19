@@ -6,7 +6,8 @@
 // parsed.json is [{ u, title, head: [label, "ב-100 גרם", "מנה (325 גרם)", ...],
 // rows: [[label, per100, serving1, ...], ...] }], the energy/protein/carbs/fat
 // rows in that order. An item sold in several sizes becomes one row per size.
-// Items the site gives only per-100 g figures for are skipped. Rounding as for
+// Items the site gives only per-100 g figures for, and servings of 0 or 1
+// calories, are skipped. Rounding as for
 // Aroma: the serving to a whole number, calories and macros to the nearest one.
 
 import { readFileSync } from "node:fs";
@@ -37,6 +38,8 @@ for (const item of items) {
     const amount = Math.round(Number(rawAmount));
     const [kcal, protein, carbs, fat] = item.rows.slice(0, 4).map((row) => figure(row[index + 2]));
     const calories = Math.round(kcal);
+    // Espresso, water, diet soda: nothing to count, and Eli asked for them out.
+    if (calories <= 1) continue;
     const [p, c, f] = [protein, carbs, fat].map(Math.round);
     // One size: the item's own name. Several: the name before any " – " gloss,
     // then the size as the site words it ("קטן", "כוס גדולה", "9 נאגטס").
