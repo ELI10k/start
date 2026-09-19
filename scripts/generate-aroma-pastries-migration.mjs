@@ -3,8 +3,8 @@
 //
 //   node scripts/generate-aroma-pastries-migration.mjs <aroma.json> <first-id>
 //
-// Rounding, as Eli asked: the serving weight to a round number (tens, or fives
-// under 50 g), calories up to the next ten, macros to whole grams. The rounded
+// Rounding, as Eli asked: the serving weight to a whole gram (whole weights stay
+// as published), calories up to the next ten, macros to whole grams. The rounded
 // serving values are what the card shows; the per-100 g columns are derived back
 // from them so the unit arithmetic reproduces exactly those numbers.
 
@@ -14,7 +14,7 @@ const [file, firstIdArg] = process.argv.slice(2);
 const rows = JSON.parse(readFileSync(file, "utf8"));
 let id = Number(firstIdArg);
 
-const roundWeight = (g) => (g < 50 ? Math.round(g / 5) * 5 : Math.round(g / 10) * 10);
+const roundWeight = (g) => Math.round(g);
 const per100 = (value, grams) => Math.round((value / grams) * 100 * 1000) / 1000;
 const q = (s) => `'${String(s).replaceAll("'", "''")}'`;
 const slug = (name) => encodeURIComponent(name.replaceAll(" ", "-")).toLowerCase();
