@@ -50,7 +50,8 @@ export default async function Home() {
   // its figures back and the two disagreeing is worse than either being wrong.
   const [data, logged] = await Promise.all([
     getClientOverview(auth.id, today),
-    listClientFoodLog(auth.id, today),
+    // This screen only needs totals, not private food-photo URLs.
+    listClientFoodLog(auth.id, today, { signPhotoUrls: false }),
   ]);
   const meals = data.menu?.meals ?? [];
   // Marked eaten, or every choice in it logged - the same test the nutrition
