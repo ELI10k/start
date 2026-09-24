@@ -35,9 +35,26 @@ export default function NativeBridge() {
 
     (window as { StartNative?: { platform: string } }).StartNative = { platform };
 
+    const follow = (url: string | undefined) => {
+      if (!url) return;
+      try {
+        const parsed = new URL(url);
+        const target = safeDeepLink(`${parsed.pathname}${parsed.search}`, "/");
+        if (target !== window.location.pathname + window.location.search) router.push(target);
+      } catch {
+        router.push("/");
+      }
+    };
+
     void (async () => {
-      const [{ App }, { Keyboard }, { Network }, { PushNotifications }, { SplashScreen }, { StatusBar, Style }, { StartHealth }] = await Promise.all([
-        import("@capacitor/app"),
+      // Register deep links first. Waiting for every native plugin creates a
+      // race where iOS opens the app before appUrlOpen has a listener.
+      const { App } = await import("@capacitor/app");
+      if (cancelled) return;
+      void App.addListener("appUrlOpen", ({ url }) => follow(url)).then((handle) => track(() => void handle.remove()));
+      void App.getLaunchUrl().then((launch) => follow(launch?.url)).catch(() => {});
+
+      const [{ Keyboard }, { Network }, { PushNotifications }, { SplashScreen }, { StatusBar, Style }, { StartHealth }] = await Promise.all([
         import("@capacitor/keyboard"),
         import("@capacitor/network"),
         import("@capacitor/push-notifications"),
@@ -60,28 +77,6 @@ export default function NativeBridge() {
         connected ? connectionStore.reportSuccess() : connectionStore.reportFailure(new Error("network request failed"));
       void Network.getStatus().then((status) => report(status.connected));
       void Network.addListener("networkStatusChange", (status) => report(status.connected)).then((handle) => track(() => void handle.remove()));
-
-      // A start:// link or a universal link arrives here. Only the path is used,
-      // and only after the same check a tapped notification goes through.
-      const follow = (url: string | undefined) => {
-        if (!url) return;
-        try {
-          const parsed = new URL(url);
-          const target = safeDeepLink(`${parsed.pathname}${parsed.search}`, "/");
-          // The app is already showing the destination when it was launched
-          // straight into it; pushing again would stack a duplicate entry.
-          if (target !== window.location.pathname + window.location.search) router.push(target);
-        } catch {
-          router.push("/");
-        }
-      };
-
-      void App.addListener("appUrlOpen", ({ url }) => follow(url)).then((handle) => track(() => void handle.remove()));
-
-      // A cold start from a link does not fire appUrlOpen - the URL is already
-      // consumed by the time a listener exists. This is the magic-link case:
-      // tapping the email with the app closed is the most common way in.
-      void App.getLaunchUrl().then((launch) => follow(launch?.url)).catch(() => {});
 
       // Steps, through the custom plugin.
       (window as { StartHealth?: unknown }).StartHealth = {
