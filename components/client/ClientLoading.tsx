@@ -7,14 +7,19 @@
 // document's main content.
 export default function ClientLoading() {
   return (
-    <div role="status" aria-busy="true" aria-label="טוענים…" className="min-h-screen bg-[#FFFFFF] px-4 pb-28 pt-8 text-[#0B0B0B]">
-      <div className="mx-auto max-w-5xl">
-        <div className="h-4 w-24 animate-pulse rounded bg-[#BBF7D0]" />
-        <div className="mt-4 h-10 w-64 max-w-full animate-pulse rounded-xl bg-[#F1F3F1]" />
-        <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {Array.from({ length: 4 }, (_, index) => <div key={index} className="h-28 animate-pulse rounded-[22px] bg-[#FFFFFF]" />)}
+    <div role="status" aria-busy="true" aria-label="טוענים…" className="min-h-dvh bg-[#FFFFFF] pb-28 text-[#0B0B0B]">
+      <div className="flex h-16 items-center justify-between border-b border-[#E5E7E5] px-5">
+        <div className="h-11 w-11 animate-pulse rounded-full bg-[#ECFDF3]" />
+        <div className="h-4 w-36 animate-pulse rounded bg-[#BBF7D0]" />
+      </div>
+      <div className="mx-auto max-w-5xl px-4 pt-5">
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 3 }, (_, index) => <div key={index} className="h-28 animate-pulse rounded-[22px] border border-[#E5E7E5] bg-[#F7F8F7]" />)}
         </div>
-        <div className="mt-5 h-64 animate-pulse rounded-[26px] bg-[#FFFFFF]" />
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }, (_, index) => <div key={index} className="h-28 animate-pulse rounded-[22px] border border-[#E5E7E5] bg-[#F7F8F7]" />)}
+        </div>
+        <div className="mt-5 h-20 animate-pulse rounded-[22px] border border-[#E5E7E5] bg-[#F7F8F7]" />
       </div>
     </div>
   );

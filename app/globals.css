@@ -80,7 +80,10 @@
 
 /* ── Base ──────────────────────────────────────────────────────────────── */
 
-html, body { overflow-x: hidden; }
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
 
 body {
   background: var(--background);
@@ -227,6 +230,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .client-app-shell {
   min-height: 100dvh;
   overflow-x: clip;
+  overscroll-behavior-y: none;
   padding-bottom: var(--nav-clearance);
   background: var(--background);
   color: var(--ink);

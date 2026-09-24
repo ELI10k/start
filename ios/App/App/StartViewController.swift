@@ -13,5 +13,10 @@ import UIKit
 class StartViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(StartHealthPlugin())
+        // A native app should not expose Safari's rubber-band canvas above and
+        // below the page. Content still scrolls normally when it is taller than
+        // the screen; only the elastic overscroll is disabled.
+        bridge?.webView?.scrollView.bounces = false
+        bridge?.webView?.scrollView.alwaysBounceVertical = false
     }
 }
