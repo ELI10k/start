@@ -5,7 +5,6 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
-import NativeBridge from "@/components/native/NativeBridge";
 
 const links = [
   { href: "/", label: "בית" },
@@ -60,8 +59,6 @@ export default function ClientShell({ children, className = "" }: { children: Re
           notification to the screen the bell would have opened. */}
       <PushRegistration />
       <AnalyticsProvider />
-      {/* Hands the container's capabilities to the app. No-op on the web. */}
-      <NativeBridge />
       <div className="client-app-content">{children}</div>
       <BottomNav />
     </main>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { WorkoutProvider } from "@/components/workouts/WorkoutProvider";
 import AuthSessionWatcher from "@/components/auth/AuthSessionWatcher";
 import ServiceWorker from "@/components/client/ServiceWorker";
+import NativeBridge from "@/components/native/NativeBridge";
 
 export const dynamic = "force-dynamic";
 const assistant = Assistant({ subsets: ["hebrew", "latin"], display: "swap", variable: "--font-assistant" });
@@ -47,6 +48,9 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${assistant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        {/* Deep links can arrive before authentication, so the native bridge
+            must exist on the login and confirmation screens too. */}
+        <NativeBridge />
         <AuthSessionWatcher />
         {/* Installability, and one static offline page. Nothing per-user is
             cached; the worker states the boundary. */}
