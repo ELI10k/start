@@ -633,11 +633,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    inside it - about 180px of clearance for a 72px bar. Everywhere else that is
    only slack at the end of a long scroll; here it was the whole difference
    between fitting the screen and not, so the home screen pays for the bar once. */
-.client-app-shell--home { height: 100dvh; min-height: 0; overflow: hidden; padding-bottom: 0; }
-.client-app-shell--home .client-app-content {
-  height: calc(100dvh - 3.5rem - env(safe-area-inset-top));
-  padding-bottom: var(--nav-clearance);
-}
+.client-app-shell--home { padding-bottom: 0; }
+.client-app-shell--home .client-app-content { padding-bottom: var(--nav-clearance); }
 .home-screen {
   display: flex;
   flex-direction: column;
@@ -645,9 +642,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
      read as a page that had failed to load its header. */
   justify-content: flex-start;
   gap: clamp(.7rem, 2.4vh, 1.25rem);
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  min-height: calc(100dvh - 3.5rem - 1rem - var(--nav-clearance) - env(safe-area-inset-top));
 }
 .home-screen .premium-card { margin-bottom: 0; }
 .home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
@@ -665,15 +660,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Two across, not four. Four left each tile about 80px - a label's width and
    no more - so the subtitle naming the active plan or the next training day
    arrived truncated, which is the half of the tile that was worth adding. */
-.quick-actions-grid {
-  display: grid;
-  flex: 1;
-  min-height: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: .6rem;
-}
-.home-screen .quick-actions-grid .quick-action-card { min-height: 0; }
+.quick-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 5.75rem;
   align-items: center; justify-content: center; flex-direction: column; gap: .35rem;

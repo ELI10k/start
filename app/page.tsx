@@ -5,11 +5,40 @@ import ClientShell from "@/components/client/ClientShell";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { getAuthContext, getClientOverview } from "@/lib/data/product-repository";
 import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkoutWidget";
+import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
+import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
+import { listContentCategories, listPublishedContent } from "@/lib/data/content-repository";
+import { lessonForWeek } from "@/lib/content/weekly-lesson";
+import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
+import ProgressPulse from "@/components/client/ProgressPulse";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
+import { Suspense } from "react";
+
+async function HomeWeeklySummary({ clientId }: { clientId: string }) {
+  const [latestSummary] = await getWeeklySummaries(clientId, 1);
+  return <WeeklySummaryCard summary={latestSummary} />;
+}
+
+async function HomeWeeklyLesson({ clientId, today }: { clientId: string; today: string }) {
+  const [lessons, categories] = await Promise.all([
+    listPublishedContent(clientId),
+    listContentCategories(),
+  ]);
+  const weeklyLesson = lessonForWeek(lessons, categories.map((category) => category.id), today);
+  if (!weeklyLesson) return null;
+  return (
+    <section aria-labelledby="weekly-lesson-heading">
+      <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
+        השיעור שלך השבוע
+      </h2>
+      <WeeklyLessonCard lesson={weeklyLesson} />
+    </section>
+  );
+}
 
 export default async function Home() {
   const auth = await getAuthContext();
@@ -69,6 +98,10 @@ export default async function Home() {
 
         {/* Only ever renders in the days after the coach releases one, which is
             also the only time this screen is allowed to grow past the fold. */}
+        <Suspense fallback={null}>
+          <HomeWeeklySummary clientId={auth.id} />
+        </Suspense>
+
         <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
           <MetricTile
             label="ארוחות היום"
@@ -135,12 +168,17 @@ export default async function Home() {
             course that was not written. This asks for one decision a week
             instead of thirty, and it is last on the screen because it is the
             one thing here that is not today's business. */}
+        <Suspense fallback={null}>
+          <HomeWeeklyLesson clientId={auth.id} today={today} />
+        </Suspense>
+
         {/* Where they have got to, in the space the screen had left over.
             
             The measurements screen keeps these figures and the charts behind
             them; this is a reflection of them, on the screen a client actually
             opens - because somebody three kilos down who does not know it is
             somebody about to stop. */}
+        <ProgressPulse entries={data.progress} />
       </div>
     </ClientShell>
   );
