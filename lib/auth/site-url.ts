@@ -15,6 +15,7 @@ import { headers } from "next/headers";
 // of time.
 
 const clean = (value?: string | null) => value?.trim().replace(/\/$/, "") ?? "";
+const PRODUCTION_SITE_URL = "https://start.elicohenfitness.co.il";
 
 // A host and nothing else: no scheme, no path, no credentials, no second host
 // smuggled in behind a comma.
@@ -42,8 +43,7 @@ export async function requestOrigin(): Promise<string> {
 export async function siteUrlForRedirect(): Promise<string> {
   const configured = clean(process.env.NEXT_PUBLIC_SITE_URL);
   if (process.env.VERCEL_ENV === "production") {
-    const productionUrl = clean(process.env.VERCEL_PROJECT_PRODUCTION_URL);
-    return configured || (productionUrl ? `https://${productionUrl}` : "");
+    return PRODUCTION_SITE_URL;
   }
   return (await requestOrigin()) || configured;
 }

@@ -16,9 +16,12 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 // branch that matters is which source it chooses, so that is what is pinned.
 test("a sign-in that started on a preview never points at production", async () => {
   const helper = await source("lib/auth/site-url.ts");
-  // Production keeps its configured address.
+  // Production always uses the public custom domain. This is also the domain
+  // associated with the native app, so a stale Vercel alias cannot break
+  // Universal Links in magic-link emails.
   assert.match(helper, /if \(process\.env\.VERCEL_ENV === "production"\)/);
-  assert.match(helper, /return configured \|\| \(productionUrl \? `https:\/\/\$\{productionUrl\}` : ""\)/);
+  assert.match(helper, /const PRODUCTION_SITE_URL = "https:\/\/start\.elicohenfitness\.co\.il"/);
+  assert.match(helper, /return PRODUCTION_SITE_URL;/);
   // Everything else answers on the origin the request arrived on. The production
   // URL is not reachable from that branch at all.
   const preview = helper.slice(helper.indexOf("return (await requestOrigin())"));
