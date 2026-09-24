@@ -19,7 +19,7 @@ export async function requestMagicLink(_previous: LoginState, formData: FormData
   // mailbox being flooded.
   const forwarded=(inbound.get("x-forwarded-for")?.split(",")[0]??inbound.get("x-real-ip")??"").trim();
   const[emailAllowed,addressAllowed]=await Promise.all([
-    consumeRateLimit({action:"magic_link_email",subject:email,windowSeconds:900,limit:3}),
+    consumeRateLimit({action:"magic_link_email",subject:email,windowSeconds:60,limit:3}),
     forwarded?consumeRateLimit({action:"magic_link_ip",subject:forwarded,windowSeconds:900,limit:20}):Promise.resolve(true),
   ]);
   if(!emailAllowed||!addressAllowed)return{status:"error",message:"נשלחו יותר מדי בקשות. יש להמתין ולנסות שוב."}; if (!getSupabaseConfig()) return { status: "error", message: "שירות ההתחברות עדיין לא הוגדר בסביבה זו." }; const siteUrl = await siteUrlForRedirect(); if (!siteUrl) return { status: "error", message: "כתובת האתר עדיין לא הוגדרה בסביבה זו." }; const requested=safeReturnPath(String(formData.get("next")??"")) ?? "/"; const returnQuery=`?next=${encodeURIComponent(requested)}`; try { const supabase = await createSupabaseServerClient(); const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${siteUrl}/auth/confirm-link${returnQuery}`, shouldCreateUser: false } }); if (error) { console.error("Magic Link request failed", { code: error.code, status: error.status }); return { status: "error", message: error.message.includes("rate") ? "נשלחו יותר מדי בקשות. יש להמתין ולנסות שוב." : "לא ניתן לשלוח קישור כרגע. ודאו שהחשבון קיים ונסו שוב." }; } return { status: "sent", message: "קישור התחברות נשלח. אפשר לבדוק את תיבת האימייל." }; } catch { return { status: "error", message: "שירות ההתחברות אינו זמין כרגע." }; } }
