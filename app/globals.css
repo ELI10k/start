@@ -654,6 +654,12 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    fixed tab bar are accounted for. Keep every home section, but spend that
    height on information instead of empty header/card padding. */
 @media (max-width: 767px) {
+  body:has(.client-app-shell--home) { overflow: hidden; }
+  .client-app-shell--home {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
   .mobile-app-header {
     min-height: calc(2.75rem + env(safe-area-inset-top));
     padding-inline: .75rem;
@@ -663,12 +669,20 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     line-height: 1;
   }
   .client-app-shell--home .client-app-content {
+    box-sizing: border-box;
+    height: calc(100dvh - 2.75rem - env(safe-area-inset-top));
     padding-top: .4rem;
+    padding-bottom: var(--nav-clearance);
     padding-inline: .75rem;
+    overflow: hidden;
   }
   .home-screen {
+    display: grid;
+    grid-auto-rows: max-content;
     gap: .45rem;
+    height: 100%;
     min-height: calc(100dvh - 2.75rem - .4rem - var(--nav-clearance) - env(safe-area-inset-top));
+    overflow: hidden;
   }
   .home-screen .dashboard-metrics--fit .metric-tile {
     min-height: 4.65rem;
@@ -676,7 +690,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   }
   .home-screen .dashboard-metrics--fit .metric-tile strong { margin-top: .25rem; }
   .home-screen .quick-action-card {
-    min-height: 5.65rem;
+    min-height: 0;
+    height: 100%;
     gap: .2rem;
     padding: .45rem .35rem;
   }
@@ -696,6 +711,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   }
   .home-screen .weekly-lesson__icon { width: 2rem; height: 2rem; }
   .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
+  .home-screen .quick-actions-grid {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    height: min(10.5rem, 25dvh);
+    gap: .45rem;
+  }
 }
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
    seven tiles down a 1440px window looks like an error. */
