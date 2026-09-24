@@ -649,6 +649,54 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Two rows of them now, so each is measured against half of what one row had.
    The screen still has to end above the fold with a lesson under it. */
 .home-screen .quick-action-card { min-height: clamp(7rem, 15vh, 9.5rem); }
+
+/* The native phone shell has very little useful height once the safe areas and
+   fixed tab bar are accounted for. Keep every home section, but spend that
+   height on information instead of empty header/card padding. */
+@media (max-width: 767px) {
+  .mobile-app-header {
+    min-height: calc(2.75rem + env(safe-area-inset-top));
+    padding-inline: .75rem;
+  }
+  .mobile-app-header .start-wordmark {
+    font-size: .95rem;
+    line-height: 1;
+  }
+  .client-app-shell--home .client-app-content {
+    padding-top: .4rem;
+    padding-inline: .75rem;
+  }
+  .home-screen {
+    gap: .45rem;
+    min-height: calc(100dvh - 2.75rem - .4rem - var(--nav-clearance) - env(safe-area-inset-top));
+  }
+  .home-screen .dashboard-metrics--fit .metric-tile {
+    min-height: 4.65rem;
+    padding: .5rem .45rem;
+  }
+  .home-screen .dashboard-metrics--fit .metric-tile strong { margin-top: .25rem; }
+  .home-screen .quick-action-card {
+    min-height: 5.65rem;
+    gap: .2rem;
+    padding: .45rem .35rem;
+  }
+  .home-screen .quick-action-card__icon,
+  .home-screen .quick-action-card > span:first-child:has(svg) {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: .8rem;
+  }
+  .home-screen .quick-action-card__label { font-size: .95rem; }
+  .home-screen .quick-action-card__meta { font-size: .72rem; }
+  .home-screen .section-heading--compact { margin-bottom: .3rem; }
+  .home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
+  .home-screen .weekly-lesson {
+    min-height: 3.25rem;
+    padding: .4rem .6rem;
+  }
+  .home-screen .weekly-lesson__icon { width: 2rem; height: 2rem; }
+  .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
+}
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
    seven tiles down a 1440px window looks like an error. */
 @media (min-width: 768px) {
