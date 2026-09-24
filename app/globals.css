@@ -654,11 +654,20 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    fixed tab bar are accounted for. Keep every home section, but spend that
    height on information instead of empty header/card padding. */
 @media (max-width: 767px) {
-  body:has(.client-app-shell--home) { overflow: hidden; }
+  html:has(.client-app-shell--home),
+  body:has(.client-app-shell--home) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   .client-app-shell--home {
     height: 100dvh;
     min-height: 0;
     overflow: hidden;
+    touch-action: none;
   }
   .mobile-app-header {
     min-height: calc(2rem + env(safe-area-inset-top));
