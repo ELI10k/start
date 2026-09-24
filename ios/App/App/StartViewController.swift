@@ -16,7 +16,7 @@ class StartViewController: CAPBridgeViewController {
         scrollView.bounces = false
         scrollView.alwaysBounceVertical = false
         scrollView.alwaysBounceHorizontal = false
-        scrollView.directionalLockEnabled = true
+        scrollView.isDirectionalLockEnabled = true
     }
 
     override open func capacitorDidLoad() {
