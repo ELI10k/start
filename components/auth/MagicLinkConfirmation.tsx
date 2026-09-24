@@ -7,8 +7,9 @@ export default function MagicLinkConfirmation({ tokenHash, next }: { tokenHash: 
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const native = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
-    if (!native || !form.current) return;
+    const capacitor = (window as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.() === true;
+    const standalone = (navigator as Navigator & { standalone?: boolean }).standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+    if ((!capacitor && !standalone) || !form.current) return;
     setSubmitting(true);
     form.current.requestSubmit();
   }, []);
