@@ -11,12 +11,21 @@ import UIKit
 // switched off. Registering here, rather than leaving it as a step in Xcode,
 // means there is no way to build the app with the plugin quietly missing.
 class StartViewController: CAPBridgeViewController {
+    private func configureNativeScrolling() {
+        guard let scrollView = bridge?.webView?.scrollView else { return }
+        scrollView.bounces = false
+        scrollView.alwaysBounceVertical = false
+        scrollView.alwaysBounceHorizontal = false
+        scrollView.directionalLockEnabled = true
+    }
+
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(StartHealthPlugin())
-        // A native app should not expose Safari's rubber-band canvas above and
-        // below the page. Content still scrolls normally when it is taller than
-        // the screen; only the elastic overscroll is disabled.
-        bridge?.webView?.scrollView.bounces = false
-        bridge?.webView?.scrollView.alwaysBounceVertical = false
+        configureNativeScrolling()
+    }
+
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        configureNativeScrolling()
     }
 }

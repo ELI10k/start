@@ -1,6 +1,5 @@
 import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
-import { UserRound } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
@@ -30,15 +29,6 @@ export default function ClientShell({ children, className = "" }: { children: Re
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
         <Link href="/" className="start-wordmark" aria-label="START LIFE FIT — מסך הבית">START LIFE FIT</Link>
-        {/* No bell here. The bottom bar now has a notifications tab, and on a
-            phone that puts the same screen a thumb-width apart from a header
-            icon nobody reaches for - the bar tab is the one that gets pressed.
-            The desktop nav below keeps its bell: there is no bottom bar there. */}
-        <div className="mobile-app-header__actions">
-          <Link href="/profile" className="avatar-button" aria-label="פתיחת הפרופיל">
-            <UserRound aria-hidden="true" size={18} />
-          </Link>
-        </div>
       </header>
       <nav aria-label="ניווט ראשי ללקוח" className="desktop-app-nav">
         <div className="desktop-app-nav__inner">

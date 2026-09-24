@@ -271,11 +271,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   display: flex;
   min-height: calc(3.5rem + env(safe-area-inset-top));
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: env(safe-area-inset-top) 1rem 0;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .92);
   backdrop-filter: blur(18px);
+}
+
+.mobile-app-header .start-wordmark {
+  font-size: 1.05rem;
+  font-weight: 950;
+  letter-spacing: .2em;
+  text-align: center;
 }
 
 .mobile-app-header__actions,
@@ -641,7 +648,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
 /* Two rows of them now, so each is measured against half of what one row had.
    The screen still has to end above the fold with a lesson under it. */
-.home-screen .quick-action-card { min-height: clamp(4.9rem, 11.5vh, 7rem); }
+.home-screen .quick-action-card { min-height: clamp(7rem, 15vh, 9.5rem); }
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
    seven tiles down a 1440px window looks like an error. */
 @media (min-width: 768px) {
@@ -657,7 +664,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 5.75rem;
   align-items: center; justify-content: center; flex-direction: column; gap: .35rem;
-  padding-inline: .3rem;
+  padding: .8rem .45rem;
   border: 1px solid var(--line); border-radius: var(--radius-md);
   background: var(--surface); box-shadow: var(--shadow-card);
   color: var(--ink); font-size: .72rem; font-weight: 700; text-decoration: none;
@@ -666,17 +673,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .quick-action-card > svg { color: var(--green); }
 .quick-action-card__icon,
 .quick-action-card > span:first-child:has(svg) {
-  display: grid; width: 2.6rem; height: 2.6rem; place-items: center;
-  border-radius: .75rem; background: var(--green-tint); color: var(--green);
+  display: grid; width: 3.4rem; height: 3.4rem; place-items: center;
+  border-radius: 1rem; background: var(--green-tint); color: var(--green);
 }
-.quick-action-card__label { font-size: .88rem; font-weight: 800; line-height: 1.2; }
+.quick-action-card__label { font-size: 1.05rem; font-weight: 900; line-height: 1.2; }
 /* The line that absorbed the cards this screen no longer has room for - the
    active plan's name, the next training day. One line, clipped: a coach who
    names a menu "תפריט העלאת מסה - שלב ב׳" must not be able to change how tall
    this row is, because the row has to end above the fold. */
 .quick-action-card__meta {
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink-muted); font-size: .72rem; font-weight: 600; line-height: 1.2;
+  color: var(--ink-muted); font-size: .82rem; font-weight: 650; line-height: 1.2;
 }
 .quick-action-card__meta--error { color: var(--red); }
 @media (min-width: 1024px) {
@@ -689,7 +696,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-ring { width: 7rem; }
   .progress-ring::before { width: 5.9rem; }
   .quick-actions-grid { gap: .4rem; }
-  .quick-action-card { min-height: 5.4rem; font-size: .66rem; }
+  .quick-action-card { min-height: 6.5rem; font-size: .66rem; }
 }
 
 .premium-card__description { color: var(--ink-muted); font-size: .82rem; line-height: 1.5; }

@@ -8,9 +8,8 @@
 export default function ClientLoading() {
   return (
     <div role="status" aria-busy="true" aria-label="טוענים…" className="min-h-dvh bg-[#FFFFFF] pb-28 text-[#0B0B0B]">
-      <div className="flex h-16 items-center justify-between border-b border-[#E5E7E5] px-5">
-        <div className="h-11 w-11 animate-pulse rounded-full bg-[#ECFDF3]" />
-        <div className="h-4 w-36 animate-pulse rounded bg-[#BBF7D0]" />
+      <div className="flex h-16 items-center justify-center border-b border-[#E5E7E5] px-5">
+        <div className="h-5 w-40 animate-pulse rounded bg-[#BBF7D0]" />
       </div>
       <div className="mx-auto max-w-5xl px-4 pt-5">
         <div className="grid grid-cols-3 gap-2">
