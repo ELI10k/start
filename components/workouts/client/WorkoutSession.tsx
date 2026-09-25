@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/purity */
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, Repeat2, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
@@ -24,12 +24,13 @@ const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);retur
 const clock=(seconds:number)=>`${Math.floor(seconds/60).toString().padStart(2,"0")}:${(seconds%60).toString().padStart(2,"0")}`;
 
 export default function WorkoutSession({programId,dayId}:{programId:string;dayId:string}){
+  const router=useRouter();
   const{getProgram,getExercise,currentClientId,snapshot,loading,persistenceError,pendingSync,startSession,saveSession,cancelSession,completeSession}=useWorkouts();
   const program=getProgram(programId);const day=program?.days.find((item)=>item.id===dayId);
   const assignment=snapshot.assignments.find((item)=>item.clientId===currentClientId&&item.programId===programId&&item.status==="active");
   const anySession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);
   const session=anySession?.programId===programId&&anySession.dayId===dayId?anySession:undefined;
-  const[now,setNow]=useState(()=>Date.now());const[summary,setSummary]=useState(false);const[warning,setWarning]=useState("");const[saved,setSaved]=useState<CompletedWorkout>();const[isStarting,setIsStarting]=useState(false);const[isCompleting,setIsCompleting]=useState(false);const[abandon,setAbandon]=useState(false);const[swapping,setSwapping]=useState(false);
+  const[now,setNow]=useState(()=>Date.now());const[summary,setSummary]=useState(false);const[warning,setWarning]=useState("");const[saved,setSaved]=useState<CompletedWorkout>();const[isStarting,setIsStarting]=useState(false);const[isCompleting,setIsCompleting]=useState(false);const[abandon,setAbandon]=useState(false);const[isAbandoning,setIsAbandoning]=useState(false);const[swapping,setSwapping]=useState(false);
   // Whether "there are unfinished exercises" has already been put to the client.
   // This used to be inferred from `warning` holding anything at all - and
   // completing the last exercise writes a warning of its own ("אפשר לסיים את
@@ -174,7 +175,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     setWarning("");setSummary(true);
   };
   const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
-  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} setSleepHours={(nextSleep)=>persist({sleepHours:nextSleep})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)}/>;
+  const exitWithoutSaving=async()=>{if(isAbandoning)return;setIsAbandoning(true);try{if(await cancelSession(currentClientId)){setAbandon(false);router.replace("/workouts");router.refresh()}else{setAbandon(false);setWarning("לא הצלחנו למחוק את האימון הפעיל. נסה שוב.")}}finally{setIsAbandoning(false)}};
+  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} setSleepHours={(nextSleep)=>persist({sleepHours:nextSleep})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)} onExit={()=>{setSummary(false);setAbandon(true)}}/>;
 
   return <main className="client-app-content">
     {/* Where you are in the workout follows you down the page - on a phone the
@@ -298,7 +300,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         <button disabled={session.currentExerciseIndex===ordered.length-1} onClick={()=>persist({currentExerciseIndex:session.currentExerciseIndex+1})} className="premium-secondary-button">הבא<ChevronLeft aria-hidden="true" size={17}/></button>
       </nav>
       <button onClick={finish} className="premium-primary-button mt-3 w-full">סיום אימון</button>
-      <button onClick={()=>setAbandon(true)} className="mt-2 flex w-full items-center justify-center gap-2 text-sm text-[#5B5F5B]"><X aria-hidden="true" size={16}/>יציאה מהאימון</button>
+      <button onClick={()=>setAbandon(true)} className="mt-2 flex w-full items-center justify-center gap-2 text-sm text-[#5B5F5B]"><X aria-hidden="true" size={16}/>יציאה ללא שמירה</button>
     </div>
 
     {/* The choice used to be "finish" or "delete everything". A client who did
@@ -328,9 +330,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     <BottomSheet open={abandon} title="לצאת מהאימון?" onClose={()=>setAbandon(false)}>
       <p className="text-sm text-[#5B5F5B]">{completedSets} מתוך {totalSets} סטים נרשמו עד עכשיו.</p>
       <div className="sheet__actions">
-        <button onClick={()=>{setAbandon(false);setSummary(true)}} className="premium-primary-button">שמירת מה שבוצע וסיום</button>
-        <button onClick={()=>setAbandon(false)} className="premium-secondary-button">חזרה לאימון</button>
-        <button onClick={async()=>{setAbandon(false);await cancelSession(currentClientId)}} className="mt-1 flex w-full items-center justify-center gap-2 text-sm text-[#DC2626]">מחיקת האימון וכל הסטים שנרשמו</button>
+        <button onClick={()=>{setAbandon(false);setSummary(true)}} disabled={isAbandoning} className="premium-primary-button">שמירת מה שבוצע וסיום</button>
+        <button onClick={()=>setAbandon(false)} disabled={isAbandoning} className="premium-secondary-button">חזרה לאימון</button>
+        <button onClick={exitWithoutSaving} disabled={isAbandoning} className="mt-1 flex w-full items-center justify-center gap-2 text-sm text-[#DC2626]">{isAbandoning?"יוצאים…":"יציאה ללא שמירה ומחיקת כל הסטים"}</button>
       </div>
     </BottomSheet>
   </main>;
@@ -421,7 +423,7 @@ function RestTimer({seconds,onAdd,onSkip}:{seconds:number;onAdd:()=>void;onSkip:
   </section>;
 }
 
-function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,setSleepHours,warning,onSave,saving,onBack}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;setSleepHours:(value:number|undefined)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void}){
+function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,setSleepHours,warning,onSave,saving,onBack,onExit}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;setSleepHours:(value:number|undefined)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void;onExit:()=>void}){
   // The note is typed locally and saved when the field is left.
   //
   // It used to be controlled straight off the session: every keystroke wrote to
@@ -464,6 +466,7 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
           enough reason to lose somebody's last sentence. */}
       <button onClick={()=>{flush();void onSave()}} disabled={saving} className="premium-primary-button">{saving?"שומרים…":"שמירת האימון"}</button>
       <button onClick={onBack} disabled={saving} className="premium-secondary-button">חזרה לאימון</button>
+      <button onClick={onExit} disabled={saving} className="flex min-h-11 items-center justify-center gap-2 text-sm font-bold text-[#DC2626]"><X aria-hidden="true" size={16}/>יציאה ללא שמירה</button>
     </div>
   </main>;
 }

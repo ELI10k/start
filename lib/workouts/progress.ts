@@ -50,18 +50,33 @@ export function getTodayWorkoutDay(
   // Days declared missed, as {dayId, date} - the date so the week can be
   // bounded, the day so the right one is crossed off.
   skipped:readonly {dayId:string;date:string}[]=[],
+  // The assignment makes two details explicit: how many sessions this week
+  // contains, and which assignment's history may advance it. A-B trained six
+  // times is A,B,A,B,A,B; treating answered days as a Set made the sequence
+  // forget occurrences after the first A and B.
+  weeklyFrequency:number=program.days.length,
+  assignmentId?:string,
 ):WorkoutDay|undefined{
   if(!program.days.length)return undefined;
   const opened=trainingWeekStart(today);
   const inWeek=(date:string)=>date>=opened&&date<=today;
-  const answered=new Set<string>([
-    ...completedWorkouts
-      .filter((item)=>item.clientId===clientId&&item.programId===program.id&&inWeek(dateOnly(item.completedAt)))
-      .map((item)=>item.dayId),
-    ...skipped.filter((item)=>inWeek(item.date)).map((item)=>item.dayId),
-  ]);
   const ordered=[...program.days].sort((a,b)=>a.order-b.order);
-  return ordered.find((day)=>!answered.has(day.id))??ordered[0];
+  const answeredByDay=new Map<string,number>();
+  const answer=(dayId:string)=>answeredByDay.set(dayId,(answeredByDay.get(dayId)??0)+1);
+  completedWorkouts
+    .filter((item)=>item.clientId===clientId&&item.programId===program.id&&(!assignmentId||item.assignmentId===assignmentId)&&inWeek(dateOnly(item.completedAt)))
+    .forEach((item)=>answer(item.dayId));
+  skipped.filter((item)=>inWeek(item.date)).forEach((item)=>answer(item.dayId));
+
+  const scheduledOccurrences=new Map<string,number>();
+  const sessions=Math.max(1,Math.min(14,weeklyFrequency||ordered.length));
+  for(let index=0;index<sessions;index++){
+    const day=ordered[index%ordered.length];
+    const occurrence=(scheduledOccurrences.get(day.id)??0)+1;
+    scheduledOccurrences.set(day.id,occurrence);
+    if((answeredByDay.get(day.id)??0)<occurrence)return day;
+  }
+  return ordered[0];
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
