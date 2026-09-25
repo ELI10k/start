@@ -7,7 +7,8 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 
 export default function DashboardWorkoutActivity({ handledIds }: { handledIds: readonly string[] }) {
   const { snapshot } = useWorkouts();
-  const [handled, setHandled] = useState(() => new Set(handledIds));
+  const [locallyHandled, setLocallyHandled] = useState<ReadonlySet<string>>(() => new Set());
+  const handled = new Set([...handledIds, ...locallyHandled]);
   const recent = [...snapshot.completedWorkouts]
     .filter((item) => !handled.has(item.id))
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
@@ -22,7 +23,7 @@ export default function DashboardWorkoutActivity({ handledIds }: { handledIds: r
         <span>{client?.fullName ?? "לקוח משויך"} · {new Date(item.completedAt).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</span>
         <span className="flex items-center gap-2">
           <Link href={`/coach/clients/${item.clientId}/workouts/${item.id}`} className="chip">צפייה</Link>
-          <HandledButton workoutId={item.id} onHandled={() => setHandled((current) => new Set([...current, item.id]))}/>
+          <HandledButton workoutId={item.id} onHandled={() => setLocallyHandled((current) => new Set([...current, item.id]))}/>
         </span>
       </article>;
     })}</div> : <p className="mt-3 text-sm text-[#5B5F5B]">אין אימונים שממתינים לטיפול.</p>}

@@ -1,9 +1,9 @@
-// Opens the coach's training-day screen on a deployed START and reports what is
+// Opens the coach's training-day screen on a deployed START LIFE FIT and reports what is
 // actually on it: the "דגשים" button, the muscle-group tag, and whether sets /
 // reps / rest are editable inputs or read-only text.
 //
 // Two hosts to get past: Vercel's SSO on preview deployments (handled with the
-// project's automation-bypass token) and START's own login (handled with a
+// project's automation-bypass token) and START LIFE FIT's own login (handled with a
 // Supabase password grant in Node, so the credential never reaches the browser -
 // same approach as e2e/support/session.ts).
 //

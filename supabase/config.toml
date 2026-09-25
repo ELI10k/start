@@ -244,11 +244,11 @@ otp_expiry = 86400
 # sender_name = "Admin"
 
 [auth.email.template.invite]
-subject = "הוזמנת ל-START"
+subject = "הוזמנת ל-START LIFE FIT"
 content_path = "./supabase/templates/invite.html"
 
 [auth.email.template.magic_link]
-subject = "קישור הכניסה שלך ל-START"
+subject = "קישור הכניסה שלך ל-START LIFE FIT"
 content_path = "./supabase/templates/magic-link.html"
 
 # Uncomment to customize notification email template

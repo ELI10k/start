@@ -55,6 +55,8 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
 
   const date = String(form.get("date") ?? "");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, message: "תאריך לא תקין." };
+  const time = String(form.get("time") ?? "12:00");
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return { ok: false, message: "שעת האכילה אינה תקינה." };
 
   const source = String(form.get("source") ?? "text");
   if (!["text", "scan", "photo"].includes(source)) return { ok: false, message: RULES.invalid_food_source };
@@ -157,11 +159,12 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     if (uploadError) return { ok: false, message: "העלאת התמונה נכשלה. אפשר לנסות שוב." };
   }
 
-  const { error } = await supabase.rpc("log_client_food", {
+  const { error } = await supabase.rpc("log_client_food_scoped", {
     p_date: date,
     p_name: resolvedName,
     p_source: source,
     p_meal_id: uuid(form.get("mealId")),
+    p_meal_group_id: uuid(form.get("mealGroupId")),
     p_food_id: foodId || null,
     p_quantity: quantity,
     p_unit: String(form.get("unit") ?? "").trim() || null,
@@ -170,6 +173,7 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     p_carbs: carbs,
     p_fat: fat,
     p_photo_path: photoPath,
+    p_eaten_time: time,
   });
 
   if (error) {
@@ -208,18 +212,20 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   //     on the client's screen and tells the coach the frame was missed.
   const mealId = uuid(form.get("mealId"));
   if (mealId && String(form.get("preserveMealStatus")) !== "true") {
-    const [{ data: meal }, { data: existing }] = await Promise.all([
-      supabase.from("meals").select("free_calorie_target").eq("id", mealId).maybeSingle(),
-      supabase.from("meal_day_status").select("status").eq("client_id", auth.id).eq("meal_id", mealId).eq("status_date", date).maybeSingle(),
-    ]);
+    const { data: meal } = await supabase.from("meals").select("free_calorie_target").eq("id", mealId).maybeSingle();
     const isFreeCalorieMeal = Boolean(meal?.free_calorie_target);
-    if (!isFreeCalorieMeal && !existing)
-      await supabase.rpc("set_meal_day_status", {
+    if (!isFreeCalorieMeal) {
+      const { error: statusError } = await supabase.rpc("set_meal_day_status", {
         p_meal_id: mealId,
         p_date: date,
         p_status: "other",
         p_note: resolvedName.slice(0, 500),
       });
+      if (statusError) {
+        console.error("food_log_meal_status_failed", { mealId, code: statusError.code });
+        return { ok: false, message: "המאכל נשמר, אבל סימון הארוחה כ׳נאכל משהו אחר׳ לא נשמר. נסו שוב." };
+      }
+    }
   }
 
   revalidatePath("/nutrition");
@@ -232,6 +238,24 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
     : needsEstimate
       ? `נרשם עם הערכה: ${calories} קל׳ · ${protein} ג׳ חלבון · ${carbs} ג׳ פחמימות · ${fat} ג׳ שומן.`
       : "נרשם ונוסף לסיכום של היום." };
+}
+
+export async function updateClientFoodLog(form: FormData): Promise<void> {
+  const auth = await getAuthContext();
+  if (!auth || auth.role !== "client") return;
+  const id = uuid(form.get("id"));
+  const quantity = number(form, "quantity");
+  const time = String(form.get("time") ?? "");
+  if (!id || quantity === null || quantity <= 0 || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return;
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.rpc("update_client_food_log", {
+    p_id: id,
+    p_quantity: quantity,
+    p_time: time,
+  });
+  if (error) console.error("food_log_update_failed", { id, code: error.code });
+  revalidatePath("/nutrition");
+  revalidatePath("/");
 }
 
 export async function deleteClientFoodLog(form: FormData): Promise<void> {

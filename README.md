@@ -1,4 +1,4 @@
-# START
+# START LIFE FIT
 
 RTL Hebrew frontend demonstration for nutrition coaching, built with Next.js 16, React 19, TypeScript, and Tailwind CSS 4.
 

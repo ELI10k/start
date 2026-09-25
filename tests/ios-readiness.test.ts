@@ -54,13 +54,22 @@ test("the association file refuses to serve a placeholder team id", async () => 
 });
 
 test("a cold start from a link is followed, not only a warm one", async () => {
-  const bridge = await source("components/native/NativeBridge.tsx");
+  const [bridge, layout, clientShell] = await Promise.all([
+    source("components/native/NativeBridge.tsx"),
+    source("app/layout.tsx"),
+    source("components/client/ClientShell.tsx"),
+  ]);
   // appUrlOpen does not fire when the URL launched the app - which is exactly
   // the magic-link case, since the app is usually closed when the email arrives.
   assert.match(bridge, /App\.getLaunchUrl\(\)/);
   assert.match(bridge, /appUrlOpen/);
   // Both paths go through the same in-app-only check.
   assert.match(bridge, /const target = safeDeepLink/);
+  // The listener must also exist before login. Keeping it only inside the
+  // authenticated client shell opens the app but strands the magic link on
+  // the login screen.
+  assert.match(layout, /<NativeBridge\s*\/>/);
+  assert.doesNotMatch(clientShell, /<NativeBridge\s*\/>/);
 });
 
 test("one command re-applies everything cap sync does not own", async () => {

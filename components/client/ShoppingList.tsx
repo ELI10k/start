@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, ShoppingBasket } from "lucide-react";
+import { Check, Copy, Database, PencilLine, Plus, ShoppingBasket, Trash2 } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import { buildShoppingList, shoppingListText, SHOPPING_CATEGORIES, type ShoppingSource } from "@/lib/nutrition/shopping-list";
+import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
+
+export type ShoppingCatalogueFood = ComboboxFood;
 
 // The menu already lists every food and every quantity. Turning that into a
 // shopping list is presentation, not a new engine - and it is the one thing a
@@ -11,12 +14,22 @@ import { buildShoppingList, shoppingListText, SHOPPING_CATEGORIES, type Shopping
 export default function ShoppingList({
   items,
   title,
+  catalogueFoods = [],
+  recentFreeFoods = [],
   // `inline` renders the list as the screen rather than behind a button: the
   // shopping list has its own tab now, and a screen whose only content is a
   // button that opens the content is a screen with an extra tap in it.
   inline = false,
-}: { items: readonly ShoppingSource[]; title: string; inline?: boolean }) {
+}: {
+  items: readonly ShoppingSource[];
+  title: string;
+  catalogueFoods?: readonly ShoppingCatalogueFood[];
+  recentFreeFoods?: readonly ShoppingSource[];
+  inline?: boolean;
+}) {
   const [open, setOpen] = useState(false);
+  const [catalogueOpen, setCatalogueOpen] = useState(false);
+  const [manualOpen, setManualOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   // Kept across a route change, and only for this menu.
   //
@@ -25,7 +38,9 @@ export default function ShoppingList({
   // while its owner is still in the shop. A new menu gets a new key, so last
   // week's ticks never appear against this week's list.
   const storageKey = `start.shopping.${title}`;
+  const extrasKey = `${storageKey}.extras`;
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set());
+  const [extras, setExtras] = useState<ShoppingSource[]>([]);
   // Read after mount, not in a lazy initialiser: this component renders on the
   // server too, where localStorage does not exist, and seeding state from it
   // during render is the hydration mismatch that causes.
@@ -34,10 +49,18 @@ export default function ShoppingList({
       const stored = window.localStorage.getItem(storageKey);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (stored) setTicked(new Set(JSON.parse(stored) as string[]));
+      const savedExtras = window.localStorage.getItem(extrasKey);
+      if (savedExtras) setExtras(JSON.parse(savedExtras) as ShoppingSource[]);
     } catch { /* a browser that refuses storage still gets a working list */ }
-  }, [storageKey]);
+  }, [extrasKey, storageKey]);
 
-  const lines = useMemo(() => buildShoppingList(items), [items]);
+  const lines = useMemo(() => buildShoppingList([...items, ...extras]), [extras, items]);
+  const saveExtras = (next: ShoppingSource[]) => {
+    setExtras(next);
+    try { window.localStorage.setItem(extrasKey, JSON.stringify(next)); } catch { /* ignore */ }
+  };
+  const addExtra = (item: ShoppingSource) => saveExtras([...extras, item]);
+  const removeExtra = (index: number) => saveExtras(extras.filter((_, itemIndex) => itemIndex !== index));
   const toggle = (key: string) =>
     setTicked((current) => {
       const next = new Set(current);
@@ -61,13 +84,12 @@ export default function ShoppingList({
     }
   };
 
-  if (!lines.length) return null;
-
   // By aisle. A supermarket is laid out in food groups and so is the menu these
   // lines came from, so walking the list is walking the shop - instead of the
   // alphabetical sweep that sent a client back to the fridges four times.
   const body = (
     <>
+      {!lines.length ? <p className="rounded-2xl bg-[#F7F8F7] p-4 text-sm text-[#5B5F5B]">הרשימה עדיין ריקה. אפשר להוסיף פריט מהמאגר או לכתוב אותו ידנית.</p> : null}
       {SHOPPING_CATEGORIES.map(({ type, label }) => {
         const inCategory = lines.filter((line) => line.category === type);
         if (!inCategory.length) return null;
@@ -78,9 +100,9 @@ export default function ShoppingList({
           </section>
         );
       })}
-      <p className="mt-3 text-xs text-[#5B5F5B]">
+      {lines.length ? <p className="mt-3 text-xs text-[#5B5F5B]">
         פריט מסומן כחלופה הוא בחירה אפשרית ולא חובה — כדאי לקנות לפחות אחת מכל קבוצה, כדי שתהיה באמת בחירה.
-      </p>
+      </p> : null}
     </>
   );
   const copyButton = (
@@ -91,15 +113,55 @@ export default function ShoppingList({
   );
 
   const done = lines.filter((line) => ticked.has(`${line.name} ${line.unit}`)).length;
+  const additions = (
+    <section className="grid gap-3 rounded-2xl border border-[#E5E7E5] bg-white p-4">
+      <h2 className="font-black">הוספת פריטים</h2>
+      <div className="grid grid-cols-2 gap-2">
+        <button type="button" onClick={() => setCatalogueOpen(true)} className="premium-secondary-button"><Database size={16} />מהמאגר</button>
+        <button type="button" onClick={() => setManualOpen(true)} className="premium-secondary-button"><PencilLine size={16} />הוספה ידנית</button>
+      </div>
+      {recentFreeFoods.length ? (
+        <div>
+          <p className="mb-2 text-sm font-bold">מאכלים שנאכלו בקלוריות החופשיות</p>
+          <div className="flex flex-wrap gap-2">
+            {recentFreeFoods.map((item, index) => (
+              <button key={`${item.name}-${item.measurementUnit}-${index}`} type="button" onClick={() => addExtra(item)} className="chip">
+                <Plus size={14} />{item.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {extras.length ? (
+        <div className="grid gap-2 border-t border-[#E5E7E5] pt-3">
+          <p className="text-sm font-bold">פריטים שהוספת</p>
+          {extras.map((item, index) => (
+            <div key={`${item.name}-${index}`} className="flex items-center justify-between gap-2 text-sm">
+              <span>{item.name} · {item.displayQuantity} {item.measurementUnit}</span>
+              <button type="button" aria-label={`מחיקת ${item.name}`} onClick={() => removeExtra(index)} className="chip text-[#DC2626]"><Trash2 size={14} /></button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
+  const sheets = (
+    <>
+      <CatalogueAddition open={catalogueOpen} onClose={() => setCatalogueOpen(false)} foods={catalogueFoods} onAdd={addExtra} />
+      <ManualAddition open={manualOpen} onClose={() => setManualOpen(false)} onAdd={addExtra} />
+    </>
+  );
 
   if (inline) return (
     <div className="grid gap-3">
+      {additions}
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-[#5B5F5B]">נאספו {done} מתוך {lines.length}</p>
         {done ? <button type="button" onClick={clear} className="chip">ניקוי הסימונים</button> : null}
       </div>
       {body}
-      <div className="mt-2">{copyButton}</div>
+      {lines.length ? <div className="mt-2">{copyButton}</div> : null}
+      {sheets}
     </div>
   );
 
@@ -120,8 +182,52 @@ export default function ShoppingList({
           <button type="button" onClick={() => setOpen(false)} className="premium-secondary-button">סגירה</button>
         </div>
       </BottomSheet>
+      {sheets}
     </>
   );
+}
+
+function CatalogueAddition({ open, onClose, foods, onAdd }: { open: boolean; onClose: () => void; foods: readonly ShoppingCatalogueFood[]; onAdd: (item: ShoppingSource) => void }) {
+  const [foodId, setFoodId] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit] = useState("יחידה");
+  const food = foods.find((item) => item.id === foodId);
+  const add = () => {
+    const amount = Number(quantity.replace(",", "."));
+    if (!food || !Number.isFinite(amount) || amount <= 0) return;
+    onAdd({ name: food.brand ? `${food.name} — ${food.brand}` : food.name, displayQuantity: amount, measurementUnit: unit.trim() || "יחידה", itemRole: "primary", groupType: "other" });
+    setFoodId(""); setQuantity("1"); setUnit("יחידה"); onClose();
+  };
+  return <BottomSheet open={open} title="הוספה ממאגר המזונות" onClose={onClose} placement="top">
+    {!food ? <FoodCombobox foods={foods} value={foodId} usage={[]} clientCatalogueOrder onSelect={setFoodId} onClose={onClose} /> : <div className="grid gap-3">
+      <p className="font-black">{food.brand ? `${food.name} — ${food.brand}` : food.name}</p>
+      <label className="text-sm font-bold">כמות<input value={quantity} onChange={(event) => setQuantity(event.target.value)} inputMode="decimal" className="nutrition-input mt-2" /></label>
+      <label className="text-sm font-bold">יחידה<input value={unit} onChange={(event) => setUnit(event.target.value)} className="nutrition-input mt-2" placeholder="יחידה / גרם / אריזה" /></label>
+      <button type="button" onClick={add} className="premium-primary-button">הוספה לרשימה</button>
+    </div>}
+  </BottomSheet>;
+}
+
+function ManualAddition({ open, onClose, onAdd }: { open: boolean; onClose: () => void; onAdd: (item: ShoppingSource) => void }) {
+  const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [unit, setUnit] = useState("יחידה");
+  const add = () => {
+    const amount = Number(quantity.replace(",", "."));
+    if (!name.trim() || !Number.isFinite(amount) || amount <= 0) return;
+    onAdd({ name: name.trim(), displayQuantity: amount, measurementUnit: unit.trim() || "יחידה", itemRole: "primary", groupType: "other" });
+    setName(""); setQuantity("1"); setUnit("יחידה"); onClose();
+  };
+  return <BottomSheet open={open} title="הוספה ידנית לרשימה" onClose={onClose}>
+    <div className="grid gap-3">
+      <label className="text-sm font-bold">שם הפריט<input value={name} onChange={(event) => setName(event.target.value)} className="nutrition-input mt-2" /></label>
+      <div className="grid grid-cols-2 gap-2">
+        <label className="text-sm font-bold">כמות<input value={quantity} onChange={(event) => setQuantity(event.target.value)} inputMode="decimal" className="nutrition-input mt-2" /></label>
+        <label className="text-sm font-bold">יחידה<input value={unit} onChange={(event) => setUnit(event.target.value)} className="nutrition-input mt-2" /></label>
+      </div>
+      <button type="button" onClick={add} className="premium-primary-button">הוספה לרשימה</button>
+    </div>
+  </BottomSheet>;
 }
 
 function Group({

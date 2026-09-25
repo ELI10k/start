@@ -70,7 +70,7 @@ begin
   select id into v_plan from public.meal_plans where coach_id=p_coach_id and is_system_template;
   if v_plan is not null then return v_plan; end if;
   insert into public.meal_plans(coach_id,title,description,status,calorie_target,is_system_template)
-  values(p_coach_id,'תפריט מאסטר START','תבנית המערכת לפי טבלת START: בכל ארוחה מוצגות חלופות חלבון ופחמימה. יש לשכפל לפני שיוך ללקוח.','published',2250,true)
+  values(p_coach_id,'תפריט מאסטר START LIFE FIT','תבנית המערכת לפי טבלת START LIFE FIT: בכל ארוחה מוצגות חלופות חלבון ופחמימה. יש לשכפל לפני שיוך ללקוח.','published',2250,true)
   returning id into v_plan;
 
   insert into public.meals(meal_plan_id,day_index,title,notes,sort_order)

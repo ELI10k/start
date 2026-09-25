@@ -1,12 +1,12 @@
-# START — native readiness audit
+# START LIFE FIT — native readiness audit
 
-What it would take to ship START through TestFlight and Play internal testing,
+What it would take to ship START LIFE FIT through TestFlight and Play internal testing,
 and what stands in the way today. Written against the app as it is, not as it
 might be rearranged.
 
 ## The finding that decides the approach
 
-**START cannot be statically exported, so Capacitor cannot bundle it as assets.**
+**START LIFE FIT cannot be statically exported, so Capacitor cannot bundle it as assets.**
 
 Eight modules are Server Actions (`app/actions/*.ts`, `app/login/actions.ts`),
 every screen reads Supabase through a cookie-bound server client, and the whole

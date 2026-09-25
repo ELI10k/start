@@ -3,7 +3,7 @@
 -- "אכלתי משהו אחר" recorded free text and nothing else. It was the honest
 -- answer to a real situation - better than "לא נאכל" - but it bought the coach
 -- a sentence and cost the day its numbers, because free text has no macros and
--- START does not invent them.
+-- START LIFE FIT does not invent them.
 --
 -- Three ways to say it, and two of them carry figures:
 --   text  - a sentence, as today. No macros; the coach reads it.

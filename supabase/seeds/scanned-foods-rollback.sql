@@ -6,7 +6,7 @@ begin;
 -- catalogue exactly as it was. Deliberately does NOT drop foods.source: rows
 -- contributed while the migration was live are only distinguishable from curated
 -- ones by that column, and dropping it would silently promote community data to
--- looking like START data. Drop it by hand once you have decided what to do with
+-- looking like START LIFE FIT data. Drop it by hand once you have decided what to do with
 -- those rows.
 
 drop function if exists public.upsert_scanned_food(text,text,text,text,text,numeric,numeric,numeric,numeric,numeric,text,text);

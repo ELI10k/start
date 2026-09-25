@@ -1,4 +1,4 @@
-# START — Feature Complete
+# START LIFE FIT — Feature Complete
 
 Declared 2026-08-09 on `integration/start-unified`.
 
@@ -71,7 +71,7 @@ isolation; payments, subscriptions and store distribution; the 19:30 workout
 reminder (Vercel Hobby allows one cron run per day); nine of Eli's master foods that
 have no branded catalog equivalent and need source values.
 
-Deliberately deferred: self-signup, analytics, START IQ.
+Deliberately deferred: self-signup, analytics, START LIFE FIT IQ.
 
 ## Freeze rule
 

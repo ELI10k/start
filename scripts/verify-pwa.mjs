@@ -1,4 +1,4 @@
-// Web/PWA audit: is START installable, does it come back as an app rather than a
+// Web/PWA audit: is START LIFE FIT installable, does it come back as an app rather than a
 // bookmark, does a signed-in session survive a reload, and does anything shout in
 // the console on the routes a coach and a client actually use.
 //

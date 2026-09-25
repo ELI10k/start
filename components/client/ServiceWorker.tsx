@@ -8,9 +8,16 @@ import { useEffect } from "react";
 export default function ServiceWorker() {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
-    // Registration failing is not worth surfacing: it costs the install prompt,
-    // not the app.
-    void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    // Let the first screen become interactive before starting worker discovery
+    // and installation. Registration failing is not worth surfacing: it costs
+    // the install prompt, not the app.
+    const register = () => void navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    if (document.readyState === "complete") {
+      const timeout = window.setTimeout(register, 1);
+      return () => window.clearTimeout(timeout);
+    }
+    window.addEventListener("load", register, { once: true });
+    return () => window.removeEventListener("load", register);
   }, []);
   return null;
 }

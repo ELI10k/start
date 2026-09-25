@@ -2,7 +2,9 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { ArrowRight, Barcode, Camera, Database, Images, PencilLine } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, UtensilsCrossed } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -14,9 +16,11 @@ import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { displayCalories } from "@/lib/nutrition/display";
 import { foodUnit, hasNaturalUnit, unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { addMyMealToDay, type MyMealActionState } from "@/app/actions/my-meals";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
-type SheetTab = "text" | "food" | "scan" | "photo";
+type SheetTab = "text" | "food" | "scan" | "photo" | "saved";
+export type SavedMealChoice = Readonly<{ id: string; name: string; itemCount: number }>;
 
 export type PickableFood = ComboboxFood & {
   calories: number | null;
@@ -56,6 +60,7 @@ const round = (value: number) => Math.round(value * 10) / 10;
  */
 export default function AteSomethingElse({
   mealId,
+  mealGroupId,
   date,
   open,
   onClose,
@@ -72,8 +77,10 @@ export default function AteSomethingElse({
   // not a substitution being described, so it opens on the camera rather than
   // making the client find it behind two other tabs.
   initialTab = "text",
+  savedMeals = [],
 }: {
   mealId: string;
+  mealGroupId?: string;
   date: string;
   open: boolean;
   onClose: () => void;
@@ -82,7 +89,9 @@ export default function AteSomethingElse({
   foods?: readonly PickableFood[];
   preserveMealStatus?: boolean;
   initialTab?: SheetTab;
+  savedMeals?: readonly SavedMealChoice[];
 }) {
+  const router = useRouter();
   const [tab, setTab] = useState<SheetTab>(initialTab);
   // Back to the tab it was opened for, every time it opens. Without this the
   // sheet remembers the last tab used anywhere on the screen, so a client who
@@ -101,6 +110,7 @@ export default function AteSomethingElse({
   const [manualScan, setManualScan] = useState(false);
   const [grams, setGrams] = useState("100");
   const [servings, setServings] = useState("1");
+  const [eatenTime, setEatenTime] = useState(() => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date()));
   const gramsTimer = useRef<number | null>(null);
   const [loggedName, setLoggedName] = useState("");
   // Whether a chosen photograph is still being downscaled.
@@ -154,7 +164,19 @@ export default function AteSomethingElse({
     if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);
     gramsTimer.current=window.setTimeout(()=>commitGrams(value),450);
   };
-  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood();setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{
+    const result=await logClientFood(previous,form);
+    if(result.ok){
+      formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood();
+      setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""});
+      // A server revalidation updates the next request. Refreshing here updates
+      // the already-open nutrition screen too, so the meal visibly turns green
+      // as soon as its replacement is saved instead of only after navigation.
+      router.refresh();
+      if(mealId&&!preserveMealStatus)onClose();
+    }
+    return result;
+  },initial);
 
   const preparePhoto = async (input: HTMLInputElement) => {
     const chosen = input.files?.[0];
@@ -226,6 +248,7 @@ export default function AteSomethingElse({
             <Database aria-hidden="true" size={15} />מהמאגר
           </button>
         ) : null}
+        <button type="button" onClick={() => setTab("saved")} aria-pressed={tab === "saved"} className={`chip${tab === "saved" ? " pill--green" : ""}`}><UtensilsCrossed aria-hidden="true" size={15}/>מהארוחות שלי</button>
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
           <Camera aria-hidden="true" size={15} />צילום
         </button>
@@ -246,10 +269,14 @@ export default function AteSomethingElse({
         </div>
       )}
 
-      <form ref={formRef} action={action} className="mt-4 grid gap-3">
+      {tab === "saved" ? <div className="mt-4 grid gap-2">{savedMeals.length?savedMeals.map((meal)=><SavedMealButton key={meal.id} meal={meal} date={date} time={eatenTime} targetMealId={mealId} onSaved={()=>{router.refresh();onClose()}}/>):<div className="rounded-2xl bg-[#F7F8F7] p-5 text-center"><p className="font-bold">עדיין אין ארוחות שמורות</p><p className="mt-1 text-sm text-[#5B5F5B]">אפשר ליצור ארוחה עם המאכלים והכמויות הקבועים שלך.</p><Link href="/my-meals" className="premium-primary-button mt-4">יצירת ארוחה</Link></div>}</div> : <form ref={formRef} action={action} className="mt-4 grid gap-3">
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="mealId" value={mealId} />
+        <input type="hidden" name="mealGroupId" value={mealGroupId ?? ""} />
         <input type="hidden" name="preserveMealStatus" value={preserveMealStatus ? "true" : "false"} />
+        <label className="text-sm font-bold">שעת האכילה
+          <input name="time" type="time" required value={eatenTime} onChange={(event)=>setEatenTime(event.target.value)} className="nutrition-input mt-2" />
+        </label>
         {/* The catalogue reports itself as "scan".
             
             The database's own check accepts text, scan or photo, so a fourth
@@ -518,7 +545,12 @@ export default function AteSomethingElse({
           />
           <button type="button" onClick={close} className="premium-secondary-button">{state.ok?"סגירה":"ביטול ללא שמירה"}</button>
         </div>
-      </form>
+      </form>}
     </BottomSheet>
   );
+}
+
+function SavedMealButton({meal,date,time,targetMealId,onSaved}:{meal:SavedMealChoice;date:string;time:string;targetMealId:string;onSaved:()=>void}){
+  const[state,submit,pending]=useActionState(async(previous:MyMealActionState,form:FormData)=>{const result=await addMyMealToDay(previous,form);if(result.ok)onSaved();return result},{ok:false});
+  return <form action={submit} className="rounded-2xl border border-[#E5E7E5] bg-white p-3"><input type="hidden" name="id" value={meal.id}/><input type="hidden" name="date" value={date}/><input type="hidden" name="time" value={time}/><input type="hidden" name="targetMealId" value={targetMealId}/><div className="flex items-center justify-between gap-3"><span><strong className="block">{meal.name}</strong><small className="text-[#5B5F5B]">{meal.itemCount} מאכלים</small></span><button disabled={pending} className="premium-primary-button shrink-0">{pending?"מוסיפים…":"בחירה"}</button></div>{state.message&&!state.ok?<p role="alert" className="mt-2 text-xs text-[#DC2626]">{state.message}</p>:null}</form>;
 }

@@ -75,6 +75,7 @@ test("only the negative state is red, and eating and skipping need no dialog", a
   const control = await source("components/client/MealStatusControl.tsx");
   assert.match(control, /pill pill--red[\s\S]*לא נאכל/);
   assert.match(control, /pill pill--green[\s\S]*נאכל/);
+  assert.match(control, /pill pill--green">נאכל משהו אחר/);
   // "Eaten" and "not eaten" are still one post each - no confirmation step.
   assert.doesNotMatch(control, /window\.confirm/);
   // Skipping is offered even when an alternative has not been chosen.
@@ -87,13 +88,53 @@ test("only the negative state is red, and eating and skipping need no dialog", a
   assert.match(control, /setSubstituting\(true\)/);
 });
 
-test("one chosen macro is enough to mark a meal eaten", async () => {
+test("a catalogued substitute turns the meal green and replaces only its meal group", async () => {
+  const [page, groupSubstitution, sheet, action, migration] = await Promise.all([
+    source("app/nutrition/page.tsx"),
+    source("components/client/MealGroupSubstitution.tsx"),
+    source("components/client/AteSomethingElse.tsx"),
+    source("app/actions/food-log.ts"),
+    source("supabase/migrations/202609240001_food_log_meal_group_scope.sql"),
+  ]);
+  assert.match(page, /loggedMealCalories \+ \(meal\.status === "other" \? retainedMealCalories : 0\)/);
+  assert.match(page, /קלוריות לא נמדדו/);
+  assert.match(page, /meal\.status === "other" \|\| meal\.status === "eaten"/);
+  assert.match(page, /<LoggedFoodList entries=\{mealLogs\}/);
+  assert.doesNotMatch(groupSubstitution, /preserveMealStatus/);
+  assert.match(groupSubstitution, /mealGroupId=\{mealGroupId\}/);
+  assert.match(sheet, /name="mealGroupId"/);
+  assert.match(action, /log_client_food_scoped/);
+  assert.match(action, /p_meal_group_id: uuid\(form\.get\("mealGroupId"\)\)/);
+  assert.match(migration, /meal_group_id uuid references public\.meal_food_groups/);
+  assert.match(migration, /g\.id = p_meal_group_id and g\.meal_id = p_meal_id/);
+  assert.match(sheet, /שם המאכל שיופיע בארוחה/);
+  assert.match(sheet, /defaultValue=\{grams\}/);
+  assert.match(sheet, /const scheduleGrams=.*window\.setTimeout\(\(\)=>commitGrams\(value\),450\)/s);
+  assert.match(sheet, /type="text" inputMode="decimal"/);
+  assert.doesNotMatch(sheet, /\[50,100,150,200,250,300\]/);
+  assert.match(sheet, /שינוי מוצר/);
+});
+
+test("a prescribed meal can be saved without tapping every default again", async () => {
   const page = await source("app/nutrition/page.tsx");
   const actions = await source("app/actions/product.ts");
-  assert.match(page, /meal\.groups\.some\(\(group\) => group\.selectedItemId\)/);
-  assert.match(page, /אפשר לסמן לאחר בחירת פריט אחד לפחות/);
-  assert.match(actions, /p_quantity: 0/);
-  assert.match(actions, /refresh_meal_intake already excludes zero/);
+  assert.match(page, /blocked=\{false\}/);
+  assert.doesNotMatch(actions, /if \(!selected\.size\) throw/);
+  assert.doesNotMatch(actions, /p_quantity: 0/);
+  assert.match(actions, /Fill missing selections with the primary/);
+});
+
+test("menu food names can be changed without renaming the shared catalogue", async () => {
+  const [migration, editor, repository] = await Promise.all([
+    source("supabase/migrations/202609160001_menu_item_custom_names.sql"),
+    source("components/coach/menus/PersistentMenuEditor.tsx"),
+    source("lib/data/product-repository.ts"),
+  ]);
+  assert.match(migration, /add column if not exists custom_name text/);
+  assert.match(migration, /meal_plan_not_owned/);
+  assert.match(editor, /customName:item\.customName\?\.trim\(\)/);
+  assert.match(editor, /שם שיוצג במקום/);
+  assert.match(repository, /item\.custom_name\.trim\(\)/);
 });
 
 test("tapping the selected meal item again clears it", async () => {
@@ -122,6 +163,15 @@ test("saying what was eaten instead offers all three ways", async () => {
   assert.match(sheet, /פתיחת מצלמה/);
   assert.match(sheet, /formRef\.current\?\.reset\(\)/);
   assert.match(sheet, /setCode\(""\)/);
+  // A catalogue product opens at its known unit/package weight, so a 200 g
+  // yoghurt cup is not silently logged as the generic 100 g fallback.
+  assert.match(sheet, /selected\?\.unitWeightGrams/);
+  assert.match(sheet, /String\(Math\.round\(selected\.unitWeightGrams\)\)/);
+  // The selected catalogue item is easy to replace and is transient: closing
+  // the sheet must not restore the previous product on the next opening.
+  assert.match(sheet, /שינוי מוצר/);
+  assert.match(sheet, /setPickedId\(""\)/);
+  assert.match(sheet, /setGrams\("100"\)/);
 });
 
 test("the coach can see which meals were skipped", async () => {

@@ -3,6 +3,7 @@
 const MASTER_ID=/^master-(p|c|f)-\d+$/;
 const PROMOTED_MASTER_FOODS:Readonly<Record<string,"protein"|"carbohydrate"|"fat">>={
   "340":"protein",
+  "341":"protein",
 };
 
 export function masterFoodGroup(id:string):"protein"|"carbohydrate"|"fat"|null{

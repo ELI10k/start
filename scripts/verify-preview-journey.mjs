@@ -1,4 +1,4 @@
-// The whole coach editing route on a deployed START, end to end, read mostly and
+// The whole coach editing route on a deployed START LIFE FIT, end to end, read mostly and
 // written only where the check is the write: copy an official programme, edit the
 // copy, reload, and prove the official original did not move.
 //
@@ -6,7 +6,7 @@
 //   - Vercel's SSO on preview deployments. The project's automation-bypass secret
 //     is fetched from the Vercel API at run time using the CLI's own login, held
 //     in a local const, and never printed. It is not an argument and not a file.
-//   - START's login. A Supabase password grant runs in Node and the resulting
+//   - START LIFE FIT's login. A Supabase password grant runs in Node and the resulting
 //     session is injected as a cookie, so the password never reaches the browser
 //     and therefore never reaches a screenshot or a trace.
 //

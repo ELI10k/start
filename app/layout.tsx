@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Assistant } from "next/font/google";
 import "./globals.css";
-import { WorkoutProvider } from "@/components/workouts/WorkoutProvider";
+import { ConditionalWorkoutProvider } from "@/components/workouts/ConditionalWorkoutProvider";
 import AuthSessionWatcher from "@/components/auth/AuthSessionWatcher";
 import ServiceWorker from "@/components/client/ServiceWorker";
+import NativeBridge from "@/components/native/NativeBridge";
 
+// Authentication is read through a shared Supabase wrapper. Next cannot see
+// the cookies() call through that abstraction during static analysis, so this
+// guard prevents private routes from being prerendered at build time.
 export const dynamic = "force-dynamic";
 const assistant = Assistant({ subsets: ["hebrew", "latin"], display: "swap", variable: "--font-assistant" });
 
@@ -47,11 +51,14 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${assistant.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        {/* Deep links can arrive before authentication, so the native bridge
+            must exist on the login and confirmation screens too. */}
+        <NativeBridge />
         <AuthSessionWatcher />
         {/* Installability, and one static offline page. Nothing per-user is
             cached; the worker states the boundary. */}
         <ServiceWorker />
-        <WorkoutProvider>{children}</WorkoutProvider>
+        <ConditionalWorkoutProvider>{children}</ConditionalWorkoutProvider>
       </body>
     </html>
   );

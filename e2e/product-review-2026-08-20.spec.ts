@@ -137,7 +137,7 @@ test.describe("2026-08-20 review", () => {
     await expect(label).toBeVisible();
     // Rows are not the unit any more: a group holds a primary and its
     // alternatives, and only one of them is ever eaten.
-    await expect(page.getByText(/ארוחות נענו היום/)).toBeVisible();
+    await expect(page.getByText(/ארוחות נענו/)).toBeVisible();
     await expect(page.getByText(/פריטים סומנו היום/)).toHaveCount(0);
   });
 
@@ -161,7 +161,7 @@ test.describe("2026-08-20 review", () => {
     // The link has to save the step it promises: the builder opens with the
     // client already selected.
     await page.waitForURL(/\/coach\/menus\/new\?clientId=/);
-    const picker = page.getByLabel("לקוח");
+    const picker = page.getByLabel("לקוח", { exact: true });
     await expect(picker).not.toHaveValue("");
   });
 });

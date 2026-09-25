@@ -119,7 +119,7 @@ report.cacheVerdict = {
   anyNextChunk: allCached.filter((url) => url.includes("/_next/")),
 };
 
-// ---- offline: a navigation must land on START's own page
+// ---- offline: a navigation must land on START LIFE FIT's own page
 await context.setOffline(true);
 await page.goto(`${baseUrl}/coach/workouts`, { waitUntil: "domcontentloaded" }).catch(() => undefined);
 await page.waitForTimeout(1500);
@@ -130,7 +130,7 @@ report.offlineNavigation = await page.evaluate(() => ({
   heading: document.querySelector("h1")?.textContent ?? null,
   hasRetry: Boolean([...document.querySelectorAll("button")].find((b) => b.textContent?.includes("נסה שוב"))),
   documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  saysItNeedsConnection: document.body.innerText.includes("START דורש חיבור לאינטרנט"),
+  saysItNeedsConnection: document.body.innerText.includes("START LIFE FIT דורש חיבור לאינטרנט"),
   showsNoStoredData: !/ק״ג|קלוריות|סטים/.test(document.body.innerText),
 }));
 await page.screenshot({ path: join(shotDir, "offline-375.png"), fullPage: true });

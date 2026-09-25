@@ -9,12 +9,11 @@ import { validateMealPlanPayload } from "../lib/nutrition/menu-validation.ts";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-// The 339 products from the imported workbook keep their numeric ids and
-// must all still be there; produce and the coach's own portions were added on top
-// and carry "coach-" ids, so the catalogue grows without the import being lost.
+// Every product in the website catalogue keeps its numeric id and must remain
+// available without duplicates or an entry being lost.
 test("nutrition catalog keeps every imported product and stays distinct", () => {
-  assert.equal(foods.filter((food) => /^\d+$/.test(food.id)).length, 339);
-  assert.ok(foods.length > 339);
+  assert.equal(foods.filter((food) => /^\d+$/.test(food.id)).length, 342);
+  assert.ok(foods.length >= 342);
   assert.equal(new Set(foods.map((food) => food.id)).size, foods.length);
   assert.equal(
     new Set(
@@ -27,8 +26,10 @@ test("nutrition catalog keeps every imported product and stays distinct", () => 
     ).size,
     foods.length,
   );
-  // The gap this closed: one vegetable in the whole catalogue.
-  assert.ok(foods.filter((food) => food.category === "ירקות").length > 20);
+  // Vegetable products remain represented across fresh, frozen and canned groups.
+  assert.ok(
+    foods.filter((food) => food.category.includes("ירקות")).length >= 20,
+  );
 });
 
 test("nutrition schema includes canonical relations, constraints, RLS and RPCs", async () => {
@@ -175,7 +176,7 @@ test("meal-plan mutations reject incomplete or unsafe payloads before the RPC", 
   );
 });
 
-test("the client sees the day's totals, and no targets beside them", async () => {
+test("the client sees the day's totals and their current personal targets", async () => {
   const page = await file("app/nutrition/page.tsx");
   // The card is named for what it answers now - what has been eaten - and each
   // macro carries both halves, because "1688/2014" was read as often for what
@@ -191,7 +192,8 @@ test("the client sees the day's totals, and no targets beside them", async () =>
   // is no longer the whole day, and "נותרו בתפריט" says nothing about eating
   // 800 calories that were never in it. Overrun is what the figure is for, and
   // it is the only one shown in red.
-  assert.match(page, /target=\{menu\.calorieTarget\}/);
+  assert.match(page, /target=\{calorieTarget\}/);
+  assert.match(page, /client_profiles.+calorie_target,protein_target/);
   assert.match(page, /חריגה של/);
   assert.match(page, /נותרו \$\{Math\.round\(target - value\)\}/);
 });

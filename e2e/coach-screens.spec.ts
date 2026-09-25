@@ -89,7 +89,13 @@ test.describe("coach screens", () => {
     if (!opened) {
       const official = await openFirstTrainingDay(page, { officialOnly: true });
       if (!official) test.skip(true, "no programme at all");
-      await page.getByRole("button", { name: /יצירת עותק לעריכה/ }).click();
+      // The button is named for what it does - "עריכה בעותק נפרד" in
+      // WorkoutDayPreview. The old wording matched nothing, so this fallback
+      // could only ever time out: the test passed when a previous run happened
+      // to leave an editable copy behind, and failed when it did not.
+      const copy = page.getByRole("button", { name: /עריכה בעותק נפרד/ });
+      await expect(copy).toBeVisible({ timeout: 20_000 });
+      await copy.click();
       await expect(page).toHaveURL(/\/coach\/workouts\/[^/]+$/, { timeout: 30_000 });
       const day = page.locator('a[href*="/days/"]').first();
       await day.waitFor({ state: "visible", timeout: 30_000 });
@@ -153,16 +159,19 @@ test.describe("coach screens", () => {
 // coach owns or to an approved one.
 async function openFirstTrainingDay(page: Page, options: { editableOnly?: boolean; officialOnly?: boolean } = {}) {
   await page.goto("/coach/workouts");
-  // Not just any link under /coach/workouts/ - the static "מאגר תרגילים" link is
-  // one of those and is present before the programmes have loaded, so waiting on
-  // it let the helper run against an empty list and skip every test silently.
-  const programmeLinks = page.locator('a[href*="/coach/workouts/"]:not([href$="/exercises"]):not([href$="/new"])');
+  // Not just any link under /coach/workouts/ - the static "מאגר תרגילים" and
+  // "הצעות לתוכנית הבאה" links are two of those and are present before the
+  // programmes have loaded, so waiting on them let the helper run against an
+  // empty list and skip every test silently. The programmes arrive client-side
+  // some eight seconds later, so the wait has to be for a programme link
+  // itself, not for any link on the screen.
+  const programmeLinks = page.locator('a[href*="/coach/workouts/workout-program"]');
   await expect(programmeLinks.first()).toBeVisible({ timeout: 20_000 });
 
   // Collect the hrefs first: navigating invalidates the element handles.
   const hrefs = [...new Set((await programmeLinks.evaluateAll((nodes) =>
     nodes.map((node) => node.getAttribute("href") ?? ""),
-  )).filter((href) => /\/coach\/workouts\/[^/]+$/.test(href) && !href.endsWith("/new") && !href.endsWith("/exercises")))];
+  )).filter((href) => /\/coach\/workouts\/[^/]+$/.test(href)))];
 
   for (const href of hrefs) {
     await page.goto(href);

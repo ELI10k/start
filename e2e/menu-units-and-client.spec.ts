@@ -26,7 +26,7 @@ test("a unit survives the save and reaches the client as a unit", async ({ page 
   await page.goto("/coach/menus?status=no-menu");
   await expect(page.getByRole("heading", { name: "תפריטים" })).toBeVisible({ timeout: 30_000 });
 
-  const row = page.locator(".app-list a").filter({ hasText: "START E2E Client" }).first();
+  const row = page.locator(".app-list a").filter({ hasText: /START (LIFE FIT )?E2E Client/ }).first();
   if (!(await row.count())) {
     await page.goto("/coach/menus/new");
     await expect(page.getByRole("heading", { name: "תפריט חדש" })).toBeVisible({ timeout: 30_000 });
@@ -55,15 +55,21 @@ test("a unit survives the save and reaches the client as a unit", async ({ page 
   await expect(protein).toBeVisible({ timeout: 20_000 });
   await protein.locator(".food-picker__choose").click();
 
-  if (await page.getByLabel("לקוח").inputValue() === "") {
-    await page.getByLabel("לקוח").selectOption({ label: "START E2E Client" });
+  if (await page.getByLabel("לקוח", { exact: true }).inputValue() === "") {
+    // The profile has been renamed "START E2E Client" in the database; accept either.
+    const e2eClient = page.getByLabel("לקוח", { exact: true }).locator("option", { hasText: /^START (LIFE FIT )?E2E Client$/ });
+    await page.getByLabel("לקוח", { exact: true }).selectOption((await e2eClient.first().getAttribute("value")) ?? "");
   }
   await page.getByLabel("סטטוס").selectOption("active");
-  await page.getByRole("button", { name: "שמירה" }).click();
+  await page.getByRole("button", { name: "שמירה", exact: true }).click();
   // Activating a menu that misses its target asks first, and the sheet takes a
   // moment - counting straight after the click races it.
   await page.getByRole("button", { name: "הפעלה בכל זאת" }).click({ timeout: 8_000 }).catch(() => {});
   await expect(page.locator(".menu-dock__message")).toContainText(/נשמר/, { timeout: 30_000 });
+  // A new menu's save then replaces the URL with the menu's own; navigating away
+  // before that lands aborts the next page load.
+  await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 30_000 });
+  await page.waitForLoadState("networkidle");
 
   // What the client is actually told.
   await signIn(page, requireIdentity("client"));
@@ -89,7 +95,7 @@ test("a menu duplicated onto a client opens with that client, goal and macros", 
   // So the client's recorded goal is read and the two are compared.
   await page.goto("/coach/clients");
   await expect(page.getByRole("heading", { name: "לקוחות" })).toBeVisible({ timeout: 30_000 });
-  await page.locator(".app-list a").filter({ hasText: "START E2E Client" }).first().click();
+  await page.locator(".app-list a").filter({ hasText: /START (LIFE FIT )?E2E Client/ }).first().click();
   await page.waitForURL(/\/coach\/clients\/[0-9a-f-]{36}/);
   const clientId = page.url().match(/clients\/([0-9a-f-]{36})/)?.[1];
   await page.goto(`/coach/clients/${clientId}?tab=intake`);
@@ -101,14 +107,14 @@ test("a menu duplicated onto a client opens with that client, goal and macros", 
   await expect(page.getByRole("heading", { name: "תפריטים" })).toBeVisible({ timeout: 30_000 });
 
   await page.getByRole("button", { name: /שכפול ללקוח/ }).first().click();
-  const client = page.getByRole("button", { name: /START E2E Client/ }).first();
+  const client = page.getByRole("button", { name: /START (LIFE FIT )?E2E Client/ }).first();
   await expect(client).toBeVisible({ timeout: 20_000 });
   await client.click();
 
   await page.waitForURL(/\/coach\/menus\/[0-9a-f-]{36}/, { timeout: 60_000 });
   await expect(page.getByRole("heading", { name: "עריכת תפריט" })).toBeVisible({ timeout: 30_000 });
 
-  const picked = await page.getByLabel("לקוח").inputValue();
+  const picked = await page.getByLabel("לקוח", { exact: true }).inputValue();
   const goal = await page.getByLabel("מטרה").inputValue();
   const protein = await page.getByLabel("יעד חלבון").inputValue();
   const carbs = await page.getByLabel("יעד פחמימות").inputValue();

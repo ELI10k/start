@@ -82,7 +82,7 @@ const clientAssignedMenus = must(
   await client.client
     .from("meal_plans")
     .select("id,title,calorie_target,protein_target,carbohydrate_target,fat_target")
-    .eq("title", "תפריט מאסטר START — עותק"),
+    .eq("title", "תפריט מאסטר START LIFE FIT — עותק"),
   "client assigned menu visibility",
 );
 assert(

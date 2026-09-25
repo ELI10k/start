@@ -1,6 +1,6 @@
 begin;
 
--- Foods can now arrive from three places: the curated START catalogue, an Open
+-- Foods can now arrive from three places: the curated START LIFE FIT catalogue, an Open
 -- Food Facts lookup after a barcode scan, and a person typing one in. Knowing
 -- which matters - a curated row is authoritative, a scanned one is only as good
 -- as the community database it came from.
@@ -63,7 +63,7 @@ begin
     then 'manual-' || replace(gen_random_uuid()::text, '-', '')
     else 'barcode-' || v_digits end;
 
-  -- A barcode already known to START wins: a curated row is not overwritten by a
+  -- A barcode already known to START LIFE FIT wins: a curated row is not overwritten by a
   -- community one, and re-scanning only refreshes a row of the same provenance.
   if v_digits is not null then
     select id into v_id from public.foods where barcode = v_digits limit 1;

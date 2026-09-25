@@ -1,6 +1,7 @@
 "use client";
 import { Circle, CircleDot } from "lucide-react";
 import { useFormStatus } from "react-dom";
+import { displayCalories } from "@/lib/nutrition/display";
 
 // The whole row is the submit control, so choosing an option is one tap
 // instead of reading a row and then hunting for a separate "בחירה" button.
@@ -52,7 +53,7 @@ export default function MealOptionButton({
           because the name is still recognisable and "20" is not. */}
       <span className="flex shrink-0 flex-col items-end text-xs leading-tight text-[#5B5F5B]">
         <span className="whitespace-nowrap">{quantity} {unit}</span>
-        <span className="whitespace-nowrap tabular-nums">{calories} קל׳</span>
+        <span className="whitespace-nowrap tabular-nums">{displayCalories(calories)} קל׳</span>
       </span>
     </button>
   );

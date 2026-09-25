@@ -1,4 +1,4 @@
--- START beta-test seed. Run manually in Supabase SQL Editor as postgres.
+-- START LIFE FIT beta-test seed. Run manually in Supabase SQL Editor as postgres.
 -- Safe scope: only the existing client/coach emails declared below and IDs prefixed beta-test-.
 begin;
 

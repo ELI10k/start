@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Fragment } from "react";
+import Link from "next/link";
 import ClientShell from "@/components/client/ClientShell";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
@@ -24,8 +25,8 @@ import PortionOverride from "@/components/client/PortionOverride";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import OutsideMenuFood from "@/components/client/OutsideMenuFood";
-import { sumLoggedFood } from "@/lib/nutrition/food-log";
-import { addTotals, eatenFromMenu, remainingInMenu } from "@/lib/nutrition/menu-intake";
+import { replacedMealGroups, sumLoggedFood } from "@/lib/nutrition/food-log";
+import { addTotals, eatenFromMenu, remainingInMenu, retainedSubstitutionItems } from "@/lib/nutrition/menu-intake";
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
@@ -74,14 +75,21 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
   const supabase = await createSupabaseServerClient();
-  const [menu, freeMenu, foods, logged, behavior, favoriteResult] = await Promise.all([
+  const [menu, freeMenu, foods, logged, behavior, favoriteResult, profileResult, savedMealsResult] = await Promise.all([
     getActiveClientMenu(auth.id, today),
     getFreeMenuDay(auth.id, today),
     listDatabaseFoods(),
     listClientFoodLog(auth.id, today),
     getClientNutritionBehavior(auth.id,today),
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
+    supabase.from("client_profiles").select("calorie_target,protein_target,carbohydrate_target,fat_target").eq("user_id", auth.id).maybeSingle(),
+    supabase.from("my_meals").select("id,name,my_meal_items(id)").eq("client_id",auth.id).order("updated_at",{ascending:false}),
   ]);
+  const savedMeals=(savedMealsResult.data??[]).map((meal)=>({id:String(meal.id),name:String(meal.name),itemCount:Array.isArray(meal.my_meal_items)?meal.my_meal_items.length:0}));
+  const legacyProfileResult=profileResult.error?.code==="42703"
+    ? await supabase.from("client_profiles").select("calorie_target,protein_target").eq("user_id",auth.id).maybeSingle()
+    : null;
+  const nutritionProfile=(legacyProfileResult?.data??profileResult.data) as {calorie_target?:number|null;protein_target?:number|null;carbohydrate_target?:number|null;fat_target?:number|null}|null;
   // Favourites only reorder the food picker. This screen is the client's plan,
   // the day's log and today's totals, and none of that should disappear
   // because one convenience table was briefly unreachable - which is the rule
@@ -93,6 +101,13 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   // part joins the day's totals; the rest is shown as unmeasured rather than
   // counted as zero.
   const loggedTotals=sumLoggedFood(logged);
+  // A self-managed digital client can change these in the profile. Those
+  // personal targets are the current goal; the menu's targets remain the
+  // fallback for older accounts that have not set their own yet.
+  const calorieTarget = nutritionProfile?.calorie_target == null ? menu?.calorieTarget : Number(nutritionProfile.calorie_target);
+  const proteinTarget = nutritionProfile?.protein_target == null ? menu?.proteinTarget : Number(nutritionProfile.protein_target);
+  const carbohydrateTarget = nutritionProfile?.carbohydrate_target == null ? menu?.carbohydrateTarget : Number(nutritionProfile.carbohydrate_target);
+  const fatTarget = nutritionProfile?.fat_target == null ? menu?.fatTarget : Number(nutritionProfile.fat_target);
   // Eaten and still to come, kept apart. A single number cannot answer "how am I
   // doing" and "what is left", and a slash between two figures says neither: it
   // reads as a fraction, a score or a ratio depending on who is looking.
@@ -143,7 +158,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const outsideMenuLogs = logged.filter((entry) => !entry.mealId);
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
-  const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
+  const replacedGroupsIn = (mealId: string | undefined) => replacedMealGroups(logged, mealId);
+  const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn, replacedGroupsIn), loggedTotals);
   const remainingTotals = remainingInMenu(menu?.meals ?? []);
   const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
   const answeredMeals = menu?.meals.filter((meal) => Boolean(meal.status || meal.completed)).length ?? 0;
@@ -151,10 +167,10 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const nutritionInsights = dailyNutritionInsights({
     eaten: eatenTotals,
     targets: {
-      calories: menu?.calorieTarget,
-      protein: menu?.proteinTarget,
-      carbs: menu?.carbohydrateTarget,
-      fat: menu?.fatTarget,
+      calories: calorieTarget,
+      protein: proteinTarget,
+      carbs: carbohydrateTarget,
+      fat: fatTarget,
     },
     answeredMeals,
     unansweredMeals,
@@ -208,6 +224,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
           tab inside every meal's "אכלתי משהו אחר" sheet, so the card here was a
           second door to one room, charging 90px for it. */}
       <div className="nutrition-toolbar">
+        <Link href={`/my-meals?date=${today}`} className="chip">הארוחות שלי</Link>
         {/* Only while there is something to jump to: once the current meal is
             marked, the anchor is gone and so is this. */}
         {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
@@ -218,7 +235,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
         {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
       </div>
 
-      {freeMenu ? <div className="space-y-4"><FreeMenu date={today} day={freeMenu} foods={foods}/>{outsideMenuSection}</div> : menu ? (
+      {freeMenu ? <div className="space-y-4"><FreeMenu date={today} day={{...freeMenu,day:{...freeMenu.day,calorie_target:calorieTarget ?? freeMenu.day.calorie_target,protein_target:proteinTarget ?? freeMenu.day.protein_target}}} foods={foods}/>{outsideMenuSection}</div> : menu ? (
         <div className="space-y-4">
           {menu.meals.map((meal) => {
             // Eating one part of a meal is still eating. The button becomes
@@ -242,11 +259,15 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             const mealLogs = logged.filter((entry) => entry.mealId === meal.id);
             const measuredMealLogs = mealLogs.filter((entry) => entry.calories !== null);
             const loggedMealCalories = Math.round(measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0));
+            const retainedMealCalories = Math.round(
+              retainedSubstitutionItems(meal, replacedMealGroups(mealLogs, meal.id))
+                .reduce((sum, item) => sum + (item.calories ?? 0), 0),
+            );
             // "Ate something else" replaces the written meal. Its card must show
             // what was actually logged, not the calories of the meal it replaced.
             // An extra item added after a normal eaten mark is additive instead.
             const mealCalories = meal.status === "other" || (meal.freeCalorieTarget && measuredMealLogs.length > 0)
-              ? loggedMealCalories
+              ? loggedMealCalories + (meal.status === "other" ? retainedMealCalories : 0)
               : plannedMealCalories + loggedMealCalories;
             const calorieLabel = meal.status === "other" && mealLogs.length > 0 && measuredMealLogs.length === 0
               ? "קלוריות לא נמדדו"
@@ -291,6 +312,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   completed={meal.completed}
                   blocked={false}
                   foods={pickableFoods}
+                  savedMeals={savedMeals}
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
@@ -305,6 +327,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   frame={meal.freeCalorieTarget}
                   logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
                   unmeasured={mine.length-measured.length}
+                  foods={pickableFoods}
                 />;
               })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
                 {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}. לחיצה נוספת מבטלת בחירה.</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
@@ -328,7 +351,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                     unit={unitLabel(chosen.measurementUnit,Number(chosen.displayQuantity))}
                     current={group.amountOverride}
                   />:null})()}
-                  <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} groupType={group.type} foods={pickableFoods}/>
+                  <MealGroupSubstitution mealId={meal.id} mealGroupId={group.id} date={today} groupLabel={groupLabel(group.type)} groupType={group.type} foods={pickableFoods}/>
                   </fieldset>)}
               </div>}
               </div>
@@ -374,10 +397,10 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   they appear to have missed. The coach still sees both sides,
                   in the builder and on the client file. */}
               <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} target={menu.calorieTarget} unit="קל׳" />
-                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} target={menu.proteinTarget} unit="גרם" />
-                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} target={menu.carbohydrateTarget} unit="גרם" />
-                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} target={menu.fatTarget} unit="גרם" />
+                <MacroTotal label="קלוריות" value={eatenTotals.calories} left={remainingTotals.calories} target={calorieTarget} unit="קל׳" />
+                <MacroTotal label="חלבון" value={eatenTotals.protein} left={remainingTotals.protein} target={proteinTarget} unit="גרם" />
+                <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} target={carbohydrateTarget} unit="גרם" />
+                <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} target={fatTarget} unit="גרם" />
               </dl>
             </section>
           )}
@@ -449,16 +472,16 @@ function MacroTotal({
     <div className="rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3">
       <dt className="text-xs text-[#5B5F5B]">{label}</dt>
       {/* Named, not slashed. Which figure is which is the whole question. */}
-      <dd className="mt-1 font-black">
+      <dd className="mt-1 text-xl font-black">
         {Math.round(value)} {unit}
       </dd>
       <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
         {target && target > 0
           ? value - target > 0.5
-            ? `חריגה של ${Math.round(value - target)} ${unit}`
+            ? `יעד: ${Math.round(target)} ${unit} · חריגה של ${Math.round(value - target)} ${unit}`
             : target - value > 0.5
-              ? `נותרו ${Math.round(target - value)} ${unit} ליעד`
-              : "היעד הושלם"
+              ? `יעד: ${Math.round(target)} ${unit} · נותרו ${Math.round(target - value)} ${unit}`
+              : `יעד: ${Math.round(target)} ${unit} · היעד הושלם`
           : left > 0.5 ? `נותרו ${Math.round(left)} בתפריט` : "אין עוד ארוחות לסמן"}
       </p>
     </div>

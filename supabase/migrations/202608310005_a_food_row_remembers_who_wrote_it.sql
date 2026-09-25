@@ -16,7 +16,7 @@ drop table if exists public.rate_limit_events;
 
 -- A food row now remembers who wrote it.
 --
--- upsert_scanned_food updated any row that was not curated START data, so one
+-- upsert_scanned_food updated any row that was not curated START LIFE FIT data, so one
 -- client could rewrite the name and every macro of a product another client
 -- had scanned - and the catalogue is shared, so the wrong number reached
 -- everybody who scanned that barcode afterwards. Rows that already exist keep
@@ -62,7 +62,7 @@ begin
   if p_carbs   is not null and (p_carbs   < 0 or p_carbs   > 100) then raise exception 'invalid_carbs'; end if;
   if p_fat     is not null and (p_fat     < 0 or p_fat     > 100) then raise exception 'invalid_fat'; end if;
 
-  -- A barcode already known to START wins. Curated data is never overwritten,
+  -- A barcode already known to START LIFE FIT wins. Curated data is never overwritten,
   -- and a scanned row is refreshed only by whoever wrote it or by a coach, who
   -- is the person the catalogue is curated by. Anyone else scanning the same
   -- product gets the row that is already there - the safe answer, and also the

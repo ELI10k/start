@@ -1,7 +1,7 @@
-# START - Claude Code Handoff Checklist
+# START LIFE FIT - Claude Code Handoff Checklist
 
 ## Before opening Claude Code
-- [ ] Confirm the START project folder exists locally.
+- [ ] Confirm the START LIFE FIT project folder exists locally.
 - [ ] Confirm it is the latest repository used by Codex.
 - [ ] Make a backup or ensure all current work is committed and pushed.
 - [ ] Obtain the complete food Excel file.
@@ -28,7 +28,7 @@ Do not use `sudo npm install -g`.
 Then:
 
 ```bash
-cd /path/to/START
+cd /path/to/start
 claude
 ```
 

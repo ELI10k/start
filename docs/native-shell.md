@@ -1,6 +1,6 @@
 # The native shell
 
-START is a server-rendered Next.js app: server components, server actions, and a
+START LIFE FIT is a server-rendered Next.js app: server components, server actions, and a
 proxy that refreshes the Supabase session on every request. A static export for a
 native container would mean giving all of that up.
 

@@ -1,4 +1,4 @@
-# START autonomous sprint progress
+# START LIFE FIT autonomous sprint progress
 
 Final pass: 2026-07-20
 

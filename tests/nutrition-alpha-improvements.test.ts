@@ -45,7 +45,7 @@ test("food search normalization supports Hebrew, English and partial words",()=>
 
 test("master menu and coach usage migration enforce isolation and idempotency",()=>{
   const sql=readFileSync(new URL("../supabase/migrations/202607290001_master_menu_and_coach_food_usage.sql",import.meta.url),"utf8");
-  assert.match(sql,/תפריט מאסטר START/);
+  assert.match(sql,/תפריט מאסטר START LIFE FIT/);
   assert.match(sql,/unique index if not exists meal_plans_one_start_master_per_coach/);
   assert.match(sql,/primary key\(coach_id, food_id\)/);
   assert.match(sql,/selection_count=public\.coach_food_usage\.selection_count\+1/);

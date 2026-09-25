@@ -19,7 +19,7 @@ test.describe("workouts - client", () => {
   test("the workouts screen loads for a signed-in client", async ({ page }) => {
     await page.goto("/workouts");
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
-    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("either an active program or an explicit empty state is shown", async ({ page }) => {
@@ -33,7 +33,7 @@ test.describe("workouts - client", () => {
   test("workout history is reachable and scoped to this client", async ({ page }) => {
     await page.goto("/workouts/history");
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
-    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("the progress view for workouts renders", async ({ page }) => {
@@ -65,7 +65,7 @@ test.describe("workouts - coach", () => {
   test("the coach can open the workout programs list", async ({ page }) => {
     await page.goto("/coach/workouts");
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
-    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("the coach can open the exercise bank", async ({ page }) => {

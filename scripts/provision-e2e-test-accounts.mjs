@@ -93,13 +93,13 @@ const coach = await provision({
   email: coachEmail,
   password: coachPassword,
   role: "coach",
-  fullName: "START E2E Coach",
+  fullName: "START LIFE FIT E2E Coach",
 });
 const client = await provision({
   email: clientEmail,
   password: clientPassword,
   role: "client",
-  fullName: "START E2E Client",
+  fullName: "START LIFE FIT E2E Client",
 });
 
 const { error: onboardingError } = await admin.from("client_profiles").upsert({

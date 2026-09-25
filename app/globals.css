@@ -80,7 +80,10 @@
 
 /* ── Base ──────────────────────────────────────────────────────────────── */
 
-html, body { overflow-x: hidden; }
+html, body {
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
 
 body {
   background: var(--background);
@@ -227,6 +230,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .client-app-shell {
   min-height: 100dvh;
   overflow-x: clip;
+  overscroll-behavior-y: none;
   padding-bottom: var(--nav-clearance);
   background: var(--background);
   color: var(--ink);
@@ -267,11 +271,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   display: flex;
   min-height: calc(3.5rem + env(safe-area-inset-top));
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   padding: env(safe-area-inset-top) 1rem 0;
   border-bottom: 1px solid var(--line);
   background: rgba(255, 255, 255, .92);
   backdrop-filter: blur(18px);
+}
+
+.mobile-app-header .start-wordmark {
+  font-size: 1.05rem;
+  font-weight: 950;
+  letter-spacing: .2em;
+  text-align: center;
 }
 
 .mobile-app-header__actions,
@@ -637,7 +648,84 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
 /* Two rows of them now, so each is measured against half of what one row had.
    The screen still has to end above the fold with a lesson under it. */
-.home-screen .quick-action-card { min-height: clamp(4.9rem, 11.5vh, 7rem); }
+.home-screen .quick-action-card { min-height: clamp(7rem, 15vh, 9.5rem); }
+
+/* The native phone shell has very little useful height once the safe areas and
+   fixed tab bar are accounted for. Keep every home section, but spend that
+   height on information instead of empty header/card padding. */
+@media (max-width: 767px) {
+  html:has(.client-app-shell--home),
+  body:has(.client-app-shell--home) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .client-app-shell--home {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    touch-action: none;
+  }
+  .mobile-app-header {
+    min-height: calc(2rem + env(safe-area-inset-top));
+    padding-inline: .75rem;
+  }
+  .mobile-app-header .start-wordmark {
+    font-size: .95rem;
+    line-height: 1;
+  }
+  .client-app-shell--home .client-app-content {
+    box-sizing: border-box;
+    height: calc(100dvh - 2rem - env(safe-area-inset-top));
+    padding-top: .4rem;
+    padding-bottom: var(--nav-clearance);
+    padding-inline: .75rem;
+    overflow: hidden;
+  }
+  .home-screen {
+    display: grid;
+    grid-auto-rows: max-content;
+    gap: .45rem;
+    height: 100%;
+    min-height: calc(100dvh - 2rem - .4rem - var(--nav-clearance) - env(safe-area-inset-top));
+    overflow: hidden;
+  }
+  .home-screen .dashboard-metrics--fit .metric-tile {
+    min-height: 4.65rem;
+    padding: .5rem .45rem;
+  }
+  .home-screen .dashboard-metrics--fit .metric-tile strong { margin-top: .25rem; }
+  .home-screen .quick-action-card {
+    min-height: 0;
+    height: 100%;
+    gap: .2rem;
+    padding: .45rem .35rem;
+  }
+  .home-screen .quick-action-card__icon,
+  .home-screen .quick-action-card > span:first-child:has(svg) {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: .8rem;
+  }
+  .home-screen .quick-action-card__label { font-size: .95rem; }
+  .home-screen .quick-action-card__meta { font-size: .72rem; }
+  .home-screen .section-heading--compact { margin-bottom: .3rem; }
+  .home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
+  .home-screen .weekly-lesson {
+    min-height: 3.25rem;
+    padding: .4rem .6rem;
+  }
+  .home-screen .weekly-lesson__icon { width: 2rem; height: 2rem; }
+  .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
+  .home-screen .quick-actions-grid {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    height: min(15.5rem, 37dvh);
+    gap: .45rem;
+  }
+}
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
    seven tiles down a 1440px window looks like an error. */
 @media (min-width: 768px) {
@@ -653,7 +741,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 5.75rem;
   align-items: center; justify-content: center; flex-direction: column; gap: .35rem;
-  padding-inline: .3rem;
+  padding: .8rem .45rem;
   border: 1px solid var(--line); border-radius: var(--radius-md);
   background: var(--surface); box-shadow: var(--shadow-card);
   color: var(--ink); font-size: .72rem; font-weight: 700; text-decoration: none;
@@ -662,17 +750,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .quick-action-card > svg { color: var(--green); }
 .quick-action-card__icon,
 .quick-action-card > span:first-child:has(svg) {
-  display: grid; width: 2.6rem; height: 2.6rem; place-items: center;
-  border-radius: .75rem; background: var(--green-tint); color: var(--green);
+  display: grid; width: 3.4rem; height: 3.4rem; place-items: center;
+  border-radius: 1rem; background: var(--green-tint); color: var(--green);
 }
-.quick-action-card__label { font-size: .88rem; font-weight: 800; line-height: 1.2; }
+.quick-action-card__label { font-size: 1.05rem; font-weight: 900; line-height: 1.2; }
 /* The line that absorbed the cards this screen no longer has room for - the
    active plan's name, the next training day. One line, clipped: a coach who
    names a menu "תפריט העלאת מסה - שלב ב׳" must not be able to change how tall
    this row is, because the row has to end above the fold. */
 .quick-action-card__meta {
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink-muted); font-size: .72rem; font-weight: 600; line-height: 1.2;
+  color: var(--ink-muted); font-size: .82rem; font-weight: 650; line-height: 1.2;
 }
 .quick-action-card__meta--error { color: var(--red); }
 @media (min-width: 1024px) {
@@ -685,7 +773,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-ring { width: 7rem; }
   .progress-ring::before { width: 5.9rem; }
   .quick-actions-grid { gap: .4rem; }
-  .quick-action-card { min-height: 5.4rem; font-size: .66rem; }
+  .quick-action-card { min-height: 6.5rem; font-size: .66rem; }
 }
 
 .premium-card__description { color: var(--ink-muted); font-size: .82rem; line-height: 1.5; }
@@ -1479,6 +1567,20 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   padding: 1.5rem 1rem var(--nav-clearance);
 }
 .food-database { width: min(100%, 900px); margin: 0 auto; }
+/* Back to the filters from deep in the list. It clears the client's and the
+   coach's bottom navigation, both of which are fixed on a phone. */
+.food-to-top {
+  position: fixed; z-index: 45;
+  inset-block-end: calc(5.5rem + env(safe-area-inset-bottom));
+  inset-inline-start: 1rem;
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); color: var(--ink);
+  box-shadow: var(--shadow-card); cursor: pointer;
+}
+.food-to-top:hover { border-color: var(--green); color: var(--green); }
+@media (min-width: 768px) { .food-to-top { inset-block-end: 1.5rem; } }
 .food-database__header {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 1.5rem; margin-bottom: 1.5rem;
@@ -1838,6 +1940,12 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--surface) 96%, transparent);
   backdrop-filter: blur(10px);
+}
+/* Below md the coach nav is itself fixed to the bottom (z-50, 4rem tall) and
+   was covering the dock - save included. Sit the dock on top of it. */
+@media (max-width: 767px) {
+  .menu-dock { bottom: calc(4rem + env(safe-area-inset-bottom)); padding-bottom: .75rem; }
+  .menu-editor { padding-bottom: 13rem; }
 }
 
 .menu-dock__totals {

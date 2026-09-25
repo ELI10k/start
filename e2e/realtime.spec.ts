@@ -35,7 +35,7 @@ test.describe("a conversation arrives by itself", () => {
       await signIn(coachPage, requireIdentity("coach"));
       await coachPage.goto("/coach/clients");
       await expect(coachPage.getByRole("heading", { name: "לקוחות" })).toBeVisible({ timeout: 30_000 });
-      const row = coachPage.locator(".app-list a").filter({ hasText: "START E2E Client" }).first();
+      const row = coachPage.locator(".app-list a").filter({ hasText: /START (LIFE FIT )?E2E Client/ }).first();
       test.skip(!(await row.count()), "the coach has no E2E client to write to");
       await row.click();
       await coachPage.waitForURL(/\/coach\/clients\/[0-9a-f-]{36}/, { timeout: 30_000 });

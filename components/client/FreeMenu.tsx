@@ -5,6 +5,7 @@ import { Plus, Search, SlidersHorizontal, Trash2 } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { deleteFreeMenuEntry, saveFreeMenuEntry, type FreeMenuState } from "@/app/actions/free-menu";
+import { displayCalories } from "@/lib/nutrition/display";
 
 const initial: FreeMenuState = { ok: false };
 
@@ -108,8 +109,8 @@ export default function FreeMenu({
         <p className="text-xs font-bold tracking-widest text-[#16A34A]">תפריט חופשי</p>
         <h2 className="mt-2 text-2xl font-black">היום מתועד בחופשיות</h2>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Metric label="קלוריות" value={Math.round(summary.calories)} />
-          <Metric label="חלבון" value={`${Math.round(summary.protein)} ג׳`} />
+          <Metric label="קלוריות" value={Math.round(summary.calories)} target={calorieTarget === null ? null : Math.round(calorieTarget)} unit="קל׳" />
+          <Metric label="חלבון" value={`${Math.round(summary.protein)} ג׳`} target={proteinTarget === null ? null : Math.round(proteinTarget)} unit="ג׳" />
           <Metric label="פחמימות" value={`${Math.round(summary.carbohydrates)} ג׳`} />
           <Metric label="שומן" value={`${Math.round(summary.fat)} ג׳`} />
         </div>
@@ -251,7 +252,7 @@ export default function FreeMenu({
                   <li key={food.id}>
                     <button type="button" onClick={() => setPicked(food)} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#E5E7E5] px-3 text-start">
                       <span className="font-bold">{food.name}</span>
-                      <span className="text-sm text-[#5B5F5B]">{Math.round(food.calories)} קל׳ / 100</span>
+                      <span className="text-sm text-[#5B5F5B]">{displayCalories(food.calories)} קל׳ / 100</span>
                     </button>
                   </li>
                 ))}
@@ -278,11 +279,12 @@ export default function FreeMenu({
   );
 }
 
-function Metric({ label, value }: { label: string; value: string | number }) {
+function Metric({ label, value, target, unit }: { label: string; value: string | number; target?: number | null; unit?: string }) {
   return (
     <div className="rounded-xl bg-[#F7F8F7] p-3">
       <p className="text-xs text-[#5B5F5B]">{label}</p>
-      <strong>{value}</strong>
+      <strong className="block text-xl">{value}</strong>
+      {target !== undefined ? <span className="mt-1 block text-xs text-[#5B5F5B]">יעד: {target === null ? "לא הוגדר" : `${target} ${unit ?? ""}`}</span> : null}
     </div>
   );
 }

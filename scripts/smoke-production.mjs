@@ -1,4 +1,4 @@
-// Read-only smoke test against a deployed START. Checks that every route answers
+// Read-only smoke test against a deployed START LIFE FIT. Checks that every route answers
 // the way it should, that the guards still redirect, and that no gold or dark
 // surface survives in the served CSS.
 //

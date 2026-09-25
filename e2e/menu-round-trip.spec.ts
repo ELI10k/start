@@ -27,7 +27,7 @@ test.describe("menu round trip", () => {
     await title.fill(name);
 
     // A client, which is what makes the target computable.
-    const client = page.getByLabel("לקוח");
+    const client = page.getByLabel("לקוח", { exact: true });
     const options = await client.locator("option").all();
     if (options.length > 1) await client.selectOption((await options[1].getAttribute("value")) ?? "");
 

@@ -6,8 +6,8 @@ const target = new URL(
   import.meta.url,
 );
 const foods = JSON.parse(await readFile(source, "utf8"));
-if (foods.filter((food) => /^\d+$/.test(food.id)).length !== 336) {
-  throw new Error("The 336 imported branded products are no longer all present.");
+if (foods.filter((food) => /^\d+$/.test(food.id)).length !== 341) {
+  throw new Error("The 341 imported products are no longer all present.");
 }
 if (new Set(foods.map((food) => food.id)).size !== foods.length) {
   throw new Error("Food IDs must be unique before generating the migration.");

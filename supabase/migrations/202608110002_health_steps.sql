@@ -2,7 +2,7 @@ begin;
 
 -- Steps arrive from Apple HealthKit on iOS and Health Connect on Android, both
 -- of which already merge whatever the user wears - phone, watch, ring - into one
--- daily figure per source. START stores that figure; it never adds sources
+-- daily figure per source. START LIFE FIT stores that figure; it never adds sources
 -- together, because a phone and a watch worn on the same walk would count it
 -- twice.
 --

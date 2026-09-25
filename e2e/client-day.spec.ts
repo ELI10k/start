@@ -48,7 +48,7 @@ test.describe("the client's day", () => {
     await expect(page.getByRole("button", { name: /^ברקוד$/ })).toBeVisible({ timeout: 10_000 });
     const note = `בדיקה ${Date.now()}`;
     await page.getByLabel("תיאור קצר").fill(note);
-    await page.getByRole("button", { name: "שמירה" }).click();
+    await page.getByRole("button", { name: "שמירה", exact: true }).click();
     await expect(page.getByText(note).first()).toBeVisible({ timeout: 30_000 });
     console.log("נרשם ומוצג:", note);
   });

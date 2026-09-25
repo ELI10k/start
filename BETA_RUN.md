@@ -1,4 +1,4 @@
-# START — beta run to TestFlight
+# START LIFE FIT — beta run to TestFlight
 
 Working log for the continuous run. Branch: `integration/start-unified`.
 

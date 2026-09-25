@@ -4,7 +4,7 @@ Use this worksheet to complete App Store Connect's App Privacy questionnaire.
 It is an engineering inventory, not a substitute for checking the final build
 and Apple's current definitions at submission time.
 
-| Data category | Examples in START | Linked to user | Primary purpose |
+| Data category | Examples in START LIFE FIT | Linked to user | Primary purpose |
 | --- | --- | --- | --- |
 | Contact info | email, name, optional phone | Yes | Account management, authentication, coach communication |
 | Health & fitness | step count, weight, measurements, training activity, nutrition goals | Yes | App functionality and personalized coaching |

@@ -32,7 +32,7 @@ node scripts/provision-e2e-test-accounts.mjs
 The script is idempotent, rotates the two passwords, refuses to convert an existing non-test account, and creates only one isolated test relationship.
 
 For the project-maintainer setup, the two generated passwords are stored in
-macOS Keychain under `START E2E Coach` and `START E2E Client`. They are not
+macOS Keychain under `START LIFE FIT E2E Coach` and `START LIFE FIT E2E Client`. They are not
 application environment variables and are never written to this repository.
 
 Enable the login surface during a test window with server-only Vercel variables:

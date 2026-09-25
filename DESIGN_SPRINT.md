@@ -1,4 +1,4 @@
-# START — Design sprint
+# START LIFE FIT — Design sprint
 
 All ten screens are done. This records what the sprint produced and the rules
 that still bind, so a fresh session can pick it up without re-deriving anything.

@@ -19,6 +19,7 @@ import { FIXED_MEAL_TITLES } from "@/lib/nutrition/menu-validation";
 import { calculateAlternativePortion,convertQuantity,defaultPortionQuantity,foodUnit,GROUP_CALORIE_SHARE,hasNaturalUnit,MEAL_CALORIE_SHARE,portionFor,portionForCalories,unitLabel } from "@/lib/nutrition/meal-alternatives";
 import type { Portion } from "@/lib/nutrition/meal-alternatives";
 import { israelDateKey } from "@/lib/date-time";
+import { displayCalories } from "@/lib/nutrition/display";
 
 type FoodOption={id:string;name:string;brand:string|null;category?:string;calories:number;protein:number|null;carbs:number|null;fat:number|null;packageUnit:string|null;unitWeightGrams:number|null;isMaster?:boolean;masterGroup?:GroupType|null};
 // favorite is null when the coach has said nothing either way.
@@ -27,7 +28,7 @@ type ClientOption=Readonly<{id:string;full_name:string;weight:number|null;calori
 // `unitMode` is which unit `amount` is counted in. "native" is the food's own -
 // a pita, a slice, an egg - and "gram" is grams. A food without a natural unit
 // is always grams and the picker is not offered for it.
-type Item={foodId:string;amount:number;amountSource?:"auto"|"manual";note?:string;primary?:boolean;unitMode?:"native"|"gram"};
+type Item={foodId:string;amount:number;amountSource?:"auto"|"manual";note?:string;customName?:string;primary?:boolean;unitMode?:"native"|"gram"};
 type GroupType="protein"|"carbohydrate"|"fat"|"vegetables";
 type Group={type:GroupType;items:Item[]};
 type Meal={title:typeof FIXED_MEAL_TITLES[number];notes:string;freeCalorieTarget:string;groups:Group[]};
@@ -404,7 +405,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const calculated=selectedFood&&referenceFood&&referenceAmount
       ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type,referenceMode)
       :null;
-    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource,unitMode:"native" as const}:item)}:value)});
+    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,customName:"",amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource,unitMode:"native" as const}:item)}:value)});
     if(!foodId)return;
     const now=new Date().toISOString();
     // Carry the existing opinion forward rather than inventing "not a favourite":
@@ -589,7 +590,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     if(needsActivationConfirm&&!confirmed){setConfirmActivation(true);return}
     setConfirmActivation(false);
     try{
-    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?israelDateKey():"",days:savedDays().map((day,daySortOrder)=>({dayIndex:day.dayIndex,title:dayLabel(day.dayIndex),sortOrder:daySortOrder,meals:day.meals.map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount,item.unitMode??"native"):null;return{...item,amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}))});
+    const result=await saveMenuTree({id:menu.id,title:menu.title,description:menu.description,clientId:menu.clientId,status:menu.status,calorieTarget:menu.calorieTarget,proteinTarget:menu.proteinTarget,carbohydrateTarget:menu.carbohydrateTarget,fatTarget:menu.fatTarget,proteinTargetSource:menu.macroSources.protein,carbohydrateTargetSource:menu.macroSources.carbohydrates,fatTargetSource:menu.macroSources.fat,activeFrom:menu.status==="active"?israelDateKey():"",days:savedDays().map((day,daySortOrder)=>({dayIndex:day.dayIndex,title:dayLabel(day.dayIndex),sortOrder:daySortOrder,meals:day.meals.map((meal,mealIndex)=>({...meal,sortOrder:mealIndex,groups:meal.groups.map((group,groupIndex)=>({...group,sortOrder:groupIndex,items:group.items.map((item,itemIndex)=>{const food=foodMap.get(item.foodId);const portion=food?portionFor(food,item.amount,item.unitMode??"native"):null;return{...item,customName:item.customName?.trim()??"",amount:portion?.grams??item.amount,displayQuantity:item.amount,measurementUnit:portion?.unit??"גרם",amountSource:item.amountSource??"manual",note:item.note??"",itemRole:(item.primary??itemIndex===0)?"primary":"alternative",sortOrder:itemIndex}})}))}))}))});
     say(result.message??"",result.ok?"ok":"error");
     if(result.ok){
       // The server now holds it, so the local copy is no longer the only one.
@@ -817,7 +818,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                     :<span>{selectedFood?unitLabel(foodUnit(selectedFood,unitMode).unit,item.amount):"גרם"}</span>}
                 </label>
                 {portion?<dl className="food-row__meta" aria-label={`ערכים תזונתיים של ${selectedFood?.name??"המזון"}`}>
-                  <MacroChip label="קלוריות" value={portion.calories} unit="קל׳"/>
+                  <MacroChip label="קלוריות" value={displayCalories(portion.calories)} unit="קל׳"/>
                   <MacroChip label="חלבון" value={portion.protein} unit="ג׳"/>
                   <MacroChip label="פחמימה" value={portion.carbs} unit="ג׳"/>
                   <MacroChip label="שומן" value={portion.fat} unit="ג׳"/>
@@ -825,6 +826,14 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
               </div>
               {/* A note belongs to the food, not to the meal: "בלי מלח" applies
                   to the chicken and to nothing else on the plate. */}
+              {selectedFood?<input
+                className="nutrition-input mt-2 text-sm"
+                placeholder={selectedFood.name}
+                aria-label={`שם שיוצג במקום ${selectedFood.name}`}
+                value={item.customName??""}
+                maxLength={200}
+                onChange={event=>updateMeal(index,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((food,i)=>i===itemIndex?{...food,customName:event.target.value}:food)}:value)})}
+              />:null}
               {selectedFood?<input
                 className="nutrition-input mt-2 text-sm"
                 placeholder="הערה למאכל (רשות)"

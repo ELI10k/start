@@ -117,8 +117,8 @@ try {
     await admin.auth.admin.createUser({
       email: coachEmail,
       email_confirm: true,
-      app_metadata: { role: "coach", full_name: "START Auth Coach" },
-      user_metadata: { full_name: "START Auth Coach" },
+      app_metadata: { role: "coach", full_name: "START LIFE FIT Auth Coach" },
+      user_metadata: { full_name: "START LIFE FIT Auth Coach" },
     }),
     "create coach",
   );
@@ -128,8 +128,8 @@ try {
     await admin.auth.admin.createUser({
       email: clientEmail,
       email_confirm: true,
-      app_metadata: { role: "client", full_name: "START Auth Client" },
-      user_metadata: { full_name: "START Auth Client" },
+      app_metadata: { role: "client", full_name: "START LIFE FIT Auth Client" },
+      user_metadata: { full_name: "START LIFE FIT Auth Client" },
     }),
     "create client",
   );

@@ -1,4 +1,4 @@
-# START — App Store review package
+# START LIFE FIT — App Store review package
 
 This is the submission-time source of truth. Do not submit until every item in
 **Required outside the repository** has a real value and the TestFlight pass is
@@ -6,7 +6,7 @@ complete.
 
 ## Reviewer notes (paste into App Review Information)
 
-START is an invite-only coaching app for clients of a personal fitness and
+START LIFE FIT is an invite-only coaching app for clients of a personal fitness and
 nutrition coach. The review account is pre-populated and does not represent a
 real person.
 
@@ -37,7 +37,7 @@ Native functionality:
   image.
 - Notifications are optional and are not required to use the app.
 
-START does not write to Apple Health and does not use health or fitness data for
+START LIFE FIT does not write to Apple Health and does not use health or fitness data for
 advertising, marketing, or data brokerage. There are no purchases or links to
 purchase digital content in this build.
 
@@ -79,3 +79,18 @@ purchase digital content in this build.
 - [ ] Privacy, terms and public support pages work while signed out.
 - [ ] Offline and server-unavailable states are understandable and recover.
 - [ ] No production page contains placeholders, demo limitations or broken URLs.
+
+## Prepared before Apple membership activation
+
+- [x] Isolated reviewer client exists and is marked `is_test_account=true`.
+- [x] Reviewer client contains an active workout, workout history, an active
+      meal plan, progress history, check-ins and three current notifications.
+- [x] App Store description, subtitle, promotional text and keywords are ready.
+- [x] Review contact is `start.elicohenfitness@gmail.com`, `+972 52-529-0202`.
+- [x] Age-rating answers are documented in `docs/app-store-age-rating-he.md`.
+- [x] Screenshot sequence and exact output specification are documented in
+      `docs/app-store-screenshot-plan-he.md`.
+- [x] Native shell is pinned to `https://start.elicohenfitness.co.il`.
+- [ ] Final screenshots: waiting for approved sign-in to the isolated test account.
+- [ ] Native archive and device screenshots: blocked until full Xcode and the
+      active Apple Developer membership are available.

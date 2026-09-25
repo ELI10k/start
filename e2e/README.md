@@ -41,8 +41,8 @@ select u.email from auth.users u
 ```
 
 The passwords are the ones set by `scripts/provision-e2e-test-accounts.mjs`; the
-project maintainer keeps them in the macOS Keychain under `START E2E Coach` and
-`START E2E Client`.
+project maintainer keeps them in the macOS Keychain under `START LIFE FIT E2E Coach` and
+`START LIFE FIT E2E Client`.
 
 ## Safety
 

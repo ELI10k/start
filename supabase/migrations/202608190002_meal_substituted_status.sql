@@ -8,7 +8,7 @@
 --
 -- The fourth state records what actually happened, with the client's own words
 -- attached. It is deliberately NOT counted as intake: the planned items are not
--- logged, because they are not what was eaten, and START does not invent
+-- logged, because they are not what was eaten, and START LIFE FIT does not invent
 -- nutrition values for free text. What it buys is a true signal - the coach can
 -- see the difference between "skipped breakfast" and "had eggs on toast instead".
 --

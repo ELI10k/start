@@ -7,6 +7,7 @@ import {
   eatenFromMenu,
   isMealAnswered,
   isMealEaten,
+  isMealConsumed,
   mealStanding,
   remainingInMenu,
   sumItems,
@@ -36,9 +37,16 @@ test("a meal stands at its chosen alternative, and at the primary before a choic
   assert.deepEqual(mealStanding(chosenAlternative).map((row) => row.id), ["b"]);
 });
 
+test("all primary foods in a group contribute before an alternative is chosen", () => {
+  const combined = meal({ groups: [{ items: [item("egg", 80), item("whites", 40), item("yoghurt", 120, "alternative")] }] });
+  assert.deepEqual(mealStanding(combined).map((row) => row.id), ["egg", "whites"]);
+  assert.equal(sumItems(mealStanding(combined)).calories, 120);
+});
+
 test("answered and eaten are different questions", () => {
   assert.equal(isMealEaten(meal({ status: "eaten" })), true);
   assert.equal(isMealEaten(meal({ completed: true })), true);
+  assert.equal(isMealConsumed(meal({ status: "other" })), true);
   // Skipped and substituted are answers, and neither is intake.
   for (const status of ["not_eaten", "other"] as const) {
     assert.equal(isMealEaten(meal({ status })), false, status);
@@ -51,6 +59,21 @@ test("a meal that was answered is neither eaten nor still to come", () => {
   const day = [meal({ status: "eaten" }), meal({ status: "not_eaten" }), meal()];
   assert.equal(eatenFromMenu(day).calories, 300);
   assert.equal(remainingInMenu(day).calories, 300);
+});
+
+test("a group replacement keeps the other selected parts of the meal", () => {
+  const dinner = meal({
+    id: "dinner",
+    status: "other",
+    groups: [
+      { id: "protein", items: [item("powder", 120)], selectedItemId: undefined },
+      { id: "carb", items: [item("apple", 200)], selectedItemId: "apple" },
+    ],
+  });
+  assert.equal(eatenFromMenu([dinner], undefined, () => new Set(["protein"])).calories, 200);
+  // The general "something else" button is additive to choices the client
+  // explicitly made in this meal. It must not erase the selected apple.
+  assert.equal(eatenFromMenu([dinner], undefined, () => new Set()).calories, 200);
 });
 
 test("measured food in a free-calorie window counts only what was eaten", () => {
@@ -121,13 +144,13 @@ test("intake is recorded at the portion the client reported", async () => {
   assert.match(migration, /amount_override=case when meal_group_selections\.meal_item_id is distinct from excluded\.meal_item_id/);
 });
 
-test("logging a food never erases an answer the client already gave", async () => {
+test("logging a replacement marks the meal as other while a photo preserves its answer", async () => {
   const action = await source("app/actions/food-log.ts");
-  // set_meal_day_status('other') deletes the meal's recorded intake, so calling
-  // it against a meal already marked eaten cost the day a whole meal - as a
-  // side effect of logging an extra snack against it.
-  assert.match(action, /if \(!isFreeCalorieMeal && !existing\)/);
-  assert.match(action, /from\("meal_day_status"\)/);
+  // The explicit "I ate something else" path must win even if the meal already
+  // had a mark. A photograph is evidence beside the answer, not a replacement,
+  // and opts out through preserveMealStatus.
+  assert.match(action, /preserveMealStatus/);
+  assert.match(action, /p_status: "other"/);
   // A free-calorie window has no plan to have eaten instead of.
   assert.match(action, /free_calorie_target/);
 });

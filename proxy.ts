@@ -49,8 +49,22 @@ type PendingCookie = Readonly<{
 }>;
 
 export async function proxy(request: NextRequest) {
-  const config = getSupabaseConfig();
   const path = request.nextUrl.pathname;
+  const hostname = request.nextUrl.hostname.toLowerCase();
+
+  // The public domain is the storefront, while start.elicohenfitness.co.il
+  // remains the signed-in product. Keep the landing page at the clean root URL
+  // without changing the application's authenticated `/` route.
+  if (
+    path === "/" &&
+    (hostname === "elicohenfitness.co.il" || hostname === "www.elicohenfitness.co.il")
+  ) {
+    const landingUrl = request.nextUrl.clone();
+    landingUrl.pathname = "/join";
+    return NextResponse.rewrite(landingUrl);
+  }
+
+  const config = getSupabaseConfig();
   const requestedPath = `${path}${request.nextUrl.search}`;
 
   if (!config) {

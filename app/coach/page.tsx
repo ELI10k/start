@@ -8,6 +8,8 @@ import { getCoachAttention } from "@/lib/coach-intelligence/proactive-repository
 import { listCoachThreads } from "@/lib/messages/repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import CoachAttentionPanel from "@/components/coach/CoachAttentionPanel";
+import { israelDateKey } from "@/lib/date-time";
+import DashboardNutritionActivity, { type NutritionActivityItem } from "@/components/coach/DashboardNutritionActivity";
 
 /**
  * The coach's morning screen.
@@ -24,7 +26,7 @@ export default async function CoachDashboard() {
   if (auth.role !== "coach") redirect("/unauthorized");
 
   const supabase = await createSupabaseServerClient();
-  const [clients, menus, unreadNotifications, checkIns, attention, threads, nutritionProposals, handledWorkouts] = await Promise.all([
+  const [clients, menus, unreadNotifications, checkIns, attention, threads, nutritionProposals, handledWorkouts, handledNutrition] = await Promise.all([
     listCoachClients(auth.id),
     listCoachMenus(auth.id),
     getUnreadNotificationCount(),
@@ -37,6 +39,7 @@ export default async function CoachDashboard() {
       .select("id", { count: "exact", head: true })
       .eq("status", "pending"),
     supabase.from("coach_workout_reviews").select("workout_session_id").eq("coach_id",auth.id),
+    supabase.from("coach_nutrition_reviews").select("client_id,activity_date").eq("coach_id",auth.id),
   ]);
   const pendingProposals = nutritionProposals.count ?? 0;
 
@@ -52,10 +55,23 @@ export default async function CoachDashboard() {
   const waitingThreads = threads.filter((thread) => thread.awaitingReply);
   const pendingCheckIns = checkIns.newCount + checkIns.respondedCount;
   const openCheckIns = checkIns.recent.filter((item) => !item.handled_at);
+  const nutritionActivity = await loadNutritionActivity(
+    supabase,
+    clients.map((client) => client.id),
+  );
 
   return <main className="px-4 py-10 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-7xl">
-      <header className="border-b border-[#E5E7E5] pb-7">
+      <section>
+        <h2 className="sr-only">פעולות מהירות</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
+          <Quick href="/coach/menus/new" label="תפריט חדש"/>
+          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
+        </div>
+      </section>
+
+      <header className="mt-8 border-b border-[#E5E7E5] pb-7">
         <p className="text-xs font-black tracking-[.2em] text-[#16A34A]">START LIFE FIT COACH</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">שלום, {auth.fullName.split(" ")[0]}</h1>
         <p className="mt-2 text-[#5B5F5B]">
@@ -88,6 +104,14 @@ export default async function CoachDashboard() {
             </Link>)}
         </div>
       </section>}
+
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
+        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
+        <Metric href="/coach/check-ins?status=new" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
+        <Metric href="/coach/check-ins" label="ממתינים לטיפול" value={pendingCheckIns}/>
+        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
+      </section>
 
       <CoachAttentionPanel items={attention.items} measured={attention.measured}/>
 
@@ -132,28 +156,85 @@ export default async function CoachDashboard() {
 
       <DashboardWorkoutActivity handledIds={(handledWorkouts.data??[]).map((row)=>row.workout_session_id)}/>
 
-      {/* Three shortcuts, not eight. The other five were all reachable from the
-          navigation directly above them. */}
-      <section className="mt-8">
-        <h2 className="sr-only">פעולות מהירות</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
-          <Quick href="/coach/menus/new" label="תפריט חדש"/>
-          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
-        </div>
-      </section>
+      <DashboardNutritionActivity
+        items={nutritionActivity}
+        clientNames={Object.fromEntries(nameById)}
+        handledKeys={(handledNutrition.data ?? []).map((row) => `${row.client_id}:${row.activity_date}`)}
+      />
 
-      {/* The counters last: they describe the practice, they do not ask for
-          anything. */}
-      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
-        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
-        <Metric href="/coach/check-ins?status=new" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
-        <Metric href="/coach/check-ins" label="ממתינים לטיפול" value={pendingCheckIns}/>
-        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
-      </section>
     </div>
   </main>;
+}
+
+async function loadNutritionActivity(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  clientIds: readonly string[],
+): Promise<readonly NutritionActivityItem[]> {
+  if (!clientIds.length) return [];
+  const today = israelDateKey();
+  const from = new Date(`${today}T12:00:00Z`);
+  from.setUTCDate(from.getUTCDate() - 6);
+  const fromDate = from.toISOString().slice(0, 10);
+  const [statuses, foodLogs] = await Promise.all([
+    supabase
+      .from("meal_day_status")
+      .select("client_id,status,status_date,updated_at")
+      .in("client_id", [...clientIds])
+      .gte("status_date", fromDate)
+      .lte("status_date", today)
+      .order("updated_at", { ascending: false })
+      .limit(100),
+    supabase
+      .from("client_food_log")
+      .select("client_id,log_date,created_at")
+      .in("client_id", [...clientIds])
+      .gte("log_date", fromDate)
+      .lte("log_date", today)
+      .order("created_at", { ascending: false })
+      .limit(100),
+  ]);
+
+  // Nutrition activity is useful context, but a rolling deployment with one of
+  // these newer tables missing must not take the coach's whole dashboard down.
+  const grouped = new Map<string, NutritionActivityItem>();
+  const update = (
+    clientId: string,
+    date: string,
+    at: string,
+    change: Pick<NutritionActivityItem, "eaten" | "skipped" | "outsideFoods">,
+  ) => {
+    const key = `${clientId}:${date}`;
+    const current = grouped.get(key) ?? {
+      clientId,
+      date,
+      eaten: 0,
+      skipped: 0,
+      outsideFoods: 0,
+      latestAt: at,
+    };
+    grouped.set(key, {
+      ...current,
+      eaten: current.eaten + change.eaten,
+      skipped: current.skipped + change.skipped,
+      outsideFoods: current.outsideFoods + change.outsideFoods,
+      latestAt: at > current.latestAt ? at : current.latestAt,
+    });
+  };
+  for (const row of statuses.data ?? [])
+    update(row.client_id, row.status_date, row.updated_at, {
+      eaten: row.status === "eaten" ? 1 : 0,
+      skipped: row.status === "not_eaten" ? 1 : 0,
+      outsideFoods: 0,
+    });
+  for (const row of foodLogs.data ?? [])
+    update(row.client_id, row.log_date, row.created_at, {
+      eaten: 0,
+      skipped: 0,
+      outsideFoods: 1,
+    });
+  return [...grouped.values()]
+    .sort((a, b) => b.latestAt.localeCompare(a.latestAt))
+    .slice(0, 5);
 }
 
 // How long a client has been waiting for an answer, in the coarsest unit that

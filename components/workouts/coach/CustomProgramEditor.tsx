@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Copy, GripVertical, Plus, Repeat, Save, Search, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Dumbbell, GripVertical, Plus, Repeat, Save, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
@@ -35,10 +35,27 @@ type DragOrigin = Readonly<{ dayId: string; exerciseId: string }>;
 function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProgram;setDraft:(program:WorkoutProgram)=>void;onSave:()=>Promise<void>;saving:boolean;message:string}){
  const{snapshot}=useWorkouts();
  const[query,setQuery]=useState("");
+ const[muscleGroup,setMuscleGroup]=useState("");
  const[dragging,setDragging]=useState<DragOrigin|null>(null);
  const[replacing,setReplacing]=useState<DragOrigin|null>(null);
 
- const choices=useMemo(()=>snapshot.exercises.filter((exercise)=>exercise.status==="active"&&(`${exercise.name} ${exercise.category??""} ${exercise.primaryMuscleGroup??""}`).toLocaleLowerCase("he").includes(query.trim().toLocaleLowerCase("he"))).slice(0,30),[query,snapshot.exercises]);
+ const activeExercises=useMemo(()=>snapshot.exercises.filter((exercise)=>exercise.status==="active"),[snapshot.exercises]);
+ const muscleGroups=useMemo(()=>{
+   const counts=new Map<string,number>();
+   activeExercises.forEach((exercise)=>{
+     const groups=new Set([exercise.primaryMuscleGroup,...exercise.secondaryMuscleGroups].filter((value):value is string=>Boolean(value?.trim())));
+     groups.forEach((group)=>counts.set(group,(counts.get(group)??0)+1));
+   });
+   return [...counts].sort(([left],[right])=>left.localeCompare(right,"he"));
+ },[activeExercises]);
+ const choices=useMemo(()=>{
+   const term=query.trim().toLocaleLowerCase("he");
+   return activeExercises.filter((exercise)=>{
+     const matchesSearch=!term||(`${exercise.name} ${exercise.category??""} ${exercise.primaryMuscleGroup??""} ${exercise.secondaryMuscleGroups.join(" ")}`).toLocaleLowerCase("he").includes(term);
+     const matchesMuscle=!muscleGroup||exercise.primaryMuscleGroup===muscleGroup||exercise.secondaryMuscleGroups.includes(muscleGroup);
+     return matchesSearch&&matchesMuscle;
+   }).slice(0,30);
+ },[activeExercises,muscleGroup,query]);
  const patch=(value:Partial<WorkoutProgram>)=>setDraft({...draft,...value});
  const setDays=(days:WorkoutDay[])=>patch({days:normalizeDays(days)});
  const addDay=()=>setDays([...draft.days,emptyDay(draft.days.length)]);
@@ -158,6 +175,31 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
         <input className="nutrition-input" value={query} onChange={event=>setQuery(event.target.value)} placeholder="חיפוש תרגיל או קבוצת שריר" aria-label="חיפוש תרגיל"/>
       </label>
     </div>
+    <fieldset className="mt-4">
+      <legend className="text-sm font-black">בחירת שריר</legend>
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+        <button
+          type="button"
+          onClick={()=>setMuscleGroup("")}
+          aria-pressed={!muscleGroup}
+          className={`flex min-h-16 items-center gap-3 rounded-2xl border p-3 text-start transition ${!muscleGroup?"border-[#16A34A] bg-[#ECFDF3] text-[#15803D]":"border-[#E5E7E5] bg-[#FFFFFF] hover:border-[#16A34A]/50"}`}
+        >
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white"><Dumbbell aria-hidden="true" size={18}/></span>
+          <span><strong className="block text-sm">כל השרירים</strong><small className="text-[#5B5F5B]">{activeExercises.length} תרגילים</small></span>
+        </button>
+        {muscleGroups.map(([group,count])=><button
+          key={group}
+          type="button"
+          onClick={()=>setMuscleGroup(current=>current===group?"":group)}
+          aria-pressed={muscleGroup===group}
+          className={`min-h-16 rounded-2xl border p-3 text-start transition ${muscleGroup===group?"border-[#16A34A] bg-[#ECFDF3] text-[#15803D]":"border-[#E5E7E5] bg-[#FFFFFF] hover:border-[#16A34A]/50"}`}
+        >
+          <strong className="block text-sm">{group}</strong>
+          <small className="text-[#5B5F5B]">{count} תרגילים</small>
+        </button>)}
+      </div>
+    </fieldset>
+    <p className="mt-4 text-xs text-[#5B5F5B]">{choices.length} תרגילים מוצגים{muscleGroup?` עבור ${muscleGroup}`:""}</p>
     <div className="mt-4 grid max-h-64 gap-2 overflow-y-auto md:grid-cols-2">
       {choices.map(exercise=>
         <div key={exercise.id} className="flex items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] p-3">
@@ -172,6 +214,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
           </select>
         </div>
       )}
+      {!choices.length&&<p className="col-span-full rounded-xl border border-dashed border-[#E5E7E5] p-6 text-center text-sm text-[#5B5F5B]">לא נמצאו תרגילים המתאימים לשריר ולחיפוש שבחרת.</p>}
     </div>
   </section>
 

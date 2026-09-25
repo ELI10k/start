@@ -50,11 +50,29 @@ export async function signIn(page: Page, who: TestIdentity): Promise<void> {
   const baseURL = (page.context() as unknown as { _options?: { baseURL?: string } })._options?.baseURL
     ?? process.env.E2E_BASE_URL
     ?? "http://127.0.0.1:3100";
+  const landed = await enter(page, who, baseURL);
+  if (landed) return;
+
+  // The shared token can stop being accepted mid-run: a spec that exercises the
+  // real logout revokes it for the identity, and a client is locked to one
+  // device, so the last activation wins. Both land here on /login, and both are
+  // fixed by taking a fresh grant rather than failing a test that was not about
+  // signing in.
+  invalidateSession(who.email);
+  if (!(await enter(page, who, baseURL))) {
+    throw new Error(`Signing in as ${who.role} did not leave /login, even with a fresh session.`);
+  }
+}
+
+async function enter(page: Page, who: TestIdentity, baseURL: string): Promise<boolean> {
   const session = await cachedPasswordGrant(who.email, who.password);
   const deviceId = await applySession(page.context(), baseURL, session);
   if (who.role === "client") await activateDevice(session, deviceId);
   await page.goto(who.role === "coach" ? "/coach" : "/");
-  await page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 });
+  return page
+    .waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 })
+    .then(() => true)
+    .catch(() => false);
 }
 
 // Kept for the spec that exercises the login form itself. Everything else uses signIn.

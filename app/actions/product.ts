@@ -390,11 +390,9 @@ export async function setMealStatus(form: FormData): Promise<void> {
   if (!MEAL_STATUSES.has(status)) throw new Error("invalid_meal_status");
   if (status === "other" && !note) throw new Error("substitution_requires_note");
 
-  // The legacy database function expects one selection in every group. A
-  // client, however, may genuinely eat only the protein or only the
-  // carbohydrate. Preserve that truth by filling every unchosen group with its
-  // primary item at a zero amount; refresh_meal_intake already excludes zero
-  // portions, so only the foods the client actually chose reach today's totals.
+  // A prescribed primary is already a choice made by the coach. The client may
+  // replace it, but should not have to tap every default again just to save the
+  // meal. Fill missing selections with the primary and keep its planned amount.
   if (status === "eaten") {
     const { data: groups, error: groupsError } = await supabase
       .from("meal_food_groups")
@@ -410,7 +408,6 @@ export async function setMealStatus(form: FormData): Promise<void> {
         .eq("selection_date", date);
       if (selectionsError) throw selectionsError;
       const selected = new Set((selections ?? []).map((row) => String(row.group_id)));
-      if (!selected.size) throw new Error("יש לבחור לפחות פריט אחד לפני סימון הארוחה.");
       const missing = groupIds.filter((groupId) => !selected.has(groupId));
       if (missing.length) {
         const { data: items, error: itemsError } = await supabase
@@ -432,10 +429,6 @@ export async function setMealStatus(form: FormData): Promise<void> {
             p_group_id: groupId, p_meal_item_id: itemId, p_date: date,
           });
           if (selectError) throw selectError;
-          const { error: amountError } = await supabase.rpc("set_meal_group_amount", {
-            p_group_id: groupId, p_date: date, p_quantity: 0,
-          });
-          if (amountError) throw amountError;
         }));
       }
     }
@@ -573,6 +566,28 @@ export async function saveMenuTree(
         ? "תפריט פעיל חייב להיות משויך ללקוח."
         : "התפריט לא נשמר. יש לבדוק את כל הכמויות והשדות.",
     };
+  const customNames = (plan.days ?? []).flatMap((day, dayIndex) =>
+    (day.meals ?? []).flatMap((meal, mealIndex) =>
+      (meal.groups ?? []).flatMap((group, groupIndex) =>
+        (group.items ?? []).map((item, itemIndex) => ({
+          dayIndex: "dayIndex" in day ? Number(day.dayIndex) : dayIndex,
+          mealSortOrder: Number(meal.sortOrder ?? mealIndex),
+          groupSortOrder: Number(group.sortOrder ?? groupIndex),
+          itemSortOrder: Number(item.sortOrder ?? itemIndex),
+          customName: "customName" in item ? String(item.customName ?? "").trim().slice(0, 200) : "",
+        })),
+      ),
+    ),
+  );
+  // The function arrives with migration 202609160001. Without it, a menu with
+  // no custom names must still save; only a real custom name is worth failing on.
+  const { error: namesError } = await supabase.rpc("apply_meal_item_custom_names", {
+    p_plan_id: data,
+    p_names: customNames,
+  });
+  const namesMissing = namesError?.code === "PGRST202" || namesError?.code === "42883";
+  if (namesError && !(namesMissing && customNames.every((item) => !item.customName)))
+    return { ok: false, message: "התפריט נשמר, אבל שמות המאכלים המותאמים לא נשמרו. יש לנסות שוב." };
   revalidatePath("/coach/menus");
   revalidatePath(`/coach/menus/${data}`);
   revalidatePath("/nutrition");

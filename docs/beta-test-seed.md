@@ -1,10 +1,10 @@
-# Seed נתוני טסט ל-START
+# Seed נתוני טסט ל-START LIFE FIT
 
 הקובץ הראשי הוא `supabase/seeds/beta-test-client.sql`. הוא מיועד להרצה ידנית בלבד ב-Supabase SQL Editor, אינו משתמש במפתח בקוד לקוח ואינו משנה RLS.
 
 ## לפני הרצה
 
-1. התחברו ל-[Supabase Dashboard](https://supabase.com/dashboard) של פרויקט START.
+1. התחברו ל-[Supabase Dashboard](https://supabase.com/dashboard) של פרויקט START LIFE FIT.
 2. ודאו שהחשבונות `elicohenib@gmail.com` (coach) ו-`elicohenyou@gmail.com` (client) קיימים ושיש ביניהם קשר פעיל.
 3. פתחו **SQL Editor** → **New query**.
 4. העתיקו את כל תוכן `supabase/seeds/beta-test-client.sql`, הדביקו והריצו פעם אחת.

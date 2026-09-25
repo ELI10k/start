@@ -11,7 +11,25 @@ import UIKit
 // switched off. Registering here, rather than leaving it as a step in Xcode,
 // means there is no way to build the app with the plugin quietly missing.
 class StartViewController: CAPBridgeViewController {
+    private func configureNativeScrolling() {
+        guard let scrollView = bridge?.webView?.scrollView else { return }
+        // Keep normal scrolling for long screens, but remove Safari-style
+        // rubber-banding at every edge.
+        scrollView.bounces = false
+        scrollView.alwaysBounceVertical = false
+        scrollView.alwaysBounceHorizontal = false
+        scrollView.isDirectionalLockEnabled = true
+    }
+
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(StartHealthPlugin())
+        configureNativeScrolling()
+    }
+
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // capacitorDidLoad can run before WKWebView has attached its scroll
+        // view. Re-apply once the native view is actually on screen.
+        configureNativeScrolling()
     }
 }

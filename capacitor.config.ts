@@ -17,7 +17,7 @@ import { KeyboardResize } from "@capacitor/keyboard";
 const serverUrl = process.env.START_NATIVE_SERVER_URL;
 
 const config: CapacitorConfig = {
-  appId: "co.il.startcoaching.app",
+  appId: "il.co.elicohenfitness.startlifefit",
   appName: "START LIFE FIT",
   // Only a fallback: an offline splash for when the device cannot reach the
   // server at all. The real UI comes from serverUrl.
@@ -35,7 +35,10 @@ const config: CapacitorConfig = {
     : undefined,
   plugins: {
     SplashScreen: {
-      launchAutoHide: false,
+      // Never leave the user trapped behind the native splash if the remote
+      // page or its client bundle is slow to initialise.
+      launchAutoHide: true,
+      launchShowDuration: 2000,
       backgroundColor: "#FFFFFF",
       androidSpinnerStyle: "small",
       iosSpinnerStyle: "small",

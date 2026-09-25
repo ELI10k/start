@@ -26,7 +26,7 @@ type Item = Readonly<{
   fat: number;
 }>;
 
-type Group = Readonly<{ items: readonly Item[]; selectedItemId?: string }>;
+type Group = Readonly<{ id?: string; items: readonly Item[]; selectedItemId?: string }>;
 
 export type IntakeMeal = Readonly<{
   id?: string;
@@ -45,6 +45,14 @@ export const isMealAnswered = (meal: IntakeMeal) => meal.status !== null || meal
 export const isMealEaten = (meal: IntakeMeal) => meal.status === "eaten" || (meal.status === null && meal.completed);
 
 /**
+ * A meal was consumed when the client ate either the plan or a replacement.
+ * Kept separate from `isMealEaten`: nutrition totals may include the planned
+ * rows only for an `eaten` meal, while the dashboard's meal counter must count
+ * an `other` meal as eaten too.
+ */
+export const isMealConsumed = (meal: IntakeMeal) => meal.status === "other" || isMealEaten(meal);
+
+/**
  * The rows that describe this meal as it currently stands.
  *
  * The chosen alternative in each group - already carrying the client's reported
@@ -56,8 +64,24 @@ export function mealStanding(meal: IntakeMeal): readonly Item[] {
   return meal.groups.flatMap((group) => {
     const chosen = group.items.find((item) => item.id === group.selectedItemId);
     if (chosen) return [chosen];
-    const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
-    return primary ? [primary] : [];
+    const primaries = group.items.filter((item) => item.itemRole === "primary");
+    return primaries.length ? primaries : group.items.slice(0, 1);
+  });
+}
+
+/** The selected planned rows that remain beside group-level replacements. */
+export function retainedSubstitutionItems(
+  meal: IntakeMeal,
+  replacedGroups: ReadonlySet<string>,
+): readonly Item[] {
+  // Only explicit choices were actually eaten. Falling back to a primary would
+  // invent food the client never selected. An unscoped replacement therefore
+  // keeps every explicit choice, while a group-level replacement removes the
+  // choice from that one group.
+  return meal.groups.flatMap((group) => {
+    if (group.id && replacedGroups.has(group.id)) return [];
+    const chosen = group.items.find((item) => item.id === group.selectedItemId);
+    return chosen ? [chosen] : [];
   });
 }
 
@@ -116,9 +140,15 @@ export function freeCalorieRemaining(meals: readonly IntakeMeal[]): IntakeTotals
 export const eatenFromMenu = (
   meals: readonly IntakeMeal[],
   loggedCaloriesIn?: (mealId: string | undefined) => number,
+  replacedGroupsIn?: (mealId: string | undefined) => ReadonlySet<string>,
 ): IntakeTotals =>
   addTotals(
-    sumItems(meals.filter(isMealEaten).flatMap(mealStanding)),
+    sumItems([
+      ...meals.filter(isMealEaten).flatMap(mealStanding),
+      ...meals
+        .filter((meal) => meal.status === "other" && replacedGroupsIn)
+        .flatMap((meal) => retainedSubstitutionItems(meal, replacedGroupsIn!(meal.id))),
+    ]),
     freeCalorieIntake(meals, loggedCaloriesIn),
   );
 

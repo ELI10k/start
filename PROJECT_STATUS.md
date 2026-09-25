@@ -1,4 +1,4 @@
-# START - Project Status
+# START LIFE FIT - Project Status
 
 Last updated: 2026-08-21 — third product review implemented, then all twelve of
 its actionable proposals built; see "2026-08-21" below.

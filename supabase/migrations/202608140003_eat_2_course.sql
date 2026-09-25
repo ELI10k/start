@@ -1,6 +1,6 @@
 begin;
 
--- EAT 2 is an Eli Cohen course made available for START. This migration adds
+-- EAT 2 is an Eli Cohen course made available for START LIFE FIT. This migration adds
 -- one course category and its three source-backed lessons. It does not alter
 -- existing content or permissions.
 insert into public.content_categories(id, name, slug, description, sort_order, active)

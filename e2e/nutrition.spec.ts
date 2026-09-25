@@ -64,7 +64,7 @@ test.describe("nutrition", () => {
     // client-side transition both page trees are briefly in the DOM, and every
     // label matches twice.
     await menuTitle(page);
-    const client = page.getByRole("main").getByLabel("לקוח");
+    const client = page.getByRole("main").getByLabel("לקוח", { exact: true });
     const options = await client.locator("option").allTextContents();
     const named = options.find((option) => option && option !== "ללא שיוך");
     test.skip(!named, "no client is assigned to this test coach");
@@ -194,7 +194,7 @@ test.describe("nutrition", () => {
     await page.getByRole("button", { name: /שמירה/ }).click();
     // Wait for the server to confirm before navigating away, otherwise the reload
     // races the save and reads the previous title back.
-    await expect(page.getByRole("button", { name: "שמירה" })).toBeEnabled({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: "שמירה", exact: true })).toBeEnabled({ timeout: 30_000 });
     await page.waitForTimeout(500);
     await page.goto(savedUrl);
     await expect(await menuTitle(page)).toHaveValue(`${title} ערוך`);

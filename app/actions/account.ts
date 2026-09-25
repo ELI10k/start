@@ -3,6 +3,9 @@
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { permanentlyDeleteOwnAccount } from "@/lib/account/delete-account";
+import { revalidatePath } from "next/cache";
+import { GOAL_LABELS, isNutritionGoal } from "@/lib/nutrition/energy";
+import { getAuthContext } from "@/lib/data/product-repository";
 
 export type DeleteAccountState = Readonly<{
   status: "idle" | "error" | "deleted";
@@ -10,6 +13,48 @@ export type DeleteAccountState = Readonly<{
 }>;
 
 export const initialDeleteAccountState: DeleteAccountState = { status: "idle", message: "" };
+
+export type NutritionGoalState = Readonly<{ status: "idle" | "saved" | "error"; message: string }>;
+
+export async function updateOwnNutritionGoals(
+  _previous: NutritionGoalState,
+  formData: FormData,
+): Promise<NutritionGoalState> {
+  const session = await getAuthContext();
+  if (!session || session.role !== "client") return { status: "error", message: "החיבור לחשבון פג. יש להתחבר מחדש." };
+  const auth = await createSupabaseServerClient();
+  const goal = String(formData.get("nutritionGoal") ?? "");
+  const calories = Number(formData.get("calorieTarget"));
+  const proteinRaw = String(formData.get("proteinTarget") ?? "").trim();
+  const protein = proteinRaw ? Number(proteinRaw) : null;
+  const carbohydrateRaw = String(formData.get("carbohydrateTarget") ?? "").trim();
+  const carbohydrates = carbohydrateRaw ? Number(carbohydrateRaw) : null;
+  const fatRaw = String(formData.get("fatTarget") ?? "").trim();
+  const fat = fatRaw ? Number(fatRaw) : null;
+  if (!isNutritionGoal(goal)) return { status: "error", message: "יש לבחור מטרה." };
+  if (!Number.isFinite(calories) || calories < 800 || calories > 10000)
+    return { status: "error", message: "יעד הקלוריות חייב להיות בין 800 ל־10,000." };
+  if (protein !== null && (!Number.isFinite(protein) || protein < 1 || protein > 1000))
+    return { status: "error", message: "יעד החלבון אינו תקין." };
+  if (carbohydrates !== null && (!Number.isFinite(carbohydrates) || carbohydrates < 1 || carbohydrates > 1000))
+    return { status: "error", message: "יעד הפחמימה אינו תקין." };
+  if (fat !== null && (!Number.isFinite(fat) || fat < 1 || fat > 1000))
+    return { status: "error", message: "יעד השומן אינו תקין." };
+
+  const { error } = await auth.from("client_profiles").update({
+    nutrition_goal: goal,
+    goal: GOAL_LABELS[goal],
+    calorie_target: Math.round(calories),
+    protein_target: protein === null ? null : Math.round(protein),
+    carbohydrate_target: carbohydrates === null ? null : Math.round(carbohydrates),
+    fat_target: fat === null ? null : Math.round(fat),
+  }).eq("user_id", session.id);
+  if (error) return { status: "error", message: "השמירה נכשלה. אפשר לנסות שוב בעוד רגע." };
+  revalidatePath("/profile");
+  revalidatePath("/nutrition");
+  revalidatePath("/");
+  return { status: "saved", message: "המטרה והיעדים נשמרו." };
+}
 
 export async function deleteOwnAccount(
   _previous: DeleteAccountState,

@@ -56,7 +56,7 @@ begin
     v_status := 'disabled';
   end if;
   v_full_name := trim(coalesce(new.raw_user_meta_data->>'full_name', new.raw_app_meta_data->>'full_name', split_part(coalesce(new.email, ''), '@', 1), 'משתמש'));
-  if length(v_full_name) < 2 then v_full_name := 'משתמש START'; end if;
+  if length(v_full_name) < 2 then v_full_name := 'משתמש START LIFE FIT'; end if;
 
   insert into public.profiles(id, email, full_name, role, status)
   values(new.id, lower(coalesce(new.email, new.id::text || '@invalid.local')), v_full_name, v_role, v_status)

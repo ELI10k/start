@@ -118,7 +118,7 @@ test("the action decides provenance itself rather than trusting the form", async
   assert.match(action, /if \(!auth\) return \{ ok: false/);
 });
 
-test("the lookup prefers START's own catalogue and survives a slow community API", async () => {
+test("the lookup prefers START LIFE FIT's own catalogue and survives a slow community API", async () => {
   const route = await source("app/api/foods/barcode/[barcode]/route.ts");
   assert.match(route, /from\("foods"\)[\s\S]*\.eq\("barcode", barcode\)/);
   assert.match(route, /AbortController/);

@@ -1,6 +1,6 @@
 # Authoritative route audit
 
-Reviewed: 2026-07-20. All titles are Hebrew or START-branded. Root metadata supplies the default title/description; food/content dynamic IDs validate and call `notFound`. Coach client/menu dynamic pages also validate repository/provider IDs.
+Reviewed: 2026-07-20. All titles are Hebrew or START LIFE FIT-branded. Root metadata supplies the default title/description; food/content dynamic IDs validate and call `notFound`. Coach client/menu dynamic pages also validate repository/provider IDs.
 
 ## Client and shared routes
 

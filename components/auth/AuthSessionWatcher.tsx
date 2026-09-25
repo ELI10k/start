@@ -1,15 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import type { AuthChangeEvent } from "@supabase/supabase-js";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { clearSnapshotCache } from "@/lib/workouts/snapshot-cache";
+import { getSupabaseConfig } from "@/lib/supabase/env";
 
 export default function AuthSessionWatcher() {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Public and error screens must still render when deployment configuration
+    // is incomplete. The server-side guards already refuse private data; this
+    // watcher is an enhancement for an existing authenticated session, not a
+    // reason to crash the whole React tree.
+    if (!getSupabaseConfig()) return;
+
     const supabase = createSupabaseBrowserClient();
     if (!supabase) return;
 
@@ -28,7 +36,7 @@ export default function AuthSessionWatcher() {
     });
 
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [pathname, router]);
 
   return null;
 }

@@ -1,10 +1,10 @@
-# START - Claude Code Project Instructions
+# START LIFE FIT - Claude Code Project Instructions
 
 ## Mission
-You are the primary engineer continuing an existing production fitness-coaching platform named START by Eli Cohen. Do not rebuild from scratch. Preserve existing working behavior, understand the repository first, then continue development until the application is beta-ready.
+You are the primary engineer continuing an existing production fitness-coaching platform named START LIFE FIT. Do not rebuild from scratch. Preserve existing working behavior, understand the repository first, then continue development until the application is beta-ready.
 
 ## Product
-START is a Hebrew RTL web application for online nutrition and fitness coaching. It has two roles:
+START LIFE FIT is a Hebrew RTL web application for online nutrition and fitness coaching. It has two roles:
 - Coach: manages clients, menus, workouts, check-ins, progress, notifications and content.
 - Client: follows nutrition and workouts, logs progress, submits check-ins and views coach feedback.
 
@@ -74,7 +74,7 @@ For each task:
 2. Complete the full client-side UI redesign in white/green, mobile-first design. Do not stop after the home screen.
 3. Redesign coach UX, especially building a complete menu in under two minutes.
 4. Perform a full personal beta test and fix real-world issues.
-5. Only later: START IQ and advanced AI coaching.
+5. Only later: START LIFE FIT IQ and advanced AI coaching.
 
 ## Nutrition engine rules
 - Fixed meal types: breakfast, snack 1, lunch, snack 2, dinner, free calories.

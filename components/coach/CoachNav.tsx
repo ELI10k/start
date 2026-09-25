@@ -179,7 +179,7 @@ function Logout({ labelled = false }: { labelled?: boolean }) {
     <form action="/auth/logout" method="post">
       <button
         aria-label="התנתקות"
-        className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-bold text-[#5B5F5B]"
+        className="flex min-h-11 min-w-11 w-full items-center gap-2 rounded-xl px-3 text-sm font-bold text-[#5B5F5B]"
       >
         <LogOut size={17} />
         {labelled && "התנתקות"}

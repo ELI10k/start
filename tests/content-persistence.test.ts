@@ -91,6 +91,6 @@ test("content seed runs only when the database has no content", async () => {
     migration,
     /if not exists\(select 1 from public\.content_items\) then/,
   );
-  assert.match(migration, /ברוכים הבאים לספריית START/);
+  assert.match(migration, /ברוכים הבאים לספריית START LIFE FIT/);
   assert.match(migration, /status, sort_order, estimated_minutes/);
 });

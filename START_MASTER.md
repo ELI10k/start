@@ -1,7 +1,7 @@
-# START MASTER - Full Product and Engineering Handoff
+# START LIFE FIT MASTER - Full Product and Engineering Handoff
 
-**Project:** START by Eli Cohen  
-**Owner:** Eli Cohen  
+**Project:** START LIFE FIT
+**Owner:** Eli Cohen
 **Purpose of this document:** Give a new Claude Code engineer enough context to continue the existing application without restarting, losing decisions or repeating discovery work.
 
 > Important: This document records the latest known state from product conversations and Codex reports. The repository, database and deployed application must be audited. Any discrepancy must be reported rather than silently assumed.
@@ -10,7 +10,7 @@
 
 ## 1. Executive summary
 
-START is a web-based nutrition and fitness coaching platform built for Eli Cohen's online coaching business. The product combines coach workflows and client self-service in one ecosystem.
+START LIFE FIT is a web-based nutrition and fitness coaching platform built for Eli Cohen's online coaching business. The product combines coach workflows and client self-service in one ecosystem.
 
 The platform is already substantially implemented. It is not an idea-stage project and must not be rebuilt. Existing implementation reportedly includes authentication, role separation, client/coach dashboards, nutrition, workout execution, progress, weekly check-ins, private body photos, notifications, content, database seed data, tests and Vercel deployment.
 
@@ -21,7 +21,7 @@ The main remaining work is not simply “add more features.” It is:
 3. Complete a full white/green mobile-first redesign of the client experience.
 4. Improve the coach UX.
 5. Run a personal beta and fix defects.
-6. Later add advanced coaching intelligence called START IQ.
+6. Later add advanced coaching intelligence called START LIFE FIT IQ.
 
 Eli values speed and practicality. The product must let a coach build a complete nutrition plan in under two minutes and let a client understand what to do immediately.
 
@@ -30,12 +30,12 @@ Eli values speed and practicality. The product must let a coach build a complete
 ## 2. Business and brand context
 
 ### 2.1 Brand
-The long-term ecosystem name is **START by Eli Cohen**.
+The long-term ecosystem name is **START LIFE FIT**.
 
 Potential membership tiers:
-- START Digital
-- START Coach
-- START VIP
+- START LIFE FIT Digital
+- START LIFE FIT Coach
+- START LIFE FIT VIP
 
 The application should feel like one premium product ecosystem, not a generic admin panel.
 
@@ -706,9 +706,9 @@ Design principles:
 
 ---
 
-## 16. START IQ - long-term intelligence
+## 16. START LIFE FIT IQ - long-term intelligence
 
-START IQ is an approved long-term feature concept.
+START LIFE FIT IQ is an approved long-term feature concept.
 
 It should analyze:
 - Nutrition adherence
@@ -925,7 +925,7 @@ At the end of each session update:
 5. Invite first beta clients.
 
 ### Phase F - Later roadmap
-- START IQ
+- START LIFE FIT IQ
 - AI technique analysis
 - Advanced behavior analysis
 - Subscription tier/product expansion

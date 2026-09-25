@@ -9,6 +9,7 @@ import { saveScannedFood, type ScanState } from "@/app/actions/scanned-food";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
+import { displayCalories } from "@/lib/nutrition/display";
 
 type Found = Readonly<{
   barcode: string;
@@ -117,13 +118,13 @@ export default function BarcodeScanner({ date }: { date: string }) {
               <strong className="block text-lg">{found.name}</strong>
               {found.brand && <span className="text-sm text-[#5B5F5B]">{found.brand}</span>}
               <dl className="compact-data-list mt-3">
-                <div><span>קלוריות ל-100 גרם</span><strong>{found.calories}</strong></div>
+                <div><span>קלוריות ל-100 גרם</span><strong>{displayCalories(found.calories)}</strong></div>
                 <div><span>חלבון</span><strong>{found.protein ?? "—"}</strong></div>
                 <div><span>פחמימות</span><strong>{found.carbs ?? "—"}</strong></div>
                 <div><span>שומן</span><strong>{found.fat ?? "—"}</strong></div>
               </dl>
               <p className="mt-3 text-xs text-[#5B5F5B]">
-                מקור: {found.source === "start" ? "מאגר START" : found.source === "manual" ? "הוזן ידנית" : "Open Food Facts"}
+                מקור: {found.source === "start" ? "מאגר START LIFE FIT" : found.source === "manual" ? "הוזן ידנית" : "Open Food Facts"}
               </p>
             </article>
 

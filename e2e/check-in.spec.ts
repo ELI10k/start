@@ -63,14 +63,14 @@ test.describe("check-in and progress", () => {
 
   test("check-in history renders for the signed-in client", async ({ page }) => {
     await page.goto("/check-in/history");
-    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
   });
 
   test("the progress screen shows weight and measurements", async ({ page }) => {
     await page.goto("/progress");
     await expect(page).not.toHaveURL(/\/login|\/unauthorized/);
-    await expect(page.locator("main")).toBeVisible();
+    await expect(page.locator("main").first()).toBeVisible();
   });
 
   test("progress photos are never served from a public URL", async ({ page }) => {

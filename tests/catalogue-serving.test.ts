@@ -50,6 +50,18 @@ test("the Muller protein yogurt displays one 200 gram cup in Hebrew", () => {
   }), { calories: 130, protein: 25, carbs: 5, fat: 0, servingLabel: "גביע 200 גרם" });
 });
 
+test("Danone PRO 1.5% displays nutrition for the full 200 gram cup", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 70,
+    protein: 10,
+    carbs: 3.4,
+    fat: 1.5,
+    packageUnit: "גביע",
+    unitWeightGrams: 200,
+    servingLabel: "גביע 200 גרם",
+  }), { calories: 140, protein: 20, carbs: 6.8, fat: 3, servingLabel: "גביע 200 גרם" });
+});
+
 test("both Yoplait GO yogurts display a full 200 gram cup", () => {
   const common = { packageUnit: "גביע", unitWeightGrams: 200, servingLabel: "גביע 200 גרם" };
   assert.deepEqual(catalogueServingNutrition({
@@ -70,4 +82,16 @@ test("protein powder displays the requested 34 gram scoop", () => {
     unitWeightGrams: 34,
     servingLabel: "סקופ 34 גרם",
   }), { calories: 120, protein: 25, carbs: 3, fat: 1.4, servingLabel: "סקופ 34 גרם" });
+});
+
+test("iHerb barbecue protein snack displays one 30 gram serving", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 400,
+    protein: 70,
+    carbs: 6.67,
+    fat: 10,
+    packageUnit: "מנה",
+    unitWeightGrams: 30,
+    servingLabel: "מנה של 30 גרם",
+  }), { calories: 120, protein: 21, carbs: 2, fat: 3, servingLabel: "מנה של 30 גרם" });
 });

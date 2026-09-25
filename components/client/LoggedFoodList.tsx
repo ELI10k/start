@@ -1,5 +1,5 @@
 import { Barcode, Camera, PencilLine, Trash2 } from "lucide-react";
-import { deleteClientFoodLog } from "@/app/actions/food-log";
+import { deleteClientFoodLog, updateClientFoodLog } from "@/app/actions/food-log";
 import type { LoggedFood } from "@/lib/nutrition/food-log";
 import { displayCalories } from "@/lib/nutrition/display";
 import { unitLabel } from "@/lib/nutrition/meal-alternatives";
@@ -56,6 +56,7 @@ export default function LoggedFoodList({
             <p className="mt-2 text-xs text-[#5B5F5B]">
               {entry.quantity ? `${entry.quantity} ${unitLabel(entry.unit ?? "גרם", Number(entry.quantity))} · ` : ""}
               {displayCalories(entry.calories)} קל׳
+              {entry.eatenAt ? ` · ${new Date(entry.eatenAt).toLocaleTimeString("he-IL", { timeZone: "Asia/Jerusalem", hour: "2-digit", minute: "2-digit" })}` : ""}
               {entry.protein !== null ? ` · ${entry.protein} ג׳ חלבון` : ""}
               {entry.carbs !== null ? ` · ${entry.carbs} ג׳ פחמימות` : ""}
               {entry.fat !== null ? ` · ${entry.fat} ג׳ שומן` : ""}
@@ -64,6 +65,21 @@ export default function LoggedFoodList({
           ) : (
             <p className="mt-2 text-xs text-[#5B5F5B]">לא נספר בקלוריות — אין ערכים מאושרים לתיאור או לתמונה.</p>
           )}
+          {!readOnly && entry.quantity && entry.foodId ? (
+            <details className="mt-3 rounded-xl bg-[#F7F8F7] p-3">
+              <summary className="cursor-pointer text-sm font-bold text-[#15803D]">עריכת כמות ושעה</summary>
+              <form action={updateClientFoodLog} className="mt-3 grid grid-cols-2 gap-2">
+                <input type="hidden" name="id" value={entry.id}/>
+                <label className="text-xs font-bold">כמות ({unitLabel(entry.unit ?? "גרם", Number(entry.quantity))})
+                  <input name="quantity" required type="number" min="0.1" step="0.1" defaultValue={entry.quantity} className="nutrition-input mt-1"/>
+                </label>
+                <label className="text-xs font-bold">שעת אכילה
+                  <input name="time" required type="time" defaultValue={entry.eatenAt ? new Date(entry.eatenAt).toLocaleTimeString("en-GB", {timeZone:"Asia/Jerusalem",hour:"2-digit",minute:"2-digit",hour12:false}) : "12:00"} className="nutrition-input mt-1"/>
+                </label>
+                <button className="premium-primary-button col-span-2">שמירת השינוי</button>
+              </form>
+            </details>
+          ) : null}
         </li>
       ))}
     </ul>

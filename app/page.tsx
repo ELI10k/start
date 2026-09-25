@@ -12,9 +12,9 @@ import { lessonForWeek } from "@/lib/content/weekly-lesson";
 import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
 import ProgressPulse from "@/components/client/ProgressPulse";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
-import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, isMealConsumed } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
-import { sumLoggedFood } from "@/lib/nutrition/food-log";
+import { replacedMealGroups, sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
 import { Suspense } from "react";
 
@@ -50,14 +50,16 @@ export default async function Home() {
   // its figures back and the two disagreeing is worse than either being wrong.
   const [data, logged] = await Promise.all([
     getClientOverview(auth.id, today),
-    listClientFoodLog(auth.id, today),
+    // The dashboard only needs nutrition totals. Avoid a separate storage
+    // request for private photo URLs that this screen never renders.
+    listClientFoodLog(auth.id, today, { signPhotoUrls: false }),
   ]);
   const meals = data.menu?.meals ?? [];
   // Marked eaten, or every choice in it logged - the same test the nutrition
   // screen applies. `meal.completed` alone missed nothing today, but it is one
   // of two fields that can say "eaten" and reading only one is how the two
   // screens drifted apart the last three times.
-  const completed = meals.filter(isMealEaten);
+  const completed = meals.filter(isMealConsumed);
   // What was eaten, at the amount the client reported eating - plus anything
   // they logged beside the plan and the free-calorie windows they filled. This
   // tile used to read `meal.items`, which is every row the coach wrote at the
@@ -66,8 +68,11 @@ export default async function Home() {
   // tile and the nutrition screen answer with the same number.
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
-  const totals = addTotals(eatenFromMenu(meals, loggedCaloriesIn), sumLoggedFood(logged));
-  const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
+  const totals = addTotals(
+    eatenFromMenu(meals, loggedCaloriesIn, (mealId) => replacedMealGroups(logged, mealId)),
+    sumLoggedFood(logged),
+  );
+  const calorieTarget = data.clientProfile.calorie_target ?? data.menu?.calorieTarget ?? null;
   const plannedWorkouts = data.workouts.planned;
   const completedWorkouts = data.workouts.completed;
   const eatenCalories = Math.round(totals.calories);
@@ -95,8 +100,6 @@ export default async function Home() {
             landed on when the back button returns here. */}
         <h1 className="sr-only">מה חשוב לך היום</h1>
 
-        {/* Only ever renders in the days after the coach releases one, which is
-            also the only time this screen is allowed to grow past the fold. */}
         <Suspense fallback={null}>
           <HomeWeeklySummary clientId={auth.id} />
         </Suspense>
@@ -160,24 +163,12 @@ export default async function Home() {
           </Link>
         </nav>
 
-        {/* One lesson from the library, changing every week in course order.
-            
-            The library was a tile and nothing more, so a client who never
-            pressed it never met the content - and a course nobody opens is a
-            course that was not written. This asks for one decision a week
-            instead of thirty, and it is last on the screen because it is the
-            one thing here that is not today's business. */}
         <Suspense fallback={null}>
           <HomeWeeklyLesson clientId={auth.id} today={today} />
         </Suspense>
 
-        {/* Where they have got to, in the space the screen had left over.
-            
-            The measurements screen keeps these figures and the charts behind
-            them; this is a reflection of them, on the screen a client actually
-            opens - because somebody three kilos down who does not know it is
-            somebody about to stop. */}
         <ProgressPulse entries={data.progress} />
+
       </div>
     </ClientShell>
   );

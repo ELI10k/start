@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Camera, Check, PencilLine, Plus, Undo2, X } from "lucide-react";
-import AteSomethingElse, { type PickableFood } from "@/components/client/AteSomethingElse";
+import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 import { setMealStatus } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
 
@@ -26,6 +26,7 @@ export default function MealStatusControl({
   // Passed straight through to the sheet, which is the only thing here that
   // needs it.
   foods = [],
+  savedMeals = [],
 }: {
   mealId: string;
   date: string;
@@ -34,6 +35,7 @@ export default function MealStatusControl({
   completed: boolean;
   blocked: boolean;
   foods?: readonly PickableFood[];
+  savedMeals?: readonly SavedMealChoice[];
 }) {
   const [substituting, setSubstituting] = useState(false);
   const [photographing, setPhotographing] = useState(false);
@@ -77,7 +79,7 @@ export default function MealStatusControl({
   if (status === "other") {
     return (
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <span className="pill">נאכל משהו אחר</span>
+        <span className="pill pill--green">נאכל משהו אחר</span>
         {statusNote && <span className="text-xs text-[#5B5F5B]">{statusNote}</span>}
         {/* A meal is rarely one thing.
             
@@ -92,7 +94,7 @@ export default function MealStatusControl({
         </button>
         {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-        <AteSomethingElse mealId={mealId} date={date} foods={foods} open={substituting} onClose={() => setSubstituting(false)} />
+        <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
       </div>
     );
@@ -138,7 +140,7 @@ export default function MealStatusControl({
         className="chip border-[#DC2626] text-[#DC2626]"
       />
 
-      <AteSomethingElse mealId={mealId} date={date} foods={foods} open={substituting} onClose={() => setSubstituting(false)} />
+      <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} open={substituting} onClose={() => setSubstituting(false)} />
       {photoSheet}
     </div>
   );

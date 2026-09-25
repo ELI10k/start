@@ -29,6 +29,8 @@ export function foodLogPhotoPath(clientId: string, date: string, mimeType: strin
 export type LoggedFood = Readonly<{
   id: string;
   mealId: string | null;
+  /** The one planned group this row replaced; null means the whole meal. */
+  mealGroupId?: string | null;
   name: string;
   quantity: number | null;
   unit: string | null;
@@ -37,9 +39,27 @@ export type LoggedFood = Readonly<{
   carbs: number | null;
   fat: number | null;
   source: "text" | "scan" | "photo";
+  eatenAt?: string;
+  foodId?: string | null;
   photoUrl: string | null;
   nutritionEstimated?: boolean;
 }>;
+
+/**
+ * Which parts of an "other" meal were actually replaced.
+ *
+ * The returned ids are the individual groups whose planned choice must not be
+ * counted beside the logged replacement. An unscoped "something else" entry
+ * does not erase choices the client explicitly made in the same meal: those
+ * choices describe food they ate as well and must remain in the total.
+ */
+export function replacedMealGroups(
+  entries: readonly Pick<LoggedFood, "mealId" | "mealGroupId">[],
+  mealId: string | undefined,
+): ReadonlySet<string> {
+  const mealEntries = entries.filter((entry) => entry.mealId === mealId);
+  return new Set(mealEntries.map((entry) => entry.mealGroupId).filter((id): id is string => Boolean(id)));
+}
 
 /**
  * What a set of logged entries adds up to.

@@ -3,7 +3,7 @@ begin;
 -- Two of the three courses that shipped as library scaffolding leave the shelf.
 --
 -- They were written to demonstrate that the library worked, not to be watched:
--- "היכרות עם START" and "הרגלים ומעקב" hold three short notes about the
+-- "היכרות עם START LIFE FIT" and "הרגלים ומעקב" hold three short notes about the
 -- library itself, and they sat between Eli's own courses. They are deactivated
 -- rather than deleted, so the lessons, and any progress or favourite pointing
 -- at them, survive and can be brought back by flipping one flag.

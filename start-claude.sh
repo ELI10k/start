@@ -8,7 +8,7 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 
 if [ ! -d .git ]; then
-  echo "Run this script from the START repository root (the folder containing .git)."
+  echo "Run this script from the START LIFE FIT repository root (the folder containing .git)."
   exit 1
 fi
 

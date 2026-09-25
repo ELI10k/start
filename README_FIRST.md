@@ -1,6 +1,6 @@
-# START Claude Code Handoff - Start Here
+# START LIFE FIT Claude Code Handoff - Start Here
 
-1. Copy this entire folder's contents into the root of the existing START repository.
+1. Copy this entire folder's contents into the root of the existing START LIFE FIT repository.
 2. Do not replace the application code.
 3. Confirm the repository is committed/backed up.
 4. Open Terminal in the repository root.

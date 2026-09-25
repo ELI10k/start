@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import AteSomethingElse from "@/components/client/AteSomethingElse";
+import type { PickableFood } from "@/components/client/AteSomethingElse";
 
 /**
  * The free-calorie window, with a way to fill it.
@@ -21,6 +22,7 @@ export default function FreeCalorieMeal({
   frame,
   logged,
   unmeasured,
+  foods,
 }: {
   mealId: string;
   date: string;
@@ -29,6 +31,7 @@ export default function FreeCalorieMeal({
   logged: number;
   /** Entries recorded against it that carry no figures. */
   unmeasured: number;
+  foods: readonly PickableFood[];
 }) {
   const [adding, setAdding] = useState(false);
   const left = Math.round(frame - logged);
@@ -62,6 +65,8 @@ export default function FreeCalorieMeal({
         onClose={() => setAdding(false)}
         title="מה אכלת במסגרת הזו?"
         unmeasuredNote="התיאור או התמונה יישלחו לחישוב אוטומטי. אם לא ניתן לזהות בוודאות, הפריט יישמר לעיון המאמן בלי להוסיף ערכים שגויים."
+        foods={foods}
+        preserveMealStatus
       />
     </div>
   );

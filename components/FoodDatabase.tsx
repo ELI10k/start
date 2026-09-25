@@ -1,13 +1,19 @@
 "use client";
-import { Search, SlidersHorizontal, Star, X } from "lucide-react";
-import { useDeferredValue, useMemo, useState, useTransition } from "react";
+import { ArrowUp, Search, SlidersHorizontal, Star, X } from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 import type { Food, FoodSort } from "@/lib/foods";
-import { ALL_CATEGORIES, queryFoods } from "@/lib/foods/repository";
+import { queryFoods } from "@/lib/foods/repository";
+import { ALL_SHELF, foodShelves, foodsOnShelf } from "@/lib/foods/shelves";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { foodMacroGroup, type MacroGroup } from "@/lib/nutrition/food-groups";
 import { displayCalories } from "@/lib/nutrition/display";
 
 type DisplayFood = Food & Readonly<{ usageCount?: number }>;
+
+// The catalogue passed 800 products with the chains. Drawn at once on a phone
+// that is a page hundreds of thousands of pixels tall, so it renders a page at
+// a time; any change of filter starts again from the top.
+const PAGE_SIZE = 60;
 
 export default function FoodDatabase({
   foods,
@@ -17,34 +23,42 @@ export default function FoodDatabase({
   initialFavorites?: readonly string[];
 }) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState(ALL_CATEGORIES);
+  const [shelf, setShelf] = useState(ALL_SHELF);
   const [sort, setSort] = useState<FoodSort>("calories-low");
   const deferredSearch = useDeferredValue(search);
   const [favorites, setFavorites] = useState(() => new Set(initialFavorites));
   const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const [limitKey, setLimitKey] = useState("");
+  const filterKey = `${deferredSearch}|${shelf}|${sort}|${favoriteOnly}`;
+  if (filterKey !== limitKey) {
+    setLimitKey(filterKey);
+    setLimit(PAGE_SIZE);
+  }
   const [, startTransition] = useTransition();
-  const categories = useMemo(
+  const classifiable = useMemo(
     () =>
-      [ALL_CATEGORIES, ...new Set(foods.map((food) => food.category))].sort(
-        (a, b) =>
-          a === ALL_CATEGORIES
-            ? -1
-            : b === ALL_CATEGORIES
-              ? 1
-              : a.localeCompare(b, "he"),
-      ),
+      foods.map((food) => ({
+        ...food,
+        protein: food.protein ?? null,
+        carbs: food.carbs ?? null,
+        fat: food.fat ?? null,
+      })),
     [foods],
   );
+  const shelves = useMemo(() => foodShelves(classifiable), [classifiable]);
+  const onShelf = useMemo(
+    () => new Set(foodsOnShelf(classifiable, shelf).map((food) => food.id)),
+    [classifiable, shelf],
+  );
   const visible = useMemo(() => {
-    const queried = queryFoods(foods, {
-      search: deferredSearch,
-      category,
-      sort,
-    });
+    const queried = queryFoods(foods, { search: deferredSearch, sort }).filter(
+      (food) => onShelf.has(food.id),
+    );
     return favoriteOnly
       ? queried.filter((food) => favorites.has(food.id))
       : queried;
-  }, [foods, deferredSearch, category, sort, favoriteOnly, favorites]);
+  }, [foods, deferredSearch, onShelf, sort, favoriteOnly, favorites]);
   const favoriteGroups = useMemo(() => {
     const groups: Record<MacroGroup, Food[]> = {
       protein: [],
@@ -64,7 +78,7 @@ export default function FoodDatabase({
   }, [visible]);
   const clear = () => {
     setSearch("");
-    setCategory(ALL_CATEGORIES);
+    setShelf(ALL_SHELF);
     setSort("calories-low");
     setFavoriteOnly(false);
   };
@@ -155,6 +169,21 @@ export default function FoodDatabase({
       <div className="food-categories" aria-label="סינון לפי קטגוריה">
         <button
           type="button"
+          aria-pressed={shelf === ALL_SHELF && !favoriteOnly}
+          className={
+            shelf === ALL_SHELF && !favoriteOnly
+              ? "food-category active"
+              : "food-category"
+          }
+          onClick={() => {
+            setShelf(ALL_SHELF);
+            setFavoriteOnly(false);
+          }}
+        >
+          הכול
+        </button>
+        <button
+          type="button"
           aria-pressed={favoriteOnly}
           className={favoriteOnly ? "food-category active" : "food-category"}
           onClick={() => setFavoriteOnly((value) => !value)}
@@ -162,17 +191,17 @@ export default function FoodDatabase({
           <Star size={15} fill={favoriteOnly ? "currentColor" : "none"} />
           מועדפים
         </button>
-        {categories.map((item) => (
+        {shelves.filter((item) => item.key !== ALL_SHELF).map((item) => (
           <button
-            key={item}
+            key={item.key}
             type="button"
-            aria-pressed={category === item}
+            aria-pressed={shelf === item.key}
             className={
-              category === item ? "food-category active" : "food-category"
+              shelf === item.key ? "food-category active" : "food-category"
             }
-            onClick={() => setCategory(item)}
+            onClick={() => setShelf(item.key)}
           >
-            {item}
+            {item.label}
           </button>
         ))}
       </div>
@@ -204,16 +233,27 @@ export default function FoodDatabase({
             )}
           </div>
         ) : (
-          <div className="food-list">
-            {visible.map((food) => (
-              <FoodCard
-                key={food.id}
-                food={food}
-                favorite={favorites.has(food.id)}
-                onToggle={() => toggle(food.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="food-list">
+              {visible.slice(0, limit).map((food) => (
+                <FoodCard
+                  key={food.id}
+                  food={food}
+                  favorite={favorites.has(food.id)}
+                  onToggle={() => toggle(food.id)}
+                />
+              ))}
+            </div>
+            {visible.length > limit && (
+              <button
+                type="button"
+                className="premium-secondary-button mx-auto mt-6 flex"
+                onClick={() => setLimit((value) => value + PAGE_SIZE)}
+              >
+                הצגת עוד ({visible.length - limit})
+              </button>
+            )}
+          </>
         )
       ) : (
         <div className="food-empty-state">
@@ -225,7 +265,31 @@ export default function FoodDatabase({
           </button>
         </div>
       )}
+      <BackToTop />
     </section>
+  );
+}
+
+// Hundreds of products deep, the filters are a long scroll away. The button
+// only appears once there is something to come back from.
+function BackToTop() {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShown(window.scrollY > 800);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!shown) return null;
+  return (
+    <button
+      type="button"
+      className="food-to-top"
+      aria-label="חזרה לראש הרשימה"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+    >
+      <ArrowUp size={20} aria-hidden="true" />
+    </button>
   );
 }
 export function FoodCard({

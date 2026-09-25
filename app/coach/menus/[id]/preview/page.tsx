@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import { dayLabel } from "@/lib/nutrition/menu-days";
+import { displayCalories } from "@/lib/nutrition/display";
 import {
   getAuthContext,
   getCoachMenu,
   listDatabaseFoods,
 } from "@/lib/data/product-repository";
-type PreviewItem={id:string;food_id:string;amount:number|string;display_quantity?:number|string;measurement_unit?:string;item_role?:string;calculated_calories:number|string};
+type PreviewItem={id:string;food_id:string;amount:number|string;display_quantity?:number|string;measurement_unit?:string;item_role?:string;custom_name?:string|null;calculated_calories:number|string};
 type PreviewDay = { day_index: number; meals: Array<{ id: string; title: string;notes?:string;free_calorie_target?:number|string; groups?:Array<{id:string;group_type:string;items:PreviewItem[]}>;items:PreviewItem[] }> };
 export default async function MenuPreviewPage({
   params,
@@ -103,9 +104,9 @@ export default async function MenuPreviewPage({
                       key={item.id}
                       className={`flex justify-between gap-4 py-3 text-sm ${isPrimary(item,index)?"font-bold text-[#16A34A]":""}`}
                     >
-                      <span>{isPrimary(item,index)?"מאכל ראשי · ":"חלופה · "}{names.get(item.food_id) ?? "מזון לא זמין"}</span>
+                      <span>{isPrimary(item,index)?"מאכל ראשי · ":"חלופה · "}{item.custom_name?.trim() || names.get(item.food_id) || "מזון לא זמין"}</span>
                       <span className="text-[#5B5F5B]">
-                        {item.display_quantity??item.amount} {item.measurement_unit==="יחידות"?"יחידות":"גרם"} · {item.calculated_calories} קל׳
+                        {item.display_quantity??item.amount} {item.measurement_unit==="יחידות"?"יחידות":"גרם"} · {displayCalories(item.calculated_calories)} קל׳
                       </span>
                     </li>
                   ))}</ul></section>})}

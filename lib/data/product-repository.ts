@@ -10,6 +10,7 @@ import {
   FOOD_LOG_PHOTO_BUCKET,
   FOOD_LOG_PHOTO_URL_TTL_SECONDS,
   type LoggedFood,
+  replacedMealGroups,
   sumLoggedFood,
 } from "@/lib/nutrition/food-log";
 import {
@@ -623,7 +624,7 @@ export async function getCoachClientDashboard(
       .filter((entry) => entry.mealId === mealId)
       .reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
   const totals = addTotals(
-    eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn),
+    eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn, (mealId) => replacedMealGroups(loggedToday, mealId)),
     sumLoggedFood(loggedToday),
   );
   // Adherence is counted in meals, not in rows.
@@ -724,6 +725,35 @@ export async function getCoachClientDashboard(
   };
 }
 
+const MENU_ITEM_COLUMNS =
+  "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)";
+
+// `custom_name` arrives with migration 202609160001. Until that migration has
+// run, selecting it fails with 42703 and takes the whole client home screen
+// down, so fall back to the catalogue names instead.
+async function loadMenuItems(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  mealIds: string[],
+) {
+  const withNames = await supabase
+    .from("meal_items")
+    .select(`${MENU_ITEM_COLUMNS},custom_name`)
+    .in("meal_id", mealIds)
+    .order("sort_order");
+  if (withNames.error?.code !== "42703") return withNames;
+  return supabase
+    .from("meal_items")
+    .select(MENU_ITEM_COLUMNS)
+    .in("meal_id", mealIds)
+    .order("sort_order");
+}
+
+function menuItemName(item: { custom_name?: unknown; foods?: unknown }) {
+  return typeof item.custom_name === "string" && item.custom_name.trim()
+    ? item.custom_name.trim()
+    : foodRelationName(item.foods);
+}
+
 export async function getActiveClientMenu(
   clientId: string,
   date: string,
@@ -733,14 +763,6 @@ export async function getActiveClientMenu(
   // nutrition log is the authoritative historical snapshot. Assignment end
   // dates can subsequently change when a coach reassigns a plan; using only
   // the current assignment range made already-used menus disappear backwards.
-  const { data: existingLog, error: existingLogError } = await supabase
-    .from("nutrition_logs")
-    .select("id,assignment_id,meal_plan_id")
-    .eq("client_id", clientId)
-    .eq("log_date", date)
-    .maybeSingle();
-  if (existingLogError) throw existingLogError;
-
   const currentAssignment = async () => {
     let assignmentQuery = supabase
       .from("client_meal_plan_assignments")
@@ -766,13 +788,28 @@ export async function getActiveClientMenu(
     return data;
   };
 
+  // These reads are independent. Starting them together removes a full
+  // database round-trip from the common first visit of the day, when there is
+  // no historical nutrition-log snapshot yet.
+  const [existingLogResult, activeAssignment] = await Promise.all([
+    supabase
+      .from("nutrition_logs")
+      .select("id,assignment_id,meal_plan_id")
+      .eq("client_id", clientId)
+      .eq("log_date", date)
+      .maybeSingle(),
+    currentAssignment(),
+  ]);
+  const { data: existingLog, error: existingLogError } = existingLogResult;
+  if (existingLogError) throw existingLogError;
+
   let assignment: { id: string; meal_plan_id: string } | null =
     existingLog?.meal_plan_id
       ? {
           id: existingLog.assignment_id,
           meal_plan_id: existingLog.meal_plan_id,
         }
-      : await currentAssignment();
+      : activeAssignment;
   let plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
 
   // The snapshot is a preference, not a requirement.
@@ -788,7 +825,7 @@ export async function getActiveClientMenu(
   // report against, and nothing on the screen to explain it. So an unreadable
   // snapshot falls through to whatever is assigned now rather than to nothing.
   if (!plan && existingLog?.meal_plan_id) {
-    assignment = await currentAssignment();
+    assignment = activeAssignment;
     plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
   }
   if (!assignment || !plan) return null;
@@ -817,7 +854,8 @@ export async function getActiveClientMenu(
   const [
     { data: groups, error: groupError },
     { data: items, error: itemError },
-    { data: log, error: logError },
+    { data: eatenRows, error: eatenError },
+    statusByMeal,
   ] = await Promise.all([
     mealIds.length
       ? supabase
@@ -827,29 +865,19 @@ export async function getActiveClientMenu(
           .order("sort_order")
       : Promise.resolve({ data: [], error: null }),
     mealIds.length
-      ? supabase
-          .from("meal_items")
-          .select(
-            "id,meal_id,group_id,food_id,amount,display_quantity,measurement_unit,item_role,amount_source,note,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat,foods(name)",
-          )
-          .in("meal_id", mealIds)
-          .order("sort_order")
+      ? loadMenuItems(supabase, mealIds)
       : Promise.resolve({ data: [], error: null }),
-    Promise.resolve({
-      data: existingLog ? { id: existingLog.id } : null,
-      error: null,
-    }),
+    existingLog
+      ? supabase
+          .from("eaten_meal_items")
+          .select("meal_item_id")
+          .eq("nutrition_log_id", existingLog.id)
+          .not("meal_item_id", "is", null)
+      : Promise.resolve({ data: [], error: null }),
+    readMealDayStatus(clientId, date, mealIds),
   ]);
   if (groupError) throw groupError;
   if (itemError) throw itemError;
-  if (logError) throw logError;
-  const { data: eatenRows, error: eatenError } = log
-    ? await supabase
-        .from("eaten_meal_items")
-        .select("meal_item_id")
-        .eq("nutrition_log_id", log.id)
-        .not("meal_item_id", "is", null)
-    : { data: [], error: null };
   if (eatenError) throw eatenError;
   const eatenIds = new Set(
     (eatenRows ?? []).map((entry) => entry.meal_item_id),
@@ -875,12 +903,6 @@ export async function getActiveClientMenu(
       .filter((row) => "amount_override" in row && row.amount_override !== null)
       .map((row) => [row.group_id as string, Number(row.amount_override)]),
   );
-  const statusByMeal = await readMealDayStatus(
-    clientId,
-    date,
-    meals.map((meal) => meal.id),
-  );
-
   return {
     id: plan.id,
     title: plan.title,
@@ -896,7 +918,7 @@ export async function getActiveClientMenu(
         .map((item) => ({
           id: item.id,
           foodId: item.food_id,
-          name: foodRelationName(item.foods),
+          name: menuItemName(item),
           amount: Number(item.amount),
           displayQuantity: Number(item.display_quantity ?? item.amount),
           measurementUnit: item.measurement_unit ?? "גרם",
@@ -1138,16 +1160,28 @@ async function readMealDayStatus(
 export async function listClientFoodLog(
   clientId: string,
   date: string,
+  options: Readonly<{ signPhotoUrls?: boolean }> = {},
 ): Promise<readonly LoggedFood[]> {
   const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase
+  const currentResult = await supabase
     .from("client_food_log")
     .select(
-      "id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path",
+      "id,meal_id,meal_group_id,food_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path,eaten_at,created_at",
     )
     .eq("client_id", clientId)
     .eq("log_date", date)
     .order("created_at");
+  // `eaten_at` was added after the food log shipped. During a rolling deploy,
+  // the UI must keep reading the existing rows until the migration lands.
+  const legacyResult = currentResult.error?.code === "42703" ? await supabase
+      .from("client_food_log")
+      .select("id,meal_id,food_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path,created_at")
+      .eq("client_id", clientId)
+      .eq("log_date", date)
+      .order("created_at")
+    : null;
+  const data: readonly Record<string, unknown>[] | null = legacyResult ? legacyResult.data : currentResult.data;
+  const error = legacyResult ? legacyResult.error : currentResult.error;
   if (error) {
     // The table arrives in 202608200007. Until it is applied the screen simply
     // has nothing logged on it, which is exactly how it behaved before.
@@ -1158,7 +1192,7 @@ export async function listClientFoodLog(
   const paths = rows
     .map((row) => row.photo_path)
     .filter((path): path is string => Boolean(path));
-  const signed = paths.length
+  const signed = options.signPhotoUrls !== false && paths.length
     ? await supabase.storage
         .from(FOOD_LOG_PHOTO_BUCKET)
         .createSignedUrls(paths, FOOD_LOG_PHOTO_URL_TTL_SECONDS)
@@ -1175,6 +1209,8 @@ export async function listClientFoodLog(
   return rows.map((row) => ({
     id: String(row.id),
     mealId: row.meal_id ? String(row.meal_id) : null,
+    mealGroupId: row.meal_group_id ? String(row.meal_group_id) : null,
+    foodId: row.food_id ? String(row.food_id) : null,
     name: String(row.name),
     quantity: figure(row.quantity),
     unit: row.unit ? String(row.unit) : null,
@@ -1185,6 +1221,7 @@ export async function listClientFoodLog(
     source: (["text", "scan", "photo"].includes(String(row.source))
       ? row.source
       : "text") as LoggedFood["source"],
+    eatenAt: String(("eaten_at" in row ? row.eaten_at : null) ?? row.created_at),
     photoUrl: row.photo_path
       ? (urlByPath.get(String(row.photo_path)) ?? null)
       : null,

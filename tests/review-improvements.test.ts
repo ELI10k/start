@@ -173,7 +173,7 @@ test("the shopping list sums per unit and never converts between them", () => {
   const chicken = lines.find((line) => line.name === "חזה עוף");
   assert.deepEqual(chicken, { name: "חזה עוף", quantity: 270, unit: "גרם", alternativeOnly: false, category: "protein" });
 
-  // Same food, both a countable unit and a mass, stays two lines - START does not
+  // Same food, both a countable unit and a mass, stays two lines - START LIFE FIT does not
   // invent the conversion between them.
   const pitta = lines.filter((line) => line.name === "פיתה");
   assert.equal(pitta.length, 1);
