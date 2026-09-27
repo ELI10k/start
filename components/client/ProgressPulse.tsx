@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
-import { motivationLine, progressChanges, type ProgressReading } from "@/lib/progress/changes";
+import { progressChanges, type ProgressReading } from "@/lib/progress/changes";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
@@ -14,10 +14,11 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
   const changes = progressChanges(entries);
   const goalProgress = weightGoalProgress(entries, targetWeight);
   const { weightChange, navelChange } = changes;
+  const compliment = changes.readings > 1 ? "כל הכבוד על ההתמדה, ממשיכים ככה 💪" : changes.readings === 1 ? "מעולה שהתחלת לעקוב 💪" : "הצעד הראשון מתחיל במדידה 💪";
 
   return (
     <Link href="/progress" className="progress-pulse">
-      <span className="progress-pulse__line">{motivationLine(changes)}</span>
+      <span className="progress-pulse__line"><strong>מדדי התקדמות</strong><span>{compliment}</span></span>
       {weightChange !== null || navelChange !== null ? (
         <span className="progress-pulse__figures">
           {weightChange !== null ? (
