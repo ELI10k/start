@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { motivationLine, progressChanges, type ProgressReading } from "@/lib/progress/changes";
+import { weightGoalProgress } from "@/lib/progress/weight-goal";
+import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 // The two numbers off the measurements screen, on the screen the client opens
 // every day - and a sentence that says what they mean.
@@ -8,8 +10,9 @@ import { motivationLine, progressChanges, type ProgressReading } from "@/lib/pro
 // Not a move: the measurements screen keeps them, along with the charts and the
 // history that give them context. This is the reflection. A client who is three
 // kilos down and does not know it is a client who is about to stop.
-export default function ProgressPulse({ entries }: { entries: readonly ProgressReading[] }) {
+export default function ProgressPulse({ entries, targetWeight }: { entries: readonly ProgressReading[]; targetWeight?: number | string | null }) {
   const changes = progressChanges(entries);
+  const goalProgress = weightGoalProgress(entries, targetWeight);
   const { weightChange, navelChange } = changes;
 
   return (
@@ -25,6 +28,7 @@ export default function ProgressPulse({ entries }: { entries: readonly ProgressR
           ) : null}
         </span>
       ) : null}
+      {goalProgress ? <WeightGoalMeter progress={goalProgress} compact /> : null}
     </Link>
   );
 }

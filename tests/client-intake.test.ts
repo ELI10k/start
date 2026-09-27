@@ -107,6 +107,17 @@ test("the weight is not editable from the coach's card", async () => {
   assert.match(form, /משקל אחרון מהמדידות/);
 });
 
+test("the coach can set the target weight used by the progress meter", async () => {
+  const [form, actions, page] = await Promise.all([
+    source("components/coach/ClientIntakeForm.tsx"),
+    source("app/actions/onboarding.ts"),
+    source("app/progress/page.tsx"),
+  ]);
+  assert.match(form, /name="targetWeight"/);
+  assert.match(actions, /target_weight:targetWeight/);
+  assert.match(page, /targetWeight=\{data\.clientProfile\.target_weight\}/);
+});
+
 test("out-of-range intake is refused with the field named", async () => {
   const actions = await source("app/actions/onboarding.ts");
   const fn = actions.slice(actions.indexOf("export async function updateClientIntake"));

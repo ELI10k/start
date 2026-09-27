@@ -21,6 +21,7 @@ export type IntakeValues = Readonly<{
   nutritionGoal: string | null;
   traineeLevel: string | null;
   latestWeight: number | null;
+  targetWeight: number | null;
 }>;
 
 const initialState: IntakeState = { status: "idle", message: "" };
@@ -54,6 +55,7 @@ export default function ClientIntakeForm({ clientId, values }: { clientId: strin
       <Field label="אימונים בשבוע" name="weeklyWorkouts" type="number" min="1" max="14" defaultValue={values.weeklyWorkouts ?? ""}/>
       <Select label="מטרה" name="nutritionGoal" defaultValue={values.nutritionGoal ?? ""} options={NUTRITION_GOALS.map((goal) => [goal, GOAL_LABELS[goal]])}/>
       <Select label="רמת מתאמן" name="traineeLevel" defaultValue={values.traineeLevel ?? ""} options={TRAINEE_LEVELS.map((item) => [item, TRAINEE_LEVEL_LABELS[item]])}/>
+      <Field label="יעד משקל (ק״ג)" name="targetWeight" type="number" min="1" step="0.1" defaultValue={values.targetWeight ?? ""}/>
     </div>
 
     {/* The weight is not editable here: it comes from the client's own weigh-ins

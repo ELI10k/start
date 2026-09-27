@@ -22,7 +22,7 @@ export default async function ProgressPage() {
   return <ClientShell>
     <PageHeader eyebrow="התקדמות" title="משקל ומדידות" description="המדידות נשמרות בחשבון שלך ומוצגות לאורך זמן." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
     <div className="grid gap-4">
-      <PersistedProgressHistory entries={data.progress}/>
+      <PersistedProgressHistory entries={data.progress} targetWeight={data.clientProfile.target_weight}/>
       <ProgressPhotoGallery sessions={photoSessions} error={checkInHistory.photoError}/>
     </div>
     <PersistedProgressForm today={today}/>

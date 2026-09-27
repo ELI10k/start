@@ -575,6 +575,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
             nutritionGoal: intake?.nutrition_goal ?? null,
             traineeLevel: intake?.trainee_level ?? null,
             latestWeight: data.progress[0]?.weight ? Number(data.progress[0].weight) : null,
+            targetWeight: intake?.target_weight ? Number(intake.target_weight) : null,
           }}/>
         </div>
       </Section>

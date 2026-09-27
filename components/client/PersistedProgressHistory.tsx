@@ -2,6 +2,8 @@ import { Ruler, Scale, TrendingDown, TrendingUp } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { averageWeightChangeRates } from "@/lib/progress/rates";
+import { weightGoalProgress } from "@/lib/progress/weight-goal";
+import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 type ProgressEntry = Readonly<{
   id: string;
@@ -74,7 +76,7 @@ function rateText(value: number | null) {
   return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
 }
 
-export default function PersistedProgressHistory({ entries }: { entries: readonly ProgressEntry[] }) {
+export default function PersistedProgressHistory({ entries, targetWeight }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null }) {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const weights = ordered.flatMap((entry) => {
     const value = valueOf(entry.weight);
@@ -102,9 +104,11 @@ export default function PersistedProgressHistory({ entries }: { entries: readonl
   const startingNavel = navelCircumferences[0]?.value;
   const currentNavel = navelCircumferences.at(-1)?.value;
   const weightRates = averageWeightChangeRates(weights);
+  const goalProgress = weightGoalProgress(entries, targetWeight);
 
   return (
     <div className="grid gap-4">
+      {goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} /></section> : null}
       {/* The two numbers a client actually opens this screen for, before any chart. */}
       <section className="dashboard-metrics" aria-label="מדדי התקדמות">
         <MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />

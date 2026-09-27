@@ -1220,6 +1220,16 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .progress-pulse__figure[data-rising] { background: var(--red-tint); color: var(--red); }
 .progress-pulse__figure-label { color: inherit; opacity: .75; }
+.progress-pulse .weight-goal { flex: 1 0 100%; }
+.weight-goal { display: grid; gap: .55rem; }
+.weight-goal__meta, .weight-goal__scale { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.weight-goal__meta { font-size: .85rem; }
+.weight-goal__meta > span, .weight-goal__scale { color: var(--ink-muted); font-size: .72rem; }
+.weight-goal__track { height: .65rem; overflow: hidden; border-radius: 999px; background: var(--green-tint); }
+.weight-goal__track > span { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
+.weight-goal--compact { gap: .35rem; }
+.weight-goal--compact .weight-goal__meta { font-size: .72rem; }
+.weight-goal--compact .weight-goal__track { height: .4rem; }
 
 /* Grouped settings rows — the profile pattern. */
 .settings-group { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }

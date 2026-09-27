@@ -178,7 +178,7 @@ export default async function Home() {
             them; this is a reflection of them, on the screen a client actually
             opens - because somebody three kilos down who does not know it is
             somebody about to stop. */}
-        <ProgressPulse entries={data.progress} />
+        <ProgressPulse entries={data.progress} targetWeight={data.clientProfile.target_weight} />
       </div>
     </ClientShell>
   );

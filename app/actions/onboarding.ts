@@ -128,6 +128,7 @@ export async function updateClientIntake(_:IntakeState,form:FormData):Promise<In
   const steps=value(form,"dailySteps")?Number(value(form,"dailySteps")):null;
   if(steps!==null && (!Number.isFinite(steps) || steps<0 || steps>60000)) return {status:"error",message:"ממוצע צעדים יומי חייב להיות בין 0 ל־60,000."};
   const height=positive(form,"height");
+  const targetWeight=positive(form,"targetWeight");
   const weeklyWorkouts=nonNegative(form,"weeklyWorkouts");
   if(weeklyWorkouts!==null && weeklyWorkouts>14) return {status:"error",message:"מספר האימונים בשבוע חייב להיות בין 0 ל־14."};
 
@@ -146,6 +147,7 @@ export async function updateClientIntake(_:IntakeState,form:FormData):Promise<In
     age_years:age,
     sex:sex==="male"||sex==="female"?sex:null,
     height,
+    target_weight:targetWeight,
     daily_steps:steps,
     nutrition_goal:nutritionGoal,
     trainee_level:traineeLevel,
