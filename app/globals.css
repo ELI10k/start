@@ -442,10 +442,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .section-heading > svg { color: var(--green); }
 .section-heading--compact { margin-bottom: .65rem; }
 .daily-tip-heading {
+  justify-content: flex-start;
   color: var(--ink);
   font-size: 1.1rem;
   font-weight: 900;
   line-height: 1.25;
+}
+.daily-tip-heading .daily-tip-heading__label,
+.daily-tip-heading .daily-tip-heading__emoji {
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: normal;
 }
 
 .dashboard-greeting {

@@ -33,7 +33,8 @@ async function HomeDailyTip({ clientId, today }: { clientId: string; today: stri
   return (
     <section aria-labelledby="daily-tip-heading">
       <h2 id="daily-tip-heading" className="section-heading section-heading--compact daily-tip-heading">
-        💡 הטיפ היומי
+        <span className="daily-tip-heading__label">הטיפ היומי</span>
+        <span className="daily-tip-heading__emoji" aria-hidden="true">💡</span>
       </h2>
       <WeeklyLessonCard lesson={dailyTip} />
     </section>
