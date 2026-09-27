@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { motivationLine, progressChanges, type ProgressReading } from "@/lib/progress/changes";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
@@ -21,10 +21,10 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
       {weightChange !== null || navelChange !== null ? (
         <span className="progress-pulse__figures">
           {weightChange !== null ? (
-            <Figure label="משקל" value={`${weightChange > 0 ? "+" : ""}${weightChange} ק״ג`} rising={weightChange > 0} />
+            <Figure text={weightChange < 0 ? `ירדת במשקל ${Math.abs(weightChange)} ק״ג` : weightChange > 0 ? `עלית במשקל ${weightChange} ק״ג` : "המשקל נשאר יציב"} direction={weightChange > 0 ? "up" : weightChange < 0 ? "down" : "flat"} />
           ) : null}
           {navelChange !== null ? (
-            <Figure label="היקף טבור" value={`${navelChange > 0 ? "+" : ""}${navelChange} ס״מ`} rising={navelChange > 0} />
+            <Figure text={navelChange < 0 ? `ירדת ${Math.abs(navelChange)} ס״מ בהיקף הטבור` : navelChange > 0 ? `עלית ${navelChange} ס״מ בהיקף הטבור` : "היקף הטבור נשאר יציב"} direction={navelChange > 0 ? "up" : navelChange < 0 ? "down" : "flat"} />
           ) : null}
         </span>
       ) : null}
@@ -35,12 +35,11 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
 
 // Down is green and up is red for both of these, which is the direction the
 // measurements screen already reads them in.
-function Figure({ label, value, rising }: { label: string; value: string; rising: boolean }) {
+function Figure({ text, direction }: { text: string; direction: "up" | "down" | "flat" }) {
   return (
-    <span className="progress-pulse__figure" data-rising={rising || undefined}>
-      {rising ? <TrendingUp aria-hidden="true" size={14} /> : <TrendingDown aria-hidden="true" size={14} />}
-      <span className="progress-pulse__figure-label">{label}</span>
-      <strong>{value}</strong>
+    <span className="progress-pulse__figure" data-rising={direction === "up" || undefined}>
+      {direction === "up" ? <TrendingUp aria-hidden="true" size={14} /> : direction === "down" ? <TrendingDown aria-hidden="true" size={14} /> : <Minus aria-hidden="true" size={14} />}
+      <strong>{text}</strong>
     </span>
   );
 }

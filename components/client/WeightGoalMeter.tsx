@@ -7,7 +7,7 @@ export default function WeightGoalMeter({ progress, compact = false }: { progres
     <div className={compact ? "weight-goal weight-goal--compact" : "weight-goal"}>
       <div className="weight-goal__meta">
         <strong><span aria-hidden="true">🎯</span> {label}</strong>
-        <span>יעד: {progress.targetWeight} ק״ג</span>
+        <span>משקל נוכחי: {progress.currentWeight} ק״ג</span>
       </div>
       <div
         className="weight-goal__track"
