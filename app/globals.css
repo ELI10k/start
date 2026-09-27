@@ -1232,7 +1232,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .weight-goal__track > span { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
 .weight-goal--compact { gap: .35rem; }
 .weight-goal--compact .weight-goal__meta { font-size: .72rem; }
-.weight-goal--compact .weight-goal__track { height: .4rem; }
+.weight-goal--compact .weight-goal__track { width: 100%; max-width: 20rem; height: .35rem; justify-self: start; }
 
 /* Grouped settings rows — the profile pattern. */
 .settings-group { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
