@@ -14,7 +14,7 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
   const changes = progressChanges(entries);
   const goalProgress = weightGoalProgress(entries, targetWeight);
   const { weightChange, navelChange } = changes;
-  const compliment = changes.readings > 1 ? "כל הכבוד על ההתמדה, ממשיכים ככה 💪" : changes.readings === 1 ? "מעולה שהתחלת לעקוב 💪" : "הצעד הראשון מתחיל במדידה 💪";
+  const compliment = changes.readings > 1 ? "זה בדיוק מה שקורה כשלא מוותרים 🔥" : changes.readings === 1 ? "יצאנו לדרך — עכשיו מתחילים להזיז מספרים 🔥" : "הכול מתחיל מהמדידה הראשונה — יוצאים לדרך 🔥";
 
   return (
     <Link href="/progress" className="progress-pulse">
