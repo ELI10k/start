@@ -28,11 +28,11 @@ export default function ClientShell({ children, className = "" }: { children: Re
   return (
     <main className={`client-app-shell ${className}`.trim()}>
       <header className="mobile-app-header">
-        <Link href="/" className="start-wordmark" aria-label="START LIFE FIT — מסך הבית">START LIFE FIT</Link>
+        <Link href="/" className="start-wordmark" aria-label="LIFE FIT — מסך הבית">LIFE FIT</Link>
       </header>
       <nav aria-label="ניווט ראשי ללקוח" className="desktop-app-nav">
         <div className="desktop-app-nav__inner">
-          <Link href="/" className="start-wordmark">START LIFE FIT</Link>
+          <Link href="/" className="start-wordmark">LIFE FIT</Link>
           <div className="desktop-app-nav__links">
             {links.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
           </div>

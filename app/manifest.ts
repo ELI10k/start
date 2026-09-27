@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
 
-// The PWA manifest. START LIFE FIT is installed from the browser for now, so this is what
+// The PWA manifest. LIFE FIT is installed from the browser for now, so this is what
 // decides whether it lands on a home screen as an app or as a bookmark.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "START LIFE FIT",
-    short_name: "START LIFE FIT",
-    description: "מערכת הליווי של START LIFE FIT — תזונה, אימונים והתקדמות.",
+    name: "LIFE FIT",
+    short_name: "LIFE FIT",
+    description: "מערכת הליווי של LIFE FIT — תזונה, אימונים והתקדמות.",
     // standalone is what removes the browser chrome. Without it the bottom
     // navigation sits under Safari's toolbar on an iPhone.
     display: "standalone",

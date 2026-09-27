@@ -1,6 +1,6 @@
 // A service worker that holds exactly one page.
 //
-// Every screen in START LIFE FIT is server-rendered per request behind an auth cookie: a
+// Every screen in LIFE FIT is server-rendered per request behind an auth cookie: a
 // menu, a workout in progress, a client list. A caching worker would serve one
 // person's data from another person's device after a logout, or show a coach a
 // menu they edited an hour ago and believe they had saved. So nothing that could
@@ -8,7 +8,7 @@
 // Supabase call, no image a client uploaded.
 //
 // What is stored is a static offline page and the app icons: public bytes, the
-// same for everyone, and the reason a lost signal shows START LIFE FIT's own screen
+// same for everyone, and the reason a lost signal shows LIFE FIT's own screen
 // instead of the browser's error page.
 //
 // Requests this worker does not recognise are not answered at all - it returns
@@ -104,7 +104,7 @@ self.addEventListener("fetch", (event) => {
 
 // ---------------------------------------------------------------------- push
 //
-// A push arrives while START LIFE FIT is closed, so this is the only code that runs. The
+// A push arrives while LIFE FIT is closed, so this is the only code that runs. The
 // body is the same four fields the in-app notification row carries - title,
 // body, href, category - encrypted end to end, which is why the push service
 // that relayed it could not read them.
@@ -114,7 +114,7 @@ self.addEventListener("fetch", (event) => {
 // it is shown plainly rather than swallowed - swallowing it is what makes a
 // browser revoke the permission.
 
-const NOTIFICATION_FALLBACK = { title: "START LIFE FIT", body: "יש עדכון חדש", href: "/notifications" };
+const NOTIFICATION_FALLBACK = { title: "LIFE FIT", body: "יש עדכון חדש", href: "/notifications" };
 
 self.addEventListener("push", (event) => {
   let payload = NOTIFICATION_FALLBACK;
