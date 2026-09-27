@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { dayIndex, lessonForDay } from "../lib/content/weekly-lesson.ts";
 
@@ -38,4 +39,16 @@ test("a lesson whose course is missing from the ordering sorts last, not first",
 
 test("an empty library returns nothing rather than throwing", () => {
   assert.equal(lessonForDay([], [], "2026-01-04"), null);
+});
+
+test("the client home keeps the daily tip heading visible and correctly arranged", async () => {
+  const [home, styles] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(home, />הטיפ היומי<\/span>/);
+  assert.match(home, /daily-tip-heading__emoji[^>]*aria-hidden="true">💡<\/span>/);
+  assert.match(styles, /\.daily-tip-heading\s*\{[^}]*font-weight:\s*900/s);
+  assert.match(styles, /\.daily-tip-heading\s*\{[^}]*gap:\s*\.3rem/s);
 });
