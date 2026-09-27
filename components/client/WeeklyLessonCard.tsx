@@ -2,11 +2,11 @@ import Link from "next/link";
 import { BookOpen, CheckCircle2, PlayCircle } from "lucide-react";
 import type { LessonSource } from "@/lib/content/weekly-lesson";
 
-// One lesson, on the screen the client opens every day.
+// One daily tip, on the screen the client opens every day.
 //
 // The library had a tile and nothing else - a client who never pressed it never
 // met the content at all, and a course nobody opens is a course that was not
-// written. A single lesson a week, in the order the courses were built, asks for
+// written. A single item each day, in the order the courses were built, asks for
 // one decision instead of thirty.
 export default function WeeklyLessonCard({ lesson }: { lesson: LessonSource }) {
   const done = lesson.progressPercent >= 100;

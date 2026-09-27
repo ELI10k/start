@@ -8,7 +8,7 @@ import DashboardWorkoutWidget from "@/components/workouts/client/DashboardWorkou
 import WeeklySummaryCard from "@/components/client/WeeklySummaryCard";
 import { getWeeklySummaries } from "@/lib/coach-intelligence/summary-repository";
 import { listContentCategories, listPublishedContent } from "@/lib/data/content-repository";
-import { lessonForWeek } from "@/lib/content/weekly-lesson";
+import { lessonForDay } from "@/lib/content/weekly-lesson";
 import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
 import ProgressPulse from "@/components/client/ProgressPulse";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
@@ -23,19 +23,19 @@ async function HomeWeeklySummary({ clientId }: { clientId: string }) {
   return <WeeklySummaryCard summary={latestSummary} />;
 }
 
-async function HomeWeeklyLesson({ clientId, today }: { clientId: string; today: string }) {
+async function HomeDailyTip({ clientId, today }: { clientId: string; today: string }) {
   const [lessons, categories] = await Promise.all([
     listPublishedContent(clientId),
     listContentCategories(),
   ]);
-  const weeklyLesson = lessonForWeek(lessons, categories.map((category) => category.id), today);
-  if (!weeklyLesson) return null;
+  const dailyTip = lessonForDay(lessons, categories.map((category) => category.id), today);
+  if (!dailyTip) return null;
   return (
-    <section aria-labelledby="weekly-lesson-heading">
-      <h2 id="weekly-lesson-heading" className="section-heading section-heading--compact">
-        השיעור שלך השבוע
+    <section aria-labelledby="daily-tip-heading">
+      <h2 id="daily-tip-heading" className="section-heading section-heading--compact">
+        הטיפ היומי
       </h2>
-      <WeeklyLessonCard lesson={weeklyLesson} />
+      <WeeklyLessonCard lesson={dailyTip} />
     </section>
   );
 }
@@ -169,7 +169,7 @@ export default async function Home() {
             instead of thirty, and it is last on the screen because it is the
             one thing here that is not today's business. */}
         <Suspense fallback={null}>
-          <HomeWeeklyLesson clientId={auth.id} today={today} />
+          <HomeDailyTip clientId={auth.id} today={today} />
         </Suspense>
 
         {/* Where they have got to, in the space the screen had left over.

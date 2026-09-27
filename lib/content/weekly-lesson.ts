@@ -12,31 +12,28 @@ export type LessonSource = Readonly<{
 }>;
 
 /**
- * The Sunday-to-Saturday week a date falls in, counted from a fixed point.
+ * The day a date falls on, counted from a fixed point.
  *
- * Fixed rather than per-client on purpose: the whole roster is on the same
- * lesson in the same week, so "did you watch this week's one" is a question a
- * coach can ask a group. A client who joins in week forty starts at whatever the
- * roster is on, and reads the rest through the library at their own pace.
- *
- * The epoch is a Sunday, so week boundaries land where the app's week does.
+ * Keeping this date-based rather than request-based makes the tip stable for
+ * the whole day: refreshing the dashboard does not unexpectedly swap it, while
+ * the next calendar day advances every client to the next published item.
  */
-const EPOCH = Date.UTC(2026, 0, 4); // Sunday, 4 January 2026.
-export function weekIndex(dateKey: string): number {
+const EPOCH = Date.UTC(2026, 0, 4);
+export function dayIndex(dateKey: string): number {
   const at = Date.parse(`${dateKey}T12:00:00Z`);
   if (!Number.isFinite(at)) return 0;
-  return Math.max(0, Math.floor((at - EPOCH) / (7 * 86400000)));
+  return Math.max(0, Math.floor((at - EPOCH) / 86400000));
 }
 
 /**
- * This week's lesson: the library in course order, advanced by one a week.
+ * Today's tip: the library in course order, advanced by one every day.
  *
  * Ordered the way the library itself is - by course, then by the coach's order
- * inside it - so a client following along week by week reads the syllabus in the
+ * inside it - so a client following along day by day reads the syllabus in the
  * sequence it was written, rather than whatever the newest upload happens to be.
  * It wraps at the end instead of running out.
  */
-export function lessonForWeek(
+export function lessonForDay(
   lessons: readonly LessonSource[],
   categoryOrder: readonly string[],
   dateKey: string,
@@ -52,5 +49,5 @@ export function lessonForWeek(
     rank(a.categoryId) - rank(b.categoryId)
     || a.sortOrder - b.sortOrder
     || a.title.localeCompare(b.title, "he"));
-  return ordered[weekIndex(dateKey) % ordered.length];
+  return ordered[dayIndex(dateKey) % ordered.length];
 }
