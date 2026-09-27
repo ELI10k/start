@@ -443,6 +443,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .section-heading--compact { margin-bottom: .65rem; }
 .daily-tip-heading {
   justify-content: flex-start;
+  gap: .3rem;
   color: var(--ink);
   font-size: 1.1rem;
   font-weight: 900;
