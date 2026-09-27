@@ -54,7 +54,7 @@ export default function TodayWorkout(){
     else setMessage("לא ניתן היה להעביר את האימון. נסה שוב.");
   }finally{setPending(false)}};
 
-  return <div className="grid gap-4">
+  return <div className="workout-today grid gap-4">
     {/* More than one programme can be running at a time, so the client picks
         which one today's workout comes from. With a single programme the row
         would say nothing, so it is not rendered at all. */}
@@ -98,6 +98,19 @@ export default function TodayWorkout(){
       <MetricTile label="פיספסת החודש" value={String(monthlyMissed)} accent={monthlyMissed?"down":"neutral"} icon={<Circle aria-hidden="true" size={18}/>}/>
       <MetricTile label="אימונים החודש" value={`${monthly.completed} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
     </section>
+
+    {/* The two answers to "what happened to today's workout" belong in the
+        document flow. Keeping them fixed covered the metrics and exercises on
+        a phone, so the screen looked cut even when its width was correct. */}
+    <div className="workout-primary-actions" aria-label="פעולות לאימון של היום">
+      <Link href={sessionHref} className="fab" aria-label={startLabel}>
+        <Play aria-hidden="true" size={18}/>{startLabel}
+      </Link>
+      {completed||skippedToday?null:
+        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
+          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
+        </button>}
+    </div>
 
     {/* What today actually contains. The screen used to name the day and jump
         straight to the FAB, so a client could not see which exercises were
@@ -188,24 +201,6 @@ export default function TodayWorkout(){
         confirmation is announced politely; "we could not save that" interrupts. */}
     <p role="status" className="text-sm font-bold text-[#16A34A]">{failed?"":message}</p>
     <p role="alert" className="text-sm font-bold text-[#DC2626]">{failed?message:""}</p>
-
-    {/* The two answers to "what happened to today's workout", in thumb reach and
-        in the order they are true in: it is starting, or it did not happen.
-        
-        Declaring a miss existed already - three taps into "פעולות לאימון היום",
-        behind a sheet a client opens by accident more often than on purpose - so
-        a workout that was skipped stayed unanswered, and the day it belongs to
-        stayed "today's workout". It is the same call to the same function; it is
-        simply where the question is being asked. */}
-    <div className="fab-stack">
-      <Link href={sessionHref} className="fab" aria-label={startLabel}>
-        <Play aria-hidden="true" size={18}/>{startLabel}
-      </Link>
-      {completed||skippedToday?null:
-        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
-          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
-        </button>}
-    </div>
 
     <BottomSheet open={missed} title="פיספסתי את האימון" onClose={()=>setMissed(false)}>
       <p className="text-sm text-[#5B5F5B]">
