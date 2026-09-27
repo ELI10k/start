@@ -32,8 +32,8 @@ async function HomeDailyTip({ clientId, today }: { clientId: string; today: stri
   if (!dailyTip) return null;
   return (
     <section aria-labelledby="daily-tip-heading">
-      <h2 id="daily-tip-heading" className="section-heading section-heading--compact">
-        הטיפ היומי
+      <h2 id="daily-tip-heading" className="section-heading section-heading--compact daily-tip-heading">
+        💡 הטיפ היומי
       </h2>
       <WeeklyLessonCard lesson={dailyTip} />
     </section>

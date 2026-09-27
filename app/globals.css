@@ -441,6 +441,12 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .section-heading h2 { margin-top: .18rem; font-size: 1.2rem; font-weight: 800; }
 .section-heading > svg { color: var(--green); }
 .section-heading--compact { margin-bottom: .65rem; }
+.daily-tip-heading {
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 900;
+  line-height: 1.25;
+}
 
 .dashboard-greeting {
   display: flex; align-items: center; justify-content: space-between;
@@ -1174,8 +1180,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .shopping-row[data-done] .shopping-row__box { border-color: var(--green); background: var(--green); }
 .shopping-row[data-done] .shopping-row__name { color: var(--ink-muted); text-decoration: line-through; }
 
-/* This week's lesson: one row, last on the home screen, the only thing there
-   that is not about today. */
+/* Today's tip: one row with a fresh published item for the client each day. */
 .weekly-lesson {
   display: flex; align-items: center; gap: .75rem;
   min-height: 3.75rem; padding: .6rem .8rem;
