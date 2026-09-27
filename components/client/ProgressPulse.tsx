@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { LineChart, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { progressChanges, type ProgressReading } from "@/lib/progress/changes";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
@@ -18,7 +18,7 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
 
   return (
     <Link href="/progress" className="progress-pulse">
-      <span className="progress-pulse__line"><strong>מדדי התקדמות <span aria-hidden="true">📈</span></strong><span>{compliment}</span></span>
+      <span className="progress-pulse__line"><strong>מדדי התקדמות <LineChart aria-hidden="true" size={17} strokeWidth={2.4} /></strong><span>{compliment}</span></span>
       {weightChange !== null || navelChange !== null ? (
         <span className="progress-pulse__figures">
           {weightChange !== null ? (
