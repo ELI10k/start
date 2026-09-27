@@ -716,17 +716,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .quick-action-card {
     min-height: 0;
     height: 100%;
-    gap: .2rem;
-    padding: .45rem .35rem;
+    gap: .3rem;
+    padding: .6rem .45rem;
   }
   .home-screen .quick-action-card__icon,
   .home-screen .quick-action-card > span:first-child:has(svg) {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: .8rem;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: .95rem;
   }
-  .home-screen .quick-action-card__label { font-size: .95rem; }
-  .home-screen .quick-action-card__meta { font-size: .72rem; }
+  .home-screen .quick-action-card__label { font-size: 1.05rem; }
+  .home-screen .quick-action-card__meta { font-size: .78rem; }
   .home-screen .section-heading--compact { margin-bottom: .3rem; }
   .home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
   .home-screen .weekly-lesson {
@@ -737,7 +737,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
   .home-screen .quick-actions-grid {
     grid-template-rows: repeat(2, minmax(0, 1fr));
-    height: min(15.5rem, 37dvh);
+    height: min(17.5rem, 42dvh);
     gap: .45rem;
   }
 }
