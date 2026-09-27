@@ -18,7 +18,7 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
 
   return (
     <Link href="/progress" className="progress-pulse">
-      <span className="progress-pulse__line"><strong>מדדי התקדמות</strong><span>{compliment}</span></span>
+      <span className="progress-pulse__line"><strong>מדדי התקדמות <span aria-hidden="true">📈</span></strong><span>{compliment}</span></span>
       {weightChange !== null || navelChange !== null ? (
         <span className="progress-pulse__figures">
           {weightChange !== null ? (
