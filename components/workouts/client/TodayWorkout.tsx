@@ -99,19 +99,6 @@ export default function TodayWorkout(){
       <MetricTile label="אימונים החודש" value={`${monthly.completed} אימונים`} icon={<Flame aria-hidden="true" size={18}/>}/>
     </section>
 
-    {/* The two answers to "what happened to today's workout" belong in the
-        document flow. Keeping them fixed covered the metrics and exercises on
-        a phone, so the screen looked cut even when its width was correct. */}
-    <div className="workout-primary-actions" aria-label="פעולות לאימון של היום">
-      <Link href={sessionHref} className="fab" aria-label={startLabel}>
-        <Play aria-hidden="true" size={18}/>{startLabel}
-      </Link>
-      {completed||skippedToday?null:
-        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
-          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
-        </button>}
-    </div>
-
     {/* What today actually contains. The screen used to name the day and jump
         straight to the FAB, so a client could not see which exercises were
         coming - or read the coach's דגשים - without starting the workout first.
@@ -152,6 +139,16 @@ export default function TodayWorkout(){
         })}
       </div>
     </section>
+
+    <div className="workout-primary-actions" aria-label="פעולות לאימון של היום">
+      <Link href={sessionHref} className="fab" aria-label={startLabel}>
+        <Play aria-hidden="true" size={18}/>{startLabel}
+      </Link>
+      {completed||skippedToday?null:
+        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
+          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
+        </button>}
+    </div>
 
     <section aria-labelledby="week-plan">
       <div className="section-heading section-heading--compact">

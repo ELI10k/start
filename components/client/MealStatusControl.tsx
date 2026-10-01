@@ -102,8 +102,13 @@ export default function MealStatusControl({
     return (
       <div className="flex flex-wrap items-center gap-2">
         <span className="pill pill--green">נאכל</span>
+        <button type="button" onClick={() => setSubstituting(true)} className="chip">
+          <PencilLine aria-hidden="true" size={15} />
+          נאכל משהו אחר
+        </button>
         {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול השלמה" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
+        <AteSomethingElse mealId={mealId} date={date} foods={foods} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
       </div>
     );

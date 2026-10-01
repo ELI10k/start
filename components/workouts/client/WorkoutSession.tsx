@@ -111,6 +111,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // recorded and is named below when the two differ.
   const performedId=result.performedExerciseId??result.exerciseId;
   const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);
+  const dynamicWarmup=exercise?.id==="exercise-155pu7s"||exercise?.primaryMuscleGroup==="חימום";
   const comparableWorkouts=snapshot.completedWorkouts.filter((workout)=>workout.programId===programId&&workout.dayId===dayId);
   const performance=exercisePerformance(comparableWorkouts,currentClientId,performedId);const previous=performance.sessions[0];// The best set that is comparable to today's work, not the heaviest weight ever
   // moved on the exercise: a 12-rep back-off set is not a benchmark for a 10-rep
@@ -120,8 +121,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const best=bestComparableSet(performance.sessions,repTarget);
   // What to load before the working sets, worked out from what was actually
   // lifted last time. No previous session means no honest percentage of anything.
-  const firstForMuscle=ordered.findIndex((entry)=>getExercise(entry.exerciseId)?.primaryMuscleGroup===exercise?.primaryMuscleGroup)===session.currentExerciseIndex;
-  const warmup=firstForMuscle?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
+  const bodyweightAbs=exercise?.primaryMuscleGroup==="בטן"&&(/משקל גוף/.test(exercise.name)||exercise.category==="משקל גוף");
+  const warmup=!bodyweightAbs&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
   const challenge=previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment}):null;
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
@@ -231,17 +232,17 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         </div>
       </div>
 
-      <dl className="session-stats">
+      {!dynamicWarmup&&<dl className="session-stats">
         <Stat label="סטים" value={current.sets??"לא הוגדר"}/>
         <Stat label="חזרות" value={current.reps??"לא הוגדר"}/>
         <Stat label="מנוחה" value={current.rest??"לא הוגדר"}/>
         <Stat label="רמת מאמץ" value={current.effort?`RPE ${current.effort}`:"לא הוגדר"}/>
-      </dl>
+      </dl>}
 
       {(current.notes||exercise?.executionNotes)&&<p className="mt-3 rounded-2xl bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">{current.notes||exercise?.executionNotes}</p>}
 
-      <PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>
-      {challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
+      {!dynamicWarmup&&<PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>}
+      {!dynamicWarmup&&challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
 
       {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
           instance. Rendering an empty table header for those left the client with
@@ -268,22 +269,24 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
             <SetEditor key={set.id} set={set} index={index} target={current.setPrescriptions?.[index]?.repetitions??current.reps} onUpdate={(patch)=>updateSet(set,patch)}/>
           )}
         </section>
-        :<p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-4 text-center text-sm text-[#5B5F5B]">לא הוגדרו סטים לתרגיל הזה במקור. אפשר לסמן אותו כהושלם ולהמשיך.</p>}
+        :dynamicWarmup
+          ?<p className="mt-4 rounded-2xl border border-dashed border-[#16A34A]/40 bg-[#ECFDF3] p-4 text-center text-sm text-[#15803D]">צפו בסרטון, בצעו את החימום הדינאמי וסמנו שבוצע.</p>
+          :<p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-4 text-center text-sm text-[#5B5F5B]">לא הוגדרו סטים לתרגיל הזה במקור. אפשר לסמן אותו כהושלם ולהמשיך.</p>}
 
       {/* The rest countdown belongs where the thumb already is. At the top of the
           page it scrolled out of sight the moment a set was logged, which is the
           moment it starts. */}
       {rest>0&&<RestTimer seconds={rest} onAdd={()=>persist({restEndsAt:new Date(Date.now()+(rest+30)*1000).toISOString()})} onSkip={()=>persist({restEndsAt:undefined})}/>}
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      {dynamicWarmup?<button onClick={completeExercise} className="mt-4 min-h-12 w-full rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white">סימון שבוצע חימום</button>:<><div className="mt-4 grid grid-cols-2 gap-2">
         <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="min-h-10 rounded-xl border border-[#D7DAD7] bg-white px-3 py-2 text-sm font-black">{result.skipped?"החזרת התרגיל":"דילוג"}</button>
         <button onClick={completeExercise} className="min-h-10 rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white">השלמה</button>
-      </div>
-      <div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="איך הרגיש התרגיל">
+      </div></>}
+      {!dynamicWarmup&&<div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="איך הרגיש התרגיל">
         <button type="button" aria-pressed={result.difficulty==="easy"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="easy"?undefined:"easy"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="easy"?"border-[#16A34A] bg-[#ECFDF3] text-[#15803D]":"border-[#D7DAD7] bg-white"}`}>קל</button>
         <button type="button" aria-pressed={result.difficulty==="medium"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="medium"?undefined:"medium"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="medium"?"border-[#D97706] bg-[#FFFBEB] text-[#B45309]":"border-[#D7DAD7] bg-white"}`}>בינוני</button>
         <button type="button" aria-pressed={result.difficulty==="hard"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="hard"?undefined:"hard"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="hard"?"border-[#DC2626] bg-[#FEF2F2] text-[#DC2626]":"border-[#D7DAD7] bg-white"}`}>קשה</button>
-      </div>
+      </div>}
       <Link href={`/workouts/exercises/${result.exerciseId}?programId=${programId}&dayId=${dayId}`} className="mt-3 flex items-center justify-center text-sm text-[#5B5F5B]">כל היסטוריית התרגיל</Link>
     </article>
 
@@ -386,10 +389,11 @@ function PreviousPerformance({previous,best,targetReps,recent}:{previous?:{date:
 // weight itself.
 function WarmupSetEditor({set,completed,onToggle}:{set:{percent:number;weightKg:number;repetitions:number};completed:boolean;onToggle:()=>void}){
   const [weight,setWeight]=useState(String(set.weightKg));
+  const [repetitions,setRepetitions]=useState(String(set.repetitions));
   return <div className="set-row" data-done={completed||undefined}>
     <span className="set-row__index text-[10px]" aria-label={`חימום ${set.percent}%`}>{set.percent}%</span>
     <input aria-label={`משקל בחימום ${set.percent}% (ק״ג)`} className="nutrition-input" type="number" min="0" step="0.1" value={weight} onChange={(event)=>setWeight(event.target.value)}/>
-    <div className="nutrition-input grid place-items-center tabular-nums" aria-label={`${set.repetitions} חזרות חימום`}>{set.repetitions}</div>
+    <input aria-label={`חזרות בחימום ${set.percent}%`} className="nutrition-input" type="number" min="1" step="1" value={repetitions} onChange={(event)=>setRepetitions(event.target.value)}/>
     <button type="button" aria-label={completed?`ביטול השלמת חימום ${set.percent}%`:`השלמת חימום ${set.percent}%`} aria-pressed={completed} onClick={onToggle} className={`grid size-11 place-items-center rounded-full ${completed?"border border-[#16A34A] text-[#16A34A]":"bg-[#16A34A] text-white"}`}>{completed?<RotateCcw aria-hidden="true" size={17}/>:<CheckCircle2 aria-hidden="true" size={18}/>}</button>
   </div>;
 }
