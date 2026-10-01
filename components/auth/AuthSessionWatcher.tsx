@@ -10,8 +10,15 @@ export default function AuthSessionWatcher() {
   const router = useRouter();
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) return;
+    let supabase: ReturnType<typeof createSupabaseBrowserClient>;
+    try {
+      supabase = createSupabaseBrowserClient();
+    } catch {
+      // Public pages can be deployed without the authenticated app's Supabase
+      // environment. The session watcher is optional there and must not crash
+      // hydration after the page has already rendered successfully.
+      return;
+    }
 
     const {
       data: { subscription },
