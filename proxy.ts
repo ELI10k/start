@@ -49,8 +49,27 @@ type PendingCookie = Readonly<{
 }>;
 
 export async function proxy(request: NextRequest) {
-  const config = getSupabaseConfig();
   const path = request.nextUrl.pathname;
+  const hostname = (
+    request.headers.get("x-forwarded-host") ??
+    request.headers.get("host") ??
+    request.nextUrl.hostname
+  )
+    .split(":")[0]
+    .toLowerCase();
+
+  // Serve the public storefront on the primary domain. The authenticated app
+  // keeps its existing root route on start.elicohenfitness.co.il.
+  if (
+    path === "/" &&
+    (hostname === "elicohenfitness.co.il" || hostname === "www.elicohenfitness.co.il")
+  ) {
+    const landingUrl = request.nextUrl.clone();
+    landingUrl.pathname = "/join";
+    return NextResponse.redirect(landingUrl);
+  }
+
+  const config = getSupabaseConfig();
   const requestedPath = `${path}${request.nextUrl.search}`;
 
   if (!config) {

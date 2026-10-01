@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Assistant } from "next/font/google";
 import "./globals.css";
-import { WorkoutProvider } from "@/components/workouts/WorkoutProvider";
+import { ConditionalWorkoutProvider } from "@/components/workouts/ConditionalWorkoutProvider";
 import AuthSessionWatcher from "@/components/auth/AuthSessionWatcher";
 import ServiceWorker from "@/components/client/ServiceWorker";
 import NativeBridge from "@/components/native/NativeBridge";
@@ -55,7 +55,7 @@ export default function RootLayout({
         {/* Installability, and one static offline page. Nothing per-user is
             cached; the worker states the boundary. */}
         <ServiceWorker />
-        <WorkoutProvider>{children}</WorkoutProvider>
+        <ConditionalWorkoutProvider>{children}</ConditionalWorkoutProvider>
       </body>
     </html>
   );
