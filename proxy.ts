@@ -69,6 +69,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(landingUrl);
   }
 
+  // Public routes and route handlers own their own access rules. Running every
+  // anonymous API request through Supabase first meant that a temporary auth
+  // outage turned an intentional 401 (barcode and cron endpoints, for example)
+  // into an unrelated 500 before the handler could answer at all.
+  if (!isPrivatePath(path) && path !== "/login") {
+    return NextResponse.next();
+  }
+
   const config = getSupabaseConfig();
   const requestedPath = `${path}${request.nextUrl.search}`;
 
@@ -115,6 +123,18 @@ export async function proxy(request: NextRequest) {
   };
 
   let response = applyPendingAuthState(NextResponse.next({ request }));
+
+  const hasAuthCookie = request.cookies.getAll().some(({ name }) =>
+    name.startsWith("sb-") && name.includes("-auth-token"),
+  );
+
+  // With no Supabase session cookie there is nothing to refresh or validate.
+  // Redirecting locally is both faster and, crucially, still works while the
+  // auth service is temporarily unreachable.
+  if (!hasAuthCookie) {
+    return isPrivatePath(path) ? redirect(loginPathFor(requestedPath)) : response;
+  }
+
   const supabase = createServerClient(config.url, config.anonKey, {
     cookies: {
       getAll: () => request.cookies.getAll(),
@@ -131,9 +151,15 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // Authentication infrastructure must fail closed without turning a normal
+    // signed-out visit into a server error page.
+    return isPrivatePath(path) ? redirect(loginPathFor(requestedPath)) : response;
+  }
 
   if (!isPrivatePath(path)) {
     if (path === "/login" && user) {
