@@ -7,6 +7,7 @@ import { queryExercises } from "@/lib/workouts/repository";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
+import { EXERCISE_CATEGORIES, EXERCISE_DIFFICULTIES, matchesExerciseCategory, sortMuscles, type ExerciseCategoryFilter } from "@/lib/workouts/exercise-directory-filters";
 
 export default function ExerciseDirectory() {
   const { snapshot } = useWorkouts();
@@ -17,15 +18,19 @@ export default function ExerciseDirectory() {
   const [difficulty, setDifficulty] = useState("");
   const all = snapshot.exercises;
   const unique = (values: (string | undefined)[]) => [...new Set(values.filter((value): value is string => Boolean(value)))].sort((a, b) => a.localeCompare(b, "he"));
-  const results = useMemo(() => queryExercises(all, { search, muscleGroup: muscle, equipment, category, difficulty, status: "active" }), [all, category, difficulty, equipment, muscle, search]);
+  const muscles = sortMuscles(unique(all.flatMap((item) => [item.primaryMuscleGroup, ...item.secondaryMuscleGroups])));
+  const results = useMemo(() => {
+    const matching = queryExercises(all, { search, muscleGroup: muscle, equipment, difficulty, status: "active" });
+    return category ? matching.filter((exercise) => matchesExerciseCategory(exercise, category as ExerciseCategoryFilter)) : matching;
+  }, [all, category, difficulty, equipment, muscle, search]);
 
   return <>
     <section className="grid gap-3 rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-4 sm:grid-cols-2 lg:grid-cols-5">
       <label className="relative sm:col-span-2 lg:col-span-5"><Search className="absolute right-4 top-4 text-[#16A34A]" size={18}/><span className="sr-only">חיפוש תרגיל</span><input className="nutrition-input pr-11" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="חיפוש בעברית"/></label>
-      <Filter label="שריר" value={muscle} onChange={setMuscle} values={unique(all.flatMap((item) => [item.primaryMuscleGroup, ...item.secondaryMuscleGroups]))}/>
+      <Filter label="שריר" value={muscle} onChange={setMuscle} values={muscles}/>
       <Filter label="ציוד" value={equipment} onChange={setEquipment} values={unique(all.map((item) => item.equipment))}/>
-      <Filter label="קטגוריה" value={category} onChange={setCategory} values={unique(all.map((item) => item.category))}/>
-      <Filter label="רמה" value={difficulty} onChange={setDifficulty} values={unique(all.map((item) => item.difficulty))}/>
+      <Filter label="קטגוריה" value={category} onChange={setCategory} values={EXERCISE_CATEGORIES.map((item) => ({ value: item, label: item }))}/>
+      <Filter label="רמה" value={difficulty} onChange={setDifficulty} values={[...EXERCISE_DIFFICULTIES]}/>
     </section>
     <p className="mt-4 text-xs text-[#5B5F5B]">{results.length} מתוך {all.length} תרגילים מאושרים</p>
     {results.length ? <div className="mt-3 grid gap-3 md:grid-cols-2">{results.map((exercise) => {
@@ -45,6 +50,6 @@ export default function ExerciseDirectory() {
   </>;
 }
 
-function Filter({ label, value, onChange, values }: { label: string; value: string; onChange: (value: string) => void; values: string[] }) {
-  return <label className="text-xs text-[#5B5F5B]">{label}<select className="nutrition-input mt-1" value={value} onChange={(event) => onChange(event.target.value)}><option value="">הכול</option>{values.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>;
+function Filter({ label, value, onChange, values }: { label: string; value: string; onChange: (value: string) => void; values: readonly (string | { value: string; label: string })[] }) {
+  return <label className="text-xs text-[#5B5F5B]">{label}<select className="nutrition-input mt-1" value={value} onChange={(event) => onChange(event.target.value)}><option value="">הכול</option>{values.map((item) => { const option = typeof item === "string" ? { value: item, label: item } : item; return <option key={option.value} value={option.value}>{option.label}</option>; })}</select></label>;
 }
