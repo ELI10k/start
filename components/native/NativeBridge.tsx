@@ -86,6 +86,7 @@ export default function NativeBridge() {
         requestPermission: async () => (await StartHealth.requestPermission()).status as HealthPermissionState,
         readDailySteps: async (fromDay: string, toDay: string) => (await StartHealth.readDailySteps({ fromDay, toDay })).days,
       };
+      window.dispatchEvent(new Event("start:health-ready"));
 
       // Push, through the official plugin. The token is handed to the app's own
       // registration component, which is what writes it to Supabase.

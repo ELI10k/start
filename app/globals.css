@@ -570,11 +570,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
   gap: .6rem;
 }
-/* Three tiles that fit the screen instead of scrolling off it. The scrolling row
-   is right for the coach's four-and-more metrics; on the client's home there are
-   exactly three and half of the third hung off the edge of a phone. */
+/* Four daily figures in one row. In RTL the fourth item lands on the left, so
+   steps can be added without moving the three figures clients already know. */
 .dashboard-metrics--fit {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: .5rem; overflow: visible; margin-inline: 0; padding-inline: 0;
 }
 .dashboard-metrics--fit .metric-tile { min-width: 0; flex: initial; padding: .65rem .55rem; min-height: 5.4rem; }
@@ -627,6 +626,15 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .metric-tile--neutral .metric-tile__icon,
 .metric-tile--green .metric-tile__icon { color: var(--green); }
 .metric-tile--down strong { color: var(--red); }
+.metric-tile--button {
+  width: 100%;
+  appearance: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.metric-tile--button:disabled { cursor: default; }
+.metric-tile--button:focus-visible { outline: 3px solid color-mix(in srgb, var(--green) 30%, transparent); outline-offset: 2px; }
 
 @media (min-width: 768px) {
   .dashboard-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; }
