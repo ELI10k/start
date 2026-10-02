@@ -1,0 +1,560 @@
+[
+  {
+    "name": "בכריעה, פשיטת מרפקים",
+    "href": "https://www.instructor.co.il/excercise/kneeling-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-kneeling-arm-extension"
+  },
+  {
+    "name": "ניתורי שפיפה",
+    "href": "https://www.instructor.co.il/excercise/squat-jumps/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-jump-squat"
+  },
+  {
+    "name": "ניתורי מכרע",
+    "href": "https://www.instructor.co.il/excercise/split-jumps/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-jump-lunge"
+  },
+  {
+    "name": "חתירה אוסטרלית במוט",
+    "href": "https://www.instructor.co.il/excercise/inverted-row-2/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-underhand-inverted-row"
+  },
+  {
+    "name": "בישיבה, כפיפת ריכוז כנגד הירך",
+    "href": "https://www.instructor.co.il/excercise/leg-concentration-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "exercise-1fo5t9c"
+  },
+  {
+    "name": "פשיטת מרפקים על ספסל",
+    "href": "https://www.instructor.co.il/excercise/bench-dip-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-bench-dip"
+  },
+  {
+    "name": "לחיצת כתפיים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-military-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-14tz34b"
+  },
+  {
+    "name": "בשכיבה, פשיטת גו",
+    "href": "https://www.instructor.co.il/excercise/floor-hyperextension/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-floor-hyperextension"
+  },
+  {
+    "name": "ציפור-כלב  ברגליים ישרות",
+    "href": "https://www.instructor.co.il/excercise/straight-leg-bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-straight-leg-bird-dog"
+  },
+  {
+    "name": "ציפור-כלב מול מול קיר",
+    "href": "https://www.instructor.co.il/excercise/wall-bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-wall-bird-dog"
+  },
+  {
+    "name": "ציפור-כלב",
+    "href": "https://www.instructor.co.il/excercise/bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-bird-dog"
+  },
+  {
+    "name": "כפיפת בטן אלכסונית (אופניים)",
+    "href": "https://www.instructor.co.il/excercise/air-bike-crunches/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "exercise-p2ohuv"
+  },
+  {
+    "name": "בטן סטטית – פלאנק צדי",
+    "href": "https://www.instructor.co.il/excercise/side-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-side-plank"
+  },
+  {
+    "name": "בטן סטטית – פלאנק",
+    "href": "https://www.instructor.co.il/excercise/front-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-front-plank"
+  },
+  {
+    "name": "הרמת אגן אנכית",
+    "href": "https://www.instructor.co.il/excercise/hip-lift/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-vertical-hip-lift"
+  },
+  {
+    "name": "לשון צונחת אחורה",
+    "href": "https://www.instructor.co.il/excercise/curl-up/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-curl-up"
+  },
+  {
+    "name": "כפיפת גו ברגליים ישרות במקבילים",
+    "href": "https://www.instructor.co.il/excercise/captain-chair-straight-leg-raise/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-captain-chair-straight-leg-raise"
+  },
+  {
+    "name": "לחיצת שכמות על ספסל",
+    "href": "https://www.instructor.co.il/excercise/scapula-dips/",
+    "muscles": [
+      "שכמה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-scapula-dips"
+  },
+  {
+    "name": "סמוך קום",
+    "href": "https://www.instructor.co.il/excercise/burpees/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-burpee"
+  },
+  {
+    "name": "מקבילים באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/parallel-bar-narrow-grip-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-narrow-grip-dips"
+  },
+  {
+    "name": "שכיבות סמיכה",
+    "href": "https://www.instructor.co.il/excercise/pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-hdg3yz"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע מתון",
+    "href": "https://www.instructor.co.il/excercise/soft-incline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-dhk3wr"
+  },
+  {
+    "name": "עמידת סמיכה מול קיר",
+    "href": "https://www.instructor.co.il/excercise/wall-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-wall-pushup"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע",
+    "href": "https://www.instructor.co.il/excercise/incline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-dhk3wr"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע שלילי",
+    "href": "https://www.instructor.co.il/excercise/decline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-150pt7l"
+  },
+  {
+    "name": "חתירה אוסטרלית",
+    "href": "https://www.instructor.co.il/excercise/inverted-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-inverted-row"
+  },
+  {
+    "name": "כפיפות בטן עם ידיים מאחורי הראש",
+    "href": "https://www.instructor.co.il/excercise/weighted-crunch-behind-head-waist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "exercise-pn4ire"
+  },
+  {
+    "name": "מקבילים באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/parallel-bar-dips/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-wide-grip-dips"
+  },
+  {
+    "name": "פשיטת ירך על ספסל רומי",
+    "href": "https://www.instructor.co.il/excercise/hip-extension-roman-chair/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-roman-chair-hip-extension"
+  },
+  {
+    "name": "דדליפט רומני",
+    "href": "https://www.instructor.co.il/excercise/romanian-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד",
+    "existingId": "beta-test-exercise-07"
+  },
+  {
+    "name": "כפיפות בטן עם גלגלת",
+    "href": "https://www.instructor.co.il/excercise/abrolls/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-ab-wheel"
+  },
+  {
+    "name": "עליית מתח באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-pull-up/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-say88l"
+  },
+  {
+    "name": "עליית מתח באחיזה רחבה בסיוע גומיית כח",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-pull-up-copy/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-band-assisted-wide-pullup"
+  },
+  {
+    "name": "עליית מתח באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-pull-up/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-1igvlte"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-lat-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-1ly3xqh"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה אמצעית",
+    "href": "https://www.instructor.co.il/excercise/narrow-mid-position-grip-lat-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-mk9vfe"
+  },
+  {
+    "name": "עליית כח",
+    "href": "https://www.instructor.co.il/excercise/single-bar-narrow-grip-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-muscle-up"
+  },
+  {
+    "name": "שפיפה – סקוואט חופשי",
+    "href": "https://www.instructor.co.il/excercise/squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-n1izh5"
+  },
+  {
+    "name": "לחיצת חזה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-rr4mtu"
+  },
+  {
+    "name": "הרחקת ירך כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-abduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד",
+    "existingId": "exercise-1oc1t8h"
+  },
+  {
+    "name": "בשכיבה, כפיפת ברכיים עם מגבת",
+    "href": "https://www.instructor.co.il/excercise/sliding-leg-curls-with-towel/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-sliding-leg-curl"
+  },
+  {
+    "name": "שכיבות סמיכה על בוסו",
+    "href": "https://www.instructor.co.il/excercise/bosu-pushups/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-bosu-pushup"
+  },
+  {
+    "name": "שפיפה – סקוואט עם כסא",
+    "href": "https://www.instructor.co.il/excercise/squat-with-chair/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב",
+    "existingId": "bodyweight-chair-squat"
+  },
+  {
+    "name": "סקוואט כנגד משקולות יד",
+    "href": "https://www.instructor.co.il/excercise/squat-dumbbells/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-1w08fkm"
+  },
+  {
+    "name": "לחיצת רגליים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/leg-press/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב",
+    "existingId": "exercise-mhdxgx"
+  },
+  {
+    "name": "כפיפה נורדית/רוסית",
+    "href": "https://www.instructor.co.il/excercise/nordic-ham-curl/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד",
+    "existingId": "bodyweight-nordic-curl"
+  }
+]

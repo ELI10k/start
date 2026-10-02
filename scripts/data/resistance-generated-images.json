@@ -1,0 +1,706 @@
+[
+  {
+    "slug": "360",
+    "sprite": "exec-38789a0f-3858-40ca-adf7-f217ec77d5d4.png"
+  },
+  {
+    "slug": "ball-dips",
+    "sprite": "exec-97acf9a0-2d86-415b-8c88-8afb90494658.png"
+  },
+  {
+    "slug": "cable-lying-biceps-curl",
+    "sprite": "exec-9ea2faaa-2572-442f-88bd-0794853bcf24.png"
+  },
+  {
+    "slug": "suspender-pendulum",
+    "sprite": "exec-cc552816-0c4b-4ee4-abe8-15fb59c8b6fe.png"
+  },
+  {
+    "slug": "reverse-plank",
+    "sprite": "exec-f0fe24bb-d2e2-4e34-8b13-bcdfe35a9c5b.png"
+  },
+  {
+    "slug": "suspender-star-pushup",
+    "sprite": "exec-4c444b34-a9d8-404e-9b91-80a2a6951469.png"
+  },
+  {
+    "slug": "band-hip-abduction",
+    "sprite": "exec-f4db6387-5c3b-4d52-9ef6-ab89a666e464.png"
+  },
+  {
+    "slug": "hang-clean",
+    "sprite": "exec-bb94e1fd-d37c-4001-a7f5-604a9c01d010.png"
+  },
+  {
+    "slug": "one-arm-kettlebell-snatch",
+    "sprite": "exec-f6bcc6bc-c120-43a2-ae9e-ad5eed54b34e.png"
+  },
+  {
+    "slug": "band-squat",
+    "sprite": "exec-77ab32bf-e763-4922-9a6c-9e39aa35cf64.png"
+  },
+  {
+    "slug": "battling-rope-power-slam",
+    "sprite": "exec-05eb54df-10c5-4ac7-a0d9-9d624c34bec5.png"
+  },
+  {
+    "slug": "band-wide-grip-shoulder-press",
+    "sprite": "exec-cd114e78-7c0a-4918-b335-2021e836616b.png"
+  },
+  {
+    "slug": "dumbbell-incline-two-arms-extenstion",
+    "sprite": "exec-00e78ec6-18a9-4d7a-aa4a-96fc3a2eb3e3.png"
+  },
+  {
+    "slug": "band-arm-skull-crasher",
+    "sprite": "exec-8b68e758-d7b5-4fa7-9d64-a5dc34d6a039.png"
+  },
+  {
+    "slug": "lever-seated-dips",
+    "sprite": "exec-2fb4a37b-80ee-4b6e-b55c-41db471fd53c.png"
+  },
+  {
+    "slug": "dumbbell-incline-arm-extension",
+    "sprite": "exec-320285c0-d8a9-4b21-ba4a-3ff0648a2ca7.png"
+  },
+  {
+    "slug": "band-arm-extension",
+    "sprite": "exec-8d0c62a1-f7d9-4511-8ab9-ab91b97f199f.png"
+  },
+  {
+    "slug": "band-kickback",
+    "sprite": "exec-86acf330-7ea9-4b7a-bbf8-fc001dea0712.png"
+  },
+  {
+    "slug": "suspender-arm-curl",
+    "sprite": "exec-6c3fcd7a-01f4-46f5-8679-c50d3476f05a.png"
+  },
+  {
+    "slug": "suspender-waist-side-bend",
+    "sprite": "exec-1b14fdd0-9304-472b-b0ed-c2cfe0770095.png"
+  },
+  {
+    "slug": "band-standing-waist-twist",
+    "sprite": "exec-cb8fd4dd-0e48-4ad4-89c3-157ecaaed82d.png"
+  },
+  {
+    "slug": "smith-wide-grip-shoulder-press",
+    "sprite": "exec-05342c00-b43e-4a16-a14a-b81c0c9c2c3b.png"
+  },
+  {
+    "slug": "landmine-waist-twist",
+    "sprite": "exec-dcfc7aa4-6a3a-4369-ab89-23ba73636683.png"
+  },
+  {
+    "slug": "kettlebell-figure-eight",
+    "sprite": "exec-12f40d07-e53a-4268-a081-c070564260f2.png"
+  },
+  {
+    "slug": "dumbbell-kickback",
+    "sprite": "exec-95bdfe14-0879-4e59-860e-04366c1d3830.png"
+  },
+  {
+    "slug": "barbell-rollout-from-bench",
+    "sprite": "exec-0d713436-2baa-4f2d-a043-375d5943cd41.png"
+  },
+  {
+    "slug": "cable-incline-arm-extension",
+    "sprite": "exec-9e83d775-74b6-4612-9849-ec92a78f45c5.png"
+  },
+  {
+    "slug": "barbell-decline-upper-arm-press",
+    "sprite": "exec-3866c739-a376-4e28-bdeb-ee907c2249ea.png"
+  },
+  {
+    "slug": "smith-incline-arm-extension",
+    "sprite": "exec-b122dbb6-8505-40bc-976b-af9c9cbf3a39.png"
+  },
+  {
+    "slug": "wide-grip-cable-arm-curl",
+    "sprite": "exec-2138d388-de5f-418e-9c74-31a5360754e1.png"
+  },
+  {
+    "slug": "lever-preacher-curl",
+    "sprite": "exec-e91f8fb1-e92b-446c-9ee6-b73ba3b2f8f6.png"
+  },
+  {
+    "slug": "stability-ball-crunch",
+    "sprite": "exec-3bc56d8e-09e0-485d-92de-efdad725e1ff.png"
+  },
+  {
+    "slug": "suspender-handstand-pushup",
+    "sprite": "exec-acf62f59-93c7-4c40-9933-946af914cb6f.png"
+  },
+  {
+    "slug": "suspender-triceps-kickback",
+    "sprite": "exec-3eb40c6c-0580-4a29-a402-4954785455ed.png"
+  },
+  {
+    "slug": "suspender-arm-extension",
+    "sprite": "exec-16ee7eff-6431-465e-9a09-3fe28d3c1ca4.png"
+  },
+  {
+    "slug": "band-standing-crunch",
+    "sprite": "exec-e9ea0afc-6198-40e4-9a13-be9691aabb26.png"
+  },
+  {
+    "slug": "band-seated-waist-twist",
+    "sprite": "exec-ef9ea028-ba21-4dce-b6b6-a9fcbf6d7493.png"
+  },
+  {
+    "slug": "kettlebell-windmill",
+    "sprite": "exec-2cd6e38f-2970-4d79-a202-e56980d3ea67.png"
+  },
+  {
+    "slug": "kettlebell-alternating-press",
+    "sprite": "exec-2144ff71-02de-4b76-992f-a350f5f7348e.png"
+  },
+  {
+    "slug": "kettlebell-military-press",
+    "sprite": "exec-10347974-701f-47e6-b079-ac40db097195.png"
+  },
+  {
+    "slug": "suspender-forward-y-raise",
+    "sprite": "exec-096678dd-9c0f-4290-b740-cc67350db411.png"
+  },
+  {
+    "slug": "suspender-forward-raise",
+    "sprite": "exec-59445270-f1da-4d40-bf25-0edda449947e.png"
+  },
+  {
+    "slug": "stability-ball-pushups",
+    "sprite": "exec-58fdf1ae-7678-4ede-8535-332999b38d6a.png"
+  },
+  {
+    "slug": "cable-forward-raise",
+    "sprite": "exec-328c2788-f184-43dc-9f90-4fd0cea0a655.png"
+  },
+  {
+    "slug": "cable-one-arm-lateral-raise",
+    "sprite": "exec-663700f6-32c6-4c0b-8253-4dff061d36b0.png"
+  },
+  {
+    "slug": "dumbbell-cuban-press",
+    "sprite": "exec-a84cf212-705b-42f9-acbc-9ace2cb99a00.png"
+  },
+  {
+    "slug": "machine-shoulder-press",
+    "sprite": "exec-6a6a1e38-2948-4cdd-8ba7-725d0b67e739.png"
+  },
+  {
+    "slug": "suspender-flys",
+    "sprite": "exec-da45c02a-0eab-4e5f-ab25-90e3cb3f1b65.png"
+  },
+  {
+    "slug": "stability-ball-push-up",
+    "sprite": "exec-7c560d7f-0a30-4214-a913-bdfdd02f4975.png"
+  },
+  {
+    "slug": "suspender-chest-press",
+    "sprite": "exec-3e0667b5-f1ec-4acf-9dcf-6fd30757be29.png"
+  },
+  {
+    "slug": "kettlebell-one-arm-press",
+    "sprite": "exec-b4cda782-b149-4198-a00e-f02b4fc78bb6.png"
+  },
+  {
+    "slug": "suspended-legs-pushups",
+    "sprite": "exec-b4b5e79d-ce7c-4fc6-88b8-0d9afd937d5a.png"
+  },
+  {
+    "slug": "stability-ball-hip-thrust",
+    "sprite": "exec-2c42caee-98a4-4593-b8fa-6c12ce8482d9.png"
+  },
+  {
+    "slug": "band-lateral-walk",
+    "sprite": "exec-b1731f3a-a40b-4761-9cfe-988342dec74d.png"
+  },
+  {
+    "slug": "smith-machine-row",
+    "sprite": "exec-8c0471e8-a7b3-4e44-94cd-d2ef7d6296c8.png"
+  },
+  {
+    "slug": "smith-machine-row-2",
+    "sprite": "exec-a69d75cc-244d-4556-b0a6-09114b4c87d7.png"
+  },
+  {
+    "slug": "suspender-pullups",
+    "sprite": "exec-ddaacba5-6424-43d8-97cf-e601050ac480.png"
+  },
+  {
+    "slug": "kettlebell-alternate-row",
+    "sprite": "exec-39bf3c5c-51bd-4da1-b474-d1c7a94ba87b.png"
+  },
+  {
+    "slug": "barbell-wide-grip-row",
+    "sprite": "exec-643c59df-1c65-468e-ac19-2fa8f9dd8d6b.png"
+  },
+  {
+    "slug": "suspender-inverted-row",
+    "sprite": "exec-3892af2f-69af-4383-b65a-df838974b632.png"
+  },
+  {
+    "slug": "kettlebell-row",
+    "sprite": "exec-2ee319f6-cf06-46ea-9ece-7d0862331b0b.png"
+  },
+  {
+    "slug": "bellbar-pulover",
+    "sprite": "exec-cca8a9aa-69f8-4c43-84c5-e5d84d24dbed.png"
+  },
+  {
+    "slug": "kettlebell-renegate-row",
+    "sprite": "exec-8383dc2b-6ecc-4f3b-8370-950a83e204e2.png"
+  },
+  {
+    "slug": "band-hip-thrust",
+    "sprite": "exec-79148883-e58f-4c94-8afd-a19dbabfd8e3.png"
+  },
+  {
+    "slug": "cable-pull-through-stiff-legged-deadlift",
+    "sprite": "exec-b6b14ee7-dc7e-445f-a697-e5ccea21d88c.png"
+  },
+  {
+    "slug": "band-one-leg-stiff-legged-deadlift",
+    "sprite": "exec-d695a9ed-0d8b-4aa2-887f-7d2137ca707c.png"
+  },
+  {
+    "slug": "suspenders-squat",
+    "sprite": "exec-d7ec2b51-46ab-40b3-ad5b-b0bdc081a883.png"
+  },
+  {
+    "slug": "suspender-lunge-front-kick",
+    "sprite": "exec-0617d549-14cb-48f7-ad2c-3275fadb529e.png"
+  },
+  {
+    "slug": "suspended-pistol",
+    "sprite": "exec-f3970ac2-1468-4416-b35a-71a850f8c0af.png"
+  },
+  {
+    "slug": "bulgarian-suspended-lunges",
+    "sprite": "exec-ff96e78a-d195-48cf-9259-40ad0a7f12e3.png"
+  },
+  {
+    "slug": "barbarian-squat",
+    "sprite": "exec-0ae82353-1d0e-44b3-8f85-c9fe619c8766.png"
+  },
+  {
+    "slug": "elastic-band-leg-curl",
+    "sprite": "exec-99262992-63d0-4ff8-aa45-1493c78c4b96.png"
+  },
+  {
+    "slug": "straps-aided-lunges",
+    "sprite": "exec-dd93a324-1c87-4f3c-b53a-84210239e638.png"
+  },
+  {
+    "slug": "band-concentration-curl",
+    "sprite": "exec-a199f870-5766-4774-b614-93aca1bbde13.png"
+  },
+  {
+    "slug": "cable-arm-curl",
+    "sprite": "exec-ae362a38-1281-414f-b432-86aa4fb798d6.png"
+  },
+  {
+    "slug": "suspended-mountain-climb",
+    "sprite": "exec-0f591036-38ad-4287-9caa-5bcfc79db712.png"
+  },
+  {
+    "slug": "suspended-hip-thrust",
+    "sprite": "exec-0accf56a-981c-4f56-b38c-eb95132c1706.png"
+  },
+  {
+    "slug": "band-leg-extension",
+    "sprite": "exec-4446983a-21ab-4c13-9583-25f9052421e9.png"
+  },
+  {
+    "slug": "band-arm-curl",
+    "sprite": "exec-eac8b904-2e17-4250-bd38-df1fab06ade8.png"
+  },
+  {
+    "slug": "suspended-face-pull",
+    "sprite": "exec-2b4b7982-2ce2-44c9-9fd4-434c1b239b13.png"
+  },
+  {
+    "slug": "face-pull",
+    "sprite": "exec-494acfea-474a-4862-adf5-2c84bf983677.png"
+  },
+  {
+    "slug": "smith-machine-scapula-elevation",
+    "sprite": "exec-ac8c54c5-96dd-4388-9a21-bd11b77a45d0.png"
+  },
+  {
+    "slug": "suspension-crunch",
+    "sprite": "exec-07c17e68-447c-4535-92c1-d3397c26fff9.png"
+  },
+  {
+    "slug": "lever-seated-twist",
+    "sprite": "exec-e135c015-7159-4c93-901a-537c63c01159.png"
+  },
+  {
+    "slug": "dumbbell-side-bend",
+    "sprite": "exec-c5335ef9-e595-4a8c-84c1-b40138d192f3.png"
+  },
+  {
+    "slug": "russian-twist-stability-ball",
+    "sprite": "exec-00b20b34-7370-40fe-b80e-41004e490574.png"
+  },
+  {
+    "slug": "suspender-arm-curls",
+    "sprite": "exec-03263a6b-cd95-45c3-ad80-76da68a45010.png"
+  },
+  {
+    "slug": "suspender-side-plank",
+    "sprite": "exec-d9a6e731-c1d8-45c3-b77a-996ecce3b878.png"
+  },
+  {
+    "slug": "stability-ball-plank",
+    "sprite": "exec-412577f5-3bbf-46e0-8efe-b60d022390cd.png"
+  },
+  {
+    "slug": "smith-machine-hip-lift",
+    "sprite": "exec-c9786c7d-7049-4d30-8d2e-e5ad122cd40f.png"
+  },
+  {
+    "slug": "band-kneeling-crunch",
+    "sprite": "exec-d4dbf989-158c-49ef-91b3-20bce527c4f3.png"
+  },
+  {
+    "slug": "cable-kneeling-crunch",
+    "sprite": "exec-38269135-a83e-43b2-8e92-0e0008f4a041.png"
+  },
+  {
+    "slug": "scapula-retraction",
+    "sprite": "exec-fbbdcf79-6546-4e6e-a379-5b065cb0473d.png"
+  },
+  {
+    "slug": "dumbbell-shrug",
+    "sprite": "exec-30a8898b-452f-4805-bf73-72ed38dda931.png"
+  },
+  {
+    "slug": "supinated-lever-close-grip-pulldown",
+    "sprite": "exec-0a156e89-80c0-4ae5-abdf-d962bedaef10.png"
+  },
+  {
+    "slug": "supinated-band-close-grip-pulldown",
+    "sprite": "exec-22b795c5-5c1f-4777-bf75-78052c511668.png"
+  },
+  {
+    "slug": "mid-position-band-close-grip-pulldown",
+    "sprite": "exec-61665067-05b8-440b-93fa-a830be6bb29d.png"
+  },
+  {
+    "slug": "dumbbell-one-arm-bent-over-row",
+    "sprite": "exec-434e4b27-fedc-471c-83ab-42de592c6651.png"
+  },
+  {
+    "slug": "kneeling-leg-curls",
+    "sprite": "exec-ad2e57e2-79aa-4d7f-acd0-e494458087a9.png"
+  },
+  {
+    "slug": "kettlebell-swing",
+    "sprite": "exec-4e070418-7958-4990-a34a-e614e1d44317.png"
+  },
+  {
+    "slug": "resisted-band-seated-chest-press",
+    "sprite": "exec-e9c7e9f7-f215-4448-ada8-58d14fd61af8.png"
+  },
+  {
+    "slug": "cable-shoulder-press",
+    "sprite": "exec-8c754079-231d-4843-b564-2c4e2592b04b.png"
+  },
+  {
+    "slug": "dumbbell-shoulder-abduction",
+    "sprite": "exec-de15e8a4-0778-486a-872d-8c6e44a33532.png"
+  },
+  {
+    "slug": "barbell-upright-row",
+    "sprite": "exec-321db700-e3c1-4e95-8ae5-607e780f77c2.png"
+  },
+  {
+    "slug": "lever-shoulder-press",
+    "sprite": "exec-406f97b1-8ac4-4aec-9e9f-9d00fa423ebb.png"
+  },
+  {
+    "slug": "smith-machine-standing-military-press",
+    "sprite": "exec-74de5f2f-cbac-4ae9-a5f9-81742a0804a3.png"
+  },
+  {
+    "slug": "barbell-standing-military-press",
+    "sprite": "exec-9deba843-77fd-4edc-a61f-efb4bff7bfe9.png"
+  },
+  {
+    "slug": "lever-lying-t-bar-row",
+    "sprite": "exec-3a01cefc-2e66-4bb1-bc69-06f4f7527a23.png"
+  },
+  {
+    "slug": "suspended-row",
+    "sprite": "exec-1a4623c0-a065-4149-91b4-e63b04ed9792.png"
+  },
+  {
+    "slug": "standing-band-row",
+    "sprite": "exec-17f02439-fe23-46e6-9492-8b8e1571038b.png"
+  },
+  {
+    "slug": "cable-seated-row-back",
+    "sprite": "exec-5a27a2c5-2bef-4088-9198-faaa16f4d3ad.png"
+  },
+  {
+    "slug": "dumbbell-straight-arm-pullover-stability-ball",
+    "sprite": "exec-ecff054c-204b-494b-affd-0667c4c8a849.png"
+  },
+  {
+    "slug": "dumbbell-straight-arm-pullover",
+    "sprite": "exec-4e1c289a-ee3c-46ae-9b31-7895f87a59b2.png"
+  },
+  {
+    "slug": "dumbbell-stiff-legged-deadlift-copy",
+    "sprite": "exec-a3e46420-ec13-45e7-9bd2-6ec51d4e5da6.png"
+  },
+  {
+    "slug": "cable-bench-press",
+    "sprite": "exec-32850016-0f74-40a7-86be-ee76f239d7fb.png"
+  },
+  {
+    "slug": "cable-straight-arm-pulldown",
+    "sprite": "exec-0cff2f9d-aded-4e6a-8bef-faf18726cf96.png"
+  },
+  {
+    "slug": "lever-seated-leg-raise-crunch",
+    "sprite": "exec-e6e8797a-1611-45b5-bd87-c9c1422ff252.png"
+  },
+  {
+    "slug": "lever-lying-crunch",
+    "sprite": "exec-217fa519-6047-484c-abb3-138ae742dd82.png"
+  },
+  {
+    "slug": "alternating-dumbbell-arm-curl",
+    "sprite": "exec-3f7f1203-c6ac-4397-be34-a7e38c687275.png"
+  },
+  {
+    "slug": "dumbbell-preacher-bench-arm-curl",
+    "sprite": "exec-fa562c57-3c22-4ac8-9b34-5d13ae2e06db.png"
+  },
+  {
+    "slug": "dumbbell-bent-over-row",
+    "sprite": "exec-fe873fa1-d407-4cfb-8640-bcee674dacdf.png"
+  },
+  {
+    "slug": "bar-preacher-bench-arm-curl",
+    "sprite": "exec-3125932d-431e-438c-9292-0a6e13b8e120.png"
+  },
+  {
+    "slug": "good-morning",
+    "sprite": "exec-7aa60029-0845-450d-bcf1-860b3d6b6d56.png"
+  },
+  {
+    "slug": "suspended-one-hand-pull",
+    "sprite": "exec-292fdedd-0d90-4bd6-ba13-f4a9fee9edbc.png"
+  },
+  {
+    "slug": "barbell-ab-rollout",
+    "sprite": "exec-bb899b95-3e5e-449a-97e3-611388799807.png"
+  },
+  {
+    "slug": "farmer-walk",
+    "sprite": "exec-3e32100a-ea7f-4f52-b9ae-ad5dc9cbff68.png"
+  },
+  {
+    "slug": "cable-triceps-pushdown",
+    "sprite": "exec-22384e16-55d2-4e08-9922-7036154e8cd4.png"
+  },
+  {
+    "slug": "narrow-grip-pull-up-graviton",
+    "sprite": "exec-30ee3b14-24f4-448d-adbb-0dc3b29e3abd.png"
+  },
+  {
+    "slug": "suspender-reverse-flys",
+    "sprite": "exec-f6e41835-3a76-44ba-8cf3-6fd7f45dd78b.png"
+  },
+  {
+    "slug": "lever-seated-reverse-flys",
+    "sprite": "exec-614894b2-b443-4b6d-8f6f-c92a9eaf5174.png"
+  },
+  {
+    "slug": "turkish-getup",
+    "sprite": "exec-e6f0c147-f7fb-42c4-a8da-76303ea0a46b.png"
+  },
+  {
+    "slug": "wide-grip-lat-pull-down-behind-neck",
+    "sprite": "exec-bb928942-3938-4cdf-a90c-9610bf6e92bd.png"
+  },
+  {
+    "slug": "narrow-grip-lat-pull-down",
+    "sprite": "exec-08f1b02a-03ee-418b-ab12-0e619999d177.png"
+  },
+  {
+    "slug": "rope-climbing",
+    "sprite": "exec-feede991-ff37-4684-b83c-9c4a2e77e81c.png"
+  },
+  {
+    "slug": "pulley-narrow-grip-lat-supinated-pull-down",
+    "sprite": "exec-a34e47a5-96c6-4233-9216-8147ee7702c2.png"
+  },
+  {
+    "slug": "cable-crossovers",
+    "sprite": "exec-916ce845-c893-455f-bb25-f45550248c96.png"
+  },
+  {
+    "slug": "standing-calf-raise-smith-machine",
+    "sprite": "exec-3bf4494d-6b2b-42eb-bd79-02888abecc90.png"
+  },
+  {
+    "slug": "flys",
+    "sprite": "exec-975cb65e-035f-4eb0-bc51-0efe66bc5788.png"
+  },
+  {
+    "slug": "plantar-flexion-dumbbell",
+    "sprite": "exec-d8f41089-2a8f-4d4d-8022-e0c11970f380.png"
+  },
+  {
+    "slug": "lower-pully-flys",
+    "sprite": "exec-904adce9-1708-4f8f-a733-b753056f820d.png"
+  },
+  {
+    "slug": "barbell-hip-thrust",
+    "sprite": "exec-ccdf5e7b-c304-4f0f-bc68-b320044d58a5.png"
+  },
+  {
+    "slug": "alternate-hip-flexion",
+    "sprite": "exec-62d486da-bdda-48ff-9888-fc084fbaa9ea.png"
+  },
+  {
+    "slug": "lever-seated-hip-adduction",
+    "sprite": "exec-3d1e909d-4c03-4fe9-9950-12d1cab56ee7.png"
+  },
+  {
+    "slug": "sitting-hip-abduction-machine",
+    "sprite": "exec-0c95ad3d-e56e-4527-a08f-b0ee93454b5f.png"
+  },
+  {
+    "slug": "deadlift-kettlebell",
+    "sprite": "exec-fb33073c-6b4a-4db5-a6e0-e7438643ea2d.png"
+  },
+  {
+    "slug": "barbell-decline-bench-press",
+    "sprite": "exec-8efa9772-2edd-4958-a981-72a0264cfc8d.png"
+  },
+  {
+    "slug": "barbell-incline-bench-press",
+    "sprite": "exec-a33c7c71-584f-4671-9266-3e63c2ad3fce.png"
+  },
+  {
+    "slug": "flys-machine",
+    "sprite": "exec-1d426f20-8e54-4943-bdd4-7c6823e44379.png"
+  },
+  {
+    "slug": "battling-ropes-alternate-arms-squat",
+    "sprite": "exec-e138c4dd-1938-4dee-8a65-27cc09b14c93.png"
+  },
+  {
+    "slug": "smith-machine-bench-press",
+    "sprite": "exec-90166f0c-7483-442f-aa66-95cc0e89e81c.png"
+  },
+  {
+    "slug": "dumbell-bench-press",
+    "sprite": "exec-c617e0a0-0d6e-437b-b8bf-9f5117c24026.png"
+  },
+  {
+    "slug": "seated-machine-chest-press",
+    "sprite": "exec-ee6095d1-4a4a-4eb1-8380-7c8ebd9ee1fb.png"
+  },
+  {
+    "slug": "flat-bench-press-narrow-grip",
+    "sprite": "exec-1d0fdf8f-be22-42e6-9fa3-f9e9eb51f57d.png"
+  },
+  {
+    "slug": "guilliotine-bench-press",
+    "sprite": "exec-5737d892-b815-4d1e-aed5-8dc87fab88ca.png"
+  },
+  {
+    "slug": "bellbar-stiff-legged-deadlift",
+    "sprite": "exec-0dd986eb-0991-43cf-9e24-2618b6ad2c9c.png"
+  },
+  {
+    "slug": "kettlebell-deadlift",
+    "sprite": "exec-24192cb9-7def-4bc9-9bd4-e49efd40a758.png"
+  },
+  {
+    "slug": "bellbar-deadlift",
+    "sprite": "exec-c83afd8a-bba5-4662-94fc-53154431cec5.png"
+  },
+  {
+    "slug": "cable-hip-extension",
+    "sprite": "exec-dbd87d4d-4d62-4d0f-b6a2-8b41c73bcbe4.png"
+  },
+  {
+    "slug": "cable-hip-adduction",
+    "sprite": "exec-b6f3efcb-1ceb-4025-aab2-11a47ee4454d.png"
+  },
+  {
+    "slug": "standing-w-machine-hip-adduction",
+    "sprite": "exec-2013b0ca-65ea-4a3c-96c3-4e5dc6211752.png"
+  },
+  {
+    "slug": "standing-hip-abduction-machine",
+    "sprite": "exec-e4723edf-47bb-4718-8d6b-3da9aa4723fb.png"
+  },
+  {
+    "slug": "leg-curls-with-resistance-band",
+    "sprite": "exec-2ee58061-a0bb-4f51-bd54-75c7321ce641.png"
+  },
+  {
+    "slug": "leg-curls-with-dumbbells",
+    "sprite": "exec-a44d1af4-b37a-45bb-98b9-336222a624b7.png"
+  },
+  {
+    "slug": "seated-leg-curls-2",
+    "sprite": "exec-c134caef-be33-4351-89da-308e7e858709.png"
+  },
+  {
+    "slug": "leg-extension",
+    "sprite": "exec-ada5fd07-917d-4fe3-9cae-962244fc404f.png"
+  },
+  {
+    "slug": "kettlebell-goblet-squat",
+    "sprite": "exec-108b2461-4f3f-4e20-b515-02ba33e9ddca.png"
+  },
+  {
+    "slug": "0band-thruster",
+    "sprite": "exec-1470c121-f17f-4028-a287-ef7ea12ff115.png"
+  },
+  {
+    "slug": "landmind-thrust",
+    "sprite": "exec-e042472e-fe6f-4022-81e4-ef360c169f66.png"
+  },
+  {
+    "slug": "lunges-with-smith-machine",
+    "sprite": "exec-b868aec2-ce3a-4416-b75c-68a87f4fbcf0.png"
+  },
+  {
+    "slug": "lunges-with-dumbells",
+    "sprite": "exec-e0728721-c1a7-4a1a-bedb-6edbb9d47a7b.png"
+  },
+  {
+    "slug": "barbell-lunges",
+    "sprite": "exec-562d668a-ebeb-4813-bc3c-85e56f4db081.png"
+  },
+  {
+    "slug": "squat-stability-ball",
+    "sprite": "exec-6bc278dd-b230-434b-9b9b-e29b39cea542.png"
+  },
+  {
+    "slug": "squat-stability-ball-2",
+    "sprite": "exec-0689bfb4-c15b-483d-a66e-589b7658cc14.png"
+  },
+  {
+    "slug": "squat-smith-machine",
+    "sprite": "exec-5be3e3c8-5536-42ff-8dd2-47b0d5e13b20.png"
+  },
+  {
+    "slug": "front-squat",
+    "sprite": "exec-4d8e6a34-0f8d-4ce0-b519-7532d89704fb.png"
+  },
+  {
+    "slug": "bar-squat",
+    "sprite": "exec-6b4c0e3e-991a-4fa9-919e-937beb761524.png"
+  }
+]

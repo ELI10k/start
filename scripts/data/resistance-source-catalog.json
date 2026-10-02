@@ -1,0 +1,2478 @@
+[
+  {
+    "name": "שלוש מאות שישים",
+    "href": "https://www.instructor.co.il/excercise/360/",
+    "muscles": [
+      "שרירי ליבה",
+      "כתף",
+      "גב",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "סטיל מייס"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בכריעה, פשיטת מרפקים",
+    "href": "https://www.instructor.co.il/excercise/kneeling-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מקבילים על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/ball-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה, כפיפת מרפקים וכפיפת כתף בפולי",
+    "href": "https://www.instructor.co.il/excercise/cable-lying-biceps-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מטוטלת ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-pendulum/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פלאנק הפוך",
+    "href": "https://www.instructor.co.il/excercise/reverse-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "סמיכת כוכב",
+    "href": "https://www.instructor.co.il/excercise/suspender-star-pushup/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה, הרחקת ירך כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-hip-abduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "ניתורי שפיפה",
+    "href": "https://www.instructor.co.il/excercise/squat-jumps/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "ניתורי מכרע",
+    "href": "https://www.instructor.co.il/excercise/split-jumps/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "קלין בקטלבל",
+    "href": "https://www.instructor.co.il/excercise/hang-clean/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "הנפה סנאצ' ביד אחת כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/one-arm-kettlebell-snatch/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "הטחה בחבל קרב",
+    "href": "https://www.instructor.co.il/excercise/battling-rope-power-slam/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "חבל קרב"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה, לחיצת כתפיים באחיזה רחבה כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-wide-grip-shoulder-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה אוסטרלית במוט",
+    "href": "https://www.instructor.co.il/excercise/inverted-row-2/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בישיבה, כפיפת ריכוז כנגד הירך",
+    "href": "https://www.instructor.co.il/excercise/leg-concentration-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה בשיפוע, פשיטת מרפקים כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-incline-two-arms-extenstion/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה פשיטת מרפקים כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-skull-crasher/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "מקבילים באחיזה צרה במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת מרפקים במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-incline-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פשיטת מרפקים כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בהטיית גו, פשיטת מרפק ביד אחת כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-kickback/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת מרפק ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת גו אלכסונית ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-waist-side-bend/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה פיתול מותן כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-standing-waist-twist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, לחיצת כתפיים באחיזה רחבה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-wide-grip-shoulder-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פיתול אלכסוני כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/landmine-waist-twist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "שמיניות עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-figure-eight/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בהטייה, פשיטת מרפק כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-kickback/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפות בטן בגלגול מוט מעל ספסל",
+    "href": "https://www.instructor.co.il/excercise/barbell-rollout-from-bench/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פשיטת מרפקים על ספסל",
+    "href": "https://www.instructor.co.il/excercise/bench-dip-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה בשיפוע, פשיטת מרפקים כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-incline-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה פשיטת מרפקים כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-decline-upper-arm-press/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה בשיפוע פשיטת מרפקים במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-incline-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת מרפקים כנגד פולי באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-cable-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת מרפקים בתנוחת כומר כנגד מכונה יעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-preacher-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפות גו על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לחיצת כתפיים בסמיכה על הידיים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-handstand-pushup/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת מרפקים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-triceps-kickback/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת מרפקים בסמיכה ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-extension/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה, כפיפת גו כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-standing-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה, פיתול גו אלכסוני כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-seated-waist-twist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "תחנת רוח עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-windmill/",
+    "muscles": [
+      "שרירי ליבה",
+      "כתף",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת כתפיים לסירוגין כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-alternating-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת כתפיים כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-military-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה, כפיפה והרחקת כתף כנגד רצועת תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-forward-y-raise/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, כפיפת כתף כנגד רצועת תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-forward-raise/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "שכיבת סמיכה באחיזה צרה על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-pushups/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, כפיפת כתף כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-forward-raise/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה הרחקת כתף בזרוע אחת כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-one-arm-lateral-raise/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לחיצה קובאנית נגד משקולות יד",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-cuban-press/",
+    "muscles": [
+      "שכמה",
+      "כתף",
+      "גב",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת כתפיים במכונה באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/machine-shoulder-press/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פרפר בתלייה ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-flys/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "שכיבת סמיכה בשיפוע שלילי על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-push-up/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצות חזה בסמיכה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-chest-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה, לחיצת חזה ביד אחת עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-one-arm-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה בתלייה מהרגליים",
+    "href": "https://www.instructor.co.il/excercise/suspended-legs-pushups/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת ירך על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-hip-thrust/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הליכת סרטן",
+    "href": "https://www.instructor.co.il/excercise/band-lateral-walk/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "חתירה אנכית במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-row-2/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "עליית מתח ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-pullups/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בהטייה חתירה ביד אחת לסירוגין כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-alternate-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה בשיפוע חתירה אופקית כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-wide-grip-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה הפוכה בתלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-inverted-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה בהטיה, חתירה כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה פולאובר כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-pulover/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בסמיכה חתירה ביד אחת עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-renegate-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת ירך עם גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-hip-thrust/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "דדליפט ברגל ישרה כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-pull-through-stiff-legged-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "דדליפט ברגל אחת ישרה כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-one-leg-stiff-legged-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "סקוואט בעזרת רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspenders-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מכרעים והנפת רגל בתלייה על רצועה",
+    "href": "https://www.instructor.co.il/excercise/suspender-lunge-front-kick/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה סקוואט ברגל אחת (\"אקדח\") ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspended-pistol/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מכרעים בולגריים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/bulgarian-suspended-lunges/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "סקוואט הברברי",
+    "href": "https://www.instructor.co.il/excercise/barbarian-squat/",
+    "muscles": [
+      "שרירי ליבה",
+      "גב",
+      "רגליים"
+    ],
+    "equipment": [
+      "סטיל מייס"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה כפיפת ברך כנגד רצועה אלסטית",
+    "href": "https://www.instructor.co.il/excercise/elastic-band-leg-curl/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "מכרעים בעזרת רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/straps-aided-lunges/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפת ריכוז כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-concentration-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפת מרפקים כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "מטפס הרים בתלייה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspended-mountain-climb/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת ירך ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspended-hip-thrust/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה פשיטת ברך עם רצועה אלסטית",
+    "href": "https://www.instructor.co.il/excercise/band-leg-extension/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, כפיפת מרפקים לסירוגין כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לחיצת כתפיים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-military-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה אל הפנים ברצועה",
+    "href": "https://www.instructor.co.il/excercise/suspended-face-pull/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה אל הפנים",
+    "href": "https://www.instructor.co.il/excercise/face-pull/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "כבל פולי",
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה, הרמת שכמות במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-scapula-elevation/",
+    "muscles": [
+      "שכמה"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת בטן בתלייה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspension-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, פשיטת גו",
+    "href": "https://www.instructor.co.il/excercise/floor-hyperextension/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "ציפור-כלב  ברגליים ישרות",
+    "href": "https://www.instructor.co.il/excercise/straight-leg-bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "ציפור-כלב מול מול קיר",
+    "href": "https://www.instructor.co.il/excercise/wall-bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "ציפור-כלב",
+    "href": "https://www.instructor.co.il/excercise/bird-dog/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פיתול אלכסוני במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-twist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה כפיפת בטן צדית כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-side-bend/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת בטן אלכסונית (אופניים)",
+    "href": "https://www.instructor.co.il/excercise/air-bike-crunches/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פיתול רוסי על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/russian-twist-stability-ball/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת מרפקים כנגד רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-curls/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפות גו על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-crunch-2/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פלאנק צדי ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-side-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בטן סטטית – פלאנק צדי",
+    "href": "https://www.instructor.co.il/excercise/side-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בטן סטטית – פלאנק",
+    "href": "https://www.instructor.co.il/excercise/front-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בטן סטטית – פלאנק עם כדור פיזו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-plank/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הרמת אגן אנכית  במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-hip-lift/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הרמת אגן אנכית",
+    "href": "https://www.instructor.co.il/excercise/hip-lift/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לשון צונחת אחורה",
+    "href": "https://www.instructor.co.il/excercise/curl-up/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בכריעה על העקבים כפיפת בטן כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-kneeling-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בכריעה על העקבים כפיפת בטן כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-kneeling-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה קירוב שכמות כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/scapula-retraction/",
+    "muscles": [
+      "שכמה"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, הרמת שכמות כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-shrug/",
+    "muscles": [
+      "שכמה"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "משיכה עליונה כנגד מכונה ייעודית באחיזה צרה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/supinated-lever-close-grip-pulldown/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה עליונה כנגד גומיה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/supinated-band-close-grip-pulldown/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה עליונה כנגד גומיה באחיזה אמצעית",
+    "href": "https://www.instructor.co.il/excercise/mid-position-band-close-grip-pulldown/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפת גו ברגליים ישרות במקבילים",
+    "href": "https://www.instructor.co.il/excercise/captain-chair-straight-leg-raise/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת שכמות על ספסל",
+    "href": "https://www.instructor.co.il/excercise/scapula-dips/",
+    "muscles": [
+      "שכמה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בהטיית גו, חתירה ביד אחת כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-one-arm-bent-over-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "סמוך קום",
+    "href": "https://www.instructor.co.il/excercise/burpees/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה, כפיפת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/kneeling-leg-curls/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "סווינג עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-swing/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה, לחיצת חזה כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/resisted-band-seated-chest-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מקבילים באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/parallel-bar-narrow-grip-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה",
+    "href": "https://www.instructor.co.il/excercise/pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע מתון",
+    "href": "https://www.instructor.co.il/excercise/soft-incline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "עמידת סמיכה מול קיר",
+    "href": "https://www.instructor.co.il/excercise/wall-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע",
+    "href": "https://www.instructor.co.il/excercise/incline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה בשיפוע שלילי",
+    "href": "https://www.instructor.co.il/excercise/decline-pushups/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה לחיצת כתפיים כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-shoulder-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה הרחקת כתפיים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-shoulder-abduction/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה חתירה אופקית כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-upright-row/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת כתפיים באחיזה צרה כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-shoulder-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בישיבה לחיצת כתפיים באחיזה צרה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-standing-military-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה לחיצת כתפיים באחיזה צרה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-standing-military-press/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה כנגד מוט T",
+    "href": "https://www.instructor.co.il/excercise/lever-lying-t-bar-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה אוסטרלית",
+    "href": "https://www.instructor.co.il/excercise/inverted-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "חתירה כנגד רצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspended-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה חתירה כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/standing-band-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בישיבה חתירה כנגד כבל פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-seated-row-back/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בשכיבה על כדור פיזיו פולאובר כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-straight-arm-pullover-stability-ball/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקולות יד",
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה פולאובר כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-straight-arm-pullover/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "דדליפט ברגל ישרה  כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-stiff-legged-deadlift-copy/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לחיצת חזה כנגד כבל",
+    "href": "https://www.instructor.co.il/excercise/cable-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה פולאובר כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-straight-arm-pulldown/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת ירך ובטן במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-leg-raise-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפת בטן במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-lying-crunch/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפות בטן עם ידיים מאחורי הראש",
+    "href": "https://www.instructor.co.il/excercise/weighted-crunch-behind-head-waist/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "מקבילים באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/parallel-bar-dips/",
+    "muscles": [
+      "חזה",
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בישיבה כפיפת מרפק לסירוגין כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/alternating-dumbbell-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "משקולות יד",
+      "כדור פיזיו"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפת מרפקים בכסא כומר כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-preacher-bench-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בהטיית גו , חתירה כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-bent-over-row/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפת מרפקים בכסא כומר כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-preacher-bench-arm-curl/",
+    "muscles": [
+      "יד קדמית"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת ירך על ספסל רומי",
+    "href": "https://www.instructor.co.il/excercise/hip-extension-roman-chair/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "דדליפט רומני",
+    "href": "https://www.instructor.co.il/excercise/romanian-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בוקר טוב",
+    "href": "https://www.instructor.co.il/excercise/good-morning/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "חתירה ופרפר כנגד רצועה",
+    "href": "https://www.instructor.co.il/excercise/suspended-one-hand-pull/",
+    "muscles": [
+      "גב",
+      "חזה",
+      "רגליים"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפות בטן בגלגול מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-ab-rollout/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "כפיפות בטן עם גלגלת",
+    "href": "https://www.instructor.co.il/excercise/abrolls/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הליכת האיכר",
+    "href": "https://www.instructor.co.il/excercise/farmer-walk/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת מרפקים כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/%d7%a4%d7%a9%d7%99%d7%98%d7%aa-%d7%9e%d7%a8%d7%a4%d7%a7%d7%99%d7%9d-%d7%9b%d7%a0%d7%92%d7%93-%d7%a4%d7%95%d7%9c%d7%99-%d7%a2%d7%9c%d7%99%d7%95%d7%9f/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "עליית מתח באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-pull-up/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "עליית מתח באחיזה צרה בגרביטון",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-pull-up-graviton/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בעמידה הרחקה אופקית בכתף כנגד רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-reverse-flys/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "רצועות תלייה"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה הרחקה אופקית בכתף כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-reverse-flys/",
+    "muscles": [
+      "כתף"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "עליית מתח באחיזה רחבה בסיוע גומיית כח",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-pull-up-copy/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "עליית מתח באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-pull-up/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "קימה טורקית",
+    "href": "https://www.instructor.co.il/excercise/turkish-getup/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה רחבה אל מאחורי הראש",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-lat-pull-down-behind-neck/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-lat-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-lat-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה אמצעית",
+    "href": "https://www.instructor.co.il/excercise/narrow-mid-position-grip-lat-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "טיפוס על חבל",
+    "href": "https://www.instructor.co.il/excercise/rope-climbing/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "חבל קרב"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/pulley-narrow-grip-lat-supinated-pull-down/",
+    "muscles": [
+      "גב"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "עליית כח",
+    "href": "https://www.instructor.co.il/excercise/single-bar-narrow-grip-dips/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "בהטיית גו, פרפר כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-crossovers/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה הרמת עקבים כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/standing-calf-raise-smith-machine/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, פרפר כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/flys/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הרמת עקבים כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/plantar-flexion-dumbbell/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, פרפר עם כבל קרוס מפולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/lower-pully-flys/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פשיטת ירך (גשר) כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-hip-thrust/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, כפיפת ירך לסירוגין",
+    "href": "https://www.instructor.co.il/excercise/alternate-hip-flexion/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה, קירוב ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-hip-adduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה הרחקת ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/sitting-hip-abduction-machine/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "דדליפט ברגל אחת כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/deadlift-kettlebell/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "לחיצת חזה בשיפוע שלילי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-decline-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה בשיפוע חיובי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-incline-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פרפר כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/flys-machine/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "גל לסירוגין בשפיפה עם חבל",
+    "href": "https://www.instructor.co.il/excercise/battling-ropes-alternate-arms-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "חבל קרב"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט חופשי",
+    "href": "https://www.instructor.co.il/excercise/squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbell-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/seated-machine-chest-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה באחיזה צרה במוט",
+    "href": "https://www.instructor.co.il/excercise/flat-bench-press-narrow-grip/",
+    "muscles": [
+      "יד אחורית"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת גיליוטינה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/guilliotine-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת חזה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-bench-press/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "דדליפט ברגל ישרה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-stiff-legged-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "דדליפט כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "דדליפט כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-deadlift/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "פשיטת ירך כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-extension/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "קירוב ירך כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-adduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה, קירוב ירך כנגד מכונה",
+    "href": "https://www.instructor.co.il/excercise/standing-w-machine-hip-adduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "הרחקת ירך כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-abduction/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כבל פולי"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בעמידה הרחקת ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/standing-hip-abduction-machine/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה, כפיפת ברכיים כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/leg-curls-with-resistance-band/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, כפיפת ברכיים כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/leg-curls-with-dumbbells/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בשכיבה, כפיפת ברכיים עם מגבת",
+    "href": "https://www.instructor.co.il/excercise/sliding-leg-curls-with-towel/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "בישיבה, כפיפת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/seated-leg-curls-2/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "פשיטת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/leg-extension/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מבודד"
+  },
+  {
+    "name": "שפיפה – סקוואט כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-goblet-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "קטלבל"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט ולחיצת כתפיים בגומיה",
+    "href": "https://www.instructor.co.il/excercise/0band-thruster/",
+    "muscles": [
+      "כתף",
+      "רגליים"
+    ],
+    "equipment": [
+      "גומיית התנגדות"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט ולחיצת כתפיים במוט",
+    "href": "https://www.instructor.co.il/excercise/landmind-thrust/",
+    "muscles": [
+      "כתף",
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מכרעים כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/lunges-with-smith-machine/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מכרעים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/lunges-with-dumbells/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שכיבות סמיכה על בוסו",
+    "href": "https://www.instructor.co.il/excercise/bosu-pushups/",
+    "muscles": [
+      "חזה"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "מכרעים כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-lunges/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט עם כסא",
+    "href": "https://www.instructor.co.il/excercise/squat-with-chair/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "סקוואט כנגד משקולות יד",
+    "href": "https://www.instructor.co.il/excercise/squat-dumbbells/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקולות יד"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "סקוואט על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/squat-stability-ball/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/squat-stability-ball-2/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/squat-smith-machine/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונת סמית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט קדמי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/front-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "לחיצת רגליים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/leg-press/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מכונה ייעודית"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "שפיפה – סקוואט כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-squat/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "מוט"
+    ],
+    "movementType": "מורכב"
+  },
+  {
+    "name": "כפיפה נורדית/רוסית",
+    "href": "https://www.instructor.co.il/excercise/nordic-ham-curl/",
+    "muscles": [
+      "רגליים"
+    ],
+    "equipment": [
+      "משקל גוף"
+    ],
+    "movementType": "מבודד"
+  }
+]

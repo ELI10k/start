@@ -1,0 +1,4423 @@
+[
+  {
+    "id": "resistance-360",
+    "slug": "360",
+    "name": "שלוש מאות שישים",
+    "href": "https://www.instructor.co.il/excercise/360/",
+    "category": "סטיל מייס",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [
+      "כתפיים",
+      "גב",
+      "יד אחורית"
+    ],
+    "equipment": "סטיל מייס",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/360.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/360.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שלוש מאות שישים, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-ball-dips",
+    "slug": "ball-dips",
+    "name": "מקבילים על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/ball-dips/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/ball-dips.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/ball-dips.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מקבילים על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-lying-biceps-curl",
+    "slug": "cable-lying-biceps-curl",
+    "name": "בשכיבה, כפיפת מרפקים וכפיפת כתף בפולי",
+    "href": "https://www.instructor.co.il/excercise/cable-lying-biceps-curl/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-lying-biceps-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-lying-biceps-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, כפיפת מרפקים וכפיפת כתף בפולי, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-pendulum",
+    "slug": "suspender-pendulum",
+    "name": "מטוטלת ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-pendulum/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-pendulum.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-pendulum.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מטוטלת ברצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-reverse-plank",
+    "slug": "reverse-plank",
+    "name": "פלאנק הפוך",
+    "href": "https://www.instructor.co.il/excercise/reverse-plank/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/reverse-plank.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/reverse-plank.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פלאנק הפוך, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-star-pushup",
+    "slug": "suspender-star-pushup",
+    "name": "סמיכת כוכב",
+    "href": "https://www.instructor.co.il/excercise/suspender-star-pushup/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-star-pushup.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-star-pushup.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל סמיכת כוכב, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-hip-abduction",
+    "slug": "band-hip-abduction",
+    "name": "בעמידה, הרחקת ירך כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-hip-abduction/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-hip-abduction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-hip-abduction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, הרחקת ירך כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-hang-clean",
+    "slug": "hang-clean",
+    "name": "קלין בקטלבל",
+    "href": "https://www.instructor.co.il/excercise/hang-clean/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/hang-clean.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/hang-clean.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל קלין בקטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-one-arm-kettlebell-snatch",
+    "slug": "one-arm-kettlebell-snatch",
+    "name": "הנפה סנאצ' ביד אחת כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/one-arm-kettlebell-snatch/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/one-arm-kettlebell-snatch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/one-arm-kettlebell-snatch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הנפה סנאצ' ביד אחת כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-squat",
+    "slug": "band-squat",
+    "name": "שפיפה – סקוואט כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-squat/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט כנגד גומיית התנגדות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-battling-rope-power-slam",
+    "slug": "battling-rope-power-slam",
+    "name": "הטחה בחבל קרב",
+    "href": "https://www.instructor.co.il/excercise/battling-rope-power-slam/",
+    "category": "חבל קרב",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "חבל קרב",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/battling-rope-power-slam.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/battling-rope-power-slam.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הטחה בחבל קרב, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-wide-grip-shoulder-press",
+    "slug": "band-wide-grip-shoulder-press",
+    "name": "בעמידה, לחיצת כתפיים באחיזה רחבה כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-wide-grip-shoulder-press/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-wide-grip-shoulder-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-wide-grip-shoulder-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, לחיצת כתפיים באחיזה רחבה כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-incline-two-arms-extenstion",
+    "slug": "dumbbell-incline-two-arms-extenstion",
+    "name": "בישיבה בשיפוע, פשיטת מרפקים כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-incline-two-arms-extenstion/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-incline-two-arms-extenstion.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-incline-two-arms-extenstion.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה בשיפוע, פשיטת מרפקים כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-arm-skull-crasher",
+    "slug": "band-arm-skull-crasher",
+    "name": "בשכיבה פשיטת מרפקים כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-skull-crasher/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-skull-crasher.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-skull-crasher.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה פשיטת מרפקים כנגד גומייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-seated-dips",
+    "slug": "lever-seated-dips",
+    "name": "מקבילים באחיזה צרה במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-dips/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-dips.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-dips.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מקבילים באחיזה צרה במכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-incline-arm-extension",
+    "slug": "dumbbell-incline-arm-extension",
+    "name": "פשיטת מרפקים במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-incline-arm-extension/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-incline-arm-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-incline-arm-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים במכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-arm-extension",
+    "slug": "band-arm-extension",
+    "name": "פשיטת מרפקים כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-extension/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים כנגד גומייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-kickback",
+    "slug": "band-kickback",
+    "name": "בהטיית גו, פשיטת מרפק ביד אחת כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-kickback/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-kickback.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-kickback.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו, פשיטת מרפק ביד אחת כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-arm-curl",
+    "slug": "suspender-arm-curl",
+    "name": "כפיפת מרפק ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-curl/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפק ברצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-waist-side-bend",
+    "slug": "suspender-waist-side-bend",
+    "name": "כפיפת גו אלכסונית ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-waist-side-bend/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-waist-side-bend.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-waist-side-bend.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת גו אלכסונית ברצועות תליה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-standing-waist-twist",
+    "slug": "band-standing-waist-twist",
+    "name": "בעמידה פיתול מותן כנגד גומייה",
+    "href": "https://www.instructor.co.il/excercise/band-standing-waist-twist/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-standing-waist-twist.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-standing-waist-twist.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה פיתול מותן כנגד גומייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-wide-grip-shoulder-press",
+    "slug": "smith-wide-grip-shoulder-press",
+    "name": "בעמידה, לחיצת כתפיים באחיזה רחבה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-wide-grip-shoulder-press/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-wide-grip-shoulder-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-wide-grip-shoulder-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, לחיצת כתפיים באחיזה רחבה במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-landmine-waist-twist",
+    "slug": "landmine-waist-twist",
+    "name": "פיתול אלכסוני כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/landmine-waist-twist/",
+    "category": "מוט",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/landmine-waist-twist.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/landmine-waist-twist.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פיתול אלכסוני כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-figure-eight",
+    "slug": "kettlebell-figure-eight",
+    "name": "שמיניות עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-figure-eight/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-figure-eight.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-figure-eight.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שמיניות עם קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-kickback",
+    "slug": "dumbbell-kickback",
+    "name": "בהטייה, פשיטת מרפק כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-kickback/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-kickback.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-kickback.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטייה, פשיטת מרפק כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-rollout-from-bench",
+    "slug": "barbell-rollout-from-bench",
+    "name": "כפיפות בטן בגלגול מוט מעל ספסל",
+    "href": "https://www.instructor.co.il/excercise/barbell-rollout-from-bench/",
+    "category": "מוט",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-rollout-from-bench.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-rollout-from-bench.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפות בטן בגלגול מוט מעל ספסל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-incline-arm-extension",
+    "slug": "cable-incline-arm-extension",
+    "name": "בישיבה בשיפוע, פשיטת מרפקים כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-incline-arm-extension/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-incline-arm-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-incline-arm-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה בשיפוע, פשיטת מרפקים כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-decline-upper-arm-press",
+    "slug": "barbell-decline-upper-arm-press",
+    "name": "בשכיבה פשיטת מרפקים כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-decline-upper-arm-press/",
+    "category": "מוט",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-decline-upper-arm-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-decline-upper-arm-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה פשיטת מרפקים כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-incline-arm-extension",
+    "slug": "smith-incline-arm-extension",
+    "name": "בישיבה בשיפוע פשיטת מרפקים במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-incline-arm-extension/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-incline-arm-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-incline-arm-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה בשיפוע פשיטת מרפקים במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-wide-grip-cable-arm-curl",
+    "slug": "wide-grip-cable-arm-curl",
+    "name": "כפיפת מרפקים כנגד פולי באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-cable-arm-curl/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/wide-grip-cable-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/wide-grip-cable-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים כנגד פולי באחיזה רחבה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-preacher-curl",
+    "slug": "lever-preacher-curl",
+    "name": "כפיפת מרפקים בתנוחת כומר כנגד מכונה יעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-preacher-curl/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-preacher-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-preacher-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים בתנוחת כומר כנגד מכונה יעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-stability-ball-crunch",
+    "slug": "stability-ball-crunch",
+    "name": "כפיפות גו על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-crunch/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפות גו על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-handstand-pushup",
+    "slug": "suspender-handstand-pushup",
+    "name": "לחיצת כתפיים בסמיכה על הידיים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-handstand-pushup/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-handstand-pushup.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-handstand-pushup.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת כתפיים בסמיכה על הידיים ברצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-triceps-kickback",
+    "slug": "suspender-triceps-kickback",
+    "name": "פשיטת מרפקים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-triceps-kickback/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-triceps-kickback.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-triceps-kickback.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים ברצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-arm-extension",
+    "slug": "suspender-arm-extension",
+    "name": "פשיטת מרפקים בסמיכה ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-extension/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים בסמיכה ברצועות תליה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-standing-crunch",
+    "slug": "band-standing-crunch",
+    "name": "בעמידה, כפיפת גו כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-standing-crunch/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-standing-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-standing-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, כפיפת גו כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-seated-waist-twist",
+    "slug": "band-seated-waist-twist",
+    "name": "בישיבה, פיתול גו אלכסוני כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-seated-waist-twist/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-seated-waist-twist.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-seated-waist-twist.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה, פיתול גו אלכסוני כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-windmill",
+    "slug": "kettlebell-windmill",
+    "name": "תחנת רוח עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-windmill/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [
+      "כתפיים",
+      "יד אחורית"
+    ],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-windmill.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-windmill.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל תחנת רוח עם קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-alternating-press",
+    "slug": "kettlebell-alternating-press",
+    "name": "לחיצת כתפיים לסירוגין כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-alternating-press/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-alternating-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-alternating-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת כתפיים לסירוגין כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-military-press",
+    "slug": "kettlebell-military-press",
+    "name": "לחיצת כתפיים כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-military-press/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-military-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-military-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת כתפיים כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-forward-y-raise",
+    "slug": "suspender-forward-y-raise",
+    "name": "בעמידה, כפיפה והרחקת כתף כנגד רצועת תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-forward-y-raise/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-forward-y-raise.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-forward-y-raise.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, כפיפה והרחקת כתף כנגד רצועת תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-forward-raise",
+    "slug": "suspender-forward-raise",
+    "name": "בעמידה, כפיפת כתף כנגד רצועת תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-forward-raise/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-forward-raise.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-forward-raise.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, כפיפת כתף כנגד רצועת תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-stability-ball-pushups",
+    "slug": "stability-ball-pushups",
+    "name": "שכיבת סמיכה באחיזה צרה על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-pushups/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-pushups.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-pushups.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שכיבת סמיכה באחיזה צרה על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-forward-raise",
+    "slug": "cable-forward-raise",
+    "name": "בעמידה, כפיפת כתף כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-forward-raise/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-forward-raise.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-forward-raise.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, כפיפת כתף כנגד פולי, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-one-arm-lateral-raise",
+    "slug": "cable-one-arm-lateral-raise",
+    "name": "בעמידה הרחקת כתף בזרוע אחת כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-one-arm-lateral-raise/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-one-arm-lateral-raise.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-one-arm-lateral-raise.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה הרחקת כתף בזרוע אחת כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-cuban-press",
+    "slug": "dumbbell-cuban-press",
+    "name": "לחיצה קובאנית נגד משקולות יד",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-cuban-press/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "שכמה",
+    "secondaryMuscleGroups": [
+      "כתפיים",
+      "גב",
+      "יד אחורית"
+    ],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-cuban-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-cuban-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצה קובאנית נגד משקולות יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-machine-shoulder-press",
+    "slug": "machine-shoulder-press",
+    "name": "לחיצת כתפיים במכונה באחיזה רחבה",
+    "href": "https://www.instructor.co.il/excercise/machine-shoulder-press/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/machine-shoulder-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/machine-shoulder-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת כתפיים במכונה באחיזה רחבה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-flys",
+    "slug": "suspender-flys",
+    "name": "פרפר בתלייה ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-flys/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-flys.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-flys.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פרפר בתלייה ברצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-stability-ball-push-up",
+    "slug": "stability-ball-push-up",
+    "name": "שכיבת סמיכה בשיפוע שלילי על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-push-up/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-push-up.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-push-up.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שכיבת סמיכה בשיפוע שלילי על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-chest-press",
+    "slug": "suspender-chest-press",
+    "name": "לחיצות חזה בסמיכה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-chest-press/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-chest-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-chest-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצות חזה בסמיכה על רצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-one-arm-press",
+    "slug": "kettlebell-one-arm-press",
+    "name": "בשכיבה, לחיצת חזה ביד אחת עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-one-arm-press/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-one-arm-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-one-arm-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, לחיצת חזה ביד אחת עם קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-legs-pushups",
+    "slug": "suspended-legs-pushups",
+    "name": "שכיבות סמיכה בתלייה מהרגליים",
+    "href": "https://www.instructor.co.il/excercise/suspended-legs-pushups/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-legs-pushups.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-legs-pushups.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שכיבות סמיכה בתלייה מהרגליים, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-stability-ball-hip-thrust",
+    "slug": "stability-ball-hip-thrust",
+    "name": "פשיטת ירך על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-hip-thrust/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-hip-thrust.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-hip-thrust.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ירך על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-lateral-walk",
+    "slug": "band-lateral-walk",
+    "name": "הליכת סרטן",
+    "href": "https://www.instructor.co.il/excercise/band-lateral-walk/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-lateral-walk.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-lateral-walk.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הליכת סרטן, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-row",
+    "slug": "smith-machine-row",
+    "name": "חתירה אנכית במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-row/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה אנכית במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-row-2",
+    "slug": "smith-machine-row-2",
+    "name": "חתירה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-row-2/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-row-2.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-row-2.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-pullups",
+    "slug": "suspender-pullups",
+    "name": "עליית מתח ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspender-pullups/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-pullups.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-pullups.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל עליית מתח ברצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-alternate-row",
+    "slug": "kettlebell-alternate-row",
+    "name": "בהטייה חתירה ביד אחת לסירוגין כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-alternate-row/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-alternate-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-alternate-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטייה חתירה ביד אחת לסירוגין כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-wide-grip-row",
+    "slug": "barbell-wide-grip-row",
+    "name": "בשכיבה בשיפוע חתירה אופקית כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-wide-grip-row/",
+    "category": "מוט",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-wide-grip-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-wide-grip-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה בשיפוע חתירה אופקית כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-inverted-row",
+    "slug": "suspender-inverted-row",
+    "name": "חתירה הפוכה בתלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-inverted-row/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-inverted-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-inverted-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה הפוכה בתלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-row",
+    "slug": "kettlebell-row",
+    "name": "בעמידה בהטיה, חתירה כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-row/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה בהטיה, חתירה כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bellbar-pulover",
+    "slug": "bellbar-pulover",
+    "name": "בשכיבה פולאובר כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-pulover/",
+    "category": "מוט",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-pulover.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-pulover.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה פולאובר כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-renegate-row",
+    "slug": "kettlebell-renegate-row",
+    "name": "בסמיכה חתירה ביד אחת עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-renegate-row/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-renegate-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-renegate-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בסמיכה חתירה ביד אחת עם קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-hip-thrust",
+    "slug": "band-hip-thrust",
+    "name": "פשיטת ירך עם גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-hip-thrust/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-hip-thrust.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-hip-thrust.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ירך עם גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-pull-through-stiff-legged-deadlift",
+    "slug": "cable-pull-through-stiff-legged-deadlift",
+    "name": "דדליפט ברגל ישרה כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-pull-through-stiff-legged-deadlift/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-pull-through-stiff-legged-deadlift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-pull-through-stiff-legged-deadlift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט ברגל ישרה כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-one-leg-stiff-legged-deadlift",
+    "slug": "band-one-leg-stiff-legged-deadlift",
+    "name": "דדליפט ברגל אחת ישרה כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-one-leg-stiff-legged-deadlift/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-one-leg-stiff-legged-deadlift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-one-leg-stiff-legged-deadlift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט ברגל אחת ישרה כנגד גומיית התנגדות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspenders-squat",
+    "slug": "suspenders-squat",
+    "name": "סקוואט בעזרת רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspenders-squat/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspenders-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspenders-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל סקוואט בעזרת רצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-lunge-front-kick",
+    "slug": "suspender-lunge-front-kick",
+    "name": "מכרעים והנפת רגל בתלייה על רצועה",
+    "href": "https://www.instructor.co.il/excercise/suspender-lunge-front-kick/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-lunge-front-kick.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-lunge-front-kick.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים והנפת רגל בתלייה על רצועה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-pistol",
+    "slug": "suspended-pistol",
+    "name": "שפיפה סקוואט ברגל אחת (\"אקדח\") ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspended-pistol/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-pistol.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-pistol.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה סקוואט ברגל אחת (\"אקדח\") ברצועות תליה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bulgarian-suspended-lunges",
+    "slug": "bulgarian-suspended-lunges",
+    "name": "מכרעים בולגריים ברצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/bulgarian-suspended-lunges/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bulgarian-suspended-lunges.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bulgarian-suspended-lunges.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים בולגריים ברצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbarian-squat",
+    "slug": "barbarian-squat",
+    "name": "סקוואט הברברי",
+    "href": "https://www.instructor.co.il/excercise/barbarian-squat/",
+    "category": "סטיל מייס",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [
+      "גב",
+      "רגליים"
+    ],
+    "equipment": "סטיל מייס",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbarian-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbarian-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל סקוואט הברברי, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-elastic-band-leg-curl",
+    "slug": "elastic-band-leg-curl",
+    "name": "בעמידה כפיפת ברך כנגד רצועה אלסטית",
+    "href": "https://www.instructor.co.il/excercise/elastic-band-leg-curl/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/elastic-band-leg-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/elastic-band-leg-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה כפיפת ברך כנגד רצועה אלסטית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-straps-aided-lunges",
+    "slug": "straps-aided-lunges",
+    "name": "מכרעים בעזרת רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/straps-aided-lunges/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/straps-aided-lunges.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/straps-aided-lunges.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים בעזרת רצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-concentration-curl",
+    "slug": "band-concentration-curl",
+    "name": "כפיפת ריכוז כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-concentration-curl/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-concentration-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-concentration-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת ריכוז כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-arm-curl",
+    "slug": "cable-arm-curl",
+    "name": "כפיפת מרפקים כנגד פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-arm-curl/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים כנגד פולי, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-mountain-climb",
+    "slug": "suspended-mountain-climb",
+    "name": "מטפס הרים בתלייה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspended-mountain-climb/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-mountain-climb.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-mountain-climb.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מטפס הרים בתלייה על רצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-hip-thrust",
+    "slug": "suspended-hip-thrust",
+    "name": "פשיטת ירך ברצועות",
+    "href": "https://www.instructor.co.il/excercise/suspended-hip-thrust/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-hip-thrust.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-hip-thrust.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ירך ברצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-leg-extension",
+    "slug": "band-leg-extension",
+    "name": "בישיבה פשיטת ברך עם רצועה אלסטית",
+    "href": "https://www.instructor.co.il/excercise/band-leg-extension/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-leg-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-leg-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה פשיטת ברך עם רצועה אלסטית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-arm-curl",
+    "slug": "band-arm-curl",
+    "name": "בעמידה, כפיפת מרפקים לסירוגין כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/band-arm-curl/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, כפיפת מרפקים לסירוגין כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-face-pull",
+    "slug": "suspended-face-pull",
+    "name": "משיכה אל הפנים ברצועה",
+    "href": "https://www.instructor.co.il/excercise/suspended-face-pull/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-face-pull.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-face-pull.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה אל הפנים ברצועה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-face-pull",
+    "slug": "face-pull",
+    "name": "משיכה אל הפנים",
+    "href": "https://www.instructor.co.il/excercise/face-pull/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי ו-גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/face-pull.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/face-pull.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה אל הפנים, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-scapula-elevation",
+    "slug": "smith-machine-scapula-elevation",
+    "name": "בעמידה, הרמת שכמות במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-scapula-elevation/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "שכמה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-scapula-elevation.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-scapula-elevation.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, הרמת שכמות במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspension-crunch",
+    "slug": "suspension-crunch",
+    "name": "כפיפת בטן בתלייה על רצועות",
+    "href": "https://www.instructor.co.il/excercise/suspension-crunch/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspension-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspension-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת בטן בתלייה על רצועות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-seated-twist",
+    "slug": "lever-seated-twist",
+    "name": "פיתול אלכסוני במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-twist/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-twist.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-twist.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פיתול אלכסוני במכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-side-bend",
+    "slug": "dumbbell-side-bend",
+    "name": "בעמידה כפיפת בטן צדית כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-side-bend/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-side-bend.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-side-bend.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה כפיפת בטן צדית כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-russian-twist-stability-ball",
+    "slug": "russian-twist-stability-ball",
+    "name": "פיתול רוסי על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/russian-twist-stability-ball/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/russian-twist-stability-ball.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/russian-twist-stability-ball.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פיתול רוסי על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-arm-curls",
+    "slug": "suspender-arm-curls",
+    "name": "כפיפת מרפקים כנגד רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-arm-curls/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-curls.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-arm-curls.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים כנגד רצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-side-plank",
+    "slug": "suspender-side-plank",
+    "name": "פלאנק צדי ברצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspender-side-plank/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-side-plank.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-side-plank.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פלאנק צדי ברצועות תליה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-stability-ball-plank",
+    "slug": "stability-ball-plank",
+    "name": "בטן סטטית – פלאנק עם כדור פיזו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-plank/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-plank.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/stability-ball-plank.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בטן סטטית – פלאנק עם כדור פיזו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-hip-lift",
+    "slug": "smith-machine-hip-lift",
+    "name": "הרמת אגן אנכית  במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-hip-lift/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-hip-lift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-hip-lift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הרמת אגן אנכית  במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-band-kneeling-crunch",
+    "slug": "band-kneeling-crunch",
+    "name": "בכריעה על העקבים כפיפת בטן כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/band-kneeling-crunch/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-kneeling-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/band-kneeling-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בכריעה על העקבים כפיפת בטן כנגד גומיית התנגדות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-kneeling-crunch",
+    "slug": "cable-kneeling-crunch",
+    "name": "בכריעה על העקבים כפיפת בטן כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-kneeling-crunch/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-kneeling-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-kneeling-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בכריעה על העקבים כפיפת בטן כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-scapula-retraction",
+    "slug": "scapula-retraction",
+    "name": "בשכיבה קירוב שכמות כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/scapula-retraction/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "שכמה",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/scapula-retraction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/scapula-retraction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה קירוב שכמות כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-shrug",
+    "slug": "dumbbell-shrug",
+    "name": "בעמידה, הרמת שכמות כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-shrug/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "שכמה",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-shrug.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-shrug.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, הרמת שכמות כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-supinated-lever-close-grip-pulldown",
+    "slug": "supinated-lever-close-grip-pulldown",
+    "name": "משיכה עליונה כנגד מכונה ייעודית באחיזה צרה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/supinated-lever-close-grip-pulldown/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/supinated-lever-close-grip-pulldown.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/supinated-lever-close-grip-pulldown.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה עליונה כנגד מכונה ייעודית באחיזה צרה בסופינציה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-supinated-band-close-grip-pulldown",
+    "slug": "supinated-band-close-grip-pulldown",
+    "name": "משיכה עליונה כנגד גומיה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/supinated-band-close-grip-pulldown/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/supinated-band-close-grip-pulldown.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/supinated-band-close-grip-pulldown.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה עליונה כנגד גומיה בסופינציה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-mid-position-band-close-grip-pulldown",
+    "slug": "mid-position-band-close-grip-pulldown",
+    "name": "משיכה עליונה כנגד גומיה באחיזה אמצעית",
+    "href": "https://www.instructor.co.il/excercise/mid-position-band-close-grip-pulldown/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/mid-position-band-close-grip-pulldown.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/mid-position-band-close-grip-pulldown.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה עליונה כנגד גומיה באחיזה אמצעית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-one-arm-bent-over-row",
+    "slug": "dumbbell-one-arm-bent-over-row",
+    "name": "בהטיית גו, חתירה ביד אחת כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-one-arm-bent-over-row/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-one-arm-bent-over-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-one-arm-bent-over-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו, חתירה ביד אחת כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kneeling-leg-curls",
+    "slug": "kneeling-leg-curls",
+    "name": "בשכיבה, כפיפת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/kneeling-leg-curls/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kneeling-leg-curls.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kneeling-leg-curls.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, כפיפת ברכיים כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-swing",
+    "slug": "kettlebell-swing",
+    "name": "סווינג עם קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-swing/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-swing.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-swing.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל סווינג עם קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-resisted-band-seated-chest-press",
+    "slug": "resisted-band-seated-chest-press",
+    "name": "בישיבה, לחיצת חזה כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/resisted-band-seated-chest-press/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/resisted-band-seated-chest-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/resisted-band-seated-chest-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה, לחיצת חזה כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-shoulder-press",
+    "slug": "cable-shoulder-press",
+    "name": "בעמידה לחיצת כתפיים כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-shoulder-press/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-shoulder-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-shoulder-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה לחיצת כתפיים כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-shoulder-abduction",
+    "slug": "dumbbell-shoulder-abduction",
+    "name": "בעמידה הרחקת כתפיים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-shoulder-abduction/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-shoulder-abduction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-shoulder-abduction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה הרחקת כתפיים כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-upright-row",
+    "slug": "barbell-upright-row",
+    "name": "בעמידה חתירה אופקית כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-upright-row/",
+    "category": "מוט",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-upright-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-upright-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה חתירה אופקית כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-shoulder-press",
+    "slug": "lever-shoulder-press",
+    "name": "לחיצת כתפיים באחיזה צרה כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-shoulder-press/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-shoulder-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-shoulder-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת כתפיים באחיזה צרה כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-standing-military-press",
+    "slug": "smith-machine-standing-military-press",
+    "name": "בישיבה לחיצת כתפיים באחיזה צרה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-standing-military-press/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-standing-military-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-standing-military-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה לחיצת כתפיים באחיזה צרה במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-standing-military-press",
+    "slug": "barbell-standing-military-press",
+    "name": "בעמידה לחיצת כתפיים באחיזה צרה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-standing-military-press/",
+    "category": "מוט",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-standing-military-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-standing-military-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה לחיצת כתפיים באחיזה צרה כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-lying-t-bar-row",
+    "slug": "lever-lying-t-bar-row",
+    "name": "חתירה כנגד מוט T",
+    "href": "https://www.instructor.co.il/excercise/lever-lying-t-bar-row/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-lying-t-bar-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-lying-t-bar-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה כנגד מוט T, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-row",
+    "slug": "suspended-row",
+    "name": "חתירה כנגד רצועות תליה",
+    "href": "https://www.instructor.co.il/excercise/suspended-row/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה כנגד רצועות תליה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-standing-band-row",
+    "slug": "standing-band-row",
+    "name": "בעמידה חתירה כנגד גומיית התנגדות",
+    "href": "https://www.instructor.co.il/excercise/standing-band-row/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-band-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-band-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה חתירה כנגד גומיית התנגדות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-seated-row-back",
+    "slug": "cable-seated-row-back",
+    "name": "בישיבה חתירה כנגד כבל פולי",
+    "href": "https://www.instructor.co.il/excercise/cable-seated-row-back/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-seated-row-back.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-seated-row-back.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה חתירה כנגד כבל פולי, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-straight-arm-pullover-stability-ball",
+    "slug": "dumbbell-straight-arm-pullover-stability-ball",
+    "name": "בשכיבה על כדור פיזיו פולאובר כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-straight-arm-pullover-stability-ball/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד ו-כדור פיזיו",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-straight-arm-pullover-stability-ball.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-straight-arm-pullover-stability-ball.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה על כדור פיזיו פולאובר כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-straight-arm-pullover",
+    "slug": "dumbbell-straight-arm-pullover",
+    "name": "בשכיבה פולאובר כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-straight-arm-pullover/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-straight-arm-pullover.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-straight-arm-pullover.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה פולאובר כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-stiff-legged-deadlift-copy",
+    "slug": "dumbbell-stiff-legged-deadlift-copy",
+    "name": "דדליפט ברגל ישרה  כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-stiff-legged-deadlift-copy/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-stiff-legged-deadlift-copy.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-stiff-legged-deadlift-copy.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט ברגל ישרה  כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-bench-press",
+    "slug": "cable-bench-press",
+    "name": "לחיצת חזה כנגד כבל",
+    "href": "https://www.instructor.co.il/excercise/cable-bench-press/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה כנגד כבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-straight-arm-pulldown",
+    "slug": "cable-straight-arm-pulldown",
+    "name": "בעמידה פולאובר כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-straight-arm-pulldown/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-straight-arm-pulldown.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-straight-arm-pulldown.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה פולאובר כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-seated-leg-raise-crunch",
+    "slug": "lever-seated-leg-raise-crunch",
+    "name": "כפיפת ירך ובטן במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-leg-raise-crunch/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-leg-raise-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-leg-raise-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת ירך ובטן במכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-lying-crunch",
+    "slug": "lever-lying-crunch",
+    "name": "כפיפת בטן במכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-lying-crunch/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-lying-crunch.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-lying-crunch.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת בטן במכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-alternating-dumbbell-arm-curl",
+    "slug": "alternating-dumbbell-arm-curl",
+    "name": "בישיבה כפיפת מרפק לסירוגין כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/alternating-dumbbell-arm-curl/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד ו-כדור פיזיו",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/alternating-dumbbell-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/alternating-dumbbell-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה כפיפת מרפק לסירוגין כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-preacher-bench-arm-curl",
+    "slug": "dumbbell-preacher-bench-arm-curl",
+    "name": "כפיפת מרפקים בכסא כומר כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-preacher-bench-arm-curl/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-preacher-bench-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-preacher-bench-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים בכסא כומר כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-bent-over-row",
+    "slug": "dumbbell-bent-over-row",
+    "name": "בהטיית גו , חתירה כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/dumbbell-bent-over-row/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-bent-over-row.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-bent-over-row.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו , חתירה כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bar-preacher-bench-arm-curl",
+    "slug": "bar-preacher-bench-arm-curl",
+    "name": "כפיפת מרפקים בכסא כומר כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-preacher-bench-arm-curl/",
+    "category": "מוט",
+    "primaryMuscleGroup": "יד קדמית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bar-preacher-bench-arm-curl.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bar-preacher-bench-arm-curl.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפת מרפקים בכסא כומר כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-good-morning",
+    "slug": "good-morning",
+    "name": "בוקר טוב",
+    "href": "https://www.instructor.co.il/excercise/good-morning/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/good-morning.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/good-morning.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בוקר טוב, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspended-one-hand-pull",
+    "slug": "suspended-one-hand-pull",
+    "name": "חתירה ופרפר כנגד רצועה",
+    "href": "https://www.instructor.co.il/excercise/suspended-one-hand-pull/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [
+      "חזה",
+      "רגליים"
+    ],
+    "equipment": "רצועות תלייה",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-one-hand-pull.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspended-one-hand-pull.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל חתירה ופרפר כנגד רצועה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-ab-rollout",
+    "slug": "barbell-ab-rollout",
+    "name": "כפיפות בטן בגלגול מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-ab-rollout/",
+    "category": "מוט",
+    "primaryMuscleGroup": "שרירי ליבה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-ab-rollout.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-ab-rollout.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל כפיפות בטן בגלגול מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-farmer-walk",
+    "slug": "farmer-walk",
+    "name": "הליכת האיכר",
+    "href": "https://www.instructor.co.il/excercise/farmer-walk/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/farmer-walk.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/farmer-walk.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הליכת האיכר, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-triceps-pushdown",
+    "slug": "cable-triceps-pushdown",
+    "name": "פשיטת מרפקים כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-triceps-pushdown/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-triceps-pushdown.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-triceps-pushdown.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-narrow-grip-pull-up-graviton",
+    "slug": "narrow-grip-pull-up-graviton",
+    "name": "עליית מתח באחיזה צרה בגרביטון",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-pull-up-graviton/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/narrow-grip-pull-up-graviton.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/narrow-grip-pull-up-graviton.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל עליית מתח באחיזה צרה בגרביטון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-suspender-reverse-flys",
+    "slug": "suspender-reverse-flys",
+    "name": "בעמידה הרחקה אופקית בכתף כנגד רצועות תלייה",
+    "href": "https://www.instructor.co.il/excercise/suspender-reverse-flys/",
+    "category": "רצועות תלייה",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "רצועות תלייה",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-reverse-flys.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/suspender-reverse-flys.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה הרחקה אופקית בכתף כנגד רצועות תלייה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-seated-reverse-flys",
+    "slug": "lever-seated-reverse-flys",
+    "name": "בישיבה הרחקה אופקית בכתף כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-reverse-flys/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-reverse-flys.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-reverse-flys.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה הרחקה אופקית בכתף כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-turkish-getup",
+    "slug": "turkish-getup",
+    "name": "קימה טורקית",
+    "href": "https://www.instructor.co.il/excercise/turkish-getup/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/turkish-getup.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/turkish-getup.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל קימה טורקית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-wide-grip-lat-pull-down-behind-neck",
+    "slug": "wide-grip-lat-pull-down-behind-neck",
+    "name": "משיכה באמצעות פולי עליון באחיזה רחבה אל מאחורי הראש",
+    "href": "https://www.instructor.co.il/excercise/wide-grip-lat-pull-down-behind-neck/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/wide-grip-lat-pull-down-behind-neck.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/wide-grip-lat-pull-down-behind-neck.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה באמצעות פולי עליון באחיזה רחבה אל מאחורי הראש, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-narrow-grip-lat-pull-down",
+    "slug": "narrow-grip-lat-pull-down",
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה",
+    "href": "https://www.instructor.co.il/excercise/narrow-grip-lat-pull-down/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/narrow-grip-lat-pull-down.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/narrow-grip-lat-pull-down.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה באמצעות פולי עליון באחיזה צרה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-rope-climbing",
+    "slug": "rope-climbing",
+    "name": "טיפוס על חבל",
+    "href": "https://www.instructor.co.il/excercise/rope-climbing/",
+    "category": "חבל קרב",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "חבל קרב",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/rope-climbing.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/rope-climbing.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל טיפוס על חבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-pulley-narrow-grip-lat-supinated-pull-down",
+    "slug": "pulley-narrow-grip-lat-supinated-pull-down",
+    "name": "משיכה באמצעות פולי עליון באחיזה צרה בסופינציה",
+    "href": "https://www.instructor.co.il/excercise/pulley-narrow-grip-lat-supinated-pull-down/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "גב",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/pulley-narrow-grip-lat-supinated-pull-down.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/pulley-narrow-grip-lat-supinated-pull-down.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל משיכה באמצעות פולי עליון באחיזה צרה בסופינציה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-crossovers",
+    "slug": "cable-crossovers",
+    "name": "בהטיית גו, פרפר כנגד פולי עליון",
+    "href": "https://www.instructor.co.il/excercise/cable-crossovers/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-crossovers.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-crossovers.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו, פרפר כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-standing-calf-raise-smith-machine",
+    "slug": "standing-calf-raise-smith-machine",
+    "name": "בעמידה הרמת עקבים כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/standing-calf-raise-smith-machine/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-calf-raise-smith-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-calf-raise-smith-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה הרמת עקבים כנגד מכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-flys",
+    "slug": "flys",
+    "name": "בשכיבה, פרפר כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/flys/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flys.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flys.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, פרפר כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-plantar-flexion-dumbbell",
+    "slug": "plantar-flexion-dumbbell",
+    "name": "הרמת עקבים כנגד משקולת יד",
+    "href": "https://www.instructor.co.il/excercise/plantar-flexion-dumbbell/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/plantar-flexion-dumbbell.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/plantar-flexion-dumbbell.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל הרמת עקבים כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lower-pully-flys",
+    "slug": "lower-pully-flys",
+    "name": "בשכיבה, פרפר עם כבל קרוס מפולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/lower-pully-flys/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lower-pully-flys.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lower-pully-flys.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, פרפר עם כבל קרוס מפולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-hip-thrust",
+    "slug": "barbell-hip-thrust",
+    "name": "פשיטת ירך (גשר) כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-hip-thrust/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-hip-thrust.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-hip-thrust.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ירך (גשר) כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-alternate-hip-flexion",
+    "slug": "alternate-hip-flexion",
+    "name": "בשכיבה, כפיפת ירך לסירוגין",
+    "href": "https://www.instructor.co.il/excercise/alternate-hip-flexion/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/alternate-hip-flexion.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/alternate-hip-flexion.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, כפיפת ירך לסירוגין, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lever-seated-hip-adduction",
+    "slug": "lever-seated-hip-adduction",
+    "name": "בישיבה, קירוב ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/lever-seated-hip-adduction/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-hip-adduction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lever-seated-hip-adduction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה, קירוב ירך כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-sitting-hip-abduction-machine",
+    "slug": "sitting-hip-abduction-machine",
+    "name": "בישיבה הרחקת ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/sitting-hip-abduction-machine/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/sitting-hip-abduction-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/sitting-hip-abduction-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה הרחקת ירך כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-deadlift-kettlebell",
+    "slug": "deadlift-kettlebell",
+    "name": "דדליפט ברגל אחת כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/deadlift-kettlebell/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/deadlift-kettlebell.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/deadlift-kettlebell.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט ברגל אחת כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-decline-bench-press",
+    "slug": "barbell-decline-bench-press",
+    "name": "לחיצת חזה בשיפוע שלילי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-decline-bench-press/",
+    "category": "מוט",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-decline-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-decline-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה בשיפוע שלילי כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-incline-bench-press",
+    "slug": "barbell-incline-bench-press",
+    "name": "לחיצת חזה בשיפוע חיובי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-incline-bench-press/",
+    "category": "מוט",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-incline-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-incline-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה בשיפוע חיובי כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-flys-machine",
+    "slug": "flys-machine",
+    "name": "פרפר כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/flys-machine/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flys-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flys-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פרפר כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-battling-ropes-alternate-arms-squat",
+    "slug": "battling-ropes-alternate-arms-squat",
+    "name": "גל לסירוגין בשפיפה עם חבל",
+    "href": "https://www.instructor.co.il/excercise/battling-ropes-alternate-arms-squat/",
+    "category": "חבל קרב",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "חבל קרב",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/battling-ropes-alternate-arms-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/battling-ropes-alternate-arms-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל גל לסירוגין בשפיפה עם חבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-smith-machine-bench-press",
+    "slug": "smith-machine-bench-press",
+    "name": "לחיצת חזה במכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/smith-machine-bench-press/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/smith-machine-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה במכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbell-bench-press",
+    "slug": "dumbell-bench-press",
+    "name": "לחיצת חזה כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/dumbell-bench-press/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbell-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbell-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-seated-machine-chest-press",
+    "slug": "seated-machine-chest-press",
+    "name": "לחיצת חזה כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/seated-machine-chest-press/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/seated-machine-chest-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/seated-machine-chest-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-flat-bench-press-narrow-grip",
+    "slug": "flat-bench-press-narrow-grip",
+    "name": "לחיצת חזה באחיזה צרה במוט",
+    "href": "https://www.instructor.co.il/excercise/flat-bench-press-narrow-grip/",
+    "category": "מוט",
+    "primaryMuscleGroup": "יד אחורית",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flat-bench-press-narrow-grip.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/flat-bench-press-narrow-grip.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה באחיזה צרה במוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-guilliotine-bench-press",
+    "slug": "guilliotine-bench-press",
+    "name": "לחיצת גיליוטינה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/guilliotine-bench-press/",
+    "category": "מוט",
+    "primaryMuscleGroup": "חזה",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/guilliotine-bench-press.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/guilliotine-bench-press.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת גיליוטינה כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bellbar-stiff-legged-deadlift",
+    "slug": "bellbar-stiff-legged-deadlift",
+    "name": "דדליפט ברגל ישרה כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-stiff-legged-deadlift/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-stiff-legged-deadlift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-stiff-legged-deadlift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט ברגל ישרה כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-deadlift",
+    "slug": "kettlebell-deadlift",
+    "name": "דדליפט כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-deadlift/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-deadlift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-deadlift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bellbar-deadlift",
+    "slug": "bellbar-deadlift",
+    "name": "דדליפט כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bellbar-deadlift/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-deadlift.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bellbar-deadlift.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל דדליפט כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-hip-extension",
+    "slug": "cable-hip-extension",
+    "name": "פשיטת ירך כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-extension/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-hip-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-hip-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ירך כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-cable-hip-adduction",
+    "slug": "cable-hip-adduction",
+    "name": "קירוב ירך כנגד פולי תחתון",
+    "href": "https://www.instructor.co.il/excercise/cable-hip-adduction/",
+    "category": "כבל פולי",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כבל פולי",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-hip-adduction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-hip-adduction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל קירוב ירך כנגד פולי תחתון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-standing-w-machine-hip-adduction",
+    "slug": "standing-w-machine-hip-adduction",
+    "name": "בעמידה, קירוב ירך כנגד מכונה",
+    "href": "https://www.instructor.co.il/excercise/standing-w-machine-hip-adduction/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-w-machine-hip-adduction.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-w-machine-hip-adduction.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה, קירוב ירך כנגד מכונה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-standing-hip-abduction-machine",
+    "slug": "standing-hip-abduction-machine",
+    "name": "בעמידה הרחקת ירך כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/standing-hip-abduction-machine/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-hip-abduction-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/standing-hip-abduction-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בעמידה הרחקת ירך כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-leg-curls-with-resistance-band",
+    "slug": "leg-curls-with-resistance-band",
+    "name": "בישיבה, כפיפת ברכיים כנגד גומיה",
+    "href": "https://www.instructor.co.il/excercise/leg-curls-with-resistance-band/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-curls-with-resistance-band.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-curls-with-resistance-band.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה, כפיפת ברכיים כנגד גומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-leg-curls-with-dumbbells",
+    "slug": "leg-curls-with-dumbbells",
+    "name": "בשכיבה, כפיפת ברכיים כנגד משקולת",
+    "href": "https://www.instructor.co.il/excercise/leg-curls-with-dumbbells/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-curls-with-dumbbells.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-curls-with-dumbbells.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בשכיבה, כפיפת ברכיים כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-seated-leg-curls-2",
+    "slug": "seated-leg-curls-2",
+    "name": "בישיבה, כפיפת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/seated-leg-curls-2/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/seated-leg-curls-2.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/seated-leg-curls-2.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל בישיבה, כפיפת ברכיים כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-leg-extension",
+    "slug": "leg-extension",
+    "name": "פשיטת ברכיים כנגד מכונה ייעודית",
+    "href": "https://www.instructor.co.il/excercise/leg-extension/",
+    "category": "מכונה ייעודית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונה ייעודית",
+    "difficulty": "מתחילים",
+    "movementType": "מבודד",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-extension.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/leg-extension.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת ברכיים כנגד מכונה ייעודית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-kettlebell-goblet-squat",
+    "slug": "kettlebell-goblet-squat",
+    "name": "שפיפה – סקוואט כנגד קטלבל",
+    "href": "https://www.instructor.co.il/excercise/kettlebell-goblet-squat/",
+    "category": "קטלבל",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "קטלבל",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-goblet-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/kettlebell-goblet-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט כנגד קטלבל, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-0band-thruster",
+    "slug": "0band-thruster",
+    "name": "שפיפה – סקוואט ולחיצת כתפיים בגומיה",
+    "href": "https://www.instructor.co.il/excercise/0band-thruster/",
+    "category": "גומיית התנגדות",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [
+      "רגליים"
+    ],
+    "equipment": "גומיית התנגדות",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/0band-thruster.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/0band-thruster.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט ולחיצת כתפיים בגומיה, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-landmind-thrust",
+    "slug": "landmind-thrust",
+    "name": "שפיפה – סקוואט ולחיצת כתפיים במוט",
+    "href": "https://www.instructor.co.il/excercise/landmind-thrust/",
+    "category": "מוט",
+    "primaryMuscleGroup": "כתפיים",
+    "secondaryMuscleGroups": [
+      "רגליים"
+    ],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/landmind-thrust.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/landmind-thrust.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט ולחיצת כתפיים במוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lunges-with-smith-machine",
+    "slug": "lunges-with-smith-machine",
+    "name": "מכרעים כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/lunges-with-smith-machine/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lunges-with-smith-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lunges-with-smith-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים כנגד מכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-lunges-with-dumbells",
+    "slug": "lunges-with-dumbells",
+    "name": "מכרעים כנגד משקולות",
+    "href": "https://www.instructor.co.il/excercise/lunges-with-dumbells/",
+    "category": "משקולות יד",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lunges-with-dumbells.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/lunges-with-dumbells.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-barbell-lunges",
+    "slug": "barbell-lunges",
+    "name": "מכרעים כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/barbell-lunges/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-lunges.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/barbell-lunges.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל מכרעים כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-squat-stability-ball",
+    "slug": "squat-stability-ball",
+    "name": "סקוואט על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/squat-stability-ball/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-stability-ball.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-stability-ball.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל סקוואט על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-squat-stability-ball-2",
+    "slug": "squat-stability-ball-2",
+    "name": "שפיפה – סקוואט על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/squat-stability-ball-2/",
+    "category": "כדור פיזיו",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "כדור פיזיו",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-stability-ball-2.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-stability-ball-2.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט על כדור פיזיו, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-squat-smith-machine",
+    "slug": "squat-smith-machine",
+    "name": "שפיפה – סקוואט כנגד מכונת סמית",
+    "href": "https://www.instructor.co.il/excercise/squat-smith-machine/",
+    "category": "מכונת סמית",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מכונת סמית",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-smith-machine.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/squat-smith-machine.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט כנגד מכונת סמית, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-front-squat",
+    "slug": "front-squat",
+    "name": "שפיפה – סקוואט קדמי כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/front-squat/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/front-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/front-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט קדמי כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-bar-squat",
+    "slug": "bar-squat",
+    "name": "שפיפה – סקוואט כנגד מוט",
+    "href": "https://www.instructor.co.il/excercise/bar-squat/",
+    "category": "מוט",
+    "primaryMuscleGroup": "רגליים",
+    "secondaryMuscleGroups": [],
+    "equipment": "מוט",
+    "difficulty": "בינוני",
+    "movementType": "מורכב",
+    "imageUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bar-squat.jpg",
+    "videoUrl": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/bar-squat.mp4",
+    "howTo": "מתמקמים בעמדת המוצא המתאימה לתרגיל שפיפה – סקוואט כנגד מוט, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "commonMistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  }
+]
