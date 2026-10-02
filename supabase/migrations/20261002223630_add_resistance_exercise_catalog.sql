@@ -1521,7 +1521,7 @@ insert into public.workout_exercises (
   'resistance-cable-triceps-pushdown','פשיטת מרפקים כנגד פולי עליון','פשיטת מרפקים כנגד פולי עליון','{}'::text[],
   'כבל פולי','יד אחורית',array[]::text[],
   'כבל פולי','מתחילים','{"url":"https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-triceps-pushdown.mp4","provider":"self-hosted","title":"פשיטת מרפקים כנגד פולי עליון"}'::jsonb,
-  'מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.',array['instructor.co.il']::text[],'[{"workbook":"instructor.co.il","sheet":"כוח והתנגדות","cell":"https://www.instructor.co.il/excercise/cable-triceps-pushdown/","name":"פשיטת מרפקים כנגד פולי עליון"}]'::jsonb,'active',
+  'מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.',array['instructor.co.il']::text[],'[{"workbook":"instructor.co.il","sheet":"כוח והתנגדות","cell":"https://www.instructor.co.il/excercise/%d7%a4%d7%a9%d7%99%d7%98%d7%aa-%d7%9e%d7%a8%d7%a4%d7%a7%d7%99%d7%9d-%d7%9b%d7%a0%d7%92%d7%93-%d7%a4%d7%95%d7%9c%d7%99-%d7%a2%d7%9c%d7%99%d7%95%d7%9f/","name":"פשיטת מרפקים כנגד פולי עליון"}]'::jsonb,'active',
   'https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/cable-triceps-pushdown.jpg','מתמקמים בעמדת המוצא המתאימה לתרגיל פשיטת מרפקים כנגד פולי עליון, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.',array['שמור על מנח גוף יציב','בצע את התנועה בקצב נשלט','התאם את ההתנגדות ליכולת']::text[],array['שימוש בתנופה במקום בשריר המטרה','עבודה בטווח שמייצר כאב','איבוד שליטה בציוד או בעמדת הגוף']::text[]
 ) on conflict (id) do nothing;
 
@@ -2480,5 +2480,13 @@ update public.workout_exercises set
   source_workbooks = case when 'instructor.co.il' = any(coalesce(source_workbooks,'{}'::text[])) then source_workbooks else array_append(coalesce(source_workbooks,'{}'::text[]),'instructor.co.il') end,
   source_references = case when coalesce(source_references,'[]'::jsonb) @> '[{"cell":"https://www.instructor.co.il/excercise/nordic-ham-curl/"}]'::jsonb then source_references else coalesce(source_references,'[]'::jsonb) || '[{"workbook":"instructor.co.il","sheet":"כוח והתנגדות","cell":"https://www.instructor.co.il/excercise/nordic-ham-curl/","name":"כפיפה נורדית/רוסית"}]'::jsonb end
 where id = 'bodyweight-nordic-curl';
+
+update public.workout_exercises set
+  aliases = case when 'כפיפות גו על כדור פיזיו' = any(coalesce(aliases,'{}'::text[])) then aliases else array_append(coalesce(aliases,'{}'::text[]),'כפיפות גו על כדור פיזיו') end,
+  category = 'כדור פיזיו', equipment = 'כדור פיזיו',
+  primary_muscle_group = 'שרירי ליבה', secondary_muscle_groups = array[]::text[],
+  source_workbooks = case when 'instructor.co.il' = any(coalesce(source_workbooks,'{}'::text[])) then source_workbooks else array_append(coalesce(source_workbooks,'{}'::text[]),'instructor.co.il') end,
+  source_references = case when coalesce(source_references,'[]'::jsonb) @> '[{"cell":"https://www.instructor.co.il/excercise/stability-ball-crunch-2/"}]'::jsonb then source_references else coalesce(source_references,'[]'::jsonb) || '[{"workbook":"instructor.co.il","sheet":"כוח והתנגדות","cell":"https://www.instructor.co.il/excercise/stability-ball-crunch-2/","name":"כפיפות גו על כדור פיזיו"}]'::jsonb end
+where id = 'resistance-stability-ball-crunch';
 
 commit;

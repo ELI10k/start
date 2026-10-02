@@ -556,5 +556,17 @@
     ],
     "movementType": "מבודד",
     "existingId": "bodyweight-nordic-curl"
+  },
+  {
+    "name": "כפיפות גו על כדור פיזיו",
+    "href": "https://www.instructor.co.il/excercise/stability-ball-crunch-2/",
+    "muscles": [
+      "שרירי ליבה"
+    ],
+    "equipment": [
+      "כדור פיזיו"
+    ],
+    "movementType": "מבודד",
+    "existingId": "resistance-stability-ball-crunch"
   }
 ]
