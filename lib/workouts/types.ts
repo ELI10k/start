@@ -1,4 +1,4 @@
-export type ExerciseVideo = Readonly<{ url: string; provider: "youtube"; title?: string }>;
+export type ExerciseVideo = Readonly<{ url: string; provider: "youtube" | "self-hosted"; title?: string }>;
 export type ExerciseStatus = "active" | "archived";
 export type ExerciseSourceReference = Readonly<{workbook:string;sheet:string;cell:string;name:string}>;
 // Guidance is coach-authored and always optional. Nothing is generated: an

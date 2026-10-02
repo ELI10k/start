@@ -73,12 +73,17 @@ export function ExerciseGuidancePanel({ exercise }: { exercise: Exercise }) {
         </section>
       ))}
 
-      {view.videoUrl && (
+      {view.videoUrl && isDirectVideo(view.videoUrl) ? (
+        <video controls playsInline preload="metadata" poster={view.imageUrl} className="aspect-square w-full rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] object-contain" aria-label={`סרטון הדגמה של ${view.name}`}>
+          <source src={view.videoUrl} type="video/mp4" />
+          הדפדפן אינו תומך בהצגת הסרטון.
+        </video>
+      ) : view.videoUrl ? (
         <a href={view.videoUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-[#16A34A]">
           צפייה בסרטון ההסבר
           <ExternalLink aria-hidden="true" size={15} />
         </a>
-      )}
+      ) : null}
 
       {/* Naming what is absent is the point: it tells the coach exactly what to
           fill in, and it tells the client that nothing was hidden from them. */}
@@ -91,6 +96,8 @@ export function ExerciseGuidancePanel({ exercise }: { exercise: Exercise }) {
     </div>
   );
 }
+
+const isDirectVideo = (url: string) => /\.(?:mp4|m4v|mov|webm)(?:[?#]|$)/i.test(url);
 
 const MISSING_LABELS = {
   "how-to": "איך מבצעים",
