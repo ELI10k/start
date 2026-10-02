@@ -16,12 +16,10 @@ export const maxDuration = 60;
 // the same row rather than producing duplicates.
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    return NextResponse.json({ ok: false, message: "CRON_SECRET is not configured." }, { status: 500 });
-  }
   // Vercel Cron sends the secret as a bearer token. Reject anything else so the
-  // route cannot be triggered from the open internet.
-  if (!isAuthorizedCronRequest(request, secret)) {
+  // route cannot be triggered from the open internet. Missing configuration is
+  // also closed as unauthorized instead of leaking a deployment error.
+  if (!secret || !isAuthorizedCronRequest(request, secret)) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
 

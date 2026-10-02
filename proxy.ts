@@ -29,12 +29,6 @@ const clientPrefixes = [
 ];
 
 const isSharedPath = (path: string) => path === "/foods" || path.startsWith("/foods/");
-const isLocalWorkoutPath = (path: string) =>
-  path === "/workouts" ||
-  path.startsWith("/workouts/") ||
-  path === "/coach/workouts" ||
-  path.startsWith("/coach/workouts/") ||
-  /^\/coach\/clients\/[^/]+\/workouts$/.test(path);
 const isPrivatePath = (path: string) =>
   path === "/" ||
   path === "/coach" ||
@@ -81,7 +75,6 @@ export async function proxy(request: NextRequest) {
   const requestedPath = `${path}${request.nextUrl.search}`;
 
   if (!config) {
-    if (isLocalWorkoutPath(path)) return NextResponse.next();
     return isPrivatePath(path)
       ? NextResponse.redirect(new URL(loginPathFor(requestedPath), request.url))
       : NextResponse.next();

@@ -12,7 +12,12 @@ const OFF_TIMEOUT_MS = 6_000;
 const OFF_FIELDS = "product_name,product_name_he,generic_name,brands,quantity,serving_size,product_quantity,nutriments";
 
 export async function GET(_request: Request, context: { params: Promise<{ barcode: string }> }) {
-  const auth = await getAuthContext();
+  let auth = null;
+  try {
+    auth = await getAuthContext();
+  } catch {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   if (!auth) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const { barcode: raw } = await context.params;

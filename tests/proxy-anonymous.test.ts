@@ -18,3 +18,8 @@ test("public API routes reach their own authorization handler", () => {
   assert.ok(publicBypass > 0);
   assert.ok(configRead > publicBypass);
 });
+
+test("missing Supabase configuration still redirects private workout routes", () => {
+  assert.doesNotMatch(source, /isLocalWorkoutPath/);
+  assert.match(source, /if \(!config\) \{\s*return isPrivatePath\(path\)/);
+});
