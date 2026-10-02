@@ -100,6 +100,7 @@ main { width: 100%; }
    window. Phones retain the page's native scroll to avoid nested touch scroll. */
 @media (min-width: 1024px) {
   .exercise-directory-scroll {
+    direction: ltr;
     max-height: max(22rem, calc(100dvh - 28rem));
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -108,6 +109,8 @@ main { width: 100%; }
     scrollbar-gutter: stable;
     scrollbar-width: auto;
   }
+
+  .exercise-directory-scroll > * { direction: rtl; }
 
   .exercise-directory-scroll::-webkit-scrollbar { width: 12px; }
   .exercise-directory-scroll::-webkit-scrollbar-track { background: transparent; }

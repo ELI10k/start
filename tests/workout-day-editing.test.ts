@@ -246,5 +246,7 @@ test("the desktop exercise catalogue scrolls inside the content area", async () 
   assert.match(css, /\.exercise-directory-scroll \{/);
   assert.match(css, /max-height: max\(22rem, calc\(100dvh - 28rem\)\)/);
   assert.match(css, /overflow-y: auto/);
+  assert.match(css, /\.exercise-directory-scroll \{[\s\S]*direction: ltr/);
+  assert.match(css, /\.exercise-directory-scroll > \* \{ direction: rtl; \}/);
   assert.match(css, /@media \(min-width: 1024px\)/);
 });
