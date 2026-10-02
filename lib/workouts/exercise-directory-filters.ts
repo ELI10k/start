@@ -17,6 +17,7 @@ const MUSCLE_ORDER = [
   "גב",
   "רחב גבי",
   "טרפזים",
+  "שכמה",
   "כתף קדמית",
   "כתף אמצעית",
   "כתף אחורית",
@@ -35,6 +36,7 @@ const MUSCLE_ORDER = [
   "רגליים",
   "תאומים",
   "כל הגוף",
+  "חימום",
 ] as const;
 
 const muscleRank = new Map<string, number>(MUSCLE_ORDER.map((muscle, index) => [muscle, index]));
@@ -48,12 +50,14 @@ export function sortMuscles(values: readonly string[]): string[] {
 
 export function matchesExerciseCategory(exercise: Exercise, selected: ExerciseCategoryFilter): boolean {
   const text = [exercise.name, exercise.category, exercise.equipment, ...exercise.sourceWorkbooks].filter(Boolean).join(" ").toLocaleLowerCase("he");
+  const movementAndEquipment = [exercise.name, exercise.equipment].filter(Boolean).join(" ").toLocaleLowerCase("he");
 
-  if (selected === "TRX") return /\btrx\b/i.test(text);
-  if (selected === "משקל גוף") return /משקל גוף/.test(text) && !/\btrx\b/i.test(text);
+  if (EXERCISE_CATEGORIES.includes(exercise.category as ExerciseCategoryFilter)) return exercise.category === selected;
+  if (selected === "TRX") return /\btrx\b|רצוע(?:ה|ות) תל(?:יה|ייה)/i.test(text);
+  if (selected === "משקל גוף") return /משקל גוף/.test(text) && !/\btrx\b|רצוע(?:ה|ות) תל(?:יה|ייה)/i.test(text);
 
-  const isMachine = /מכונ|כבל|פולי|סמית|לחיצת רגליים|פשיטת ברכיים|כפיפת ברכיים/.test(text);
+  const isMachine = /מכונ|כבל|פולי|סמית|המר|לחיצת רגליים|פשיטת ברכיים|כפיפת ברכיים/.test(movementAndEquipment);
   if (selected === "מכונות") return isMachine;
 
-  return !isMachine && !/משקל גוף|\btrx\b/i.test(text);
+  return !isMachine && !/משקל גוף|\btrx\b|רצוע(?:ה|ות) תל(?:יה|ייה)/i.test(text);
 }

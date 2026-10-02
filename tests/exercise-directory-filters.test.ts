@@ -25,4 +25,8 @@ test("category choices group exercises by their actual equipment", () => {
   assert.equal(matchesExerciseCategory(exercise({ equipment: "משקל גוף", category: "ליבה" }), "משקל גוף"), true);
   assert.equal(matchesExerciseCategory(exercise({ equipment: "רצועות TRX" }), "TRX"), true);
   assert.equal(matchesExerciseCategory(exercise({ equipment: "משקולות יד" }), "משקולות"), true);
+  assert.equal(matchesExerciseCategory(exercise({ equipment: "רצועות תלייה" }), "TRX"), true);
+  assert.equal(matchesExerciseCategory(exercise({ category: "משקל גוף", equipment: "מוט" }), "משקל גוף"), true);
+  assert.equal(matchesExerciseCategory(exercise({ category: "מכונות", equipment: "כבל פולי" }), "משקולות"), false);
+  assert.equal(matchesExerciseCategory(exercise({ category: "משקולות ומכונות", equipment: "משקולות יד", sourceWorkbooks: ["בנק תרגילים משקולות ומכונות.xlsx"] }), "משקולות"), true);
 });

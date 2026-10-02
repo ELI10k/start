@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import process from "node:process";
 import { createClient } from "@supabase/supabase-js";
+import { canonicalizeEquipment, categorizeExercise } from "./lib/exercise-taxonomy.mjs";
 
 process.loadEnvFile(process.env.ENV_FILE || ".env.local");
 
@@ -29,7 +30,7 @@ const rows = newExercises.filter(({ id }) => !presentIds.has(id)).map((exercise)
   name: exercise.name,
   normalized_name: normalizeName(exercise.name),
   aliases: [],
-  category: exercise.category,
+  category: categorizeExercise(exercise),
   primary_muscle_group: exercise.primaryMuscleGroup,
   secondary_muscle_groups: exercise.secondaryMuscleGroups,
   equipment: exercise.equipment,
@@ -54,7 +55,7 @@ const matchesById = Map.groupBy(existingMatches, ({ existingId }) => existingId)
 for (const [id, matches] of matchesById) {
   const { data: current, error: readError } = await supabase
     .from("workout_exercises")
-    .select("aliases,source_workbooks,source_references")
+    .select("id,name,category,equipment,aliases,source_workbooks,source_references")
     .eq("id", id).single();
   if (readError) throw readError;
 
@@ -64,13 +65,14 @@ for (const [id, matches] of matchesById) {
     if (!references.some((reference) => reference?.cell === match.href)) references.push(sourceReference(match.name, match.href));
   }
   const representative = matches[0];
-  const category = representative.equipment[0] || "כוח והתנגדות";
+  const equipment = canonicalizeEquipment({ ...current, equipment: representative.equipment.join(" ו-") || current.equipment });
+  const category = categorizeExercise({ ...current, equipment });
   const primary = muscle(representative.muscles[0] || "כל הגוף");
   const secondary = representative.muscles.slice(1).map(muscle);
   const { error: updateError } = await supabase.from("workout_exercises").update({
     aliases,
     category,
-    equipment: representative.equipment.join(" ו-") || "משקל גוף",
+    equipment,
     primary_muscle_group: primary,
     secondary_muscle_groups: secondary,
     source_workbooks: [...new Set([...(current.source_workbooks ?? []), "instructor.co.il"])],
