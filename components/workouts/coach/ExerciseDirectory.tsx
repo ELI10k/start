@@ -33,7 +33,7 @@ export default function ExerciseDirectory() {
       <Filter label="רמה" value={difficulty} onChange={setDifficulty} values={[...EXERCISE_DIFFICULTIES]}/>
     </section>
     <p className="mt-4 text-xs text-[#5B5F5B]">{results.length} מתוך {all.length} תרגילים מאושרים</p>
-    {results.length ? <div className="mt-3 grid gap-3 md:grid-cols-2">{results.map((exercise) => {
+    {results.length ? <div className="exercise-directory-scroll mt-3 grid gap-3 md:grid-cols-2" role="region" aria-label="תוצאות מאגר התרגילים" tabIndex={0}>{results.map((exercise) => {
       const detailHref = `/coach/workouts/exercises/${exercise.id}`;
       return <article key={exercise.id} className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
         <div className="flex justify-between gap-3">

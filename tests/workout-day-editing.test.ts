@@ -237,3 +237,14 @@ test("coach exercise cards stay inside the coach-authorized route", async () => 
   assert.match(detail, /ExerciseDetail exerciseId=\{exerciseId\}/);
   assert.match(detail, /href="\/coach\/workouts\/exercises"/);
 });
+
+test("the desktop exercise catalogue scrolls inside the content area", async () => {
+  const directory = await source("components/workouts/coach/ExerciseDirectory.tsx");
+  const css = await source("app/globals.css");
+  assert.match(directory, /exercise-directory-scroll/);
+  assert.match(directory, /role="region" aria-label="תוצאות מאגר התרגילים" tabIndex=\{0\}/);
+  assert.match(css, /\.exercise-directory-scroll \{/);
+  assert.match(css, /max-height: max\(22rem, calc\(100dvh - 28rem\)\)/);
+  assert.match(css, /overflow-y: auto/);
+  assert.match(css, /@media \(min-width: 1024px\)/);
+});
