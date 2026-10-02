@@ -24,7 +24,7 @@ const { data: present, error: lookupError } = await supabase.from("workout_exerc
 if (lookupError) throw lookupError;
 const presentIds = new Set((present ?? []).map(({ id }) => id));
 
-const rows = newExercises.filter(({ id }) => !presentIds.has(id)).map((exercise) => ({
+const allRows = newExercises.map((exercise) => ({
   id: exercise.id,
   name: exercise.name,
   normalized_name: normalizeName(exercise.name),
@@ -44,11 +44,10 @@ const rows = newExercises.filter(({ id }) => !presentIds.has(id)).map((exercise)
   cues: exercise.cues,
   common_mistakes: exercise.commonMistakes,
 }));
+const rows = allRows.filter(({ id }) => !presentIds.has(id));
 
-if (rows.length) {
-  const { error } = await supabase.from("workout_exercises").insert(rows);
-  if (error) throw error;
-}
+const { error: upsertError } = await supabase.from("workout_exercises").upsert(allRows, { onConflict: "id" });
+if (upsertError) throw upsertError;
 
 const matchesById = Map.groupBy(existingMatches, ({ existingId }) => existingId);
 for (const [id, matches] of matchesById) {
