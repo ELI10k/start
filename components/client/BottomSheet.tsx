@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, type ReactNode } from "react";
+import { acquireBodyScrollLock } from "@/lib/browser/body-scroll-lock";
 
 // The mobile answer to a modal: slides up from the bottom, has a drag handle, and
 // closes on Escape or on a backdrop tap. Focus is trapped while it is open and
@@ -27,8 +28,7 @@ export default function BottomSheet({
   useEffect(() => {
     if (!open) return;
     opener.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const releaseBodyScrollLock = acquireBodyScrollLock();
     panel.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -56,7 +56,7 @@ export default function BottomSheet({
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      releaseBodyScrollLock();
       opener.current?.focus();
     };
   }, [open, onClose]);

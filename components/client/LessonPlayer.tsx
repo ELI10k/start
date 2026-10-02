@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { saveContentProgress } from "@/app/actions/content";
+import { acquireBodyScrollLock } from "@/lib/browser/body-scroll-lock";
 
 /* A player that does not announce where the video is stored.
  *
@@ -275,11 +276,10 @@ export default function LessonPlayer({
     };
     document.addEventListener("keydown", onKey);
     // The page behind must not scroll under the player while it is covering it.
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const releaseBodyScrollLock = acquireBodyScrollLock();
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
+      releaseBodyScrollLock();
     };
   }, [full]);
 

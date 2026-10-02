@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { acquireBodyScrollLock } from "@/lib/browser/body-scroll-lock";
 
 export type CheckInPhoto = Readonly<{
   id: string;
@@ -81,11 +82,10 @@ function Lightbox({
       if (event.key === "ArrowRight") onMove((index - 1 + photos.length) % photos.length);
     };
     document.addEventListener("keydown", onKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const releaseBodyScrollLock = acquireBodyScrollLock();
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      releaseBodyScrollLock();
     };
   }, [index, photos.length, onClose, onMove]);
 
