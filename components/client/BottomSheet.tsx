@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { acquireBodyScrollLock } from "@/lib/browser/body-scroll-lock";
 
 // The mobile answer to a modal: slides up from the bottom, has a drag handle, and
 // closes on Escape or on a backdrop tap. Focus is trapped while it is open and
@@ -33,8 +34,7 @@ export default function BottomSheet({
   useEffect(() => {
     if (!open) return;
     opener.current = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const releaseBodyScrollLock = acquireBodyScrollLock();
     panel.current?.focus();
 
     // iOS keeps fixed elements anchored to the layout viewport when its
@@ -89,7 +89,7 @@ export default function BottomSheet({
       document.removeEventListener("keydown", onKeyDown);
       visualViewport?.removeEventListener("resize", fitToVisibleViewport);
       visualViewport?.removeEventListener("scroll", fitToVisibleViewport);
-      document.body.style.overflow = previousOverflow;
+      releaseBodyScrollLock();
       opener.current?.focus();
     };
   }, [open, placement]);

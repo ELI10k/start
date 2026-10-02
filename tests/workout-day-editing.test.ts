@@ -213,10 +213,17 @@ test("the guidance sheet closes three ways and gives the page back", async () =>
   const sheet = await source("components/client/BottomSheet.tsx");
   assert.match(sheet, /className="sheet-backdrop" onClick=\{onClose\}/);
   assert.match(sheet, /if \(event\.key === "Escape"\)/);
-  // Whatever the page's overflow was before the sheet opened is what it gets
-  // back - the cleanup restores it rather than clearing it to a guess.
-  assert.match(sheet, /const previousOverflow = document\.body\.style\.overflow/);
-  assert.match(sheet, /document\.body\.style\.overflow = previousOverflow/);
+  // The shared lock restores scrolling after the final overlapping surface
+  // closes, including when Next hides a preserved route during navigation.
+  assert.match(sheet, /const releaseBodyScrollLock = acquireBodyScrollLock\(\)/);
+  assert.match(sheet, /releaseBodyScrollLock\(\)/);
+  const scrollLock = await source("lib/browser/body-scroll-lock.ts");
+  assert.match(scrollLock, /lockCount \+= 1/);
+  assert.match(scrollLock, /if \(lockCount === 0\)/);
+  assert.match(scrollLock, /body\.style\.overflow = overflowBeforeFirstLock/);
+  const recovery = await source("components/coach/CoachScrollRecovery.tsx");
+  assert.match(recovery, /releaseOrphanedBodyScrollLock\(\)/);
+  assert.match(recovery, /\[pathname\]/);
   const button = await source("components/workouts/ExerciseGuidanceButton.tsx");
   assert.match(button, /onClick=\{\(\) => setOpen\(false\)\}/);
 });
