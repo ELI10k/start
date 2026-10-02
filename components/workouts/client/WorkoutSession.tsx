@@ -14,10 +14,11 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
 import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
 import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
-import { isCompoundLift, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
+import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
 import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
+import { workoutRestSeconds } from "@/lib/workouts/rest";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
 const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);return Number.isFinite(count)&&count>0?Math.min(count,20):0};
@@ -82,14 +83,14 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     const reportExercises:ReportExercise[]=saved.exerciseResults.map((entry)=>{
       const performed=entry.performedExerciseId??entry.exerciseId;
       const prescription=ordered.find((item)=>item.id===entry.workoutExerciseId);
-      const restSeconds=Number.parseInt(prescription?.rest??"",10);
+      const restSeconds=workoutRestSeconds(prescription?.rest);
       // The session just saved is the newest one in the snapshot's history, so
       // "previous" is the one before it.
       const history=exercisePerformance(snapshot.completedWorkouts,currentClientId,performed).sessions
         .filter((session)=>session.workoutId!==saved.id);
       return{
         name:getExercise(performed)?.name??"תרגיל",
-        restSeconds:Number.isFinite(restSeconds)&&restSeconds>0?restSeconds:null,
+        restSeconds,
         sets:entry.sets,
         previousSets:history[0]?.sets??[],
         skipped:entry.skipped,
@@ -121,8 +122,17 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const best=bestComparableSet(performance.sessions,repTarget);
   // What to load before the working sets, worked out from what was actually
   // lifted last time. No previous session means no honest percentage of anything.
+  // Flexion and extension may both be filed under "legs", but they load
+  // opposing muscles and each needs its own preparation. Base the decision on
+  // the exercise itself, not on whether another exercise shares its broad
+  // catalogue group. Bodyweight abdominal work is the explicit exception.
   const bodyweightAbs=exercise?.primaryMuscleGroup==="בטן"&&(/משקל גוף/.test(exercise.name)||exercise.category==="משקל גוף");
-  const warmup=!bodyweightAbs&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
+  const earlierMuscleGroups=ordered.slice(0,session.currentExerciseIndex).map((entry)=>{
+    const entryResult=session.exerciseResults.find((item)=>item.workoutExerciseId===entry.id);
+    return getExercise(entryResult?.performedExerciseId??entry.exerciseId)?.primaryMuscleGroup;
+  });
+  const firstForMuscle=isFirstExerciseForMuscle(exercise?.primaryMuscleGroup,earlierMuscleGroups);
+  const warmup=firstForMuscle&&!bodyweightAbs&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
   const challenge=previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment}):null;
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
@@ -133,7 +143,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     .filter((item)=>item.id!==performedId&&item.status!=="archived"&&prescribed?.primaryMuscleGroup&&item.primaryMuscleGroup===prescribed.primaryMuscleGroup)
     .slice(0,40);
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
-  const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item)};const restSeconds=patch.completed?Number.parseInt(current.rest??"",10):0;replaceResult(nextResult,Number.isFinite(restSeconds)&&restSeconds>0?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
+  const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item)};const restSeconds=patch.completed?workoutRestSeconds(current.rest):null;replaceResult(nextResult,restSeconds?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
   // Marking an exercise done used to leave the client staring at the exercise
   // they had just finished, with nothing saying what to do next; the only way on
   // was the arrow in the footer. Completing it now carries them to the next
@@ -256,9 +266,13 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
             <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
               <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
             </div>
-            {warmup.sets.map((set)=><WarmupSetEditor key={set.percent} set={set} completed={result.warmupCompletedPercents?.includes(set.percent)??false} onToggle={()=>{
-              const current=result.warmupCompletedPercents??[];
-              replaceResult({...result,warmupCompletedPercents:current.includes(set.percent)?current.filter((percent)=>percent!==set.percent):[...current,set.percent]});
+            {warmup.sets.map((set)=><WarmupSetEditor key={`${current.id}-${set.percent}`} set={set} completed={result.warmupCompletedPercents?.includes(set.percent)??false} onToggle={()=>{
+              const completedWarmups=result.warmupCompletedPercents??[];
+              const isCompleted=completedWarmups.includes(set.percent);
+              replaceResult(
+                {...result,warmupCompletedPercents:isCompleted?completedWarmups.filter((percent)=>percent!==set.percent):[...completedWarmups,set.percent]},
+                isCompleted?{}:{restEndsAt:new Date(Date.now()+60_000).toISOString()},
+              );
             }}/>) }
             <div className="mb-1 mt-4 text-sm font-black">סטים עובדים</div>
           </>:null}

@@ -66,6 +66,18 @@ export default function TodayWorkout(){
         })}
       </div>}
 
+    {/* The two immediate answers for today's workout stay above the workout
+        card, so they are visible before the client reaches אימון 2. */}
+    <div className="workout-primary-actions" aria-label="פעולות לאימון של היום">
+      <Link href={sessionHref} className="fab" aria-label={startLabel}>
+        <Play aria-hidden="true" size={18}/>{startLabel}
+      </Link>
+      {completed||skippedToday?null:
+        <button type="button" onClick={()=>setMissed(true)} className="fab fab--missed">
+          <SkipForward aria-hidden="true" size={17}/>פיספסתי אימון
+        </button>}
+    </div>
+
     {/* The one inverted surface on the screen: what to do today, and nothing else. */}
     <section className="daily-progress-card" aria-labelledby="today-workout">
       <div className="daily-progress-card__copy">

@@ -25,6 +25,18 @@ export type WarmupPlan = Readonly<{
   sets: readonly WarmupSet[];
 }>;
 
+/**
+ * A loaded warm-up belongs only to the first exercise for a muscle group in a
+ * workout. Later exercises for the same muscle are already preceded by working
+ * sets for that muscle and should not ask the client to warm it up again.
+ */
+export function isFirstExerciseForMuscle(
+  primaryMuscleGroup: string | undefined,
+  earlierMuscleGroups: readonly (string | undefined)[],
+) {
+  return Boolean(primaryMuscleGroup && !earlierMuscleGroups.includes(primaryMuscleGroup));
+}
+
 // Gyms have 1.25 kg plates a side at best, so 2.5 kg is the smallest jump that
 // is actually loadable on a bar.
 const toLoadable = (value: number) => roundToPlate(value);
