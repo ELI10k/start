@@ -729,7 +729,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen {
     display: grid;
     grid-auto-rows: max-content;
-    gap: .45rem;
+    gap: clamp(.3rem, .8dvh, .45rem);
     height: 100%;
     min-height: calc(100dvh - 2rem - .4rem - var(--nav-clearance) - env(safe-area-inset-top));
     overflow: hidden;
@@ -742,13 +742,13 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .quick-action-card {
     min-height: 0;
     height: 100%;
-    gap: .2rem;
-    padding: .45rem .35rem;
+    gap: .16rem;
+    padding: .35rem;
   }
   .home-screen .quick-action-card__icon,
   .home-screen .quick-action-card > span:first-child:has(svg) {
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.35rem;
+    height: 2.35rem;
     border-radius: .8rem;
   }
   .home-screen .quick-action-card__label { font-size: .95rem; }
@@ -763,8 +763,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
   .home-screen .quick-actions-grid {
     grid-template-rows: repeat(2, minmax(0, 1fr));
-    height: min(15.5rem, 37dvh);
-    gap: .45rem;
+    /* Four useful destinations should feel substantial without owning the
+       screen. Tying the pair of rows to 24% of the viewport leaves room for
+       today's metrics, lesson and progress even on a short iPhone. */
+    height: clamp(9.5rem, 24dvh, 11.5rem);
+    gap: clamp(.3rem, .8dvh, .45rem);
   }
 }
 /* The desktop nav is a top bar, there is no fold to fit inside, and stretching
