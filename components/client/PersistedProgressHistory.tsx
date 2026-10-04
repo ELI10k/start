@@ -3,7 +3,7 @@ import { StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { averageWeightChangeRates } from "@/lib/progress/rates";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
-import { weightTrendTone } from "@/lib/progress/weight-trend";
+import { weightTrendTone, type WeightTrendTone } from "@/lib/progress/weight-trend";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 type ProgressEntry = Readonly<{
@@ -77,47 +77,51 @@ function rateText(value: number | null) {
   return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
 }
 
-function WeightHistoryGraph({
-  entries,
+function WeightChangeGraph({
+  current,
+  previous,
   min,
   max,
   nutritionGoal,
 }: {
-  entries: readonly Readonly<{ entry: ProgressEntry; previousWeight: number | null }>[];
+  current: number;
+  previous: number | null;
   min: number;
   max: number;
   nutritionGoal?: string | null;
 }) {
   const range = max - min || 1;
-  const height = entries.length * 100;
-  const points = entries.map(({ entry, previousWeight }, index) => {
-    const current = valueOf(entry.weight) ?? 0;
-    const change = previousWeight === null ? 0 : Number((current - previousWeight).toFixed(1));
-    return {
-      x: 12 + ((current - min) / range) * 76,
-      y: index * 100 + 50,
-      tone: previousWeight === null ? "neutral" : weightTrendTone(change, nutritionGoal),
-    };
-  });
+  const x = (weight: number) => 4 + ((weight - min) / range) * 40;
+
+  if (previous === null) {
+    return (
+      <span className="measurement-trend measurement-trend--first" aria-label="מדידה ראשונה">
+        <svg viewBox="0 0 48 100" aria-hidden="true">
+          <circle cx={x(current)} cy="25" r="3" />
+        </svg>
+      </span>
+    );
+  }
+
+  const change = Number((current - previous).toFixed(1));
+  const tone: WeightTrendTone = weightTrendTone(change, nutritionGoal);
+  const direction = change < 0 ? "ירידה" : change > 0 ? "עלייה" : "ללא שינוי";
+  const goalContext = nutritionGoal?.includes("cut")
+    ? "בחיטוב"
+    : nutritionGoal?.includes("bulk")
+      ? "במסה"
+      : "";
 
   return (
-    <div className="measurement-history" role="img" aria-label="גרף שינוי במשקל בין השקילות">
-      <svg viewBox={`0 0 100 ${height}`} preserveAspectRatio="none" aria-hidden="true">
-        {points.slice(0, -1).map((point, index) => (
-          <line
-            className={`measurement-history__segment measurement-history__segment--${point.tone}`}
-            key={`${point.y}-${points[index + 1].y}`}
-            x1={point.x}
-            y1={point.y}
-            x2={points[index + 1].x}
-            y2={points[index + 1].y}
-          />
-        ))}
-        {points.map((point) => (
-          <circle className={`measurement-history__point measurement-history__point--${point.tone}`} cx={point.x} cy={point.y} key={point.y} r="4.5" />
-        ))}
+    <span
+      className={`measurement-trend measurement-trend--${tone}`}
+      aria-label={`${direction}${change === 0 ? "" : ` של ${Math.abs(change)} ק״ג`} מהשקילה הקודמת${goalContext ? `, ${goalContext}` : ""}`}
+    >
+      <svg viewBox="0 0 48 100" aria-hidden="true">
+        <line x1={x(current)} y1="25" x2={x(previous)} y2="75" />
+        <circle cx={x(current)} cy="25" r="3" />
       </svg>
-    </div>
+    </span>
   );
 }
 
@@ -220,21 +224,25 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
           <h2 id="measurement-log">יומן מדידות</h2>
           <span>{ordered.length} רשומות</span>
         </div>
-        <div className="app-list measurement-log__list">
-          <WeightHistoryGraph entries={displayedEntries} min={minWeight} max={maxWeight} nutritionGoal={nutritionGoal} />
+        <div className="app-list">
           {displayedEntries.map(({ entry, previousWeight }) => {
             const currentWeight = valueOf(entry.weight);
-            const change = currentWeight !== null && previousWeight !== null ? Number((currentWeight - previousWeight).toFixed(1)) : null;
             return (
               <div className="measurement-log__row" key={entry.id}>
-                <span className="measurement-log__weight">
-                  <span className="app-list__icon"><Scale aria-hidden="true" size={17} /></span>
-                  <span className="app-list__main">
-                    <strong>{entry.weight} ק״ג</strong>
-                    <span>{entry.date}{entry.notes ? ` · ${entry.notes}` : ""}</span>
-                  </span>
+                <span className="app-list__icon"><Scale aria-hidden="true" size={17} /></span>
+                <span className="app-list__main">
+                  <strong>{entry.weight} ק״ג</strong>
+                  <span>{entry.date}{entry.notes ? ` · ${entry.notes}` : ""}</span>
                 </span>
-                <span className="sr-only">{change === null ? "מדידה ראשונה" : `${change > 0 ? "עלייה" : change < 0 ? "ירידה" : "ללא שינוי"} ${Math.abs(change)} ק״ג מהשקילה הקודמת`}</span>
+                {currentWeight !== null ? (
+                  <WeightChangeGraph
+                    current={currentWeight}
+                    previous={previousWeight}
+                    min={minWeight}
+                    max={maxWeight}
+                    nutritionGoal={nutritionGoal}
+                  />
+                ) : null}
                 <span className="app-list__meta">
                   <strong>{entry.navel_circumference ?? "—"}</strong>
                   היקף טבור
