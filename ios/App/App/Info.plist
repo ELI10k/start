@@ -43,9 +43,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>המצלמה משמשת לסריקת ברקוד של מוצרי מזון ולצילום תמונות מעקב שנשמרות בחשבון הפרטי שלך.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>START LIFE FIT מציג את הצעדים היומיים שלך מתוך אפליקציית הבריאות, כדי לעקוב אחרי היעד היומי ואחרי המגמה השבועית.</string>
+	<string>LIFE FIT מציג את הצעדים היומיים ושעות השינה שלך מתוך אפליקציית הבריאות, כדי לעקוב אחרי הפעילות וההתאוששות שלך.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>START LIFE FIT אינו כותב נתונים לאפליקציית הבריאות. ההרשאה נדרשת רק לקריאת הצעדים.</string>
+	<string>LIFE FIT אינו כותב נתונים לאפליקציית הבריאות. ההרשאה נדרשת רק לקריאת צעדים ושינה.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>בחירת תמונת מעקב מהגלריה, לצורך צ׳ק-אין שבועי מול המאמן.</string>
 	<key>UIApplicationSceneManifest</key>

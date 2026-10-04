@@ -1,5 +1,5 @@
 import { calendarDay, lastDays } from "./calculations.ts";
-import type { DailySteps, HealthAvailability, HealthPermissionState, HealthProvider, HealthSource } from "./types.ts";
+import type { DailySleep, DailySteps, HealthAvailability, HealthPermissionState, HealthProvider, HealthSource } from "./types.ts";
 
 // Three providers, one contract.
 //
@@ -16,6 +16,7 @@ export const unavailableProvider: HealthProvider = {
   getPermission: async () => "unavailable",
   requestPermission: async () => "unavailable",
   readDailySteps: async () => [],
+  readDailySleep: async () => [],
 };
 
 export function createTestProvider(steps: readonly number[], source: HealthSource = "test", permission: HealthPermissionState = "granted"): HealthProvider {
@@ -33,6 +34,14 @@ export function createTestProvider(steps: readonly number[], source: HealthSourc
       const days: DailySteps[] = [];
       for (let day = fromDay, index = 0; day <= toDay; day = shift(day), index += 1) {
         days.push({ day, steps: steps[index % Math.max(1, steps.length)] ?? 0, source, recordedAt: `${day}T20:00:00.000Z` });
+      }
+      return days;
+    },
+    readDailySleep: async (fromDay, toDay) => {
+      if (current !== "granted") return [];
+      const days: DailySleep[] = [];
+      for (let day = fromDay; day <= toDay; day = shift(day)) {
+        days.push({ day, minutes: 450, source, recordedAt: `${day}T08:00:00.000Z` });
       }
       return days;
     },
@@ -54,6 +63,7 @@ export type NativeHealthBridge = Readonly<{
   getPermission: () => Promise<HealthPermissionState> | HealthPermissionState;
   requestPermission: () => Promise<HealthPermissionState> | HealthPermissionState;
   readDailySteps: (fromDay: string, toDay: string) => Promise<readonly { day: string; steps: number }[]>;
+  readDailySleep: (fromDay: string, toDay: string) => Promise<readonly { day: string; minutes: number }[]>;
 }>;
 
 declare global {
@@ -81,6 +91,17 @@ export function nativeProvider(bridge: NativeHealthBridge): HealthProvider {
           .map((row) => ({ day: row.day, steps: Math.max(0, Math.round(row.steps)), source: bridge.source, recordedAt }));
       } catch {
         // A bridge that throws mid-read is a failed sync, not a zero-step day.
+        return [];
+      }
+    },
+    readDailySleep: async (fromDay, toDay) => {
+      try {
+        const rows = await bridge.readDailySleep(fromDay, toDay);
+        const recordedAt = new Date().toISOString();
+        return rows
+          .filter((row) => typeof row?.day === "string" && Number.isFinite(row?.minutes))
+          .map((row) => ({ day: row.day, minutes: Math.max(0, Math.round(row.minutes)), source: bridge.source, recordedAt }));
+      } catch {
         return [];
       }
     },

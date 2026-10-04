@@ -68,6 +68,19 @@ public class StartHealthPlugin extends Plugin {
     call.resolve(result);
   }
 
+  @PluginMethod
+  public void readDailySleep(PluginCall call) {
+    String fromDay = call.getString("fromDay");
+    String toDay = call.getString("toDay");
+    if (fromDay == null || toDay == null || !validDay(fromDay) || !validDay(toDay)) {
+      call.reject("invalid_range");
+      return;
+    }
+    JSObject result = new JSObject();
+    result.put("days", new JSArray());
+    call.resolve(result);
+  }
+
   private boolean validDay(String value) {
     try {
       LocalDate.parse(value);

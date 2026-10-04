@@ -2,23 +2,25 @@
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { clampGoal } from "./calculations";
-import type { DailySteps, HealthPreferences, HealthSource } from "./types";
+import type { DailySleep, DailySteps, HealthPreferences, HealthSource } from "./types";
 
 type Row = Record<string, unknown>;
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
-export type HealthSnapshot = Readonly<{ entries: readonly DailySteps[]; preferences: HealthPreferences }>;
-export const emptyHealthSnapshot: HealthSnapshot = { entries: [], preferences: { dailyStepGoal: 10000 } };
+export type HealthSnapshot = Readonly<{ entries: readonly DailySteps[]; sleep: readonly DailySleep[]; preferences: HealthPreferences }>;
+export const emptyHealthSnapshot: HealthSnapshot = { entries: [], sleep: [], preferences: { dailyStepGoal: 10000 } };
 
 export function createHealthRepository() {
   const supabase = createSupabaseBrowserClient();
   return {
     load: async (fromDay: string): Promise<HealthSnapshot> => {
-      const [steps, preferences] = await Promise.all([
+      const [steps, sleep, preferences] = await Promise.all([
         supabase.from("health_steps").select("day,steps,source,recorded_at").gte("day", fromDay).order("day"),
+        supabase.from("health_sleep").select("day,minutes,source,recorded_at").gte("day", fromDay).order("day"),
         supabase.from("health_preferences").select("daily_step_goal,last_sync_at,last_sync_source").maybeSingle(),
       ]);
       if (steps.error) throw steps.error;
+      if (sleep.error) throw sleep.error;
       // A client with no preferences row yet is normal, not an error.
       if (preferences.error && preferences.error.code !== "PGRST116") throw preferences.error;
       const row = (preferences.data ?? undefined) as Row | undefined;
@@ -26,6 +28,12 @@ export function createHealthRepository() {
         entries: ((steps.data ?? []) as Row[]).map((entry) => ({
           day: text(entry.day),
           steps: Number(entry.steps) || 0,
+          source: text(entry.source) as HealthSource,
+          recordedAt: text(entry.recorded_at),
+        })),
+        sleep: ((sleep.data ?? []) as Row[]).map((entry) => ({
+          day: text(entry.day),
+          minutes: Number(entry.minutes) || 0,
           source: text(entry.source) as HealthSource,
           recordedAt: text(entry.recorded_at),
         })),
@@ -43,6 +51,17 @@ export function createHealthRepository() {
         const { error } = await supabase.rpc("record_health_steps", {
           p_day: entry.day,
           p_steps: entry.steps,
+          p_source: entry.source,
+          p_recorded_at: entry.recordedAt,
+        });
+        if (error) throw error;
+      }
+    },
+    recordSleep: async (entries: readonly DailySleep[]) => {
+      for (const entry of entries) {
+        const { error } = await supabase.rpc("record_health_sleep", {
+          p_day: entry.day,
+          p_minutes: entry.minutes,
           p_source: entry.source,
           p_recorded_at: entry.recordedAt,
         });
