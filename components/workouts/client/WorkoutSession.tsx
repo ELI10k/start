@@ -41,7 +41,6 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const[confirmedPartial,setConfirmedPartial]=useState(false);
   const ordered=useMemo(()=>[...(day?.exercises??[])].sort((a,b)=>a.order-b.order),[day]);
   useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
-  useEffect(()=>{const guard=(event:BeforeUnloadEvent)=>{if(session){event.preventDefault();event.returnValue=""}};window.addEventListener("beforeunload",guard);return()=>window.removeEventListener("beforeunload",guard)},[session]);
   // Scheduled against the rest end itself rather than polled off the ticking
   // clock, so the buzz lands on time even if a render is late - and cancels
   // cleanly when the client skips the rest or adds thirty seconds to it.

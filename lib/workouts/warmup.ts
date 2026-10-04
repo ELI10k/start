@@ -1,14 +1,12 @@
 import type { ExerciseSetResult } from "./types.ts";
 
-// Warm-up sets, worked out rather than guessed.
+// A single preparation set is shown for the first loaded exercise of each
+// muscle group. Its repetitions stay above the working target without asking
+// the client to complete two or three separate warm-up sets:
 //
-// A client arriving at an exercise had no idea what to load for the first set,
-// so they either guessed low and wasted a set or guessed high and warmed up on
-// their working weight. The numbers below are Eli's protocol, given 2026-08-19:
-//
-//   50% x 10, then 70% x 5
-//   a third at 85% x 3 for the heavy compounds
-//   and for easy work - RPE 6 or below - one set is enough
+//   up to 8 working reps -> 12 warm-up reps
+//   9-12 working reps   -> 15 warm-up reps
+//   above 12 working reps -> 20 warm-up reps
 //
 // Everything is derived from what the client actually lifted last time. With no
 // previous session there is no honest percentage of anything, and the screen says
@@ -61,9 +59,8 @@ export function workingWeightFrom(
 /**
  * The warm-up for one exercise, or null when there is nothing to base it on.
  *
- * `effort` is the prescribed RPE as the programme writes it ("RPE 9", "9", "8-9").
- * Easy work gets one set: warming up twice for a set you could do ten more of is
- * time spent not training.
+ * `effort` and `compound` remain accepted for compatibility with existing
+ * callers. The current protocol deliberately uses one set for every exercise.
  */
 export function planWarmup(
   workingWeightKg: number | null,
@@ -71,20 +68,15 @@ export function planWarmup(
 ): WarmupPlan | null {
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
 
-  const rpe = parseEffort(options.effort);
-  const steps: readonly { percent: number; repetitions: number }[] =
-    rpe !== null && rpe <= 6
-      ? [{ percent: 50, repetitions: 10 }]
-      : options.compound
-        ? [
-            { percent: 50, repetitions: 10 },
-            { percent: 70, repetitions: 5 },
-            { percent: 85, repetitions: 3 },
-          ]
-        : [
-            { percent: 50, repetitions: 10 },
-            { percent: 70, repetitions: 5 },
-          ];
+  const workingRepetitions = options.repetitions;
+  const repetitions = workingRepetitions === undefined || workingRepetitions <= 8
+    ? 12
+    : workingRepetitions <= 12
+      ? 15
+      : 20;
+  const steps: readonly { percent: number; repetitions: number }[] = [
+    { percent: 50, repetitions },
+  ];
 
   return {
     workingWeightKg,
@@ -127,7 +119,6 @@ export const warmupPlan = planWarmup;
 
 /** How many warm-up sets the protocol calls for, without computing the weights. */
 export const warmupStepCount = (options: { effort?: string; compound?: boolean } = {}) => {
-  const rpe = parseEffort(options.effort);
-  if (rpe !== null && rpe <= 6) return 1;
-  return options.compound ? 3 : 2;
+  void options;
+  return 1;
 };
