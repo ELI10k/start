@@ -1063,6 +1063,25 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .app-list__meta { flex: 0 0 auto; color: var(--ink-muted); font-size: .72rem; text-align: end; }
 .app-list__meta strong { display: block; color: var(--ink); font-size: .85rem; }
+.measurement-trend {
+  display: grid;
+  flex: 0 0 4.5rem;
+  justify-items: center;
+  color: var(--ink-muted);
+}
+.measurement-trend svg { display: block; width: 4.5rem; height: 2.15rem; overflow: visible; }
+.measurement-trend line { stroke: currentColor; stroke-width: 2.75; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.measurement-trend circle { fill: var(--surface); stroke: currentColor; stroke-width: 2.25; vector-effect: non-scaling-stroke; }
+.measurement-trend small { margin-top: -.15rem; font-size: .67rem; font-weight: 800; white-space: nowrap; }
+.measurement-trend--positive { color: var(--green); }
+.measurement-trend--negative { color: var(--red); }
+.measurement-trend--neutral,
+.measurement-trend--first { color: var(--ink-muted); }
+@media (max-width: 374px) {
+  .measurement-log__row { gap: .45rem; padding-inline: .7rem; }
+  .measurement-trend { flex-basis: 3.6rem; }
+  .measurement-trend svg { width: 3.6rem; }
+}
 .app-list > [data-unread="true"],
 .app-list > *[data-unread="true"] { background: var(--green-tint); }
 .notification-row { min-width: 0; }
