@@ -8,6 +8,7 @@ test("the client home fits inside a short phone viewport", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 });
   await signIn(page, requireIdentity("client"));
   await expect(page.locator(".home-screen")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("שעות שינה", { exact: true })).toBeVisible();
   await expect(page.locator(".quick-action-card")).toHaveCount(4);
 
   const layout = await page.evaluate(() => {
