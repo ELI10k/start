@@ -215,7 +215,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       <header className="session-exercise__head">
         <ExerciseThumbnail exercise={exercise}/>
         <div className="min-w-0 flex-1">
-          <span className="session-exercise__count">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="session-exercise__count">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
+            {result.completed&&<span role="status" className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-2 py-1 text-xs font-black text-[#15803D]"><CheckCircle2 aria-hidden="true" size={15}/>הושלם</span>}
+          </div>
           <h1 className="session-exercise__name" title={exercise?.name}>{exercise?.name??"פרטי תרגיל חסרים"}</h1>
           {result.performedExerciseId&&prescribed&&<p className="text-xs text-[#5B5F5B]">במקום {prescribed.name} · המאמן יראה את ההחלפה</p>}
         </div>
@@ -291,9 +294,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
           moment it starts. */}
       {rest>0&&<RestTimer seconds={rest} onAdd={()=>persist({restEndsAt:new Date(Date.now()+(rest+30)*1000).toISOString()})} onSkip={()=>persist({restEndsAt:undefined})}/>}
 
-      {dynamicWarmup?<button onClick={completeExercise} className="mt-4 min-h-12 w-full rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white">סימון שבוצע חימום</button>:<><div className="mt-4 grid grid-cols-2 gap-2">
+      {dynamicWarmup?<button onClick={completeExercise} disabled={result.completed} className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white disabled:bg-[#ECFDF3] disabled:text-[#15803D]">{result.completed?<><CheckCircle2 aria-hidden="true" size={18}/>החימום הושלם</>:"סימון שבוצע חימום"}</button>:<><div className="mt-4 grid grid-cols-2 gap-2">
         <button onClick={()=>replaceResult({...result,skipped:!result.skipped,completed:false})} className="min-h-10 rounded-xl border border-[#D7DAD7] bg-white px-3 py-2 text-sm font-black">{result.skipped?"החזרת התרגיל":"דילוג"}</button>
-        <button onClick={completeExercise} className="min-h-10 rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white">השלמה</button>
+        <button onClick={completeExercise} disabled={result.completed} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#16A34A] px-3 py-2 text-sm font-black text-white disabled:bg-[#ECFDF3] disabled:text-[#15803D]">{result.completed?<><CheckCircle2 aria-hidden="true" size={18}/>הושלם</>:"השלמה"}</button>
       </div></>}
       {!dynamicWarmup&&<div className="mt-2 grid grid-cols-3 gap-2" role="group" aria-label="איך הרגיש התרגיל">
         <button type="button" aria-pressed={result.difficulty==="easy"} onClick={()=>replaceResult({...result,difficulty:result.difficulty==="easy"?undefined:"easy"})} className={`min-h-10 rounded-xl border px-2 py-2 text-sm font-black ${result.difficulty==="easy"?"border-[#16A34A] bg-[#ECFDF3] text-[#15803D]":"border-[#D7DAD7] bg-white"}`}>קל</button>
