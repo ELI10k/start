@@ -37,3 +37,17 @@ test("the guide route and lesson screen use the native video player", async () =
   assert.match(route, /content-media\/life-fit-guide-v1\.mp4/);
   assert.match(lesson, /<NativeLessonPlayer/);
 });
+
+test("a one-lesson course uses a nearly full-width card", async () => {
+  const [page, rail, css] = await Promise.all([
+    file("app/content/page.tsx"),
+    file("components/client/CinemaRail.tsx"),
+    file("app/globals.css"),
+  ]);
+  assert.match(page, /wide=\{course\.lessons\.length === 1\}/);
+  assert.match(rail, /cinema-rail__track--wide/);
+  assert.match(
+    css,
+    /\.cinema-rail__track--wide\s*\{[^}]*100vw[^}]*40rem/s,
+  );
+});

@@ -89,6 +89,7 @@ export default async function ContentPage() {
             title={course.name}
             description={course.description}
             href={`/content/category/${encodeURIComponent(course.slug)}`}
+            wide={course.lessons.length === 1}
           >
             {course.lessons.map((lesson, index) => (
               <LessonCard

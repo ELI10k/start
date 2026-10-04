@@ -13,12 +13,14 @@ export default function CinemaRail({
   description,
   href,
   id,
+  wide = false,
   children,
 }: {
   title: string;
   description?: string | null;
   href?: string;
   id?: string;
+  wide?: boolean;
   children: React.ReactNode;
 }) {
   const track = useRef<HTMLDivElement>(null);
@@ -82,7 +84,11 @@ export default function CinemaRail({
         >
           <ChevronRight aria-hidden="true" size={28} />
         </button>
-        <div className="cinema-rail__track" ref={track} onScroll={measure}>
+        <div
+          className={`cinema-rail__track${wide ? " cinema-rail__track--wide" : ""}`}
+          ref={track}
+          onScroll={measure}
+        >
           {children}
         </div>
         <button
