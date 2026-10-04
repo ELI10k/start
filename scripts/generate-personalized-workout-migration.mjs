@@ -3,7 +3,7 @@
 import { writeFile } from "node:fs/promises";
 import { BUILT_IN_PROGRAMS } from "../lib/workouts/program-catalog.ts";
 import { readFile } from "node:fs/promises";
-const output = new URL("../supabase/migrations/20261004121045_personalized_workout_catalog.sql", import.meta.url);
+const output = new URL("../supabase/migrations/20261004121752_personalized_workout_catalog.sql", import.meta.url);
 const exercises = JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json", import.meta.url), "utf8"));
 const quote = value => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
 const sql = `begin;

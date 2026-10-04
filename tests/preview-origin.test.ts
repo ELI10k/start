@@ -89,7 +89,7 @@ test("automatic training assignment is a visible choice the coach can refuse", a
 });
 
 test("assignment still only ever adds, so a level change cannot touch history", async () => {
-  const sql = await source("supabase/migrations/20261004121045_personalized_workout_catalog.sql");
+  const sql = await source("supabase/migrations/20261004121752_personalized_workout_catalog.sql");
   assert.match(sql, /if exists\(select 1 from public.workout_assignments where client_id=p_client_id and status='active'\) then return 'already_active'/);
   assert.doesNotMatch(sql, /delete from|update public.workout_assignments/i);
 });

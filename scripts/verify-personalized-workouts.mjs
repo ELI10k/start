@@ -30,6 +30,8 @@ try {
   await page.getByRole("heading",{name:"תוכניות אימון",exact:true}).waitFor();
   for(const program of BUILT_IN_PROGRAMS)await page.getByRole("heading",{name:program.name,exact:true}).waitFor({timeout:15000});
   report.catalogue=21;
+  await page.getByPlaceholder("חיפוש תוכנית",{exact:true}).fill("TRX");
+  await page.getByRole("heading",{name:"אימון TRX FBW לגברים",exact:true}).waitFor();
   await page.screenshot({path:new URL("../reports/personalized-workout-catalog.png",import.meta.url).pathname,fullPage:false});
   await page.goto(`${base}/coach/clients/new`,{waitUntil:"networkidle"});
   await page.getByLabel("מין",{exact:true}).selectOption("female");
