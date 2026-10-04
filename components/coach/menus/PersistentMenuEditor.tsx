@@ -924,6 +924,7 @@ function DockTotal({label,value,target}:{label:string;value:number;target?:numbe
   const rounded=Math.round(value);
   const goal=Math.round(target??0);
   const gap=goal-rounded;
+  const isDailyReserve=label==="קלוריות"&&gap>=80&&gap<=120;
   // Three states, and the colours follow the coach's question rather than the
   // arithmetic's sign. Room left on a target is not a problem - it is a menu
   // still being written - so it is green. Going past the target is the only one
@@ -934,7 +935,8 @@ function DockTotal({label,value,target}:{label:string;value:number;target?:numbe
   return <div className="menu-dock__total" data-state={state}>
     <dt>{label}</dt>
     <dd>{rounded}{hasTarget?<span>/{goal}</span>:null}</dd>
-    {hasTarget?<small>{gap>0?`נותר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
+    {hasTarget?<small>{isDailyReserve?`רזרבה ${gap}`:gap>0?`נותר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
+    {isDailyReserve?<span className="sr-only">הרזרבה מיועדת לבישול, משקאות וסטיות מדידה.</span>:null}
   </div>;
 }
 

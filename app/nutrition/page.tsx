@@ -431,6 +431,9 @@ function MacroTotal({
   target?: number | null;
   unit: string;
 }) {
+  const gap = target && target > 0 ? Math.round(target - value) : 0;
+  const isDailyReserve = label === "קלוריות" && left <= 0.5 && gap >= 80 && gap <= 120;
+
   return (
     <div className="rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3">
       <dt className="text-xs text-[#5B5F5B]">{label}</dt>
@@ -439,7 +442,9 @@ function MacroTotal({
         {Math.round(value)} {unit}
       </dd>
       <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
-        {target && target > 0
+        {isDailyReserve
+          ? `התכנון היומי הושלם · רזרבה של כ־${gap} ${unit} לבישול, משקאות וסטיות מדידה`
+          : target && target > 0
           ? value - target > 0.5
             ? `חריגה של ${Math.round(value - target)} ${unit}`
             : target - value > 0.5
