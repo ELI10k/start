@@ -90,20 +90,19 @@ function WeightChangeGraph({
   max: number;
   nutritionGoal?: string | null;
 }) {
+  const range = max - min || 1;
+  const x = (weight: number) => 4 + ((weight - min) / range) * 40;
+
   if (previous === null) {
     return (
       <span className="measurement-trend measurement-trend--first" aria-label="מדידה ראשונה">
-        <svg viewBox="0 0 48 18" aria-hidden="true">
-          <line x1="8" y1="9" x2="40" y2="9" />
-          <circle cx="24" cy="9" r="2.5" />
+        <svg viewBox="0 0 48 100" aria-hidden="true">
+          <circle cx={x(current)} cy="25" r="3" />
         </svg>
-        <small>התחלה</small>
       </span>
     );
   }
 
-  const range = max - min || 1;
-  const x = (weight: number) => 4 + ((weight - min) / range) * 40;
   const change = Number((current - previous).toFixed(1));
   const tone: WeightTrendTone = weightTrendTone(change, nutritionGoal);
   const direction = change < 0 ? "ירידה" : change > 0 ? "עלייה" : "ללא שינוי";
@@ -118,12 +117,10 @@ function WeightChangeGraph({
       className={`measurement-trend measurement-trend--${tone}`}
       aria-label={`${direction}${change === 0 ? "" : ` של ${Math.abs(change)} ק״ג`} מהשקילה הקודמת${goalContext ? `, ${goalContext}` : ""}`}
     >
-      <svg viewBox="0 0 48 18" aria-hidden="true">
-        <line x1={x(previous)} y1="15" x2={x(current)} y2="3" />
-        <circle cx={x(previous)} cy="15" r="2" />
-        <circle cx={x(current)} cy="3" r="2.5" />
+      <svg viewBox="0 0 48 100" aria-hidden="true">
+        <line x1={x(current)} y1="25" x2={x(previous)} y2="75" />
+        <circle cx={x(current)} cy="25" r="3" />
       </svg>
-      <small>{change > 0 ? "+" : ""}{change} ק״ג</small>
     </span>
   );
 }
