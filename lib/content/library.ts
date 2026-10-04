@@ -11,7 +11,7 @@ import { courseArt } from "./course-art.ts";
    play inside the app; a PDF and an outside link leave it. Everything on the
    screen - the badge on a card, the icon on a row, whether the lesson screen
    shows a player or a button - is decided from this one function. */
-export type MediaKind = "youtube" | "instagram" | "pdf" | "link" | "text";
+export type MediaKind = "youtube" | "instagram" | "video" | "pdf" | "link" | "text";
 
 export function mediaKind(item: {
   mediaUrl: string | null;
@@ -23,7 +23,9 @@ export function mediaKind(item: {
   if (!host) return "link";
   if (isHost(host, "youtu.be") || isHost(host, "youtube.com")) return "youtube";
   if (isHost(host, "instagram.com")) return "instagram";
-  if (new URL(url).pathname.toLowerCase().endsWith(".pdf")) return "pdf";
+  const path = new URL(url).pathname.toLowerCase();
+  if (/\.(mp4|webm|mov)$/.test(path)) return "video";
+  if (path.endsWith(".pdf")) return "pdf";
   return "link";
 }
 

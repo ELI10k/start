@@ -66,6 +66,10 @@ test("a lesson is classified by where its media lives", () => {
     mediaKind(lesson({ mediaUrl: "https://my.schooler.biz/system/lessons/a.pdf?1722330487" })),
     "pdf",
   );
+  assert.equal(
+    mediaKind(lesson({ mediaUrl: "https://start.elicohenfitness.co.il/media/life-fit-guide.mp4" })),
+    "video",
+  );
   assert.equal(mediaKind(lesson({ mediaUrl: "https://il.iherb.com/pr/x/22708" })), "link");
   assert.equal(mediaKind(lesson({ mediaUrl: null, body: "טקסט" })), "text");
 });
@@ -271,11 +275,13 @@ test("every course on the shelf has artwork that ships with the app", async () =
     "supabase/migrations/202608220002_schooler_course_library.sql",
   );
   const slugs = Object.keys(COURSE_ART);
-  assert.equal(slugs.length, 11);
+  assert.equal(slugs.length, 12);
   for (const [slug, path] of Object.entries(COURSE_ART)) {
     // The file is really in the bundle, and the database agrees on the path.
     await readFile(new URL(`../public${path}`, import.meta.url));
-    if (slug !== "eat-2") assert.match(migration, new RegExp(`'${slug}'`));
+    if (slug !== "eat-2" && slug !== "start-guide") {
+      assert.match(migration, new RegExp(`'${slug}'`));
+    }
   }
 });
 

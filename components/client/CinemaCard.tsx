@@ -112,6 +112,7 @@ export function LessonCard({
 export function kindLabel(kind: MediaKind): string {
   switch (kind) {
     case "youtube":
+    case "video":
       return "וידאו";
     case "instagram":
       return "ריל";
