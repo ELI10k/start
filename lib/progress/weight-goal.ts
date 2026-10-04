@@ -9,6 +9,11 @@ export type WeightGoalProgress = Readonly<{
   percent: number;
 }>;
 
+export type WeightGoalEstimate = Readonly<{
+  weeks: number;
+  months: number;
+}>;
+
 const round = (value: number) => Number(value.toFixed(1));
 
 /** Progress is measured along the direction from the first weigh-in to the goal.
@@ -53,5 +58,26 @@ export function weightGoalProgress(
     remainingKg: reached ? 0 : round(remainingKg),
     completedKg: round(completedKg),
     percent: reached ? 100 : Math.round((completedKg / totalDistance) * 100),
+  };
+}
+
+/** Estimates time to the goal only when the measured weekly trend is moving
+ * toward it. Rounding weeks up avoids promising arrival before the target is
+ * actually reached. */
+export function weightGoalEstimate(
+  progress: WeightGoalProgress,
+  weeklyKg: number | null | undefined,
+): WeightGoalEstimate | null {
+  if (!weeklyKg || progress.remainingKg <= 0) return null;
+
+  const distanceToTarget = progress.targetWeight - progress.currentWeight;
+  if (distanceToTarget * weeklyKg <= 0) return null;
+
+  const exactWeeks = progress.remainingKg / Math.abs(weeklyKg);
+  if (!Number.isFinite(exactWeeks) || exactWeeks <= 0) return null;
+
+  return {
+    weeks: Math.ceil(exactWeeks),
+    months: Number((exactWeeks / (365.25 / 12 / 7)).toFixed(1)),
   };
 }

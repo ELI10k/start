@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { LineChart, Minus, TrendingDown, TrendingUp } from "lucide-react";
-import { progressChanges, type ProgressReading } from "@/lib/progress/changes";
+import { numberOf, progressChanges, type ProgressReading } from "@/lib/progress/changes";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
+import { averageWeightChangeRates } from "@/lib/progress/rates";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 // The two numbers off the measurements screen, on the screen the client opens
@@ -13,6 +14,10 @@ import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 export default function ProgressPulse({ entries, targetWeight }: { entries: readonly ProgressReading[]; targetWeight?: number | string | null }) {
   const changes = progressChanges(entries);
   const goalProgress = weightGoalProgress(entries, targetWeight);
+  const weightRates = averageWeightChangeRates(entries.flatMap((entry) => {
+    const value = numberOf(entry.weight);
+    return value === null ? [] : [{ date: entry.date, value }];
+  }));
   const { weightChange, navelChange } = changes;
   const compliment = changes.readings > 1 ? "זה בדיוק מה שקורה כשלא מוותרים 🔥" : changes.readings === 1 ? "יצאנו לדרך — עכשיו מתחילים להזיז מספרים 🔥" : "הכול מתחיל מהמדידה הראשונה — יוצאים לדרך 🔥";
 
@@ -29,7 +34,7 @@ export default function ProgressPulse({ entries, targetWeight }: { entries: read
           ) : null}
         </span>
       ) : null}
-      {goalProgress ? <WeightGoalMeter progress={goalProgress} compact /> : null}
+      {goalProgress ? <WeightGoalMeter progress={goalProgress} weeklyKg={weightRates?.weeklyKg} compact /> : null}
     </Link>
   );
 }

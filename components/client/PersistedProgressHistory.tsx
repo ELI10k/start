@@ -163,7 +163,7 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
 
   return (
     <div className="grid gap-4">
-      {goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} /></section> : null}
+      {goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} weeklyKg={weightRates?.weeklyKg} /></section> : null}
       {/* The two numbers a client actually opens this screen for, before any chart. */}
       <section className="dashboard-metrics" aria-label="מדדי התקדמות">
         <MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
