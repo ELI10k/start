@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MoonStar } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
-import { calendarDay, formatSleep, sleepByDay, sleepToPersist } from "@/lib/health/calculations";
+import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, formatSleep, sleepByDay, sleepToPersist } from "@/lib/health/calculations";
 import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
 import type { HealthPermissionState } from "@/lib/health/types";
@@ -79,6 +79,8 @@ export default function SleepMetricTile() {
             ? "הנתון האחרון שנקלט"
             : "אין עדיין נתוני שינה";
   const value = formatSleep(latest?.minutes ?? 0);
+  const goal = formatSleep(DEFAULT_SLEEP_GOAL_MINUTES);
+  const progress = latest ? `${value} מתוך ${goal}` : `יעד ${goal}`;
 
   return (
     <button
@@ -86,13 +88,13 @@ export default function SleepMetricTile() {
       className="metric-tile metric-tile--neutral metric-tile--button metric-tile--health"
       onClick={() => void sync(true)}
       disabled={syncing || permission === "unavailable"}
-      aria-label={`שעות שינה: ${value}. ${detail}`}
+      aria-label={`שעות שינה: ${progress}. ${detail}`}
     >
       <span className="metric-tile__head">
         <span>שעות שינה</span>
         <span className="metric-tile__icon"><MoonStar aria-hidden="true" size={18} /></span>
       </span>
-      <strong>{value}</strong>
+      <strong>{progress}</strong>
       <small>{detail}</small>
     </button>
   );
