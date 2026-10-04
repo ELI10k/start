@@ -62,7 +62,7 @@ try {
     check((await admin.from("profiles").upsert({id:createdId,email:created.data.user.email,full_name:"בדיקת התאמת אימונים",role:"client",status:"active",is_test_account:true})).error,"test profile");
     check((await admin.from("client_profiles").upsert({user_id:createdId,onboarding_completed:true})).error,"test intake");
     check((await admin.from("coach_client_relationships").upsert({coach_id:session.user.id,client_id:createdId,status:"active"},{onConflict:"coach_id,client_id"})).error,"test relationship");
-    await page.goto(`${base}/coach/clients/${createdId}`,{waitUntil:"networkidle"});
+    await page.goto(`${base}/coach/clients/${createdId}?tab=intake`,{waitUntil:"networkidle"});
     const form=page.locator('form').filter({has:page.locator('input[name="clientId"]')});
     await form.getByLabel("מין",{exact:true}).selectOption("female");
     await form.getByLabel("רמת מתאמן",{exact:true}).selectOption("beginner");
@@ -79,6 +79,7 @@ try {
     await form.getByRole("status").filter({hasText:"דורשים בדיקת מאמן"}).waitFor();
     const before=await admin.from("workout_assignments").select("id").eq("client_id",createdId);check(before.error,"read medical guard");assert.equal(before.data.length,0);
     report.medicalReview="no assignment";
+    await page.reload({waitUntil:"networkidle"});
     await form.getByLabel("פציעה, כאב, היריון או מגבלה רפואית",{exact:true}).selectOption("no");
     await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
     await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
