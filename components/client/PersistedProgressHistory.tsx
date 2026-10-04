@@ -3,6 +3,7 @@ import { StateBlock } from "@/components/client/AppPatterns";
 import { MetricTile } from "@/components/client/PremiumUI";
 import { averageWeightChangeRates } from "@/lib/progress/rates";
 import { weightGoalProgress } from "@/lib/progress/weight-goal";
+import { weightTrendTone } from "@/lib/progress/weight-trend";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 type ProgressEntry = Readonly<{
@@ -76,7 +77,7 @@ function rateText(value: number | null) {
   return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
 }
 
-export default function PersistedProgressHistory({ entries, targetWeight }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null; nutritionGoal?: string | null }) {
+export default function PersistedProgressHistory({ entries, targetWeight, nutritionGoal }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null; nutritionGoal?: string | null }) {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const weights = ordered.flatMap((entry) => {
     const value = valueOf(entry.weight);
@@ -105,7 +106,9 @@ export default function PersistedProgressHistory({ entries, targetWeight }: { en
   const currentNavel = navelCircumferences.at(-1)?.value;
   const weightRates = averageWeightChangeRates(weights);
   const goalProgress = weightGoalProgress(entries, targetWeight);
-  const displayedEntries = [...ordered].reverse();
+  const displayedEntries = ordered
+    .map((entry, index) => ({ entry, previousWeight: index > 0 ? valueOf(ordered[index - 1].weight) : null }))
+    .reverse();
 
   return (
     <div className="grid gap-4">
@@ -171,19 +174,33 @@ export default function PersistedProgressHistory({ entries, targetWeight }: { en
           <span>{ordered.length} רשומות</span>
         </div>
         <div className="app-list">
-          {displayedEntries.map((entry) => (
+          {displayedEntries.map(({ entry, previousWeight }) => {
+            const currentWeight = valueOf(entry.weight);
+            const change = currentWeight !== null && previousWeight !== null
+              ? Number((currentWeight - previousWeight).toFixed(1))
+              : null;
+            const tone = change === null ? "neutral" : weightTrendTone(change, nutritionGoal);
+
+            return (
               <div className="measurement-log__row" key={entry.id}>
                 <span className="app-list__icon"><Scale aria-hidden="true" size={17} /></span>
                 <span className="app-list__main">
                   <strong>{entry.weight} ק״ג</strong>
                   <span>{entry.date}{entry.notes ? ` · ${entry.notes}` : ""}</span>
                 </span>
+                <span
+                  className={`measurement-change measurement-change--${tone}`}
+                  aria-label={change === null ? "שקילה ראשונה" : `שינוי של ${change > 0 ? "פלוס " : change < 0 ? "מינוס " : ""}${Math.abs(change)} קילוגרם מהשקילה הקודמת`}
+                >
+                  {change === null ? "התחלה" : `${change > 0 ? "+" : ""}${change} ק״ג`}
+                </span>
                 <span className="app-list__meta">
                   <strong>{entry.navel_circumference ?? "—"}</strong>
                   היקף טבור
                 </span>
               </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>

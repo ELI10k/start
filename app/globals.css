@@ -1068,7 +1068,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: 2rem minmax(0, 1fr) auto;
+  grid-template-columns: 2rem minmax(0, 1fr) 4.5rem auto;
   gap: .45rem;
   padding: .7rem .75rem;
 }
@@ -1076,9 +1076,21 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .measurement-log__row .app-list__main,
 .measurement-log__row .app-list__meta { min-width: 0; }
 .measurement-log__row .app-list__meta { line-height: 1.35; }
+.measurement-change {
+  direction: ltr;
+  justify-self: center;
+  font-size: .76rem;
+  font-weight: 850;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.measurement-change--positive { color: var(--green-press); }
+.measurement-change--negative { color: var(--red); }
+.measurement-change--neutral { color: var(--ink-muted); }
 @media (max-width: 340px) {
   .app-list > .measurement-log__row {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 4.1rem auto;
     gap: .35rem;
     padding-inline: .6rem;
   }
