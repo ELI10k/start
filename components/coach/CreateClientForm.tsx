@@ -11,7 +11,9 @@ import {
 } from "@/lib/progress/measurements";
 import { GOAL_LABELS, MISSING_LABELS, NUTRITION_GOALS, calculateEnergy, type NutritionGoal, type Sex } from "@/lib/nutrition/energy";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
-import { PROGRAMMES_BY_LEVEL, TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS, isTraineeLevel } from "@/lib/workouts/trainee-level";
+import { TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS } from "@/lib/workouts/trainee-level";
+import TrainingIntakeFields from "./TrainingIntakeFields";
+import { intakeFromForm } from "@/lib/workouts/personalization";
 
 const initialState:CreateClientState={status:"idle",message:""};
 
@@ -23,7 +25,8 @@ export default function CreateClientForm(){
   // input: the fields stay plain, and the calorie readout and the programme list
   // both work from the same snapshot.
   const[inputs,setInputs]=useState<Record<string,string>>({});
-  const level=inputs.traineeLevel??"";
+  const trainingForm=new FormData();
+  for(const [key,value] of Object.entries(inputs)) trainingForm.set(key,value);
 
   // The same functions the menu builder and the server use. Nothing is
   // recalculated here - a second copy of the formula is how the two screens
@@ -114,25 +117,7 @@ export default function CreateClientForm(){
           coach submits rather than discovered afterwards. A level with three
           splits is not three programmes a beginner should be handed blindly, so
           each one can be unticked. */}
-      {isTraineeLevel(level)&&<div className="sm:col-span-2 rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-4">
-        <label className="flex items-start gap-3 text-sm font-bold">
-          <input type="checkbox" name="autoAssignProgrammes" defaultChecked className="mt-1 size-5 shrink-0 accent-[#16A34A]"/>
-          <span>שייך תוכנית אימונים אוטומטית לפי הרמה
-            <span className="mt-1 block text-xs font-normal text-[#5B5F5B]">אפשר לבטל, ולשייך ידנית מאוחר יותר ממסך האימונים.</span>
-          </span>
-        </label>
-        <fieldset className="mt-3 border-0 p-0">
-          <legend className="text-xs font-bold text-[#3F433F]">התוכניות שישויכו לרמת {TRAINEE_LEVEL_LABELS[level]}</legend>
-          <div className="mt-2 grid gap-2">
-            {PROGRAMMES_BY_LEVEL[level].map(name=>
-              <label key={name} className="flex items-center gap-2 text-sm font-normal">
-                <input type="checkbox" name="levelProgrammes" value={name} defaultChecked className="size-4 shrink-0 accent-[#16A34A]"/>
-                <span>{name}</span>
-              </label>)}
-          </div>
-          <p className="mt-2 text-xs text-[#5B5F5B]">שיוך מוסיף בלבד. שינוי רמה בעתיד אינו מוחק שיוך קיים ואינו נוגע בהיסטוריית האימונים.</p>
-        </fieldset>
-      </div>}
+      <TrainingIntakeFields preview={intakeFromForm(trainingForm)}/>
     </section>
 
     <button disabled={pending} className="mt-6 min-h-14 w-full rounded-2xl bg-[#16A34A] px-6 font-black text-[#FFFFFF] disabled:cursor-wait disabled:opacity-50">{pending?"יוצרים לקוח ושולחים הזמנה…":"יצירת לקוח ושליחת הזמנה"}</button>

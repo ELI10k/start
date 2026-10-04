@@ -95,7 +95,8 @@ export default function CompletedWorkoutDetail({workoutId,clientId,readOnly=fals
     {shown.workoutNote&&!editing&&<p className="mt-4 rounded-xl bg-[#FFFFFF] p-4">{shown.workoutNote}</p>}
 
     <div className="mt-6 space-y-4">{shown.exerciseResults.map((result)=>{
-      const exercise=getExercise(result.exerciseId);
+      const exercise=getExercise(result.performedExerciseId??result.exerciseId);
+      const timed=/שניות/.test(day?.exercises.find(e=>e.id===result.workoutExerciseId)?.reps??"");
       return <article key={result.workoutExerciseId} className="rounded-[22px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
         <div className="flex justify-between gap-3">
           <h2 className="text-xl font-black">{exercise?.name??"תרגיל חסר"}</h2>
@@ -103,15 +104,15 @@ export default function CompletedWorkoutDetail({workoutId,clientId,readOnly=fals
         </div>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="text-[#5B5F5B]"><tr><th className="p-2 text-right">סט</th><th className="p-2 text-right">משקל</th><th className="p-2 text-right">חזרות</th><th className="p-2 text-right">נפח</th></tr></thead>
+            <thead className="text-[#5B5F5B]"><tr><th className="p-2 text-right">סט</th><th className="p-2 text-right">משקל</th><th className="p-2 text-right">{timed?"שניות":"חזרות"}</th><th className="p-2 text-right">נפח</th></tr></thead>
             <tbody>{result.sets.map((set)=>
               <tr key={set.id} className="border-t border-[#E5E7E5]">
                 <td className="p-2">{set.order+1}</td>
-                <td className="p-2">{editing
+                <td className="p-2">{editing&&!timed
                   ? <input type="number" min="0" step="0.5" inputMode="decimal" aria-label={`משקל בסט ${set.order+1}`} className="nutrition-input max-w-24" value={set.weightKg??""} onChange={(event)=>patchSet(result.workoutExerciseId,set.id,{weightKg:numberOrUndefined(event.target.value)})}/>
                   : set.weightKg??"—"}</td>
                 <td className="p-2">{editing
-                  ? <input type="number" min="0" step="1" inputMode="numeric" aria-label={`חזרות בסט ${set.order+1}`} className="nutrition-input max-w-24" value={set.repetitions??""} onChange={(event)=>patchSet(result.workoutExerciseId,set.id,{repetitions:numberOrUndefined(event.target.value)})}/>
+                  ? <input type="number" min="0" step="1" inputMode="numeric" aria-label={`${timed?"שניות":"חזרות"} בסט ${set.order+1}`} className="nutrition-input max-w-24" value={set.repetitions??""} onChange={(event)=>patchSet(result.workoutExerciseId,set.id,{repetitions:numberOrUndefined(event.target.value)})}/>
                   : set.repetitions??"—"}</td>
                 <td className="p-2">{workoutVolume([{...result,sets:[set]}])}</td>
               </tr>)}

@@ -11,55 +11,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { siteUrlForRedirect } from "@/lib/auth/site-url";
 import { GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
-import { assignmentsToAdd, isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
+import { isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
+import { intakeFromForm, trainingPreferences } from "@/lib/workouts/personalization";
+import { assignPersonalizedTraining } from "@/lib/workouts/assign-personalized";
 
-/**
- * Gives a client the programmes their trainee level starts with.
- *
- * Only ever adds. A programme the client already has is left alone, and nothing
- * is ever removed - a completed workout belongs to the assignment it was
- * performed under, so dropping an assignment would orphan that history. Removing
- * a programme stays a deliberate act by the coach.
- *
- * Programmes are matched by exact name against what is already in the
- * catalogue; this never imports or creates one. A name the catalogue does not
- * have simply yields no assignment.
- */
-async function assignLevelProgrammes(
-  admin:ReturnType<typeof createSupabaseAdminClient>,
-  clientId:string,
-  level:TraineeLevel,
-  // Which of the level's programmes the coach actually ticked. Empty means the
-  // whole level, which is what the self-serve onboarding path passes.
-  chosenNames:readonly string[]=[],
-){
-  const[{data:catalogue},{data:existing}]=await Promise.all([
-    admin.from("workout_programs").select("id,name,training_frequency").eq("status","active"),
-    admin.from("workout_assignments").select("program_id").eq("client_id",clientId).in("status",["active","paused"]),
-  ]);
-  const programmes=(catalogue??[]).map(row=>({id:String(row.id),name:String(row.name),trainingFrequency:row.training_frequency?Number(row.training_frequency):undefined}));
-  const assigned=(existing??[]).map(row=>String(row.program_id));
-  const wanted=assignmentsToAdd(level,programmes,assigned);
-  // A level with three splits is not three programmes a beginner should be given
-  // blindly. When the coach narrowed the list, honour exactly that.
-  const toAdd=chosenNames.length
-    ? wanted.filter(programme=>chosenNames.includes(programme.name.trim()))
-    : wanted;
-  if(!toAdd.length)return;
-
-  // A client trains several programmes side by side here, so these go in as
-  // active rows directly rather than through assign_workout_program, which
-  // deliberately keeps exactly one active assignment.
-  const{error}=await admin.from("workout_assignments").insert(toAdd.map(programme=>({
-    client_id:clientId,
-    program_id:programme.id,
-    start_date:israelDateKey(),
-    weekly_frequency:programme.trainingFrequency??3,
-    status:"active",
-  })));
-  // A failure here must not undo a created client: the coach can assign by hand.
-  if(error)console.error("level programme assignment failed",{clientId,level,message:error.message});
-}
 
 const emailPattern=/^\S+@\S+\.\S+$/;
 const value=(form:FormData,key:string)=>String(form.get(key)??"").trim();
@@ -106,8 +61,8 @@ export type IntakeState = Readonly<{
  *
  * A blank field clears the column rather than being ignored: a coach correcting
  * a wrong age to "unknown" has to be able to say so. Trainee level is stored and
- * nothing else - it never touches an assignment here, so it cannot disturb a
- * workout the client has already done.
+ * together with training preferences. Automatic assignment preserves an
+ * existing active programme and its history.
  */
 export async function updateClientIntake(_:IntakeState,form:FormData):Promise<IntakeState> {
   const coach=await getAuthContext();
@@ -140,7 +95,7 @@ export async function updateClientIntake(_:IntakeState,form:FormData):Promise<In
   const currentPreferences=existing?.preferences && typeof existing.preferences==="object" && !Array.isArray(existing.preferences)
     ? existing.preferences as Record<string,unknown>
     : {};
-  const preferences={...currentPreferences,weekly_workouts:weeklyWorkouts};
+  const preferences={...currentPreferences,...trainingPreferences(intakeFromForm(form)),weekly_workouts:weeklyWorkouts};
 
   const { error }=await admin.from("client_profiles").update({
     preferences,
@@ -157,9 +112,16 @@ export async function updateClientIntake(_:IntakeState,form:FormData):Promise<In
   }).eq("user_id",clientId);
   if(error) return {status:"error",message:"השמירה נכשלה. אפשר לנסות שוב בעוד רגע."};
 
+  const trainingMessage=value(form,"autoAssignProgrammes")==="on"
+    ? await assignPersonalizedTraining(admin,clientId,intakeFromForm(form)) : "";
+  if(trainingMessage) {
+    const {error: recommendationError}=await admin.from("client_profiles").update({preferences:{...preferences,training_recommendation:trainingMessage}}).eq("user_id",clientId);
+    if(recommendationError) return {status:"error",message:`האפיון נשמר. ${trainingMessage} שמירת ההמלצה נכשלה; יש לרענן ולבדוק את השיוך.`};
+  }
+  revalidatePath("/workouts");
   revalidatePath(`/coach/clients/${clientId}`);
   revalidatePath("/coach/menus/new");
-  return {status:"saved",message:"נתוני הקליטה נשמרו. יעד הקלוריות בבונה התפריט יחושב מהם."};
+  return {status:"saved",message:`נתוני הקליטה נשמרו. ${trainingMessage}`};
 }
 
 const createClientErrorMessage = (error: unknown) => {
@@ -200,7 +162,7 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
     // were free text nothing read, and the menu is built from the approved
     // catalogue rather than from a sentence.
     const preferences={
-      medical_notes:value(form,"medicalNotes"), weekly_workouts:nonNegative(form,"weeklyWorkouts"),
+      ...trainingPreferences(intakeFromForm(form)), weekly_workouts:nonNegative(form,"weeklyWorkouts"),
     };
     const { error: profileError }=await admin.from("profiles").update({full_name:fullName,phone:phone||null,role:"client",status:"active",is_test_account:coachProfile.is_test_account}).eq("id",clientId);
     if(profileError) throw new Error("client_profile_failed");
@@ -228,10 +190,13 @@ export async function createClientFromCoach(_:CreateClientState,form:FormData):P
     // client. It is a choice on the form now, ticked by default, and the form
     // names the programmes it will assign before the coach submits.
     const autoAssign=value(form,"autoAssignProgrammes")==="on";
-    const chosenProgrammes=form.getAll("levelProgrammes").map(String).filter(Boolean);
-    if(traineeLevel&&autoAssign)await assignLevelProgrammes(admin,clientId,traineeLevel as TraineeLevel,chosenProgrammes);
     const { error: relationError }=await admin.from("coach_client_relationships").upsert({coach_id:coach.id,client_id:clientId,status:"active"},{onConflict:"coach_id,client_id"});
     if(relationError) throw new Error("client_relationship_failed");
+    if(autoAssign) {
+      const message=await assignPersonalizedTraining(admin,clientId,intakeFromForm(form));
+      const {error: recommendationError}=await admin.from("client_profiles").update({preferences:{...preferences,training_recommendation:message}}).eq("user_id",clientId);
+      if(recommendationError) throw new Error("training_recommendation_save_failed");
+    }
     const { error: invitationHistoryError }=await admin.from("client_invitations").insert({client_id:clientId,coach_id:coach.id,status:"sent",expires_at:inviteExpiry()});
     if(invitationHistoryError) throw new Error("client_invitation_history_failed");
     if(initialWeight){
@@ -404,7 +369,8 @@ export async function completeClientOnboarding(form:FormData) {
   // The same columns the coach's intake writes. Two paths writing two shapes is
   // how a client ends up with a calorie target the builder cannot compute: the
   // fields it needs would exist for one kind of client and not the other.
-  const preferences={allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),training_location:value(form,"trainingLocation"),equipment:value(form,"equipment"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),training_type:value(form,"trainingType")};
+  const {data: previousProfile}=await supabase.from("client_profiles").select("preferences").eq("user_id",auth.id).maybeSingle();
+  const preferences={...(previousProfile?.preferences??{}),...trainingPreferences(intakeFromForm(form)),allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),training_type:value(form,"trainingType")};
   const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal"):null;
   const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel"):null;
   const {error}=await supabase.from("client_profiles").update({
@@ -425,7 +391,11 @@ export async function completeClientOnboarding(form:FormData) {
   if(error) throw new Error("onboarding_save_failed");
   // A client who told us their level gets the matching programmes, exactly as
   // one created by the coach does.
-  if(traineeLevel)await assignLevelProgrammes(createSupabaseAdminClient(),auth.id,traineeLevel as TraineeLevel);
+  if(value(form,"autoAssignProgrammes")==="on") {
+    const message=await assignPersonalizedTraining(createSupabaseAdminClient(),auth.id,intakeFromForm(form));
+    const {error: recommendationError}=await supabase.from("client_profiles").update({preferences:{...preferences,training_recommendation:message}}).eq("user_id",auth.id);
+    if(recommendationError) throw new Error("training_recommendation_save_failed");
+  }
   const weight=positive(form,"weight");if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:positive(form,"navelCircumference")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
   const admin=createSupabaseAdminClient();
   await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:new Date().toISOString()}).eq("client_id",auth.id).in("status",["sent","opened"]);

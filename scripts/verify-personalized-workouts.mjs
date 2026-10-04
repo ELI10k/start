@@ -1,0 +1,105 @@
+import assert from "node:assert/strict";
+import {randomUUID} from "node:crypto";
+import {config} from "dotenv";
+import {createClient} from "@supabase/supabase-js";
+import {chromium} from "@playwright/test";
+import {BUILT_IN_PROGRAMS} from "../lib/workouts/program-catalog.ts";
+
+config({path:new URL("../.env.e2e",import.meta.url).pathname,quiet:true});
+config({path:new URL("../.env.local",import.meta.url).pathname,quiet:true});
+const base=process.argv[2]??"https://start.elicohenfitness.co.il";
+const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+const client=createClient(url,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const {data:auth,error:authError}=await client.auth.signInWithPassword({email:process.env.E2E_COACH_EMAIL,password:process.env.E2E_COACH_PASSWORD});
+if(authError)throw new Error(`Test coach sign-in failed: ${authError.code}`);
+const session=auth.session;
+const key=`sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
+const encoded=`base64-${Buffer.from(JSON.stringify(session)).toString("base64")}`;
+const cookies=[];
+for(let n=0;n*3180<encoded.length;n++)cookies.push({name:encoded.length<=3180?key:`${key}.${n}`,value:encoded.slice(n*3180,(n+1)*3180),domain:new URL(base).hostname,path:"/",secure:base.startsWith("https"),sameSite:"Lax"});
+cookies.push({name:"start-device-id",value:"personalized-workout-coach-verification",domain:new URL(base).hostname,path:"/",secure:base.startsWith("https"),sameSite:"Lax"});
+const browser=await chromium.launch({headless:true});
+const context=await browser.newContext({viewport:{width:1280,height:1000},locale:"he-IL"});
+await context.addCookies(cookies);
+const page=await context.newPage();
+const report={};
+let admin,createdId,copyId;
+const check=(error,step)=>{if(error)throw new Error(`${step}: ${error.code??error.message}`)};
+try {
+  await page.goto(`${base}/coach/workouts`,{waitUntil:"networkidle"});
+  await page.getByRole("heading",{name:"תוכניות אימון",exact:true}).waitFor();
+  for(const program of BUILT_IN_PROGRAMS)await page.getByRole("heading",{name:program.name,exact:true}).waitFor({timeout:15000});
+  report.catalogue=21;
+  await page.screenshot({path:new URL("../reports/personalized-workout-catalog.png",import.meta.url).pathname,fullPage:false});
+  await page.goto(`${base}/coach/clients/new`,{waitUntil:"networkidle"});
+  await page.getByLabel("מין",{exact:true}).selectOption("female");
+  await page.getByLabel("רמת מתאמן",{exact:true}).selectOption("beginner");
+  await page.getByLabel("אימונים בשבוע",{exact:true}).fill("3");
+  await page.getByLabel("מיקום האימון",{exact:true}).selectOption("gym");
+  await page.getByLabel("ציוד זמין לאימון",{exact:true}).selectOption("gym");
+  await page.getByLabel("דגש באימון",{exact:true}).selectOption("glutes");
+  await page.getByLabel("חלוקת אימונים",{exact:true}).selectOption("auto");
+  await page.getByLabel("משך אימון זמין (דקות)",{exact:true}).fill("60");
+  await page.getByLabel("חודשי אימון עקבי",{exact:true}).fill("8");
+  await page.getByLabel("שליטה בטכניקה",{exact:true}).selectOption("stable");
+  await page.getByLabel("פציעה, כאב, היריון או מגבלה רפואית",{exact:true}).selectOption("no");
+  await page.getByRole("status").filter({hasText:"אימון FBW לנשים דגש לישבן"}).waitFor();
+  report.liveRecommendation="FBW female glutes beginner";
+  await page.setViewportSize({width:390,height:844});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"mobile overflow");
+  report.mobile="390px, no horizontal overflow";
+
+  if(process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    admin=createClient(url,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+    const {data:coach,error:coachError}=await admin.from("profiles").select("is_test_account").eq("id",session.user.id).single();
+    check(coachError,"test coach verification");
+    assert.equal(coach.is_test_account,true,"Only an isolated test coach may run mutation smoke tests");
+    const id=randomUUID();
+    const created=await admin.auth.admin.createUser({email:`workout-smoke-${id}@example.invalid`,password:`${randomUUID()}Aa1!`,email_confirm:true,app_metadata:{role:"client",is_test_account:true}});
+    check(created.error,"create disposable test identity");createdId=created.data.user.id;
+    check((await admin.from("profiles").upsert({id:createdId,email:created.data.user.email,full_name:"בדיקת התאמת אימונים",role:"client",status:"active",is_test_account:true})).error,"test profile");
+    check((await admin.from("client_profiles").upsert({user_id:createdId,onboarding_completed:true})).error,"test intake");
+    check((await admin.from("coach_client_relationships").upsert({coach_id:session.user.id,client_id:createdId,status:"active"},{onConflict:"coach_id,client_id"})).error,"test relationship");
+    await page.goto(`${base}/coach/clients/${createdId}`,{waitUntil:"networkidle"});
+    const form=page.locator('form').filter({has:page.locator('input[name="clientId"]')});
+    await form.getByLabel("מין",{exact:true}).selectOption("female");
+    await form.getByLabel("רמת מתאמן",{exact:true}).selectOption("beginner");
+    await form.getByLabel("אימונים בשבוע",{exact:true}).fill("3");
+    await form.getByLabel("מיקום האימון",{exact:true}).selectOption("gym");
+    await form.getByLabel("ציוד זמין לאימון",{exact:true}).selectOption("gym");
+    await form.getByLabel("דגש באימון",{exact:true}).selectOption("glutes");
+    await form.getByLabel("חלוקת אימונים",{exact:true}).selectOption("auto");
+    await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).fill("40");
+    await form.getByLabel("חודשי אימון עקבי",{exact:true}).fill("8");
+    await form.getByLabel("שליטה בטכניקה",{exact:true}).selectOption("stable");
+    await form.getByLabel("פציעה, כאב, היריון או מגבלה רפואית",{exact:true}).selectOption("yes");
+    await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
+    await form.getByRole("status").filter({hasText:"דורשים בדיקת מאמן"}).waitFor();
+    const before=await admin.from("workout_assignments").select("id").eq("client_id",createdId);check(before.error,"read medical guard");assert.equal(before.data.length,0);
+    report.medicalReview="no assignment";
+    await form.getByLabel("פציעה, כאב, היריון או מגבלה רפואית",{exact:true}).selectOption("no");
+    await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
+    await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
+    const assignments=await admin.from("workout_assignments").select("id,program_id,weekly_frequency").eq("client_id",createdId).eq("status","active");check(assignments.error,"read assignment");assert.equal(assignments.data.length,1);assert.equal(assignments.data[0].weekly_frequency,3);copyId=assignments.data[0].program_id;
+    const days=await admin.from("workout_program_days").select("id,workout_program_exercises(exercise_id,sets_text,reps_text)").eq("program_id",copyId);check(days.error,"read copy");assert.equal(days.data.length,2);assert.ok(days.data.flatMap(d=>d.workout_program_exercises).filter(e=>e.exercise_id!=="exercise-155pu7s").every(e=>e.sets_text==="2"));
+    report.personalCopy="2 days; fixed repetitions; 2 sets for 40 minutes";
+    await page.reload({waitUntil:"networkidle"});
+    assert.equal(await form.getByLabel("דגש באימון",{exact:true}).inputValue(),"glutes");
+    assert.equal(await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).inputValue(),"40");
+    await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
+    await form.getByRole("status").filter({hasText:"התוכנית הפעילה נשמרה"}).waitFor();
+    const repeated=await admin.from("workout_assignments").select("id").eq("client_id",createdId).eq("status","active");assert.equal(repeated.data.length,1);
+    report.persistenceAndIdempotency="passed";
+  }
+} finally {
+  await browser.close();
+  if(admin&&createdId) {
+    // Exact disposable test identity only; production users are never targets.
+    const copies=await admin.from("workout_assignments").select("program_id").eq("client_id",createdId);
+    const copiedIds=copies.data?.map(a=>a.program_id)??[];
+    check((await admin.auth.admin.deleteUser(createdId)).error,"remove disposable test identity");
+    for(const programId of new Set([...copiedIds,copyId].filter(Boolean)))check((await admin.from("workout_programs").delete().eq("id",programId).eq("coach_id",session.user.id).eq("official",false)).error,"remove test copy");
+    report.disposableTestData="removed";
+  }
+}
+console.log(JSON.stringify(report,null,2));

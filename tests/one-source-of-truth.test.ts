@@ -79,8 +79,8 @@ test("coach intake and client onboarding write the same columns", async () => {
     assert.ok(clientBlock.includes(column), `client onboarding does not write ${column}`);
   }
   // And both give the client their programmes from the same helper.
-  assert.ok(coachBlock.includes("assignLevelProgrammes"));
-  assert.ok(clientBlock.includes("assignLevelProgrammes"));
+  assert.ok(coachBlock.includes("assignPersonalizedTraining"));
+  assert.ok(clientBlock.includes("assignPersonalizedTraining"));
 });
 
 test("onboarding does not reintroduce the fields the intake dropped", async () => {

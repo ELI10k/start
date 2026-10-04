@@ -82,15 +82,15 @@ test("the session count is merged into the preferences blob, not written over it
   const fn = actions.slice(actions.indexOf("export async function updateClientIntake"));
   // Overwriting would drop the allergies, meal times and equipment the original
   // intake put there.
-  assert.match(fn, /const preferences=\{\.\.\.currentPreferences,weekly_workouts:weeklyWorkouts\}/);
+  assert.match(fn, /const preferences=\{\.\.\.currentPreferences,.*weekly_workouts:weeklyWorkouts\}/);
 });
 
-test("the level mapping is offered as a recommendation, and says so", async () => {
+test("the intake offers automatic personalization while preserving active plans", async () => {
   const form = await source("components/coach/ClientIntakeForm.tsx");
-  assert.match(form, /תוכניות מומלצות לרמת/);
-  assert.match(form, /המלצה בלבד/);
-  // It reads the shared mapping rather than restating programme names.
-  assert.match(form, /PROGRAMMES_BY_LEVEL\[level\]\.map/);
+  assert.match(form, /TrainingIntakeFields values=\{values.trainingPreferences\}/);
+  const fields = await source("components/coach/TrainingIntakeFields.tsx");
+  assert.match(fields, /התאם ושייך תוכנית אוטומטית לפי האפיון/);
+  assert.match(fields, /אם כבר קיימת תוכנית פעילה/);
   assert.doesNotMatch(form, /A-B-C"/);
   // And the mapping is the one the product asked for.
   assert.deepEqual([...TRAINEE_LEVELS], ["beginner", "intermediate", "advanced"]);

@@ -1,0 +1,67 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFile} from "node:fs/promises";
+import {BUILT_IN_PROGRAMS, PROGRAM_DEFINITIONS, buildProgram} from "../lib/workouts/program-catalog.ts";
+import {assessedLevel, recommendTraining, personalizeProgram, alternativeExercises, type TrainingIntake} from "../lib/workouts/personalization.ts";
+import type {Exercise} from "../lib/workouts/types.ts";
+const input: TrainingIntake={sex:"female",traineeLevel:"beginner",weeklyWorkouts:3,trainingLocation:"gym",equipment:"gym",trainingFocus:"glutes",trainingSplit:"auto",sessionMinutes:60,medicalReview:"no",experienceMonths:8,technique:"stable"};
+const catalogue=JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json",import.meta.url),"utf8"));
+
+test("21 distinct programmes, with all prescriptions, real exercises and complete muscle coverage",()=>{
+  assert.equal(BUILT_IN_PROGRAMS.length,21);
+  assert.equal(new Set(BUILT_IN_PROGRAMS.map(p=>p.name)).size,21);
+  for(const p of BUILT_IN_PROGRAMS){
+    const groups=new Set<string>();
+    for(const day of p.days){
+      assert.equal(day.exercises[0].exerciseId,"exercise-155pu7s");
+      for(const e of day.exercises){
+        const real=catalogue.find((x: {id:string})=>x.id===e.exerciseId);
+        assert.ok(real,`${p.name}: missing ${e.exerciseId}`);
+        assert.ok(real.video?.url,`${real.name}: no real media`);
+        groups.add(real.primary_muscle_group === "בטן" ? "שרירי ליבה" : real.primary_muscle_group);
+        if(e.exerciseId==="exercise-155pu7s")continue;
+        assert.match(e.reps!,/^\d+( שניות)?$/);
+        assert.equal(e.setPrescriptions?.length,Number(e.sets));
+        assert.ok(e.rest);
+      }
+    }
+    for(const group of ["חזה","גב","רגליים","כתפיים","יד קדמית","יד אחורית","שרירי ליבה"]) assert.ok(groups.has(group),`${p.name}: ${group}`);
+  }
+});
+test("automatic selection considers level, frequency, equipment and focus",()=>{
+  assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes");
+  assert.equal(recommendTraining({...input,trainingSplit:"PPL"}).programId,"lifefit-ppl-female-glutes-beginner");
+  assert.equal(recommendTraining({...input,traineeLevel:"intermediate",weeklyWorkouts:4}).programId,"lifefit-a-b-female-glutes-intermediate");
+  assert.equal(recommendTraining({...input,traineeLevel:"advanced",experienceMonths:36,weeklyWorkouts:6,trainingFocus:"back"}).programId,"lifefit-ppl-female-back-advanced");
+  assert.equal(recommendTraining({...input,equipment:"trx",trainingLocation:"home"}).programId,"lifefit-trx-female-glutes");
+});
+test("medical concerns, missing data and impossible schedules require review",()=>{
+  assert.equal(recommendTraining({...input,medicalReview:"yes"}).status,"review");
+  assert.equal(recommendTraining({...input,medicalNotes:"כאב ברך"}).status,"review");
+  assert.equal(recommendTraining({...input,equipment:""}).status,"missing");
+  assert.equal(recommendTraining({...input,weeklyWorkouts:2,trainingSplit:"PPL"}).status,"review");
+  assert.equal(recommendTraining({...input,weeklyWorkouts:6,trainingSplit:"FBW"}).status,"review");
+  assert.equal(recommendTraining({...input,trainingLocation:"home"}).status,"review");
+});
+test("experience and technique can lower a self-reported advanced level",()=>{
+  assert.equal(assessedLevel({...input,traineeLevel:"advanced",experienceMonths:3}),"beginner");
+  assert.equal(assessedLevel({...input,traineeLevel:"advanced",experienceMonths:14}),"intermediate");
+  assert.equal(assessedLevel({...input,traineeLevel:"advanced",experienceMonths:36,technique:"learning"}),"beginner");
+});
+test("short sessions reduce sets while retaining every movement and fixed targets",()=>{
+  const rec=recommendTraining({...input,sessionMinutes:40});
+  const p=personalizeProgram(buildProgram(rec.definition!),rec,40);
+  for(const day of p.days)for(const e of day.exercises)if(e.exerciseId!=="exercise-155pu7s")assert.equal(e.sets,"2");
+  const advanced=buildProgram(PROGRAM_DEFINITIONS[0],"advanced");
+  assert.match(advanced.days[1].exercises.at(-1)!.reps!,/40 שניות/);
+});
+const ex=(id:string,name:string,muscle:string,equipment:string):Exercise=>({id,name,normalizedName:name,aliases:[],primaryMuscleGroup:muscle,equipment,secondaryMuscleGroups:[],cues:[],commonMistakes:[],sourceWorkbooks:[],sourceReferences:[],status:"active"});
+test("replacements preserve movement, units and home equipment",()=>{
+  const row=ex("exercise-126wehi","חתירה במכונה","גב","מכונה ייעודית");
+  const trx=ex("resistance-suspended-row","חתירה ברצועות","גב","רצועות תלייה");
+  const pull=ex("exercise-1ly3xqh","משיכה בפולי עליון","גב","כבל פולי");
+  assert.deepEqual(alternativeExercises(row,[row,trx,pull],{clientId:"x",trainingTypes:[],equipment:["TRX"],trainingLocation:"home",preferredDays:[]}).map(e=>e.id),[trx.id]);
+  const plank=ex("bodyweight-front-plank","פלאנק","שרירי ליבה","משקל גוף");
+  const abs=ex("exercise-pn4ire","כפיפות בטן","שרירי ליבה","משקל גוף");
+  assert.equal(alternativeExercises(plank,[plank,abs]).length,0);
+});

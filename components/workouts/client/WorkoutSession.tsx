@@ -19,6 +19,7 @@ import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-
 import { signalRestOver } from "@/lib/workouts/feedback";
 import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
 import { workoutRestSeconds } from "@/lib/workouts/rest";
+import { alternativeExercises } from "@/lib/workouts/personalization";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
 const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);return Number.isFinite(count)&&count>0?Math.min(count,20):0};
@@ -113,6 +114,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const performedId=result.performedExerciseId??result.exerciseId;
   const exercise=getExercise(performedId);const prescribed=getExercise(result.exerciseId);
   const dynamicWarmup=exercise?.id==="exercise-155pu7s"||exercise?.primaryMuscleGroup==="חימום";
+  const timed=/שניות/.test(current.reps??"");
   const comparableWorkouts=snapshot.completedWorkouts.filter((workout)=>workout.programId===programId&&workout.dayId===dayId);
   const performance=exercisePerformance(comparableWorkouts,currentClientId,performedId);const previous=performance.sessions[0];// The best set that is comparable to today's work, not the heaviest weight ever
   // moved on the exercise: a 12-rep back-off set is not a benchmark for a 10-rep
@@ -139,9 +141,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // A replacement has to train the same thing, so the list is the catalogue
   // filtered to the prescribed exercise's primary muscle group. Both fields are
   // already classified, so no new data is needed for this.
-  const swapOptions=snapshot.exercises
-    .filter((item)=>item.id!==performedId&&item.status!=="archived"&&prescribed?.primaryMuscleGroup&&item.primaryMuscleGroup===prescribed.primaryMuscleGroup)
-    .slice(0,40);
+  const swapOptions=alternativeExercises(prescribed,snapshot.exercises,snapshot.workoutPreferences.find(p=>p.clientId===currentClientId)).filter(item=>item.id!==performedId);
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
   const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item)};const restSeconds=patch.completed?workoutRestSeconds(current.rest):null;replaceResult(nextResult,restSeconds?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
   // Marking an exercise done used to leave the client staring at the exercise
@@ -244,15 +244,15 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
 
       {!dynamicWarmup&&<dl className="session-stats">
         <Stat label="סטים" value={current.sets??"לא הוגדר"}/>
-        <Stat label="חזרות" value={current.reps??"לא הוגדר"}/>
+        <Stat label={timed?"זמן לסט":"חזרות"} value={current.reps??"לא הוגדר"}/>
         <Stat label="מנוחה" value={current.rest??"לא הוגדר"}/>
         <Stat label="רמת מאמץ" value={current.effort?`RPE ${current.effort}`:"לא הוגדר"}/>
       </dl>}
 
       {(current.notes||exercise?.executionNotes)&&<p className="mt-3 rounded-2xl bg-[#F7F8F7] p-3 text-sm text-[#5B5F5B]">{current.notes||exercise?.executionNotes}</p>}
 
-      {!dynamicWarmup&&<PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>}
-      {!dynamicWarmup&&challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
+      {!dynamicWarmup&&!timed&&<PreviousPerformance previous={previous} best={best} targetReps={repTarget} recent={performance.sessions.slice(0,3)}/>}
+      {!dynamicWarmup&&!timed&&challenge&&<section className="workout-challenge mt-3"><span>האתגר באימון היום</span><strong>{challenge.weightKg} ק״ג × {repTarget??"לפי התוכנית"}</strong><small>{challenge.reason}</small></section>}
 
       {/* Some rows in the source workbooks carry no sets - a dynamic warm-up, for
           instance. Rendering an empty table header for those left the client with
@@ -277,7 +277,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
             <div className="mb-1 mt-4 text-sm font-black">סטים עובדים</div>
           </>:null}
           <div className="set-row text-xs font-bold text-[#5B5F5B]" aria-hidden="true">
-            <span/><span>משקל (ק״ג)</span><span>חזרות</span><span/>
+            <span/><span>{timed?"":"משקל (ק״ג)"}</span><span>{timed?"שניות":"חזרות"}</span><span/>
           </div>
           {result.sets.map((set,index)=>
             <SetEditor key={set.id} set={set} index={index} target={current.setPrescriptions?.[index]?.repetitions??current.reps} onUpdate={(patch)=>updateSet(set,patch)}/>
@@ -415,10 +415,11 @@ function WarmupSetEditor({set,completed,onToggle}:{set:{percent:number;weightKg:
 // One row per set: number, weight, reps, done. Everything a client touches
 // mid-set is on the same line and at least a fingertip wide.
 function SetEditor({set,index,target,onUpdate}:{set:ExerciseSetResult;index:number;target?:string;onUpdate:(patch:Partial<ExerciseSetResult>)=>void}){
+  const timed=/שניות/.test(target??"");
   return <div className="set-row" data-done={set.completed||undefined}>
     <span className="set-row__index" aria-hidden="true">{index+1}</span>
-    <input aria-label={`משקל בסט ${index+1} (ק״ג)`} className="nutrition-input" type="number" min="0" step="0.1" value={set.weightKg??""} onChange={(event)=>onUpdate({weightKg:event.target.value===""?undefined:Number(event.target.value)})}/>
-    <input aria-label={`חזרות בסט ${index+1}, יעד ${target??"—"}`} className="nutrition-input" type="number" min="0" step="1" placeholder={target??""} value={set.repetitions??""} onChange={(event)=>onUpdate({repetitions:event.target.value===""?undefined:Number(event.target.value)})}/>
+    {timed?<span/>:<input aria-label={`משקל בסט ${index+1} (ק״ג)`} className="nutrition-input" type="number" min="0" step="0.1" value={set.weightKg??""} onChange={(event)=>onUpdate({weightKg:event.target.value===""?undefined:Number(event.target.value)})}/>}
+    <input aria-label={`${timed?"שניות":"חזרות"} בסט ${index+1}, יעד ${target??"—"}`} className="nutrition-input" type="number" min="0" step="1" placeholder={timed?String(Number.parseInt(target??"",10)):target??""} value={set.repetitions??""} onChange={(event)=>onUpdate({repetitions:event.target.value===""?undefined:Number(event.target.value),...(timed?{weightKg:undefined,notes:"זמן בשניות"}:{})})}/>
     <button
       aria-label={set.completed?`ביטול השלמת סט ${index+1}`:`השלמת סט ${index+1}`}
       aria-pressed={set.completed}

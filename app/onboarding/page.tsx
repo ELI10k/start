@@ -7,6 +7,7 @@ import { TRAINEE_LEVEL_LABELS, TRAINEE_LEVELS } from "@/lib/workouts/trainee-lev
 import { INITIAL_NAVEL_MAX_CM, INITIAL_NAVEL_MIN_CM } from "@/lib/progress/measurements";
 import Link from "next/link";
 import LegalLinks from "@/components/legal/LegalLinks";
+import TrainingIntakeFields from "@/components/coach/TrainingIntakeFields";
 
 // The client's own intake. It asks for exactly what the coach's form asks for,
 // because both write the same columns - a client who filled this in must be as
@@ -54,9 +55,7 @@ export default async function Onboarding() {
 
       <section className="mt-4 grid gap-4 rounded-[28px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 sm:grid-cols-2">
         <h2 className="text-sm font-black text-[#3F433F] sm:col-span-2">אימון</h2>
-        <Field label="סוג אימון" name="trainingType" />
-        <Field label="מיקום אימונים" name="trainingLocation" />
-        <Field label="ציוד זמין" name="equipment" />
+        <TrainingIntakeFields />
         <Field label="ימים מועדפים" name="preferredDays" />
         <Field label="אלרגיות או מגבלות" name="allergies" />
         <Field label="שעות אכילה" name="mealTimes" />

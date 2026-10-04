@@ -66,15 +66,12 @@ test("each level maps to the programme count the product asked for", () => {
   assert.equal(PROGRAMMES_BY_LEVEL.advanced.length, 3);
 });
 
-test("assignment inserts rows directly, so a client can hold several at once", async () => {
-  const action = await source("app/actions/onboarding.ts");
-  // assign_workout_program keeps exactly one active assignment by design, which
-  // is the opposite of what a level needs.
-  assert.match(action, /async function assignLevelProgrammes/);
-  assert.match(action, /from\("workout_assignments"\)\.insert/);
-  assert.doesNotMatch(action, /rpc\("assign_workout_program"/);
-  // And a failure there must not undo a client that was already created.
-  assert.match(action, /level programme assignment failed/);
+test("automatic intake assigns one personalized programme atomically", async () => {
+  const helper = await source("lib/workouts/assign-personalized.ts");
+  assert.match(helper, /recommendTraining\(input\)/);
+  assert.match(helper, /rpc\("assign_intake_workout"/);
+  assert.match(helper, /already_active/);
+  assert.match(helper, /Personalized training assignment failed/);
 });
 
 test("the intake collects what the calculation needs and drops what nothing read", async () => {

@@ -74,26 +74,22 @@ test("the PREVIEW badge is decided on the server and cannot show in production",
   assert.doesNotMatch(nav, /process\.env/);
 });
 
-test("assigning the level's programmes is a choice the coach sees and can refuse", async () => {
+test("automatic training assignment is a visible choice the coach can refuse", async () => {
   const form = await source("components/coach/CreateClientForm.tsx");
-  assert.match(form, /name="autoAssignProgrammes"/);
-  assert.match(form, /שייך תוכנית אימונים אוטומטית לפי הרמה/);
-  // The programmes are named before the coach submits, and each can be unticked.
-  assert.match(form, /PROGRAMMES_BY_LEVEL\[level\]\.map/);
-  assert.match(form, /name="levelProgrammes"/);
+  assert.match(form, /TrainingIntakeFields preview=/);
+  const fields = await source("components/coach/TrainingIntakeFields.tsx");
+  assert.match(fields, /name="autoAssignProgrammes"/);
+  assert.match(fields, /התאם ושייך תוכנית אוטומטית לפי האפיון/);
 
   const actions = await source("app/actions/onboarding.ts");
   // Nothing is assigned unless the box is ticked.
   assert.match(actions, /const autoAssign=value\(form,"autoAssignProgrammes"\)==="on"/);
-  assert.match(actions, /if\(traineeLevel&&autoAssign\)await assignLevelProgrammes/);
-  // And only the programmes that were left ticked.
-  assert.match(actions, /chosenNames\.length/);
-  assert.match(actions, /wanted\.filter\(programme=>chosenNames\.includes\(programme\.name\.trim\(\)\)\)/);
+  assert.match(actions, /if\(autoAssign\)/);
+  assert.match(actions, /assignPersonalizedTraining\(admin,clientId,intakeFromForm\(form\)\)/);
 });
 
 test("assignment still only ever adds, so a level change cannot touch history", async () => {
-  const actions = await source("app/actions/onboarding.ts");
-  const fn = actions.slice(actions.indexOf("async function assignLevelProgrammes"), actions.indexOf("const emailPattern"));
-  assert.match(fn, /assignmentsToAdd\(level,programmes,assigned\)/);
-  assert.doesNotMatch(fn, /\.delete\(\)|\.update\(/);
+  const sql = await source("supabase/migrations/20261004121045_personalized_workout_catalog.sql");
+  assert.match(sql, /if exists\(select 1 from public.workout_assignments where client_id=p_client_id and status='active'\) then return 'already_active'/);
+  assert.doesNotMatch(sql, /delete from|update public.workout_assignments/i);
 });

@@ -3,7 +3,8 @@
 import { useActionState } from "react";
 import { updateClientIntake, type IntakeState } from "@/app/actions/onboarding";
 import { GOAL_LABELS, MISSING_LABELS, NUTRITION_GOALS, calculateEnergy, type NutritionGoal, type Sex } from "@/lib/nutrition/energy";
-import { PROGRAMMES_BY_LEVEL, TRAINEE_LEVELS, TRAINEE_LEVEL_LABELS, isTraineeLevel } from "@/lib/workouts/trainee-level";
+import { TRAINEE_LEVELS, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-level";
+import TrainingIntakeFields from "./TrainingIntakeFields";
 
 // The intake form runs once, when a client is created. Every client created
 // before the calorie columns existed therefore has none of them, and the builder
@@ -22,6 +23,7 @@ export type IntakeValues = Readonly<{
   traineeLevel: string | null;
   latestWeight: number | null;
   targetWeight: number | null;
+  trainingPreferences?: Record<string, unknown>;
 }>;
 
 const initialState: IntakeState = { status: "idle", message: "" };
@@ -40,7 +42,6 @@ export default function ClientIntakeForm({ clientId, values }: { clientId: strin
     goal: (values.nutritionGoal as NutritionGoal | null) ?? undefined,
   });
 
-  const level = isTraineeLevel(values.traineeLevel) ? values.traineeLevel : null;
 
   return <form action={action} className="grid gap-4">
     <input type="hidden" name="clientId" value={clientId}/>
@@ -56,6 +57,8 @@ export default function ClientIntakeForm({ clientId, values }: { clientId: strin
       <Select label="מטרה" name="nutritionGoal" defaultValue={values.nutritionGoal ?? ""} options={NUTRITION_GOALS.map((goal) => [goal, GOAL_LABELS[goal]])}/>
       <Select label="רמת מתאמן" name="traineeLevel" defaultValue={values.traineeLevel ?? ""} options={TRAINEE_LEVELS.map((item) => [item, TRAINEE_LEVEL_LABELS[item]])}/>
       <Field label="יעד משקל (ק״ג)" name="targetWeight" type="number" min="1" step="0.1" defaultValue={values.targetWeight ?? ""}/>
+      <TrainingIntakeFields values={values.trainingPreferences}/>
+      <label className="block text-sm font-bold sm:col-span-2">מגבלות רפואיות או הערות<textarea name="medicalNotes" defaultValue={String(values.trainingPreferences?.medical_notes??"")} className="nutrition-input mt-2 min-h-24"/></label>
     </div>
 
     {/* The weight is not editable here: it comes from the client's own weigh-ins
@@ -74,16 +77,8 @@ export default function ClientIntakeForm({ clientId, values }: { clientId: strin
         : <p className="text-xs text-[#5B5F5B]">עדיין לא ניתן לחשב יעד קלורי. חסר: {energy.missing.map((field) => MISSING_LABELS[field]).join(", ")}.</p>}
     </div>
 
-    {/* A recommendation, and labelled as one. Nothing here assigns a programme:
-        which programmes a level should start with is settled, but whether the
-        system assigns them or the coach does is not. */}
-    {level && <div className="rounded-2xl border border-[#E5E7E5] p-3">
-      <p className="text-xs font-bold text-[#3F433F]">תוכניות מומלצות לרמת {TRAINEE_LEVEL_LABELS[level]}</p>
-      <ul className="mt-2 grid gap-1 text-xs text-[#5B5F5B]">
-        {PROGRAMMES_BY_LEVEL[level].map((name) => <li key={name} className="flex gap-2"><span aria-hidden="true" className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#16A34A]"/><span>{name}</span></li>)}
-      </ul>
-      <p className="mt-2 text-[11px] text-[#5B5F5B]">המלצה בלבד. שיוך תוכנית נעשה ממסך האימונים.</p>
-    </div>}
+    {/* Saved recommendations remain visible after a reload. */}
+    {typeof values.trainingPreferences?.training_recommendation === "string" && <p className="text-sm text-[#5B5F5B]">{values.trainingPreferences.training_recommendation}</p>}
 
     <button disabled={pending} className="premium-primary-button w-full">{pending ? "שומרים…" : "שמירת נתוני הקליטה"}</button>
   </form>;
