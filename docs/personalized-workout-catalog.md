@@ -9,3 +9,10 @@ Automatic assignment creates a private editable copy. Shorter sessions reduce se
 Alternatives preserve muscle group, recognized movement pattern, available home equipment, and seconds versus repetitions. A row is not replaced with a vertical pull; a squat is not replaced with a leg curl. Planks display and log seconds in the session and completed-workout detail. Medical restrictions require coach review rather than interpreting free text as a medical diagnosis.
 
 Source: `lib/workouts/program-catalog.ts`; exercises snapshot: `data/personalized-workout-exercises.json`. Regenerate the additive migration with `node scripts/generate-personalized-workout-migration.mjs`. The migration inserts only missing templates/exercises and never overwrites live prescriptions. Tests: `tests/personalized-workouts.test.ts` plus existing workout and intake tests.
+# Expanded catalogue
+
+The catalogue now has 37 unique official templates (16 additions): male gym FBW intermediate/advanced, balanced female gym FBW at three levels, male upper/lower A-B at three levels, intermediate/advanced bodyweight FBW with a confirmed pull-up and rowing station, and home dumbbell FBW with/without a flat bench at all three levels. Existing beginner templates remain untouched.
+
+Home dumbbell programmes are shared across sexes and selected by level, time, frequency and equipment. Without a bench, chest work uses floor push-ups; no bench, machines or cables are assumed. The bench option uses a stable flat exercise bench, not an adjustable bench. Home special-focus/split requests and bodyweight without a stable pulling station require coach review. Bodyweight beginners retain the existing coach-selected template.
+
+Verified home substitutions use an explicit exercise allowlist because older catalogue metadata can omit bench/ball requirements. No active client assignment or historical prescription is replaced by the additive migration.

@@ -7,9 +7,9 @@ import type {Exercise} from "../lib/workouts/types.ts";
 const input: TrainingIntake={sex:"female",traineeLevel:"beginner",weeklyWorkouts:3,trainingLocation:"gym",equipment:"gym",trainingFocus:"glutes",trainingSplit:"auto",sessionMinutes:60,medicalReview:"no",experienceMonths:8,technique:"stable"};
 const catalogue=JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json",import.meta.url),"utf8"));
 
-test("21 distinct programmes, with all prescriptions, real exercises and complete muscle coverage",()=>{
-  assert.equal(BUILT_IN_PROGRAMS.length,21);
-  assert.equal(new Set(BUILT_IN_PROGRAMS.map(p=>p.name)).size,21);
+test("37 distinct programmes, with all prescriptions, real exercises and complete muscle coverage",()=>{
+  assert.equal(BUILT_IN_PROGRAMS.length,37);
+  assert.equal(new Set(BUILT_IN_PROGRAMS.map(p=>p.name)).size,37);
   for(const p of BUILT_IN_PROGRAMS){
     const groups=new Set<string>();
     for(const day of p.days){
@@ -27,6 +27,35 @@ test("21 distinct programmes, with all prescriptions, real exercises and complet
     }
     for(const group of ["חזה","גב","רגליים","כתפיים","יד קדמית","יד אחורית","שרירי ליבה"]) assert.ok(groups.has(group),`${p.name}: ${group}`);
   }
+});
+test("expanded gym and home catalogue selects the correct sex, level and equipment",()=>{
+  for(const level of ["beginner","intermediate","advanced"] as const){
+    const base={...input,traineeLevel:level,experienceMonths:36,trainingFocus:"balanced",trainingLocation:"home"};
+    for(const equipment of ["dumbbells","dumbbells_bench"]){
+      const rec=recommendTraining({...base,equipment});
+      assert.equal(rec.programId,`lifefit-home-${equipment}-${level}`);
+      const program=buildProgram(rec.definition!);
+      assert.equal(program.equipment.includes("ספסל"),equipment==="dumbbells_bench");
+      assert.ok(program.days.flatMap(d=>d.exercises).every(e=>!catalogue.find((x:{id:string})=>x.id===e.exerciseId)?.equipment?.match(/מכונה|פולי|מוט/)));
+    }
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"female"}).programId,`lifefit-fbw-female-balanced-${level}`);
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male",trainingSplit:"A-B"}).programId,`lifefit-a-b-male-balanced-${level}`);
+    if(level!=="beginner"){
+      assert.equal(recommendTraining({...base,equipment:"bodyweight_station"}).programId,`lifefit-home-bodyweight-${level}`);
+      assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male"}).programId,`lifefit-fbw-male-balanced-${level}`);
+    }
+  }
+  assert.equal(recommendTraining({...input,trainingFocus:"balanced",equipment:"bodyweight"}).status,"review");
+  assert.equal(recommendTraining({...input,trainingFocus:"balanced",equipment:"dumbbells",weeklyWorkouts:4}).status,"review");
+  assert.equal(recommendTraining({...input,equipment:"dumbbells"}).status,"review");
+});
+test("home substitutions never introduce an unavailable bench, machine or pull-up station",()=>{
+  const row=ex("resistance-dumbbell-bent-over-row","חתירה כנגד משקולת","גב","משקולות יד");
+  const benchRow=ex("resistance-dumbbell-one-arm-bent-over-row","חתירה ביד אחת","גב","משקולות יד");
+  const supported=ex("exercise-1h0qzj6","חתירה מעל הספה","גב","משקולות יד");
+  const prefs={clientId:"x",trainingTypes:[],equipment:["משקולות יד","משקל גוף"],trainingLocation:"home",preferredDays:[]};
+  assert.equal(alternativeExercises(row,[row,benchRow,supported],prefs).length,0);
+  assert.deepEqual(alternativeExercises(row,[row,benchRow,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).map(e=>e.id),[benchRow.id]);
 });
 test("automatic selection considers level, frequency, equipment and focus",()=>{
   assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes");

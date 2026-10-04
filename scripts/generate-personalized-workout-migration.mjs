@@ -3,18 +3,22 @@
 import { writeFile } from "node:fs/promises";
 import { BUILT_IN_PROGRAMS } from "../lib/workouts/program-catalog.ts";
 import { readFile } from "node:fs/promises";
-const output = new URL("../supabase/migrations/20261004121752_personalized_workout_catalog.sql", import.meta.url);
+const output = new URL(process.argv[2] ?? "../supabase/migrations/20261004143008_expanded_workout_catalog.sql", import.meta.url);
 const exercises = JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json", import.meta.url), "utf8"));
+const expanded=output.pathname.includes("expanded_workout_catalog");
+const programmes=expanded?BUILT_IN_PROGRAMS.slice(21):BUILT_IN_PROGRAMS;
+const referenced=new Set(programmes.flatMap(p=>p.days.flatMap(d=>d.exercises.map(e=>e.exerciseId))));
+const selectedExercises=exercises.filter(e=>referenced.has(e.id));
 const quote = value => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
 const sql = `begin;
 do $catalog$
 declare e jsonb; p jsonb; d jsonb; x jsonb; s jsonb;
 begin
- for e in select * from jsonb_array_elements(${quote(exercises)}) loop
+ for e in select * from jsonb_array_elements(${quote(selectedExercises)}) loop
   insert into public.workout_exercises(id,name,normalized_name,aliases,category,primary_muscle_group,secondary_muscle_groups,equipment,difficulty,video,execution_notes,image_url,how_to,cues,common_mistakes,source_workbooks,source_references,status)
   values(e->>'id',e->>'name',e->>'normalized_name',array(select jsonb_array_elements_text(e->'aliases')),e->>'category',e->>'primary_muscle_group',array(select jsonb_array_elements_text(e->'secondary_muscle_groups')),e->>'equipment',e->>'difficulty',e->'video',e->>'execution_notes',e->>'image_url',e->>'how_to',array(select jsonb_array_elements_text(e->'cues')),array(select jsonb_array_elements_text(e->'common_mistakes')),array(select jsonb_array_elements_text(e->'source_workbooks')),e->'source_references','active') on conflict(id) do nothing;
  end loop;
- for p in select * from jsonb_array_elements(${quote(BUILT_IN_PROGRAMS)}) loop
+ for p in select * from jsonb_array_elements(${quote(programmes)}) loop
   if exists(select 1 from public.workout_programs where id=p->>'id') then continue; end if;
   insert into public.workout_programs(id,name,description,program_type,difficulty,training_frequency,equipment,source_workbook,status,official)
   values(p->>'id',p->>'name',p->>'description',p->>'programType',p->>'difficulty',(p->>'trainingFrequency')::smallint,array(select jsonb_array_elements_text(p->'equipment')),p->>'sourceWorkbook','active',true);
@@ -66,4 +70,4 @@ grant execute on function public.assign_intake_workout(uuid,uuid,jsonb,date,text
 commit;
 `;
 await writeFile(output, sql);
-console.log(JSON.stringify({programs: BUILT_IN_PROGRAMS.length, days: BUILT_IN_PROGRAMS.flatMap(p=>p.days).length, exercises: exercises.length, output: output.pathname}));
+console.log(JSON.stringify({programs: programmes.length, days: programmes.flatMap(p=>p.days).length, exercises: selectedExercises.length, output: output.pathname}));

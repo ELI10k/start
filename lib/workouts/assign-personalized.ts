@@ -21,7 +21,8 @@ export async function assignPersonalizedTraining(admin: ReturnType<typeof create
   const personalized = personalizeProgram(template, recommendation, input.sessionMinutes!);
   const id = `personal-${randomUUID()}`;
   const program = {...personalized, id, name: `${template.name} — מותאם אישית`, official: false, duplicatedFromId: template.id, days: personalized.days.map((day, n) => ({...day, id: `${id}-day-${n}`, exercises: day.exercises.map((entry, i) => ({...entry, id: `${id}-day-${n}-ex-${i}`, notes: [entry.effort ? `RPE יעד: ${entry.effort}` : "", entry.notes].filter(Boolean).join("\n"), setPrescriptions: entry.setPrescriptions?.map((set, j) => ({...set, id: `${id}-day-${n}-ex-${i}-set-${j}`}))}))}))};
-  const {data: result, error: assignmentError} = await admin.rpc("assign_intake_workout", {p_client_id: clientId, p_coach_id: relationship.coach_id, p_program: program, p_start_date: israelDateKey(), p_location: input.trainingLocation, p_equipment: input.equipment === "trx" ? ["TRX", "משקל גוף"] : ["משקולות יד", "מוט", "מכונה ייעודית", "כבל פולי", "משקל גוף"]});
+  const availableEquipment = recommendation.definition?.homeEquipment ? [...personalized.equipment] : input.equipment === "trx" ? ["TRX", "משקל גוף"] : ["משקולות יד", "מוט", "ספסל", "מכונה ייעודית", "כבל פולי", "משקל גוף"];
+  const {data: result, error: assignmentError} = await admin.rpc("assign_intake_workout", {p_client_id: clientId, p_coach_id: relationship.coach_id, p_program: program, p_start_date: israelDateKey(), p_location: input.trainingLocation, p_equipment: availableEquipment});
   if (assignmentError) {console.error("Personalized training assignment failed", {code: assignmentError.code}); return "האפיון נשמר, אך שיוך האימון נכשל. אפשר לשמור שוב או לשייך ממסך האימונים.";}
   return result === "already_active" ? `האפיון נשמר. התוכנית הפעילה נשמרה; המלצה: ${recommendation.message}` : `שויכה תוכנית מותאמת: ${recommendation.message}`;
 }

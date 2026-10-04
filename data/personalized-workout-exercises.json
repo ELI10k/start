@@ -2320,4 +2320,736 @@
       "איבוד שליטה בציוד או בעמדת הגוף"
     ]
   }
+,
+  {
+    "id": "exercise-hdg3yz",
+    "name": "שכיבות סמיכה משקל גוף",
+    "normalized_name": "שכיבות סמיכה משקל גוף",
+    "aliases": [
+      "שכיבות סמיכה"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "חזה",
+    "secondary_muscle_groups": [
+      "יד אחורית"
+    ],
+    "equipment": "משקל גוף",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=f8vDeIyfkSw",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx",
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "C4",
+        "name": "שכיבות סמיכה משקל גוף",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      },
+      {
+        "cell": "B5",
+        "name": "שכיבות סמיכה משקל גוף",
+        "sheet": "משקל גוף מתחילים",
+        "workbook": "משקל גוף מתחילים.xlsx"
+      },
+      {
+        "cell": "B7",
+        "name": "שכיבות סמיכה משקל גוף",
+        "sheet": "משקל גוף מתקדמים",
+        "workbook": "משקל גוף מתקדמים.xlsx"
+      },
+      {
+        "cell": "https://www.instructor.co.il/excercise/pushups/",
+        "name": "שכיבות סמיכה",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 22:59:28.495178+00",
+    "image_url": "https://i.ytimg.com/vi/f8vDeIyfkSw/hqdefault.jpg",
+    "how_to": "שכיבות סמיכה עם הידיים מעט רחבות מהכתפיים. הגוף נשאר קו ישר מהעקבים עד הראש.",
+    "cues": [
+      "בטן וישבן אסופים — הגוף כלוח אחד",
+      "המרפקים בזווית של כ-45 מעלות, לא ניצבים לגוף",
+      "החזה יורד עד קרוב לרצפה",
+      "צוואר בהמשך לעמוד השדרה, המבט מעט קדימה"
+    ],
+    "common_mistakes": [
+      "אגן שצונח או מתרומם",
+      "טווח חלקי — לרדת רק חצי",
+      "הראש יורד לפני החזה"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-bent-over-row",
+    "name": "בהטיית גו , חתירה כנגד משקולת יד",
+    "normalized_name": "בהטיית גו חתירה כנגד משקולת יד",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "גב",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-bent-over-row.mp4",
+      "title": "בהטיית גו , חתירה כנגד משקולת יד",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו , חתירה כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/dumbbell-bent-over-row/",
+        "name": "בהטיית גו , חתירה כנגד משקולת יד",
+        "sheet": "כוח והתנגדות",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 22:52:39.157753+00",
+    "updated_at": "2026-10-02 23:16:30.1326+00",
+    "image_url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-bent-over-row.jpg",
+    "how_to": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו , חתירה כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "common_mistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "exercise-1fr384u",
+    "name": "הרחקה אופקית במשקולות בודדות",
+    "normalized_name": "הרחקה אופקית במשקולות בודדות",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "כתפיים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=BykZ5q2ve9U",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "אימון FBW מלא לחדר כושר.xlsx",
+      "בנק תרגילים משקולות ומכונות.xlsx"
+    ],
+    "source_references": [
+      {
+        "cell": "B10",
+        "name": "הרחקה אופקית במשקולות בודדות",
+        "sheet": "אימון FBW מלא לחדר כושר",
+        "workbook": "אימון FBW מלא לחדר כושר.xlsx"
+      },
+      {
+        "cell": "D5",
+        "name": "הרחקה אופקית במשקולות בודדות",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 23:16:29.566899+00",
+    "image_url": "https://i.ytimg.com/vi/BykZ5q2ve9U/hqdefault.jpg",
+    "how_to": "הרחקה אופקית עם משקולות בהטיית גו קדימה, לכיוון הכתף האחורית והגב העליון.",
+    "cues": [
+      "גו מוטה קדימה עם גב ישר",
+      "המרפקים נעים אחורה ולצדדים",
+      "עצירה קצרה בסוף התנועה",
+      "משקל קל — זה שריר קטן"
+    ],
+    "common_mistakes": [
+      "להזדקף תוך כדי הסט",
+      "לכופף מרפקים ולהפוך את זה לחתירה"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-kickback",
+    "name": "בהטייה, פשיטת מרפק כנגד משקולת",
+    "normalized_name": "בהטייה פשיטת מרפק כנגד משקולת",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "יד אחורית",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "video": {
+      "url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-kickback.mp4",
+      "title": "בהטייה, פשיטת מרפק כנגד משקולת",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטייה, פשיטת מרפק כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/dumbbell-kickback/",
+        "name": "בהטייה, פשיטת מרפק כנגד משקולת",
+        "sheet": "כוח והתנגדות",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 22:52:39.157753+00",
+    "updated_at": "2026-10-02 23:16:30.330437+00",
+    "image_url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-kickback.jpg",
+    "how_to": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטייה, פשיטת מרפק כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "common_mistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-plantar-flexion-dumbbell",
+    "name": "הרמת עקבים כנגד משקולת יד",
+    "normalized_name": "הרמת עקבים כנגד משקולת יד",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "רגליים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "מתחילים",
+    "video": {
+      "url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/plantar-flexion-dumbbell.mp4",
+      "title": "הרמת עקבים כנגד משקולת יד",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "מתמקמים בעמדת המוצא המתאימה לתרגיל הרמת עקבים כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/plantar-flexion-dumbbell/",
+        "name": "הרמת עקבים כנגד משקולת יד",
+        "sheet": "כוח והתנגדות",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 22:52:39.157753+00",
+    "updated_at": "2026-10-02 23:16:30.666247+00",
+    "image_url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/plantar-flexion-dumbbell.jpg",
+    "how_to": "מתמקמים בעמדת המוצא המתאימה לתרגיל הרמת עקבים כנגד משקולת יד, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "common_mistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbell-bench-press",
+    "name": "לחיצת חזה כנגד משקולות",
+    "normalized_name": "לחיצת חזה כנגד משקולות",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "חזה",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbell-bench-press.mp4",
+      "title": "לחיצת חזה כנגד משקולות",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/dumbell-bench-press/",
+        "name": "לחיצת חזה כנגד משקולות",
+        "sheet": "כוח והתנגדות",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 22:52:39.157753+00",
+    "updated_at": "2026-10-02 23:16:30.373758+00",
+    "image_url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbell-bench-press.jpg",
+    "how_to": "מתמקמים בעמדת המוצא המתאימה לתרגיל לחיצת חזה כנגד משקולות, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "common_mistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "resistance-dumbbell-one-arm-bent-over-row",
+    "name": "בהטיית גו, חתירה ביד אחת כנגד משקולת",
+    "normalized_name": "בהטיית גו חתירה ביד אחת כנגד משקולת",
+    "aliases": [],
+    "category": "משקולות",
+    "primary_muscle_group": "גב",
+    "secondary_muscle_groups": [],
+    "equipment": "משקולות יד",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-one-arm-bent-over-row.mp4",
+      "title": "בהטיית גו, חתירה ביד אחת כנגד משקולת",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו, חתירה ביד אחת כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/dumbbell-one-arm-bent-over-row/",
+        "name": "בהטיית גו, חתירה ביד אחת כנגד משקולת",
+        "sheet": "כוח והתנגדות",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 22:52:39.157753+00",
+    "updated_at": "2026-10-02 23:16:30.331401+00",
+    "image_url": "https://bacxfweisncnpjgiqxcp.supabase.co/storage/v1/object/public/exercise-media/resistance/dumbbell-one-arm-bent-over-row.jpg",
+    "how_to": "מתמקמים בעמדת המוצא המתאימה לתרגיל בהטיית גו, חתירה ביד אחת כנגד משקולת, מייצבים את הגוף ומבצעים את התנועה בטווח נוח ובשליטה. חוזרים לעמדת המוצא ללא תנופה.",
+    "cues": [
+      "שמור על מנח גוף יציב",
+      "בצע את התנועה בקצב נשלט",
+      "התאם את ההתנגדות ליכולת"
+    ],
+    "common_mistakes": [
+      "שימוש בתנופה במקום בשריר המטרה",
+      "עבודה בטווח שמייצר כאב",
+      "איבוד שליטה בציוד או בעמדת הגוף"
+    ]
+  },
+  {
+    "id": "exercise-n1izh5",
+    "name": "סקוואט משקל גוף",
+    "normalized_name": "סקוואט משקל גוף",
+    "aliases": [
+      "שפיפה – סקוואט חופשי"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "רגליים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=P6cK6B2indM",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx",
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "A4",
+        "name": "סקוואט משקל גוף",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      },
+      {
+        "cell": "B3",
+        "name": "סקוואט משקל גוף",
+        "sheet": "משקל גוף מתחילים",
+        "workbook": "משקל גוף מתחילים.xlsx"
+      },
+      {
+        "cell": "B3",
+        "name": "סקוואט משקל גוף",
+        "sheet": "משקל גוף מתקדמים",
+        "workbook": "משקל גוף מתקדמים.xlsx"
+      },
+      {
+        "cell": "https://www.instructor.co.il/excercise/squat/",
+        "name": "שפיפה – סקוואט חופשי",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 22:59:33.426493+00",
+    "image_url": "https://i.ytimg.com/vi/P6cK6B2indM/hqdefault.jpg",
+    "how_to": "סקוואט ללא משקל, ידיים קדימה לאיזון, ירידה מבוקרת ועלייה עד יישור.",
+    "cues": [
+      "מתחילים את התנועה מהאגן אחורה",
+      "ברכיים בקו כפות הרגליים",
+      "עקבים נשארים על הרצפה",
+      "עומק לפי הטווח הנוח לך"
+    ],
+    "common_mistakes": [
+      "לרדת מהר ולקפוץ בחזרה",
+      "ברכיים שנכנסות פנימה"
+    ]
+  },
+  {
+    "id": "exercise-2ez0zf",
+    "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+    "normalized_name": "לאנג סטטי | לאנג דינמאי | לאנג עם משקולות",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primary_muscle_group": "רגליים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף או משקולות יד",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=8u2wOtbiKMg",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקולות ומכונות.xlsx",
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתקדמים.xlsx"
+    ],
+    "source_references": [
+      {
+        "cell": "A6",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+        "sheet": "בנק תרגילים משקולות ומכונות",
+        "workbook": "בנק תרגילים משקולות ומכונות.xlsx"
+      },
+      {
+        "cell": "A6",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      },
+      {
+        "cell": "B4",
+        "name": "לאנג׳ סטטי | לאנג׳ דינמאי | לאנג׳ עם משקולות",
+        "sheet": "משקל גוף מתקדמים",
+        "workbook": "משקל גוף מתקדמים.xlsx"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 23:16:29.699542+00",
+    "image_url": "https://i.ytimg.com/vi/8u2wOtbiKMg/hqdefault.jpg",
+    "how_to": "לאנג׳ — צעד קדימה או ירידה במקום, עד שהברך האחורית קרובה לרצפה, וחזרה. בגרסה עם משקולות מחזיקים משקולת בכל יד.",
+    "cues": [
+      "הגו זקוף, המבט קדימה",
+      "הברך הקדמית בקו כף הרגל",
+      "יורדים למטה ולא קדימה",
+      "דוחפים מהעקב של הרגל הקדמית"
+    ],
+    "common_mistakes": [
+      "ברך קדמית שנכנסת פנימה",
+      "צעד קצר מדי שמעמיס על הברך",
+      "להיטות של הגו קדימה"
+    ]
+  },
+  {
+    "id": "bodyweight-sliding-leg-curl",
+    "name": "בשכיבה, כפיפת ברכיים עם מגבת",
+    "normalized_name": "בשכיבה כפיפת ברכיים עם מגבת",
+    "aliases": [
+      "בשכיבה, כפיפת ברכיים עם מגבת"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "רגליים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://start.elicohenfitness.co.il/exercises/bodyweight/sliding-leg-curl.mp4",
+      "title": "בשכיבה, כפיפת ברכיים עם מגבת",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "שוכבים על הגב עם העקבים על מגבות ומרימים אגן. מחליקים עקבים אל הישבן ומרחיקים אותם שוב בלי להניח את האגן.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/sliding-leg-curls-with-towel/",
+        "name": "בשכיבה, כפיפת ברכיים עם מגבת",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 17:58:12.668962+00",
+    "updated_at": "2026-10-02 22:59:34.477015+00",
+    "image_url": "https://start.elicohenfitness.co.il/exercises/bodyweight/sliding-leg-curl.jpg",
+    "how_to": "שוכבים על הגב עם העקבים על מגבות ומרימים אגן. מחליקים עקבים אל הישבן ומרחיקים אותם שוב בלי להניח את האגן.",
+    "cues": [
+      "אגן נשאר גבוה",
+      "לחץ דרך העקבים",
+      "החזרה איטית"
+    ],
+    "common_mistakes": [
+      "אגן נופל",
+      "משיכה באצבעות הרגליים",
+      "החלקה מהירה"
+    ]
+  },
+  {
+    "id": "bodyweight-inverted-row",
+    "name": "חתירה אוסטרלית",
+    "normalized_name": "חתירה אוסטרלית",
+    "aliases": [
+      "חתירה אוסטרלית"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "גב",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://start.elicohenfitness.co.il/exercises/bodyweight/inverted-row.mp4",
+      "title": "חתירה אוסטרלית",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "נשכבים מתחת למוט באחיזה עילית ושומרים גוף ישר. מושכים את החזה למוט תוך קירוב שכמות ויורדים בשליטה ליישור ידיים.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/inverted-row/",
+        "name": "חתירה אוסטרלית",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 17:58:12.668962+00",
+    "updated_at": "2026-10-02 22:59:29.754955+00",
+    "image_url": "https://start.elicohenfitness.co.il/exercises/bodyweight/inverted-row.jpg",
+    "how_to": "נשכבים מתחת למוט באחיזה עילית ושומרים גוף ישר. מושכים את החזה למוט תוך קירוב שכמות ויורדים בשליטה ליישור ידיים.",
+    "cues": [
+      "עקבים יציבים",
+      "אגן בקו הגוף",
+      "החזה מגיע למוט"
+    ],
+    "common_mistakes": [
+      "אגן נופל",
+      "משיכת הראש קדימה",
+      "תנופה"
+    ]
+  },
+  {
+    "id": "exercise-say88l",
+    "name": "מתח מצב צר",
+    "normalized_name": "מתח מצב צר",
+    "aliases": [
+      "עליית מתח באחיזה צרה"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "גב",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=MN8fI9ZTm5w",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "B5",
+        "name": "מתח מצב צר",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      },
+      {
+        "cell": "https://www.instructor.co.il/excercise/narrow-grip-pull-up/",
+        "name": "עליית מתח באחיזה צרה",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 22:59:31.509975+00",
+    "image_url": "https://i.ytimg.com/vi/MN8fI9ZTm5w/hqdefault.jpg",
+    "how_to": null,
+    "cues": [],
+    "common_mistakes": []
+  },
+  {
+    "id": "exercise-1rpyv0f",
+    "name": "לחיצות כתף על הריצפה",
+    "normalized_name": "לחיצות כתף על הריצפה",
+    "aliases": [],
+    "category": "משקל גוף",
+    "primary_muscle_group": "כתפיים",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=ytljvBIaoyo",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקל גוף.xlsx"
+    ],
+    "source_references": [
+      {
+        "cell": "D4",
+        "name": "לחיצות כתף על הריצפה",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 23:16:29.581755+00",
+    "image_url": "https://i.ytimg.com/vi/ytljvBIaoyo/hqdefault.jpg",
+    "how_to": null,
+    "cues": [],
+    "common_mistakes": []
+  },
+  {
+    "id": "exercise-1fo5t9c",
+    "name": "כפיפת מרפקים משקל גוף",
+    "normalized_name": "כפיפת מרפקים משקל גוף",
+    "aliases": [
+      "בישיבה, כפיפת ריכוז כנגד הירך"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "יד קדמית",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": null,
+    "video": {
+      "url": "https://www.youtube.com/watch?v=uny2Klu-cwo",
+      "provider": "youtube"
+    },
+    "execution_notes": null,
+    "source_workbooks": [
+      "בנק תרגילים משקל גוף.xlsx",
+      "משקל גוף מתחילים.xlsx",
+      "משקל גוף מתקדמים.xlsx",
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "F4",
+        "name": "כפיפת מרפקים משקל גוף",
+        "sheet": "בנק תרגילים משקל גוף",
+        "workbook": "בנק תרגילים משקל גוף.xlsx"
+      },
+      {
+        "cell": "B8",
+        "name": "כפיפת מרפקים משקל גוף",
+        "sheet": "משקל גוף מתחילים",
+        "workbook": "משקל גוף מתחילים.xlsx"
+      },
+      {
+        "cell": "B11",
+        "name": "כפיפת מרפקים משקל גוף",
+        "sheet": "משקל גוף מתקדמים",
+        "workbook": "משקל גוף מתקדמים.xlsx"
+      },
+      {
+        "cell": "https://www.instructor.co.il/excercise/leg-concentration-arm-curl/",
+        "name": "בישיבה, כפיפת ריכוז כנגד הירך",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-07-20 19:12:49.339142+00",
+    "updated_at": "2026-10-02 22:59:23.576578+00",
+    "image_url": "https://i.ytimg.com/vi/uny2Klu-cwo/hqdefault.jpg",
+    "how_to": "כיפוף מרפקים כנגד משקל הגוף — תלייה או משיכה באחיזה תחתית, לפי הגרסה באימון.",
+    "cues": [
+      "מרפקים צמודים לגוף",
+      "עלייה מבוקרת בלי תנופה",
+      "ירידה איטית עד יישור"
+    ],
+    "common_mistakes": [
+      "להשתמש בתנופה מהרגליים",
+      "לעצור באמצע הטווח"
+    ]
+  },
+  {
+    "id": "bodyweight-kneeling-arm-extension",
+    "name": "בכריעה, פשיטת מרפקים",
+    "normalized_name": "בכריעה פשיטת מרפקים",
+    "aliases": [
+      "בכריעה, פשיטת מרפקים"
+    ],
+    "category": "משקל גוף",
+    "primary_muscle_group": "יד אחורית",
+    "secondary_muscle_groups": [],
+    "equipment": "משקל גוף",
+    "difficulty": "בינוני",
+    "video": {
+      "url": "https://start.elicohenfitness.co.il/exercises/bodyweight/kneeling-arm-extension.mp4",
+      "title": "בכריעה, פשיטת מרפקים",
+      "provider": "self-hosted"
+    },
+    "execution_notes": "כורעים מול משטח יציב ומניחים עליו את כפות הידיים. שומרים גוף אסוף, מכופפים רק את המרפקים עד שהמצח מתקרב לידיים ודוחפים חזרה באמצעות היד האחורית.",
+    "source_workbooks": [
+      "instructor.co.il"
+    ],
+    "source_references": [
+      {
+        "cell": "https://www.instructor.co.il/excercise/kneeling-arm-extension/",
+        "name": "בכריעה, פשיטת מרפקים",
+        "sheet": "משקל גוף",
+        "workbook": "instructor.co.il"
+      }
+    ],
+    "status": "active",
+    "created_at": "2026-10-02 17:58:12.668962+00",
+    "updated_at": "2026-10-02 22:59:22.40983+00",
+    "image_url": "https://start.elicohenfitness.co.il/exercises/bodyweight/kneeling-arm-extension.jpg",
+    "how_to": "כורעים מול משטח יציב ומניחים עליו את כפות הידיים. שומרים גוף אסוף, מכופפים רק את המרפקים עד שהמצח מתקרב לידיים ודוחפים חזרה באמצעות היד האחורית.",
+    "cues": [
+      "מרפקים נשארים צרים",
+      "האגן והצלעות נשארים אסופים",
+      "ירידה איטית ומבוקרת"
+    ],
+    "common_mistakes": [
+      "פתיחת מרפקים לצדדים",
+      "שקיעה בגב התחתון",
+      "דחיפה מהכתפיים במקום מהמרפקים"
+    ]
+  }
+
 ]

@@ -29,7 +29,7 @@ try {
   await page.goto(`${base}/coach/workouts`,{waitUntil:"networkidle"});
   await page.getByRole("heading",{name:"תוכניות אימון",exact:true}).waitFor();
   for(const program of BUILT_IN_PROGRAMS)await page.getByRole("heading",{name:program.name,exact:true}).waitFor({timeout:15000});
-  report.catalogue=21;
+  report.catalogue=BUILT_IN_PROGRAMS.length;
   await page.getByPlaceholder("חיפוש תוכנית",{exact:true}).fill("TRX");
   await page.getByRole("heading",{name:"אימון TRX FBW לגברים",exact:true}).waitFor();
   await page.screenshot({path:new URL("../reports/personalized-workout-catalog.png",import.meta.url).pathname,fullPage:false});
@@ -50,6 +50,13 @@ try {
   await page.setViewportSize({width:390,height:844});
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),"mobile overflow");
   report.mobile="390px, no horizontal overflow";
+  for(const equipment of ["dumbbells","dumbbells_bench"]){
+    await page.getByLabel("דגש באימון",{exact:true}).selectOption("balanced");
+    await page.getByLabel("מיקום האימון",{exact:true}).selectOption("home");
+    await page.getByLabel("ציוד זמין לאימון",{exact:true}).selectOption(equipment);
+    await page.getByRole("status").filter({hasText:equipment==="dumbbells"?"אימון FBW ביתי משקולות יד בלבד":"אימון FBW ביתי משקולות יד וספסל"}).waitFor();
+  }
+  report.homeEquipmentRecommendations="dumbbells and dumbbells + bench";
 
   if(process.env.SUPABASE_SERVICE_ROLE_KEY) {
     admin=createClient(url,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
@@ -93,6 +100,23 @@ try {
     await form.getByRole("status").filter({hasText:"התוכנית הפעילה נשמרה"}).waitFor();
     const repeated=await admin.from("workout_assignments").select("id").eq("client_id",createdId).eq("status","active");assert.equal(repeated.data.length,1);
     report.persistenceAndIdempotency="passed";
+    for(const equipment of ["dumbbells","dumbbells_bench"]){
+      // Only assignments of this disposable identity are paused for scenario testing.
+      check((await admin.from("workout_assignments").update({status:"paused"}).eq("client_id",createdId).eq("status","active")).error,"pause disposable assignment");
+      await page.reload({waitUntil:"networkidle"});
+      await form.getByLabel("מיקום האימון",{exact:true}).selectOption("home");
+      await form.getByLabel("ציוד זמין לאימון",{exact:true}).selectOption(equipment);
+      await form.getByLabel("דגש באימון",{exact:true}).selectOption("balanced");
+      await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
+      await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
+      const active=await admin.from("workout_assignments").select("program_id").eq("client_id",createdId).eq("status","active");check(active.error,"home assignment");assert.equal(active.data.length,1);
+      const personal=await admin.from("workout_programs").select("duplicated_from_id,equipment").eq("id",active.data[0].program_id).single();check(personal.error,"home copy");
+      assert.equal(personal.data.duplicated_from_id,`lifefit-home-${equipment}-beginner`);
+      assert.equal(personal.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");
+      const preferences=await admin.from("workout_preferences").select("equipment,training_location").eq("client_id",createdId).single();check(preferences.error,"home preferences");
+      assert.equal(preferences.data.training_location,"home");assert.equal(preferences.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");
+    }
+    report.homePersonalAssignments="both equipment options passed";
   }
 } finally {
   await browser.close();
