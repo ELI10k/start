@@ -1,6 +1,8 @@
 import { ISRAEL_TIME_ZONE } from "../date-time.ts";
 import type { DailySleep, DailySteps, HealthPreferences, HealthSource, StepsSummary, StepsTrendPoint } from "./types.ts";
 
+export const DEFAULT_SLEEP_GOAL_MINUTES = 8 * 60;
+
 // A step count belongs to the day the client walked it, in the timezone they
 // were standing in. Deriving the day from a UTC instant puts an evening walk in
 // Israel on the following day for two hours every night, which is exactly when
