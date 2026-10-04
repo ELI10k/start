@@ -37,10 +37,6 @@ export default async function ProfilePage() {
 
       <h2 className="section-heading section-heading--compact mt-6">האפליקציה</h2>
       <div className="settings-group">
-        <Link href="/content/10000000-0000-4000-8000-000000000004">
-          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
-          <ChevronLeft aria-hidden="true" size={18} />
-        </Link>
         <ProfileNutritionGoalsSheet goal={profile?.nutrition_goal ?? null} calorieTarget={profile?.calorie_target === null || profile?.calorie_target === undefined ? null : Number(profile.calorie_target)} proteinTarget={profile?.protein_target === null || profile?.protein_target === undefined ? null : Number(profile.protein_target)} carbohydrateTarget={profile?.carbohydrate_target == null ? null : Number(profile.carbohydrate_target)} fatTarget={profile?.fat_target == null ? null : Number(profile.fat_target)} latestWeight={latest?.weight == null ? null : Number(latest.weight)} recommendations={recommendations}/>
         <Link href="/my-meals">
           <span className="settings-group__label"><UtensilsCrossed aria-hidden="true" size={18} />הארוחות שלי</span>
@@ -98,7 +94,15 @@ export default async function ProfilePage() {
         <DeleteAccountForm />
       </section>
 
-      <LegalLinks className="mt-8 pb-4" />
+      <LegalLinks className="mt-8" />
+
+      <h2 className="section-heading section-heading--compact mt-6">מדריך האפליקציה</h2>
+      <div className="settings-group mb-4">
+        <Link href="/content/10000000-0000-4000-8000-000000000004">
+          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
+      </div>
     </ClientShell>
   );
 }

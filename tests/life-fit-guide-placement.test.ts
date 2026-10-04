@@ -5,12 +5,15 @@ import test from "node:test";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the profile guide link is directly above change goals", async () => {
+test("the profile guide link appears once at the end of the screen", async () => {
   const source = await file("app/profile/page.tsx");
   const guide = source.indexOf("מדריך השימוש באפליקציה");
   const goals = source.indexOf("<ProfileNutritionGoalsSheet");
+  const legal = source.indexOf("<LegalLinks");
   assert.ok(guide >= 0, "guide link is missing");
-  assert.ok(goals > guide, "guide link must appear above change goals");
+  assert.ok(goals < guide, "guide link must not remain above change goals");
+  assert.ok(legal < guide, "guide link must appear at the end of the profile screen");
+  assert.equal(source.match(/מדריך השימוש באפליקציה/g)?.length, 1);
   assert.match(source, /content\/10000000-0000-4000-8000-000000000004/);
 });
 
@@ -48,6 +51,6 @@ test("a one-lesson course uses a nearly full-width card", async () => {
   assert.match(rail, /cinema-rail__track--wide/);
   assert.match(
     css,
-    /\.cinema-rail__track--wide\s*\{[^}]*100vw[^}]*40rem/s,
+    /\.cinema-rail__track--wide\s*\{[^}]*100vw[^}]*48rem[^}]*padding-inline: \.5rem/s,
   );
 });
