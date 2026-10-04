@@ -365,6 +365,9 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                 <MacroTotal label="פחמימות" value={eatenTotals.carbs} left={remainingTotals.carbs} target={menu.carbohydrateTarget} unit="גרם" />
                 <MacroTotal label="שומן" value={eatenTotals.fat} left={remainingTotals.fat} target={menu.fatTarget} unit="גרם" />
               </dl>
+              {menu.calorieTarget&&remainingTotals.calories<=0.5&&menu.calorieTarget-eatenTotals.calories>=80&&menu.calorieTarget-eatenTotals.calories<=120?<p className="mt-3 text-center text-sm font-bold text-[#15803D]">
+                נשמרו כ־{Math.round((menu.calorieTarget-eatenTotals.calories)/10)*10} קלוריות לשמן בבישול ולחלב בקפה.
+              </p>:null}
             </section>
           )}
           {(nutritionInsights.preserve.length || nutritionInsights.improve.length) ? (
@@ -443,7 +446,7 @@ function MacroTotal({
       </dd>
       <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
         {isDailyReserve
-          ? `התכנון היומי הושלם · רזרבה של כ־${gap} ${unit} לבישול, משקאות וסטיות מדידה`
+          ? "היעד היומי הושלם"
           : target && target > 0
           ? value - target > 0.5
             ? `חריגה של ${Math.round(value - target)} ${unit}`

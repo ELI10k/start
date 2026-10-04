@@ -859,6 +859,9 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         <DockTotal label="פחמימות" value={totals.carbs} target={Number(menu.carbohydrateTarget)}/>
         <DockTotal label="שומן" value={totals.fat} target={Number(menu.fatTarget)}/>
       </dl>
+      {Number(menu.calorieTarget)-plannedCalories>=80&&Number(menu.calorieTarget)-plannedCalories<=120?<p className="menu-dock__reserve-note">
+        נשמרו כ־{Math.round((Number(menu.calorieTarget)-plannedCalories)/10)*10} קלוריות לשמן בבישול ולחלב בקפה.
+      </p>:null}
       <div className="menu-dock__actions">
         <span className="pill" data-testid="save-state">{pending?"שומרים…":dirty?"טיוטה במכשיר":savedAt?`נשמר ${savedAt}`:"אין שינויים"}</span>
         <button type="button" onClick={()=>submit()} disabled={pending||!menu.title.trim()} className="premium-primary-button"><Save aria-hidden="true" size={18}/>{pending?"שומרים…":"שמירה"}</button>
@@ -935,8 +938,7 @@ function DockTotal({label,value,target}:{label:string;value:number;target?:numbe
   return <div className="menu-dock__total" data-state={state}>
     <dt>{label}</dt>
     <dd>{rounded}{hasTarget?<span>/{goal}</span>:null}</dd>
-    {hasTarget?<small>{isDailyReserve?`רזרבה ${gap}`:gap>0?`נותר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
-    {isDailyReserve?<span className="sr-only">הרזרבה מיועדת לבישול, משקאות וסטיות מדידה.</span>:null}
+    {hasTarget?<small>{isDailyReserve?" ":gap>0?`נותר ${gap}`:gap===0?"ביעד":`חריגה ${Math.abs(gap)}`}</small>:<small>ללא יעד</small>}
   </div>;
 }
 

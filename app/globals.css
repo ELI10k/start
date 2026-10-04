@@ -2028,6 +2028,16 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   min-width: 0;
 }
 
+.menu-dock__reserve-note {
+  flex: 1 1 100%;
+  order: 3;
+  margin: -.2rem 0 0;
+  text-align: center;
+  color: var(--green-press);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
 .menu-dock__total {
   display: flex;
   flex-direction: column;
