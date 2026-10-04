@@ -27,5 +27,5 @@ test("the client home fits inside a short phone viewport", async ({ page }) => {
   });
 
   expect(layout.bottom, "all visible home sections should end above the viewport edge").toBeLessThanOrEqual(layout.viewport + 1);
-  expect(layout.tallestAction, "the four primary cards should stay compact on a short phone").toBeLessThanOrEqual(80);
+  expect(layout.tallestAction, "the four primary cards should stay compact on a short phone").toBeLessThanOrEqual(105);
 });

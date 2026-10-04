@@ -742,17 +742,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .quick-action-card {
     min-height: 0;
     height: 100%;
-    gap: .16rem;
-    padding: .35rem;
+    gap: .25rem;
+    padding: .5rem .4rem;
   }
   .home-screen .quick-action-card__icon,
   .home-screen .quick-action-card > span:first-child:has(svg) {
-    width: 2.35rem;
-    height: 2.35rem;
-    border-radius: .8rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: .9rem;
   }
-  .home-screen .quick-action-card__label { font-size: .95rem; }
-  .home-screen .quick-action-card__meta { font-size: .72rem; }
+  .home-screen .quick-action-card__label { font-size: 1.05rem; }
+  .home-screen .quick-action-card__meta { font-size: .78rem; }
   .home-screen .section-heading--compact { margin-bottom: .3rem; }
   .home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
   .home-screen .weekly-lesson {
@@ -764,9 +764,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .home-screen .quick-actions-grid {
     grid-template-rows: repeat(2, minmax(0, 1fr));
     /* Four useful destinations should feel substantial without owning the
-       screen. Tying the pair of rows to 24% of the viewport leaves room for
+       screen. Tying the pair of rows to 30% of the viewport leaves room for
        today's metrics, lesson and progress even on a short iPhone. */
-    height: clamp(9.5rem, 24dvh, 11.5rem);
+    height: clamp(11.5rem, 30dvh, 14rem);
     gap: clamp(.3rem, .8dvh, .45rem);
   }
 }
