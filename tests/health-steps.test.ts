@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { calendarDay, clampGoal, lastDays, shiftDay, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { calendarDay, clampGoal, formatSleep, lastDays, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
-import type { DailySteps } from "../lib/health/types.ts";
+import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const entry = (day: string, steps: number, from: DailySteps["source"] = "healthkit"): DailySteps => ({ day, steps, source: from, recordedAt: `${day}T20:00:00.000Z` });
 const TODAY = "2026-08-11";
+const sleepEntry = (day: string, minutes: number, from: DailySleep["source"] = "healthkit"): DailySleep => ({ day, minutes, source: from, recordedAt: `${day}T08:00:00.000Z` });
 
 test("the day is the client's calendar day, not the UTC one", () => {
   // 22:30 UTC on the 10th is already the 11th in Israel - which is when people walk.
@@ -94,6 +95,29 @@ test("a denied provider returns no steps, and a prompt can still be granted", as
 
 test("the sync window is the seven days the card shows", () => {
   assert.deepEqual(syncWindow(TODAY), { fromDay: "2026-08-05", toDay: TODAY });
+});
+
+test("sleep is formatted compactly and duplicate device readings are not added", () => {
+  assert.equal(formatSleep(450), "7:30 שעות");
+  assert.equal(formatSleep(480), "8 שעות");
+  assert.equal(formatSleep(0), "אין נתון");
+  const byDay = sleepByDay([sleepEntry(TODAY, 430), sleepEntry(TODAY, 450, "health-connect")]);
+  assert.equal(byDay.get(TODAY)?.minutes, 450);
+});
+
+test("sleep sync is idempotent and rejects impossible durations", () => {
+  const known = [sleepEntry(TODAY, 450)];
+  assert.deepEqual(sleepToPersist(known, known, TODAY), []);
+  const changed = sleepToPersist([sleepEntry(TODAY, 470), sleepEntry("2026-08-12", 480), sleepEntry("2026-08-10", 1500)], known, TODAY);
+  assert.deepEqual(changed.map((item) => item.minutes), [470]);
+});
+
+test("sleep storage is isolated and upserts one row per day and source", async () => {
+  const migration = await source("supabase/migrations/20261004143211_health_sleep.sql");
+  assert.match(migration, /primary key \(client_id, day, source\)/);
+  assert.match(migration, /on conflict \(client_id, day, source\) do update/);
+  assert.match(migration, /public\.is_coach_for\(client_id\)/);
+  assert.match(migration, /p_minutes<0 or p_minutes>1440/);
 });
 
 test("steps are stored one row per day per source, and re-syncing overwrites", async () => {
