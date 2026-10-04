@@ -1,12 +1,7 @@
 import type { ExerciseSetResult } from "./types.ts";
 
-// A single preparation set is shown for the first loaded exercise of each
-// muscle group. Its repetitions stay above the working target without asking
-// the client to complete two or three separate warm-up sets:
-//
-//   up to 8 working reps -> 12 warm-up reps
-//   9-12 working reps   -> 15 warm-up reps
-//   above 12 working reps -> 20 warm-up reps
+// Two short preparation sets are shown for the first loaded exercise of each
+// muscle group: 50% x 10, then 80% x 5. Abdominal exercises are excluded.
 //
 // Everything is derived from what the client actually lifted last time. With no
 // previous session there is no honest percentage of anything, and the screen says
@@ -68,14 +63,10 @@ export function planWarmup(
 ): WarmupPlan | null {
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
 
-  const workingRepetitions = options.repetitions;
-  const repetitions = workingRepetitions === undefined || workingRepetitions <= 8
-    ? 12
-    : workingRepetitions <= 12
-      ? 15
-      : 20;
+  void options;
   const steps: readonly { percent: number; repetitions: number }[] = [
-    { percent: 50, repetitions },
+    { percent: 50, repetitions: 10 },
+    { percent: 80, repetitions: 5 },
   ];
 
   return {
@@ -120,5 +111,5 @@ export const warmupPlan = planWarmup;
 /** How many warm-up sets the protocol calls for, without computing the weights. */
 export const warmupStepCount = (options: { effort?: string; compound?: boolean } = {}) => {
   void options;
-  return 1;
+  return 2;
 };
