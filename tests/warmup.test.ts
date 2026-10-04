@@ -7,15 +7,17 @@ test("warm-up uses the prescribed 50 percent and 80 percent preparation sets", (
   const plan = planWarmup(40, { repetitions: 8 });
   assert.ok(plan);
   assert.deepEqual(plan.sets, [
-    { percent: 50, weightKg: 20, repetitions: 10 },
-    { percent: 80, weightKg: 32.5, repetitions: 5 },
+    { percent: 50, weightKg: 20, repetitions: 12 },
+    { percent: 80, weightKg: 32.5, repetitions: 12 },
   ]);
 });
 
-test("warm-up repetitions stay 10 and 5 for every working-set target", () => {
-  for (const repetitions of [8, 9, 12, 15, 20]) {
-    assert.deepEqual(planWarmup(40, { repetitions })?.sets.map((set) => set.repetitions), [10, 5]);
-  }
+test("both warm-up sets use repetitions derived from the working-set target", () => {
+  assert.deepEqual(planWarmup(40, { repetitions: 8 })?.sets.map((set) => set.repetitions), [12, 12]);
+  assert.deepEqual(planWarmup(40, { repetitions: 9 })?.sets.map((set) => set.repetitions), [15, 15]);
+  assert.deepEqual(planWarmup(40, { repetitions: 12 })?.sets.map((set) => set.repetitions), [15, 15]);
+  assert.deepEqual(planWarmup(40, { repetitions: 15 })?.sets.map((set) => set.repetitions), [20, 20]);
+  assert.deepEqual(planWarmup(40, { repetitions: 20 })?.sets.map((set) => set.repetitions), [20, 20]);
   assert.equal(planWarmup(40, { repetitions: 20, compound: true })?.sets.length, 2);
 });
 

@@ -1,7 +1,8 @@
 import type { ExerciseSetResult } from "./types.ts";
 
-// Two short preparation sets are shown for the first loaded exercise of each
-// muscle group: 50% x 10, then 80% x 5. Abdominal exercises are excluded.
+// Two preparation sets are shown for the first loaded exercise of each muscle
+// group: 50%, then 80%. Both use the prescribed warm-up repetitions derived
+// from the working-set target. Abdominal exercises are excluded by the caller.
 //
 // Everything is derived from what the client actually lifted last time. With no
 // previous session there is no honest percentage of anything, and the screen says
@@ -63,10 +64,15 @@ export function planWarmup(
 ): WarmupPlan | null {
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
 
-  void options;
+  const workingRepetitions = options.repetitions;
+  const repetitions = workingRepetitions === undefined || workingRepetitions <= 8
+    ? 12
+    : workingRepetitions <= 12
+      ? 15
+      : 20;
   const steps: readonly { percent: number; repetitions: number }[] = [
-    { percent: 50, repetitions: 10 },
-    { percent: 80, repetitions: 5 },
+    { percent: 50, repetitions },
+    { percent: 80, repetitions },
   ];
 
   return {
