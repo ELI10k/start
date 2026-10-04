@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { acquireBodyScrollLock } from "@/lib/browser/body-scroll-lock";
 
 // The mobile answer to a modal: slides up from the bottom, has a drag handle, and
@@ -62,7 +63,10 @@ export default function BottomSheet({
   }, [open, onClose]);
 
   if (!open) return null;
-  return (
+  // Render at the document root rather than where the trigger happens to live.
+  // A sheet opened from a rounded, overflow-hidden settings group was otherwise
+  // clipped to that row and inherited the row's flex/padding styles.
+  return createPortal(
     <>
       <div className="sheet-backdrop" onClick={onClose} aria-hidden="true" />
       <div
@@ -77,6 +81,7 @@ export default function BottomSheet({
         <h2 className="sheet__title">{title}</h2>
         {children}
       </div>
-    </>
+    </>,
+    document.body,
   );
 }

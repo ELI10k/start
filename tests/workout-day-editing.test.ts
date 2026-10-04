@@ -211,6 +211,10 @@ test("a missing catalogue field is named, never filled in with something plausib
 
 test("the guidance sheet closes three ways and gives the page back", async () => {
   const sheet = await source("components/client/BottomSheet.tsx");
+  // Dialogs can be triggered inside rounded overflow-hidden cards. Portalling
+  // keeps the viewport-level sheet from inheriting or being clipped by them.
+  assert.match(sheet, /createPortal\(/);
+  assert.match(sheet, /document\.body/);
   assert.match(sheet, /className="sheet-backdrop" onClick=\{onClose\}/);
   assert.match(sheet, /if \(event\.key === "Escape"\)/);
   // The shared lock restores scrolling after the final overlapping surface
