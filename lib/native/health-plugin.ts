@@ -1,7 +1,7 @@
 import { registerPlugin } from "@capacitor/core";
 import type { HealthPermissionState } from "@/lib/health/types";
 
-// The one custom plugin START LIFE FIT needs. Apple HealthKit and Android Health Connect
+// The one custom plugin LIFE FIT needs. Apple HealthKit and Android Health Connect
 // have almost nothing in common at the API level, so the contract is written in
 // terms of what the app actually wants: whether steps are readable, whether the
 // user has agreed, and a range of calendar days.
@@ -13,6 +13,7 @@ export type StartHealthPlugin = {
   getPermission(): Promise<{ status: HealthPermissionState }>;
   requestPermission(): Promise<{ status: HealthPermissionState }>;
   readDailySteps(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; steps: number }[] }>;
+  readDailySleep(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; minutes: number }[] }>;
 };
 
 // Resolves to the native implementation on a device, and to a stub that reports
@@ -23,5 +24,6 @@ export const StartHealth = registerPlugin<StartHealthPlugin>("StartHealth", {
     getPermission: async () => ({ status: "unavailable" as const }),
     requestPermission: async () => ({ status: "unavailable" as const }),
     readDailySteps: async () => ({ days: [] }),
+    readDailySleep: async () => ({ days: [] }),
   }),
 });
