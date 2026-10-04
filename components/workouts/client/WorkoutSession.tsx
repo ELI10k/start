@@ -215,11 +215,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       <header className="session-exercise__head">
         <ExerciseThumbnail exercise={exercise}/>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="session-exercise__count">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
-            {result.completed&&<span role="status" className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-2 py-1 text-xs font-black text-[#15803D]"><CheckCircle2 aria-hidden="true" size={15}/>הושלם</span>}
-          </div>
+          <span className="session-exercise__count">תרגיל {session.currentExerciseIndex+1} מתוך {ordered.length}</span>
           <h1 className="session-exercise__name" title={exercise?.name}>{exercise?.name??"פרטי תרגיל חסרים"}</h1>
+          {result.completed&&<span role="status" className="mt-1 flex items-center justify-center gap-1.5 text-sm font-black text-[#15803D]"><CheckCircle2 aria-hidden="true" size={20} strokeWidth={2.5}/>הושלם</span>}
           {result.performedExerciseId&&prescribed&&<p className="text-xs text-[#5B5F5B]">במקום {prescribed.name} · המאמן יראה את ההחלפה</p>}
         </div>
       </header>
