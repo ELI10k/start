@@ -2553,6 +2553,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .cinema-stage { position: relative; background: #000; }
 .cinema-stage iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; }
 .cinema-stage img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.cinema-stage video { display: block; width: 100%; max-height: 78svh; aspect-ratio: 9 / 16; margin-inline: auto; background: #000; object-fit: contain; }
 /* The player and the page below it are both black; without this the frame ends
    on a hard horizontal line across the screen. */
 .cinema-stage::after {

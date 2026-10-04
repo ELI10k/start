@@ -6,6 +6,7 @@ import ClientShell from "@/components/client/ClientShell";
 import CinemaChrome from "@/components/client/CinemaChrome";
 import LessonActions from "@/components/client/LessonActions";
 import LessonPlayer from "@/components/client/LessonPlayer";
+import NativeLessonPlayer from "@/components/client/NativeLessonPlayer";
 import PdfViewer from "@/components/client/PdfViewer";
 import { KindIcon, kindLabel } from "@/components/client/CinemaCard";
 import { getAuthContext } from "@/lib/data/product-repository";
@@ -53,6 +54,7 @@ export default async function ContentDetailPage({
      keeps the plain frame - Instagram offers no such control, and a reel is a
      short vertical clip that nobody is going to scrub through anyway. */
   const video = kind === "youtube" && item.mediaUrl ? youtubeId(item.mediaUrl) : null;
+  const nativeVideo = kind === "video" ? item.mediaUrl : null;
   const embed = kind === "instagram" ? instagramEmbedUrl(item.mediaUrl) : null;
   const duration = formatDuration(item.estimatedMinutes);
   const art = lessonThumbnail(item, course?.coverUrl);
@@ -68,6 +70,13 @@ export default async function ContentDetailPage({
           title={item.title}
           posterUrl={art}
           startSeconds={youtubeStart(item.mediaUrl)}
+        />
+      ) : nativeVideo ? (
+        <NativeLessonPlayer
+          contentItemId={item.id}
+          src={nativeVideo}
+          title={item.title}
+          posterUrl={art}
         />
       ) : embed ? (
         <div className={`cinema-stage${kind === "instagram" ? " cinema-stage--instagram" : ""}`}>

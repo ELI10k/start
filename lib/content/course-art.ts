@@ -8,6 +8,7 @@
  * migration that did not run or a row that was edited by hand.
  */
 export const COURSE_ART: Readonly<Record<string, string>> = {
+  "start-guide": "/content/courses/start-guide/cover.jpg",
   "weight-basics": "/content/courses/weight-basics/cover.png",
   "nutrition-course": "/content/courses/nutrition/cover.jpg",
   "training-course": "/content/courses/training/cover.png",
