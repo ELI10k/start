@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { calendarDay, clampGoal, formatSleep, lastDays, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, clampGoal, formatSleep, lastDays, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
 import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
@@ -98,6 +98,8 @@ test("the sync window is the seven days the card shows", () => {
 });
 
 test("sleep is formatted compactly and duplicate device readings are not added", () => {
+  assert.equal(DEFAULT_SLEEP_GOAL_MINUTES, 480);
+  assert.equal(formatSleep(DEFAULT_SLEEP_GOAL_MINUTES), "8 שעות");
   assert.equal(formatSleep(450), "7:30 שעות");
   assert.equal(formatSleep(480), "8 שעות");
   assert.equal(formatSleep(0), "אין נתון");
