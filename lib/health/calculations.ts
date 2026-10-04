@@ -1,5 +1,5 @@
 import { ISRAEL_TIME_ZONE } from "../date-time.ts";
-import type { DailySteps, HealthPreferences, HealthSource, StepsSummary, StepsTrendPoint } from "./types.ts";
+import type { DailySleep, DailySteps, HealthPreferences, HealthSource, StepsSummary, StepsTrendPoint } from "./types.ts";
 
 // A step count belongs to the day the client walked it, in the timezone they
 // were standing in. Deriving the day from a UTC instant puts an evening walk in
@@ -85,6 +85,39 @@ export function stepsToPersist(incoming: readonly DailySteps[], known: readonly 
     result.push(entry);
   }
   return result;
+}
+
+export function sleepByDay(entries: readonly DailySleep[]): ReadonlyMap<string, DailySleep> {
+  const best = new Map<string, DailySleep>();
+  for (const entry of entries) {
+    if (entry.minutes < 0) continue;
+    const current = best.get(entry.day);
+    if (!current || entry.minutes > current.minutes) best.set(entry.day, entry);
+  }
+  return best;
+}
+
+export function sleepToPersist(incoming: readonly DailySleep[], known: readonly DailySleep[], today: string): readonly DailySleep[] {
+  const existing = new Map(known.map((entry) => [`${entry.day}|${entry.source}`, entry.minutes]));
+  const seen = new Set<string>();
+  const result: DailySleep[] = [];
+  for (const entry of incoming) {
+    const key = `${entry.day}|${entry.source}`;
+    if (entry.day > today) continue;
+    if (!Number.isFinite(entry.minutes) || entry.minutes < 0 || entry.minutes > 1440) continue;
+    if (existing.get(key) === entry.minutes || seen.has(key)) continue;
+    seen.add(key);
+    result.push(entry);
+  }
+  return result;
+}
+
+export function formatSleep(minutes: number): string {
+  if (!Number.isFinite(minutes) || minutes <= 0) return "אין נתון";
+  const rounded = Math.round(minutes);
+  const hours = Math.floor(rounded / 60);
+  const remainder = rounded % 60;
+  return remainder ? `${hours}:${String(remainder).padStart(2, "0")} שעות` : `${hours} שעות`;
 }
 
 export const SOURCE_LABELS: Record<HealthSource | "none", string> = {

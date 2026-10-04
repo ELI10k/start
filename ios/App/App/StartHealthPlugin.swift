@@ -18,11 +18,13 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     CAPPluginMethod(name: "isAvailable", returnType: CAPPluginReturnPromise),
     CAPPluginMethod(name: "getPermission", returnType: CAPPluginReturnPromise),
     CAPPluginMethod(name: "requestPermission", returnType: CAPPluginReturnPromise),
-    CAPPluginMethod(name: "readDailySteps", returnType: CAPPluginReturnPromise)
+    CAPPluginMethod(name: "readDailySteps", returnType: CAPPluginReturnPromise),
+    CAPPluginMethod(name: "readDailySleep", returnType: CAPPluginReturnPromise)
   ]
 
   private let store = HKHealthStore()
   private var stepType: HKQuantityType? { HKQuantityType.quantityType(forIdentifier: .stepCount) }
+  private var sleepType: HKCategoryType? { HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) }
 
   @objc func isAvailable(_ call: CAPPluginCall) {
     call.resolve(["available": HKHealthStore.isHealthDataAvailable()])
@@ -33,11 +35,11 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
   // refusal. "sharingAuthorized" therefore cannot be asked for on a read type,
   // and the honest answer before a request is "prompt".
   @objc func getPermission(_ call: CAPPluginCall) {
-    guard HKHealthStore.isHealthDataAvailable(), let stepType else {
+    guard HKHealthStore.isHealthDataAvailable(), let stepType, let sleepType else {
       call.resolve(["status": "unavailable"])
       return
     }
-    store.getRequestStatusForAuthorization(toShare: [], read: [stepType]) { status, _ in
+    store.getRequestStatusForAuthorization(toShare: [], read: [stepType, sleepType]) { status, _ in
       switch status {
       case .unnecessary: call.resolve(["status": "granted"])
       case .shouldRequest: call.resolve(["status": "prompt"])
@@ -47,11 +49,11 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
   }
 
   @objc func requestPermission(_ call: CAPPluginCall) {
-    guard HKHealthStore.isHealthDataAvailable(), let stepType else {
+    guard HKHealthStore.isHealthDataAvailable(), let stepType, let sleepType else {
       call.resolve(["status": "unavailable"])
       return
     }
-    store.requestAuthorization(toShare: [], read: [stepType]) { granted, error in
+    store.requestAuthorization(toShare: [], read: [stepType, sleepType]) { granted, error in
       if let error {
         CAPLog.print("StartHealth authorization failed: \(error.localizedDescription)")
         call.resolve(["status": "denied"])
@@ -110,6 +112,64 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
       call.resolve(["days": days])
     }
 
+    store.execute(query)
+  }
+
+  @objc func readDailySleep(_ call: CAPPluginCall) {
+    guard HKHealthStore.isHealthDataAvailable(), let sleepType else {
+      call.resolve(["days": []])
+      return
+    }
+    guard
+      let fromDay = call.getString("fromDay"),
+      let toDay = call.getString("toDay"),
+      let start = Self.day(fromDay),
+      let endDay = Self.day(toDay),
+      let end = Calendar.current.date(byAdding: .day, value: 1, to: endDay)
+    else {
+      call.reject("invalid_range")
+      return
+    }
+
+    let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+    let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+      if let error {
+        CAPLog.print("StartHealth sleep read failed: \(error.localizedDescription)")
+        call.resolve(["days": []])
+        return
+      }
+
+      let asleep = (samples as? [HKCategorySample] ?? []).filter { sample in
+        if #available(iOS 16.0, *) {
+          return [HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
+                  HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+                  HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+                  HKCategoryValueSleepAnalysis.asleepREM.rawValue].contains(sample.value)
+        }
+        return sample.value == HKCategoryValueSleepAnalysis.asleep.rawValue
+      }
+
+      // Watches and phones can report overlapping sleep stages. Merge those
+      // intervals before adding minutes so the same sleep is never counted twice.
+      let grouped = Dictionary(grouping: asleep, by: { Self.key($0.startDate) })
+      let days = grouped.keys.sorted().compactMap { day -> [String: Any]? in
+        let intervals = (grouped[day] ?? []).map { ($0.startDate, $0.endDate) }.sorted { $0.0 < $1.0 }
+        guard var current = intervals.first else { return nil }
+        var seconds: TimeInterval = 0
+        for interval in intervals.dropFirst() {
+          if interval.0 <= current.1 {
+            current.1 = max(current.1, interval.1)
+          } else {
+            seconds += current.1.timeIntervalSince(current.0)
+            current = interval
+          }
+        }
+        seconds += current.1.timeIntervalSince(current.0)
+        let minutes = min(1440, max(0, Int((seconds / 60).rounded())))
+        return minutes > 0 ? ["day": day, "minutes": minutes] : nil
+      }
+      call.resolve(["days": days])
+    }
     store.execute(query)
   }
 

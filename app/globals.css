@@ -568,15 +568,18 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    768px rule below still pins the desktop layout at four. */
 .dashboard-metrics {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
   gap: .6rem;
 }
 /* Four daily figures in one row. In RTL the fourth item lands on the left, so
    steps can be added without moving the three figures clients already know. */
 .dashboard-metrics--fit {
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: .5rem; overflow: visible; margin-inline: 0; padding-inline: 0;
 }
+.dashboard-metrics--fit > .metric-tile { grid-column: span 2; }
+.dashboard-metrics--fit > .metric-tile--health { grid-column: span 3; }
 .dashboard-metrics--fit .metric-tile { min-width: 0; flex: initial; padding: .65rem .55rem; min-height: 5.4rem; }
 .dashboard-metrics--fit .metric-tile__head { font-size: .62rem; gap: .25rem; }
 .dashboard-metrics--fit .metric-tile__head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

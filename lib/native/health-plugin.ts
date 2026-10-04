@@ -13,6 +13,7 @@ export type StartHealthPlugin = {
   getPermission(): Promise<{ status: HealthPermissionState }>;
   requestPermission(): Promise<{ status: HealthPermissionState }>;
   readDailySteps(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; steps: number }[] }>;
+  readDailySleep(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; minutes: number }[] }>;
 };
 
 // Resolves to the native implementation on a device, and to a stub that reports
@@ -23,5 +24,6 @@ export const StartHealth = registerPlugin<StartHealthPlugin>("StartHealth", {
     getPermission: async () => ({ status: "unavailable" as const }),
     requestPermission: async () => ({ status: "unavailable" as const }),
     readDailySteps: async () => ({ days: [] }),
+    readDailySleep: async () => ({ days: [] }),
   }),
 });

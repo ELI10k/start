@@ -6,6 +6,7 @@ export type HealthSource = "healthkit" | "health-connect" | "manual" | "test";
 
 /** `day` is a calendar date in the client's own timezone, never a UTC instant. */
 export type DailySteps = Readonly<{ day: string; steps: number; source: HealthSource; recordedAt: string }>;
+export type DailySleep = Readonly<{ day: string; minutes: number; source: HealthSource; recordedAt: string }>;
 
 export type HealthPreferences = Readonly<{ dailyStepGoal: number; lastSyncAt?: string; lastSyncSource?: HealthSource }>;
 
@@ -31,6 +32,8 @@ export type HealthProvider = Readonly<{
   requestPermission: () => Promise<HealthPermissionState>;
   /** Inclusive range of calendar days, oldest first. */
   readDailySteps: (fromDay: string, toDay: string) => Promise<readonly DailySteps[]>;
+  /** Minutes actually asleep, grouped by the day on which the sleep started. */
+  readDailySleep: (fromDay: string, toDay: string) => Promise<readonly DailySleep[]>;
 }>;
 
 export type StepsTrendPoint = Readonly<{ day: string; steps: number; metGoal: boolean }>;

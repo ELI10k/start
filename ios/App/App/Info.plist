@@ -24,6 +24,14 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>המצלמה משמשת לסריקת ברקוד של מוצרי מזון ולצילום תמונות מעקב שנשמרות בחשבון הפרטי שלך.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>LIFE FIT מציג את הצעדים היומיים ושעות השינה שלך מתוך אפליקציית הבריאות, כדי לעקוב אחרי הפעילות וההתאוששות שלך.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>LIFE FIT אינו כותב נתונים לאפליקציית הבריאות. ההרשאה נדרשת רק לקריאת צעדים ושינה.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>בחירת תמונת מעקב מהגלריה, לצורך צ׳ק-אין שבועי מול המאמן.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
