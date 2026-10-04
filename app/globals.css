@@ -2404,10 +2404,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .cinema-rail__track { grid-auto-columns: 16.5rem; gap: .8rem; }
 }
 .cinema-rail__track--wide {
-  grid-auto-columns: min(
-    calc(100vw - var(--cine-gutter) - var(--cine-gutter)),
-    40rem
-  );
+  grid-auto-columns: min(calc(100vw - 1rem), 48rem);
+  padding-inline: .5rem;
+  scroll-padding-inline: .5rem;
 }
 .cinema-rail__track--wide .cinema-card__body strong { font-size: 1.05rem; }
 .cinema-rail__track--wide .cinema-card__body small { font-size: .8rem; }
