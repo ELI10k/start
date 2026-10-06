@@ -7,9 +7,9 @@ import type {Exercise} from "../lib/workouts/types.ts";
 const input: TrainingIntake={sex:"female",traineeLevel:"beginner",weeklyWorkouts:3,trainingLocation:"gym",equipment:"gym",trainingFocus:"glutes",trainingSplit:"auto",sessionMinutes:60,medicalReview:"no",experienceMonths:8,technique:"stable"};
 const catalogue=JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json",import.meta.url),"utf8"));
 
-test("37 distinct programmes, with all prescriptions, real exercises and complete muscle coverage",()=>{
-  assert.equal(BUILT_IN_PROGRAMS.length,37);
-  assert.equal(new Set(BUILT_IN_PROGRAMS.map(p=>p.name)).size,37);
+test("38 distinct programmes, with all prescriptions, real exercises and complete muscle coverage",()=>{
+  assert.equal(BUILT_IN_PROGRAMS.length,38);
+  assert.equal(new Set(BUILT_IN_PROGRAMS.map(p=>p.name)).size,38);
   for(const p of BUILT_IN_PROGRAMS){
     const groups=new Set<string>();
     for(const day of p.days){
@@ -33,16 +33,16 @@ test("expanded gym and home catalogue selects the correct sex, level and equipme
     const base={...input,traineeLevel:level,experienceMonths:36,trainingFocus:"balanced",trainingLocation:"home"};
     for(const equipment of ["dumbbells","dumbbells_bench"]){
       const rec=recommendTraining({...base,equipment});
-      assert.equal(rec.programId,`lifefit-home-${equipment}-${level}`);
+      assert.equal(rec.programId,`lifefit-home-${equipment}-${level}-v2`);
       const program=buildProgram(rec.definition!);
       assert.equal(program.equipment.includes("ספסל"),equipment==="dumbbells_bench");
       assert.ok(program.days.flatMap(d=>d.exercises).every(e=>!catalogue.find((x:{id:string})=>x.id===e.exerciseId)?.equipment?.match(/מכונה|פולי|מוט/)));
     }
-    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"female"}).programId,`lifefit-fbw-female-balanced-${level}`);
-    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male",trainingSplit:"A-B"}).programId,`lifefit-a-b-male-balanced-${level}`);
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"female"}).programId,`lifefit-fbw-female-balanced-${level}-v2`);
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male",trainingSplit:"A-B"}).programId,`lifefit-a-b-male-balanced-${level}-v2`);
     if(level!=="beginner"){
-      assert.equal(recommendTraining({...base,equipment:"bodyweight_station"}).programId,`lifefit-home-bodyweight-${level}`);
-      assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male"}).programId,`lifefit-fbw-male-balanced-${level}`);
+      assert.equal(recommendTraining({...base,equipment:"bodyweight_station",bodyweightCapacity:"verified"}).programId,`lifefit-home-bodyweight-${level}-v2`);
+      assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male"}).programId,`lifefit-fbw-male-balanced-${level}-v2`);
     }
   }
   assert.equal(recommendTraining({...input,trainingFocus:"balanced",equipment:"bodyweight"}).status,"review");
@@ -58,11 +58,11 @@ test("home substitutions never introduce an unavailable bench, machine or pull-u
   assert.deepEqual(alternativeExercises(row,[row,benchRow,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).map(e=>e.id),[benchRow.id]);
 });
 test("automatic selection considers level, frequency, equipment and focus",()=>{
-  assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes");
-  assert.equal(recommendTraining({...input,trainingSplit:"PPL"}).programId,"lifefit-ppl-female-glutes-beginner");
-  assert.equal(recommendTraining({...input,traineeLevel:"intermediate",weeklyWorkouts:4}).programId,"lifefit-a-b-female-glutes-intermediate");
-  assert.equal(recommendTraining({...input,traineeLevel:"advanced",experienceMonths:36,weeklyWorkouts:6,trainingFocus:"back"}).programId,"lifefit-ppl-female-back-advanced");
-  assert.equal(recommendTraining({...input,equipment:"trx",trainingLocation:"home"}).programId,"lifefit-trx-female-glutes");
+  assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes-v2");
+  assert.equal(recommendTraining({...input,trainingSplit:"PPL"}).programId,"lifefit-ppl-female-glutes-beginner-v2");
+  assert.equal(recommendTraining({...input,traineeLevel:"intermediate",weeklyWorkouts:4}).programId,"lifefit-a-b-female-glutes-intermediate-v2");
+  assert.equal(recommendTraining({...input,traineeLevel:"advanced",experienceMonths:36,weeklyWorkouts:6,trainingFocus:"back"}).programId,"lifefit-ppl-female-back-advanced-v2");
+  assert.equal(recommendTraining({...input,equipment:"trx",trainingLocation:"home"}).programId,"lifefit-trx-female-glutes-v2");
 });
 test("medical concerns, missing data and impossible schedules require review",()=>{
   assert.equal(recommendTraining({...input,medicalReview:"yes"}).status,"review");
@@ -82,7 +82,7 @@ test("short sessions reduce sets while retaining every movement and fixed target
   const p=personalizeProgram(buildProgram(rec.definition!),rec,40);
   for(const day of p.days)for(const e of day.exercises)if(e.exerciseId!=="exercise-155pu7s")assert.equal(e.sets,"2");
   const advanced=buildProgram(PROGRAM_DEFINITIONS[0],"advanced");
-  assert.match(advanced.days[1].exercises.at(-1)!.reps!,/40 שניות/);
+  assert.match(advanced.days[1].exercises.at(-1)!.reps!,/30 שניות/);
 });
 const ex=(id:string,name:string,muscle:string,equipment:string):Exercise=>({id,name,normalizedName:name,aliases:[],primaryMuscleGroup:muscle,equipment,secondaryMuscleGroups:[],cues:[],commonMistakes:[],sourceWorkbooks:[],sourceReferences:[],status:"active"});
 test("replacements preserve movement, units and home equipment",()=>{

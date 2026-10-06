@@ -3051,5 +3051,25 @@
       "דחיפה מהכתפיים במקום מהמרפקים"
     ]
   }
-
+,
+  {
+    "id": "bodyweight-wall-pushup",
+    "name": "עמידת סמיכה מול קיר",
+    "normalized_name": "עמידת סמיכה מול קיר",
+    "aliases": ["עמידת סמיכה מול קיר"],
+    "category": "משקל גוף",
+    "primary_muscle_group": "חזה",
+    "secondary_muscle_groups": ["יד אחורית"],
+    "equipment": "משקל גוף",
+    "difficulty": "מתחילים",
+    "video": {"url": "https://start.elicohenfitness.co.il/exercises/bodyweight/wall-pushup.mp4", "title": "עמידת סמיכה מול קיר", "provider": "self-hosted"},
+    "execution_notes": "עומדים מול קיר ומניחים כפות ידיים בגובה החזה. שומרים גוף ישר, מקרבים את החזה לקיר בכיפוף מרפקים ודוחפים חזרה.",
+    "how_to": "עומדים מול קיר ומניחים כפות ידיים בגובה החזה. שומרים גוף ישר, מקרבים את החזה לקיר בכיפוף מרפקים ודוחפים חזרה.",
+    "image_url": "https://start.elicohenfitness.co.il/exercises/bodyweight/wall-pushup.jpg",
+    "cues": ["גוף בקו ישר", "כפות ידיים יציבות", "מרפקים בזווית נוחה"],
+    "common_mistakes": ["אגן נשאר מאחור", "כתפיים עולות", "מצח מוביל במקום החזה"],
+    "source_workbooks": ["instructor.co.il"],
+    "source_references": [{"cell": "https://www.instructor.co.il/excercise/wall-pushups/", "name": "עמידת סמיכה מול קיר", "sheet": "משקל גוף", "workbook": "instructor.co.il"}],
+    "status": "active"
+  }
 ]

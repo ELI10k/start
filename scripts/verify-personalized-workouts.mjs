@@ -63,6 +63,23 @@ try {
     const {data:coach,error:coachError}=await admin.from("profiles").select("is_test_account").eq("id",session.user.id).single();
     check(coachError,"test coach verification");
     assert.equal(coach.is_test_account,true,"Only an isolated test coach may run mutation smoke tests");
+    const live=await admin.from("workout_programs").select("id,status,official,workout_program_days(id,sort_order,workout_program_exercises(id,exercise_id,sort_order,sets_text,reps_text,rest_text,notes,workout_set_prescriptions(repetitions)))").like("id","lifefit-%").eq("official",true).eq("status","active");check(live.error,"revised live catalogue");
+    assert.equal(live.data.length,BUILT_IN_PROGRAMS.length);
+    for(const expected of BUILT_IN_PROGRAMS){
+      const actual=live.data.find(p=>p.id===expected.id);assert.ok(actual,expected.id);assert.equal(actual.workout_program_days.length,expected.days.length);
+      for(const day of expected.days){
+        const actualDay=actual.workout_program_days.find(d=>d.id===day.id);assert.ok(actualDay);assert.equal(actualDay.workout_program_exercises.length,day.exercises.length);
+        for(const entry of day.exercises){
+          const actualEntry=actualDay.workout_program_exercises.find(e=>e.id===entry.id);assert.ok(actualEntry);
+          assert.equal(actualEntry.exercise_id,entry.exerciseId);assert.equal(actualEntry.sort_order,entry.order);
+          assert.equal(actualEntry.sets_text,entry.sets??null);assert.equal(actualEntry.reps_text,entry.reps??null);assert.equal(actualEntry.rest_text,entry.rest??null);
+          assert.equal(actualEntry.notes,[entry.effort?`RPE יעד: ${entry.effort}`:null,entry.notes].filter(Boolean).join("\n"));
+          assert.equal(actualEntry.workout_set_prescriptions.length,entry.setPrescriptions?.length??0);
+          assert.ok(actualEntry.workout_set_prescriptions.every(s=>s.repetitions===entry.reps));
+        }
+      }
+    }
+    report.revisedTrees="all 38 live programmes exactly match revised prescriptions";
     const id=randomUUID();
     const created=await admin.auth.admin.createUser({email:`workout-smoke-${id}@example.invalid`,password:`${randomUUID()}Aa1!`,email_confirm:true,app_metadata:{role:"client",is_test_account:true}});
     check(created.error,"create disposable test identity");createdId=created.data.user.id;
@@ -111,7 +128,7 @@ try {
       await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
       const active=await admin.from("workout_assignments").select("program_id").eq("client_id",createdId).eq("status","active");check(active.error,"home assignment");assert.equal(active.data.length,1);
       const personal=await admin.from("workout_programs").select("duplicated_from_id,equipment").eq("id",active.data[0].program_id).single();check(personal.error,"home copy");
-      assert.equal(personal.data.duplicated_from_id,`lifefit-home-${equipment}-beginner`);
+      assert.equal(personal.data.duplicated_from_id,`lifefit-home-${equipment}-beginner-v2`);
       assert.equal(personal.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");
       const preferences=await admin.from("workout_preferences").select("equipment,training_location").eq("client_id",createdId).single();check(preferences.error,"home preferences");
       assert.equal(preferences.data.training_location,"home");assert.equal(preferences.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");

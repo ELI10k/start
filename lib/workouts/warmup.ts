@@ -60,9 +60,17 @@ export function workingWeightFrom(
  */
 export function planWarmup(
   workingWeightKg: number | null,
-  options: { effort?: string; compound?: boolean; repetitions?: number } = {},
+  options: { effort?: string; compound?: boolean; repetitions?: number; professional?:boolean } = {},
 ): WarmupPlan | null {
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
+
+  // Brief preparation rather than two near-working-load endurance sets.
+  // Equipment increments are unknown: show an approximate load, never above
+  // the working load. The client chooses an actually available lighter load.
+  if(options.professional){
+    const steps=options.compound?[{percent:50,repetitions:8},{percent:80,repetitions:3}]:[{percent:50,repetitions:6}];
+    return {workingWeightKg,sets:steps.map(step=>({...step,weightKg:Math.min(workingWeightKg,Math.floor(workingWeightKg*step.percent/100*2)/2)}))};
+  }
 
   const workingRepetitions = options.repetitions;
   const repetitions = workingRepetitions === undefined || workingRepetitions <= 8

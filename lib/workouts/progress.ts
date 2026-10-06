@@ -56,6 +56,7 @@ export function getTodayWorkoutDay(
   // forget occurrences after the first A and B.
   weeklyFrequency:number=program.days.length,
   assignmentId?:string,
+  assignmentStartDate?:string,
 ):WorkoutDay|undefined{
   if(!program.days.length)return undefined;
   const opened=trainingWeekStart(today);
@@ -70,13 +71,15 @@ export function getTodayWorkoutDay(
 
   const scheduledOccurrences=new Map<string,number>();
   const sessions=Math.max(1,Math.min(14,weeklyFrequency||ordered.length));
+  const professional=program.sourceWorkbook.includes("מקצועי v2");
+  const offset=professional&&assignmentStartDate?Math.max(0,Math.floor((Date.parse(opened)-Date.parse(trainingWeekStart(assignmentStartDate)))/(7*86400000)))*sessions:0;
   for(let index=0;index<sessions;index++){
-    const day=ordered[index%ordered.length];
+    const day=ordered[(offset+index)%ordered.length];
     const occurrence=(scheduledOccurrences.get(day.id)??0)+1;
     scheduledOccurrences.set(day.id,occurrence);
     if((answeredByDay.get(day.id)??0)<occurrence)return day;
   }
-  return ordered[0];
+  return professional?undefined:ordered[0];
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}

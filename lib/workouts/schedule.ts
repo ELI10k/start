@@ -15,6 +15,8 @@ export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAs
   if(!days.length)return[];
   const sessions=Math.max(1,Math.min(14,assignment.weeklyFrequency||days.length));
   const start=weekStart(todayValue);
+  const weeksSinceStart=Math.max(0,Math.floor((Date.parse(start)-Date.parse(trainingWeekStart(assignment.startDate)))/(7*86400000)));
+  const offset=program.sourceWorkbook.includes("מקצועי v2")?weeksSinceStart*sessions:0;
   // How many times each workout has already been finished this week. The second
   // FBW of the week ticks the second row, not the first one over again.
   const completedByDay=new Map<string,number>();
@@ -22,12 +24,12 @@ export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAs
     // The Israeli calendar day, not the UTC one: a workout finished at 01:00
     // on Sunday is stored as Saturday 22:00Z and would be read into the week
     // that had already closed.
-    if(workout.clientId!==clientId||israelDateKey(new Date(workout.completedAt))<start)continue;
+    if(workout.clientId!==clientId||workout.programId!==program.id||workout.assignmentId!==assignment.id||israelDateKey(new Date(workout.completedAt))<start)continue;
     completedByDay.set(workout.dayId,(completedByDay.get(workout.dayId)??0)+1);
   }
   const seen=new Map<string,number>();
   return Array.from({length:sessions},(_,index)=>{
-    const day=days[index%days.length];
+    const day=days[(offset+index)%days.length];
     const occurrence=seen.get(day.id)??0;
     seen.set(day.id,occurrence+1);
     return{day,occurrence,completed:occurrence<(completedByDay.get(day.id)??0)};

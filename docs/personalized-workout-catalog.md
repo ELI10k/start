@@ -1,5 +1,7 @@
 # Personalized workout catalogue
 
+**Current revision:** The historical implementation below is superseded by [professional v2](professional-workout-revision.md): 38 versioned active templates, revised dose/order/effort/time gates and preservation of the original trees in the archive. Regeneration now requires an explicit new migration path; never rerun it over an applied historical file.
+
 21 official templates: four TRX FBW, three men's gym PPL, two women's gym FBW, six women's PPL and six women's A-B. The repeated glute PPL request is deduplicated. The programme catalogue uses fixed repetitions, timed plank sets, dynamic warm-ups, exercise-specific rest, and level-specific RPE and volume. All referenced exercises already have real demonstration videos.
 
 Coach creation, coach intake updates and independent-client onboarding share the same training questionnaire and recommendation engine. Training preferences live in the existing client profile preferences JSON; no new client columns are necessary. Assessments consider sex, reported level, consistent experience, technique, sessions per week, setting, equipment, focus, split and available time. Beginners normally receive FBW. Explicit PPL requires at least three sessions and 45 minutes; FBW is limited to two or three sessions. Advanced requires at least 24 months and stable technique. Medical concerns and incomplete or unsupported profiles remain for coach review.

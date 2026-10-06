@@ -3,10 +3,13 @@
 import { writeFile } from "node:fs/promises";
 import { BUILT_IN_PROGRAMS } from "../lib/workouts/program-catalog.ts";
 import { readFile } from "node:fs/promises";
-const output = new URL(process.argv[2] ?? "../supabase/migrations/20261004143008_expanded_workout_catalog.sql", import.meta.url);
+if(!process.argv[2])throw new Error("Pass an explicit new migration path; never overwrite an applied catalogue migration");
+const output = new URL(process.argv[2], import.meta.url);
 const exercises = JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json", import.meta.url), "utf8"));
-const expanded=output.pathname.includes("expanded_workout_catalog");
-const programmes=expanded?BUILT_IN_PROGRAMS.slice(21):BUILT_IN_PROGRAMS;
+const programmes=BUILT_IN_PROGRAMS;
+const professional=output.pathname.includes("professional_workout_revision");
+if(!professional)throw new Error("The v2 catalogue requires a new professional_workout_revision migration");
+const oldIds=programmes.map(p=>p.id.replace(/-v2$/,""));
 const referenced=new Set(programmes.flatMap(p=>p.days.flatMap(d=>d.exercises.map(e=>e.exerciseId))));
 const selectedExercises=exercises.filter(e=>referenced.has(e.id));
 const quote = value => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
@@ -14,6 +17,12 @@ const sql = `begin;
 do $catalog$
 declare e jsonb; p jsonb; d jsonb; x jsonb; s jsonb;
 begin
+ if exists(
+  select 1 from public.workout_assignments a
+  join public.workout_programs p on p.id=a.program_id
+  where a.status='active' and (p.id in (select jsonb_array_elements_text(${quote(oldIds)}))
+    or p.duplicated_from_id in (select jsonb_array_elements_text(${quote(oldIds)})))
+ ) then raise exception 'Active legacy catalogue assignments require individual review before revision'; end if;
  for e in select * from jsonb_array_elements(${quote(selectedExercises)}) loop
   insert into public.workout_exercises(id,name,normalized_name,aliases,category,primary_muscle_group,secondary_muscle_groups,equipment,difficulty,video,execution_notes,image_url,how_to,cues,common_mistakes,source_workbooks,source_references,status)
   values(e->>'id',e->>'name',e->>'normalized_name',array(select jsonb_array_elements_text(e->'aliases')),e->>'category',e->>'primary_muscle_group',array(select jsonb_array_elements_text(e->'secondary_muscle_groups')),e->>'equipment',e->>'difficulty',e->'video',e->>'execution_notes',e->>'image_url',e->>'how_to',array(select jsonb_array_elements_text(e->'cues')),array(select jsonb_array_elements_text(e->'common_mistakes')),array(select jsonb_array_elements_text(e->'source_workbooks')),e->'source_references','active') on conflict(id) do nothing;
@@ -67,6 +76,9 @@ begin
 end $function$;
 revoke all on function public.assign_intake_workout(uuid,uuid,jsonb,date,text,text[]) from public,anon,authenticated;
 grant execute on function public.assign_intake_workout(uuid,uuid,jsonb,date,text,text[]) to service_role;
+-- Only replaced official originals are archived. Copies and history remain.
+update public.workout_programs set status='archived'
+where official=true and id in (select jsonb_array_elements_text(${quote(oldIds)}));
 commit;
 `;
 await writeFile(output, sql);

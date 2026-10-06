@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/purity */
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, Repeat2, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
@@ -39,7 +39,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // האימון"), so the client most likely to have unfinished exercises was exactly
   // the one who was never asked about them.
   const[confirmedPartial,setConfirmedPartial]=useState(false);
-  const ordered=useMemo(()=>[...(day?.exercises??[])].sort((a,b)=>a.order-b.order),[day]);
+  const ordered=[...(day?.exercises??[])].sort((a,b)=>a.order-b.order);
   useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
   // Scheduled against the rest end itself rather than polled off the ticking
   // clock, so the buzz lands on time even if a render is late - and cancels
@@ -127,14 +127,18 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // opposing muscles and each needs its own preparation. Base the decision on
   // the exercise itself, not on whether another exercise shares its broad
   // catalogue group. Bodyweight abdominal work is the explicit exception.
-  const abdominalExercise=exercise?.primaryMuscleGroup==="בטן";
+  const abdominalExercise=exercise?.primaryMuscleGroup==="בטן"||exercise?.primaryMuscleGroup==="שרירי ליבה";
   const earlierMuscleGroups=ordered.slice(0,session.currentExerciseIndex).map((entry)=>{
     const entryResult=session.exerciseResults.find((item)=>item.workoutExerciseId===entry.id);
     return getExercise(entryResult?.performedExerciseId??entry.exerciseId)?.primaryMuscleGroup;
   });
   const firstForMuscle=isFirstExerciseForMuscle(exercise?.primaryMuscleGroup,earlierMuscleGroups);
-  const warmup=firstForMuscle&&!abdominalExercise&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
-  const challenge=previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment}):null;
+  const professional=program.sourceWorkbook.includes("מקצועי v2");
+  const warmup=firstForMuscle&&!abdominalExercise&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget,professional}):null;
+  const priorEntries=performance.sessions.slice(0,2).map(history=>comparableWorkouts.find(w=>w.id===history.workoutId)?.exerciseResults.find(e=>(e.performedExerciseId??e.exerciseId)===performedId));
+  const sameLoad=priorEntries.length===2&&priorEntries[0]?.sets.every((s,i)=>s.weightKg===priorEntries[1]?.sets[i]?.weightKg);
+  const successfulExposures=repTarget!==undefined&&sameLoad&&priorEntries.every(e=>e?.difficulty==="easy"&&e.sets.length===setCount(current.sets)&&e.sets.every(s=>s.completed&&(s.repetitions??0)>=repTarget))?2:0;
+  const challenge=!timed&&previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:professional?priorEntries[0]?.difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment,professional,successfulExposures}):null;
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
   // A replacement has to train the same thing, so the list is the catalogue
