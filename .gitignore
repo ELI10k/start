@@ -60,3 +60,18 @@ next-env.d.ts
 
 # database restore points - client data, never committed
 /backups
+
+# local media/document generation workspaces
+/.video-venv/
+/tmp/
+/output/
+/outputs/legal-qa*/
+/outputs/privacy-internal-qa/
+/outputs/life-fit-explainer*/
+
+# generated media captures (keep source scripts reviewable)
+/reel-assets/recording/
+/reel-assets/.raw-*
+
+# local Swift Package Manager workspace state
+/ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
