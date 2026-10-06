@@ -655,6 +655,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .metric-overview__goal { padding: 1.1rem; }
 .metric-overview__goal .weight-goal__meta { font-size: 1rem; }
 .metric-overview__goal .weight-goal__track { height: .7rem; }
+.metric-overview__goal .weight-goal__track > span { background: var(--ink); }
+.metric-overview__goal .weight-goal__estimate,
+.metric-overview__goal .weight-goal__scale { color: var(--ink); font-weight: 800; }
 @media (max-width: 360px) {
   .progress-metric-tab { padding-inline: .1rem; }
   .progress-metric-tab__icon { width: 2.15rem; height: 2.15rem; }
