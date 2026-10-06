@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import PersistedProgressForm from "@/components/client/PersistedProgressForm";
-import PersistedProgressHistory from "@/components/client/PersistedProgressHistory";
+import ProgressMetricsDashboard from "@/components/client/ProgressMetricsDashboard";
 import ProgressPhotoGallery from "@/components/client/ProgressPhotoGallery";
 import { getAuthContext, getClientCheckInHistory, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/progress/measurements";
@@ -20,9 +20,9 @@ export default async function ProgressPage() {
     return photos.length?[{checkInId:checkIn.id,submittedAt:checkIn.submitted_at,photos}]:[];
   });
   return <ClientShell>
-    <PageHeader eyebrow="התקדמות" title="משקל ומדידות" description="המדידות נשמרות בחשבון שלך ומוצגות לאורך זמן." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
+    <PageHeader eyebrow="התקדמות" title="מדדי התקדמות" description="כל המדדים שלך במקום אחד." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
     <div className="grid gap-4">
-      <PersistedProgressHistory
+      <ProgressMetricsDashboard
         entries={data.progress}
         targetWeight={data.clientProfile.target_weight}
         nutritionGoal={data.clientProfile.nutrition_goal}

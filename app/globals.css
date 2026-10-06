@@ -604,6 +604,48 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .dashboard-metrics--fit .metric-tile strong { font-size: 1.15rem; }
 }
 
+/* Progress metrics stay on one screen without becoming one long dashboard.
+   The icon discs echo the health-source artwork while remaining crisp SVGs. */
+.progress-metrics { display: grid; gap: 1rem; }
+.progress-metric-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .35rem; }
+.progress-metric-tab {
+  display: grid; min-width: 0; justify-items: center; gap: .2rem;
+  padding: .55rem .2rem .5rem; border: 1px solid var(--line); border-radius: 1rem;
+  background: var(--surface); color: var(--ink-muted); font: inherit; cursor: pointer;
+}
+.progress-metric-tab__icon { display: grid; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: 50%; background: var(--green-tint); color: var(--green); }
+.progress-metric-tab strong { color: var(--ink); font-size: .78rem; line-height: 1; }
+.progress-metric-tab small { overflow: hidden; width: 100%; font-size: .58rem; text-overflow: ellipsis; white-space: nowrap; }
+.progress-metric-tab[data-selected] { border-color: var(--green); background: var(--green); color: rgba(255,255,255,.8); box-shadow: 0 8px 20px rgba(22,163,74,.16); }
+.progress-metric-tab[data-selected] .progress-metric-tab__icon { background: rgba(255,255,255,.18); color: white; }
+.progress-metric-tab[data-selected] strong { color: white; }
+.progress-metric-panel { min-width: 0; }
+.health-progress-view { display: grid; gap: .8rem; }
+.health-summary-card { position: relative; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); text-align: center; }
+.health-summary-card__icon { position: absolute; inset-block-start: 1rem; inset-inline-end: 1rem; display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 50%; background: var(--green-tint); color: var(--green); }
+.health-summary-card > p { color: var(--ink-muted); font-size: .78rem; }
+.health-summary-card > strong { display: block; margin-top: .25rem; font-size: clamp(1.8rem, 9vw, 2.7rem); line-height: 1.1; }
+.health-summary-card > small { display: block; margin-top: .25rem; color: var(--green-press); font-weight: 750; }
+.health-chart { margin-top: 1.25rem; }
+.health-chart__plot { position: relative; display: grid; height: 10rem; grid-template-columns: repeat(7, minmax(0,1fr)); align-items: end; gap: .45rem; padding-top: .75rem; border-bottom: 1px solid var(--line); }
+.health-chart__goal { position: absolute; inset-inline: 0; z-index: 1; border-top: 1px dashed var(--green); color: var(--green-press); text-align: start; }
+.health-chart__goal small { position: absolute; inset-inline-start: 0; inset-block-end: .1rem; font-size: .58rem; }
+.health-chart__column { z-index: 2; display: grid; height: 100%; grid-template-rows: 1fr 1.1rem; align-items: end; justify-items: center; gap: .2rem; }
+.health-chart__column i { display: block; width: min(1.6rem, 78%); min-height: 2px; border-radius: .4rem .4rem .15rem .15rem; background: var(--green); }
+.health-chart__column small { color: var(--ink-muted); font-size: .65rem; }
+.health-stat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
+.health-stat-grid > div { display: grid; grid-template-columns: auto 1fr; gap: .1rem .55rem; align-items: center; padding: .9rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.health-stat-grid svg { grid-row: span 2; padding: .45rem; width: 2.35rem; height: 2.35rem; border-radius: 50%; background: var(--green-tint); color: var(--green); }
+.health-stat-grid strong { font-size: 1.05rem; }
+.health-stat-grid span { color: var(--ink-muted); font-size: .68rem; }
+.health-insight, .health-sync-note { padding: .9rem 1rem; border-radius: var(--radius-md); background: var(--green-tint); color: var(--green-press); font-size: .78rem; font-weight: 750; text-align: center; }
+.health-sync-button { justify-self: center; gap: .4rem; }
+@media (max-width: 360px) {
+  .progress-metric-tab { padding-inline: .1rem; }
+  .progress-metric-tab__icon { width: 2.15rem; height: 2.15rem; }
+  .progress-metric-tab small { display: none; }
+}
+
 .metric-tile {
   min-width: 0;
   min-height: 6.4rem;

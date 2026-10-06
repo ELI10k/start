@@ -77,7 +77,7 @@ function rateText(value: number | null) {
   return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
 }
 
-export default function PersistedProgressHistory({ entries, targetWeight, nutritionGoal }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null; nutritionGoal?: string | null }) {
+export default function PersistedProgressHistory({ entries, targetWeight, nutritionGoal, metric = "weight" }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null; nutritionGoal?: string | null; metric?: "weight" | "measurements" }) {
   const ordered = [...entries].sort((a, b) => a.date.localeCompare(b.date));
   const weights = ordered.flatMap((entry) => {
     const value = valueOf(entry.weight);
@@ -112,28 +112,27 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
 
   return (
     <div className="grid gap-4">
-      {goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} weeklyKg={weightRates?.weeklyKg} /></section> : null}
+      {metric === "weight" && goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} weeklyKg={weightRates?.weeklyKg} /></section> : null}
       {/* The two numbers a client actually opens this screen for, before any chart. */}
       <section className="dashboard-metrics" aria-label="מדדי התקדמות">
-        <MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
+        {metric === "weight" ? <><MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
         <MetricTile
           label="שינוי במשקל"
           value={`${weightChange > 0 ? "+" : ""}${weightChange} ק״ג`}
           detail={`משקל נוכחי: ${currentWeight !== undefined ? `${currentWeight} ק״ג` : "—"}`}
           accent={weightChange > 0 ? "down" : "green"}
           icon={weightChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
-        />
-        <MetricTile label="היקף טבור התחלה" value={startingNavel !== undefined ? `${startingNavel} ס״מ` : "—"} icon={<Ruler aria-hidden="true" size={18} />} />
+        /></> : <><MetricTile label="היקף טבור התחלה" value={startingNavel !== undefined ? `${startingNavel} ס״מ` : "—"} icon={<Ruler aria-hidden="true" size={18} />} />
         <MetricTile
           label="שינוי בהיקף"
           value={`${navelChange > 0 ? "+" : ""}${navelChange} ס״מ`}
           detail={`היקף נוכחי: ${currentNavel !== undefined ? `${currentNavel} ס״מ` : "—"}`}
           accent={navelChange > 0 ? "down" : "green"}
           icon={navelChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
-        />
+        /></>}
       </section>
 
-      <section className="premium-card" aria-labelledby="average-weight-rate">
+      {metric === "weight" ? <section className="premium-card" aria-labelledby="average-weight-rate">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="average-weight-rate" className="font-black">קצב שינוי ממוצע במשקל</h2>
@@ -159,12 +158,9 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
         ) : (
           <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשות לפחות שתי מדידות בתאריכים שונים לחישוב הקצב.</p>
         )}
-      </section>
+      </section> : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <TrendChart title="מגמת משקל" unit="ק״ג" points={weights} />
-        <TrendChart title="מגמת היקף טבור" unit="ס״מ" points={navelCircumferences} />
-      </div>
+      <TrendChart title={metric === "weight" ? "מגמת משקל" : "מגמת היקף טבור"} unit={metric === "weight" ? "ק״ג" : "ס״מ"} points={metric === "weight" ? weights : navelCircumferences} />
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}

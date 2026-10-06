@@ -11,8 +11,6 @@ import { listContentCategories, listPublishedContent } from "@/lib/data/content-
 import { lessonForDay } from "@/lib/content/weekly-lesson";
 import WeeklyLessonCard from "@/components/client/WeeklyLessonCard";
 import ProgressPulse from "@/components/client/ProgressPulse";
-import StepsMetricTile from "@/components/client/StepsMetricTile";
-import SleepMetricTile from "@/components/client/SleepMetricTile";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
@@ -128,8 +126,6 @@ export default async function Home() {
             accent="neutral"
             icon={<UtensilsCrossed aria-hidden="true" size={18} />}
           />
-          <StepsMetricTile />
-          <SleepMetricTile />
         </section>
 
         {/* Four tiles, two across, each twice the size it was.
