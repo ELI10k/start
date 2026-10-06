@@ -10,6 +10,7 @@ import { resetClientDevice } from "@/app/actions/product";
 import { getActiveClientMenu, getAuthContext, getClientNutritionBehavior, getCoachClientDashboard } from "@/lib/data/product-repository";
 import { bodyMassIndex, calculateEnergy, GOAL_LABELS, isNutritionGoal, MISSING_LABELS, type NutritionGoal, type Sex } from "@/lib/nutrition/energy";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
+import { formatPortionLabel } from "@/lib/nutrition/meal-alternatives";
 import { isTraineeLevel, TRAINEE_LEVEL_LABELS } from "@/lib/workouts/trainee-level";
 import EnableFreeMenu from "@/components/coach/EnableFreeMenu";
 import { resendClientInvite, sendClientMagicLink, sendClientPasswordReset } from "@/app/actions/onboarding";
@@ -395,7 +396,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
             <div className="mt-3 grid gap-3">
               {data.menu.meals.map((meal) => <article key={meal.id} className="rounded-2xl border border-[#E5E7E5] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="font-black">{meal.title}</h4><span className={`pill ${meal.status==="not_eaten"?"pill--red":meal.status||meal.completed?"pill--green":""}`}>{meal.status==="not_eaten"?"לא נאכלה":meal.status==="other"?"נאכל משהו אחר":meal.status==="eaten"||meal.completed?"נאכלה":"לא סומנה"}</span></div>
-                {meal.groups.length?<div className="mt-3 grid gap-2">{meal.groups.map((group,index)=>{const chosen=group.items.find((item)=>item.id===group.selectedItemId)??group.items.find((item)=>item.itemRole==="primary")??group.items[0];return <div key={`${meal.id}-${index}`} className="rounded-xl bg-[#F7F8F7] px-3 py-2 text-sm"><strong>{chosen?.name??"לא נבחר מאכל"}</strong>{chosen&&<span className="mr-2 text-[#5B5F5B]">{group.amountOverride??chosen.displayQuantity} {chosen.measurementUnit} · {Math.round(chosen.calories??0)} קל׳</span>}</div>})}</div>:meal.freeCalorieTarget?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.freeCalorieTarget} קל׳ חופשיות</p>:null}
+                {meal.groups.length?<div className="mt-3 grid gap-2">{meal.groups.map((group,index)=>{const chosen=group.items.find((item)=>item.id===group.selectedItemId)??group.items.find((item)=>item.itemRole==="primary")??group.items[0];const quantity=Number(group.amountOverride??chosen?.displayQuantity);return <div key={`${meal.id}-${index}`} className="rounded-xl bg-[#F7F8F7] px-3 py-2 text-sm"><strong>{chosen?.name??"לא נבחר מאכל"}</strong>{chosen&&<span className="mr-2 text-[#5B5F5B]">{formatPortionLabel(quantity,chosen.measurementUnit)} · {Math.round(chosen.calories??0)} קל׳</span>}</div>})}</div>:meal.freeCalorieTarget?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.freeCalorieTarget} קל׳ חופשיות</p>:null}
                 {meal.notes&&<p className="mt-2 text-xs text-[#5B5F5B]">{meal.notes}</p>}
                 <LoggedFoodList entries={loggedFood.filter((entry)=>entry.mealId===meal.id)} readOnly/>
               </article>)}

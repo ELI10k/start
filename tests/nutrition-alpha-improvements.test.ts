@@ -185,6 +185,19 @@ test("a single portion reads as a singular unit",()=>{
   assert.equal(unitLabel("קופסאות",1),"קופסה");
   assert.equal(unitLabel("גרם",1),"גרם");
   assert.equal(unitLabel("פרוסות",2.5),"פרוסות");
+  assert.equal(unitLabel("פיתות",0.5),"פיתה");
+});
+
+test("countable portions are displayed as natural fractions",async()=>{
+  const {formatDisplayQuantity,formatPortionLabel}=await import("../lib/nutrition/meal-alternatives.ts");
+  assert.equal(formatDisplayQuantity(0.5,"פיתות"),"½");
+  assert.equal(formatDisplayQuantity(0.75,"פיתות"),"¾");
+  assert.equal(formatDisplayQuantity(1.5,"קופסאות"),"1½");
+  assert.equal(formatDisplayQuantity(80.5,"גרם"),"80.5");
+  assert.equal(formatPortionLabel(0.5,"פיתות"),"חצי פיתה");
+  assert.equal(formatPortionLabel(0.75,"פיתות"),"¾ פיתה");
+  assert.equal(formatPortionLabel(1.5,"פיתות"),"פיתה וחצי");
+  assert.equal(formatPortionLabel(3,"פרוסות"),"3 פרוסות");
 });
 
 test("a new menu opens with the full six-meal skeleton",()=>{
