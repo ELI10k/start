@@ -640,6 +640,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .health-stat-grid span { color: var(--ink-muted); font-size: .68rem; }
 .health-insight, .health-sync-note { padding: .9rem 1rem; border-radius: var(--radius-md); background: var(--green-tint); color: var(--green-press); font-size: .78rem; font-weight: 750; text-align: center; }
 .health-sync-button { justify-self: center; gap: .4rem; }
+.metric-overview { display: grid; gap: .8rem; }
+.metric-overview__card { padding-bottom: 1rem; }
+.metric-overview__chart { display: block; width: 100%; height: 10rem; margin-top: 1rem; overflow: visible; }
+.metric-overview__dates { display: flex; justify-content: space-between; margin-top: .3rem; color: var(--ink-muted); font-size: .65rem; }
+.metric-overview__empty { margin-top: 1rem; padding: 1rem; border: 1px dashed var(--line); border-radius: var(--radius-md); color: var(--ink-muted); font-size: .75rem; }
 @media (max-width: 360px) {
   .progress-metric-tab { padding-inline: .1rem; }
   .progress-metric-tab__icon { width: 2.15rem; height: 2.15rem; }

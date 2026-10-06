@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Footprints, MoonStar, Ruler, Scale } from "lucide-react";
 import PersistedProgressHistory from "@/components/client/PersistedProgressHistory";
 import HealthProgressPanel from "@/components/client/HealthProgressPanel";
+import PersistedProgressForm from "@/components/client/PersistedProgressForm";
+import ProgressPhotoGallery, { type ProgressPhotoSession } from "@/components/client/ProgressPhotoGallery";
 
 type ProgressEntry = Readonly<{
   id: string;
@@ -26,10 +28,16 @@ export default function ProgressMetricsDashboard({
   entries,
   targetWeight,
   nutritionGoal,
+  photoSessions,
+  photoError,
+  today,
 }: {
   entries: readonly ProgressEntry[];
   targetWeight?: number | string | null;
   nutritionGoal?: string | null;
+  photoSessions: readonly ProgressPhotoSession[];
+  photoError?: boolean;
+  today: string;
 }) {
   const [metric, setMetric] = useState<Metric>("weight");
 
@@ -71,6 +79,12 @@ export default function ProgressMetricsDashboard({
           <HealthProgressPanel metric={metric} />
         )}
       </div>
+      {metric === "weight" || metric === "measurements" ? (
+        <>
+          <ProgressPhotoGallery sessions={photoSessions} error={photoError} />
+          <PersistedProgressForm today={today} />
+        </>
+      ) : null}
     </section>
   );
 }

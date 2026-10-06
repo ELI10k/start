@@ -1,10 +1,6 @@
-import { Ruler, Scale, TrendingDown, TrendingUp } from "lucide-react";
+import { Ruler, Scale } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
-import { MetricTile } from "@/components/client/PremiumUI";
-import { averageWeightChangeRates } from "@/lib/progress/rates";
-import { weightGoalProgress } from "@/lib/progress/weight-goal";
 import { weightTrendTone } from "@/lib/progress/weight-trend";
-import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 
 type ProgressEntry = Readonly<{
   id: string;
@@ -37,44 +33,44 @@ function linePoints(points: readonly Point[]) {
     .join(" ");
 }
 
-function changeOf(points: readonly Point[]) {
-  if (!points.length) return 0;
-  const first = points[0].value;
-  const latest = points.at(-1)?.value ?? first;
-  return Number((latest - first).toFixed(1));
-}
-
-function TrendChart({ title, unit, points }: { title: string; unit: string; points: readonly Point[] }) {
-  if (!points.length) return null;
+function MetricOverview({ metric, points, targetWeight, nutritionGoal }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null }) {
+  if (!points.length) return <StateBlock icon={metric === "weight" ? <Scale aria-hidden="true" size={22} /> : <Ruler aria-hidden="true" size={22} />} title="עדיין אין מדידות" description="המדידה הראשונה שתירשם תופיע כאן, יחד עם גרף המגמה." />;
+  const title = metric === "weight" ? "משקל נוכחי" : "היקף טבור נוכחי";
+  const unit = metric === "weight" ? "ק״ג" : "ס״מ";
   const latest = points.at(-1)?.value ?? points[0].value;
-  const change = changeOf(points);
+  const first = points[0].value;
+  const previous = points.at(-2)?.value;
+  const recentChange = previous === undefined ? null : Number((latest - previous).toFixed(1));
+  const totalChange = Number((latest - first).toFixed(1));
+  const target = Number(targetWeight);
+  const hasTarget = metric === "weight" && Number.isFinite(target);
+  const comparison = recentChange === null ? "זו המדידה הראשונה" : `${recentChange > 0 ? "עלייה" : recentChange < 0 ? "ירידה" : "ללא שינוי"}${recentChange === 0 ? " מהמדידה הקודמת" : ` של ${Math.abs(recentChange)} ${unit} מהמדידה הקודמת`}`;
+  const insight = metric === "measurements"
+    ? totalChange < 0 ? "נרשמת ירידה עקבית בהיקף" : totalChange > 0 ? "נרשמה עלייה בהיקף לאורך התקופה" : "ההיקף נשאר יציב לאורך התקופה"
+    : nutritionGoal?.includes("cut") && totalChange <= 0 ? "המגמה תואמת את יעד החיטוב" : nutritionGoal?.includes("bulk") && totalChange >= 0 ? "המגמה תואמת את יעד המסה" : hasTarget ? `נותרו ${Math.abs(latest - target).toFixed(1)} ק״ג ליעד` : "המשך מדידות עקביות יציג מגמה מדויקת יותר";
   return (
-    <section className="premium-card">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="font-black">{title}</h2>
-          <p className="mt-1 text-sm text-[#5B5F5B]">{latest} {unit} · שינוי {change > 0 ? "+" : ""}{change} {unit}</p>
-        </div>
-        <span className="pill">{points.length} מדידות</span>
-      </div>
-      {/* One measurement is a dot, not a trend. An empty chart frame reads as a
-          broken chart, so say what is missing instead of drawing nothing. */}
+    <div className="metric-overview">
+      <section className="health-summary-card metric-overview__card">
+        <span className="health-summary-card__icon">{metric === "weight" ? <Scale aria-hidden="true" size={24} /> : <Ruler aria-hidden="true" size={24} />}</span>
+        <p>{title}</p>
+        <strong>{latest} {unit}</strong>
+        <small>{comparison}</small>
       {points.length > 1 ? <>
-        <svg className="mt-5 h-36 w-full overflow-visible" viewBox="0 0 100 100" role="img" aria-label={title} preserveAspectRatio="none">
+        <svg className="metric-overview__chart" viewBox="0 0 100 100" role="img" aria-label={`מגמת ${title}`} preserveAspectRatio="none">
           <line x1="0" x2="100" y1="90" y2="90" stroke="#E5E7E5" strokeWidth="1" />
           <line x1="0" x2="100" y1="55" y2="55" stroke="#E5E7E5" strokeWidth="1" />
           <polyline fill="none" points={linePoints(points)} stroke="#16A34A" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
         </svg>
-        <div className="mt-2 flex justify-between text-xs text-[#5B5F5B]"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
-      </> : <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשת מדידה נוספת כדי להציג מגמה.</p>}
-    </section>
+        <div className="metric-overview__dates"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
+      </> : <p className="metric-overview__empty">נדרשת מדידה נוספת כדי להציג מגמה.</p>}
+      </section>
+      <div className="health-stat-grid">
+        <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{first} {unit}</strong><span>{metric === "weight" ? "משקל התחלה" : "היקף התחלה"}</span></div>
+        <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{totalChange > 0 ? "+" : ""}{totalChange} {unit}</strong><span>שינוי כולל</span></div>
+      </div>
+      <p className="health-insight">{insight}</p>
+    </div>
   );
-}
-
-function rateText(value: number | null) {
-  if (value === null) return "אין מספיק נתונים";
-  if (value === 0) return "ללא שינוי";
-  return `${Math.abs(value).toFixed(2)} ק״ג ${value < 0 ? "ירידה" : "עלייה"}`;
 }
 
 export default function PersistedProgressHistory({ entries, targetWeight, nutritionGoal, metric = "weight" }: { entries: readonly ProgressEntry[]; targetWeight?: number | string | null; nutritionGoal?: string | null; metric?: "weight" | "measurements" }) {
@@ -98,69 +94,13 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
     );
   }
 
-  const weightChange = changeOf(weights);
-  const navelChange = changeOf(navelCircumferences);
-  const startingWeight = weights[0]?.value;
-  const currentWeight = weights.at(-1)?.value;
-  const startingNavel = navelCircumferences[0]?.value;
-  const currentNavel = navelCircumferences.at(-1)?.value;
-  const weightRates = averageWeightChangeRates(weights);
-  const goalProgress = weightGoalProgress(entries, targetWeight);
   const displayedEntries = ordered
     .map((entry, index) => ({ entry, previousWeight: index > 0 ? valueOf(ordered[index - 1].weight) : null }))
     .reverse();
 
   return (
     <div className="grid gap-4">
-      {metric === "weight" && goalProgress ? <section className="premium-card" aria-label="התקדמות ליעד המשקל"><WeightGoalMeter progress={goalProgress} weeklyKg={weightRates?.weeklyKg} /></section> : null}
-      {/* The two numbers a client actually opens this screen for, before any chart. */}
-      <section className="dashboard-metrics" aria-label="מדדי התקדמות">
-        {metric === "weight" ? <><MetricTile label="משקל התחלה" value={startingWeight !== undefined ? `${startingWeight} ק״ג` : "—"} icon={<Scale aria-hidden="true" size={18} />} />
-        <MetricTile
-          label="שינוי במשקל"
-          value={`${weightChange > 0 ? "+" : ""}${weightChange} ק״ג`}
-          detail={`משקל נוכחי: ${currentWeight !== undefined ? `${currentWeight} ק״ג` : "—"}`}
-          accent={weightChange > 0 ? "down" : "green"}
-          icon={weightChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
-        /></> : <><MetricTile label="היקף טבור התחלה" value={startingNavel !== undefined ? `${startingNavel} ס״מ` : "—"} icon={<Ruler aria-hidden="true" size={18} />} />
-        <MetricTile
-          label="שינוי בהיקף"
-          value={`${navelChange > 0 ? "+" : ""}${navelChange} ס״מ`}
-          detail={`היקף נוכחי: ${currentNavel !== undefined ? `${currentNavel} ס״מ` : "—"}`}
-          accent={navelChange > 0 ? "down" : "green"}
-          icon={navelChange > 0 ? <TrendingUp aria-hidden="true" size={18} /> : <TrendingDown aria-hidden="true" size={18} />}
-        /></>}
-      </section>
-
-      {metric === "weight" ? <section className="premium-card" aria-labelledby="average-weight-rate">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="average-weight-rate" className="font-black">קצב שינוי ממוצע במשקל</h2>
-            <p className="mt-1 text-sm text-[#5B5F5B]">מחושב לפי הזמן שעבר בין המדידה הראשונה לאחרונה.</p>
-          </div>
-          <span className="pill">{weights.length} מדידות</span>
-        </div>
-        {weightRates ? (
-          <div className="mt-5 overflow-hidden rounded-2xl border border-[#E5E7E5]">
-            <div className="grid grid-cols-2 border-b border-[#E5E7E5] bg-[#F7F9F7] px-4 py-3 text-xs font-bold text-[#5B5F5B]">
-              <span>תקופה</span>
-              <span>קצב ממוצע</span>
-            </div>
-            <div className="grid grid-cols-2 px-4 py-4 text-sm">
-              <strong>שבועי</strong>
-              <strong className={weightRates.weeklyKg !== null && weightRates.weeklyKg > 0 ? "text-red-600" : weightRates.weeklyKg === null ? "text-[#5B5F5B]" : "text-green-700"}>{rateText(weightRates.weeklyKg)}</strong>
-            </div>
-            <div className="grid grid-cols-2 border-t border-[#E5E7E5] px-4 py-4 text-sm">
-              <strong>חודשי</strong>
-              <strong className={weightRates.monthlyKg !== null && weightRates.monthlyKg > 0 ? "text-red-600" : weightRates.monthlyKg === null ? "text-[#5B5F5B]" : "text-green-700"}>{rateText(weightRates.monthlyKg)}</strong>
-            </div>
-          </div>
-        ) : (
-          <p className="mt-4 rounded-2xl border border-dashed border-[#E5E7E5] p-5 text-center text-sm text-[#5B5F5B]">נדרשות לפחות שתי מדידות בתאריכים שונים לחישוב הקצב.</p>
-        )}
-      </section> : null}
-
-      <TrendChart title={metric === "weight" ? "מגמת משקל" : "מגמת היקף טבור"} unit={metric === "weight" ? "ק״ג" : "ס״מ"} points={metric === "weight" ? weights : navelCircumferences} />
+      <MetricOverview metric={metric} points={metric === "weight" ? weights : navelCircumferences} targetWeight={targetWeight} nutritionGoal={nutritionGoal} />
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}

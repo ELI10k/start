@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
-import PersistedProgressForm from "@/components/client/PersistedProgressForm";
 import ProgressMetricsDashboard from "@/components/client/ProgressMetricsDashboard";
-import ProgressPhotoGallery from "@/components/client/ProgressPhotoGallery";
 import { getAuthContext, getClientCheckInHistory, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/progress/measurements";
 
@@ -26,9 +24,10 @@ export default async function ProgressPage() {
         entries={data.progress}
         targetWeight={data.clientProfile.target_weight}
         nutritionGoal={data.clientProfile.nutrition_goal}
+        photoSessions={photoSessions}
+        photoError={checkInHistory.photoError}
+        today={today}
       />
-      <ProgressPhotoGallery sessions={photoSessions} error={checkInHistory.photoError}/>
     </div>
-    <PersistedProgressForm today={today}/>
   </ClientShell>;
 }
