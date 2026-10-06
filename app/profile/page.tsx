@@ -37,6 +37,10 @@ export default async function ProfilePage() {
 
       <h2 className="section-heading section-heading--compact mt-6">האפליקציה</h2>
       <div className="settings-group">
+        <Link href="/content/10000000-0000-4000-8000-000000000004">
+          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
         <ProfileNutritionGoalsSheet goal={profile?.nutrition_goal ?? null} calorieTarget={profile?.calorie_target == null ? null : Number(profile.calorie_target)} proteinTarget={profile?.protein_target == null ? null : Number(profile.protein_target)} carbohydrateTarget={profile?.carbohydrate_target == null ? null : Number(profile.carbohydrate_target)} fatTarget={profile?.fat_target == null ? null : Number(profile.fat_target)} latestWeight={latest?.weight == null ? null : Number(latest.weight)} recommendations={recommendations} />
         <Link href="/messages">
           <span className="settings-group__label"><MessageSquare aria-hidden="true" size={18} />הודעות עם המאמן</span>
@@ -60,10 +64,6 @@ export default async function ProfilePage() {
         </Link>
         <Link href="/support">
           <span className="settings-group__label"><LifeBuoy aria-hidden="true" size={18} />תמיכה</span>
-          <ChevronLeft aria-hidden="true" size={18} />
-        </Link>
-        <Link href="/content/10000000-0000-4000-8000-000000000004">
-          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
           <ChevronLeft aria-hidden="true" size={18} />
         </Link>
       </div>
