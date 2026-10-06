@@ -35,12 +35,14 @@ test("the guide is the first published course and replaces old intro fillers", a
 });
 
 test("the guide route and lesson screen use the native video player", async () => {
-  const [route, lesson] = await Promise.all([
+  const [route, lesson, refresh] = await Promise.all([
     file("app/media/life-fit-guide.mp4/route.ts"),
     file("app/content/[id]/page.tsx"),
+    file("supabase/migrations/20261006180000_life_fit_guide_v2.sql"),
   ]);
-  assert.match(route, /content-media\/life-fit-guide-v1\.mp4/);
+  assert.match(route, /content-media\/life-fit-guide-v2\.mp4/);
   assert.match(lesson, /<NativeLessonPlayer/);
+  assert.match(refresh, /life-fit-guide\.mp4\?v=2/);
 });
 
 test("a one-lesson course uses a nearly full-width card", async () => {

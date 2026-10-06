@@ -9,7 +9,7 @@ export async function GET() {
   }
 
   return NextResponse.redirect(
-    `${origin}/storage/v1/object/public/content-media/life-fit-guide-v1.mp4`,
+    `${origin}/storage/v1/object/public/content-media/life-fit-guide-v2.mp4`,
     {
       status: 307,
       headers: {
