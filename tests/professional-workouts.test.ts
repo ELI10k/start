@@ -34,13 +34,13 @@ test("A-B is upper/lower, PPL never places pulls or glutes in Push, priorities c
   }
   if(def.split==="PPL")assert.ok(p.days[0].exercises.every(e=>!["row","vertical","hip","hinge","abduction","lunge"].includes(e.movementPattern??"")));
  }
- const back=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-a-b-female-back-advanced-v2")!;
+ const back=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-a-b-female-back-advanced-v3")!;
  assert.equal(weeklyWorkingSets(back).back,16);
 });
 test("unsupported heavy rows are removed; bodyweight advanced legs and unverified pushups have actual variants",()=>{
  for(const p of BUILT_IN_PROGRAMS)assert.ok(!working(p).some(e=>e.exerciseId==="exercise-lp8zrd"));
- const advanced=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-home-bodyweight-advanced-v2")!;
- const intermediate=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-home-bodyweight-intermediate-v2")!;
+ const advanced=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-home-bodyweight-advanced-v3")!;
+ const intermediate=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-home-bodyweight-intermediate-v3")!;
  assert.notEqual(working(advanced).find(e=>e.movementPattern==="squat")!.exerciseId,working(intermediate).find(e=>e.movementPattern==="squat")!.exerciseId);
  assert.equal(working(advanced).find(e=>e.movementPattern==="squat")!.sides,2);
  const rec=recommendTraining({...base,weeklyWorkouts:3,trainingFocus:"balanced",trainingSplit:"auto",trainingLocation:"home",equipment:"dumbbells"});
@@ -61,7 +61,7 @@ test("ready recommendations fit the time budget without cutting rest or silently
  assert.throws(()=>personalizeProgram(BUILT_IN_PROGRAMS[0],{status:"review",message:""},30));
 });
 test("strength, muscle gain and intake persistence have meaningful targets",()=>{
- const def=PROGRAM_DEFINITIONS.find(d=>d.id==="lifefit-a-b-male-balanced-intermediate-v2")!;
+ const def=PROGRAM_DEFINITIONS.find(d=>d.id==="lifefit-a-b-male-balanced-intermediate-v3")!;
  const strength=buildProgram(def,undefined,{goal:"strength"});
  assert.equal(working(strength).find(e=>e.movementPattern==="chest")!.reps,"6");
  assert.equal(working(strength).find(e=>e.movementPattern==="chest")!.rest,"180 שניות");
@@ -72,7 +72,7 @@ test("strength, muscle gain and intake persistence have meaningful targets",()=>
  assert.equal(recommendTraining({...base,equipment:"trx",trainingGoal:"strength"}).status,"review");
 });
 test("professional schedules continue A/B and PPL across weeks without changing legacy schedules",()=>{
- const p=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-ppl-male-intermediate-v2")!;
+ const p=BUILT_IN_PROGRAMS.find(p=>p.id==="lifefit-ppl-male-intermediate-v3")!;
  const a={id:"a",clientId:"c",programId:p.id,assignedAt:"2026-10-04T00:00:00Z",startDate:"2026-10-04",weeklyFrequency:4,status:"active" as const};
  assert.deepEqual(weeklySchedule(p,a,[],"c","2026-10-04").map(s=>s.day.order),[0,1,2,0]);
  assert.deepEqual(weeklySchedule(p,a,[],"c","2026-10-11").map(s=>s.day.order),[1,2,0,1]);

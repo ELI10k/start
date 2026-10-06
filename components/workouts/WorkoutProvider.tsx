@@ -1,4 +1,7 @@
 "use client";
+import { workoutAvailability } from "@/lib/workouts/availability";
+import { isProfessionalProgram } from "@/lib/workouts/professional";
+import { israelDateKey } from "@/lib/date-time";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { connectionStore, isOfflineError } from "@/lib/offline/connection";
@@ -162,7 +165,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     archive:async(programId)=>{try{await repository.archiveProgram(programId);setSnapshot((current)=>({...current,programs:archiveWorkoutProgram(current.programs,programId)}));return true}catch{return fail()}},
     deleteProgram:async(programId)=>{try{await repository.deleteProgram(programId);setSnapshot((current)=>({...current,programs:current.programs.filter((program)=>program.id!==programId)}));return true}catch{return fail()}},
     saveProgram:async(program)=>{try{await repository.saveProgram(program);setSnapshot((current)=>saveCustomWorkoutProgram(current,program));return true}catch{return fail()}},
-    startSession:async(session)=>{if(snapshot.activeSessions.some((item)=>item.clientId===session.clientId))return false;try{await repository.saveActiveSession(session);connectionStore.reportSuccess();setSnapshot((current)=>cache(startWorkoutSession(current,session)));return true}catch(error){return fail(error)}},
+    startSession:async(session)=>{if(snapshot.activeSessions.some((item)=>item.clientId===session.clientId))return false;const p=snapshot.programs.find(p=>p.id===session.programId),a=snapshot.assignments.find(a=>a.id===session.assignmentId);if(p&&a&&isProfessionalProgram(p)){const gate=workoutAvailability(p,a,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(w=>w.clientId===session.clientId),snapshot.scheduleChanges);if(gate.status!=="ready"||gate.day?.id!==session.dayId)return false;}try{await repository.saveActiveSession(session);connectionStore.reportSuccess();setSnapshot((current)=>cache(startWorkoutSession(current,session)));return true}catch(error){return fail(error)}},
     // The device is written to first and synchronously. Whatever the network
     // does next, the set the client just typed is already safe.
     saveSession:(session)=>{setSnapshot((current)=>cache(saveActiveWorkoutSession(current,session)));pendingSession.current=session;setPendingSync(true);flushSession()},

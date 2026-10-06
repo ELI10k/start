@@ -56,7 +56,8 @@ export function workingWeightFrom(
  * The warm-up for one exercise, or null when there is nothing to base it on.
  *
  * `effort` and `compound` remain accepted for compatibility with existing
- * callers. The current protocol deliberately uses one set for every exercise.
+ * callers. Professional compound lifts use two brief ramps; accessories one.
+ * Legacy programmes retain their original two-set preparation.
  */
 export function planWarmup(
   workingWeightKg: number | null,
@@ -93,13 +94,21 @@ export function planWarmup(
   };
 }
 
-// The lifts heavy enough to earn a third ramp. Matched on the exercise name
+// The compound lifts that warrant two brief ramps. Matched on the exercise name
 // because that is what the imported programmes carry; anything unrecognised is
 // treated as accessory work, which is the safe direction to be wrong in.
-const COMPOUND_PATTERNS = /סקוואט|סקווט|דדליפט|מכופף|לחיצת חזה|לחיצת רגליים|לחיצה צרפתית|מתח|סמיטה|בארבל|מוט חופשי/;
+const COMPOUND_PATTERNS = /סקוואט|סקווט|דדליפט|דד ליפט|לחיצ.*(?:חזה|רגל|כתפ)|חתיר|משיכ.*פולי עליון|מכרע|מתח|פשיטת ירך|היפ טראסט/;
 
 export function isCompoundLift(name?: string) {
   return Boolean(name && COMPOUND_PATTERNS.test(name));
+}
+
+export function preparationGroup(pattern?:string,fallback?:string):string|undefined{
+ const groups:Record<string,string>={squat:"quads",lunge:"quads",legextension:"quads",hinge:"hamstrings",legcurl:"hamstrings",hip:"glutes",abduction:"glutes",calf:"calves",row:"back",vertical:"back",chest:"chest",incline:"chest",shoulder:"shoulders",lateral:"shoulders",rear:"shoulders",curl:"biceps",triceps:"triceps",abs:"core",plank:"core"};
+ return pattern?groups[pattern]??fallback:fallback;
+}
+export function isExternallyLoadedExercise(id:string):boolean{
+ return !id.startsWith("bodyweight-")&&!/resistance-(suspend|straps)/.test(id)&&!["exercise-155pu7s","exercise-hdg3yz","exercise-say88l","exercise-1rpyv0f","exercise-1fo5t9c","exercise-n1izh5","exercise-2ez0zf","exercise-pn4ire"].includes(id);
 }
 
 // ── Compatibility surface ──────────────────────────────────────────────────

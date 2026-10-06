@@ -10,8 +10,9 @@ import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import TechniqueVideoButton from "@/components/workouts/client/TechniqueVideoButton";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
-import { activeAssignmentsFor, adherenceSummary, assignmentState, getTodayWorkoutDay, monthlyWorkoutSummary, trainingWeekStart } from "@/lib/workouts/progress";
+import { activeAssignmentsFor, adherenceSummary, assignmentState, monthlyWorkoutSummary, trainingWeekStart } from "@/lib/workouts/progress";
 import { currentTrainingWeek, weeklySchedule } from "@/lib/workouts/schedule";
+import { workoutAvailability } from "@/lib/workouts/availability";
 
 const hebrewDate = (value: string) =>
   new Date(value).toLocaleDateString("he-IL", { timeZone: "Asia/Jerusalem" });
@@ -26,9 +27,14 @@ export default function TodayWorkout(){
   if(!assignment||!program)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="אין תוכנית אימון משויכת" description="לא נמצאה תוכנית מאושרת ששויכה אליך. המאמן ישייך תוכנית והיא תופיע כאן."/>;
   const state=assignmentState(assignment,today);
   if(state!=="active")return <StateBlock icon={<CalendarDays aria-hidden="true" size={22}/>} title="התוכנית אינה פעילה כרגע" description="לא ניתן להזיז אימון מתוכנית שאינה פעילה."/>;
-  const day=getTodayWorkoutDay(program,snapshot.completedWorkouts,currentClientId,today,snapshot.scheduleChanges.filter((c)=>c.clientId===currentClientId&&c.status==="skipped").map((c)=>({dayId:c.dayId,date:c.originalDate})),assignment.weeklyFrequency,assignment.id,assignment.startDate);
-  if(!day)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="לתוכנית אין ימי אימון" description="מקור התוכנית אינו כולל יום אימון תקין."/>;
-  const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&israelDateKey(new Date(item.completedAt))===today);const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const monthly=monthlyWorkoutSummary(snapshot.completedWorkouts,currentClientId,today);const monthlyMissed=snapshot.scheduleChanges.filter((item)=>item.clientId===currentClientId&&item.status==="skipped"&&item.originalDate.startsWith(today.slice(0,7))).length;const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
+  if(!program.days.length)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="לתוכנית אין ימי אימון" description="מקור התוכנית אינו כולל יום אימון תקין."/>;
+  const preferences=snapshot.workoutPreferences.find(p=>p.clientId===currentClientId);
+  const availability=workoutAvailability(program,assignment,snapshot.completedWorkouts,today,preferences,snapshot.scheduleChanges);
+  const resume=snapshot.activeSessions.find(s=>s.clientId===currentClientId&&s.assignmentId===assignment.id);
+  if(availability.status==="recovery"&&!resume)return <StateBlock icon={<CalendarDays aria-hidden="true" size={22}/>} title="יום התאוששות" description={availability.message}/>;
+  const day=resume?program.days.find(d=>d.id===resume.dayId):availability.day;
+  if(!day)return <StateBlock icon={<CheckCircle2 aria-hidden="true" size={22}/>} title="סיימת את כל האימונים השבוע" description="כל הכבוד! האימון הבא יופיע בתחילת השבוע הבא."/>;
+  const moved=snapshot.scheduleChanges.find((item)=>item.assignmentId===assignment.id&&item.originalDate===today&&item.dayId===day.id&&item.scheduledDate!==item.originalDate);const completed=snapshot.completedWorkouts.some((item)=>item.assignmentId===assignment.id&&item.dayId===day.id&&israelDateKey(new Date(item.completedAt))===today);const activeSession=snapshot.activeSessions.find((item)=>item.clientId===currentClientId);const adherence=adherenceSummary(assignment,snapshot.completedWorkouts,today);const monthly=monthlyWorkoutSummary(snapshot.completedWorkouts,currentClientId,today);const monthlyMissed=snapshot.scheduleChanges.filter((item)=>item.clientId===currentClientId&&item.status==="skipped"&&item.originalDate.startsWith(today.slice(0,7))).length;const schedule=weeklySchedule(program,assignment,snapshot.completedWorkouts,currentClientId,today,preferences?.preferredDays);const recent=[...snapshot.completedWorkouts].filter((item)=>item.clientId===currentClientId).sort((a,b)=>b.completedAt.localeCompare(a.completedAt)).slice(0,3);
   const sessionHref=`/workouts/${program.id}/${activeSession?.dayId??day.id}`;
   const startLabel=activeSession?"המשך אימון":"התחלת אימון";
   // Already declared missed today, so the offer to declare it is withdrawn -
@@ -168,10 +174,10 @@ export default function TodayWorkout(){
         <span>{assignment.weeklyFrequency} אימונים בשבוע</span>
       </div>
       <div className="app-list">
-        {schedule.map(({day:item,occurrence,completed:itemCompleted})=>{const itemMissed=snapshot.scheduleChanges.some((change)=>change.assignmentId===assignment.id&&change.dayId===item.id&&change.status==="skipped"&&change.originalDate>=trainingWeekStart(today)&&change.originalDate<=today);return (
+        {schedule.map(({day:item,occurrence,completed:itemCompleted,scheduledDate})=>{const itemMissed=snapshot.scheduleChanges.some((change)=>change.assignmentId===assignment.id&&change.dayId===item.id&&change.status==="skipped"&&change.originalDate>=trainingWeekStart(today)&&change.originalDate<=today);return (
           <div key={`${item.id}-${occurrence}`} className={itemMissed?"workout-history-missed":""}>
             <span className="app-list__icon">{itemCompleted?<CheckCircle2 aria-hidden="true" size={17}/>:itemMissed?<XCircle aria-hidden="true" size={17}/>:<Circle aria-hidden="true" size={17}/>}</span>
-            <span className="app-list__main"><strong>{item.name}</strong><span>{item.exercises.length} תרגילים</span></span>
+            <span className="app-list__main"><strong>{item.name}</strong>{scheduledDate&&<span className="text-xs">{hebrewDate(`${scheduledDate}T12:00:00`)}</span>}<span>{item.exercises.length} תרגילים</span></span>
             <span className={`pill${itemCompleted?" pill--green":itemMissed?" pill--red":""}`}>{itemCompleted?"הושלם":itemMissed?"פוספס":"מתוכנן"}</span>
           </div>)
         })}

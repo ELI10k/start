@@ -31,7 +31,7 @@ test("workout session excludes every abdominal exercise from loaded warm-ups", a
   const { readFile } = await import("node:fs/promises");
   const session = await readFile(new URL("../components/workouts/client/WorkoutSession.tsx", import.meta.url), "utf8");
   assert.match(session, /abdominalExercise=exercise\?\.primaryMuscleGroup===\"בטן\"/);
-  assert.match(session, /firstForMuscle&&!abdominalExercise&&!dynamicWarmup/);
+  assert.match(session, /professional\?needsPreparation:firstForMuscle/);
 });
 
 test("warm-up is offered only on the first exercise for a muscle group", () => {

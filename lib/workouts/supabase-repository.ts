@@ -1,6 +1,7 @@
 "use client";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { assessedLevel } from "./personalization";
 import type { ActiveExerciseResult, ActiveWorkoutSession, AssignmentStatus, ClientWorkoutAssignment, CoachWorkoutNote, CompletedWorkout, Exercise, ExerciseGuidance, ExerciseSetResult, WorkoutClient, WorkoutNotification, WorkoutPreferences, WorkoutProgram, WorkoutRepositorySnapshot, WorkoutScheduleChange } from "./types";
 
 type Row = Record<string, unknown>;
@@ -42,6 +43,7 @@ export function createSupabaseWorkoutRepository(){
       supabase.from("workout_preferences").select("*"),
       supabase.from("workout_schedule_changes").select("*").order("scheduled_date"),
       role==="coach"?supabase.from("profiles").select("id,full_name,role").eq("role","client").eq("status","active"):Promise.resolve({data:[],error:null}),
+      supabase.from("client_profiles").select("user_id,trainee_level,preferences"),
     ]);
     const failed=results.find((result)=>result.error);if(failed?.error)throw failed.error;
     const exerciseRows=rows(results[0].data),programRows=rows(results[1].data),dayRows=rows(results[2].data),entryRows=rows(results[3].data),prescriptionRows=rows(results[4].data),assignmentRows=rows(results[5].data),sessionRows=rows(results[6].data),resultRows=rows(results[7].data),setRows=rows(results[8].data);
@@ -64,7 +66,12 @@ export function createSupabaseWorkoutRepository(){
     const clients:WorkoutClient[]=rows(results[13].data).map((row)=>({id:text(row.id),fullName:text(row.full_name)}));
     const coachNotes:CoachWorkoutNote[]=rows(results[9].data).map((row)=>({id:text(row.id),coachId:text(row.coach_id),clientId:text(row.client_id),exerciseId:optionalText(row.exercise_id),workoutId:optionalText(row.session_id),body:text(row.body),createdAt:text(row.created_at)}));
     const notifications:WorkoutNotification[]=rows(results[10].data).map((row)=>({id:text(row.id),clientId:text(row.client_id),type:row.type as WorkoutNotification["type"],createdAt:text(row.created_at),read:Boolean(row.read)}));
-    const workoutPreferences:WorkoutPreferences[]=rows(results[11].data).map((row)=>({clientId:text(row.client_id),trainingTypes:stringArray(row.training_types),equipment:stringArray(row.equipment),trainingLocation:optionalText(row.training_location),preferredDays:Array.isArray(row.preferred_days)?row.preferred_days.map(Number):[]}));
+    const workoutPreferences:WorkoutPreferences[]=rows(results[11].data).map((row)=>{
+      const profile=rows(results[14].data).find(p=>p.user_id===row.client_id);
+      const intake=profile?.preferences&&typeof profile.preferences==="object"?profile.preferences as Row:{};
+      const traineeLevel=assessedLevel({traineeLevel:text(profile?.trainee_level),experienceMonths:numberValue(intake.experience_months),technique:text(intake.technique)})??"beginner";
+      return{clientId:text(row.client_id),trainingTypes:stringArray(row.training_types),equipment:stringArray(row.equipment),trainingLocation:optionalText(row.training_location),preferredDays:Array.isArray(row.preferred_days)?row.preferred_days.map(Number):[],traineeLevel,bodyweightCapacity:text(intake.bodyweight_capacity),requiresCoachReview:intake.medical_review==="yes"||Boolean(text(intake.medical_notes).trim())};
+    });
     const scheduleChanges:WorkoutScheduleChange[]=rows(results[12].data).map((row)=>({id:text(row.id),assignmentId:text(row.assignment_id),clientId:text(row.client_id),programId:text(row.program_id),dayId:text(row.day_id),originalDate:text(row.original_date),scheduledDate:text(row.scheduled_date),movedAt:text(row.moved_at),status:row.status==="skipped"?"skipped":"planned",skippedAt:optionalText(row.skipped_at),skippedReason:optionalText(row.skipped_reason)}));
     return{currentUserId:user.id,role,snapshot:{exercises:exerciseRows.map(mapExercise),programs,clients,assignments,activeSessions,completedWorkouts,coachNotes,notifications,workoutPreferences,scheduleChanges}};
   };

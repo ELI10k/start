@@ -4,6 +4,7 @@ import {config} from "dotenv";
 import {createClient} from "@supabase/supabase-js";
 import {chromium} from "@playwright/test";
 import {BUILT_IN_PROGRAMS} from "../lib/workouts/program-catalog.ts";
+import {israelDateKey} from "../lib/date-time.ts";
 
 config({path:new URL("../.env.e2e",import.meta.url).pathname,quiet:true});
 config({path:new URL("../.env.local",import.meta.url).pathname,quiet:true});
@@ -81,7 +82,8 @@ try {
     }
     report.revisedTrees="all 38 live programmes exactly match revised prescriptions";
     const id=randomUUID();
-    const created=await admin.auth.admin.createUser({email:`workout-smoke-${id}@example.invalid`,password:`${randomUUID()}Aa1!`,email_confirm:true,app_metadata:{role:"client",is_test_account:true}});
+    const createdPassword=`${randomUUID()}Aa1!`;
+    const created=await admin.auth.admin.createUser({email:`workout-smoke-${id}@example.invalid`,password:createdPassword,email_confirm:true,app_metadata:{role:"client",is_test_account:true}});
     check(created.error,"create disposable test identity");createdId=created.data.user.id;
     check((await admin.from("profiles").upsert({id:createdId,email:created.data.user.email,full_name:"בדיקת התאמת אימונים",role:"client",status:"active",is_test_account:true})).error,"test profile");
     check((await admin.from("client_profiles").upsert({user_id:createdId,onboarding_completed:true})).error,"test intake");
@@ -95,7 +97,7 @@ try {
     await form.getByLabel("ציוד זמין לאימון",{exact:true}).selectOption("gym");
     await form.getByLabel("דגש באימון",{exact:true}).selectOption("glutes");
     await form.getByLabel("חלוקת אימונים",{exact:true}).selectOption("auto");
-    await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).fill("40");
+    await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).fill("60");
     await form.getByLabel("חודשי אימון עקבי",{exact:true}).fill("8");
     await form.getByLabel("שליטה בטכניקה",{exact:true}).selectOption("stable");
     await form.getByLabel("פציעה, כאב, היריון או מגבלה רפואית",{exact:true}).selectOption("yes");
@@ -109,10 +111,10 @@ try {
     await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
     const assignments=await admin.from("workout_assignments").select("id,program_id,weekly_frequency").eq("client_id",createdId).eq("status","active");check(assignments.error,"read assignment");assert.equal(assignments.data.length,1);assert.equal(assignments.data[0].weekly_frequency,3);copyId=assignments.data[0].program_id;
     const days=await admin.from("workout_program_days").select("id,workout_program_exercises(exercise_id,sets_text,reps_text)").eq("program_id",copyId);check(days.error,"read copy");assert.equal(days.data.length,2);assert.ok(days.data.flatMap(d=>d.workout_program_exercises).filter(e=>e.exercise_id!=="exercise-155pu7s").every(e=>e.sets_text==="2"));
-    report.personalCopy="2 days; fixed repetitions; 2 sets for 40 minutes";
+    report.personalCopy="2 days; fixed repetitions; fixed targets for 60 minutes";
     await page.reload({waitUntil:"networkidle"});
     assert.equal(await form.getByLabel("דגש באימון",{exact:true}).inputValue(),"glutes");
-    assert.equal(await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).inputValue(),"40");
+    assert.equal(await form.getByLabel("משך אימון זמין (דקות)",{exact:true}).inputValue(),"60");
     await form.getByRole("button",{name:"שמירת נתוני הקליטה",exact:true}).click();
     await form.getByRole("status").filter({hasText:"התוכנית הפעילה נשמרה"}).waitFor();
     const repeated=await admin.from("workout_assignments").select("id").eq("client_id",createdId).eq("status","active");assert.equal(repeated.data.length,1);
@@ -128,12 +130,36 @@ try {
       await form.getByRole("status").filter({hasText:"שויכה תוכנית מותאמת"}).waitFor();
       const active=await admin.from("workout_assignments").select("program_id").eq("client_id",createdId).eq("status","active");check(active.error,"home assignment");assert.equal(active.data.length,1);
       const personal=await admin.from("workout_programs").select("duplicated_from_id,equipment").eq("id",active.data[0].program_id).single();check(personal.error,"home copy");
-      assert.equal(personal.data.duplicated_from_id,`lifefit-home-${equipment}-beginner-v2`);
+      assert.equal(personal.data.duplicated_from_id,`lifefit-home-${equipment}-beginner-v3`);
       assert.equal(personal.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");
       const preferences=await admin.from("workout_preferences").select("equipment,training_location").eq("client_id",createdId).single();check(preferences.error,"home preferences");
       assert.equal(preferences.data.training_location,"home");assert.equal(preferences.data.equipment.includes("ספסל"),equipment==="dumbbells_bench");
     }
     report.homePersonalAssignments="both equipment options passed";
+    // Exercise the real client RPC, never a production client's history.
+    const trainee=createClient(url,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+    check((await trainee.auth.signInWithPassword({email:created.data.user.email,password:createdPassword})).error,"disposable client sign in");
+    const assigned=await admin.from("workout_assignments").select("id,program_id").eq("client_id",createdId).eq("status","active").single();check(assigned.error,"recovery test assignment");
+    const exerciseDays=await admin.from("workout_program_days").select("id").eq("program_id",assigned.data.program_id).order("sort_order");check(exerciseDays.error,"recovery test days");
+    const today=israelDateKey();const date=new Date(`${today}T12:00:00Z`);date.setUTCDate(date.getUTCDate()-date.getUTCDay());const weekStart=date.toISOString().slice(0,10);
+    check((await admin.from("workout_assignments").update({start_date:weekStart}).eq("id",assigned.data.id).eq("client_id",createdId)).error,"disposable first week");
+    const historicalId=`audit-history-${randomUUID()}`;
+    const historical={id:historicalId,client_id:createdId,assignment_id:assigned.data.id,program_id:assigned.data.program_id,day_id:exerciseDays.data[0].id,status:"completed",started_at:`${today}T08:00:00Z`,completed_at:`${today}T09:00:00Z`,duration_seconds:3600,total_volume:0,completion_id:randomUUID()};
+    check((await admin.from("workout_sessions").insert(historical)).error,"disposable recovery history");
+    const payload={id:`audit-start-${randomUUID()}`,clientId:createdId,assignmentId:assigned.data.id,programId:assigned.data.program_id,dayId:exerciseDays.data[1].id,startedAt:new Date().toISOString(),currentExerciseIndex:0,exerciseResults:[]};
+    const blocked=await trainee.rpc("save_active_workout",{p_session:payload});assert.match(blocked.error?.message??"",/workout_recovery_required/);
+    const beforeDate=new Date(`${today}T12:00:00Z`);beforeDate.setUTCDate(beforeDate.getUTCDate()-1);
+    check((await admin.from("workout_sessions").update({completed_at:beforeDate.toISOString()}).eq("id",historicalId).eq("client_id",createdId)).error,"disposable yesterday history");
+    assert.match((await trainee.rpc("save_active_workout",{p_session:payload})).error?.message??"",/workout_recovery_required/);
+    beforeDate.setUTCDate(beforeDate.getUTCDate()-1);
+    check((await admin.from("workout_sessions").update({completed_at:beforeDate.toISOString()}).eq("id",historicalId).eq("client_id",createdId)).error,"disposable recovered history");
+    check((await trainee.rpc("save_active_workout",{p_session:payload})).error,"start after recovery");
+    check((await trainee.rpc("save_active_workout",{p_session:payload})).error,"autosave active session");
+    check((await trainee.rpc("cancel_active_workout",{})).error,"cancel disposable active session");
+    for(let i=0;i<3;i++)check((await admin.from("workout_sessions").insert({...historical,id:`audit-quota-${randomUUID()}`,completion_id:randomUUID()})).error,"disposable weekly quota");
+    assert.match((await trainee.rpc("save_active_workout",{p_session:{...payload,id:`audit-quota-start-${randomUUID()}`}})).error?.message??"",/workout_week_complete/);
+    report.clientRecoveryRPC="same-day/next-day blocked; recovered start and autosave allowed; weekly quota blocked";
+    await trainee.auth.signOut();
   }
 } finally {
   await browser.close();

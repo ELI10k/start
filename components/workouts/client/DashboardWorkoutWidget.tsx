@@ -3,7 +3,8 @@ import { Dumbbell } from "lucide-react";
 import Link from "next/link";
 import { israelDateKey } from "@/lib/date-time";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
-import { activeAssignmentFor, getTodayWorkoutDay } from "@/lib/workouts/progress";
+import { activeAssignmentFor } from "@/lib/workouts/progress";
+import { workoutAvailability } from "@/lib/workouts/availability";
 
 // The card this replaced said the same three things in five times the height:
 // which programme is running, which day is next, and whether a session is still
@@ -14,8 +15,8 @@ export default function DashboardWorkoutWidget() {
   const { snapshot, currentClientId, loading, persistenceError } = useWorkouts();
   const assignment = activeAssignmentFor(snapshot.assignments, currentClientId, israelDateKey());
   const program = snapshot.programs.find((item) => item.id === assignment?.programId);
-  const today = program && assignment ? getTodayWorkoutDay(program, snapshot.completedWorkouts, currentClientId, israelDateKey(), snapshot.scheduleChanges.filter((c) => c.clientId === currentClientId && c.status === "skipped").map((c) => ({ dayId: c.dayId, date: c.originalDate })), assignment.weeklyFrequency, assignment.id, assignment.startDate) : undefined;
   const active = snapshot.activeSessions.find((item) => item.clientId === currentClientId);
+  const availability=program&&assignment?workoutAvailability(program,assignment,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(p=>p.clientId===currentClientId),snapshot.scheduleChanges):undefined;
   return (
     <Link
       href={active ? `/workouts/${active.programId}/${active.dayId}` : "/workouts"}
@@ -29,7 +30,7 @@ export default function DashboardWorkoutWidget() {
         <span role="alert" className="quick-action-card__meta quick-action-card__meta--error">שגיאה בטעינה</span>
       ) : (
         <span className="quick-action-card__meta">
-          {active ? "המשך אימון פעיל" : today?.name ?? program?.name ?? "אין תוכנית פעילה"}
+          {active ? "המשך אימון פעיל" : availability?.status==="recovery"?"יום התאוששות":availability?.day?.name ?? (program ? "השבוע הושלם" : "אין תוכנית פעילה")}
         </span>
       )}
     </Link>

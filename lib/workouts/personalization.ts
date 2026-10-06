@@ -68,7 +68,7 @@ patterns["bodyweight-wall-pushup"]="chest";
 for (const [movement, ids] of Object.entries(MOVEMENTS)) for (const id of ids) patterns[id] = movement;
 for (const movements of Object.values(HOME_MOVEMENTS)) for (const [movement,id] of Object.entries(movements)) patterns[id] = movement;
 Object.assign(patterns, {"resistance-suspenders-squat": "squat", "resistance-suspended-hip-thrust": "hip", "resistance-straps-aided-lunges": "lunge", "resistance-suspender-chest-press": "chest", "resistance-suspended-row": "row", "resistance-suspender-reverse-flys": "rear", "resistance-suspender-forward-y-raise": "shoulder", "resistance-suspender-arm-curl": "curl", "resistance-suspender-arm-extension": "triceps"});
-function movementPattern(exercise: Exercise) {
+export function movementPattern(exercise: Exercise) {
   if (patterns[exercise.id]) return patterns[exercise.id];
   const name = exercise.name;
   if (/פלאנק|plank/i.test(name)) return "plank";
@@ -93,11 +93,22 @@ function movementPattern(exercise: Exercise) {
 }
 export function alternativeExercises(prescribed: Exercise | undefined, catalogue: readonly Exercise[], preferences?: WorkoutPreferences): Exercise[] {
   if (!prescribed?.primaryMuscleGroup) return [];
+  if(preferences?.requiresCoachReview)return [];
   const pattern = movementPattern(prescribed);
   const muscle = prescribed.primaryMuscleGroup === "בטן" ? "שרירי ליבה" : prescribed.primaryMuscleGroup;
-  const unilateral=(e:Exercise)=>patterns[e.id]==="lunge"||e.id==="resistance-dumbbell-one-arm-bent-over-row"||/יד אחת|רגל אחת|one.arm/i.test(e.name);
+  const unilateral=(e:Exercise)=>patterns[e.id]==="lunge"||e.id==="resistance-dumbbell-one-arm-bent-over-row"||e.id==="resistance-dumbbell-kickback"||/יד אחת|רגל אחת|one.arm/i.test(e.name);
   return catalogue.filter(item => {
     if (item.id === prescribed.id || item.status !== "active") return false;
+    if(preferences){
+      const level=preferences.traineeLevel??"beginner";
+      const rank=level==="advanced"?2:level==="intermediate"?1:0;
+      const difficulty=item.difficulty??"";
+      const candidateRank=/מתקדמ|מתקדם/.test(difficulty)?2:/בינוני/.test(difficulty)?1:/מתחיל/.test(difficulty)?0:undefined;
+      if(candidateRank!==undefined&&candidateRank>rank)return false;
+      if(candidateRank===undefined&&!patterns[item.id])return false;
+      const needsCapacity=item.id==="exercise-hdg3yz"||item.id==="exercise-say88l"||item.id==="exercise-1rpyv0f"||/מתח|שכיבות סמיכה/.test(item.name);
+      if(needsCapacity&&item.id!=="bodyweight-wall-pushup"&&preferences.bodyweightCapacity!=="verified")return false;
+    }
     if ((item.primaryMuscleGroup === "בטן" ? "שרירי ליבה" : item.primaryMuscleGroup) !== muscle) return false;
     // Timed and repetition prescriptions are not interchangeable.
     if (/פלאנק|plank/i.test(item.name) !== /פלאנק|plank/i.test(prescribed.name)) return false;

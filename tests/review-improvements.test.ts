@@ -343,7 +343,8 @@ test("the warm-up and the household reading are on the screens that need them", 
     source("components/client/MealOptionButton.tsx"),
     source("app/nutrition/page.tsx"),
   ]);
-  assert.match(session, /planWarmup\(workingWeightFrom\(performance\.sessions\)/);
+  assert.match(session, /chosenLoad=.*workingWeightFrom\(performance\.sessions\)/);
+  assert.match(session, /planWarmup\(chosenLoad/);
   assert.match(session, /compound:isCompoundLift\(exercise\?\.name\)/);
   // Warm-up sets can be checked, but are stored separately and never reach volume.
   assert.match(session, /warmupCompletedPercents/);

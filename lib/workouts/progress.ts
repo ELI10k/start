@@ -1,5 +1,6 @@
 import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutProgram } from "./types.ts";
 import { israelDateKey } from "../date-time.ts";
+import { isProfessionalProgram, professionalWeekLayout } from "./professional.ts";
 /**
  * The client-facing training week starts on Sunday and ends on Saturday.
  *
@@ -37,8 +38,9 @@ export function trainingWeekStart(dateKey: string): string {
  * missed - that is what declaring is for - and the days answer independently, in
  * whatever order the client gets to them.
  *
- * When they have all been answered the first is offered again rather than
- * nothing: doing one twice is the client's decision, running out of week is not.
+ * When every scheduled occurrence has been answered, there is no next workout
+ * until Sunday opens a new training week. Returning the first day here would
+ * silently turn a four-session assignment into a fifth session.
  */
 export function getTodayWorkoutDay(
   program:WorkoutProgram,
@@ -57,6 +59,7 @@ export function getTodayWorkoutDay(
   weeklyFrequency:number=program.days.length,
   assignmentId?:string,
   assignmentStartDate?:string,
+  preferredDays:readonly number[]=[],
 ):WorkoutDay|undefined{
   if(!program.days.length)return undefined;
   const opened=trainingWeekStart(today);
@@ -70,21 +73,23 @@ export function getTodayWorkoutDay(
   skipped.filter((item)=>inWeek(item.date)).forEach((item)=>answer(item.dayId));
 
   const scheduledOccurrences=new Map<string,number>();
-  const sessions=Math.max(1,Math.min(14,weeklyFrequency||ordered.length));
-  const professional=program.sourceWorkbook.includes("מקצועי v2");
-  const offset=professional&&assignmentStartDate?Math.max(0,Math.floor((Date.parse(opened)-Date.parse(trainingWeekStart(assignmentStartDate)))/(7*86400000)))*sessions:0;
+  let sessions=Math.max(1,Math.min(14,weeklyFrequency||ordered.length));
+  const professional=isProfessionalProgram(program);
+  const layout=professional&&assignmentStartDate?professionalWeekLayout(program,assignmentStartDate,sessions,opened,preferredDays):undefined;
+  const offset=layout?.offset??0;
+  if(layout)sessions=layout.slots.length;
   for(let index=0;index<sessions;index++){
     const day=ordered[(offset+index)%ordered.length];
     const occurrence=(scheduledOccurrences.get(day.id)??0)+1;
     scheduledOccurrences.set(day.id,occurrence);
     if((answeredByDay.get(day.id)??0)<occurrence)return day;
   }
-  return professional?undefined:ordered[0];
+  return undefined;
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
 export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.filter((exercise)=>exercise.completed).flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
-export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>entry.exerciseId===exerciseId&&entry.completed)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>entry.exerciseId===exerciseId&&entry.completed)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
+export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>(entry.performedExerciseId??entry.exerciseId)===exerciseId&&entry.completed)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>(entry.performedExerciseId??entry.exerciseId)===exerciseId&&entry.completed)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
 export function activeAssignmentFor(assignments:readonly ClientWorkoutAssignment[],clientId:string,date:string):ClientWorkoutAssignment|undefined{return[...assignments].reverse().find((item)=>item.clientId===clientId&&item.status==="active"&&item.startDate<=date&&(!item.endDate||item.endDate>=date))}
 // Every programme the client is running right now, newest first. A client may
 // hold more than one active assignment since the coach can add a programme

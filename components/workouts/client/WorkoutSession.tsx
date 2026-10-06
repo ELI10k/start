@@ -14,12 +14,16 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
 import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
 import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
-import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
+import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, preparationGroup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
 import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
 import { workoutRestSeconds } from "@/lib/workouts/rest";
-import { alternativeExercises } from "@/lib/workouts/personalization";
+import { alternativeExercises, movementPattern } from "@/lib/workouts/personalization";
+import { substituteExercise } from "@/lib/workouts/substitution";
+import { isProfessionalProgram } from "@/lib/workouts/professional";
+import { workoutAvailability } from "@/lib/workouts/availability";
+import { israelDateKey } from "@/lib/date-time";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
 
 const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);return Number.isFinite(count)&&count>0?Math.min(count,20):0};
@@ -76,7 +80,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         })};
     }),
   });
-  const begin=async(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3)=>{if(isStarting)return;if(!assignment){setWarning("לא נמצאה הקצאת תוכנית פעילה.");return}if(anySession&&!session){setWarning("כבר קיים אימון פעיל אחר.");return}setIsStarting(true);try{if(await startSession(makeSession(startingSleepHours,startingEnergy)))track("workout_started",{exercises:ordered.length,sleepHours:startingSleepHours??null,energy:startingEnergy});else setWarning("לא ניתן להתחיל שני אימונים במקביל.")}finally{setIsStarting(false)}};
+  const begin=async(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3)=>{if(isStarting)return;if(!assignment){setWarning("לא נמצאה הקצאת תוכנית פעילה.");return}if(anySession&&!session){setWarning("כבר קיים אימון פעיל אחר.");return}const gate=workoutAvailability(program,assignment,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(p=>p.clientId===currentClientId),snapshot.scheduleChanges);if(isProfessionalProgram(program)&&(gate.status!=="ready"||gate.day?.id!==dayId)){setWarning(gate.message||"יש להתחיל את האימון הבא בלוח, לאחר ההתאוששות.");return;}setIsStarting(true);try{if(await startSession(makeSession(startingSleepHours,startingEnergy)))track("workout_started",{exercises:ordered.length,sleepHours:startingSleepHours??null,energy:startingEnergy});else setWarning("לא ניתן להתחיל שני אימונים במקביל.")}finally{setIsStarting(false)}};
   if(saved){
     // Assembled here because only this scope holds both the programme's
     // prescriptions and each exercise's history.
@@ -133,8 +137,12 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     return getExercise(entryResult?.performedExerciseId??entry.exerciseId)?.primaryMuscleGroup;
   });
   const firstForMuscle=isFirstExerciseForMuscle(exercise?.primaryMuscleGroup,earlierMuscleGroups);
-  const professional=program.sourceWorkbook.includes("מקצועי v2");
-  const warmup=firstForMuscle&&!abdominalExercise&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget,professional}):null;
+  const professional=isProfessionalProgram(program);
+  const group=preparationGroup(exercise?movementPattern(exercise):undefined,exercise?.primaryMuscleGroup);
+  const earlierGroups=ordered.slice(0,session.currentExerciseIndex).map(entry=>{const e=getExercise(session.exerciseResults.find(r=>r.workoutExerciseId===entry.id)?.performedExerciseId??entry.exerciseId);return preparationGroup(e?movementPattern(e):undefined,e?.primaryMuscleGroup);});
+  const needsPreparation=professional?isFirstExerciseForMuscle(group,earlierGroups):firstForMuscle;
+  const chosenLoad=Math.max(0,...result.sets.map(s=>s.weightKg??0))||workingWeightFrom(performance.sessions);
+  const warmup=(professional?needsPreparation:firstForMuscle)&&!abdominalExercise&&!dynamicWarmup?planWarmup(chosenLoad,{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget,professional}):null;
   const priorEntries=performance.sessions.slice(0,2).map(history=>comparableWorkouts.find(w=>w.id===history.workoutId)?.exerciseResults.find(e=>(e.performedExerciseId??e.exerciseId)===performedId));
   const sameLoad=priorEntries.length===2&&priorEntries[0]?.sets.every((s,i)=>s.weightKg===priorEntries[1]?.sets[i]?.weightKg);
   const successfulExposures=repTarget!==undefined&&sameLoad&&priorEntries.every(e=>e?.difficulty==="easy"&&e.sets.length===setCount(current.sets)&&e.sets.every(s=>s.completed&&(s.repetitions??0)>=repTarget))?2:0;
@@ -144,8 +152,11 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // A replacement has to train the same thing, so the list is the catalogue
   // filtered to the prescribed exercise's primary muscle group. Both fields are
   // already classified, so no new data is needed for this.
-  const swapOptions=alternativeExercises(prescribed,snapshot.exercises,snapshot.workoutPreferences.find(p=>p.clientId===currentClientId)).filter(item=>item.id!==performedId);
+  const swapPreferences=snapshot.workoutPreferences.find(p=>p.clientId===currentClientId);
+  const swapOptions=swapPreferences?alternativeExercises(prescribed,snapshot.exercises,swapPreferences).filter(item=>item.id!==performedId):[];
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
+  const swapLocked=result.completed||result.sets.some(set=>set.completed);
+  const changePerformed=(id:string)=>{if(swapLocked){setWarning("כבר נרשמו סטים בתרגיל זה. שומרים את הביצוע; החלפה תתבצע לפני התחלת התרגיל באימון הבא.");return;}replaceResult(substituteExercise(result,id),{restEndsAt:undefined});setSwapping(false);};
   const updateSet=(set:ExerciseSetResult,patch:Partial<ExerciseSetResult>)=>{const nextSet={...set,...patch};if(nextSet.completed&&nextSet.repetitions===undefined)nextSet.repetitions=targetReps(set.order);const nextResult={...result,sets:result.sets.map((item)=>item.id===set.id?nextSet:item)};const restSeconds=patch.completed?workoutRestSeconds(current.rest):null;replaceResult(nextResult,restSeconds?{restEndsAt:new Date(Date.now()+restSeconds*1000).toISOString()}:{});};
   // Marking an exercise done used to leave the client staring at the exercise
   // they had just finished, with nothing saying what to do next; the only way on
@@ -336,15 +347,16 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       </p>
       <div className="mt-3 grid gap-1">
         {result.performedExerciseId&&
-          <button type="button" onClick={()=>{replaceResult({...result,performedExerciseId:undefined});setSwapping(false)}} className="chip w-fit">
+          <button type="button" disabled={swapLocked} onClick={()=>changePerformed(result.exerciseId)} className="chip w-fit">
             חזרה ל{prescribed?.name??"תרגיל המקורי"}
           </button>}
         {swapOptions.map((option)=>
-          <button key={option.id} type="button" onClick={()=>{replaceResult({...result,performedExerciseId:option.id});setSwapping(false)}} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#E5E7E5] px-3 text-start">
+          <button key={option.id} type="button" disabled={swapLocked} onClick={()=>changePerformed(option.id)} className="flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border border-[#E5E7E5] px-3 text-start">
             <span className="font-bold">{option.name}</span>
             {option.equipment&&<span className="text-xs text-[#5B5F5B]">{option.equipment}</span>}
           </button>)}
         {!swapOptions.length&&<p className="rounded-2xl border border-dashed border-[#E5E7E5] p-4 text-center text-sm text-[#5B5F5B]">לא נמצאו תרגילים חלופיים לקבוצת השריר הזו.</p>}
+        {swapLocked&&<p role="status" className="mt-3 text-sm">כבר נרשמו סטים; לא מחליפים תרגיל באמצע הביצוע כדי לשמור משקלים והיסטוריה נכונים.</p>}
       </div>
     </BottomSheet>
 

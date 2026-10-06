@@ -7,7 +7,7 @@ export default function TrainingIntakeFields({values = {}, preview}: {values?: R
     <h3 className="text-sm font-black sm:col-span-2">אפיון אימונים והתאמה אוטומטית</h3>
     {select("מטרת אימון", "trainingGoal", [["general", "כושר וכוח כלליים"], ["hypertrophy", "בניית שריר"], ["strength", "פיתוח כוח"]], "training_goal")}
     {select("מיקום האימון", "trainingLocation", [["gym", "חדר כושר"], ["home", "בית / חוץ"]], "training_location")}
-    {select("ציוד זמין לאימון", "equipment", [["gym", "חדר כושר מלא — משקולות ומכונות"], ["trx", "TRX ומשקל גוף"], ["bodyweight", "משקל גוף בלבד — ללא מתקן משיכה"], ["bodyweight_station", "משקל גוף + מתח ומתקן חתירה יציב"], ["dumbbells", "משקולות יד בלבד — ללא ספסל"], ["dumbbells_bench", "משקולות יד + ספסל אימון"]], "equipment")}
+    {select("ציוד זמין לאימון", "equipment", [["gym", "חדר כושר מלא — משקולות ומכונות"], ["trx", "TRX + משקל גוף + מגבת ומשטח מתאים לכפיפת ברכיים"], ["bodyweight", "משקל גוף בלבד — ללא מתקן משיכה"], ["bodyweight_station", "משקל גוף + מתח ומתקן חתירה יציב + מגבת"], ["dumbbells", "משקולות יד בלבד — ללא ספסל"], ["dumbbells_bench", "משקולות יד + ספסל אימון"]], "equipment")}
     {select("דגש באימון", "trainingFocus", [["balanced", "גוף מלא ומאוזן"], ["glutes", "ישבן"], ["back", "גב"]], "training_focus")}
     {select("חלוקת אימונים", "trainingSplit", [["auto", "התאמה אוטומטית"], ["FBW", "FBW — גוף מלא"], ["A-B", "A-B"], ["PPL", "Push Pull Legs"]], "training_split")}
     <label className="block text-sm font-bold">משך אימון זמין (דקות)<input aria-label="משך אימון זמין (דקות)" name="sessionMinutes" type="number" min="30" max="120" defaultValue={String(values.session_minutes ?? "")} className="nutrition-input mt-2"/></label>

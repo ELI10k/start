@@ -33,16 +33,16 @@ test("expanded gym and home catalogue selects the correct sex, level and equipme
     const base={...input,traineeLevel:level,experienceMonths:36,trainingFocus:"balanced",trainingLocation:"home"};
     for(const equipment of ["dumbbells","dumbbells_bench"]){
       const rec=recommendTraining({...base,equipment});
-      assert.equal(rec.programId,`lifefit-home-${equipment}-${level}-v2`);
+      assert.equal(rec.programId,`lifefit-home-${equipment}-${level}-v3`);
       const program=buildProgram(rec.definition!);
       assert.equal(program.equipment.includes("ספסל"),equipment==="dumbbells_bench");
       assert.ok(program.days.flatMap(d=>d.exercises).every(e=>!catalogue.find((x:{id:string})=>x.id===e.exerciseId)?.equipment?.match(/מכונה|פולי|מוט/)));
     }
-    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"female"}).programId,`lifefit-fbw-female-balanced-${level}-v2`);
-    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male",trainingSplit:"A-B"}).programId,`lifefit-a-b-male-balanced-${level}-v2`);
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"female"}).programId,`lifefit-fbw-female-balanced-${level}-v3`);
+    assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male",trainingSplit:"A-B"}).programId,`lifefit-a-b-male-balanced-${level}-v3`);
     if(level!=="beginner"){
-      assert.equal(recommendTraining({...base,equipment:"bodyweight_station",bodyweightCapacity:"verified"}).programId,`lifefit-home-bodyweight-${level}-v2`);
-      assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male"}).programId,`lifefit-fbw-male-balanced-${level}-v2`);
+      assert.equal(recommendTraining({...base,equipment:"bodyweight_station",bodyweightCapacity:"verified"}).programId,`lifefit-home-bodyweight-${level}-v3`);
+      assert.equal(recommendTraining({...base,trainingLocation:"gym",equipment:"gym",sex:"male"}).programId,`lifefit-fbw-male-balanced-${level}-v3`);
     }
   }
   assert.equal(recommendTraining({...input,trainingFocus:"balanced",equipment:"bodyweight"}).status,"review");
@@ -58,11 +58,11 @@ test("home substitutions never introduce an unavailable bench, machine or pull-u
   assert.equal(alternativeExercises(row,[row,benchRow,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).length,0,"Adding a bench cannot silently double the sides or alter the prescription");
 });
 test("automatic selection considers level, frequency, equipment and focus",()=>{
-  assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes-v2");
-  assert.equal(recommendTraining({...input,trainingSplit:"PPL"}).programId,"lifefit-ppl-female-glutes-beginner-v2");
-  assert.equal(recommendTraining({...input,traineeLevel:"intermediate",weeklyWorkouts:4}).programId,"lifefit-a-b-female-glutes-intermediate-v2");
-  assert.equal(recommendTraining({...input,traineeLevel:"advanced",experienceMonths:36,weeklyWorkouts:6,trainingFocus:"back"}).programId,"lifefit-ppl-female-back-advanced-v2");
-  assert.equal(recommendTraining({...input,equipment:"trx",trainingLocation:"home"}).programId,"lifefit-trx-female-glutes-v2");
+  assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes-v3");
+  assert.equal(recommendTraining({...input,trainingSplit:"PPL"}).programId,"lifefit-ppl-female-glutes-beginner-v3");
+  assert.equal(recommendTraining({...input,traineeLevel:"intermediate",weeklyWorkouts:4}).programId,"lifefit-a-b-female-glutes-intermediate-v3");
+  assert.equal(recommendTraining({...input,traineeLevel:"advanced",experienceMonths:36,weeklyWorkouts:6,trainingFocus:"back"}).programId,"lifefit-ppl-female-back-advanced-v3");
+  assert.equal(recommendTraining({...input,equipment:"trx",trainingLocation:"home"}).programId,"lifefit-trx-female-glutes-v3");
 });
 test("medical concerns, missing data and impossible schedules require review",()=>{
   assert.equal(recommendTraining({...input,medicalReview:"yes"}).status,"review");
@@ -78,9 +78,10 @@ test("experience and technique can lower a self-reported advanced level",()=>{
   assert.equal(assessedLevel({...input,traineeLevel:"advanced",experienceMonths:36,technique:"learning"}),"beginner");
 });
 test("short sessions reduce sets while retaining every movement and fixed targets",()=>{
-  const rec=recommendTraining({...input,sessionMinutes:40});
-  const p=personalizeProgram(buildProgram(rec.definition!),rec,40);
-  for(const day of p.days)for(const e of day.exercises)if(e.exerciseId!=="exercise-155pu7s")assert.equal(e.sets,"2");
+  assert.equal(recommendTraining({...input,sessionMinutes:30}).status,"review");
+  const rec=recommendTraining({...input,sessionMinutes:45});
+  const p=personalizeProgram(buildProgram(rec.definition!),rec,45);
+  for(const day of p.days)for(const e of day.exercises)if(e.exerciseId!=="exercise-155pu7s")assert.ok(Number(e.sets)>=1&&Number(e.sets)<=2);
   const advanced=buildProgram(PROGRAM_DEFINITIONS[0],"advanced");
   assert.match(advanced.days[1].exercises.at(-1)!.reps!,/30 שניות/);
 });

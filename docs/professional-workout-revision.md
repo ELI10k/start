@@ -1,5 +1,19 @@
 # Professional workout revision — 2026-10-06
 
+## Follow-up audit: v3
+
+The additive `20261006143211_professional_workout_revision_v3.sql` migration publishes 38 v3 templates / 85 days and archives the exact 38 v2 originals, preserving all older trees and history. Active v2 assignments/copies were checked (zero); migration also enforces this prerequisite atomically.
+
+- Every cycle includes direct calf work and separate quadriceps/hamstring coverage. TRX cycles retain their suspension exercises and add approved sliding knee flexion, requiring a towel and compatible floor. Bodyweight calf guidance explicitly identifies its reused video as the loaded demonstration, performed without extra weight in this variant.
+- Replacement before recorded sets clears prior load/repetitions/preparation. Replacement after recorded work is blocked instead of erasing it. Performance history uses the actually performed exercise. Alternatives check assessed intake level, verified bodyweight capacity and medical-review status in addition to equipment, movement, sides and units.
+- Sunday-based schedules include actual spaced dates and partial first weeks. FBW/2–3-day strength plans require a blank calendar day between completed workouts; higher-frequency splits never offer a second strength session on the same day. Direct entry/provider checks and a server trigger protect recovery and weekly quotas; existing-session autosave/resume remains allowed. Legacy programme scheduling otherwise stays unchanged.
+- Warm-up classification includes rows, shoulder presses, pulldowns and hip thrusts and excludes French presses. Professional preparation distinguishes quads, hamstrings and glutes; a chosen first-session working load can generate ramps without inventing a starting load. Updated time estimates count actual preparation and both sides of one-arm kickbacks.
+- Completing the week's occurrences is distinguished from an empty programme.
+
+Before deployment: all 94 workout tests passed, focused ESLint and TypeScript passed, Webpack production build passed. Full-suite baseline issues are tracked separately; live verification must run against the matching v3 application. No new guard-function security/performance advisor findings were reported. Existing project-wide advisor findings were not altered.
+
+Recovery: roll back the matching application and reactivate the exact v2 originals while archiving v3 originals. Preserve new client copies and all sessions. Do not remove applied migration history.
+
 Replaces the 37 LIFE FIT templates with versioned v2 trees, plus an explicit male beginner gym FBW (38 active templates, 85 distinct days). It does not claim independent trainer certification or medical clearance. Older imported programmes outside this generated catalogue are not silently rewritten.
 
 ## Corrections

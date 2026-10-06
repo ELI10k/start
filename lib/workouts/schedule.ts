@@ -1,22 +1,24 @@
 import type { ClientWorkoutAssignment, CompletedWorkout, WorkoutDay, WorkoutProgram } from "./types.ts";
 import { trainingWeekStart } from "./progress.ts";
 import { israelDateKey } from "../date-time.ts";
+import { isProfessionalProgram, professionalWeekLayout } from "./professional.ts";
 export function currentTrainingWeek(startDate:string,today:string):number{const start=new Date(`${startDate}T00:00:00Z`);const end=new Date(`${today}T00:00:00Z`);return Math.max(1,Math.floor((end.getTime()-start.getTime())/(7*86400000))+1)}
 
-export type ScheduledSession = Readonly<{ day: WorkoutDay; occurrence: number; completed: boolean }>;
+export type ScheduledSession = Readonly<{ day: WorkoutDay; occurrence: number; completed: boolean; scheduledDate?:string }>;
 
 // The week has as many sessions as the assignment says, not as many as the
 // programme has distinct workouts. FBW is one workout trained three times a
 // week and A-B is two workouts trained four times, so the days cycle to fill the
 // frequency. Truncating to the number of days - which is what this used to do -
 // showed a single row under a heading that said three.
-export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAssignment,completedWorkouts:readonly CompletedWorkout[],clientId:string,todayValue:string|Date=new Date()):readonly ScheduledSession[]{
+export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAssignment,completedWorkouts:readonly CompletedWorkout[],clientId:string,todayValue:string|Date=new Date(),preferredDays:readonly number[]=[]):readonly ScheduledSession[]{
   const days=[...program.days].sort((a,b)=>a.order-b.order);
   if(!days.length)return[];
-  const sessions=Math.max(1,Math.min(14,assignment.weeklyFrequency||days.length));
+  let sessions=Math.max(1,Math.min(14,assignment.weeklyFrequency||days.length));
   const start=weekStart(todayValue);
-  const weeksSinceStart=Math.max(0,Math.floor((Date.parse(start)-Date.parse(trainingWeekStart(assignment.startDate)))/(7*86400000)));
-  const offset=program.sourceWorkbook.includes("מקצועי v2")?weeksSinceStart*sessions:0;
+  const layout=isProfessionalProgram(program)?professionalWeekLayout(program,assignment.startDate,sessions,start,preferredDays):undefined;
+  const offset=layout?.offset??0;
+  if(layout)sessions=layout.slots.length;
   // How many times each workout has already been finished this week. The second
   // FBW of the week ticks the second row, not the first one over again.
   const completedByDay=new Map<string,number>();
@@ -32,7 +34,9 @@ export function weeklySchedule(program:WorkoutProgram,assignment:ClientWorkoutAs
     const day=days[(offset+index)%days.length];
     const occurrence=seen.get(day.id)??0;
     seen.set(day.id,occurrence+1);
-    return{day,occurrence,completed:occurrence<(completedByDay.get(day.id)??0)};
+    const date=layout?new Date(`${start}T00:00:00Z`):undefined;
+    if(date)date.setUTCDate(date.getUTCDate()+layout!.slots[index]);
+    return{day,occurrence,completed:occurrence<(completedByDay.get(day.id)??0),scheduledDate:date?.toISOString().slice(0,10)};
   });
 }
 

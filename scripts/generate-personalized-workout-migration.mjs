@@ -8,8 +8,8 @@ const output = new URL(process.argv[2], import.meta.url);
 const exercises = JSON.parse(await readFile(new URL("../data/personalized-workout-exercises.json", import.meta.url), "utf8"));
 const programmes=BUILT_IN_PROGRAMS;
 const professional=output.pathname.includes("professional_workout_revision");
-if(!professional)throw new Error("The v2 catalogue requires a new professional_workout_revision migration");
-const oldIds=programmes.map(p=>p.id.replace(/-v2$/,""));
+if(!professional)throw new Error("The versioned catalogue requires a new professional_workout_revision migration");
+const oldIds=programmes.map(p=>p.id.replace(/-v3$/,"-v2"));
 const referenced=new Set(programmes.flatMap(p=>p.days.flatMap(d=>d.exercises.map(e=>e.exerciseId))));
 const selectedExercises=exercises.filter(e=>referenced.has(e.id));
 const quote = value => `'${JSON.stringify(value).replaceAll("'", "''")}'::jsonb`;
@@ -79,6 +79,7 @@ grant execute on function public.assign_intake_workout(uuid,uuid,jsonb,date,text
 -- Only replaced official originals are archived. Copies and history remain.
 update public.workout_programs set status='archived'
 where official=true and id in (select jsonb_array_elements_text(${quote(oldIds)}));
+${await readFile(new URL("./professional-workout-guards.sql",import.meta.url),"utf8")}
 commit;
 `;
 await writeFile(output, sql);
