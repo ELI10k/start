@@ -20,6 +20,22 @@ export type WarmupPlan = Readonly<{
 }>;
 
 /**
+ * The catalogue intentionally keeps leg exercises under one broad display
+ * group. Knee flexion and knee extension are the exception for preparation:
+ * they train opposing muscles, so doing one must not suppress the other's
+ * loaded warm-up later in the workout.
+ */
+export function warmupMuscleKey(
+  primaryMuscleGroup: string | undefined,
+  exerciseName: string | undefined,
+) {
+  if (!primaryMuscleGroup) return undefined;
+  if (/כפיפת רגליים/.test(exerciseName ?? "")) return `${primaryMuscleGroup}:כפיפת-ברך`;
+  if (/פשיטת רגליים/.test(exerciseName ?? "")) return `${primaryMuscleGroup}:פשיטת-ברך`;
+  return primaryMuscleGroup;
+}
+
+/**
  * A loaded warm-up belongs only to the first exercise for a muscle group in a
  * workout. Later exercises for the same muscle are already preceded by working
  * sets for that muscle and should not ask the client to warm it up again.

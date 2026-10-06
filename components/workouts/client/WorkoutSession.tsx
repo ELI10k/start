@@ -14,7 +14,7 @@ import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
 import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
 import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
-import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, workingWeightFrom } from "@/lib/workouts/warmup";
+import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, warmupMuscleKey, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
 import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
@@ -129,9 +129,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const bodyweightAbs=exercise?.primaryMuscleGroup==="בטן"&&(/משקל גוף/.test(exercise.name)||exercise.category==="משקל גוף");
   const earlierMuscleGroups=ordered.slice(0,session.currentExerciseIndex).map((entry)=>{
     const entryResult=session.exerciseResults.find((item)=>item.workoutExerciseId===entry.id);
-    return getExercise(entryResult?.performedExerciseId??entry.exerciseId)?.primaryMuscleGroup;
+    const earlierExercise=getExercise(entryResult?.performedExerciseId??entry.exerciseId);
+    return warmupMuscleKey(earlierExercise?.primaryMuscleGroup,earlierExercise?.name);
   });
-  const firstForMuscle=isFirstExerciseForMuscle(exercise?.primaryMuscleGroup,earlierMuscleGroups);
+  const firstForMuscle=isFirstExerciseForMuscle(warmupMuscleKey(exercise?.primaryMuscleGroup,exercise?.name),earlierMuscleGroups);
   const warmup=firstForMuscle&&!bodyweightAbs&&!dynamicWarmup?planWarmup(workingWeightFrom(performance.sessions),{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget}):null;
   const challenge=previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment}):null;
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
