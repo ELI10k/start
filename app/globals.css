@@ -660,17 +660,19 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .measurement-log__row .app-list__main > span,
 .measurement-log__row .app-list__meta { color: var(--ink); }
 .measurement-log__row .measurement-change--neutral { color: var(--ink); }
-.metric-rate { display: grid; gap: .8rem; padding: 1.1rem; }
-.metric-rate__heading { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
-.metric-rate__heading h2 { font-size: 1rem; font-weight: 900; }
-.metric-rate__heading > span { color: var(--ink); font-size: .7rem; font-weight: 750; }
-.metric-rate__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
-.metric-rate__grid > div { display: grid; gap: .25rem; padding: .8rem; border-radius: var(--radius-md); background: var(--surface-raised); }
-.metric-rate__grid span { color: var(--ink); font-size: .72rem; font-weight: 750; }
-.metric-rate__value { font-size: 1rem; }
+.metric-rate { display: grid; justify-items: stretch; gap: 1rem; padding: 1.25rem 1.1rem; }
+.metric-rate__heading { display: flex; align-items: center; justify-content: center; gap: .55rem; }
+.metric-rate__heading h2 { font-size: 1.05rem; font-weight: 900; text-align: center; }
+.metric-rate__heading svg { width: 1.45rem; height: 1.45rem; color: var(--green); stroke-width: 3; }
+.metric-rate__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.metric-rate__grid > div { display: grid; justify-items: center; gap: .35rem; min-width: 0; padding: .35rem .75rem; text-align: center; }
+.metric-rate__grid > div + div { border-inline-start: 1px solid var(--line); }
+.metric-rate__grid span { color: var(--ink); font-size: .78rem; font-weight: 800; }
+.metric-rate__value { font-size: clamp(1.05rem, 5vw, 1.4rem); line-height: 1.2; white-space: nowrap; }
 .metric-rate__value--positive { color: var(--green-press); }
 .metric-rate__value--negative { color: var(--red); }
 .metric-rate__value--neutral { color: var(--ink); }
+.metric-rate__basis { justify-self: center; padding: .45rem .85rem; border-radius: 999px; background: var(--surface-raised); color: var(--ink); font-size: .7rem; font-weight: 750; }
 @media (max-width: 360px) {
   .progress-metric-tab { padding-inline: .1rem; }
   .progress-metric-tab__icon { width: 2.15rem; height: 2.15rem; }

@@ -1,4 +1,4 @@
-import { Ruler, Scale } from "lucide-react";
+import { Minus, Ruler, Scale, TrendingDown, TrendingUp } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 import { averageWeightChangeRates } from "@/lib/progress/rates";
@@ -57,6 +57,9 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
     ? totalChange < 0 ? "נרשמת ירידה עקבית בהיקף" : totalChange > 0 ? "נרשמה עלייה בהיקף לאורך התקופה" : "ההיקף נשאר יציב לאורך התקופה"
     : nutritionGoal?.includes("cut") && totalChange <= 0 ? "המגמה תואמת את יעד החיטוב" : nutritionGoal?.includes("bulk") && totalChange >= 0 ? "המגמה תואמת את יעד המסה" : hasTarget ? `נותרו ${Math.abs(latest - target).toFixed(1)} ק״ג ליעד` : "המשך מדידות עקביות יציג מגמה מדויקת יותר";
   const coordinates = chartPoints(points);
+  const RateIcon = weeklyKg === undefined || weeklyKg === null || weeklyKg === 0
+    ? Minus
+    : weeklyKg < 0 ? TrendingDown : TrendingUp;
   return (
     <div className="metric-overview">
       <section className="health-summary-card metric-overview__card">
@@ -86,7 +89,7 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
         <section className="premium-card metric-rate" aria-labelledby="average-weight-rate">
           <div className="metric-rate__heading">
             <h2 id="average-weight-rate">קצב שינוי ממוצע במשקל</h2>
-            <span>{points.length} מדידות</span>
+            <RateIcon aria-hidden="true" />
           </div>
           <div className="metric-rate__grid">
             {[{ label: "שבועי", value: weeklyKg ?? null }, { label: "חודשי", value: monthlyKg ?? null }].map((rate) => {
@@ -94,6 +97,7 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
               return <div key={rate.label}><span>{rate.label}</span><strong className={`metric-rate__value metric-rate__value--${tone}`}>{rateText(rate.value)}</strong></div>;
             })}
           </div>
+          <span className="metric-rate__basis">מבוסס על {points.length} מדידות</span>
         </section>
       ) : null}
       <div className="health-stat-grid">
