@@ -1,5 +1,8 @@
 import { Ruler, Scale } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
+import WeightGoalMeter from "@/components/client/WeightGoalMeter";
+import { averageWeightChangeRates } from "@/lib/progress/rates";
+import { weightGoalProgress, type WeightGoalProgress } from "@/lib/progress/weight-goal";
 import { weightTrendTone } from "@/lib/progress/weight-trend";
 
 type ProgressEntry = Readonly<{
@@ -33,7 +36,7 @@ function linePoints(points: readonly Point[]) {
     .join(" ");
 }
 
-function MetricOverview({ metric, points, targetWeight, nutritionGoal }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null }) {
+function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgress, weeklyKg }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null; goalProgress?: WeightGoalProgress | null; weeklyKg?: number | null }) {
   if (!points.length) return <StateBlock icon={metric === "weight" ? <Scale aria-hidden="true" size={22} /> : <Ruler aria-hidden="true" size={22} />} title="עדיין אין מדידות" description="המדידה הראשונה שתירשם תופיע כאן, יחד עם גרף המגמה." />;
   const title = metric === "weight" ? "משקל נוכחי" : "היקף טבור נוכחי";
   const unit = metric === "weight" ? "ק״ג" : "ס״מ";
@@ -64,6 +67,11 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal }: { metri
         <div className="metric-overview__dates"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
       </> : <p className="metric-overview__empty">נדרשת מדידה נוספת כדי להציג מגמה.</p>}
       </section>
+      {metric === "weight" && goalProgress ? (
+        <section className="premium-card metric-overview__goal" aria-label="התקדמות ליעד המשקל">
+          <WeightGoalMeter progress={goalProgress} weeklyKg={weeklyKg} />
+        </section>
+      ) : null}
       <div className="health-stat-grid">
         <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{first} {unit}</strong><span>{metric === "weight" ? "משקל התחלה" : "היקף התחלה"}</span></div>
         <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{totalChange > 0 ? "+" : ""}{totalChange} {unit}</strong><span>שינוי כולל</span></div>
@@ -83,6 +91,8 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
     const value = valueOf(entry.navel_circumference);
     return value === null ? [] : [{ date: entry.date, value }];
   });
+  const goalProgress = weightGoalProgress(entries, targetWeight);
+  const weightRates = averageWeightChangeRates(weights);
 
   if (!ordered.length) {
     return (
@@ -100,7 +110,7 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
 
   return (
     <div className="grid gap-4">
-      <MetricOverview metric={metric} points={metric === "weight" ? weights : navelCircumferences} targetWeight={targetWeight} nutritionGoal={nutritionGoal} />
+      <MetricOverview metric={metric} points={metric === "weight" ? weights : navelCircumferences} targetWeight={targetWeight} nutritionGoal={nutritionGoal} goalProgress={goalProgress} weeklyKg={weightRates?.weeklyKg} />
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}
