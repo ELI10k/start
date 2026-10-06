@@ -5,14 +5,16 @@ import test from "node:test";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the profile guide link appears once at the end of the screen", async () => {
+test("the profile guide link is the last item in the app settings group", async () => {
   const source = await file("app/profile/page.tsx");
   const guide = source.indexOf("מדריך השימוש באפליקציה");
   const goals = source.indexOf("<ProfileNutritionGoalsSheet");
-  const legal = source.indexOf("<LegalLinks");
+  const support = source.indexOf("תמיכה");
+  const account = source.indexOf(">חשבון</h2>");
   assert.ok(guide >= 0, "guide link is missing");
   assert.ok(goals < guide, "guide link must not remain above change goals");
-  assert.ok(legal < guide, "guide link must appear at the end of the profile screen");
+  assert.ok(support < guide, "guide link must appear after support");
+  assert.ok(guide < account, "guide link must remain inside the app settings group");
   assert.equal(source.match(/מדריך השימוש באפליקציה/g)?.length, 1);
   assert.match(source, /content\/10000000-0000-4000-8000-000000000004/);
 });

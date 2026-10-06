@@ -62,6 +62,10 @@ export default async function ProfilePage() {
           <span className="settings-group__label"><LifeBuoy aria-hidden="true" size={18} />תמיכה</span>
           <ChevronLeft aria-hidden="true" size={18} />
         </Link>
+        <Link href="/content/10000000-0000-4000-8000-000000000004">
+          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
+          <ChevronLeft aria-hidden="true" size={18} />
+        </Link>
       </div>
 
       <h2 className="section-heading section-heading--compact mt-6">חשבון</h2>
@@ -75,15 +79,7 @@ export default async function ProfilePage() {
         <DeleteAccountForm />
       </section>
 
-      <LegalLinks className="mt-8" />
-
-      <h2 className="section-heading section-heading--compact mt-6">מדריך האפליקציה</h2>
-      <div className="settings-group mb-4">
-        <Link href="/content/10000000-0000-4000-8000-000000000004">
-          <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
-          <ChevronLeft aria-hidden="true" size={18} />
-        </Link>
-      </div>
+      <LegalLinks className="mt-8 pb-4" />
     </ClientShell>
   );
 }
