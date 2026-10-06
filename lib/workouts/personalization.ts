@@ -95,12 +95,16 @@ export function alternativeExercises(prescribed: Exercise | undefined, catalogue
   if (!prescribed?.primaryMuscleGroup) return [];
   const pattern = movementPattern(prescribed);
   const muscle = prescribed.primaryMuscleGroup === "בטן" ? "שרירי ליבה" : prescribed.primaryMuscleGroup;
+  const unilateral=(e:Exercise)=>patterns[e.id]==="lunge"||e.id==="resistance-dumbbell-one-arm-bent-over-row"||/יד אחת|רגל אחת|one.arm/i.test(e.name);
   return catalogue.filter(item => {
     if (item.id === prescribed.id || item.status !== "active") return false;
     if ((item.primaryMuscleGroup === "בטן" ? "שרירי ליבה" : item.primaryMuscleGroup) !== muscle) return false;
     // Timed and repetition prescriptions are not interchangeable.
     if (/פלאנק|plank/i.test(item.name) !== /פלאנק|plank/i.test(prescribed.name)) return false;
     if (pattern && movementPattern(item) !== pattern) return false;
+    // Existing targets/side notes and the time budget survive a self-service
+    // swap. A bilateral-to-unilateral change needs a coach to rewrite them.
+    if(unilateral(item)!==unilateral(prescribed))return false;
     if (preferences?.trainingLocation === "home") {
       const available=preferences.equipment;
       if (available.includes("משקולות יד") && !available.some(e=>/מכונה|פולי|מוט/.test(e))) {

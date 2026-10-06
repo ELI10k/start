@@ -55,7 +55,7 @@ test("home substitutions never introduce an unavailable bench, machine or pull-u
   const supported=ex("exercise-1h0qzj6","חתירה מעל הספה","גב","משקולות יד");
   const prefs={clientId:"x",trainingTypes:[],equipment:["משקולות יד","משקל גוף"],trainingLocation:"home",preferredDays:[]};
   assert.equal(alternativeExercises(row,[row,benchRow,supported],prefs).length,0);
-  assert.deepEqual(alternativeExercises(row,[row,benchRow,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).map(e=>e.id),[benchRow.id]);
+  assert.equal(alternativeExercises(row,[row,benchRow,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).length,0,"Adding a bench cannot silently double the sides or alter the prescription");
 });
 test("automatic selection considers level, frequency, equipment and focus",()=>{
   assert.equal(recommendTraining(input).programId,"lifefit-fbw-female-glutes-v2");
