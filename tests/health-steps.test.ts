@@ -122,6 +122,17 @@ test("sleep storage is isolated and upserts one row per day and source", async (
   assert.match(migration, /p_minutes<0 or p_minutes>1440/);
 });
 
+test("the steps dashboard sync also persists sleep and refreshes its tile", async () => {
+  const [stepsTile, sleepTile] = await Promise.all([
+    source("components/client/StepsMetricTile.tsx"),
+    source("components/client/SleepMetricTile.tsx"),
+  ]);
+  assert.match(stepsTile, /provider\.readDailySleep/);
+  assert.match(stepsTile, /repository\.recordSleep/);
+  assert.match(stepsTile, /start:health-sleep-synced/);
+  assert.match(sleepTile, /addEventListener\("start:health-sleep-synced"/);
+});
+
 test("steps are stored one row per day per source, and re-syncing overwrites", async () => {
   const migration = await source("supabase/migrations/202608110002_health_steps.sql");
   assert.match(migration, /primary key \(client_id, day, source\)/);

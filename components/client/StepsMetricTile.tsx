@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
-import { calendarDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
+import { calendarDay, sleepToPersist, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
 import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
 import type { HealthPermissionState } from "@/lib/health/types";
@@ -47,11 +47,23 @@ export default function StepsMetricTile() {
       if (state !== "granted") return;
 
       const range = syncWindow(today);
-      const incoming = await provider.readDailySteps(range.fromDay, range.toDay);
+      const [incoming, incomingSleep] = await Promise.all([
+        provider.readDailySteps(range.fromDay, range.toDay),
+        provider.readDailySleep(range.fromDay, range.toDay),
+      ]);
       const changed = stepsToPersist(incoming, current.entries, today);
+      const changedSleep = sleepToPersist(incomingSleep, current.sleep, today);
       if (changed.length) await repository.recordSteps(changed);
-      if (changed.length) await load();
-      track("health_synced", { source: provider.source, daysWritten: changed.length, daysRead: incoming.length });
+      if (changedSleep.length) await repository.recordSleep(changedSleep);
+      if (changed.length || changedSleep.length) await load();
+      if (changedSleep.length) window.dispatchEvent(new Event("start:health-sleep-synced"));
+      track("health_synced", {
+        source: provider.source,
+        daysWritten: changed.length,
+        daysRead: incoming.length,
+        sleepDaysWritten: changedSleep.length,
+        sleepDaysRead: incomingSleep.length,
+      });
     } catch (error) {
       track("error", describeError(error, "health-dashboard-sync"));
     } finally {

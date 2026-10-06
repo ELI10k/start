@@ -56,13 +56,16 @@ export default function SleepMetricTile() {
 
   useEffect(() => {
     const ready = () => void sync(false);
+    const reload = () => void load().catch((error) => track("error", describeError(error, "health-sleep-dashboard-reload")));
     window.addEventListener("start:health-ready", ready);
+    window.addEventListener("start:health-sleep-synced", reload);
     const initialSync = window.setTimeout(ready, 0);
     return () => {
       window.clearTimeout(initialSync);
       window.removeEventListener("start:health-ready", ready);
+      window.removeEventListener("start:health-sleep-synced", reload);
     };
-  }, [sync]);
+  }, [load, sync]);
 
   const sleep = sleepByDay(snapshot.sleep);
   const latest = sleep.get(today) ?? sleep.get([...sleep.keys()].sort().at(-1) ?? "");
