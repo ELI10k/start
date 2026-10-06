@@ -7,16 +7,14 @@ import { useFormStatus } from "react-dom";
 export default function MealOptionButton({
   selected,
   name,
-  quantity,
-  unit,
+  portion,
   calories,
   household,
   note,
 }: {
   selected: boolean;
   name: string;
-  quantity: string;
-  unit: string;
+  portion: string;
   calories: string;
   /** The same portion in spoons or palms, when there is an honest reading. */
   household?: string;
@@ -51,7 +49,7 @@ export default function MealOptionButton({
           mid-number: a quantity cut in half is worse than a name cut in half,
           because the name is still recognisable and "20" is not. */}
       <span className="flex shrink-0 flex-col items-end text-xs leading-tight text-[#5B5F5B]">
-        <span className="whitespace-nowrap">{quantity} {unit}</span>
+        <span className="whitespace-nowrap">{portion}</span>
         <span className="whitespace-nowrap tabular-nums">{calories} קל׳</span>
       </span>
     </button>

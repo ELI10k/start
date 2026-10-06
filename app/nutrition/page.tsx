@@ -15,7 +15,7 @@ import {
   getClientNutritionBehavior,
 } from "@/lib/data/product-repository";
 import FreeMenu from "@/components/client/FreeMenu";
-import { unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { formatPortionLabel, unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
 import { israelDateKey, israelWeekday, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
@@ -298,8 +298,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                     <MealOptionButton
                       selected={group.selectedItemId===item.id}
                       name={item.name}
-                      quantity={String(item.displayQuantity)}
-                      unit={unitLabel(item.measurementUnit,Number(item.displayQuantity))}
+                      portion={formatPortionLabel(Number(item.displayQuantity),item.measurementUnit)}
                       calories={String(item.calories)}
                       household={householdMeasure(item.amount,group.type,item.measurementUnit,meal.title)?.label}
                       note={item.note}

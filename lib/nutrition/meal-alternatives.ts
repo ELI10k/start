@@ -53,7 +53,36 @@ export function unitLabel(unit:string,quantity:number):string{
   // Both directions. New rows are stored plural, but rows repaired by
   // 202608200004 carry the food's own package_unit, which is singular - and
   // "3 פיתה" is as wrong as "1 פיתות".
-  return quantity===1?UNIT_SINGULARS.get(unit)??unit:UNIT_PLURALS.get(unit)??unit;
+  return quantity>0&&quantity<=1?UNIT_SINGULARS.get(unit)??unit:UNIT_PLURALS.get(unit)??unit;
+}
+
+/**
+ * A countable portion should read like something a person would ask for.
+ * Keep the numeric value in storage and forms, but render 0.5 pita as ½ pita
+ * rather than exposing a database-style decimal to the client.
+ */
+export function formatDisplayQuantity(quantity:number,unit:string):string{
+  if(!Number.isFinite(quantity))return String(quantity);
+  const countable=UNIT_PLURALS.has(unit)||UNIT_SINGULARS.has(unit);
+  if(!countable)return Number.isInteger(quantity)?String(quantity):String(Math.round(quantity*100)/100);
+
+  const whole=Math.floor(quantity);
+  const remainder=quantity-whole;
+  const fractions:ReadonlyArray<readonly[number,string]>=[[0.25,"¼"],[0.5,"½"],[0.75,"¾"]];
+  const fraction=fractions.find(([value])=>Math.abs(remainder-value)<0.001)?.[1];
+  if(!fraction)return Number.isInteger(quantity)?String(quantity):String(Math.round(quantity*100)/100);
+  return `${whole||""}${fraction}`;
+}
+
+/** A complete, natural Hebrew portion label for read-only screens. */
+export function formatPortionLabel(quantity:number,unit:string):string{
+  const singular=unitLabel(unit,1);
+  if(Math.abs(quantity-0.25)<0.001)return `רבע ${singular}`;
+  if(Math.abs(quantity-0.5)<0.001)return `חצי ${singular}`;
+  if(Math.abs(quantity-0.75)<0.001)return `¾ ${singular}`;
+  if(Math.abs(quantity-1.25)<0.001)return `${singular} ורבע`;
+  if(Math.abs(quantity-1.5)<0.001)return `${singular} וחצי`;
+  return `${formatDisplayQuantity(quantity,unit)} ${unitLabel(unit,quantity)}`;
 }
 
 // A mass or volume is already the measurement - it is never a countable unit.

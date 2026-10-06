@@ -16,7 +16,7 @@ import { foodsForGroup } from "@/lib/nutrition/food-groups";
 import { isCompatibleProtein, proteinKind } from "@/lib/nutrition/protein-kind";
 import { planMacros, type MacroSources as PlanSources } from "@/lib/nutrition/macro-plan";
 import { FIXED_MEAL_TITLES } from "@/lib/nutrition/menu-validation";
-import { calculateAlternativePortion,convertQuantity,defaultPortionQuantity,foodUnit,GROUP_CALORIE_SHARE,hasNaturalUnit,MEAL_CALORIE_SHARE,portionFor,portionForCalories,unitLabel } from "@/lib/nutrition/meal-alternatives";
+import { calculateAlternativePortion,convertQuantity,defaultPortionQuantity,foodUnit,formatPortionLabel,GROUP_CALORIE_SHARE,hasNaturalUnit,MEAL_CALORIE_SHARE,portionFor,portionForCalories,unitLabel } from "@/lib/nutrition/meal-alternatives";
 import type { Portion } from "@/lib/nutrition/meal-alternatives";
 import { israelDateKey } from "@/lib/date-time";
 
@@ -823,6 +823,9 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
                   <MacroChip label="שומן" value={portion.fat} unit="ג׳"/>
                 </dl>:null}
               </div>
+              {portion&&unitMode==="native"&&hasNaturalUnit(selectedFood!)?<p className="mt-2 text-xs font-bold text-[#5B5F5B]">
+                כך יוצג ללקוח: {formatPortionLabel(item.amount,portion.unit)}
+              </p>:null}
               {/* A note belongs to the food, not to the meal: "בלי מלח" applies
                   to the chicken and to nothing else on the plate. */}
               {selectedFood?<input
