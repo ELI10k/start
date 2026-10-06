@@ -34,7 +34,13 @@ function chartPoints(points: readonly Point[]) {
     });
 }
 
-function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgress, weeklyKg }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null; goalProgress?: WeightGoalProgress | null; weeklyKg?: number | null }) {
+function rateText(value: number | null) {
+  if (value === null) return "אין מספיק נתונים";
+  if (value === 0) return "ללא שינוי";
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)} ק״ג`;
+}
+
+function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgress, weeklyKg, monthlyKg }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null; goalProgress?: WeightGoalProgress | null; weeklyKg?: number | null; monthlyKg?: number | null }) {
   if (!points.length) return <StateBlock icon={metric === "weight" ? <Scale aria-hidden="true" size={22} /> : <Ruler aria-hidden="true" size={22} />} title="עדיין אין מדידות" description="המדידה הראשונה שתירשם תופיע כאן, יחד עם גרף המגמה." />;
   const title = metric === "weight" ? "משקל נוכחי" : "היקף טבור נוכחי";
   const unit = metric === "weight" ? "ק״ג" : "ס״מ";
@@ -76,6 +82,20 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
           <WeightGoalMeter progress={goalProgress} weeklyKg={weeklyKg} />
         </section>
       ) : null}
+      {metric === "weight" ? (
+        <section className="premium-card metric-rate" aria-labelledby="average-weight-rate">
+          <div className="metric-rate__heading">
+            <h2 id="average-weight-rate">קצב שינוי ממוצע במשקל</h2>
+            <span>{points.length} מדידות</span>
+          </div>
+          <div className="metric-rate__grid">
+            {[{ label: "שבועי", value: weeklyKg ?? null }, { label: "חודשי", value: monthlyKg ?? null }].map((rate) => {
+              const tone = rate.value === null ? "neutral" : weightTrendTone(rate.value, nutritionGoal);
+              return <div key={rate.label}><span>{rate.label}</span><strong className={`metric-rate__value metric-rate__value--${tone}`}>{rateText(rate.value)}</strong></div>;
+            })}
+          </div>
+        </section>
+      ) : null}
       <div className="health-stat-grid">
         <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{first} {unit}</strong><span>{metric === "weight" ? "משקל התחלה" : "היקף התחלה"}</span></div>
         <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{totalChange > 0 ? "+" : ""}{totalChange} {unit}</strong><span>שינוי כולל</span></div>
@@ -114,7 +134,7 @@ export default function PersistedProgressHistory({ entries, targetWeight, nutrit
 
   return (
     <div className="grid gap-4">
-      <MetricOverview metric={metric} points={metric === "weight" ? weights : navelCircumferences} targetWeight={targetWeight} nutritionGoal={nutritionGoal} goalProgress={goalProgress} weeklyKg={weightRates?.weeklyKg} />
+      <MetricOverview metric={metric} points={metric === "weight" ? weights : navelCircumferences} targetWeight={targetWeight} nutritionGoal={nutritionGoal} goalProgress={goalProgress} weeklyKg={weightRates?.weeklyKg} monthlyKg={weightRates?.monthlyKg} />
 
       {/* A four-column table forced a phone to scroll sideways. One row per
           measurement says the same thing and fits. */}
