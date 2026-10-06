@@ -3,19 +3,20 @@ import test from "node:test";
 
 import { isFirstExerciseForMuscle, planWarmup, warmupMuscleKey } from "../lib/workouts/warmup.ts";
 
-test("warm-up uses the two prescribed preparation sets", () => {
+test("warm-up uses two preparation sets with 12 reps for targets up to 8", () => {
   const plan = planWarmup(40, { repetitions: 8 });
   assert.ok(plan);
   assert.deepEqual(plan.sets, [
-    { percent: 50, weightKg: 20, repetitions: 10 },
-    { percent: 70, weightKg: 27.5, repetitions: 5 },
+    { percent: 50, weightKg: 20, repetitions: 12 },
+    { percent: 80, weightKg: 32.5, repetitions: 12 },
   ]);
 });
 
-test("warm-up protocol is stable across working-set targets", () => {
-  for (const repetitions of [8, 9, 12, 15, 20]) {
-    assert.deepEqual(planWarmup(40, { repetitions })?.sets.map((set) => set.repetitions), [10, 5]);
-  }
+test("both warm-up sets scale repetitions with the working-set target", () => {
+  assert.equal(planWarmup(40, { repetitions: 9 })?.sets[0]?.repetitions, 15);
+  assert.equal(planWarmup(40, { repetitions: 9 })?.sets[1]?.repetitions, 15);
+  assert.equal(planWarmup(40, { repetitions: 12 })?.sets[0]?.repetitions, 15);
+  assert.equal(planWarmup(40, { repetitions: 15 })?.sets[0]?.repetitions, 20);
   assert.equal(planWarmup(40, { repetitions: 20, compound: true })?.sets.length, 2);
 });
 

@@ -1,8 +1,12 @@
 import type { ExerciseSetResult } from "./types.ts";
 
-// Two short preparation sets are shown for a loaded exercise. They deliberately
-// do not mirror the working-set target: the first rehearses the movement and the
-// second bridges to the working load without tiring the client.
+// Two preparation sets are shown for the first loaded exercise of each muscle
+// group. Their repetitions stay above the working target and the load ramps
+// from 50% to 80% of the previous working weight:
+//
+//   up to 8 working reps -> 12 warm-up reps
+//   9-12 working reps   -> 15 warm-up reps
+//   above 12 working reps -> 20 warm-up reps
 //
 // Everything is derived from what the client actually lifted last time. With no
 // previous session there is no honest percentage of anything, and the screen says
@@ -80,10 +84,15 @@ export function planWarmup(
 ): WarmupPlan | null {
   if (!workingWeightKg || !Number.isFinite(workingWeightKg) || workingWeightKg <= 0) return null;
 
-  void options;
+  const workingRepetitions = options.repetitions;
+  const repetitions = workingRepetitions === undefined || workingRepetitions <= 8
+    ? 12
+    : workingRepetitions <= 12
+      ? 15
+      : 20;
   const steps: readonly { percent: number; repetitions: number }[] = [
-    { percent: 50, repetitions: 10 },
-    { percent: 70, repetitions: 5 },
+    { percent: 50, repetitions },
+    { percent: 80, repetitions },
   ];
 
   return {
