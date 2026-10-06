@@ -21,19 +21,17 @@ function valueOf(value: number | string | null): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function linePoints(points: readonly Point[]) {
-  if (!points.length) return "";
+function chartPoints(points: readonly Point[]) {
+  if (!points.length) return [];
   const values = points.map((point) => point.value);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const range = max - min || 1;
-  return points
-    .map((point, index) => {
+  return points.map((point, index) => {
       const x = points.length === 1 ? 50 : (index / (points.length - 1)) * 100;
       const y = 90 - ((point.value - min) / range) * 70;
-      return `${x},${y}`;
-    })
-    .join(" ");
+      return { x, y, value: point.value };
+    });
 }
 
 function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgress, weeklyKg }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null; goalProgress?: WeightGoalProgress | null; weeklyKg?: number | null }) {
@@ -44,6 +42,7 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
   const first = points[0].value;
   const previous = points.at(-2)?.value;
   const recentChange = previous === undefined ? null : Number((latest - previous).toFixed(1));
+  const recentTone = recentChange !== null ? weightTrendTone(recentChange, nutritionGoal) : "neutral";
   const totalChange = Number((latest - first).toFixed(1));
   const target = Number(targetWeight);
   const hasTarget = metric === "weight" && Number.isFinite(target);
@@ -51,18 +50,23 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
   const insight = metric === "measurements"
     ? totalChange < 0 ? "נרשמת ירידה עקבית בהיקף" : totalChange > 0 ? "נרשמה עלייה בהיקף לאורך התקופה" : "ההיקף נשאר יציב לאורך התקופה"
     : nutritionGoal?.includes("cut") && totalChange <= 0 ? "המגמה תואמת את יעד החיטוב" : nutritionGoal?.includes("bulk") && totalChange >= 0 ? "המגמה תואמת את יעד המסה" : hasTarget ? `נותרו ${Math.abs(latest - target).toFixed(1)} ק״ג ליעד` : "המשך מדידות עקביות יציג מגמה מדויקת יותר";
+  const coordinates = chartPoints(points);
   return (
     <div className="metric-overview">
       <section className="health-summary-card metric-overview__card">
         <span className="health-summary-card__icon">{metric === "weight" ? <Scale aria-hidden="true" size={24} /> : <Ruler aria-hidden="true" size={24} />}</span>
         <p>{title}</p>
         <strong>{latest} {unit}</strong>
-        <small>{comparison}</small>
+        <small className={`metric-overview__comparison metric-overview__comparison--${recentTone}`}>{comparison}</small>
       {points.length > 1 ? <>
         <svg className="metric-overview__chart" viewBox="0 0 100 100" role="img" aria-label={`מגמת ${title}`} preserveAspectRatio="none">
           <line x1="0" x2="100" y1="90" y2="90" stroke="#E5E7E5" strokeWidth="1" />
           <line x1="0" x2="100" y1="55" y2="55" stroke="#E5E7E5" strokeWidth="1" />
-          <polyline fill="none" points={linePoints(points)} stroke="#16A34A" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+          {coordinates.slice(1).map((point, index) => {
+            const previousPoint = coordinates[index];
+            const tone = weightTrendTone(point.value - previousPoint.value, nutritionGoal);
+            return <line key={`${point.x}-${point.y}`} className={`metric-overview__segment metric-overview__segment--${tone}`} x1={previousPoint.x} y1={previousPoint.y} x2={point.x} y2={point.y} />;
+          })}
         </svg>
         <div className="metric-overview__dates"><span>{points[0].date}</span><span>{points.at(-1)?.date}</span></div>
       </> : <p className="metric-overview__empty">נדרשת מדידה נוספת כדי להציג מגמה.</p>}
