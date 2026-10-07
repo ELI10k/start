@@ -75,6 +75,19 @@ export type ReportInput = Readonly<{
     expected: number;
     completionPercent: number;
   }>;
+  workoutQuality?: Readonly<{
+    sessions: readonly { date: string; volume: number; durationSeconds: number; difficulty: number | null; energy: number | null }[];
+    previousSessionCount: number;
+    previousAverageVolume: number | null;
+  }>;
+  previousPeriod?: Readonly<{
+    weighIns: readonly { date: string; weight: number }[];
+    checkIns: readonly { adherence: number | null; energy: number | null; sleep: number | null; hunger: number | null }[];
+    steps: readonly number[];
+    sleep: readonly number[];
+    workoutsCompleted: number;
+  }>;
+  previousActions?: readonly string[];
   health?: Readonly<{
     steps: readonly { day: string; steps: number }[];
     sleep: readonly { day: string; minutes: number }[];
@@ -104,6 +117,19 @@ const formatDate = (value: string) => value.split("-").reverse().join(".");
 const averageNumbers = (values: readonly number[]) => values.length ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length) : 0;
 const coverageLabel = (count: number, total: number) => `${count} מתוך ${total} ימים · ${Math.round(count / Math.max(1, total) * 100)}%`;
 const confidenceLabel = (count: number, expected: number) => count >= expected * .7 ? "כיסוי טוב" : count >= expected * .4 ? "כיסוי חלקי" : "כיסוי נמוך";
+const standardDeviation = (values: readonly number[]) => {
+  if (values.length < 2) return 0;
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  return Math.round(Math.sqrt(values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length));
+};
+const pearson = (pairs: readonly [number, number][]) => {
+  if (pairs.length < 7) return null;
+  const xMean = pairs.reduce((sum, pair) => sum + pair[0], 0) / pairs.length;
+  const yMean = pairs.reduce((sum, pair) => sum + pair[1], 0) / pairs.length;
+  const numerator = pairs.reduce((sum, pair) => sum + (pair[0] - xMean) * (pair[1] - yMean), 0);
+  const denominator = Math.sqrt(pairs.reduce((sum, pair) => sum + (pair[0] - xMean) ** 2, 0) * pairs.reduce((sum, pair) => sum + (pair[1] - yMean) ** 2, 0));
+  return denominator ? numerator / denominator : null;
+};
 const goalOutcome = (label: string | null, direction: "up" | "down" | "flat") => {
   if (direction === "flat") return "neutral" as const;
   if (label?.includes("חיטוב")) return direction === "down" ? "positive" as const : "negative" as const;
@@ -145,6 +171,15 @@ export function buildClientReport(input: ReportInput): ClientReport {
     facts.push({ label: "ארוחות שסומנו בחודש", value: String(input.monthlyNutrition.mealsMarked) });
   } else if (input.hasMenu) facts.push({ label: "סימון ארוחות היום", value: `${input.menuCompletionPercent}%` });
   if (input.monthlyWorkouts) facts.push({ label: "אימונים בחודש", value: `${input.monthlyWorkouts.completed} מתוך ${input.monthlyWorkouts.expected} מתוכננים` });
+  const qualitySessions=input.workoutQuality?.sessions??[];
+  const recordedVolumes=qualitySessions.map((entry)=>entry.volume).filter((value)=>value>0);
+  const averageVolume=averageNumbers(recordedVolumes);
+  const recordedDifficulty=qualitySessions.map((entry)=>entry.difficulty).filter((value):value is number=>value!==null);
+  if(qualitySessions.length) {
+    facts.push({label:"נפח אימון ממוצע",value:recordedVolumes.length?`${averageVolume.toLocaleString("he-IL")} ק״ג על פני ${recordedVolumes.length} אימונים`:"לא תועד נפח"});
+    facts.push({label:"קושי מורגש באימונים",value:recordedDifficulty.length?`${round(recordedDifficulty.reduce((sum,value)=>sum+value,0)/recordedDifficulty.length)}/5 על פני ${recordedDifficulty.length} אימונים`:"לא דווח"});
+  }
+  if(input.previousActions?.length) facts.push({label:"פעולות מהדוח הקודם",value:`${input.previousActions.length} פעולות לבדיקה חוזרת`});
 
   const healthDays = input.period?.days ?? 30;
   const stepRows = input.health?.steps ?? [];
@@ -191,6 +226,11 @@ export function buildClientReport(input: ReportInput): ClientReport {
       detail: `${change > 0 ? "+" : ""}${change} ק״ג`,
       basis: `בין ${formatDate(previous.date)} (${previous.weight} ק״ג) ל-${formatDate(latest.date)} (${latest.weight} ק״ג)`,
     });
+    const elapsedDays=Math.max(1,Math.round((new Date(`${latest.date}T12:00:00Z`).getTime()-new Date(`${previous.date}T12:00:00Z`).getTime())/86_400_000));
+    const weeklyPercent=round(change/previous.weight*100*7/elapsedDays);
+    facts.push({label:"קצב שינוי משקל",value:`${weeklyPercent>0?"+":""}${weeklyPercent}% ממשקל הגוף לשבוע`});
+    if(input.goalLabel?.includes("חיטוב")&&Math.abs(weeklyPercent)>1) attention.push({text:"קצב הירידה במשקל מהיר ודורש בדיקת התאוששות וביצועים",basis:`${weeklyPercent}% ממשקל הגוף לשבוע בין ${formatDate(previous.date)} ל־${formatDate(latest.date)}`});
+    if(input.goalLabel?.includes("מסה")&&weeklyPercent>0.75) attention.push({text:"קצב העלייה במשקל מהיר ביחס למטרת מסה מבוקרת",basis:`+${weeklyPercent}% ממשקל הגוף לשבוע`});
   } else if (input.weighIns.length === 1) {
     missing.push("יש מדידת משקל אחת בלבד, ולכן אין עדיין מגמת משקל");
   }
@@ -254,6 +294,28 @@ export function buildClientReport(input: ReportInput): ClientReport {
   dailyTrend(stepRows.map((entry) => ({ day: entry.day, value: entry.steps })), "צעדים", "צעדים בממוצע", 250);
   dailyTrend(sleepRows.map((entry) => ({ day: entry.day, value: entry.minutes })), "משך שינה", "דקות בממוצע", 15);
 
+  if(recordedVolumes.length>=4){
+    const midpoint=Math.ceil(recordedVolumes.length/2);const earlier=averageNumbers(recordedVolumes.slice(0,midpoint));const recent=averageNumbers(recordedVolumes.slice(midpoint));const change=recent-earlier;
+    trends.push({label:"נפח אימון",direction:change>averageVolume*.05?"up":change<averageVolume*-.05?"down":"flat",outcome:change>averageVolume*.05?"positive":change<averageVolume*-.05?"negative":"neutral",detail:`${earlier.toLocaleString("he-IL")} → ${recent.toLocaleString("he-IL")} ק״ג`,basis:`השוואת ${midpoint} האימונים הראשונים ל־${recordedVolumes.length-midpoint} האחרונים`});
+  }
+  const previous=input.previousPeriod;
+  const compareAverage=(label:string,current:readonly number[],prior:readonly number[],unit:string,higherIsBetter=true)=>{
+    if(current.length<2||prior.length<2)return;const now=averageNumbers(current);const before=averageNumbers(prior);const change=now-before;
+    trends.push({label:`${label} מול החודש הקודם`,direction:change>0?"up":change<0?"down":"flat",outcome:change===0?"neutral":higherIsBetter===(change>0)?"positive":"negative",detail:`${before.toLocaleString("he-IL")} → ${now.toLocaleString("he-IL")} ${unit}`,basis:`החודש הנוכחי מול 30 הימים שקדמו לו`});
+  };
+  if(previous){
+    compareAverage("צעדים",stepRows.map((entry)=>entry.steps),previous.steps,"צעדים");
+    compareAverage("משך שינה",sleepRows.map((entry)=>entry.minutes),previous.sleep,"דקות");
+    if(previous.workoutsCompleted>0&&qualitySessions.length>0) trends.push({label:"אימונים מול החודש הקודם",direction:qualitySessions.length>previous.workoutsCompleted?"up":qualitySessions.length<previous.workoutsCompleted?"down":"flat",outcome:qualitySessions.length>previous.workoutsCompleted?"positive":qualitySessions.length<previous.workoutsCompleted?"negative":"neutral",detail:`${previous.workoutsCompleted} → ${qualitySessions.length} אימונים`,basis:"השוואת 30 הימים הנוכחיים ל־30 הימים שקדמו להם"});
+  }
+  const stepsDeviation=standardDeviation(stepRows.map((entry)=>entry.steps));
+  const sleepDeviation=standardDeviation(sleepRows.map((entry)=>entry.minutes));
+  if(stepRows.length>=12&&stepsDeviation>stepAverage*.45) attention.push({text:"הצעדים אינם עקביים בין הימים",basis:`סטיית תקן ${stepsDeviation.toLocaleString("he-IL")} סביב ממוצע ${stepAverage.toLocaleString("he-IL")} · ${stepRows.length} ימים`});
+  if(sleepRows.length>=12&&sleepDeviation>75) attention.push({text:"משך השינה תנודתי בין הלילות",basis:`סטיית תקן ${sleepDeviation} דקות · ${sleepRows.length} לילות`});
+  const sleepByDate=new Map(sleepRows.map((entry)=>[entry.day,entry.minutes]));
+  const stepSleepCorrelation=pearson(stepRows.flatMap((entry)=>sleepByDate.has(entry.day)?[[entry.steps,sleepByDate.get(entry.day)!] as [number,number]]:[]));
+  if(stepSleepCorrelation!==null&&Math.abs(stepSleepCorrelation)>=.45) facts.push({label:"קשר צעדים–שינה",value:`${stepSleepCorrelation>0?"קשר חיובי":"קשר הפוך"} בינוני (${round(stepSleepCorrelation)}) · תצפית בלבד`});
+
   // ------------------------------------------- 3/4. what is going well, and not
   const latestCheckIn = input.checkIns[0];
   const adherenceAverage = average("adherence");
@@ -291,6 +353,7 @@ export function buildClientReport(input: ReportInput): ClientReport {
     if (reportingPercent < 50) attention.push({ text: "חסר מספיק תיעוד תזונתי לניתוח אמין", basis: `${input.monthlyNutrition.daysReported} ימי דיווח מתוך ${input.period?.days ?? 30} · ${reportingPercent}%` });
     if (input.monthlyNutrition.mealsSkipped > 0) attention.push({ text: "ארוחות סומנו כלא נאכלו במהלך החודש", basis: `${input.monthlyNutrition.mealsSkipped} ארוחות מתוך ${input.monthlyNutrition.mealsMarked} שסומנו` });
   }
+  if(recordedVolumes.length>=4){const first=averageNumbers(recordedVolumes.slice(0,Math.ceil(recordedVolumes.length/2)));const last=averageNumbers(recordedVolumes.slice(Math.ceil(recordedVolumes.length/2)));if(last>first*1.05)positives.push({text:"נפח האימון התקדם במהלך החודש",basis:`ממוצע ${first.toLocaleString("he-IL")} → ${last.toLocaleString("he-IL")} ק״ג`});if(last<first*.9)attention.push({text:"נפח האימון ירד במהלך החודש",basis:`ממוצע ${first.toLocaleString("he-IL")} → ${last.toLocaleString("he-IL")} ק״ג`});}
   if (stepRows.length >= healthDays * .4) {
     if (stepAverage >= stepGoal) positives.push({ text: "ממוצע הצעדים עומד ביעד", basis: `${stepAverage.toLocaleString("he-IL")} צעדים בממוצע מול יעד ${stepGoal.toLocaleString("he-IL")} · ${stepRows.length} ימי נתונים` });
     else attention.push({ text: "ממוצע הצעדים נמוך מהיעד", basis: `${stepAverage.toLocaleString("he-IL")} צעדים בממוצע מול יעד ${stepGoal.toLocaleString("he-IL")} · ${stepRows.length} ימי נתונים` });
@@ -350,9 +413,12 @@ export function buildClientReport(input: ReportInput): ClientReport {
 
   // --------------------------------------------------------------- 8. actions
   if (missing.length) actions.push({ text: "להשלים את הנתונים החסרים לפני החלטות", basis: missing.join(" · ") });
+  if(input.previousActions?.length) actions.push({text:"לבדוק עם הלקוח אילו פעולות מהדוח הקודם בוצעו ומה הייתה ההשפעה",basis:input.previousActions.join(" · ")});
   if (sleepRows.length >= healthDays * .4 && sleepAverageMinutes < sleepGoal) actions.push({ text: `להוסיף ${Math.ceil((sleepGoal - sleepAverageMinutes) / 15) * 15} דקות שינה בממוצע במשך השבועיים הקרובים`, basis: `${sleepAverageMinutes} דקות בממוצע מול יעד ${sleepGoal} דקות` });
   if (stepRows.length >= healthDays * .4 && stepAverage < stepGoal) actions.push({ text: `להגיע לממוצע של לפחות ${stepGoal.toLocaleString("he-IL")} צעדים ב־5 ימים בכל שבוע`, basis: `${stepAverage.toLocaleString("he-IL")} צעדים בממוצע כעת · יעד ${stepGoal.toLocaleString("he-IL")}` });
   for (const item of [...nutrition, ...workouts]) if (actions.length < 4) actions.push(item);
+  const priority=(point:ReportPoint)=>input.goalLabel?.includes("חיטוב")?(point.text.includes("תזונ")||point.text.includes("צעדים")?3:point.text.includes("שינה")?2:1):input.goalLabel?.includes("מסה")?(point.text.includes("אימון")||point.text.includes("עומס")?3:point.text.includes("שינה")?2:1):point.text.includes("נתונים החסרים")?3:1;
+  actions.sort((a,b)=>priority(b)-priority(a));
 
   // ------------------------------------------------------------- the referral
   // Reported pain is never interpreted here. It is repeated back and sent on.
