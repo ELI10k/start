@@ -485,6 +485,26 @@ export function buildClientReport(input: ReportInput): ClientReport {
     ...(sleepRows.length >= healthDays * .4 && sleepAverageMinutes < sleepGoal ? [`להאריך את משך השינה — הממוצע היה ${sleepAverageMinutes} דקות מול יעד ${sleepGoal}`] : []),
   ].filter((text, index, rows) => rows.indexOf(text) === index);
   const improvement = improvementText.slice(0, 6).map((text) => `🎯 ${text}`);
+  const monthlyClientTasks = [
+    input.monthlyNutrition && input.monthlyNutrition.daysReported < 24
+      ? `במשך 7 ימים לסמן כל ארוחה עד 15 דקות מסיום האכילה, כולל כמות וכל מה שנאכל מחוץ לתפריט. היעד: לפחות 6 ימי דיווח מלאים מתוך 7`
+      : null,
+    hungerAverage !== null && hungerAverage >= 8
+      ? `במשך 7 ימים להצמיד מקור חלבון וירק או פרי לארוחות העיקריות ולדרג רעב לפני ואחרי. אם הרעב לא יורד לפחות ב־2 נקודות — לעדכן אותי ונשנה את חלוקת הארוחות`
+      : null,
+    input.monthlyWorkouts && input.monthlyWorkouts.completionPercent < 80
+      ? `לקבוע מראש את ימי האימון ויום גיבוי. אם אימון מתפספס, להעביר אותו בתוך 48 שעות; ביום עמוס לבצע לפחות גרסת 20 דקות במקום לוותר`
+      : null,
+    input.monthlyWorkouts && input.monthlyWorkouts.completionPercent >= 80
+      ? `באימונים לשמור את המשקל עד ששני אימונים רצופים הושלמו בקצה העליון של טווח החזרות ובקושי עד 3/5. רק אז להעלות מדרגה אחת במשקל`
+      : null,
+    stepRows.length >= healthDays * .4 && stepAverage < stepGoal
+      ? `להגיע לפחות ל־${stepGoal.toLocaleString("he-IL")} צעדים ב־5 ימים בכל שבוע במשך השבועיים הקרובים`
+      : null,
+    sleepRows.length >= healthDays * .4 && sleepAverageMinutes < sleepGoal
+      ? `להקדים את שעת השינה ב־${Math.max(15,Math.min(60,Math.ceil((sleepGoal-sleepAverageMinutes)/15)*15))} דקות לפחות 5 לילות בשבוע במשך השבועיים הקרובים`
+      : null,
+  ].filter((value):value is string=>Boolean(value)).slice(0,3);
   const weeklyCheckIn = input.checkIns[0];
   const weeklyDate = weeklyCheckIn?.submittedAt.slice(0, 10).split("-").reverse().join(".");
   const weeklyGood = [
@@ -495,23 +515,32 @@ export function buildClientReport(input: ReportInput): ClientReport {
     input.hasProgram && input.weeklyCompletionPercent >= 80 ? `השלמת ${input.weeklyCompletionPercent}% מאימוני השבוע — עקביות יפה` : null,
     input.weeklyNutrition && input.weeklyNutrition.daysReported >= 6 ? `מילאת תזונה ב־${input.weeklyNutrition.daysReported} מתוך 7 ימים — מעקב מצוין` : null,
   ].filter((value): value is string => Boolean(value));
-  const weeklyImprove = [
-    typeof weeklyCheckIn?.adherence === "number" && weeklyCheckIn.adherence < 8 ? `לחזק את ההיצמדות לתוכנית — השבוע דירגת אותה ${weeklyCheckIn.adherence}/10` : null,
-    typeof weeklyCheckIn?.sleep === "number" && weeklyCheckIn.sleep < 7 ? `לתת יותר תשומת לב לשינה — השבוע היא הייתה ${weeklyCheckIn.sleep}/10` : null,
-    typeof weeklyCheckIn?.energy === "number" && weeklyCheckIn.energy < 7 ? `לשים לב לאנרגיה במהלך היום — השבוע היא הייתה ${weeklyCheckIn.energy}/10` : null,
-    typeof weeklyCheckIn?.hunger === "number" && weeklyCheckIn.hunger >= 8 ? `לעדכן אותי בזמן כשיש רעב גבוה — השבוע הוא היה ${weeklyCheckIn.hunger}/10` : null,
-    input.hasProgram && input.weeklyCompletionPercent < 80 ? `להשלים את האימונים המתוכננים ולמלא משקלים וחזרות — השבוע הושלמו ${input.weeklyCompletionPercent}%` : null,
-    input.weeklyNutrition && input.weeklyNutrition.daysReported < 6 ? `למלא בכל יום מה נאכל, כמויות וארוחות שלא נאכלו — השבוע מולאו ${input.weeklyNutrition.daysReported} מתוך 7 ימים` : null,
+  const weeklySnapshot = [
+    typeof weeklyCheckIn?.adherence === "number" ? `היצמדות ${weeklyCheckIn.adherence}/10` : null,
+    typeof weeklyCheckIn?.sleep === "number" ? `שינה ${weeklyCheckIn.sleep}/10` : null,
+    typeof weeklyCheckIn?.hunger === "number" ? `רעב ${weeklyCheckIn.hunger}/10` : null,
+    input.hasProgram ? `${input.weeklyCompletionPercent}% מהאימונים הושלמו` : null,
+    input.weeklyNutrition ? `תזונה מולאה ב־${input.weeklyNutrition.daysReported} מתוך 7 ימים` : null,
+  ].filter((value):value is string=>Boolean(value));
+  const weeklyTasks = [
+    input.weeklyNutrition && input.weeklyNutrition.daysReported < 6 ? `להגדיר שתי תזכורות קבועות ולסמן כל ארוחה עד 15 דקות מסיום האכילה. היעד השבוע: 6 ימי דיווח מלאים מתוך 7` : null,
+    typeof weeklyCheckIn?.sleep === "number" && weeklyCheckIn.sleep < 7 ? `להקדים את שעת השינה ב־30 דקות לפחות 5 לילות השבוע ולהפסיק מסכים 30 דקות לפני השינה` : null,
+    typeof weeklyCheckIn?.hunger === "number" && weeklyCheckIn.hunger >= 8 ? `להוסיף מקור חלבון וירק או פרי בארוחות הצהריים והערב במשך 7 ימים, ולדרג רעב לפני ואחרי. אם הרעב נשאר 8/10 ומעלה במשך 3 ימים — לעדכן אותי` : null,
+    input.hasProgram && input.weeklyCompletionPercent < 80 ? `לקבוע עכשיו את ימי האימון ויום גיבוי. אם אין זמן לאימון מלא, לבצע גרסת 20 דקות ולמלא בסיום משקלים, חזרות ורמת קושי` : null,
+    typeof weeklyCheckIn?.adherence === "number" && weeklyCheckIn.adherence < 8 ? `לבחור פעולה אחת שקשה לשמור עליה, לקבוע לה שעה וטריגר קבועים ולסמן ביצוע בכל יום במשך השבוע` : null,
+    typeof weeklyCheckIn?.energy === "number" && weeklyCheckIn.energy < 7 ? `למשך 7 ימים לרשום שעה שבה האנרגיה יורדת, הארוחה שקדמה לה ושעות השינה; נבדוק יחד את הדפוס בצ׳ק־אין הבא` : null,
   ].filter((value): value is string => Boolean(value));
   const weeklyClientMessage = weeklyCheckIn ? [
     `היי ${firstName}, מה נשמע?`,
     `עברתי על הצ׳ק־אין שמילאת ב־${weeklyDate} ועל נתוני השבוע האחרון.`,
     "",
+    `תמונת השבוע בקצרה: ${weeklySnapshot.join(" · ")}`,
+    "",
     "דברים לשימור:",
     ...weeklyGood.slice(0, 5).map((text) => `✅ ${text}`),
-    ...(weeklyImprove.length ? ["", "דברים לשיפור השבוע:", ...weeklyImprove.slice(0, 5).map((text) => `🎯 ${text}`)] : []),
+    ...(weeklyTasks.length ? ["", "תוכנית העבודה שלך לשבוע הקרוב:", ...weeklyTasks.slice(0, 3).map((text,index) => `${index+1}. ${text}`)] : []),
     "",
-    "המטרה השבוע היא להמשיך את מה שעובד ולשפר נקודה אחת בכל פעם. אני איתך, ממשיכים לעבוד 💪",
+    "בצ׳ק־אין הבא נעבור על שלושת היעדים ונראה מה בוצע, מה היה קשה ומה צריך להתאים. אני איתך, ממשיכים לעבוד 💪",
     "אלי",
   ].join("\n") : null;
   const clientMessage = [
@@ -522,9 +551,10 @@ export function buildClientReport(input: ReportInput): ClientReport {
     ...preservation,
     "",
     "קודם כל כל הכבוד על העבודה וההשקעה. כל דבר טוב שעשית החודש הוא בסיס שאנחנו ממשיכים לבנות עליו.",
-    ...(improvement.length ? ["", "דברים לשיפור:", ...improvement] : []),
+    ...(improvement.length ? ["", "מה דורש שיפור:", ...improvement] : []),
+    ...(monthlyClientTasks.length ? ["", "תוכנית העבודה שלך ל־14 הימים הקרובים:", ...monthlyClientTasks.map((text,index)=>`${index+1}. ${text}`)] : []),
     "",
-    "המטרה שלנו לחודש הקרוב היא להמשיך את הדברים הטובים ולשפר כל פעם נקודה אחת, בלי לחפש מושלם. עקביות מנצחת הכול.",
+    "בעדכון הבא נעבור על הביצוע של כל משימה ונחליט לפי הנתונים אם ממשיכים, משנים או מעלים רמה. לא מחפשים מושלם — מחפשים ביצוע עקבי שאפשר למדוד.",
     "אני איתך לאורך כל הדרך. ממשיכים לעבוד 💪",
     "אלי",
   ].join("\n");
