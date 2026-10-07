@@ -66,7 +66,7 @@ export default async function ProfilePage() {
           <span className="settings-group__label"><LifeBuoy aria-hidden="true" size={18} />תמיכה</span>
           <ChevronLeft aria-hidden="true" size={18} />
         </Link>
-        <Link href="/content/10000000-0000-4000-8000-000000000004">
+        <Link href="/content/category/start-guide">
           <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
           <ChevronLeft aria-hidden="true" size={18} />
         </Link>
