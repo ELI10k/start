@@ -8,6 +8,7 @@ import AnalyticsProvider from "@/components/client/AnalyticsProvider";
 const links = [
   { href: "/", label: "בית" },
   { href: "/nutrition", label: "תזונה" },
+  { href: "/my-meals", label: "הארוחות שלי" },
   { href: "/workouts", label: "אימונים" },
   { href: "/progress", label: "התקדמות" },
   { href: "/messages", label: "הודעות" },
