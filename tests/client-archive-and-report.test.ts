@@ -300,8 +300,9 @@ test("the monthly report creates an editable Eli-style message from its findings
   assert.match(report.clientMessage, /מתחילת התהליך ב־01\.06\.2026 ירדת 6\.4 ק״ג/);
   assert.match(report.clientMessage, /מ־94 ל־87\.6 ק״ג/);
   assert.match(report.clientMessage, /ירדת 7 ס״מ בהיקף הטבור/);
-  assert.match(report.clientMessage, /דברים לשיפור:/);
-  assert.match(report.clientMessage, /עקביות מנצחת הכול/);
+  assert.match(report.clientMessage, /מה דורש שיפור:/);
+  assert.match(report.clientMessage, /תוכנית העבודה שלך ל־14 הימים הקרובים:/);
+  assert.match(report.clientMessage, /ביצוע עקבי שאפשר למדוד/);
   assert.match(report.clientMessage, /אלי$/);
   assert.doesNotMatch(report.clientMessage, /לשקול|שינוי בקלוריות|להתאים את תדירות|לשייך תוכנית/);
 
@@ -323,8 +324,10 @@ test("the report prepares a separate weekly check-in reply and monthly summary",
   });
   assert.match(report.weeklyClientMessage ?? "", /הצ׳ק־אין שמילאת ב־15\.09\.2026/);
   assert.match(report.weeklyClientMessage ?? "", /נתוני השבוע האחרון/);
-  assert.match(report.weeklyClientMessage ?? "", /לשינה.*4\/10/);
-  assert.match(report.weeklyClientMessage ?? "", /מולאו 4 מתוך 7 ימים/);
+  assert.match(report.weeklyClientMessage ?? "", /שינה 4\/10/);
+  assert.match(report.weeklyClientMessage ?? "", /תזונה מולאה ב־4 מתוך 7 ימים/);
+  assert.match(report.weeklyClientMessage ?? "", /תוכנית העבודה שלך לשבוע הקרוב:/);
+  assert.match(report.weeklyClientMessage ?? "", /להקדים את שעת השינה ב־30 דקות/);
   assert.match(report.clientMessage, /החודש האחרון/);
 
   const view = await source("components/coach/client-file/ClientReport.tsx");
