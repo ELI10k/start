@@ -507,26 +507,28 @@ export function buildClientReport(input: ReportInput): ClientReport {
   ].filter((value):value is string=>Boolean(value)).slice(0,3);
   const weeklyCheckIn = input.checkIns[0];
   const weeklyDate = weeklyCheckIn?.submittedAt.slice(0, 10).split("-").reverse().join(".");
+  const monthlyWorkoutPercent = input.monthlyWorkouts?.completionPercent ?? null;
   const weeklyGood = [
     weeklyCheckIn ? `מילאת את הצ׳ק־אין השבועי בזמן ונתת לי תמונה ברורה של השבוע` : null,
     typeof weeklyCheckIn?.adherence === "number" && weeklyCheckIn.adherence >= 8 ? `ההיצמדות השבועית הייתה ${weeklyCheckIn.adherence}/10 — עבודה חזקה` : null,
     typeof weeklyCheckIn?.energy === "number" && weeklyCheckIn.energy >= 8 ? `רמת האנרגיה הייתה ${weeklyCheckIn.energy}/10 — נתון מצוין` : null,
     typeof weeklyCheckIn?.sleep === "number" && weeklyCheckIn.sleep >= 8 ? `השינה הייתה ${weeklyCheckIn.sleep}/10 — תמשיך לשמור על השגרה הזאת` : null,
-    input.hasProgram && input.weeklyCompletionPercent >= 80 ? `השלמת ${input.weeklyCompletionPercent}% מאימוני השבוע — עקביות יפה` : null,
+    monthlyWorkoutPercent !== null && monthlyWorkoutPercent >= 80 ? `ב־30 הימים האחרונים השלמת ${input.monthlyWorkouts?.completed} מתוך ${input.monthlyWorkouts?.expected} אימונים מתוכננים — עקביות חזקה` : null,
     input.weeklyNutrition && input.weeklyNutrition.daysReported >= 6 ? `מילאת תזונה ב־${input.weeklyNutrition.daysReported} מתוך 7 ימים — מעקב מצוין` : null,
   ].filter((value): value is string => Boolean(value));
   const weeklySnapshot = [
     typeof weeklyCheckIn?.adherence === "number" ? `היצמדות ${weeklyCheckIn.adherence}/10` : null,
     typeof weeklyCheckIn?.sleep === "number" ? `שינה ${weeklyCheckIn.sleep}/10` : null,
     typeof weeklyCheckIn?.hunger === "number" ? `רעב ${weeklyCheckIn.hunger}/10` : null,
-    input.hasProgram ? `${input.weeklyCompletionPercent}% מהאימונים הושלמו` : null,
+    monthlyWorkoutPercent !== null ? `ב־30 הימים האחרונים הושלמו ${input.monthlyWorkouts?.completed} מתוך ${input.monthlyWorkouts?.expected} אימונים מתוכננים` : null,
     input.weeklyNutrition ? `תזונה מולאה ב־${input.weeklyNutrition.daysReported} מתוך 7 ימים` : null,
   ].filter((value):value is string=>Boolean(value));
   const weeklyTasks = [
     input.weeklyNutrition && input.weeklyNutrition.daysReported < 6 ? `להגדיר שתי תזכורות קבועות ולסמן כל ארוחה עד 15 דקות מסיום האכילה. היעד השבוע: 6 ימי דיווח מלאים מתוך 7` : null,
     typeof weeklyCheckIn?.sleep === "number" && weeklyCheckIn.sleep < 7 ? `להקדים את שעת השינה ב־30 דקות לפחות 5 לילות השבוע ולהפסיק מסכים 30 דקות לפני השינה` : null,
     typeof weeklyCheckIn?.hunger === "number" && weeklyCheckIn.hunger >= 8 ? `להוסיף מקור חלבון וירק או פרי בארוחות הצהריים והערב במשך 7 ימים, ולדרג רעב לפני ואחרי. אם הרעב נשאר 8/10 ומעלה במשך 3 ימים — לעדכן אותי` : null,
-    input.hasProgram && input.weeklyCompletionPercent < 80 ? `לקבוע עכשיו את ימי האימון ויום גיבוי. אם אין זמן לאימון מלא, לבצע גרסת 20 דקות ולמלא בסיום משקלים, חזרות ורמת קושי` : null,
+    monthlyWorkoutPercent !== null && monthlyWorkoutPercent < 80 ? `לקבוע עכשיו את ימי האימון ויום גיבוי. אם אין זמן לאימון מלא, לבצע גרסת 20 דקות ולמלא בסיום משקלים, חזרות ורמת קושי` : null,
+    monthlyWorkoutPercent !== null && monthlyWorkoutPercent >= 80 ? `להמשיך באותה תדירות. להעלות משקל רק בתרגיל שבו הגעת לקצה העליון של טווח החזרות בשני אימונים רצופים ובקושי עד 3/5` : null,
     typeof weeklyCheckIn?.adherence === "number" && weeklyCheckIn.adherence < 8 ? `לבחור פעולה אחת שקשה לשמור עליה, לקבוע לה שעה וטריגר קבועים ולסמן ביצוע בכל יום במשך השבוע` : null,
     typeof weeklyCheckIn?.energy === "number" && weeklyCheckIn.energy < 7 ? `למשך 7 ימים לרשום שעה שבה האנרגיה יורדת, הארוחה שקדמה לה ושעות השינה; נבדוק יחד את הדפוס בצ׳ק־אין הבא` : null,
   ].filter((value): value is string => Boolean(value));

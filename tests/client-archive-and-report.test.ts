@@ -336,6 +336,23 @@ test("the report prepares a separate weekly check-in reply and monthly summary",
   assert.match(view, /מתעדכן מיד עם קבלת צ׳ק־אין חדש/);
 });
 
+test("training guidance uses the last thirty days and ignores the new calendar week", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    clientName: "דני",
+    checkIns: [{ submittedAt: "2026-10-04T08:00:00Z", adherence: 9, energy: 8, sleep: 8, hunger: 4, workoutsCompleted: 3, mealPlanDays: 6, notes: null }],
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    weeklyCompletionPercent: 0,
+    period: { start: "2026-09-08", end: "2026-10-07", days: 30 },
+    monthlyWorkouts: { completed: 11, skipped: 0, expected: 9, completionPercent: 100 },
+  });
+  assert.match(report.weeklyClientMessage ?? "", /30 הימים האחרונים.*11 מתוך 9 אימונים/);
+  assert.match(report.weeklyClientMessage ?? "", /להמשיך באותה תדירות/);
+  assert.doesNotMatch(report.weeklyClientMessage ?? "", /לקבוע עכשיו את ימי האימון ויום גיבוי/);
+});
+
 test("the versions migration is additive and freezes an approved version", async () => {
   const migration = await source("supabase/migrations/202608120002_coach_report_versions.sql");
   assert.match(migration, /Applied to the shared Supabase project/);
