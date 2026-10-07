@@ -113,15 +113,15 @@ export default function ClientReportView({ report, clientId }: { report: ClientR
         <Points points={report.attention} empty="לא נמצאו סימנים שדורשים תשומת לב בנתונים הקיימים."/>
       </Block>
 
-      <Block title="5 · המלצות תזונה">
+      <Block title="5 · תוכנית פעולה תזונתית">
         <Points points={report.nutrition} empty="אין מספיק נתונים להמלצת תזונה."/>
       </Block>
 
-      <Block title="6 · המלצות אימונים">
+      <Block title="6 · תוכנית פעולה באימונים">
         <Points points={report.workouts} empty="אין מספיק נתונים להמלצת אימון."/>
       </Block>
 
-      <Block title="7 · שאלות ללקוח">
+      <Block title="7 · שאלות אבחון לפני התאמה">
         {report.questions.length ? (
           <ul className="grid gap-1 text-sm">{report.questions.map((question) => <li key={question}>· {question}</li>)}</ul>
         ) : <p className="text-sm text-[#5B5F5B]">אין שאלות שעולות מהנתונים הקיימים.</p>}

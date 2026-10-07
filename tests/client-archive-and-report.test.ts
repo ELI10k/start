@@ -88,7 +88,7 @@ test("with no data the report states what is missing and recommends nothing", ()
   assert.ok(report.missing.includes("אין מדידות משקל"));
   assert.ok(report.missing.includes("אין צ׳ק־אינים"));
   // The only action is to go and get the data.
-  assert.equal(report.actions[0]?.text, "להשלים את הנתונים החסרים לפני החלטות");
+  assert.match(report.actions[0]?.text ?? "", /שקילת בוקר.*צ׳ק־אין מלא/);
   assert.equal(report.referral, null);
 });
 
@@ -200,6 +200,29 @@ test("every recommendation carries the figures it came from", () => {
   assert.ok(report.workouts.some((point) => point.basis.includes("25%")));
 });
 
+test("nutrition and workout recommendations are executable protocols, not coach questions", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    weighIns: [{ date: "2026-09-30", weight: 88, navel: 95 }, { date: "2026-09-01", weight: 87.5, navel: 95 }],
+    goalLabel: "חיטוב מהיר",
+    hasMenu: true,
+    monthlyNutrition: { daysReported: 5, mealsMarked: 20, mealsEaten: 18, mealsSkipped: 2, outsideItems: 2 },
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    monthlyWorkouts: { completed: 11, expected: 9, skipped: 0, completionPercent: 100 },
+    workoutQuality: { sessions: [], previousSessionCount: 0, previousAverageVolume: null },
+  });
+  const nutrition = report.nutrition.map((point) => point.text).join(" ");
+  const workouts = report.workouts.map((point) => point.text).join(" ");
+  assert.match(nutrition, /14 יום.*שקילות בוקר/);
+  assert.match(nutrition, /מעקב תזונה של 7 ימים/);
+  assert.match(workouts, /שני אימונים רצופים/);
+  assert.match(workouts, /2\.5%–5%/);
+  assert.doesNotMatch(`${nutrition} ${workouts}`, /^לבדוק|^לשקול/);
+});
+
 test("nothing is said about food or training the client never reported", () => {
   const report = buildClientReport(EMPTY);
   const everything = [...report.nutrition, ...report.workouts, ...report.positives, ...report.attention].map((point) => point.text).join(" ");
@@ -227,9 +250,9 @@ test("the report view separates a number, a direction and a suggestion", async (
   assert.match(view, /2 · מגמות במהלך 30 הימים/);
   assert.match(view, /3 · נקודות חיוביות/);
   assert.match(view, /4 · דורש תשומת לב/);
-  assert.match(view, /5 · המלצות תזונה/);
-  assert.match(view, /6 · המלצות אימונים/);
-  assert.match(view, /7 · שאלות ללקוח/);
+  assert.match(view, /5 · תוכנית פעולה תזונתית/);
+  assert.match(view, /6 · תוכנית פעולה באימונים/);
+  assert.match(view, /7 · שאלות אבחון לפני התאמה/);
   assert.match(view, /8 · פעולות מוצעות לחודש הבא/);
   assert.match(view, /מבוסס על: \{point\.basis\}/);
   assert.match(view, /אין עדיין שתי נקודות זמן להשוואה/);
