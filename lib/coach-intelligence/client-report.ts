@@ -374,32 +374,40 @@ export function buildClientReport(input: ReportInput): ClientReport {
   // recommendation is not made at all.
   const weightTrend = trends.find((trend) => trend.label === "משקל");
   if (weightTrend && input.goalLabel) {
-    nutrition.push({
-      text: `לבדוק אם קצב שינוי המשקל תואם למטרה „${input.goalLabel}” לפני שינוי בקלוריות`,
-      basis: `מגמת משקל ${weightTrend.detail} · ${weightTrend.basis}`,
+    const reportingDays=input.monthlyNutrition?.daysReported??0;
+    const offGoal=weightTrend.outcome==="negative";
+    if(offGoal&&reportingDays>=15) nutrition.push({
+      text: input.goalLabel.includes("חיטוב")
+        ? "לעבוד 14 ימים עם כלל החלטה אחד: אם ממוצע 7 השקילות אינו יורד לפחות 0.25% בשבוע וההיצמדות 8/10 ומעלה — להפחית 100–150 קלוריות מהיעד היומי; אם ההיצמדות נמוכה יותר, משפרים ביצוע בלי להפחית קלוריות"
+        : "לעבוד 14 ימים עם כלל החלטה אחד: אם ממוצע 7 השקילות אינו עולה 0.1%–0.5% בשבוע וההיצמדות 8/10 ומעלה — להוסיף 100–150 קלוריות ביום; אם ההיצמדות נמוכה יותר, משפרים ביצוע בלי להעלות יעד",
+      basis: `מגמת משקל ${weightTrend.detail} מול מטרה „${input.goalLabel}” · ${reportingDays} ימי תזונה מדווחים`,
+    });
+    else nutrition.push({
+      text: "לבצע פרוטוקול שקילה ל־14 יום: 3–7 שקילות בוקר בשבוע בתנאים קבועים, לעבוד לפי ממוצע שבועי ולא לפי שקילה בודדת, ולא לשנות קלוריות עד שיש לפחות 7 ימי תזונה מלאים בכל שבוע",
+      basis: `מגמת משקל ${weightTrend.detail} · כרגע ${reportingDays} ימי תזונה מדווחים`,
     });
   }
   if (input.monthlyNutrition && input.monthlyNutrition.daysReported < 15) {
-    nutrition.push({ text: "לפני שינוי בתפריט — לחזק דיווח יומי כדי לזהות דפוס אמיתי", basis: `${input.monthlyNutrition.daysReported} ימי תזונה מדווחים ב־${input.period?.days ?? 30} ימים` });
+    nutrition.push({ text: "להפעיל מעקב תזונה של 7 ימים: לסמן כל ארוחה מיד לאחר האכילה, לרשום כמות, לצלם כל חריגה ולדרג רעב 1–10 לפני הארוחה; בסוף השבוע לבחור ארוחה בעייתית אחת בלבד לשינוי", basis: `${input.monthlyNutrition.daysReported} ימי תזונה מדווחים ב־${input.period?.days ?? 30} ימים` });
   } else if (input.hasMenu && input.menuCompletionPercent < 50 && input.menuPlannedMeals > 0) {
-    nutrition.push({ text: "לפני שינוי ביעד — לבדוק מה מונע סימון של הארוחות", basis: `סימון ${input.menuCompletionPercent}% היום` });
+    nutrition.push({ text: "לקבוע שתי תזכורות קבועות ביום ולסמן את הארוחות עד 15 דקות מסיום האכילה; יעד הביצוע הוא לפחות 6 ימי דיווח מלאים בשבוע לפני שינוי בתפריט", basis: `סימון ${input.menuCompletionPercent}% היום מתוך ${input.menuPlannedMeals} ארוחות` });
   }
-  if (!input.hasMenu) nutrition.push({ text: "לבנות תפריט, אחרת אין מה למדוד מול היעד", basis: "אין תפריט פעיל" });
+  if (!input.hasMenu) nutrition.push({ text: "לבנות ללקוח תפריט בסיסי עם 3–5 ארוחות לפי סדר היום, מקור חלבון בכל ארוחה ושתי חלופות מוכנות לכל ארוחה; לאחר 7 ימי ביצוע לבצע התאמה לפי רעב, היצמדות וממוצע משקל", basis: "אין תפריט פעיל" });
   if ((monthly ? hungerAverage : latestCheckIn?.hunger) !== undefined && (monthly ? hungerAverage : latestCheckIn?.hunger) !== null && Number(monthly ? hungerAverage : latestCheckIn?.hunger) >= HIGH_RATING) {
-    nutrition.push({ text: "לשקול חלוקה מחדש של הארוחות או העלאת חלבון וסיבים", basis: monthly ? `ממוצע רעב חודשי ${hungerAverage}/10` : `רעב ${latestCheckIn?.hunger}/10 בצ׳ק־אין האחרון` });
+    nutrition.push({ text: "למשך 7 ימים להצמיד לכל ארוחה עיקרית מנת חלבון מתוכננת וירק או פרי, להעביר 10%–15% מהקלוריות לשעות שבהן הרעב הגבוה ביותר ולדרג רעב לפני ואחרי; אם אין שיפור של לפחות 2 נקודות — להתאים מחדש את חלוקת הארוחות", basis: monthly ? `ממוצע רעב חודשי ${hungerAverage}/10` : `רעב ${latestCheckIn?.hunger}/10 בצ׳ק־אין האחרון` });
   }
 
-  if (!input.hasProgram) workouts.push({ text: "לשייך תוכנית אימונים", basis: "אין תוכנית משויכת" });
+  if (!input.hasProgram) workouts.push({ text: "לשייך תוכנית התחלתית ל־4 שבועות עם 2–3 אימונים בשבוע, ימים קבועים ותרגיל חלופי לכל תנועה; להתחיל בעומס שמשאיר 2–3 חזרות ברזרבה", basis: "אין תוכנית משויכת" });
   else if (input.monthlyWorkouts) {
-    if (input.monthlyWorkouts.completionPercent < 50) workouts.push({ text: "להתאים את תדירות האימונים ליכולת ההתמדה בפועל", basis: `${input.monthlyWorkouts.completed} מתוך ${input.monthlyWorkouts.expected} אימונים בחודש · ${input.monthlyWorkouts.skipped} דולגו` });
-    else if (input.monthlyWorkouts.completionPercent >= 80) workouts.push({ text: "לבדוק נתוני משקלים, חזרות ורמת מאמץ לפני החלטה על התקדמות בעומס", basis: `${input.monthlyWorkouts.completed} מתוך ${input.monthlyWorkouts.expected} אימונים בחודש · ${input.monthlyWorkouts.completionPercent}% השלמה בלבד אינו מספיק להעלאת עומס` });
+    if (input.monthlyWorkouts.completionPercent < 50) workouts.push({ text: "לקבוע מראש את ימי האימון ביומן ולהשתמש בכלל 48 השעות: אימון שהתפספס מועבר בתוך 48 שעות ולא נמחק; להגדיר גרסת מינימום של 20 דקות ליום עמוס, ואחרי שבועיים להתאים את התדירות למספר האימונים שבוצע בפועל", basis: `${input.monthlyWorkouts.completed} מתוך ${input.monthlyWorkouts.expected} אימונים בחודש · ${input.monthlyWorkouts.skipped} דולגו` });
+    else if (input.monthlyWorkouts.completionPercent >= 80) workouts.push({ text: "להשתמש בהתקדמות כפולה: לשמור את המשקל עד ששני אימונים רצופים הושלמו בכל הסטים בקצה העליון של טווח החזרות ובקושי עד 3/5; אז להוסיף את מדרגת המשקל הקטנה ביותר, בדרך כלל 2.5%–5%. בקושי 4–5/5 משאירים או מפחיתים עומס", basis: `${input.monthlyWorkouts.completed} מתוך ${input.monthlyWorkouts.expected} אימונים בחודש · ${input.monthlyWorkouts.completionPercent}% השלמה · ${recordedDifficulty.length} דיווחי קושי` });
   } else if (input.weeklyCompletionPercent < 50) {
-    workouts.push({ text: "לשקול הפחתת תדירות שבועית לרמה שהלקוח באמת עומד בה", basis: `${input.weeklyCompletionPercent}% השלמה מול ${input.weeklyFrequency ?? "?"} אימונים בשבוע` });
+    workouts.push({ text: "לבחור עכשיו יומיים קבועים לאימון ויום גיבוי, להכין גרסת 20 דקות ליום עמוס ולהעביר כל אימון שהתפספס ליום הגיבוי באותו שבוע", basis: `${input.weeklyCompletionPercent}% השלמה מול ${input.weeklyFrequency ?? "?"} אימונים בשבוע` });
   } else if (input.weeklyCompletionPercent >= 100 && input.hasProgram) {
-    workouts.push({ text: "אפשר לשקול העלאת עומס או נפח", basis: `השלמה מלאה של ${input.weeklyFrequency ?? "?"} אימונים בשבוע` });
+    workouts.push({ text: "להתקדם רק בתרגיל שבו הושלם הקצה העליון של טווח החזרות בשני אימונים רצופים ובקושי עד 3/5; להוסיף מדרגת משקל אחת בלבד ולשמור את מספר הסטים", basis: `השלמה מלאה של ${input.weeklyFrequency ?? "?"} אימונים בשבוע` });
   }
   if (!input.lastWorkoutAt && input.hasProgram) {
-    workouts.push({ text: "לברר מה עוצר את תחילת האימונים", basis: "אין אף אימון שהושלם" });
+    workouts.push({ text: "לקבוע עם הלקוח כבר עכשיו אימון פתיחה של 20–30 דקות, לשלוח שעה ויום מדויקים ולהתחיל ב־70% מהנפח המתוכנן כדי לייצר הצלחה ראשונה", basis: "אין אף אימון שהושלם" });
   }
 
   // ------------------------------------------------------------- 7. questions
@@ -412,8 +420,8 @@ export function buildClientReport(input: ReportInput): ClientReport {
   if (sleepRows.length >= healthDays * .4 && sleepAverageMinutes < sleepGoal) questions.push("מה מקצר בפועל את שעות השינה — שעת שינה, יקיצות או שעת קימה?");
 
   // --------------------------------------------------------------- 8. actions
-  if (missing.length) actions.push({ text: "להשלים את הנתונים החסרים לפני החלטות", basis: missing.join(" · ") });
-  if(input.previousActions?.length) actions.push({text:"לבדוק עם הלקוח אילו פעולות מהדוח הקודם בוצעו ומה הייתה ההשפעה",basis:input.previousActions.join(" · ")});
+  if (missing.length) actions.push({ text: "לקבוע השבוע שתי נקודות עדכון קבועות: שקילת בוקר אחת באמצע השבוע וצ׳ק־אין מלא בסופו; להשלים בכל יום את סימון התזונה ולסנכרן צעדים ושינה לפני הצ׳ק־אין", basis: missing.join(" · ") });
+  if(input.previousActions?.length) actions.push({text:"לפתוח את השיחה הקרובה בשלוש הפעולות מהדוח הקודם, לסמן לכל אחת בוצע / חלקי / לא בוצע, ולשמור רק פעולה אחת שלא בוצעה כיעד לשבוע הבא",basis:input.previousActions.join(" · ")});
   if (sleepRows.length >= healthDays * .4 && sleepAverageMinutes < sleepGoal) actions.push({ text: `להוסיף ${Math.ceil((sleepGoal - sleepAverageMinutes) / 15) * 15} דקות שינה בממוצע במשך השבועיים הקרובים`, basis: `${sleepAverageMinutes} דקות בממוצע מול יעד ${sleepGoal} דקות` });
   if (stepRows.length >= healthDays * .4 && stepAverage < stepGoal) actions.push({ text: `להגיע לממוצע של לפחות ${stepGoal.toLocaleString("he-IL")} צעדים ב־5 ימים בכל שבוע`, basis: `${stepAverage.toLocaleString("he-IL")} צעדים בממוצע כעת · יעד ${stepGoal.toLocaleString("he-IL")}` });
   for (const item of [...nutrition, ...workouts]) if (actions.length < 4) actions.push(item);
