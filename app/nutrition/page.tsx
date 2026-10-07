@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Fragment } from "react";
+import Link from "next/link";
 import ClientShell from "@/components/client/ClientShell";
 import MealOptionButton from "@/components/client/MealOptionButton";
 import MealStatusControl from "@/components/client/MealStatusControl";
@@ -74,14 +75,19 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
   const supabase = await createSupabaseServerClient();
-  const [menu, freeMenu, foods, logged, behavior, favoriteResult] = await Promise.all([
+  const [menu, freeMenu, foods, logged, behavior, favoriteResult, savedMealsResult] = await Promise.all([
     getActiveClientMenu(auth.id, today),
     getFreeMenuDay(auth.id, today),
     listDatabaseFoods(),
     listClientFoodLog(auth.id, today),
     getClientNutritionBehavior(auth.id,today),
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
+    supabase.from("my_meals").select("id,name,my_meal_items(id)").eq("client_id", auth.id).order("updated_at", { ascending: false }),
   ]);
+  if (savedMealsResult.error) console.error("saved meals unavailable", { code: savedMealsResult.error.code });
+  const savedMeals = (savedMealsResult.data ?? []).map((meal) => ({
+    id: String(meal.id), name: String(meal.name), itemCount: Array.isArray(meal.my_meal_items) ? meal.my_meal_items.length : 0,
+  }));
   // Favourites only reorder the food picker. This screen is the client's plan,
   // the day's log and today's totals, and none of that should disappear
   // because one convenience table was briefly unreachable - which is the rule
@@ -207,6 +213,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
           tab inside every meal's "אכלתי משהו אחר" sheet, so the card here was a
           second door to one room, charging 90px for it. */}
       <div className="nutrition-toolbar">
+        <Link href={`/my-meals?date=${today}`} className="chip">הארוחות שלי</Link>
         {/* Only while there is something to jump to: once the current meal is
             marked, the anchor is gone and so is this. */}
         {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
@@ -277,6 +284,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   completed={meal.completed}
                   blocked={false}
                   foods={pickableFoods}
+                  savedMeals={savedMeals}
                 />
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
