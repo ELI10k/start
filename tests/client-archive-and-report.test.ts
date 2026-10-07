@@ -107,7 +107,41 @@ test("two measurements make a trend, and it carries both points", () => {
   assert.ok(weight);
   assert.equal(weight.direction, "down");
   assert.equal(weight.detail, "-1.5 ק״ג");
-  assert.match(weight.basis, /2026-08-01 \(80\.5 ק״ג\).*2026-08-08 \(79 ק״ג\)/);
+  assert.match(weight.basis, /01\.08\.2026 \(80\.5 ק״ג\).*08\.08\.2026 \(79 ק״ג\)/);
+});
+
+test("the monthly report includes deduplicated health coverage, trends and measurable actions", () => {
+  const days = Array.from({ length: 20 }, (_, index) => `2026-09-${String(index + 1).padStart(2, "0")}`);
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    health: {
+      steps: days.map((day, index) => ({ day, steps: 6000 + index * 50 })),
+      sleep: days.map((day) => ({ day, minutes: 420 })),
+      stepGoal: 10000,
+      sleepGoalMinutes: 480,
+      lastSyncAt: "2026-09-30T08:00:00Z",
+      connection: "connected",
+    },
+  });
+  assert.ok(report.facts.some((fact) => fact.label === "כיסוי נתוני צעדים" && fact.value.includes("20 מתוך 30")));
+  assert.ok(report.facts.some((fact) => fact.label === "משך שינה — ממוצע" && fact.value.includes("7:00")));
+  assert.ok(report.trends.some((trend) => trend.label === "צעדים"));
+  assert.ok(report.attention.some((point) => point.text.includes("הצעדים נמוך")));
+  assert.ok(report.attention.some((point) => point.text.includes("השינה הממוצע נמוך")));
+  assert.ok(report.actions.some((point) => point.text.includes("5 ימים בכל שבוע")));
+  assert.match(report.overview.coverage, /צעדים 20\/30 · שינה 20\/30/);
+});
+
+test("sparse health data is labelled as low coverage and is not judged as behavior", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    health: { steps: [{ day: "2026-09-01", steps: 1200 }], sleep: [], stepGoal: 10000, lastSyncAt: null, connection: "connected" },
+  });
+  assert.ok(report.missing.some((item) => item.includes("כיסוי צעדים נמוך")));
+  assert.ok(report.missing.some((item) => item.includes("אין נתוני משך שינה")));
+  assert.ok(!report.attention.some((point) => point.text.includes("ממוצע הצעדים נמוך")));
 });
 
 test("weight trend color follows the client's goal, not the mathematical sign", () => {

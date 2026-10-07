@@ -18,6 +18,11 @@ const TREND_TONE = {
   negative: "text-[#DC2626]",
   neutral: "text-[#5B5F5B]",
 } as const;
+const OVERVIEW_TONE = {
+  positive: "border-[#16A34A]/30 bg-[#ECFDF3] text-[#166534]",
+  attention: "border-[#DC2626]/30 bg-[#FEF2F2] text-[#991B1B]",
+  neutral: "border-[#D7DAD7] bg-[#F7F8F7] text-[#3F433F]",
+} as const;
 
 function Block({ title, kind = "fact", children }: { title: string; kind?: keyof typeof TONE; children: React.ReactNode }) {
   return (
@@ -48,8 +53,19 @@ export default function ClientReportView({ report, clientId }: { report: ClientR
   return (
     <div className="grid gap-3">
       <p className="rounded-2xl border border-[#16A34A]/30 bg-[#ECFDF3] p-4 text-sm font-bold text-[#166534]">
-        ניתוח התנהגות מצטבר של 30 הימים האחרונים — לא סיכום של ה־Check-in האחרון.
+        סיכום משולב של מדידות, תזונה, אימונים, צעדים, שינה וצ׳ק־אינים ב־30 הימים האחרונים.
       </p>
+      <section className={`rounded-2xl border p-4 ${OVERVIEW_TONE[report.overview.statusTone]}`} aria-labelledby="report-overview">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 id="report-overview" className="font-black">תמונת מצב למאמן</h3>
+          <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-black">{report.overview.status}</span>
+        </div>
+        <p className="mt-3 text-sm"><strong>המיקוד הבא:</strong> {report.overview.focus}</p>
+        <p className="mt-1 text-xs opacity-80"><strong>כיסוי הנתונים:</strong> {report.overview.coverage}</p>
+        {report.overview.highlights.length > 0 && <dl className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {report.overview.highlights.map((item) => <div key={item.label} className="rounded-xl bg-white/80 p-3"><dt className="text-xs opacity-70">{item.label}</dt><dd className="mt-1 text-sm font-black">{item.value}</dd></div>)}
+        </dl>}
+      </section>
       {report.referral && (
         <p role="alert" className="rounded-2xl border border-[#DC2626] bg-[#FEF2F2] p-4 text-sm font-bold text-[#DC2626]">
           {report.referral}
@@ -112,7 +128,9 @@ export default function ClientReportView({ report, clientId }: { report: ClientR
       </Block>
 
       <Block title="8 · פעולות מוצעות לחודש הבא">
-        <Points points={report.actions} empty="אין פעולות מוצעות בהיעדר נתונים."/>
+        {report.actions.length ? <ol className="grid gap-3">
+          {report.actions.map((point, index) => <li key={`${point.text}${point.basis}`} className="flex gap-3"><span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#0B0B0B] text-xs font-black text-white">{index + 1}</span><div><p className="text-sm font-bold">{point.text}</p><p className="mt-0.5 text-xs text-[#5B5F5B]">מבוסס על: {point.basis}</p></div></li>)}
+        </ol> : <p className="text-sm text-[#5B5F5B]">אין פעולות מוצעות בהיעדר נתונים.</p>}
       </Block>
       {report.weeklyClientMessage && <ClientReportMessage
         clientId={clientId}

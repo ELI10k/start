@@ -199,9 +199,15 @@ export default async function CoachClientPage({ params, searchParams }: { params
     getClientNutritionBehavior(id,todayKey),
     supabase.from("workout_sessions").select("id,completed_at").eq("client_id",id).eq("status","completed").gte("completed_at",`${reportStart}T00:00:00Z`).lte("completed_at",`${todayKey}T23:59:59Z`),
     supabase.from("workout_schedule_changes").select("id,original_date").eq("client_id",id).eq("status","skipped").gte("original_date",reportStart).lte("original_date",todayKey),
+    supabase.from("health_steps").select("day,steps").eq("client_id",id).gte("day",reportStart).lte("day",todayKey).order("day"),
+    supabase.from("health_sleep").select("day,minutes").eq("client_id",id).gte("day",reportStart).lte("day",todayKey).order("day"),
+    supabase.from("health_preferences").select("daily_step_goal,last_sync_at").eq("client_id",id).maybeSingle(),
   ]):null;
   if (reportBehavior?.[1].error) throw reportBehavior[1].error;
   if (reportBehavior?.[2].error) throw reportBehavior[2].error;
+  if (reportBehavior?.[3].error) throw reportBehavior[3].error;
+  if (reportBehavior?.[4].error) throw reportBehavior[4].error;
+  if (reportBehavior?.[5].error && reportBehavior[5].error.code!=="PGRST116") throw reportBehavior[5].error;
   const assignmentStart=data.workouts.assignment?.start_date && data.workouts.assignment.start_date>reportStart?data.workouts.assignment.start_date:reportStart;
   const activeReportDays=Math.min(30,Math.max(1,Math.floor((new Date(`${todayKey}T12:00:00Z`).getTime()-new Date(`${assignmentStart}T12:00:00Z`).getTime())/86_400_000)+1));
   const monthlyExpected=data.workouts.assignment?Math.max(1,Math.round(Number(data.workouts.assignment.weekly_frequency)*activeReportDays/7)):0;
@@ -212,6 +218,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const processNavelEntries=data.progress.filter((entry)=>entry.navel_circumference!==null);
   const processStartNavel=processNavelEntries.at(-1)??null;
   const processLatestNavel=processNavelEntries[0]??null;
+  const bestDaily = <T extends {day:string}>(rows: readonly T[], value: (row:T)=>number) => [...rows.reduce((days,row)=>{
+    const current=days.get(row.day);
+    if(!current||value(row)>value(current)) days.set(row.day,row);
+    return days;
+  },new Map<string,T>()).values()];
+  const reportSteps=bestDaily((reportBehavior?.[3].data??[]) as {day:string;steps:number}[],row=>Number(row.steps));
+  const reportSleep=bestDaily((reportBehavior?.[4].data??[]) as {day:string;minutes:number}[],row=>Number(row.minutes));
+  const healthPreferences=reportBehavior?.[5].data;
   // Assembled from the client's own records. Every figure below is one the
   // database holds; nothing is generated here.
   // Built on the tab that prints it. It reads no database of its own, but it
@@ -245,6 +259,14 @@ export default async function CoachClientPage({ params, searchParams }: { params
       expected:monthlyExpected,
       completionPercent:Math.min(100,Math.round(monthlyCompleted/Math.max(1,monthlyExpected)*100)),
     }:undefined,
+    health:{
+      steps:reportSteps.map((entry)=>({day:entry.day,steps:Number(entry.steps)})),
+      sleep:reportSleep.map((entry)=>({day:entry.day,minutes:Number(entry.minutes)})),
+      stepGoal:Number(healthPreferences?.daily_step_goal)||10000,
+      sleepGoalMinutes:480,
+      lastSyncAt:healthPreferences?.last_sync_at??null,
+      connection:healthPreferences?.last_sync_at||reportSteps.length||reportSleep.length?"connected":"not-connected",
+    },
     lifetimeProgress:processStartWeighIn&&processLatestWeighIn?{
       startDate:processStartWeighIn.date,
       latestDate:processLatestWeighIn.date,
