@@ -195,23 +195,29 @@ export default async function CoachClientPage({ params, searchParams }: { params
   const reportStartDate=new Date(`${todayKey}T12:00:00Z`);
   reportStartDate.setUTCDate(reportStartDate.getUTCDate()-29);
   const reportStart=reportStartDate.toISOString().slice(0,10);
+  const previousReportStartDate=new Date(reportStartDate);previousReportStartDate.setUTCDate(previousReportStartDate.getUTCDate()-30);
+  const previousReportStart=previousReportStartDate.toISOString().slice(0,10);
   const reportBehavior=tab==="report"?await Promise.all([
     getClientNutritionBehavior(id,todayKey),
-    supabase.from("workout_sessions").select("id,completed_at").eq("client_id",id).eq("status","completed").gte("completed_at",`${reportStart}T00:00:00Z`).lte("completed_at",`${todayKey}T23:59:59Z`),
+    supabase.from("workout_sessions").select("id,completed_at,total_volume,duration_seconds,perceived_difficulty,energy").eq("client_id",id).eq("status","completed").gte("completed_at",`${previousReportStart}T00:00:00Z`).lte("completed_at",`${todayKey}T23:59:59Z`).order("completed_at"),
     supabase.from("workout_schedule_changes").select("id,original_date").eq("client_id",id).eq("status","skipped").gte("original_date",reportStart).lte("original_date",todayKey),
-    supabase.from("health_steps").select("day,steps").eq("client_id",id).gte("day",reportStart).lte("day",todayKey).order("day"),
-    supabase.from("health_sleep").select("day,minutes").eq("client_id",id).gte("day",reportStart).lte("day",todayKey).order("day"),
+    supabase.from("health_steps").select("day,steps").eq("client_id",id).gte("day",previousReportStart).lte("day",todayKey).order("day"),
+    supabase.from("health_sleep").select("day,minutes").eq("client_id",id).gte("day",previousReportStart).lte("day",todayKey).order("day"),
     supabase.from("health_preferences").select("daily_step_goal,last_sync_at").eq("client_id",id).maybeSingle(),
+    supabase.from("weekly_summaries").select("week_start,actions,edited_actions,status,approved_at").eq("client_id",id).lt("week_start",reportStart).or("status.eq.sent,approved_at.not.is.null").order("week_start",{ascending:false}).limit(1).maybeSingle(),
   ]):null;
   if (reportBehavior?.[1].error) throw reportBehavior[1].error;
   if (reportBehavior?.[2].error) throw reportBehavior[2].error;
   if (reportBehavior?.[3].error) throw reportBehavior[3].error;
   if (reportBehavior?.[4].error) throw reportBehavior[4].error;
   if (reportBehavior?.[5].error && reportBehavior[5].error.code!=="PGRST116") throw reportBehavior[5].error;
+  if (reportBehavior?.[6].error && reportBehavior[6].error.code!=="PGRST116") throw reportBehavior[6].error;
   const assignmentStart=data.workouts.assignment?.start_date && data.workouts.assignment.start_date>reportStart?data.workouts.assignment.start_date:reportStart;
   const activeReportDays=Math.min(30,Math.max(1,Math.floor((new Date(`${todayKey}T12:00:00Z`).getTime()-new Date(`${assignmentStart}T12:00:00Z`).getTime())/86_400_000)+1));
   const monthlyExpected=data.workouts.assignment?Math.max(1,Math.round(Number(data.workouts.assignment.weekly_frequency)*activeReportDays/7)):0;
-  const monthlyCompleted=reportBehavior?.[1].data?.length??0;
+  const reportSessions=(reportBehavior?.[1].data??[]).filter((entry)=>entry.completed_at&&entry.completed_at.slice(0,10)>=reportStart);
+  const previousSessions=(reportBehavior?.[1].data??[]).filter((entry)=>entry.completed_at&&entry.completed_at.slice(0,10)<reportStart);
+  const monthlyCompleted=reportSessions.length;
   const monthlySkipped=reportBehavior?.[2].data?.length??0;
   const processStartWeighIn=data.progress.at(-1)??null;
   const processLatestWeighIn=data.progress[0]??null;
@@ -223,8 +229,10 @@ export default async function CoachClientPage({ params, searchParams }: { params
     if(!current||value(row)>value(current)) days.set(row.day,row);
     return days;
   },new Map<string,T>()).values()];
-  const reportSteps=bestDaily((reportBehavior?.[3].data??[]) as {day:string;steps:number}[],row=>Number(row.steps));
-  const reportSleep=bestDaily((reportBehavior?.[4].data??[]) as {day:string;minutes:number}[],row=>Number(row.minutes));
+  const allReportSteps=bestDaily((reportBehavior?.[3].data??[]) as {day:string;steps:number}[],row=>Number(row.steps));
+  const allReportSleep=bestDaily((reportBehavior?.[4].data??[]) as {day:string;minutes:number}[],row=>Number(row.minutes));
+  const reportSteps=allReportSteps.filter((entry)=>entry.day>=reportStart);
+  const reportSleep=allReportSleep.filter((entry)=>entry.day>=reportStart);
   const healthPreferences=reportBehavior?.[5].data;
   // Assembled from the client's own records. Every figure below is one the
   // database holds; nothing is generated here.
@@ -259,6 +267,19 @@ export default async function CoachClientPage({ params, searchParams }: { params
       expected:monthlyExpected,
       completionPercent:Math.min(100,Math.round(monthlyCompleted/Math.max(1,monthlyExpected)*100)),
     }:undefined,
+    workoutQuality:{
+      sessions:reportSessions.map((entry)=>({date:entry.completed_at!.slice(0,10),volume:Number(entry.total_volume)||0,durationSeconds:Number(entry.duration_seconds)||0,difficulty:entry.perceived_difficulty===null?null:Number(entry.perceived_difficulty),energy:entry.energy===null?null:Number(entry.energy)})),
+      previousSessionCount:previousSessions.length,
+      previousAverageVolume:previousSessions.length?Math.round(previousSessions.reduce((sum,entry)=>sum+(Number(entry.total_volume)||0),0)/previousSessions.length):null,
+    },
+    previousPeriod:{
+      weighIns:data.progress.filter((entry)=>entry.date>=previousReportStart&&entry.date<reportStart).map((entry)=>({date:entry.date,weight:Number(entry.weight)})),
+      checkIns:data.checkIns.filter((entry)=>entry.submitted_at.slice(0,10)>=previousReportStart&&entry.submitted_at.slice(0,10)<reportStart).map((entry)=>({adherence:entry.adherence??null,energy:entry.energy??null,sleep:entry.sleep??null,hunger:entry.hunger??null})),
+      steps:allReportSteps.filter((entry)=>entry.day<reportStart).map((entry)=>Number(entry.steps)),
+      sleep:allReportSleep.filter((entry)=>entry.day<reportStart).map((entry)=>Number(entry.minutes)),
+      workoutsCompleted:previousSessions.length,
+    },
+    previousActions:((reportBehavior?.[6].data?.edited_actions??reportBehavior?.[6].data?.actions??[]) as string[]).filter((item)=>typeof item==="string"&&item.trim()).slice(0,3),
     health:{
       steps:reportSteps.map((entry)=>({day:entry.day,steps:Number(entry.steps)})),
       sleep:reportSleep.map((entry)=>({day:entry.day,minutes:Number(entry.minutes)})),

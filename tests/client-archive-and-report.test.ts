@@ -144,6 +144,34 @@ test("sparse health data is labelled as low coverage and is not judged as behavi
   assert.ok(!report.attention.some((point) => point.text.includes("ממוצע הצעדים נמוך")));
 });
 
+test("the report analyzes training quality, body-weight pace, volatility and the previous month", () => {
+  const days = Array.from({ length: 14 }, (_, index) => `2026-09-${String(index + 1).padStart(2, "0")}`);
+  const report = buildClientReport({
+    ...EMPTY,
+    goalLabel: "חיטוב מהיר",
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    weighIns: [{ date: "2026-09-29", weight: 78, navel: 90 }, { date: "2026-09-01", weight: 82, navel: 94 }],
+    health: {
+      steps: days.map((day, index) => ({ day, steps: index % 2 ? 12000 : 3000 })),
+      sleep: days.map((day, index) => ({ day, minutes: 360 + index * 10 })),
+      stepGoal: 9000, sleepGoalMinutes: 480, lastSyncAt: "2026-09-30T08:00:00Z", connection: "connected",
+    },
+    workoutQuality: {
+      sessions: [5000, 5200, 6500, 7000].map((volume, index) => ({ date: days[index], volume, durationSeconds: 3600, difficulty: 3, energy: 4 })),
+      previousSessionCount: 2,
+      previousAverageVolume: 4500,
+    },
+    previousPeriod: { weighIns: [], checkIns: [], steps: [5000, 5200, 5100], sleep: [390, 400, 410], workoutsCompleted: 2 },
+  });
+  assert.ok(report.facts.some((fact) => fact.label === "קצב שינוי משקל" && fact.value.includes("% ממשקל הגוף לשבוע")));
+  assert.ok(report.facts.some((fact) => fact.label === "נפח אימון ממוצע"));
+  assert.ok(report.trends.some((trend) => trend.label === "נפח אימון"));
+  assert.ok(report.trends.some((trend) => trend.label === "צעדים מול החודש הקודם"));
+  assert.ok(report.trends.some((trend) => trend.label === "אימונים מול החודש הקודם"));
+  assert.ok(report.attention.some((point) => point.text.includes("הצעדים אינם עקביים")));
+  assert.ok(report.attention.some((point) => point.text.includes("קצב הירידה")));
+});
+
 test("weight trend color follows the client's goal, not the mathematical sign", () => {
   const weighIns = [{ date: "2026-09-15", weight: 82, navel: null }, { date: "2026-08-17", weight: 80, navel: null }];
   const cut = buildClientReport({ ...EMPTY, weighIns, goalLabel: "חיטוב עדין" });
