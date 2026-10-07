@@ -37,7 +37,7 @@ export default async function ProfilePage() {
 
       <h2 className="section-heading section-heading--compact mt-6">האפליקציה</h2>
       <div className="settings-group">
-        <Link href="/content/10000000-0000-4000-8000-000000000004">
+        <Link href="/content/category/start-guide">
           <span className="settings-group__label"><CirclePlay aria-hidden="true" size={18} />מדריך השימוש באפליקציה</span>
           <ChevronLeft aria-hidden="true" size={18} />
         </Link>
