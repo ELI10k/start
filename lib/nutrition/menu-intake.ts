@@ -45,6 +45,13 @@ export const isMealAnswered = (meal: IntakeMeal) => meal.status !== null || meal
 export const isMealEaten = (meal: IntakeMeal) => meal.status === "eaten" || (meal.status === null && meal.completed);
 
 /**
+ * A meal counts toward the dashboard's "meals today" total when the client
+ * reports eating either the planned meal or something else. A skipped meal is
+ * answered, but it is deliberately not counted as eaten.
+ */
+export const isMealReportedEaten = (meal: IntakeMeal) => meal.status === "other" || isMealEaten(meal);
+
+/**
  * The rows that describe this meal as it currently stands.
  *
  * The chosen alternative in each group - already carrying the client's reported

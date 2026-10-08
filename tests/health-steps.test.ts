@@ -118,6 +118,9 @@ test("health charts show values and offer a monthly range", async () => {
   assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
   assert.match(panel, /setPeriod\("month"\)/);
   assert.match(panel, /lastDays\(today, dayCount\)/);
+  assert.match(panel, /steps: "week", sleep: "week"/);
+  assert.match(panel, /const period = periods\[metric\]/);
+  assert.match(panel, /\{ \.\.\.current, \[metric\]: next \}/);
 });
 
 test("an active workout requests and releases a screen wake lock", async () => {

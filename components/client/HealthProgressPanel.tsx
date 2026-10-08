@@ -36,7 +36,11 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const [snapshot, setSnapshot] = useState<HealthSnapshot>(emptyHealthSnapshot);
   const [permission, setPermission] = useState<HealthPermissionState>("unknown");
   const [syncing, setSyncing] = useState(false);
-  const [period, setPeriod] = useState<"week" | "month">("week");
+  // Each metric owns its range. Switching steps to a month must not silently
+  // switch sleep as well, and either button must remain reversible.
+  const [periods, setPeriods] = useState<Readonly<Record<"steps" | "sleep", "week" | "month">>>({ steps: "week", sleep: "week" });
+  const period = periods[metric];
+  const setPeriod = (next: "week" | "month") => setPeriods((current) => current[metric] === next ? current : { ...current, [metric]: next });
   const inFlight = useRef(false);
   const today = calendarDay();
 
@@ -91,7 +95,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const unavailable = permission === "unavailable";
   const dayCount = period === "month" ? 30 : 7;
   const days = lastDays(today, dayCount);
-  const periodPicker = <div className="health-period-picker" role="group" aria-label="טווח הצגה"><button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבוע</button><button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודש</button></div>;
+  const periodPicker = <div className="health-period-picker" role="group" aria-label={`טווח הצגה ${metric === "steps" ? "צעדים" : "שינה"}`}><button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבוע</button><button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודש</button></div>;
 
   if (metric === "steps") {
     const summary = summarizeSteps(snapshot.entries, snapshot.preferences, today);
