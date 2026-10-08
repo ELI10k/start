@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { dayIndex, lessonForDay } from "../lib/content/weekly-lesson.ts";
+import { dayIndex, holidayGuideForDay, lessonForDay } from "../lib/content/weekly-lesson.ts";
 
 const lesson = (id: string, categoryId: string, sortOrder: number, title = id) => ({
   id, title, description: null, categoryId, categoryName: categoryId, categorySlug: categoryId,
@@ -39,6 +39,39 @@ test("a lesson whose course is missing from the ordering sorts last, not first",
 
 test("an empty library returns nothing rather than throwing", () => {
   assert.equal(lessonForDay([], [], "2026-01-04"), null);
+});
+
+test("holiday guides take over from five days before the holiday through the holiday", () => {
+  const lessons = [
+    lesson("ordinary", "basics", 1),
+    lesson("passover", "guides", 1, "תזונה בחג פסח 🍷"),
+    lesson("fast", "guides", 2, "איך לעבור צום ללא תופעות לוואי"),
+    lesson("holiday", "guides", 3, "איך לשמור על המשקל בחג 🥂"),
+  ];
+  assert.equal(holidayGuideForDay("2026-03-28"), "passover");
+  assert.equal(lessonForDay(lessons, ["basics", "guides"], "2026-03-28")?.id, "passover");
+  assert.equal(lessonForDay(lessons, ["basics", "guides"], "2026-09-16")?.id, "fast");
+  assert.equal(lessonForDay(lessons, ["basics", "guides"], "2026-09-22")?.id, "holiday");
+});
+
+test("a holiday guide does not appear six days early or outside its holiday window", () => {
+  const lessons = [
+    lesson("ordinary", "basics", 1),
+    lesson("passover", "guides", 1, "תזונה בחג פסח 🍷"),
+  ];
+  assert.equal(holidayGuideForDay("2026-03-27"), null);
+  assert.equal(lessonForDay(lessons, ["guides", "basics"], "2026-03-27")?.id, "ordinary");
+  assert.equal(lessonForDay(lessons, ["guides", "basics"], "2026-10-08")?.id, "ordinary");
+});
+
+test("Bar-Or stays in the course library and is never selected automatically", () => {
+  const lessons = [
+    lesson("bar-or", "guides", 1, "שיפור ריצת בר אור"),
+    lesson("ordinary", "basics", 1),
+  ];
+  for (const date of ["2026-01-04", "2026-01-05", "2026-10-08"]) {
+    assert.equal(lessonForDay(lessons, ["guides", "basics"], date)?.id, "ordinary");
+  }
 });
 
 test("the client home keeps the daily tip heading visible and correctly arranged", async () => {
