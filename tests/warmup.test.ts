@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { isFirstExerciseForMuscle, planWarmup } from "../lib/workouts/warmup.ts";
+import { isFirstExerciseForMuscle, planWarmup, preparationGroup } from "../lib/workouts/warmup.ts";
 
 test("warm-up uses the prescribed 50 percent and 80 percent preparation sets", () => {
   const plan = planWarmup(40, { repetitions: 8 });
@@ -31,11 +31,17 @@ test("workout session excludes every abdominal exercise from loaded warm-ups", a
   const { readFile } = await import("node:fs/promises");
   const session = await readFile(new URL("../components/workouts/client/WorkoutSession.tsx", import.meta.url), "utf8");
   assert.match(session, /abdominalExercise=exercise\?\.primaryMuscleGroup===\"בטן\"/);
-  assert.match(session, /professional\?needsPreparation:firstForMuscle/);
+  assert.match(session, /const warmup=needsPreparation/);
 });
 
 test("warm-up is offered only on the first exercise for a muscle group", () => {
   assert.equal(isFirstExerciseForMuscle("גב", ["חימום", "רגליים"]), true);
   assert.equal(isFirstExerciseForMuscle("גב", ["חימום", "גב"]), false);
   assert.equal(isFirstExerciseForMuscle(undefined, ["חימום"]), false);
+});
+
+test("opposing leg curl and leg extension receive separate preparation", () => {
+  assert.equal(preparationGroup("legcurl", "רגליים"), "hamstrings");
+  assert.equal(preparationGroup("legextension", "רגליים"), "quads");
+  assert.equal(isFirstExerciseForMuscle("quads", ["hamstrings"]), true);
 });

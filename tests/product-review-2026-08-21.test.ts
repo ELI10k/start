@@ -91,6 +91,19 @@ test("the dashboard, the nutrition screen and the client file share one rule", a
   for (const text of [dashboard, nutrition, repository]) assert.match(text, /sumLoggedFood/);
 });
 
+test("the home meal counter includes an off-plan meal that was answered", async () => {
+  const dashboard = await source("app/page.tsx");
+  assert.match(dashboard, /meals\.filter\(isMealAnswered\)/);
+  assert.doesNotMatch(dashboard, /meals\.filter\(isMealEaten\)/);
+});
+
+test("Medjool date is migrated to one 30 gram unit", async () => {
+  const migration = await source("supabase/migrations/202610080002_medjool_date_30g_serving.sql");
+  assert.match(migration, /name = 'תמר מג׳הול'/);
+  assert.match(migration, /unit_weight_grams = 30/);
+  assert.match(migration, /serving_label = '1 תמר \(30 גרם\)'/);
+});
+
 test("both sides count the same training week", async () => {
   const repository = await source("lib/data/product-repository.ts");
   // The client dashboard counts from Sunday through weekStart(); the coach's

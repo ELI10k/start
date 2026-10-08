@@ -99,6 +99,14 @@ export function sleepByDay(entries: readonly DailySleep[]): ReadonlyMap<string, 
   return best;
 }
 
+/** The most recent recorded night's duration, expressed in workout hours. */
+export function latestSleepHours(entries: readonly DailySleep[], today: string = calendarDay()): number | undefined {
+  const latest = [...sleepByDay(entries).values()]
+    .filter((entry) => entry.day <= today && entry.minutes > 0)
+    .sort((a, b) => b.day.localeCompare(a.day))[0];
+  return latest ? Math.round((latest.minutes / 60) * 100) / 100 : undefined;
+}
+
 export function sleepToPersist(incoming: readonly DailySleep[], known: readonly DailySleep[], today: string): readonly DailySleep[] {
   const existing = new Map(known.map((entry) => [`${entry.day}|${entry.source}`, entry.minutes]));
   const seen = new Set<string>();

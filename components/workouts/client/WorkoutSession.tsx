@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/purity */
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, Repeat2, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
@@ -25,6 +25,10 @@ import { isProfessionalProgram } from "@/lib/workouts/professional";
 import { workoutAvailability } from "@/lib/workouts/availability";
 import { israelDateKey } from "@/lib/date-time";
 import type { ActiveExerciseResult, ActiveWorkoutSession, CompletedWorkout, ExerciseSetResult } from "@/lib/workouts/types";
+import { useWorkoutWakeLock } from "@/lib/browser/workout-wake-lock";
+import { calendarDay, latestSleepHours, sleepToPersist } from "@/lib/health/calculations";
+import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
+import { createHealthRepository } from "@/lib/health/repository";
 
 const setCount=(value?:string)=>{const count=Number.parseInt(value??"",10);return Number.isFinite(count)&&count>0?Math.min(count,20):0};
 const clock=(seconds:number)=>`${Math.floor(seconds/60).toString().padStart(2,"0")}:${(seconds%60).toString().padStart(2,"0")}`;
@@ -43,6 +47,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // האימון"), so the client most likely to have unfinished exercises was exactly
   // the one who was never asked about them.
   const[confirmedPartial,setConfirmedPartial]=useState(false);
+  useWorkoutWakeLock(Boolean(session&&!saved));
   const ordered=[...(day?.exercises??[])].sort((a,b)=>a.order-b.order);
   useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
   // Scheduled against the rest end itself rather than polled off the ticking
@@ -132,17 +137,12 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // the exercise itself, not on whether another exercise shares its broad
   // catalogue group. Bodyweight abdominal work is the explicit exception.
   const abdominalExercise=exercise?.primaryMuscleGroup==="בטן"||exercise?.primaryMuscleGroup==="שרירי ליבה";
-  const earlierMuscleGroups=ordered.slice(0,session.currentExerciseIndex).map((entry)=>{
-    const entryResult=session.exerciseResults.find((item)=>item.workoutExerciseId===entry.id);
-    return getExercise(entryResult?.performedExerciseId??entry.exerciseId)?.primaryMuscleGroup;
-  });
-  const firstForMuscle=isFirstExerciseForMuscle(exercise?.primaryMuscleGroup,earlierMuscleGroups);
   const professional=isProfessionalProgram(program);
   const group=preparationGroup(exercise?movementPattern(exercise):undefined,exercise?.primaryMuscleGroup);
   const earlierGroups=ordered.slice(0,session.currentExerciseIndex).map(entry=>{const e=getExercise(session.exerciseResults.find(r=>r.workoutExerciseId===entry.id)?.performedExerciseId??entry.exerciseId);return preparationGroup(e?movementPattern(e):undefined,e?.primaryMuscleGroup);});
-  const needsPreparation=professional?isFirstExerciseForMuscle(group,earlierGroups):firstForMuscle;
+  const needsPreparation=isFirstExerciseForMuscle(group,earlierGroups);
   const chosenLoad=Math.max(0,...result.sets.map(s=>s.weightKg??0))||workingWeightFrom(performance.sessions);
-  const warmup=(professional?needsPreparation:firstForMuscle)&&!abdominalExercise&&!dynamicWarmup?planWarmup(chosenLoad,{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget,professional}):null;
+  const warmup=needsPreparation&&!abdominalExercise&&!dynamicWarmup?planWarmup(chosenLoad,{effort:current.effort,compound:isCompoundLift(exercise?.name),repetitions:repTarget,professional}):null;
   const priorEntries=performance.sessions.slice(0,2).map(history=>comparableWorkouts.find(w=>w.id===history.workoutId)?.exerciseResults.find(e=>(e.performedExerciseId??e.exerciseId)===performedId));
   const sameLoad=priorEntries.length===2&&priorEntries[0]?.sets.every((s,i)=>s.weightKg===priorEntries[1]?.sets[i]?.weightKg);
   const successfulExposures=repTarget!==undefined&&sameLoad&&priorEntries.every(e=>e?.difficulty==="easy"&&e.sets.length===setCount(current.sets)&&e.sets.every(s=>s.completed&&(s.repetitions??0)>=repTarget))?2:0;
@@ -201,7 +201,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   };
   const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
   const exitWithoutSaving=async()=>{if(isAbandoning)return;setIsAbandoning(true);try{if(await cancelSession(currentClientId)){setAbandon(false);router.replace("/workouts");router.refresh()}else{setAbandon(false);setWarning("לא הצלחנו למחוק את האימון הפעיל. נסה שוב.")}}finally{setIsAbandoning(false)}};
-  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} setSleepHours={(nextSleep)=>persist({sleepHours:nextSleep})} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)} onExit={()=>{setSummary(false);setAbandon(true)}}/>;
+  if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)} onExit={()=>{setSummary(false);setAbandon(true)}}/>;
 
   return <main className="client-app-content">
     {/* Where you are in the workout follows you down the page - on a phone the
@@ -371,13 +371,23 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   </main>;
 }
 
-// Sleep and energy are asked here rather than on the summary screen. Both
-// describe the state the client came in with, and both change what a coach would
-// say: "ישן 4 שעות" before a session is something to act on, and after it is only
-// a record. They stay optional - a client who wants to start just starts.
+// Sleep is synced from the health store here; energy remains the one subjective
+// pre-workout answer. Missing health data never blocks starting a workout.
 function Start({program,day,count,warning,onStart,starting,programId}:{program:string;day:string;count:number;warning:string;onStart:(sleepHours?:number,energy?:1|2|3|4|5)=>void|Promise<void>;starting:boolean;programId:string}){
+  const repository=useMemo(()=>createHealthRepository(),[]);
   const[sleepHours,setSleepHours]=useState<number|undefined>();
+  const[sleepLoading,setSleepLoading]=useState(true);
   const[energy,setEnergy]=useState<1|2|3|4|5>(3);
+  useEffect(()=>{let live=true;(async()=>{try{
+    const today=calendarDay();const range=syncWindow(today);let snapshot=await repository.load(range.fromDay);
+    const provider=resolveHealthProvider();
+    if(await provider.isAvailable()&&await provider.getPermission()==="granted"){
+      const incoming=await provider.readDailySleep(range.fromDay,range.toDay);
+      const changed=sleepToPersist(incoming,snapshot.sleep,today);
+      if(changed.length){await repository.recordSleep(changed);snapshot=await repository.load(range.fromDay);}
+    }
+    if(live)setSleepHours(latestSleepHours(snapshot.sleep,today));
+  }catch{}finally{if(live)setSleepLoading(false);}})();return()=>{live=false}},[repository]);
   return <main className="client-app-content grid min-h-[70vh] place-items-center">
     <section className="premium-card w-full max-w-lg">
       <span className="state-block__icon mx-auto"><Play aria-hidden="true" size={22}/></span>
@@ -385,9 +395,7 @@ function Start({program,day,count,warning,onStart,starting,programId}:{program:s
       <h1 className="mt-2 text-center text-3xl font-black">{day}</h1>
       <p className="mt-3 text-center text-sm text-[#5B5F5B]">{count} תרגילים לפי סדר המקור. ההתקדמות נשמרת אוטומטית.</p>
 
-      <label className="mt-6 block text-sm font-bold">כמה שעות ישנת הלילה? <span className="font-normal text-[#5B5F5B]">(רשות)</span>
-        <input type="number" min="0" max="24" step="0.5" inputMode="decimal" className="nutrition-input mt-2 max-w-32" value={sleepHours??""} onChange={(event)=>{const parsed=Number(event.target.value);setSleepHours(event.target.value.trim()===""||Number.isNaN(parsed)?undefined:parsed)}}/>
-      </label>
+      <div className="mt-6 rounded-2xl bg-[#F7F8F7] p-4 text-sm"><strong className="block">שעות השינה האחרונות</strong><span className="mt-1 block text-[#5B5F5B]">{sleepLoading?"טוענים מנתוני השינה…":sleepHours!==undefined?`${sleepHours} שעות · נקלט אוטומטית מנתוני הבריאות`:"לא נמצאו נתוני שינה מסונכרנים"}</span></div>
       <Rating label="איך רמת האנרגיה שלך עכשיו?" value={energy} onChange={setEnergy}/>
 
       {warning&&<p role="alert" className="mt-4 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">{warning}</p>}
@@ -458,7 +466,7 @@ function RestTimer({seconds,onAdd,onSkip}:{seconds:number;onAdd:()=>void;onSkip:
   </section>;
 }
 
-function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,setSleepHours,warning,onSave,saving,onBack,onExit}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;setSleepHours:(value:number|undefined)=>void;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void;onExit:()=>void}){
+function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,difficulty,setDifficulty,energy,setEnergy,sleepHours,warning,onSave,saving,onBack,onExit}:{elapsed:number;exercises:string;sets:string;skipped:number;volume:number;note:string;setNote:(value:string)=>void;difficulty:1|2|3|4|5;setDifficulty:(value:1|2|3|4|5)=>void;energy:1|2|3|4|5;setEnergy:(value:1|2|3|4|5)=>void;sleepHours?:number;warning:string;onSave:()=>void|Promise<void>;saving:boolean;onBack:()=>void;onExit:()=>void}){
   // The note is typed locally and saved when the field is left.
   //
   // It used to be controlled straight off the session: every keystroke wrote to
@@ -485,12 +493,9 @@ function CompletionForm({elapsed,exercises,sets,skipped,volume,note,setNote,diff
     </dl>
     <section className="premium-card mt-4">
       <label className="block text-sm font-bold">הערת אימון<textarea className="nutrition-input mt-2 min-h-24" value={draft} onChange={(event)=>setDraft(event.target.value)} onBlur={flush}/></label>
-      {/* Sleep and energy were answered before the workout started. They are here
-          to be corrected, not asked again - hours, not a 1-5 rating, because
-          "ישנתי 5" and "ישנתי 8" are the two numbers a coach acts on. */}
-      <label className="mt-4 block text-sm font-bold">שעות שינה <span className="font-normal text-[#5B5F5B]">(נרשם לפני האימון)</span>
-        <input type="number" min="0" max="24" step="0.5" inputMode="decimal" className="nutrition-input mt-2 max-w-32" value={sleepHours??""} onChange={(event)=>{const parsed=Number(event.target.value);setSleepHours(event.target.value.trim()===""||Number.isNaN(parsed)?undefined:parsed)}}/>
-      </label>
+      {/* Sleep stays a health-store measurement rather than a second manual
+          answer. Energy remains the subjective pre-workout value. */}
+      <p className="mt-4 text-sm"><strong>שעות שינה: </strong>{sleepHours!==undefined?`${sleepHours} שעות (מנתוני הבריאות)`:"לא נמצאו נתונים מסונכרנים"}</p>
       <Rating label="קושי מורגש באימון" value={difficulty} onChange={setDifficulty}/>
       <Rating label="רמת אנרגיה (נרשם לפני האימון)" value={energy} onChange={setEnergy}/>
     </section>

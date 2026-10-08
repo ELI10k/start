@@ -14,7 +14,7 @@ import ProgressPulse from "@/components/client/ProgressPulse";
 import StepsMetricTile from "@/components/client/StepsMetricTile";
 import SleepMetricTile from "@/components/client/SleepMetricTile";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
-import { addTotals, eatenFromMenu, isMealEaten } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, isMealAnswered } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
@@ -61,7 +61,7 @@ export default async function Home() {
   // screen applies. `meal.completed` alone missed nothing today, but it is one
   // of two fields that can say "eaten" and reading only one is how the two
   // screens drifted apart the last three times.
-  const completed = meals.filter(isMealEaten);
+  const completed = meals.filter(isMealAnswered);
   // What was eaten, at the amount the client reported eating - plus anything
   // they logged beside the plan and the free-calorie windows they filled. This
   // tile used to read `meal.items`, which is every row the coach wrote at the

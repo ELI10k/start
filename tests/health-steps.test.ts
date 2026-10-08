@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, clampGoal, formatSleep, lastDays, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
 import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
@@ -105,6 +105,29 @@ test("sleep is formatted compactly and duplicate device readings are not added",
   assert.equal(formatSleep(0), "אין נתון");
   const byDay = sleepByDay([sleepEntry(TODAY, 430), sleepEntry(TODAY, 450, "health-connect")]);
   assert.equal(byDay.get(TODAY)?.minutes, 450);
+});
+
+test("a workout receives the latest synced sleep duration automatically", () => {
+  assert.equal(latestSleepHours([sleepEntry("2026-08-10", 450), sleepEntry(TODAY, 480)], TODAY), 8);
+  assert.equal(latestSleepHours([sleepEntry("2026-08-10", 455)], TODAY), 7.58);
+  assert.equal(latestSleepHours([], TODAY), undefined);
+});
+
+test("health charts show values and offer a monthly range", async () => {
+  const panel = await source("components/client/HealthProgressPanel.tsx");
+  assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
+  assert.match(panel, /setPeriod\("month"\)/);
+  assert.match(panel, /lastDays\(today, dayCount\)/);
+});
+
+test("an active workout requests and releases a screen wake lock", async () => {
+  const [session, wakeLock] = await Promise.all([
+    source("components/workouts/client/WorkoutSession.tsx"),
+    source("lib/browser/workout-wake-lock.ts"),
+  ]);
+  assert.match(session, /useWorkoutWakeLock\(Boolean\(session&&!saved\)\)/);
+  assert.match(wakeLock, /wakeLock\?\.request\("screen"\)/);
+  assert.match(wakeLock, /sentinel\?\.release\(\)/);
 });
 
 test("sleep sync is idempotent and rejects impossible durations", () => {
