@@ -114,13 +114,18 @@ test("a workout receives the latest synced sleep duration automatically", () => 
 });
 
 test("health charts show values and offer a monthly range", async () => {
-  const panel = await source("components/client/HealthProgressPanel.tsx");
+  const [panel, styles] = await Promise.all([
+    source("components/client/HealthProgressPanel.tsx"),
+    source("app/globals.css"),
+  ]);
   assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
   assert.match(panel, /setPeriod\("month"\)/);
   assert.match(panel, /lastDays\(today, dayCount\)/);
   assert.match(panel, /steps: "week", sleep: "week"/);
   assert.match(panel, /const period = periods\[metric\]/);
   assert.match(panel, /\{ \.\.\.current, \[metric\]: next \}/);
+  assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);
+  assert.match(styles, /\.health-chart \{[^}]*overflow-x: auto;[^}]*width: 100%;[^}]*contain: inline-size/);
 });
 
 test("an active workout requests and releases a screen wake lock", async () => {

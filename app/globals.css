@@ -620,14 +620,14 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .progress-metric-tab[data-selected] .progress-metric-tab__icon { background: rgba(255,255,255,.18); color: white; }
 .progress-metric-tab[data-selected] strong { color: white; }
 .progress-metric-panel { min-width: 0; }
-.health-progress-view { display: grid; gap: .8rem; }
-.health-summary-card { position: relative; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); text-align: center; }
+.health-progress-view { display: grid; min-width: 0; width: 100%; gap: .8rem; }
+.health-summary-card { position: relative; min-width: 0; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); text-align: center; }
 .health-summary-card__icon { position: absolute; inset-block-start: 1rem; inset-inline-end: 1rem; display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 50%; background: var(--green-tint); color: var(--green); }
 .health-summary-card > p { color: var(--ink-muted); font-size: .78rem; }
 .health-summary-card > strong { display: block; margin-top: .25rem; font-size: clamp(1.8rem, 9vw, 2.7rem); line-height: 1.1; }
 .health-summary-card > small { display: block; margin-top: .25rem; color: var(--green-press); font-weight: 750; }
 .health-chart { margin-top: 1.25rem; }
-.health-chart { overflow-x: auto; padding-top: 1.1rem; }
+.health-chart { overflow-x: auto; width: 100%; min-width: 0; max-width: 100%; padding-top: 1.1rem; contain: inline-size; overscroll-behavior-inline: contain; }
 .health-chart__plot { position: relative; display: grid; height: 11rem; align-items: end; gap: .45rem; padding-top: .75rem; border-bottom: 1px solid var(--line); }
 .health-chart[data-monthly] .health-chart__plot { min-width: 82rem; }
 .health-chart__goal { position: absolute; inset-inline: 0; z-index: 1; border-top: 1px dashed var(--green); color: var(--green-press); text-align: start; }
