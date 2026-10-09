@@ -125,6 +125,18 @@ test("removing trained slots retires them from future workouts without deleting 
   assert.match(repository, /from\("workout_program_exercises"\)\.select\("\*"\)\.is\("retired_at",null\)/);
 });
 
+test("a stale editor cannot resurrect removed exercises or scramble their order", async () => {
+  const migration = await source("supabase/migrations/20261009102332_reject_stale_workout_program_saves.sql");
+  assert.match(migration, /saved\.retired_at is not null/);
+  assert.match(migration, /raise exception 'stale_program'/);
+  assert.match(migration, /from jsonb_array_elements\(coalesce\(v_day->'exercises','\[\]'::jsonb\)\) with ordinality/);
+  assert.match(migration, /values\(v_entry->>'id',v_day->>'id',v_entry->>'exerciseId',v_entry_order/);
+
+  const provider = await source("components/workouts/WorkoutProvider.tsx");
+  assert.match(provider, /message\.includes\("stale_program"\)/);
+  assert.match(provider, /saveProgram:async\(program\).*catch\(error\)\{return fail\(error\)\}/);
+});
+
 test("editing is not gated on the client-side role, which arrives late", async () => {
   const day = await source("components/workouts/WorkoutDayPreview.tsx");
   // The route is already coach-only in the proxy and the RPC re-checks server

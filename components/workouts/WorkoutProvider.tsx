@@ -125,7 +125,8 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
 
   const fail=useCallback((error?:unknown)=>{
     connectionStore.reportFailure(error);
-    setPersistenceError(isOfflineError(error)?"אין חיבור כרגע. הנתונים נשמרו במכשיר וייסנכרנו כשהחיבור יחזור.":"השמירה ב-Supabase נכשלה. יש לרענן ולנסות שוב.");
+    const message=error&&typeof error==="object"&&"message" in error?String(error.message):"";
+    setPersistenceError(message.includes("stale_program")?"התוכנית השתנתה מאז פתיחת המסך. יש לרענן את העמוד ולבצע את העריכה על הגרסה העדכנית.":isOfflineError(error)?"אין חיבור כרגע. הנתונים נשמרו במכשיר וייסנכרנו כשהחיבור יחזור.":"השמירה ב-Supabase נכשלה. יש לרענן ולנסות שוב.");
     return false;
   },[]);
 
@@ -164,7 +165,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     duplicate:async(programId)=>{const source=snapshot.programs.find((program)=>program.id===programId);if(!source)return undefined;const id=`${programId}-copy-${Date.now()}`;const program=duplicateWorkoutProgram(source,id);try{await repository.saveProgram(program);setSnapshot((current)=>({...current,programs:[...current.programs,program]}));return id}catch{fail();return undefined}},
     archive:async(programId)=>{try{await repository.archiveProgram(programId);setSnapshot((current)=>({...current,programs:archiveWorkoutProgram(current.programs,programId)}));return true}catch{return fail()}},
     deleteProgram:async(programId)=>{try{await repository.deleteProgram(programId);setSnapshot((current)=>({...current,programs:current.programs.filter((program)=>program.id!==programId)}));return true}catch{return fail()}},
-    saveProgram:async(program)=>{try{await repository.saveProgram(program);setSnapshot((current)=>saveCustomWorkoutProgram(current,program));return true}catch{return fail()}},
+    saveProgram:async(program)=>{try{await repository.saveProgram(program);setSnapshot((current)=>saveCustomWorkoutProgram(current,program));return true}catch(error){return fail(error)}},
     startSession:async(session)=>{if(snapshot.activeSessions.some((item)=>item.clientId===session.clientId))return false;const p=snapshot.programs.find(p=>p.id===session.programId),a=snapshot.assignments.find(a=>a.id===session.assignmentId);if(p&&a&&isProfessionalProgram(p)){const gate=workoutAvailability(p,a,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(w=>w.clientId===session.clientId),snapshot.scheduleChanges);if(gate.status!=="ready"||gate.day?.id!==session.dayId)return false;}try{await repository.saveActiveSession(session);connectionStore.reportSuccess();setSnapshot((current)=>cache(startWorkoutSession(current,session)));return true}catch(error){return fail(error)}},
     // The device is written to first and synchronously. Whatever the network
     // does next, the set the client just typed is already safe.
