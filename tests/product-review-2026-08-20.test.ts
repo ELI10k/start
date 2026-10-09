@@ -142,9 +142,9 @@ test("an added second primary is not scaled as an alternative of the first", asy
 test("folding a meal follows the meal when the day is reordered", async () => {
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   assert.match(editor, /const remapCollapsed=/);
-  // Switching days clears the folds: the second day is a different list, and
-  // the positions do not carry over.
-  assert.match(editor, /const showDay=\(dayIndex:number\)=>\{setActiveDay\(dayIndex\);setCollapsed\(new Set\(\)\)\}/);
+  // Switching days rebuilds the folds from that day's own meals: positions do
+  // not leak from the previous day and a long saved day stays compact.
+  assert.match(editor, /const showDay=\(dayIndex:number\)=>\{[\s\S]*?setActiveDay\(dayIndex\);[\s\S]*?setCollapsed\(new Set\(dayMeals\.map\(\(_,index\)=>index\)\)\)[\s\S]*?\};/);
   assert.doesNotMatch(editor, /onClick=\{\(\)=>setActiveDay\(/);
 });
 
