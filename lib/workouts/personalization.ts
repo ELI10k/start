@@ -105,7 +105,11 @@ export function alternativeExercises(prescribed: Exercise | undefined, catalogue
       const difficulty=item.difficulty??"";
       const candidateRank=/מתקדמ|מתקדם/.test(difficulty)?2:/בינוני/.test(difficulty)?1:/מתחיל/.test(difficulty)?0:undefined;
       if(candidateRank!==undefined&&candidateRank>rank)return false;
-      if(candidateRank===undefined&&!patterns[item.id])return false;
+      // Imported exercises do not always carry a difficulty value or an
+      // explicit pattern id. If their name/group gives us a real movement
+      // pattern, they are still safe to compare below (notably abdominal
+      // exercises imported from the coach's original workbook).
+      if(candidateRank===undefined&&!movementPattern(item))return false;
       const needsCapacity=item.id==="exercise-hdg3yz"||item.id==="exercise-say88l"||item.id==="exercise-1rpyv0f"||/מתח|שכיבות סמיכה/.test(item.name);
       if(needsCapacity&&item.id!=="bodyweight-wall-pushup"&&preferences.bodyweightCapacity!=="verified")return false;
     }

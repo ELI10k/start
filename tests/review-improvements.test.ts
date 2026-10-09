@@ -101,7 +101,7 @@ test("a substitution is recorded, and never counted as intake", async () => {
 
 // ─── ה-1, ה-2 the workout in a real gym ───────────────────────────────────
 
-test("the rest timer is audible, and the sets open with last time's numbers", async () => {
+test("the rest timer is audible, and sets keep the last load with today's reps", async () => {
   const [session, feedback] = await Promise.all([
     source("components/workouts/client/WorkoutSession.tsx"),
     source("lib/workouts/feedback.ts"),
@@ -112,7 +112,7 @@ test("the rest timer is audible, and the sets open with last time's numbers", as
   // Scheduled against the rest end rather than polled off the ticking clock.
   assert.match(session, /setTimeout\(signalRestOver,remaining\)/);
 
-  assert.match(session, /weightKg:previous\?\.weightKg,repetitions:previous\?\.repetitions/);
+  assert.match(session, /weightKg:previous\?\.weightKg,repetitions:prescribedSetRepetitions\(entry,index\)\?\?previous\?\.repetitions/);
   // Prefilled, but still confirmed: nothing is recorded that was not tapped.
   assert.match(session, /order:index,completed:false,/);
 });
@@ -316,7 +316,7 @@ test("the totals and the save sit in one bar at the bottom, and a refusal reads 
 // ─── the record has to be a record of the same thing ──────────────────────
 
 test("the personal best is compared within the rep range", async () => {
-  const { bestComparableSet, targetRepetitions } = await import("../lib/workouts/progress.ts");
+  const { bestComparableSet, prescribedSetRepetitions, targetRepetitions } = await import("../lib/workouts/progress.ts");
   const sessions = [{ sets: [
     { id: "a", order: 0, completed: true, weightKg: 60, repetitions: 12 },
     { id: "b", order: 1, completed: true, weightKg: 50, repetitions: 10 },
@@ -335,6 +335,8 @@ test("the personal best is compared within the rep range", async () => {
   assert.equal(targetRepetitions("10"), 10);
   assert.equal(targetRepetitions("8-12"), 10);
   assert.equal(targetRepetitions(undefined), undefined);
+  assert.equal(prescribedSetRepetitions({reps:"10"},0),10);
+  assert.equal(prescribedSetRepetitions({reps:"10",setPrescriptions:[{id:"set-1",order:0,repetitions:"12"}]},0),12);
 });
 
 test("the warm-up and the household reading are on the screens that need them", async () => {

@@ -95,3 +95,10 @@ test("replacements preserve movement, units and home equipment",()=>{
   const abs=ex("exercise-pn4ire","כפיפות בטן","שרירי ליבה","משקל גוף");
   assert.equal(alternativeExercises(plank,[plank,abs]).length,0);
 });
+test("abdominal replacements remain available without imported difficulty metadata",()=>{
+  const prescribed=ex("exercise-pn4ire","כפיפות בטן משקל גוף","בטן","משקל גוף");
+  const alternative=ex("exercise-p2ohuv","אופניים","שרירי ליבה","משקל גוף");
+  const prefs={clientId:"x",trainingTypes:[],equipment:["משקל גוף"],trainingLocation:"gym",preferredDays:[]};
+  assert.deepEqual(alternativeExercises(prescribed,[prescribed,alternative],prefs).map(item=>item.id),[alternative.id]);
+  assert.deepEqual(alternativeExercises(prescribed,[prescribed,alternative]).map(item=>item.id),[alternative.id]);
+});
