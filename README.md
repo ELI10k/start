@@ -22,7 +22,7 @@ npm run build
 
 Client dashboard, daily meal completion and macro progress, measurement history, weekly check-in UI, profile/preferences, support shell, unpublished content-library shell, and searchable food details. Coach routes cover client directories/details/progress/check-ins and meal-plan creation, editing, duplication, preview, and assignment.
 
-The only approved food source is `data/foods.json` (336 records), generated from `data/source/foods.xlsx` by `npm run foods:import`. Search and nutrition logic live under `lib/foods` and `lib/meal-plans`.
+The only approved food source is `data/foods.json` (359 records), generated from `data/source/foods.xlsx` by `npm run foods:import`. Search and nutrition logic live under `lib/foods` and `lib/meal-plans`.
 
 ## Data boundaries
 

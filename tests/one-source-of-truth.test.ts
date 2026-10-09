@@ -84,11 +84,11 @@ test("coach intake and client onboarding write the same columns", async () => {
 });
 
 test("onboarding does not reintroduce the fields the intake dropped", async () => {
-  const page = await source("app/onboarding/page.tsx");
+  const page = await source("components/onboarding/ClientOnboardingForm.tsx");
   for (const field of ["birthDate", "activityLevel", "dietaryPreferences", "foodDislikes"]) {
     assert.doesNotMatch(page, new RegExp(`name="${field}"`), `${field} is back on the onboarding form`);
   }
-  for (const field of ["ageYears", "sex", "dailySteps", "nutritionGoal", "traineeLevel", "navelCircumference"]) {
+  for (const field of ["ageYears", "sex", "dailySteps", "nutritionGoal", "traineeLevel"]) {
     assert.match(page, new RegExp(`name="${field}"`), `${field} is missing from onboarding`);
   }
 });

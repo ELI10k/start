@@ -222,6 +222,8 @@ test("meals can be collapsed to a one-line summary",()=>{
   const source=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
   assert.match(source,/toggleCollapsed/);
   assert.match(source,/aria-expanded=\{!collapsed\.has\(index\)\}/);
+  assert.match(source,/initialMeals\.map\(\(_?,index\)=>index\)/);
+  assert.match(source,/setCollapsed\(new Set\(dayMeals\.map\(\(_?,index\)=>index\)\)\)/);
   assert.match(source,/function mealSummary/);
   assert.match(source,/עדיין ריקה/);
 });

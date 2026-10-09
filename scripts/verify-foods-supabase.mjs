@@ -11,4 +11,4 @@ const requiredMissing = data.filter((f)=>!f.id||!f.name||!f.category||f.calories
 const invalidNutrition = data.filter((f)=>[f.calories,f.protein,f.carbs,f.fat].some((v)=>v!==null&&(!Number.isFinite(Number(v))||Number(v)<0))).map((f)=>f.id);
 const report = { totalImported:data.length, expected:data.length, duplicateIds:duplicates(data.map((f)=>f.id)), duplicateNormalizedNames:duplicates(data.map((f)=>normalize(f.name))), missingRequiredFields:requiredMissing, invalidNutritionValues:invalidNutrition };
 console.log(JSON.stringify(report,null,2));
-if(data.length!==336||report.duplicateIds.length||requiredMissing.length||invalidNutrition.length) process.exitCode=1;
+if(data.length!==359||report.duplicateIds.length||requiredMissing.length||invalidNutrition.length) process.exitCode=1;

@@ -11,6 +11,9 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { siteUrlForRedirect } from "@/lib/auth/site-url";
 import { GOAL_LABELS, isNutritionGoal, type NutritionGoal } from "@/lib/nutrition/energy";
+import { calculateEnergy } from "@/lib/nutrition/energy";
+import { calculateDietMacros, type DietType, type GenerationStatus } from "@/lib/nutrition/personalization";
+import { assignPersonalizedNutrition } from "@/lib/nutrition/assign-personalized";
 import { isTraineeLevel, type TraineeLevel } from "@/lib/workouts/trainee-level";
 import { intakeFromForm, trainingPreferences } from "@/lib/workouts/personalization";
 import { assignPersonalizedTraining } from "@/lib/workouts/assign-personalized";
@@ -50,6 +53,18 @@ export type IntakeState = Readonly<{
   status: "idle" | "saved" | "error";
   message: string;
 }>;
+
+export type ClientOnboardingState = Readonly<{
+  status: "idle" | "error";
+  message: string;
+}>;
+
+const resultFromTrainingMessage=(message:string):{status:GenerationStatus;message:string}=>{
+  if(message.startsWith("שויכה תוכנית")||message.includes("התוכנית הפעילה נשמרה"))return{status:"ready",message};
+  if(message.includes("ממתינה")||message.includes("נדרשת")||message.includes("נדרש"))return{status:"needs_review",message};
+  if(message.includes("אינה זמינה"))return{status:"unavailable",message};
+  return{status:"failed",message};
+};
 
 /**
  * Fills in the calorie inputs for a client who already exists.
@@ -362,42 +377,69 @@ export async function sendClientPasswordReset(form: FormData) {
   redirect(`/coach/clients/${clientId}?login=password-reset-sent`);
 }
 
-export async function completeClientOnboarding(form:FormData) {
+export async function completeClientOnboarding(_:ClientOnboardingState,form:FormData):Promise<ClientOnboardingState> {
   const auth=await getAuthContext();if(!auth||auth.role!=="client") throw new Error("not_authorized");
-  if(form.get("terms")!=="on") throw new Error("terms_required");
+  if(form.get("terms")!=="on") return {status:"error",message:"יש לאשר את תנאי השימוש ומדיניות הפרטיות."};
+  const age=positive(form,"ageYears"),height=positive(form,"height"),weight=positive(form,"weight"),targetWeight=positive(form,"targetWeight"),steps=positive(form,"dailySteps"),weeklyWorkouts=positive(form,"weeklyWorkouts"),sessionMinutes=positive(form,"sessionMinutes");
+  const sex=value(form,"sex"),nutritionGoalValue=value(form,"nutritionGoal"),traineeLevelValue=value(form,"traineeLevel"),medicalReview=value(form,"medicalReview"),dietType=value(form,"dietType"),dietTypeOther=value(form,"dietTypeOther"),mealCount=Number(value(form,"mealTimes"));
+  const dietaryRestrictions=form.getAll("dietaryRestrictions").map(item=>String(item));
+  if(!age||age<12||age>100) return {status:"error",message:"יש להזין גיל תקין בין 12 ל־100."};
+  if(!["male","female"].includes(sex)) return {status:"error",message:"יש לבחור מין לצורך חישוב התזונה."};
+  if(!height||height<120||height>230) return {status:"error",message:"יש להזין גובה תקין בין 120 ל־230 ס״מ."};
+  if(!weight||weight<30||weight>350) return {status:"error",message:"יש להזין משקל נוכחי תקין."};
+  if(!targetWeight||targetWeight<30||targetWeight>350) return {status:"error",message:"יש להזין משקל יעד תקין."};
+  if(!isNutritionGoal(nutritionGoalValue)) return {status:"error",message:"יש לבחור מטרה."};
+  if(!isTraineeLevel(traineeLevelValue)) return {status:"error",message:"יש לבחור ניסיון באימונים."};
+  if(!steps||!weeklyWorkouts||weeklyWorkouts<2||weeklyWorkouts>6||!sessionMinutes) return {status:"error",message:"יש להשלים צעדים, מספר אימונים וזמן זמין לאימון."};
+  if(!["no","yes"].includes(medicalReview)) return {status:"error",message:"יש לאשר את הצהרת הבריאות או לציין שאחד הסעיפים רלוונטי."};
+  if(medicalReview!=="no"&&!value(form,"medicalNotes")) return {status:"error",message:"כתבת שקיימת מגבלה רפואית. חשוב להוסיף תיאור קצר לפני שממשיכים."};
+  if(!["mediterranean","low_carb","keto","pescatarian","vegetarian","vegan","other"].includes(dietType)) return {status:"error",message:"יש לבחור את סוג התזונה המועדף."};
+  if(dietType==="other"&&!dietTypeOther) return {status:"error",message:"בחרת באפשרות אחר — יש להוסיף פירוט קצר."};
+  if(!dietaryRestrictions.length||dietaryRestrictions.some(item=>!["none","lactose_free","gluten_free"].includes(item))||(dietaryRestrictions.includes("none")&&dietaryRestrictions.length>1)) return {status:"error",message:"יש לבחור אם קיימת מגבלה תזונתית. אי אפשר לבחור „אין” יחד עם מגבלה נוספת."};
+  if(!value(form,"allergies")||![3,4,5].includes(mealCount)||!value(form,"foodPreferences")||!value(form,"foodAvoidances")) return {status:"error",message:"יש להשלים את כל שאלות התזונה ולבחור 3, 4 או 5 ארוחות."};
   const supabase=await createSupabaseServerClient();
   // The same columns the coach's intake writes. Two paths writing two shapes is
   // how a client ends up with a calorie target the builder cannot compute: the
   // fields it needs would exist for one kind of client and not the other.
   const {data: previousProfile}=await supabase.from("client_profiles").select("preferences").eq("user_id",auth.id).maybeSingle();
-  const preferences={...(previousProfile?.preferences??{}),...trainingPreferences(intakeFromForm(form)),allergies:value(form,"allergies"),meal_times:value(form,"mealTimes"),weekly_workouts:positive(form,"weeklyWorkouts"),preferred_days:value(form,"preferredDays"),training_type:value(form,"trainingType")};
-  const nutritionGoal=isNutritionGoal(value(form,"nutritionGoal"))?value(form,"nutritionGoal"):null;
-  const traineeLevel=isTraineeLevel(value(form,"traineeLevel"))?value(form,"traineeLevel"):null;
+  const preferences={...(previousProfile?.preferences??{}),...trainingPreferences(intakeFromForm(form)),diet_type:dietType,diet_type_other:dietTypeOther,dietary_restrictions:dietaryRestrictions,allergies:value(form,"allergies"),meal_times:mealCount,food_preferences:value(form,"foodPreferences"),food_avoidances:value(form,"foodAvoidances"),weekly_workouts:weeklyWorkouts,daily_step_goal:Math.max(7000,Math.min(12000,Math.round((steps+1000)/500)*500))};
+  const nutritionGoal=nutritionGoalValue as NutritionGoal;
+  const traineeLevel=traineeLevelValue as TraineeLevel;
   const {error}=await supabase.from("client_profiles").update({
     goal:nutritionGoal?GOAL_LABELS[nutritionGoal as NutritionGoal]:null,
     nutrition_goal:nutritionGoal,
     trainee_level:traineeLevel,
-    age_years:positive(form,"ageYears"),
-    sex:value(form,"sex")==="male"||value(form,"sex")==="female"?value(form,"sex"):null,
-    daily_steps:positive(form,"dailySteps"),
-    target_weight:positive(form,"targetWeight"),
-    height:positive(form,"height"),
+    age_years:age,
+    sex:sex,
+    daily_steps:steps,
+    target_weight:targetWeight,
+    height,
     preferences,
     notes:value(form,"medicalNotes")||null,
-    onboarding_completed:true,
-    onboarding_completed_at:new Date().toISOString(),
+    onboarding_completed:false,
     terms_accepted_at:new Date().toISOString(),
   }).eq("user_id",auth.id);
-  if(error) throw new Error("onboarding_save_failed");
-  // A client who told us their level gets the matching programmes, exactly as
-  // one created by the coach does.
-  if(value(form,"autoAssignProgrammes")==="on") {
-    const message=await assignPersonalizedTraining(createSupabaseAdminClient(),auth.id,intakeFromForm(form));
-    const {error: recommendationError}=await supabase.from("client_profiles").update({preferences:{...preferences,training_recommendation:message}}).eq("user_id",auth.id);
-    if(recommendationError) throw new Error("training_recommendation_save_failed");
-  }
-  const weight=positive(form,"weight");if(weight){const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:positive(form,"navelCircumference")},{onConflict:"client_id,date"});if(progressError)throw new Error("onboarding_weight_failed")}
+  if(error) return {status:"error",message:"לא הצלחנו לשמור את השאלון. אפשר לנסות שוב בעוד רגע."};
+  {const {error:progressError}=await supabase.from("progress_entries").upsert({client_id:auth.id,date:israelDateKey(),weight,navel_circumference:null},{onConflict:"client_id,date"});if(progressError)return {status:"error",message:"הפרטים נשמרו, אך השקילה הראשונה לא נשמרה. אפשר לנסות שוב."}}
   const admin=createSupabaseAdminClient();
+  const energy=calculateEnergy({ageYears:age,heightCm:height,weightKg:weight,sex:sex as "male"|"female",dailySteps:steps,weeklyWorkouts,goal:nutritionGoal});
+  if(!energy.ok)return{status:"error",message:"הפרטים והשקילה נשמרו, אך לא ניתן היה לחשב יעד תזונה מהנתונים."};
+  const macros=calculateDietMacros(weight,energy.calorieTarget,dietType as DietType);
+  if(!macros)return{status:"error",message:"הפרטים והשקילה נשמרו, אך יעד המאקרו שחושב אינו בטווח תקין."};
+  const {error:targetsError}=await admin.from("client_profiles").update({calorie_target:energy.calorieTarget,protein_target:macros.protein,carbohydrate_target:macros.carbohydrates,fat_target:macros.fat}).eq("user_id",auth.id);
+  if(targetsError)return{status:"error",message:"הפרטים נשמרו, אך שמירת יעדי התזונה נכשלה. אפשר לנסות שוב."};
+
+  const trainingMessage=value(form,"autoAssignProgrammes")==="on"
+    ? await assignPersonalizedTraining(admin,auth.id,intakeFromForm(form))
+    : "יצירת תוכנית אימונים לא התבקשה.";
+  const training=resultFromTrainingMessage(trainingMessage);
+  const nutrition=await assignPersonalizedNutrition(admin,auth.id,{
+    dietType:dietType as DietType,restrictions:dietaryRestrictions,allergies:value(form,"allergies"),avoidances:value(form,"foodAvoidances"),mealCount,
+  },energy.calorieTarget,macros);
+  const results={nutrition_targets:{status:"ready" as const,message:`${energy.calorieTarget} קלוריות; ${macros.protein} גרם חלבון, ${macros.carbohydrates} גרם פחמימה, ${macros.fat} גרם שומן.`},training,nutrition};
+  const completedAt=new Date().toISOString();
+  const {error:completionError}=await admin.from("client_profiles").update({preferences:{...preferences,training_recommendation:trainingMessage},onboarding_generation_results:results,onboarding_completed:true,onboarding_completed_at:completedAt,terms_accepted_at:completedAt}).eq("user_id",auth.id);
+  if(completionError)return{status:"error",message:"היעדים חושבו, אך שמירת סטטוס הסיום נכשלה. אפשר לנסות שוב בלי שייווצרו תוכניות כפולות."};
   await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:new Date().toISOString()}).eq("client_id",auth.id).in("status",["sent","opened"]);
-  revalidatePath("/");redirect("/");
+  revalidatePath("/");revalidatePath("/nutrition");revalidatePath("/workouts");redirect("/?onboarding=complete");
 }

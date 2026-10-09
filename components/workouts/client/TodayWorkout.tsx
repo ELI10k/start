@@ -24,7 +24,7 @@ export default function TodayWorkout(){
   // real programme arrives.
   if(loading)return <div className="grid gap-4"><SkeletonCard/><SkeletonList rows={2}/></div>;
   if(persistenceError)return <StateBlock tone="error" title="לא הצלחנו לטעון את תוכנית האימון" description={persistenceError} action={<Link href="/workouts" className="premium-primary-button">ניסיון נוסף</Link>}/>;
-  if(!assignment||!program)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="אין תוכנית אימון משויכת" description="לא נמצאה תוכנית מאושרת ששויכה אליך. המאמן ישייך תוכנית והיא תופיע כאן."/>;
+  if(!assignment||!program)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="התוכנית עדיין לא הופעלה" description="אם מילאת את שאלון האפיון והתוכנית עדיין לא הופיעה, אפשר לעדכן את התשובות או לפנות לתמיכה." action={<Link href="/onboarding" className="premium-primary-button">עדכון שאלון האפיון</Link>}/>;
   const state=assignmentState(assignment,today);
   if(state!=="active")return <StateBlock icon={<CalendarDays aria-hidden="true" size={22}/>} title="התוכנית אינה פעילה כרגע" description="לא ניתן להזיז אימון מתוכנית שאינה פעילה."/>;
   if(!program.days.length)return <StateBlock icon={<Dumbbell aria-hidden="true" size={22}/>} title="לתוכנית אין ימי אימון" description="מקור התוכנית אינו כולל יום אימון תקין."/>;

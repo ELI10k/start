@@ -66,3 +66,4 @@ end $$;
 revoke all on function public.save_workout_program_tree(jsonb) from public;
 grant execute on function public.save_workout_program_tree(jsonb) to authenticated;
 commit;
+

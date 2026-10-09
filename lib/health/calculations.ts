@@ -35,6 +35,23 @@ export function stepsByDay(entries: readonly DailySteps[]): ReadonlyMap<string, 
   return best;
 }
 
+/**
+ * Returns a stable daily average for a displayed period. A live step count for
+ * today is useful in the chart, but treating that partial day as complete makes
+ * both the weekly and monthly averages appear to fall every morning. Once a
+ * completed day exists, only completed days participate in the average.
+ */
+export function averageCompletedSteps(entries: readonly DailySteps[], days: readonly string[], today: string): number | null {
+  const byDay = stepsByDay(entries);
+  const reported = days.flatMap((day) => {
+    const entry = byDay.get(day);
+    return entry ? [entry] : [];
+  });
+  const completed = reported.filter((entry) => entry.day < today);
+  const samples = completed.length ? completed : reported;
+  return samples.length ? Math.round(samples.reduce((total, entry) => total + entry.steps, 0) / samples.length) : null;
+}
+
 const DEFAULT_GOAL = 10000;
 
 export function summarizeSteps(entries: readonly DailySteps[], preferences: Partial<HealthPreferences> | undefined, todayValue: string = calendarDay()): StepsSummary {

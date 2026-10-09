@@ -71,12 +71,13 @@ test("the shell is pinned to a deployment at sync time", async () => {
 });
 
 test("App Review compliance surfaces are public and linked from account entry points", async () => {
-  const [privacy, terms, support, login, onboarding, profile] = await Promise.all([
+  const [privacy, terms, support, login, onboarding, onboardingForm, profile] = await Promise.all([
     source("app/privacy/page.tsx"),
     source("app/terms/page.tsx"),
     source("app/app-support/page.tsx"),
     source("app/login/page.tsx"),
     source("app/onboarding/page.tsx"),
+    source("components/onboarding/ClientOnboardingForm.tsx"),
     source("app/profile/page.tsx"),
   ]);
   assert.match(privacy, /Apple Health/);
@@ -85,8 +86,9 @@ test("App Review compliance surfaces are public and linked from account entry po
   assert.match(support, /NEXT_PUBLIC_SUPPORT_EMAIL/);
   assert.match(support, /start\.elicohenfitness@gmail\.com/);
   assert.match(login, /LegalLinks/);
-  assert.match(onboarding, /href="\/terms"/);
-  assert.match(onboarding, /href="\/privacy"/);
+  assert.match(onboarding, /ClientOnboardingForm/);
+  assert.match(onboardingForm, /href="\/terms"/);
+  assert.match(onboardingForm, /href="\/privacy"/);
   assert.match(profile, /DeleteAccountForm/);
 });
 

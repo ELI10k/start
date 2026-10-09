@@ -12,6 +12,8 @@ import {
   Dumbbell,
   Lightbulb,
   MessageCircle,
+  Footprints,
+  MoonStar,
   ShieldCheck,
   Utensils,
   X,
@@ -25,22 +27,74 @@ import MobileMotion from "./MobileMotion";
 import CleanLandingUrl from "./CleanLandingUrl";
 
 export const metadata: Metadata = {
-  title: "LIFE FIT | המאמן שכבר נמצא אצלך בכיס",
+  metadataBase: new URL("https://elicohenfitness.co.il"),
+  title: "LIFE FIT | אימונים, תזונה ומעקב במקום אחד",
   description:
-    "תזונה, אימונים, מעקב וליווי אישי במקום אחד, במסלול שמתאים בדיוק לרמת התמיכה שאתם רוצים.",
+    "תוכנית אימונים, תזונה, מעקב התקדמות ונתוני פעילות במקום אחד. מסלול DIGITAL של LIFE FIT ב־97 ₪ לחודש, ללא התחייבות.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "he_IL",
+    url: "/",
+    siteName: "LIFE FIT",
+    title: "LIFE FIT | אימונים, תזונה ומעקב במקום אחד",
+    description: "מערכת אחת לתזונה, אימונים, מעקב התקדמות ופעילות יומית — בקצב שלכם.",
+    images: [{ url: "/join/opengraph-image", width: 1200, height: 630, alt: "LIFE FIT — אימונים, תזונה ומעקב במקום אחד" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LIFE FIT | אימונים, תזונה ומעקב במקום אחד",
+    description: "מערכת אחת לתזונה, אימונים, מעקב התקדמות ופעילות יומית — בקצב שלכם.",
+    images: ["/join/opengraph-image"],
+  },
 };
 
 const signupHref = "#pricing";
 const paymentHref = "https://pay.grow.link/OTMxMA~7a4a3ee5af9d1d02a1d30643953eee92-NDAzMjM4MA";
 
 type PhoneProps = {
-  screen: "nutrition" | "nutritionMeal" | "nutritionSwap" | "progress" | "progressPhotos" | "progressMeasurements" | "chat" | "workout" | "workoutSets" | "workoutTimer" | "checkin" | "checkinHistory" | "checkinSummary" | "courses" | "tipDetail" | "tipHistory" | "library" | "libraryCategory" | "libraryDetail";
+  screen: "nutrition" | "nutritionMeal" | "nutritionSwap" | "progress" | "progressPhotos" | "progressMeasurements" | "activity" | "activitySteps" | "activitySleep" | "support" | "chat" | "workout" | "workoutSets" | "workoutTimer" | "checkin" | "checkinHistory" | "checkinSummary" | "courses" | "tipDetail" | "tipHistory" | "library" | "libraryCategory" | "libraryDetail";
   alt: string;
   className?: string;
   priority?: boolean;
 };
 
 function AppScreen({ screen }: Pick<PhoneProps, "screen">) {
+  if (screen === "activitySteps" || screen === "activitySleep") {
+    const steps = screen === "activitySteps";
+    return <div className={styles.appScreen}>
+      <div className={styles.appTop}><span>START</span><b>9:41</b></div>
+      <small className={styles.appKicker}>פעילות והתאוששות</small><h4>{steps ? "הצעדים שלי" : "השינה שלי"}</h4><p className={styles.appSub}>נתונים שנקראו מ־Apple Health לאחר הרשאה</p>
+      <div className={styles.healthFocus}>
+        <span>{steps ? <Footprints size={18} aria-hidden="true" /> : <MoonStar size={18} aria-hidden="true" />}</span>
+        <small>{steps ? "צעדים היום" : "שינה אחרונה"}</small><b>{steps ? "8,460" : "7:35 שעות"}</b><em>{steps ? "מתוך יעד 10,000" : "מתוך יעד 8 שעות"}</em><i><u style={{width:steps ? "84.6%" : "94.8%"}} /></i>
+      </div>
+      <div className={`${styles.healthTrend} ${steps ? "" : styles.sleepTrend}`} aria-label={steps ? "מגמת צעדים בשבעת הימים האחרונים" : "מגמת שינה בשבעת הלילות האחרונים"}><small>{steps ? "מגמת שבעה ימים" : "שבעת הלילות האחרונים"}</small><div><i/><i/><i/><i/><i/><i/><i/></div><b>{steps ? "ממוצע שבועי: 8,120 צעדים" : "ממוצע שבועי: 7:18 שעות"}</b></div>
+      <div className={styles.healthInsight}><span>✓</span><div><b>{steps ? "קרובים ליעד הצעדים" : "קרובים ליעד השינה"}</b><p>{steps ? "עוד 1,540 צעדים כדי להשלים את היעד היומי." : "עוד 25 דקות כדי להשלים את יעד השינה."}</p></div></div>
+    </div>;
+  }
+  if (screen === "support") {
+    return <div className={styles.appScreen}>
+      <div className={styles.appTop}><span>START</span><b>9:41</b></div>
+      <small className={styles.appKicker}>שירות ותמיכה</small><h4>איך אפשר לעזור?</h4><p className={styles.appSub}>פנייה קצרה מגיעה ישירות לצוות השירות</p>
+      <div className={styles.supportTopic}><span><MessageCircle size={17} /></span><div><b>יש לי שאלה על השימוש</b><small>עזרה בתפעול ובהגדרות</small></div><em>←</em></div>
+      <div className={styles.supportTopic}><span>!</span><div><b>משהו לא עובד</b><small>דיווח על תקלה באפליקציה</small></div><em>←</em></div>
+      <div className={styles.supportTopic}><span>+</span><div><b>חסר לי משהו</b><small>בקשה או רעיון לשיפור</small></div><em>←</em></div>
+      <div className={styles.supportNote}><b>אנחנו כאן בשבילכם</b><p>הפנייה נשמרת וצוות השירות חוזר אליכם דרך פרטי הקשר בחשבון.</p></div>
+    </div>;
+  }
+  if (screen === "activity") {
+    return <div className={styles.appScreen}>
+      <div className={styles.appTop}><span>START</span><b>9:41</b></div>
+      <small className={styles.appKicker}>פעילות והתאוששות</small><h4>התמונה של היום</h4><p className={styles.appSub}>נתונים שנקראו מ־Apple Health לאחר הרשאה</p>
+      <div className={styles.healthMetrics}>
+        <div><span><Footprints size={14} aria-hidden="true" /></span><small>צעדים היום</small><b>8,460</b><em>מתוך יעד 10,000</em><i><u style={{width:"84.6%"}} /></i></div>
+        <div><span><MoonStar size={14} aria-hidden="true" /></span><small>שינה אחרונה</small><b>7:35 שעות</b><em>מתוך יעד 8 שעות</em><i><u style={{width:"94.8%"}} /></i></div>
+      </div>
+      <div className={styles.healthTrend} aria-label="מגמת צעדים בשבעת הימים האחרונים"><small>מגמת שבעה ימים</small><div><i/><i/><i/><i/><i/><i/><i/></div><b>ממוצע שבועי: 8,120 צעדים</b></div>
+      <div className={styles.healthInsight}><span>✓</span><div><b>קרובים ליעד השינה</b><p>הנתונים מופיעים לצד האימונים, התזונה וההתקדמות בתמונת היום.</p></div></div>
+    </div>;
+  }
   if (screen === "workoutSets") {
     return <div className={styles.appScreen}>
       <div className={styles.appTop}><span>START</span><b>9:41</b></div><small className={styles.appKicker}>אימון ידיים · תרגיל 2 מתוך 6</small><h4>כפיפת מרפקים</h4><p className={styles.appSub}>מתחילים בחימום ורק אז עולים לסטים העובדים</p>
@@ -204,17 +258,17 @@ function AppBottomNav({ screen }: Pick<PhoneProps, "screen">) {
   const nutrition = screen === "nutrition" || screen === "nutritionMeal" || screen === "nutritionSwap";
   const workout = screen === "workout" || screen === "workoutSets" || screen === "workoutTimer";
   const checkin = screen === "checkin" || screen === "checkinHistory" || screen === "checkinSummary";
-  const progress = screen === "progress" || screen === "progressPhotos" || screen === "progressMeasurements";
+  const progress = screen === "progress" || screen === "progressPhotos" || screen === "progressMeasurements" || screen === "activity" || screen === "activitySteps" || screen === "activitySleep";
   const library = screen === "library" || screen === "libraryCategory" || screen === "libraryDetail";
   const tips = screen === "courses" || screen === "tipDetail" || screen === "tipHistory";
-  const lastLabel = checkin ? "צ׳ק־אין" : screen === "chat" ? "הודעות" : "התקדמות";
+  const lastLabel = checkin ? "צ׳ק־אין" : screen === "chat" || screen === "support" ? "הודעות" : screen === "activity" || screen === "activitySteps" || screen === "activitySleep" ? "פעילות" : "התקדמות";
   const contentLabel = library ? "תוכן" : tips ? "טיפים" : "תזונה";
 
   return <div className={`${styles.fakeNav} ${styles.fixedPhoneNav}`}>
     <span>בית</span>
     {nutrition || library || tips ? <strong>{contentLabel}</strong> : <span>{contentLabel}</span>}
     {workout ? <strong>אימונים</strong> : <span>אימונים</span>}
-    {progress || checkin || screen === "chat" ? <strong>{lastLabel}</strong> : <span>{lastLabel}</span>}
+    {progress || checkin || screen === "chat" || screen === "support" ? <strong>{lastLabel}</strong> : <span>{lastLabel}</span>}
   </div>;
 }
 
@@ -254,6 +308,7 @@ function StoryLabelIcon({ screen }: Pick<PhoneProps, "screen">) {
   if (screen === "workout") return <Dumbbell size={20} strokeWidth={2.3} />;
   if (screen === "checkin") return <ClipboardCheck size={20} strokeWidth={2.3} />;
   if (screen === "progress") return <BarChart3 size={20} strokeWidth={2.3} />;
+  if (screen === "activity" || screen === "activitySteps" || screen === "activitySleep") return <Footprints size={20} strokeWidth={2.3} />;
   if (screen === "library") return <BookOpen size={20} strokeWidth={2.3} />;
   return <Lightbulb size={20} strokeWidth={2.3} />;
 }
@@ -268,12 +323,13 @@ const plans = [
       { text: "חלופות וכמויות לכל ארוחה: מחליפים מזון או ארוחה בהתאם למה שיש בבית, כדי לסייע לכם להישאר במסגרת היעד." },
       { text: "מעקב קלוריות וחלבון: רואים בזמן אמת כמה צרכתם וכמה נשאר לכם כדי לעמוד במטרה היומית." },
       { text: "תוכנית אימונים מלאה: כל אימון מגיע מוכן עם חימום, סדר תרגילים, סטים, חזרות ומשקלים." },
-      { text: "סרטון הסבר לכל תרגיל: רואים בדיוק איך לבצע נכון כדי להפיק יותר מכל חזרה ולבנות שריר בצורה יעילה יותר." },
-      { text: "דגשי בטיחות וביצוע: הנחיות ברורות שעוזרות לצמצם טעויות, עומסים מיותרים וסיכון לפציעות." },
-      { text: "טיימר מנוחה מובנה: שומר על הקצב בין הסטים, מונע מריחות זמן ומקצר את משך האימון." },
+      { text: "סרטון הסבר לכל תרגיל: רואים את אופן הביצוע לפני שמתחילים את התרגיל." },
+      { text: "דגשי ביצוע: הנחיות ברורות שעוזרות לבצע כל תרגיל בצורה מסודרת יותר." },
+      { text: "טיימר מנוחה מובנה: שומר על הקצב בין הסטים ועוזר לצמצם מריחות זמן." },
       { text: "היסטוריית ביצועים: כל המשקלים, החזרות והאימונים נשמרים כדי שתדעו בדיוק איפה השתפרתם." },
       { text: "מעקב התקדמות מלא: משקל, היקפים ותמונות במקום אחד, כדי לראות שינוי גם כשהמשקל לא זז." },
-      { text: "צ׳ק־אין שבועי: מזהים בזמן מה עבד, איפה הייתה סטייה ומה צריך לשנות בשבוע הבא." },
+      { text: "מעקב צעדים ושינה: נתוני הפעילות והשינה מוצגים לצד האימונים, התזונה וההתקדמות." },
+      { text: "צ׳ק־אין שבועי: מסכמים את השבוע ורואים במקום אחד מה עבד ומה היה מאתגר." },
       { text: "נטפליקס של עולם התזונה והכושר: תכנים מסודרים על תזונה, אימונים, שינה, הרגלים, מוטיבציה והתמודדות עם תקיעות." },
       { text: "הטיפ השבועי: פעולה אחת קצרה ומעשית שאפשר ליישם מיד ולהפוך בהדרגה להרגל." },
     ],
@@ -284,16 +340,49 @@ const plans = [
 
 const productStories: Array<{screen: PhoneProps["screen"]; label: string; title: string; text: string; points: string[]}> = [
   { screen: "nutrition", label: "תזונה", title: "לא עוד תפריט ששומרים. תזונה שבאמת חיים איתה.", text: "פותחים את האפליקציה ורואים בדיוק מה לאכול, כמה ומתי. ואם היום השתנה, מחליפים ארוחה בלי להרוס את התהליך.", points: ["לדעת מה וכמה לאכול בלי לחשב הכול לבד", "להחליף ארוחה ועדיין להישאר בכיוון של המטרה", "לראות בזמן אמת אם אתם עומדים בקלוריות ובחלבון"] },
-  { screen: "workout", label: "אימונים", title: "כל אימון מתחיל בדיוק מהמקום שבו עצרתם.", text: "התרגילים, החימום, הסטים, החזרות וזמני המנוחה כבר מחכים לכם. פחות התעסקות בטלפון, יותר פוקוס באימון ומסיימים מהר יותר בלי לעגל פינות.", points: ["דגשים לכל תרגיל שמפחיתים טעויות ועומסים מיותרים ועוזרים להתאמן בטוח יותר", "סרטון ביצוע ברור לכל תרגיל כדי להפיק יותר מכל חזרה ולהתקדם מהר יותר בבניית השריר", "חימום, סטים, חזרות ומשקלים במסך אחד", "טיימר שמונע מריחות זמן ומקצר את האימון", "היסטוריית ביצועים מלאה"] },
-  { screen: "checkin", label: "צ׳ק־אין", title: "שתי דקות בשבוע ששומרות על חודשים של התקדמות.", text: "הצ׳ק־אין מחבר בין מה שתכננתם למה שקרה באמת, כדי לזהות קושי מוקדם ולדייק את השבוע הבא.", points: ["לסכם את השבוע בשתי דקות בלי טבלאות מסורבלות", "להבין אם עייפות או עומס פוגעים בהתמדה", "לשנות כיוון בזמן במקום לגלות מאוחר מדי"] },
+  { screen: "workout", label: "אימונים", title: "כל אימון מתחיל בדיוק מהמקום שבו עצרתם.", text: "התרגילים, החימום, הסטים, החזרות וזמני המנוחה כבר מחכים לכם. פחות התעסקות בטלפון ויותר סדר ורצף במהלך האימון.", points: ["דגשים ברורים לביצוע כל תרגיל", "סרטון ביצוע שממחיש את התנועה לפני שמתחילים", "חימום, סטים, חזרות ומשקלים במסך אחד", "טיימר שעוזר לשמור על זמני המנוחה", "היסטוריית ביצועים מלאה"] },
+  { screen: "checkin", label: "צ׳ק־אין", title: "שתי דקות בשבוע ששומרות על חודשים של התקדמות.", text: "הצ׳ק־אין מחבר בין מה שתכננתם לבין מה שקרה בפועל, כדי לזהות קושי מוקדם ולהבין מה כדאי לבדוק בשבוע הבא.", points: ["לסכם את השבוע בשתי דקות, בלי טבלאות מסורבלות", "להבין אם עייפות או עומס פוגעים בהתמדה", "לזהות בזמן מתי כדאי לשנות כיוון"] },
   { screen: "progress", label: "התקדמות", title: "כשהתוצאה מול העיניים, הרבה יותר קשה לוותר.", text: "המשקל הוא רק חלק מהסיפור. האפליקציה מרכזת היקפים, תמונות, אימונים ומגמות כדי שתראו את התמונה המלאה.", points: ["לראות שינוי גם כשהמספר על המשקל לא זז", "להשוות תמונות ולהרגיש שהעבודה באמת משתלמת", "לדעת מה עובד ולחזור על הפעולות שמביאות תוצאה"] },
+  { screen: "activity", label: "פעילות והתאוששות", title: "הגוף ממשיך לעבוד גם מחוץ לאימון.", text: "הצעדים והשינה מתחברים לתמונה היומית שלכם, כדי להבין איך הפעילות וההתאוששות משפיעות על ההתקדמות ולקבל החלטות מדויקות יותר לאורך הדרך.", points: ["מעקב אחר מספר הצעדים והעמידה ביעד היומי", "מעקב אחר שעות השינה וההתאוששות", "הצגת מגמות לצד האימונים, התזונה וההתקדמות", "חיבור אוטומטי לנתוני הבריאות של הטלפון במכשירים נתמכים"] },
   { screen: "library", label: "נטפליקס של עולם התזונה והכושר", title: "כל מה שצריך לדעת כדי להשיג תוצאה ולשמור עליה.", text: "לא רק תזונה ואימונים. תלמדו לקבל החלטות נכונות לבד, להבין מה משפיע על הגוף ולהמשיך להתקדם גם כשהחיים משתנים.", points: ["להבין תנודות במשקל ולא להילחץ מכל עלייה", "לבנות תזונה שאפשר להתמיד בה גם מחוץ לבית", "להתאמן נכון ולהפיק יותר מכל אימון", "לשפר שינה והתאוששות כדי להגיע עם יותר אנרגיה", "להבין את מבנה הגוף ולהציב ציפיות מציאותיות", "להטמיע הרגלים שנשארים גם כשהמוטיבציה יורדת", "לעצור התקפי אכילה לפני שהם מוחקים שבוע של עבודה", "לקבל מדריכים מוכנים שחוסכים ניסוי וטעייה", "לקבל תשובות ברורות לשאלות תזונה נפוצות", "לפתור ספקות באימון ולבצע בביטחון", "ללמוד בדרך גם בנסיעה, בהליכה או בזמן הפנוי"] },
   { screen: "courses", label: "הטיפ השבועי", title: "פחות מידע. טיפ אחד שבאמת מיישמים השבוע.", text: "בכל שבוע מחכה לכם טיפ קצר ופרקטי שיעזור להתמודד טוב יותר עם אוכל, אימונים, ימים עמוסים ורגעים שבהם המוטיבציה יורדת.", points: ["לקבל רעיון אחד ברור במקום ללכת לאיבוד בעודף מידע", "ליישם פעולה קטנה כבר באותו היום", "להפוך ידע להרגל שעובד גם בחיים עמוסים"] },
 ];
 
+const healthFaqAnswer = "באפליקציית LIFE FIT ל־iPhone, הצעדים ושעות השינה נקראים מ־Apple Health לאחר שתאשרו הרשאת קריאה. LIFE FIT אינה כותבת נתונים ל־Apple Health. ב־Android חיבור Health Connect עדיין אינו זמין, ובגרסת הדפדפן אין גישה לנתוני הבריאות של הטלפון. מתן ההרשאה הוא לבחירתכם, ואפשר לבטל אותה בכל עת בהגדרות הבריאות או הפרטיות של ה־iPhone; שאר חלקי המערכת ממשיכים לפעול גם ללא ההרשאה.";
+
+const faqStructuredData = [
+  { question: "איך פועל מעקב הצעדים והשינה?", answer: healthFaqAnswer },
+  { question: "כמה עולה המינוי?", answer: "המינוי עולה 97 ₪ לחודש ומתחדש אוטומטית מדי חודש, עד לביטול. אין התחייבות ואפשר לבטל לפני מועד החיוב הבא." },
+  { question: "אפשר לבטל?", answer: "אפשר לבטל את החידוש לפני מועד החיוב הבא, ולהמשיך להשתמש במסלול עד סוף התקופה שכבר שולמה. הביטול עוצר חיובים עתידיים ואינו מוחק מיד את הגישה שלכם." },
+];
+
+const landingJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      name: "LIFE FIT DIGITAL",
+      applicationCategory: "HealthApplication",
+      operatingSystem: "iOS, Android, Web",
+      url: "https://elicohenfitness.co.il/",
+      description: "מערכת לתוכניות אימונים ותזונה, מעקב התקדמות ונתוני פעילות במכשירים נתמכים.",
+      offers: { "@type": "Offer", price: "97", priceCurrency: "ILS", url: paymentHref, category: "subscription" },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faqStructuredData.map(({ question, answer }) => ({
+        "@type": "Question",
+        name: question,
+        acceptedAnswer: { "@type": "Answer", text: answer },
+      })),
+    },
+  ],
+};
+
 export default function JoinPage() {
   return (
     <main className={styles.page}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(landingJsonLd).replace(/</g, "\\u003c") }} />
       <CleanLandingUrl />
       <header className={styles.nav}>
         <Link className={styles.logo} href="/join" aria-label="LIFE FIT, דף הבית">
@@ -312,12 +401,12 @@ export default function JoinPage() {
         <div className={styles.heroCopy}>
           <div className={styles.eyebrow}><CheckCircle2 size={16} /> תוכנית ברורה. מעקב אמיתי. תוצאות שרואים.</div>
           <h1>
-            המאמן האישי שלך.
+            המאמן האישי שלכם.
             <span> בלי המחיר של מאמן אישי.</span>
           </h1>
           <p className={styles.heroLead}>
-            אימונים, תזונה, מעקב והכוונה במערכת אחת שחיה איתך בכיס. בלי לרדוף אחרי המאמן,
-            בלי לנחש מה לאכול ובלי לשלם 500–800 ₪ בכל חודש.
+            אימונים, תזונה, מעקב ותובנות אוטומטיות במערכת אחת שחיה איתכם בכיס. בלי לפזר את המידע בין כמה מקומות,
+            בלי לנחש מה לאכול ובלי להיות תלויים ביומן של מישהו אחר.
           </p>
           <div className={styles.heroActions}>
             <a className={styles.primaryButton} href={signupHref}>אני רוצה להתחיל <ArrowLeft size={19} /></a>
@@ -336,11 +425,11 @@ export default function JoinPage() {
             <Phone screen="nutrition" alt="מסך תזונה אמיתי באפליקציית LIFE FIT" className={styles.heroPhone} priority />
             <div className={`${styles.floatingCard} ${styles.floatingTop}`}>
               <span className={styles.miniIcon}><Utensils size={17} /></span>
-              <div><b>התפריט כבר מוכן</b><small>מותאם למטרה שלך</small></div>
+              <div><b>התפריט כבר מוכן</b><small>מותאם למטרה שלכם</small></div>
             </div>
             <div className={`${styles.floatingCard} ${styles.floatingBottom}`}>
               <span className={styles.miniIcon}><BarChart3 size={17} /></span>
-              <div><b>אתה בכיוון הנכון</b><small>המערכת עוקבת איתך</small></div>
+              <div><b>אתם בכיוון הנכון</b><small>המערכת מרכזת את המעקב</small></div>
             </div>
           </div>
           <MobilePhoneTrio screens={["nutritionMeal", "nutrition", "nutritionSwap"]} label="שלושה מסכי תזונה באפליקציה" className={styles.heroMobileTrio} />
@@ -349,7 +438,7 @@ export default function JoinPage() {
 
       <section className={styles.stats} aria-label="היתרונות המרכזיים">
         <div><strong>24/7</strong><span>הכול זמין כשנוח לכם</span></div>
-        <div><strong>87%</strong><span>פחות מעלות מאמן אישי</span></div>
+        <div><strong>97 ₪</strong><span>מחיר חודשי קבוע וברור</span></div>
         <div><strong>מקום אחד</strong><span>לאימונים, תזונה ומעקב</span></div>
       </section>
 
@@ -357,7 +446,7 @@ export default function JoinPage() {
         <div className={styles.sectionHeading}>
           <span className={styles.sectionIndex}>01 / ההבדל</span>
           <h2>אם אתם עדיין משלמים על מוטיבציה<br />אתם משלמים על הדבר הלא נכון.</h2>
-          <p>מאמן יכול להיות מצוין. אבל רוב האנשים לא צריכים עוד מישהו שיגיד להם “יאללה”. הם צריכים מערכת ברורה שמסירה תירוצים ומראה בדיוק מה עושים עכשיו.</p>
+            <p>ליווי אישי יכול להיות מצוין, אבל לא כל אחד צריך אותו בכל שלב. מסלול DIGITAL נותן מערכת ברורה לשימוש עצמאי, שמרכזת את התוכנית, המעקב והתובנות במקום אחד.</p>
         </div>
 
         <div className={styles.comparison}>
@@ -380,14 +469,14 @@ export default function JoinPage() {
             <h3>LIFE FIT</h3>
             <div className={styles.bigPrice}>97 ₪ <small>לחודש</small></div>
             <ul>
-              <li><Check size={16} /> יודעים בדיוק מה לאכול ומה להתאמן</li>
+              <li><Check size={16} /> יודעים בדיוק מה לאכול ואיך להתאמן</li>
               <li><Check size={16} /> הכול מחכה לכם במקום אחד</li>
               <li><Check size={16} /> רואים התקדמות, לא רק מקווים לה</li>
               <li><Check size={16} /> מתקדמים בקצב שלכם, בכל שעה</li>
             </ul>
           </article>
         </div>
-        <p className={styles.fairNote}>לא תחליף לטיפול רפואי או לאימון פיזי שנדרש בו פיקוח אישי. כן תחליף חכם לבלגן, לניחושים ולתשלום המיותר של רוב המתאמנים.</p>
+        <p className={styles.fairNote}>המערכת אינה תחליף לטיפול רפואי או לאימון שנדרש בו פיקוח אישי. היא כן חלופה מסודרת לבלגן, לניחושים ולמידע שמפוזר בין כמה מקומות.</p>
       </section>
 
       <section className={styles.secondChance} aria-labelledby="second-chance-title">
@@ -419,7 +508,7 @@ export default function JoinPage() {
               <li><X size={17} /> לא ראיתם את ההתקדמות בזמן אמת</li>
               <li><X size={17} /> כל סטייה הרגישה כמו חזרה לנקודת ההתחלה</li>
             </ul>
-            <div className={styles.pathResolution}><CheckCircle2 size={21} /><span><b>הפעם הליווי ממשיך איתכם.</b> גם אחרי השיחה, גם בארוחה הבאה וגם באימון הבא.</span></div>
+            <div className={styles.pathResolution}><CheckCircle2 size={21} /><span><b>הפעם המערכת ממשיכה איתכם.</b> בארוחה הבאה, באימון הבא ובמעקב שאחריהם.</span></div>
           </article>
         </div>
         <a className={styles.secondChanceCta} href="#pricing">הפעם אני עושה את זה אחרת <ArrowLeft size={19} /></a>
@@ -453,15 +542,21 @@ export default function JoinPage() {
           <article className={styles.featureCard}>
             <span className={styles.featureIcon}><MessageCircle size={22} /></span>
             <span className={styles.featureNumber}>04</span>
-            <h3>הכוונה ברגע הנכון</h3>
-            <p>צ׳ק־אין, פידבק והתראות שעוזרים לזהות סטייה לפני ששבוע חלש הופך לחודש אבוד.</p>
+            <h3>תובנות ברגע הנכון</h3>
+            <p>צ׳ק־אין, סיכומים והתראות אוטומטיות שעוזרים לזהות דפוסים ולשמור על הכיוון.</p>
+          </article>
+          <article className={styles.featureCard}>
+            <span className={styles.featureIcon}><Footprints size={22} /></span>
+            <span className={styles.featureNumber}>05</span>
+            <h3>פעילות והתאוששות</h3>
+            <p>צעדים ושינה מצטרפים לתמונה היומית במכשירים נתמכים, כדי לראות גם מה קורה מחוץ לאימון.</p>
           </article>
         </div>
 
         <div className={styles.productStories}>
           {productStories.map((story, index) => <article className={`${styles.productStory} ${index % 2 ? styles.storyLight : styles.storyDark}`} key={story.label}>
-            <div className={`${styles.storyVisual} ${story.screen === "workout" ? styles.storyVisualWorkout : ""} ${story.screen === "nutrition" ? styles.storyVisualNutrition : ""}`}>
-              {story.screen === "workout" ? <div className={styles.workoutPhoneSet}><Phone screen="workoutSets" alt="מסך חימום וסטים באימון ידיים" /><Phone screen="workout" alt="מסך ביצוע אימון ידיים עם סרטון הדגמה" /><Phone screen="workoutTimer" alt="טיימר מנוחה בין סטים" /></div> : story.screen === "nutrition" ? <div className={styles.nutritionPhoneSet}><Phone screen="nutritionMeal" alt="פירוט ארוחה עם כמויות וערכים" /><Phone screen="nutrition" alt="סיכום התזונה היומי" /><Phone screen="nutritionSwap" alt="החלפות חכמות לארוחה" /></div> : <><Phone screen={story.screen} alt={`מסך ${story.label} באפליקציה`} className={styles.desktopStoryPhone} />{mobileStoryScreens[story.screen] && <MobilePhoneTrio screens={mobileStoryScreens[story.screen]!} label={`${story.label} באפליקציה`} />}</>}
+            <div className={`${styles.storyVisual} ${story.screen === "workout" ? styles.storyVisualWorkout : ""} ${story.screen === "nutrition" ? styles.storyVisualNutrition : ""} ${story.screen === "activity" ? styles.storyVisualActivity : ""}`}>
+              {story.screen === "workout" ? <div className={styles.workoutPhoneSet}><Phone screen="workoutSets" alt="מסך חימום וסטים באימון ידיים" /><Phone screen="workout" alt="מסך ביצוע אימון ידיים עם סרטון הדגמה" /><Phone screen="workoutTimer" alt="טיימר מנוחה בין סטים" /></div> : story.screen === "nutrition" ? <div className={styles.nutritionPhoneSet}><Phone screen="nutritionMeal" alt="פירוט ארוחה עם כמויות וערכים" /><Phone screen="nutrition" alt="סיכום התזונה היומי" /><Phone screen="nutritionSwap" alt="החלפות חכמות לארוחה" /></div> : story.screen === "activity" ? <div className={styles.activityPhoneSet}><Phone screen="activitySteps" alt="מסך צעדים יומי ומגמה שבועית" /><Phone screen="activitySleep" alt="מסך שעות שינה ומגמה שבועית" /></div> : <><Phone screen={story.screen} alt={`מסך ${story.label} באפליקציה`} className={styles.desktopStoryPhone} />{mobileStoryScreens[story.screen] && <MobilePhoneTrio screens={mobileStoryScreens[story.screen]!} label={`${story.label} באפליקציה`} />}</>}
             </div>
             <div className={styles.storyCopy}><span className={styles.storyLabel}><StoryLabelIcon screen={story.screen} />{story.label}</span><h3>{story.title}</h3><p>{story.text}</p><ul className={story.screen === "library" ? styles.courseTopicList : undefined}>{story.points.map(point => <li key={point}><Check size={17}/>{point}</li>)}</ul><a href="#pricing">לבחירת המסלול שמתאים לי <ArrowLeft size={17}/></a></div>
           </article>)}
@@ -470,41 +565,70 @@ export default function JoinPage() {
         <div className={styles.phoneGallery}>
           <div className={styles.galleryCopy}>
             <span>הכול מדבר באותה שפה</span>
-            <h3>האימון משפיע על המעקב.<br />המעקב מדייק את הדרך.</h3>
+            <h3>האימון נכנס למעקב.<br />המעקב מראה את ההתקדמות.</h3>
             <p>במקום ארבע אפליקציות, פתקים וצילומי מסך, יש לכם מערכת אחת שרואה את התמונה המלאה.</p>
-            <a href={signupHref}>למסלולי ההשקה <ArrowLeft size={18} /></a>
+            <a href={signupHref}>למסלול DIGITAL <ArrowLeft size={18} /></a>
           </div>
           <div className={styles.phoneStack}>
             <Phone screen="nutrition" alt="תפריט תזונה עם ארוחות וערכים אמיתיים" className={styles.phoneOne} />
             <Phone screen="progress" alt="מעקב התקדמות עם נתוני אימונים ומדידות" className={styles.phoneTwo} />
-            <Phone screen="chat" alt="שיחת ליווי טבעית עם מאמן" className={styles.phoneThree} />
+            <Phone screen="activitySteps" alt="צעדים ומגמה שבועית" className={styles.phoneThree} />
           </div>
         </div>
       </section>
 
       <section className={styles.humanSupport} aria-labelledby="human-support-title">
         <div className={styles.supportVisual}>
-          <Phone screen="chat" alt="מסך פנייה וקבלת מענה אנושי באפליקציה" />
-          <div className={styles.supportMessage}><span><MessageCircle size={18} /></span><div><b>אנחנו כאן</b><small>קוראים כל פנייה וחוזרים אליכם</small></div></div>
+          <Phone screen="support" alt="מסך פנייה לצוות השירות באפליקציית LIFE FIT" />
+          <div className={styles.supportMessage}><span><MessageCircle size={18} /></span><div><b>יש לכם בקשה?</b><small>פונים לצוות השירות מעמוד התמיכה</small></div></div>
         </div>
         <div className={styles.supportCopy}>
-          <span className={styles.supportEyebrow}>מאחורי האפליקציה יש אנשים</span>
+          <span className={styles.supportEyebrow}>מערכת עצמאית, עם כתובת לפניות</span>
           <h2 id="human-support-title">זו לא עוד אפליקציה שאתם צריכים להסתדר איתה.<br /><em>זה המקום שלכם.</em></h2>
-          <p>משהו חסר לכם? פעולה מסוימת לא נוחה? יש לכם רעיון שיכול להפוך את הדרך לפשוטה יותר? דברו איתנו. מאחורי LIFE FIT יש צוות אמיתי שמקשיב, עונה ומשפר את המערכת לפי מה שאתם באמת צריכים.</p>
+          <p>מסלול DIGITAL מיועד לשימוש עצמאי: התוכניות, הסיכומים והתובנות במערכת אינם צ׳אט אישי עם מאמן ואינם עדכון ידני שבועי. אם משהו חסר, לא נוח או לא עובד, אפשר לפנות לצוות השירות בבקשה, בתקלה או ברעיון לשיפור.</p>
           <ul>
-            <li><Check size={18} /><span><b>מענה אנושי</b> — לא נשארים לבד מול מסך.</span></li>
-            <li><Check size={18} /><span><b>מקשיבים לכל בקשה ורעיון</b> ובודקים איך אפשר לעזור.</span></li>
-            <li><Check size={18} /><span><b>האפליקציה ממשיכה להשתפר</b> יחד עם האנשים שמשתמשים בה.</span></li>
+            <li><Check size={18} /><span><b>התובנות והסיכומים נוצרים במערכת</b> מתוך הנתונים שהזנתם או אישרתם לקריאה.</span></li>
+            <li><Check size={18} /><span><b>צוות השירות מטפל בפניות שימוש ותקלות</b> — לא מחליף ליווי מקצועי אישי.</span></li>
+            <li><Check size={18} /><span><b>בקשות ורעיונות נשמרים לשיפור המוצר</b> בהתאם לצורכי המשתמשים.</span></li>
           </ul>
-          <a href="#pricing">מצטרפים למקום שנבנה בשבילכם <ArrowLeft size={18} /></a>
         </div>
+      </section>
+
+      <section className={styles.gettingStarted} aria-labelledby="getting-started-title">
+        <div className={styles.gettingStartedHeading}>
+          <span className={styles.sectionIndex}>04 / איך מתחילים</span>
+          <h2 id="getting-started-title">מההצטרפות ועד האימון הראשון.<br />בלי להסתבך.</h2>
+          <p>מצטרפים, משלימים את תהליך הקליטה וממשיכים אל הכלים והתוכניות שהופעלו בחשבון — הכול במקום אחד.</p>
+        </div>
+        <ol className={styles.startSteps}>
+          <li>
+            <span aria-hidden="true">01</span>
+            <h3>מצטרפים למסלול</h3>
+            <p>משלימים תשלום חודשי מאובטח ב־Grow, ללא התחייבות.</p>
+          </li>
+          <li>
+            <span aria-hidden="true">02</span>
+            <h3>מקבלים הזמנה מאובטחת</h3>
+            <p>לאחר קליטת ההצטרפות והגדרת החשבון, נשלח למייל קישור להשלמת הכניסה.</p>
+          </li>
+          <li>
+            <span aria-hidden="true">03</span>
+            <h3>משלימים פרטים ומטרות</h3>
+            <p>עונים על שאלות קצרות על הגוף, התזונה, הניסיון, סביבת האימון והמטרות.</p>
+          </li>
+          <li>
+            <span aria-hidden="true">04</span>
+            <h3>נכנסים ומתחילים לעקוב</h3>
+            <p>התוכניות והכלים שהופעלו בחשבון מרוכזים במערכת, ובה מסמנים ארוחות ואימונים ועוקבים אחר ההתקדמות.</p>
+          </li>
+        </ol>
       </section>
 
       <section className={styles.pricing} id="pricing">
         <div className={styles.sectionHeading}>
-          <span className={styles.sectionIndex}>04 / מתחילים</span>
+          <span className={styles.sectionIndex}>05 / מתחילים</span>
           <h2>כמה עולה לכם עוד חודש<br />של “ביום ראשון אני מתחיל”?</h2>
-          <p>מסלול אחד שמעניק גישה לכל פיצ׳רי האפליקציה</p>
+          <p>מסלול אחד שמעניק גישה לכל הכלים והיכולות של האפליקציה</p>
         </div>
 
         <section className={styles.finalCta} id="contact">
@@ -521,7 +645,7 @@ export default function JoinPage() {
                 <span className={styles.planDot} />
               </div>
               <div className={styles.planPrice}><span>₪</span>{plan.price}<small>/ לחודש</small></div>
-              <p className={styles.renewalPrice}>בחיוב חודשי מתחדש. ללא התחייבות — ניתן לבטל בכל רגע לפני החיוב הבא.</p>
+              <p className={styles.renewalPrice}>בחיוב חודשי מתחדש. ללא התחייבות — אפשר לבטל לפני החיוב הבא.</p>
               <ul>
                 {plan.features.map((feature) => {
                   const [title, ...description] = feature.text.split(":");
@@ -548,17 +672,19 @@ export default function JoinPage() {
               <div><Check size={17} /><span><strong>חלופות וכמויות לכל ארוחה:</strong> מחליפים מזון או ארוחה בהתאם למה שיש בבית, כדי לסייע לכם להישאר במסגרת היעד.</span></div>
               <div><Check size={17} /><span><strong>מעקב קלוריות וחלבון:</strong> רואים בזמן אמת כמה צרכתם וכמה נשאר לכם כדי לעמוד במטרה היומית.</span></div>
               <div><Check size={17} /><span><strong>תוכנית אימונים מלאה:</strong> כל אימון מגיע מוכן עם חימום, סדר תרגילים, סטים, חזרות ומשקלים.</span></div>
-              <div><Check size={17} /><span><strong>סרטון הסבר לכל תרגיל:</strong> רואים בדיוק איך לבצע נכון כדי להפיק יותר מכל חזרה ולבנות שריר בצורה יעילה יותר.</span></div>
-              <div><Check size={17} /><span><strong>דגשי בטיחות וביצוע:</strong> הנחיות ברורות שעוזרות לצמצם טעויות, עומסים מיותרים וסיכון לפציעות.</span></div>
-              <div><Check size={17} /><span><strong>טיימר מנוחה מובנה:</strong> שומר על הקצב בין הסטים, מונע מריחות זמן ומקצר את משך האימון.</span></div>
+              <div><Check size={17} /><span><strong>סרטון הסבר לכל תרגיל:</strong> רואים את אופן הביצוע לפני שמתחילים את התרגיל.</span></div>
+              <div><Check size={17} /><span><strong>דגשי ביצוע:</strong> הנחיות ברורות שעוזרות לבצע כל תרגיל בצורה מסודרת יותר.</span></div>
+              <div><Check size={17} /><span><strong>טיימר מנוחה מובנה:</strong> שומר על הקצב בין הסטים ועוזר לצמצם מריחות זמן.</span></div>
               <div><Check size={17} /><span><strong>היסטוריית ביצועים:</strong> כל המשקלים, החזרות והאימונים נשמרים כדי שתדעו בדיוק איפה השתפרתם.</span></div>
               <div><Check size={17} /><span><strong>מעקב התקדמות מלא:</strong> משקל, היקפים ותמונות במקום אחד, כדי לראות שינוי גם כשהמשקל לא זז.</span></div>
-              <div><Check size={17} /><span><strong>צ׳ק־אין שבועי:</strong> מזהים בזמן מה עבד, איפה הייתה סטייה ומה צריך לשנות בשבוע הבא.</span></div>
+              <div><Check size={17} /><span><strong>מעקב צעדים ושינה:</strong> נתוני הפעילות והשינה מוצגים לצד האימונים, התזונה וההתקדמות.</span></div>
+              <div><Check size={17} /><span><strong>צ׳ק־אין שבועי:</strong> מסכמים את השבוע ורואים במקום אחד מה עבד ומה היה מאתגר.</span></div>
               <div><Check size={17} /><span><strong>נטפליקס של עולם התזונה והכושר:</strong> תכנים מסודרים על תזונה, אימונים, שינה, הרגלים, מוטיבציה והתמודדות עם תקיעות.</span></div>
               <div><Check size={17} /><span><strong>הטיפ השבועי:</strong> פעולה אחת קצרה ומעשית שאפשר ליישם מיד ולהפוך בהדרגה להרגל.</span></div>
             </div>
           </details>
-          <details><summary>כמה עולה המינוי?<ChevronDown size={18} /></summary><p>המינוי עולה 97 ₪ לחודש ומתחדש אוטומטית מדי חודש, עד לביטול. אין התחייבות וניתן לבטל לפני מועד החיוב הבא.</p></details>
+          <details><summary>איך פועל מעקב הצעדים והשינה?<ChevronDown size={18} /></summary><p>{healthFaqAnswer}</p></details>
+          <details><summary>כמה עולה המינוי?<ChevronDown size={18} /></summary><p>המינוי עולה 97 ₪ לחודש ומתחדש אוטומטית מדי חודש, עד לביטול. אין התחייבות ואפשר לבטל לפני מועד החיוב הבא.</p></details>
           <details><summary>אפשר לבטל?<ChevronDown size={18} /></summary><p>כן. אין סיבה להחזיק אתכם בכוח. אפשר לבטל את החידוש לפני מועד החיוב הבא, ולהמשיך להשתמש במסלול עד סוף התקופה שכבר שולמה. הביטול עוצר חיובים עתידיים ואינו מוחק מיד את הגישה שלכם.</p></details>
           <details><summary>האם זה מתאים גם למתחילים?<ChevronDown size={18} /></summary><p>כן, במיוחד למתחילים. אתם לא אמורים להגיע עם ידע בתזונה או באימונים. המערכת מפרקת את הדרך לפעולות ברורות: מה לבצע באימון, מה לאכול ואיך לבדוק שאתם מתקדמים.</p></details>
           <details><summary>האם זה מתאים גם למתאמנים מתקדמים?<ChevronDown size={18} /></summary><p>בהחלט. מתאמנים מתקדמים מקבלים תוכנית שמאפשרת לעקוב בצורה מדויקת אחר משקלים, חזרות, ביצועים ומדדי גוף לאורך זמן. כך אפשר לזהות תקיעות, לנהל עומסים ולדייק את התזונה בהתאם למטרה, במקום להסתמך על תחושה בלבד.</p></details>

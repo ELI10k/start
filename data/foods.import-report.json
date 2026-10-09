@@ -3,8 +3,8 @@
   "sheets": [
     "בלוק 1 - מוצרי חלב"
   ],
-  "sourceRows": 341,
-  "importedFoods": 341,
+  "sourceRows": 359,
+  "importedFoods": 359,
   "ignoredRows": 0,
   "categoryCount": 64,
   "duplicateNames": [
@@ -27,9 +27,9 @@
     "protein": 15,
     "carbs": 17,
     "fat": 23,
-    "sugars": 85,
-    "sodiumMg": 88,
-    "calciumMg": 283
+    "sugars": 86,
+    "sodiumMg": 89,
+    "calciumMg": 284
   },
   "issues": []
 }

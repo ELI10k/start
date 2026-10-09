@@ -258,3 +258,4 @@ test("coach exercise cards stay inside the coach-authorized route", async () => 
   assert.match(detail, /ExerciseDetail exerciseId=\{exerciseId\}/);
   assert.match(detail, /href="\/coach\/workouts\/exercises"/);
 });
+

@@ -11,7 +11,7 @@ export async function assignPersonalizedTraining(admin: ReturnType<typeof create
   const recommendation = recommendTraining(input);
   if (recommendation.status !== "ready") return recommendation.message;
   const {data: relationship, error: relationshipError} = await admin.from("coach_client_relationships").select("coach_id").eq("client_id", clientId).eq("status", "active").limit(1).maybeSingle();
-  if (relationshipError || !relationship) return "האפיון נשמר. נדרש שיוך מאמן לפני הפעלת תוכנית.";
+  if (relationshipError) return "האפיון נשמר, אך לא ניתן היה לבדוק את מסלול התוכנית. אפשר לנסות שוב.";
   const {data: row, error} = await admin.from("workout_programs").select("*,workout_program_days(*,workout_program_exercises(*,workout_set_prescriptions(*)))").eq("status", "active").eq("official", true).or(`id.eq.${recommendation.programId},name.eq.${recommendation.programId}`).limit(1).maybeSingle();
   if (error || !row) return "האפיון נשמר; התוכנית המומלצת אינה זמינה במאגר. נדרשת בדיקת מאמן.";
   const template: WorkoutProgram = BUILT_IN_PROGRAMS.find(p => p.id === row.id) ?? {
@@ -22,7 +22,10 @@ export async function assignPersonalizedTraining(admin: ReturnType<typeof create
   const id = `personal-${randomUUID()}`;
   const program = {...personalized, id, name: `${template.name} — מותאם אישית`, official: false, duplicatedFromId: template.id, days: personalized.days.map((day, n) => ({...day, id: `${id}-day-${n}`, exercises: day.exercises.map((entry, i) => ({...entry, id: `${id}-day-${n}-ex-${i}`, notes: [entry.effort ? `RPE יעד: ${entry.effort}` : "", entry.notes].filter(Boolean).join("\n"), setPrescriptions: entry.setPrescriptions?.map((set, j) => ({...set, id: `${id}-day-${n}-ex-${i}-set-${j}`}))}))}))};
   const availableEquipment = recommendation.definition?.homeEquipment || input.equipment === "trx" ? [...personalized.equipment] : ["משקולות יד", "מוט", "ספסל", "מכונה ייעודית", "כבל פולי", "משקל גוף"];
-  const {data: result, error: assignmentError} = await admin.rpc("assign_intake_workout", {p_client_id: clientId, p_coach_id: relationship.coach_id, p_program: program, p_start_date: israelDateKey(), p_location: input.trainingLocation, p_equipment: availableEquipment});
+  const assignment = relationship
+    ? await admin.rpc("assign_intake_workout", {p_client_id: clientId, p_coach_id: relationship.coach_id, p_program: program, p_start_date: israelDateKey(), p_location: input.trainingLocation, p_equipment: availableEquipment})
+    : await admin.rpc("assign_digital_intake_workout", {p_client_id: clientId, p_program: program, p_start_date: israelDateKey(), p_location: input.trainingLocation, p_equipment: availableEquipment});
+  const {data: result, error: assignmentError} = assignment;
   if (assignmentError) {console.error("Personalized training assignment failed", {code: assignmentError.code}); return "האפיון נשמר, אך שיוך האימון נכשל. אפשר לשמור שוב או לשייך ממסך האימונים.";}
   return result === "already_active" ? `האפיון נשמר. התוכנית הפעילה נשמרה; המלצה: ${recommendation.message}` : `שויכה תוכנית מותאמת: ${recommendation.message}`;
 }

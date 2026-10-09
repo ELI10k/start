@@ -14,7 +14,7 @@ import ProgressPulse from "@/components/client/ProgressPulse";
 import StepsMetricTile from "@/components/client/StepsMetricTile";
 import SleepMetricTile from "@/components/client/SleepMetricTile";
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
-import { addTotals, eatenFromMenu, isMealReportedEaten } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, isMealAnswered } from "@/lib/nutrition/menu-intake";
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
@@ -57,10 +57,11 @@ export default async function Home() {
     listClientFoodLog(auth.id, today, { signPhotoUrls: false }),
   ]);
   const meals = data.menu?.meals ?? [];
-  // The tile describes meals eaten, not meals answered. "Something else"
-  // counts because the client did eat; "not eaten" remains an answer without
-  // inflating the eaten total.
-  const completed = meals.filter(isMealReportedEaten);
+  // Marked eaten, or every choice in it logged - the same test the nutrition
+  // screen applies. `meal.completed` alone missed nothing today, but it is one
+  // of two fields that can say "eaten" and reading only one is how the two
+  // screens drifted apart the last three times.
+  const completed = meals.filter(isMealAnswered);
   // What was eaten, at the amount the client reported eating - plus anything
   // they logged beside the plan and the free-calorie windows they filled. This
   // tile used to read `meal.items`, which is every row the coach wrote at the
@@ -79,6 +80,11 @@ export default async function Home() {
   const checkInDue = israelWeekday(today) === 5 && !data.checkIns.some((checkIn) =>
     trainingWeekStart(israelDateKey(new Date(checkIn.submitted_at))) === currentWeek
   );
+  const generation = data.clientProfile.onboarding_generation_results && typeof data.clientProfile.onboarding_generation_results === "object" && !Array.isArray(data.clientProfile.onboarding_generation_results)
+    ? data.clientProfile.onboarding_generation_results as Record<string,{status?:string;message?:string}>
+    : {};
+  const generationEntries = Object.entries(generation);
+  const generationReady = generationEntries.length > 0 && generationEntries.every(([,result]) => result.status === "ready");
 
   return (
     <ClientShell className="client-app-shell--home">
@@ -97,6 +103,14 @@ export default async function Home() {
             headline - but it still needs one to be announced by, and to be
             landed on when the back button returns here. */}
         <h1 className="sr-only">מה חשוב לך היום</h1>
+
+        {generationEntries.length > 0 ? <section className={`rounded-2xl border p-4 text-sm ${generationReady ? "border-[#BBF7D0] bg-[#F0FDF4]" : "border-[#FDE68A] bg-[#FFFBEB]"}`} aria-label="סטטוס הכנת התוכניות">
+          <strong className="block text-base">{generationReady ? "הכול מוכן להתחלה" : "האפיון נשמר — חלק מהדברים דורשים טיפול"}</strong>
+          <p className="mt-1 text-[#5B5F5B]">היעדים והתוכניות נוצרו לפי תשובות שאלון האפיון. אפשר לעדכן העדפות מהפרופיל בלי למחוק את ההיסטוריה.</p>
+          <ul className="mt-3 grid gap-1">
+            {generationEntries.map(([key,result]) => <li key={key}><b>{key === "training" ? "אימונים" : key === "nutrition" ? "תזונה" : "יעדי קלוריות ומאקרו"}:</b> {result.message}</li>)}
+          </ul>
+        </section> : null}
 
         {/* Only ever renders in the days after the coach releases one, which is
             also the only time this screen is allowed to grow past the fold. */}

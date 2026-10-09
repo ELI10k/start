@@ -44,6 +44,9 @@ test("coach creation stores weight and navel in the central progress row idempot
   assert.match(action, /is_test_account:coachProfile\.is_test_account/);
   assert.match(history, /aria-label=\{`מגמת \$\{title\}`\}/);
   assert.match(history, /entry\.navel_circumference \?\? "—"/);
+  assert.match(history, /ממוצע שבועי/);
+  assert.match(history, /ממוצע חודשי/);
+  assert.match(history, /monthlyKg=\{weightRates\?\.monthlyKg\}/);
   assert.match(coachProfile, /אין עדיין מדידת היקף טבור/);
   assert.match(coachProfile, /find\(\(entry\)=>entry\.navel_circumference!==null\)/);
 });

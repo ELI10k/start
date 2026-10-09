@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { normalizeExerciseName, stableWorkoutId } from "../lib/workouts/normalization.ts";
 import { archiveWorkoutProgram, assignWorkout, createMemoryWorkoutRepository, duplicateWorkoutProgram, saveCompletedWorkout, startWorkoutSession } from "../lib/workouts/storage.ts";
 import { exercisePerformance, getTodayWorkoutDay, trainingWeekStart, workoutCompletionPercent, workoutStreak, workoutVolume } from "../lib/workouts/progress.ts";
+import { fetchAllPages } from "../lib/supabase/pagination.ts";
 import type { ActiveWorkoutSession, ClientWorkoutAssignment, CompletedWorkout, WorkoutProgram, WorkoutRepositorySnapshot } from "../lib/workouts/types.ts";
 
 const fixture:WorkoutProgram={id:"program-test",name:"TEST ONLY",sourceWorkbook:"test.xlsx",status:"active",official:true,equipment:[],days:[{id:"day-a",name:"A",order:0,exercises:[{id:"we-1",exerciseId:"ex-1",order:0,sets:"3",reps:"10"}]},{id:"day-b",name:"B",order:1,exercises:[]}]};
@@ -42,6 +43,30 @@ test("memory repository isolates and resets snapshots",()=>{const repository=cre
 test("import audit confirms real approved programs, exercises and resolved references",async()=>{const audit=JSON.parse(await readFile(new URL("../reports/workout-import-audit.json",import.meta.url),"utf8"));assert.equal(audit.filesCopied.length,9);assert.ok(audit.programsImported>0);assert.ok(audit.uniqueExercisesImported>0);assert.equal(audit.unresolvedReferences.length,0);assert.ok(audit.videoLinksPreserved>0)});
 test("Supabase workout schema covers catalog, assignments, sessions, sets and role policies",async()=>{const sql=await readFile(new URL("../supabase/migrations/202607200004_workout_persistence.sql",import.meta.url),"utf8");for(const table of ["workout_exercises","workout_programs","workout_program_days","workout_program_exercises","workout_assignments","workout_sessions","workout_session_exercises","workout_sets"])assert.match(sql,new RegExp(`create table public\\.${table}`));for(const rpc of ["assign_workout_program","save_active_workout","complete_workout"])assert.match(sql,new RegExp(`function public\\.${rpc}`));assert.match(sql,/enable row level security/)});
 test("workout UI persistence no longer uses localStorage",async()=>{const provider=await readFile(new URL("../components/workouts/WorkoutProvider.tsx",import.meta.url),"utf8");const storage=await readFile(new URL("../lib/workouts/storage.ts",import.meta.url),"utf8");assert.doesNotMatch(provider,/localStorage|createBrowserWorkoutRepository/);assert.doesNotMatch(storage,/localStorage|start-workouts-v2/);assert.match(provider,/createSupabaseWorkoutRepository/)});
+test("large workout tables are loaded past the PostgREST row limit",async()=>{
+  const source=Array.from({length:2205},(_,id)=>({id}));
+  const ranges:Array<[number,number]>=[];
+  const result=await fetchAllPages((from,to)=>{
+    ranges.push([from,to]);
+    return Promise.resolve({data:source.slice(from,to+1),error:null});
+  });
+  assert.equal(result.error,null);
+  assert.equal(result.data?.length,source.length);
+  assert.deepEqual(ranges,[[0,999],[1000,1999],[2000,2999]]);
+  const repository=await readFile(new URL("../lib/workouts/supabase-repository.ts",import.meta.url),"utf8");
+  for(const table of ["workout_program_exercises","workout_set_prescriptions","workout_session_exercises","workout_sets"]){
+    assert.match(repository,new RegExp(`fetchAllPages\\(\\(from,to\\)=>supabase\\.from\\(\\"${table}\\"\\)`));
+  }
+});
+test("client workout loading follows assigned programmes instead of downloading every programme entry",async()=>{
+  const repository=await readFile(new URL("../lib/workouts/supabase-repository.ts",import.meta.url),"utf8");
+  assert.match(repository,/assignedProgramIds/);
+  assert.match(repository,/\.in\("id",assignedProgramIds\)/);
+  assert.match(repository,/\.in\("program_id",visibleProgramIds\)/);
+  assert.match(repository,/\.in\("day_id",visibleDayIds\)/);
+  assert.match(repository,/\.in\("program_exercise_id",visibleEntryIds\)/);
+  assert.match(repository,/role==="client"/);
+});
 test("finishing the weekly quota shows completion instead of workout one",async()=>{const today=await readFile(new URL("../components/workouts/client/TodayWorkout.tsx",import.meta.url),"utf8");const dashboard=await readFile(new URL("../components/workouts/client/DashboardWorkoutWidget.tsx",import.meta.url),"utf8");assert.match(today,/סיימת את כל האימונים השבוע/);assert.match(today,/האימון הבא יופיע בתחילת השבוע הבא/);assert.match(dashboard,/השבוע הושלם/)});
 test("workout provider reloads and clears role-scoped state across login transitions",async()=>{const provider=await readFile(new URL("../components/workouts/WorkoutProvider.tsx",import.meta.url),"utf8");assert.match(provider,/usePathname/);assert.match(provider,/authScope/);assert.match(provider,/const dataScope=needsWorkoutData\?`\$\{authScope\}:workouts`:`\$\{authScope\}:shell`/);assert.match(provider,/\},\[[^\]]*\bdataScope\b[^\]]*\brepository\b[^\]]*\]\)/);assert.match(provider,/setSnapshot\(emptyWorkoutSnapshot\)/);assert.match(provider,/setCurrentClientId\(""\)/)});
 test("active workout uses the active assignment and derives a prescription summary when legacy text is absent",async()=>{const dashboard=await readFile(new URL("../components/workouts/client/DashboardWorkoutWidget.tsx",import.meta.url),"utf8");const today=await readFile(new URL("../components/workouts/client/TodayWorkout.tsx",import.meta.url),"utf8");const repository=await readFile(new URL("../lib/workouts/supabase-repository.ts",import.meta.url),"utf8");const sessionUi=await readFile(new URL("../components/workouts/client/WorkoutSession.tsx",import.meta.url),"utf8");assert.match(dashboard,/activeAssignmentFor\(\s*snapshot\.assignments,\s*currentClientId/);assert.match(dashboard,/role="status"/);assert.match(dashboard,/role="alert"/);assert.match(today,/activeAssignmentsFor\(snapshot\.assignments,currentClientId,today\)/);assert.match(today,/בחירת תוכנית פעילה/);assert.match(today,/role="status"/);assert.match(today,/role="alert"/);assert.match(repository,/sets:optionalText\(entry\.sets_text\)\?\?\(setPrescriptions\.length\?String\(setPrescriptions\.length\)/);assert.match(repository,/reps:optionalText\(entry\.reps_text\)\?\?\(repetitions\.length\?repetitions\.join/);assert.match(sessionUi,/value=\{current\.sets\?\?"לא הוגדר"\}/)});
