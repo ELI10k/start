@@ -113,6 +113,13 @@ test("a workout receives the latest synced sleep duration automatically", () => 
   assert.equal(latestSleepHours([], TODAY), undefined);
 });
 
+test("the workout refreshes sleep when the native health bridge becomes ready", async () => {
+  const session = await source("components/workouts/client/WorkoutSession.tsx");
+  assert.match(session, /addEventListener\("start:health-ready",ready\)/);
+  assert.match(session, /setSleepHours\(latestSleepHours\(snapshot\.sleep,today\)\)/);
+  assert.match(session, /removeEventListener\("start:health-ready",ready\)/);
+});
+
 test("health charts show values and offer a monthly range", async () => {
   const [panel, styles] = await Promise.all([
     source("components/client/HealthProgressPanel.tsx"),

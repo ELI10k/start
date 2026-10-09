@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/purity */
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, ChevronLeft, ChevronRight, ExternalLink, Play, Repeat2, RotateCcw, X } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton";
@@ -378,16 +378,31 @@ function Start({program,day,count,warning,onStart,starting,programId}:{program:s
   const[sleepHours,setSleepHours]=useState<number|undefined>();
   const[sleepLoading,setSleepLoading]=useState(true);
   const[energy,setEnergy]=useState<1|2|3|4|5>(3);
-  useEffect(()=>{let live=true;(async()=>{try{
-    const today=calendarDay();const range=syncWindow(today);let snapshot=await repository.load(range.fromDay);
-    const provider=resolveHealthProvider();
-    if(await provider.isAvailable()&&await provider.getPermission()==="granted"){
-      const incoming=await provider.readDailySleep(range.fromDay,range.toDay);
-      const changed=sleepToPersist(incoming,snapshot.sleep,today);
-      if(changed.length){await repository.recordSleep(changed);snapshot=await repository.load(range.fromDay);}
-    }
-    if(live)setSleepHours(latestSleepHours(snapshot.sleep,today));
-  }catch{}finally{if(live)setSleepLoading(false);}})();return()=>{live=false}},[repository]);
+  const syncInFlight=useRef(false);
+  const syncSleep=useCallback(async()=>{
+    if(syncInFlight.current)return;
+    syncInFlight.current=true;setSleepLoading(true);
+    try{
+      const today=calendarDay();const range=syncWindow(today);let snapshot=await repository.load(range.fromDay);
+      // Paint the last persisted reading immediately. The native bridge can be
+      // registered after React mounts, so its later ready event refreshes this
+      // value instead of leaving the workout with the first empty result.
+      setSleepHours(latestSleepHours(snapshot.sleep,today));
+      const provider=resolveHealthProvider();
+      if(await provider.isAvailable()&&await provider.getPermission()==="granted"){
+        const incoming=await provider.readDailySleep(range.fromDay,range.toDay);
+        const changed=sleepToPersist(incoming,snapshot.sleep,today);
+        if(changed.length){await repository.recordSleep(changed);snapshot=await repository.load(range.fromDay);}
+        setSleepHours(latestSleepHours(snapshot.sleep,today));
+      }
+    }catch{}finally{syncInFlight.current=false;setSleepLoading(false)}
+  },[repository]);
+  useEffect(()=>{
+    const ready=()=>void syncSleep();
+    window.addEventListener("start:health-ready",ready);
+    const initialSync=window.setTimeout(ready,0);
+    return()=>{window.clearTimeout(initialSync);window.removeEventListener("start:health-ready",ready)};
+  },[syncSleep]);
   return <main className="client-app-content grid min-h-[70vh] place-items-center">
     <section className="premium-card w-full max-w-lg">
       <span className="state-block__icon mx-auto"><Play aria-hidden="true" size={22}/></span>
