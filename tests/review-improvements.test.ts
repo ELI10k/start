@@ -120,7 +120,7 @@ test("the rest timer is audible, and the sets open with last time's numbers", as
 test("leaving a workout can keep what was done", async () => {
   const session = await source("components/workouts/client/WorkoutSession.tsx");
   assert.match(session, /שמירת מה שבוצע וסיום/);
-  assert.match(session, /מחיקת האימון וכל הסטים שנרשמו/);
+  assert.match(session, /יציאה ללא שמירה ומחיקת כל הסטים/);
 });
 
 // ─── ה-4 a swap is not a skip ─────────────────────────────────────────────
