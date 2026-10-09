@@ -96,7 +96,7 @@ test("the client report reads check-in ratings on the 1-10 scale", async () => {
   const report = await source("lib/coach-intelligence/client-report.ts");
   // 202607280002 moved every rating to 1-10. The thresholds and the printed
   // denominator were both left on the old scale.
-  assert.doesNotMatch(report, /\/5`/);
+  assert.match(report, /קושי מורגש באימונים[\s\S]*\/5/);
   assert.match(report, /const LOW_RATING = 4/);
   assert.match(report, /const HIGH_RATING = 8/);
 
