@@ -31,8 +31,8 @@ export function createSupabaseWorkoutRepository(){
     const results=await Promise.all([
       supabase.from("workout_exercises").select("*").order("name"),
       supabase.from("workout_programs").select("*").order("created_at"),
-      supabase.from("workout_program_days").select("*").order("sort_order"),
-      supabase.from("workout_program_exercises").select("*").order("sort_order"),
+      supabase.from("workout_program_days").select("*").is("retired_at",null).order("sort_order"),
+      supabase.from("workout_program_exercises").select("*").is("retired_at",null).order("sort_order"),
       supabase.from("workout_set_prescriptions").select("*").order("sort_order"),
       supabase.from("workout_assignments").select("*").order("assigned_at"),
       supabase.from("workout_sessions").select("*").in("status",["active","completed"]).order("started_at"),
