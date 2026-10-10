@@ -30,11 +30,13 @@ test("coach attention keeps the latest report and ranks real risk", () => {
 test("coach attention evaluates a coached client without waiting for a weekly report", () => {
   const items = buildCoachAttention([{
     clientId: "eli", clientName: "אלי כהן", periodEnd: "2026-10-10", eligibleDays: 7,
-    hasActiveMenu: true, plannedMeals: 28, markedMeals: 4, nutritionDays: 1,
+    // The only reported day was fully answered. That must not turn one day of
+    // evidence into 100% adherence for a seven-day attention window.
+    hasActiveMenu: true, plannedMeals: 4, markedMeals: 4, nutritionDays: 1,
     workoutsCompleted: 3, workoutsPlanned: 3, checkIns: 1, weighIns: 1,
   }]);
   assert.equal(items.length, 1);
-  assert.match(items[0]?.reason ?? "", /סומנו 4 מתוך 28 ארוחות \(14%\)/);
+  assert.match(items[0]?.reason ?? "", /דווחה תזונה ב־1 מתוך 7 ימים/);
   assert.match(items[0]?.reason ?? "", /3 אימונים הושלמו/);
   assert.match(items[0]?.reason ?? "", /צ׳ק־אין הוגש/);
   assert.match(items[0]?.reason ?? "", /שקילה עודכנה/);
@@ -47,6 +49,15 @@ test("nutrition adherence waits for five eligible days", () => {
     workoutsCompleted: 0, workoutsPlanned: 3, checkIns: 0, weighIns: 0,
   }]);
   assert.deepEqual(items, []);
+});
+
+test("meal completion is judged only after five nutrition reporting days", () => {
+  const items = buildCoachAttention([{
+    clientId: "reported", clientName: "לקוח מדווח", periodEnd: "2026-10-10", eligibleDays: 7,
+    hasActiveMenu: true, plannedMeals: 28, markedMeals: 10, nutritionDays: 5,
+    workoutsCompleted: 3, workoutsPlanned: 3, checkIns: 1, weighIns: 1,
+  }]);
+  assert.match(items[0]?.reason ?? "", /סומנו 10 מתוך 28 ארוחות \(36%\)/);
 });
 
 test("a digital client cannot enter through the live attention source", async () => {
