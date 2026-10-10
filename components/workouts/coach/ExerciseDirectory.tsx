@@ -52,4 +52,4 @@ export default function ExerciseDirectory(){
   </>}
  </div>;
 }
-function Filter({label,value,onChange,values}:{label:string;value:string;onChange:(value:string)=>void;values:{value:string;label:string}[]}){return <label className="text-xs text-[#5B5F5B]">{label}<select className="nutrition-input mt-1" value={value} onChange={e=>onChange(e.target.value)}><option value="">הכול</option>{values.map(v=><option key={v.value} value={v.value}>{v.label}</option>)}</select></label>;}
+function Filter({label,value,onChange,values}:{label:string;value:string;onChange:(value:string)=>void;values:{value:string;label:string}[]}){return <label className="text-xs text-[#5B5F5B]">{label}<select aria-label={label} className="nutrition-input mt-1" value={value} onChange={e=>onChange(e.target.value)}><option value="">הכול</option>{values.map(v=><option key={v.value} value={v.value}>{v.label}</option>)}</select></label>;}

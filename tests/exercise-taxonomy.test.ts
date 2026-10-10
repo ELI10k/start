@@ -43,6 +43,7 @@ test("presentation preserves ids, equipment and swap taxonomy, media and source 
 test("directory initially shows folders, retains loading/errors and renders emphasis separately",async()=>{
  const ui=await readFile(new URL("../components/workouts/coach/ExerciseDirectory.tsx",import.meta.url),"utf8");
  assert.match(ui,/!browsing/);assert.match(ui,/MUSCLE_FOLDERS\.map/);assert.match(ui,/דגש: \{t.focus\}/);assert.match(ui,/MuscleIllustration/);assert.match(ui,/if\(loading\)/);assert.match(ui,/if\(persistenceError\)/);
+ assert.match(ui,/<select aria-label=\{label\}/);
 });
 
 test("exercise taxonomy keeps broad categories separate from precise equipment",()=>{

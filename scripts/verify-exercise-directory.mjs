@@ -44,7 +44,7 @@ try {
  await page.getByLabel("חיפוש תרגיל",{exact:true}).fill("לשון צונחת");
  await page.getByRole("heading",{name:"כפיפות בטן (קראנץ׳) — בטן",exact:true}).waitFor();
  await page.getByLabel("חיפוש תרגיל",{exact:true}).fill("בטן");
- await page.getByLabel("ציוד נדרש",{exact:true}).selectOption("home");
+ await page.getByRole("combobox",{name:"ציוד נדרש",exact:true}).selectOption("home");
  assert.ok(await page.locator("article").count()>0);
  assert.ok((await page.locator('article [aria-label="ציוד נדרש"]').allTextContents()).every(t=>!t.includes("מכונות")&&!t.includes("פולי")));
  console.log(JSON.stringify({base,folders:7,initialExercisesHidden:true,glutes:true,shoulderFocus:true,mobile:true,detail:true,legacyAlias:true,homeEquipment:true}));
