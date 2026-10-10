@@ -1,4 +1,5 @@
 "use client";
+import {exerciseTaxonomy} from "@/lib/workouts/exercise-taxonomy";
 
 import { ChevronDown, ChevronUp, Copy, GripVertical, Plus, Repeat, Save, Search, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -44,7 +45,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message,context,embedded=fa
  const[dragging,setDragging]=useState<DragOrigin|null>(null);
  const[replacing,setReplacing]=useState<DragOrigin|null>(null);
 
- const choices=useMemo(()=>snapshot.exercises.filter((exercise)=>exercise.status==="active"&&(`${exercise.name} ${exercise.category??""} ${exercise.primaryMuscleGroup??""}`).toLocaleLowerCase("he").includes(query.trim().toLocaleLowerCase("he"))).slice(0,30),[query,snapshot.exercises]);
+ const choices=useMemo(()=>snapshot.exercises.filter((exercise)=>exercise.status==="active"&&(`${exercise.name} ${exercise.aliases.join(" ")} ${exerciseTaxonomy(exercise).focus} ${exercise.category??""} ${exercise.primaryMuscleGroup??""}`).toLocaleLowerCase("he").includes(query.trim().toLocaleLowerCase("he"))).slice(0,30),[query,snapshot.exercises]);
  const patch=(value:Partial<WorkoutProgram>)=>setDraft({...draft,...value});
  const setDays=(days:WorkoutDay[])=>patch({days:normalizeDays(days)});
  const addDay=()=>setDays([...draft.days,emptyDay(draft.days.length)]);
@@ -171,7 +172,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message,context,embedded=fa
           <ExerciseThumbnail exercise={exercise}/>
           <span className="min-w-0 text-sm">
             <strong className="block truncate">{exercise.name}</strong>
-            <small className="mt-1 block text-[#5B5F5B]">{exercise.primaryMuscleGroup??exercise.category??"ללא סיווג"}</small>
+            <small className="mt-1 block text-[#5B5F5B]">{exerciseTaxonomy(exercise).focus}</small>
           </span>
           <select aria-label={`הוספת ${exercise.name} ליום`} className="min-h-11 shrink-0 rounded-lg border border-[#E5E7E5] bg-[#FFFFFF] px-2 text-xs" defaultValue="" onChange={event=>{if(event.target.value){addExercise(event.target.value,exercise.id);event.currentTarget.value=""}}}>
             <option value="">הוספה ליום…</option>
@@ -214,7 +215,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message,context,embedded=fa
                 <span className="exercise-slot__handle" aria-hidden="true"><GripVertical size={16}/></span>
                 <ExerciseThumbnail exercise={exercise}/>
                 <strong className="min-w-0 truncate">{exercise?.name??"תרגיל"}</strong>
-                <span className="pill pill--green">{exercise?.primaryMuscleGroup??exercise?.category??"לא סווג"}</span>
+                <span className="pill pill--green">{exercise?exerciseTaxonomy(exercise).focus:"לא סווג"}</span>
                 <ExerciseGuidanceButton exercise={exercise} variant="link"/>
                 <button aria-label="הזזת תרגיל למעלה" className="icon-button mr-auto" disabled={index===0} onClick={()=>moveExercise(day.id,index,-1)}><ChevronUp aria-hidden="true" size={16}/></button>
                 <button aria-label="הזזת תרגיל למטה" className="icon-button" disabled={index===day.exercises.length-1} onClick={()=>moveExercise(day.id,index,1)}><ChevronDown aria-hidden="true" size={16}/></button>
