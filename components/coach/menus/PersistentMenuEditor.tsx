@@ -64,7 +64,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   const[menu,setMenu]=useState<EditableMenu>(()=>{
     const client=clients.find(item=>item.id===initial.clientId);
     const plan=planMacros({calories:Number(initial.calorieTarget),weightKg:client?.weight??Number.NaN,sources:planSources(initial.macroSources),current:{}});
-    const withGroups={...initial,days:initial.days.map(day=>({...day,meals:day.meals.map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:emptyGroups().map(empty=>meal.groups.find(group=>group.type===empty.type)??empty)})}))};
+    const withGroups={...initial,days:initial.days.map(day=>({...day,meals:day.meals.map(meal=>({...meal,groups:emptyGroups().map(empty=>meal.groups.find(group=>group.type===empty.type)??empty)}))}))};
     if(!plan.ok)return withGroups;
     return{...withGroups,
       proteinTarget:initial.macroSources.protein==="auto"&&!initial.proteinTarget?String(plan.plan.protein):initial.proteinTarget,
@@ -567,9 +567,9 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   // The three filters run in order: blank rows go, then groups left with nothing
   // in them, then meals left with no groups.
   const savedMealsOf=(dayMeals:readonly Meal[])=>dayMeals
-    .map(meal=>meal.title==="קלוריות חופשיות"?meal:{...meal,groups:meal.groups
+    .map(meal=>({...meal,groups:meal.groups
       .map(group=>({...group,items:group.items.filter(item=>item.foodId&&Number(item.amount)>0)}))
-      .filter(group=>group.items.length)})
+      .filter(group=>group.items.length)}))
     .filter(meal=>meal.title==="קלוריות חופשיות"?Number(meal.freeCalorieTarget)>0:meal.groups.length>0);
   // A day the coach opened and left empty is dropped rather than saved as an
   // empty day, which the reader would serve as a menu with no meals in it.
@@ -735,7 +735,7 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
         <span className="pill">{Math.round(mealMacros(meal).protein)} ג׳ חלבון</span>
       </span></div>
       {collapsed.has(index)?<p className="mt-3 text-xs text-[#5B5F5B]">{mealSummary(meal,foodMap)}</p>:<>
-      {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:<>
+      {meal.title==="קלוריות חופשיות"?<div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="יעד קלורי" value={meal.freeCalorieTarget} type="number" onChange={freeCalorieTarget=>updateMeal(index,{...meal,freeCalorieTarget})}/><Field label="הערת מאמן" value={meal.notes} onChange={notes=>updateMeal(index,{...meal,notes})}/></div>:null}
       <div className="mt-4 grid items-start gap-5">{meal.groups.map((group,groupIndex)=>
         <div key={group.type} className="rounded-2xl border border-[#E5E7E5] p-4">
           <h3 className="font-black">{groupLabels[group.type]}</h3>
@@ -854,8 +854,8 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
           </div>
         </div>)}
       </div>
-      </>}</>}</section>)}
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-[#16A34A]/30 p-3">{FIXED_MEAL_TITLES.filter(title=>!meals.some(meal=>meal.title===title)).map(title=><button key={title} type="button" onClick={()=>setMeals(current=>[...current,title==="קלוריות חופשיות"?{title,notes:"",freeCalorieTarget:"",groups:[]}:{...emptyMeal(),title}])} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4 text-sm font-bold text-[#16A34A]"><Plus size={15} className="inline"/> {title}</button>)}</div>
+      </>}</section>)}
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-dashed border-[#16A34A]/30 p-3">{FIXED_MEAL_TITLES.filter(title=>!meals.some(meal=>meal.title===title)).map(title=><button key={title} type="button" onClick={()=>setMeals(current=>[...current,{...emptyMeal(),title}])} className="min-h-11 rounded-xl border border-[#E5E7E5] px-4 text-sm font-bold text-[#16A34A]"><Plus size={15} className="inline"/> {title}</button>)}</div>
     </div><aside className="rounded-[24px] border border-[#E5E7E5] bg-[#FFFFFF] p-5 lg:sticky lg:top-5"><h2 className="font-black">יעדי המאקרו</h2><dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><MacroTotal label="חלבון" value={menu.proteinTarget} calories={Number(menu.proteinTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="פחמימה" value={menu.carbohydrateTarget} calories={Number(menu.carbohydrateTarget||0)*4} target={Number(menu.calorieTarget)}/><MacroTotal label="שומן" value={menu.fatTarget} calories={Number(menu.fatTarget||0)*9} target={Number(menu.calorieTarget)}/></dl><p className="mt-4 text-xs leading-5 text-[#5B5F5B]">בעת השמירה השרת מחשב שוב את הערכים מהמאגר המאושר; ערכי הדפדפן אינם מקור סמכות.</p></aside></div>
 
     {/* Activation replaces what the client is eating from today. Asked once, with
@@ -958,7 +958,6 @@ function DockTotal({label,value,target}:{label:string;value:number;target?:numbe
 function MacroChip({label,value,unit}:{label:string;value:number;unit:string}){return <div><dt>{label}</dt><dd>{value} {unit}</dd></div>}
 
 function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
-  if(meal.title==="קלוריות חופשיות")return meal.freeCalorieTarget?`${meal.freeCalorieTarget} קל׳ חופשיות`:"ללא יעד קלורי";
   // Every primary, not the first row. A protein portion can be two foods - one
   // egg plus two egg whites - and taking items[0] made a collapsed meal report
   // fewer calories than the same meal open.
@@ -969,5 +968,9 @@ function mealSummary(meal:Meal,foodMap:Map<string,FoodOption>):string{
     return sum+(portion?.calories??0);
   },0);
   const options=meal.groups.map(group=>`${groupLabels[group.type]} ${group.items.length}`).join(" · ");
+  if(meal.title==="קלוריות חופשיות"){
+    const target=meal.freeCalorieTarget?`${meal.freeCalorieTarget} קל׳ חופשיות`:"ללא יעד קלורי";
+    return primaries.length?`${target} · ${options}`:target;
+  }
   return primaries.length?`${Math.round(calories)} קל׳ · ${options}`:"עדיין ריקה";
 }
