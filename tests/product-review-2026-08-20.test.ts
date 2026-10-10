@@ -139,6 +139,16 @@ test("an added second primary is not scaled as an alternative of the first", asy
   assert.doesNotMatch(body, /const primary=group\.items\[0\]/);
 });
 
+test("replacing the primary recalculates its automatic alternatives", async () => {
+  const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
+  const body = editor.slice(editor.indexOf("const selectFood="), editor.indexOf("const suggestAlternatives"));
+  // Selecting a different primary used to update only that row. Its existing
+  // alternatives therefore kept quantities calculated for the previous food.
+  assert.match(body, /if\(!targetIsPrimary\|\|!selectedFood\|\|!nextAmount\)return item/);
+  assert.match(body, /if\(isPrimary\|\|item\.amountSource!=="auto"\)return item/);
+  assert.match(body, /calculateAlternativePortion\(selectedFood,nextAmount,alternativeFood,group\.type,"native"\)/);
+});
+
 test("folding a meal follows the meal when the day is reordered", async () => {
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   assert.match(editor, /const remapCollapsed=/);
