@@ -12,7 +12,7 @@ function exercise(overrides: Partial<Exercise>): Exercise {
 }
 
 test("exercise directory exposes the requested category and difficulty order", () => {
-  assert.deepEqual([...EXERCISE_CATEGORIES], ["משקולות", "מכונות", "משקל גוף", "TRX"]);
+  assert.deepEqual([...EXERCISE_CATEGORIES], ["משקולות", "מכונות", "משקל גוף", "TRX", "חימום לפני אימון"]);
   assert.deepEqual(EXERCISE_DIFFICULTIES.map(({ label }) => label), ["מתחילים", "בינוני", "מתקדמת"]);
 });
 
@@ -28,5 +28,6 @@ test("category choices group exercises by their actual equipment", () => {
   assert.equal(matchesExerciseCategory(exercise({ equipment: "רצועות תלייה" }), "TRX"), true);
   assert.equal(matchesExerciseCategory(exercise({ category: "משקל גוף", equipment: "מוט" }), "משקל גוף"), true);
   assert.equal(matchesExerciseCategory(exercise({ category: "מכונות", equipment: "כבל פולי" }), "משקולות"), false);
+  assert.equal(matchesExerciseCategory(exercise({ category: "חימום לפני אימון", primaryMuscleGroup: "חימום" }), "חימום לפני אימון"), true);
   assert.equal(matchesExerciseCategory(exercise({ category: "משקולות ומכונות", equipment: "משקולות יד", sourceWorkbooks: ["בנק תרגילים משקולות ומכונות.xlsx"] }), "משקולות"), true);
 });
