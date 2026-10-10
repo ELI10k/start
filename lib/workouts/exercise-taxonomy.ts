@@ -2,6 +2,7 @@ import type { Exercise } from "./types.ts";
 import { normalizeExerciseName } from "./normalization.ts";
 
 export const MUSCLE_FOLDERS=["חזה","גב","רגליים","כתפיים","יד אחורית","יד קדמית","בטן"] as const;
+export const EXERCISE_DIRECTORY_FOLDERS=[...MUSCLE_FOLDERS,"חימום"] as const;
 export type MuscleFolder=typeof MUSCLE_FOLDERS[number]|"חימום"|"לבדיקת מאמן";
 export const EQUIPMENT_TAGS=["משקולות יד","מוט","מכונות","פולי","גומיות","TRX","קטלבל","משקל גוף","ספסל","כדור פיזיו","בוסו","מתקן מתח","מקבילים","גלגל בטן","מגבת","גליל עיסוי","חבל קרב","סטיל מייס"] as const;
 export const HOME_EQUIPMENT=new Set<string>(["משקולות יד","גומיות","TRX","קטלבל","משקל גוף","ספסל","כדור פיזיו","בוסו","גלגל בטן","מגבת","גליל עיסוי","סטיל מייס"]);
