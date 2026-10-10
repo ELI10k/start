@@ -90,11 +90,9 @@ export function sumItems(items: readonly Item[]): IntakeTotals {
 /**
  * A free-calorie window, at what it was worth.
  *
- * These meals have no groups - the whole point of the window is that the coach
- * did not write rows for it - so `mealStanding` returns nothing for them and
- * `sumItems` therefore returned zero. A client who marked "קלוריות חופשיות ·
- * 300 קל׳" as eaten watched their day's total not move, which reads as the app
- * not having heard them.
+ * A window without prescribed choices counts at its allowance. When the coach
+ * supplied foods and alternatives, `mealStanding` already counts the chosen
+ * food, so the allowance must not be added a second time.
  *
  * Once a measured food was logged in the window, the measured food is the
  * intake. The allowance is not automatically treated as eaten as well.
@@ -105,7 +103,7 @@ export function freeCalorieIntake(
 ): IntakeTotals {
   const calories = meals
     .filter((meal) => Boolean(meal.freeCalorieTarget) && isMealEaten(meal))
-    .reduce((sum, meal) => sum + (loggedCaloriesIn(meal.id) > 0 ? 0 : (meal.freeCalorieTarget ?? 0)), 0);
+    .reduce((sum, meal) => sum + (loggedCaloriesIn(meal.id) > 0 || mealStanding(meal).length > 0 ? 0 : (meal.freeCalorieTarget ?? 0)), 0);
   // Only calories: a free window is a calorie allowance, and the coach did not
   // say what it is made of. Inventing a macro split would be inventing data.
   return { ...ZERO_TOTALS, calories };
@@ -114,7 +112,7 @@ export function freeCalorieIntake(
 /** What is still open in the free windows nobody has answered yet. */
 export function freeCalorieRemaining(meals: readonly IntakeMeal[]): IntakeTotals {
   const calories = meals
-    .filter((meal) => Boolean(meal.freeCalorieTarget) && !isMealAnswered(meal))
+    .filter((meal) => Boolean(meal.freeCalorieTarget) && !isMealAnswered(meal) && mealStanding(meal).length === 0)
     .reduce((sum, meal) => sum + (meal.freeCalorieTarget ?? 0), 0);
   return { ...ZERO_TOTALS, calories };
 }

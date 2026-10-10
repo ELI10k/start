@@ -203,7 +203,7 @@ test("countable portions are displayed as natural fractions",async()=>{
 test("a new menu opens with the full six-meal skeleton",()=>{
   const source=readFileSync(new URL("../app/coach/menus/new/page.tsx",import.meta.url),"utf8");
   assert.match(source,/FIXED_MEAL_TITLES\.map/);
-  assert.match(source,/קלוריות חופשיות/);
+  assert.match(source,/FIXED_MEAL_TITLES\.map\(title=>\(\{title,notes:"",freeCalorieTarget:"",groups:/);
   assert.doesNotMatch(source,/meals:\[\{title:"ארוחת בוקר"/);
   for(const group of ["protein","carbohydrate","fat","vegetables"])assert.match(source,new RegExp(`type:\"${group}\"`));
 });
@@ -216,6 +216,19 @@ test("the editor offers one-click suggested alternatives from favorite foods",()
   assert.match(source,/isFavorite\(food\)/);
   assert.match(source,/amountSource:"auto" as const/);
   assert.match(source,/Math\.abs\(a\.portion\.calories-target\.calories\)/);
+});
+
+test("free-calorie meals support prescribed foods and alternatives end to end",()=>{
+  const editor=readFileSync(new URL("../components/coach/menus/PersistentMenuEditor.tsx",import.meta.url),"utf8");
+  const client=readFileSync(new URL("../app/nutrition/page.tsx",import.meta.url),"utf8");
+  const migration=readFileSync(new URL("../supabase/migrations/20261010193000_free_calorie_food_alternatives.sql",import.meta.url),"utf8");
+  assert.doesNotMatch(editor,/meal\.title==="קלוריות חופשיות"\?meal:\{\.\.\.meal,groups/);
+  assert.match(editor,/meal\.groups\.map\(\(group,groupIndex\)=>/);
+  assert.match(client,/meal\.groups\.length\?<div/);
+  assert.match(migration,/save_meal_plan_tree_without_free_foods/);
+  assert.match(migration,/continue when v_meal->>'title' <> 'קלוריות חופשיות'/);
+  assert.match(migration,/insert into public\.meal_food_groups/);
+  assert.match(migration,/insert into public\.meal_items/);
 });
 
 test("meals can be collapsed to a one-line summary",()=>{
