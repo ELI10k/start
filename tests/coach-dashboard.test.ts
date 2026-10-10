@@ -31,16 +31,22 @@ test("coach dashboard migration grants session visibility only to direct coaches
 });
 
 test("handled check-ins and workouts leave the coach dashboard queue", async () => {
-  const [repository, dashboard, activity, action, migration, nav] = await Promise.all([
+  const [repository, dashboard, checkInActivity, activity, action, migration, nav] = await Promise.all([
     source("lib/data/product-repository.ts"),
     source("app/coach/page.tsx"),
+    source("components/coach/DashboardCheckInActivity.tsx"),
     source("components/workouts/coach/DashboardWorkoutActivity.tsx"),
     source("app/actions/workout-reviews.ts"),
     source("supabase/migrations/202609150001_coach_workout_reviews.sql"),
     source("components/coach/CoachNav.tsx"),
   ]);
   assert.match(repository, /rows\.filter\(\(item\) => !item\.handled_at\)\.slice\(0, 5\)/);
-  assert.match(dashboard, /openCheckIns/);
+  assert.match(dashboard, /DashboardCheckInActivity items=\{checkIns\.recent\}/);
+  assert.match(checkInActivity, /setCheckInHandled/);
+  assert.match(checkInActivity, /review\?id=\$\{item\.id\}/);
+  assert.match(checkInActivity, /if \(result\.ok\) onHandled\(\)/);
+  assert.match(checkInActivity, /new Set\(\[\.\.\.current, item\.id\]\)/);
+  assert.match(checkInActivity, /אין צ׳ק־אינים שממתינים לטיפול/);
   assert.match(activity, /markWorkoutHandled/);
   assert.match(activity, /if \(result\.ok\) onHandled\(\)/);
   assert.match(activity, /new Set\(\[\.\.\.current, item\.id\]\)/);
@@ -48,4 +54,15 @@ test("handled check-ins and workouts leave the coach dashboard queue", async () 
   assert.match(action, /coach_workout_reviews/);
   assert.match(migration, /public\.is_coach_for\(s\.client_id\)/);
   assert.match(nav, /label: "מעקב לקוחות"/);
+});
+
+test("coach shortcuts and metrics appear above the attention panel", async () => {
+  const dashboard = await source("app/coach/page.tsx");
+  const quickActions = dashboard.indexOf('data-dashboard-section="quick-actions"');
+  const practiceMetrics = dashboard.indexOf('data-dashboard-section="practice-metrics"');
+  const attentionPanel = dashboard.indexOf("<CoachAttentionPanel");
+
+  assert.ok(quickActions >= 0, "quick actions section should exist");
+  assert.ok(practiceMetrics > quickActions, "metrics should follow the quick actions");
+  assert.ok(attentionPanel > practiceMetrics, "attention panel should follow the metrics");
 });
