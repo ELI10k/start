@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFile} from "node:fs/promises";
-import {exerciseTaxonomy,equipmentTags,presentExercise,MUSCLE_FOLDERS} from "../lib/workouts/exercise-taxonomy.ts";
+import {exerciseTaxonomy,equipmentTags,presentExercise,EXERCISE_DIRECTORY_FOLDERS,MUSCLE_FOLDERS} from "../lib/workouts/exercise-taxonomy.ts";
 import {queryExercises} from "../lib/workouts/repository.ts";
 import type {Exercise} from "../lib/workouts/types.ts";
 import {canonicalizeEquipment,canonicalizeMuscle,categorizeExercise} from "../scripts/lib/exercise-taxonomy.mjs";
@@ -42,7 +42,10 @@ test("presentation preserves ids, equipment and swap taxonomy, media and source 
 });
 test("directory initially shows folders, retains loading/errors and renders emphasis separately",async()=>{
  const ui=await readFile(new URL("../components/workouts/coach/ExerciseDirectory.tsx",import.meta.url),"utf8");
- assert.match(ui,/!browsing/);assert.match(ui,/MUSCLE_FOLDERS\.map/);assert.match(ui,/דגש: \{t.focus\}/);assert.match(ui,/MuscleIllustration/);assert.match(ui,/if\(loading\)/);assert.match(ui,/if\(persistenceError\)/);
+ const illustration=await readFile(new URL("../components/workouts/MuscleIllustration.tsx",import.meta.url),"utf8");
+ assert.deepEqual([...EXERCISE_DIRECTORY_FOLDERS],[...MUSCLE_FOLDERS,"חימום"]);
+ assert.match(ui,/!browsing/);assert.match(ui,/EXERCISE_DIRECTORY_FOLDERS\.map/);assert.match(ui,/דגש: \{t.focus\}/);assert.match(ui,/MuscleIllustration/);assert.match(ui,/if\(loading\)/);assert.match(ui,/if\(persistenceError\)/);
+ assert.doesNotMatch(ui,/\["חימום","לבדיקת מאמן"\]/);assert.match(illustration,/warmup\?"חימום כל הגוף"/);
  assert.match(ui,/<select aria-label=\{label\}/);
 });
 

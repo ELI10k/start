@@ -8,7 +8,7 @@ import ExerciseGuidanceButton from "@/components/workouts/ExerciseGuidanceButton
 import ExerciseThumbnail from "@/components/workouts/ExerciseThumbnail";
 import MuscleIllustration from "@/components/workouts/MuscleIllustration";
 import {SkeletonList,StateBlock} from "@/components/client/AppPatterns";
-import {EQUIPMENT_TAGS,MUSCLE_FOLDERS,exerciseTaxonomy,type MuscleFolder} from "@/lib/workouts/exercise-taxonomy";
+import {EQUIPMENT_TAGS,EXERCISE_DIRECTORY_FOLDERS,exerciseTaxonomy,type MuscleFolder} from "@/lib/workouts/exercise-taxonomy";
 import {normalizeExerciseName} from "@/lib/workouts/normalization";
 
 export default function ExerciseDirectory(){
@@ -35,10 +35,10 @@ export default function ExerciseDirectory(){
   </section>
   {!browsing?<>
    <p className="text-sm text-[#5B5F5B]">בחר קבוצת שרירים כדי לפתוח את התרגילים שלה · {all.length} תרגילים במאגר</p>
-   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">{MUSCLE_FOLDERS.map(muscle=><button type="button" key={muscle} onClick={()=>open(muscle)} className="rounded-[22px] border border-[#E5E7E5] bg-white p-4 text-start transition hover:border-[#16A34A] focus-visible:outline-2 focus-visible:outline-[#16A34A]">
-    <MuscleIllustration muscle={muscle}/><span className="mt-2 flex items-center gap-2 text-xl font-black"><FolderOpen size={20} aria-hidden="true"/>{muscle}</span><span className="mt-1 block text-sm text-[#5B5F5B]">{all.filter(e=>e.taxonomy.folder===muscle).length} תרגילים</span>
-   </button>)}</div>
-   {(["חימום","לבדיקת מאמן"] as const).map(muscle=>{const count=all.filter(e=>e.taxonomy.folder===muscle).length;return count?<button type="button" key={muscle} onClick={()=>open(muscle)} className="chip">{muscle} · {count} תרגילים</button>:null;})}
+   <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">{EXERCISE_DIRECTORY_FOLDERS.map(muscle=>{const count=all.filter(e=>e.taxonomy.folder===muscle).length;return <button type="button" key={muscle} aria-label={`פתיחת תיקיית ${muscle}, ${count} תרגילים`} onClick={()=>open(muscle)} className={`rounded-[22px] border p-4 text-start transition hover:border-[#16A34A] focus-visible:outline-2 focus-visible:outline-[#16A34A] ${muscle==="חימום"?"border-[#A7DCB5] bg-gradient-to-b from-[#F0FBF3] to-white":"border-[#E5E7E5] bg-white"}`}>
+    <MuscleIllustration muscle={muscle}/><span className="mt-2 flex items-center gap-2 text-xl font-black"><FolderOpen size={20} aria-hidden="true"/>{muscle}</span><span className="mt-1 block text-sm text-[#5B5F5B]">{count} תרגילים</span>
+   </button>;})}</div>
+   {(["לבדיקת מאמן"] as const).map(muscle=>{const count=all.filter(e=>e.taxonomy.folder===muscle).length;return count?<button type="button" key={muscle} onClick={()=>open(muscle)} className="chip">{muscle} · {count} תרגילים</button>:null;})}
   </>:<>
    <div className="flex flex-wrap items-center justify-between gap-3"><button type="button" onClick={reset} className="inline-flex min-h-11 items-center gap-2 font-bold text-[#16A34A]"><ArrowRight size={18} aria-hidden="true"/>כל קבוצות השרירים</button><span className="text-sm text-[#5B5F5B]">{results.length} תרגילים</span></div>
    <h2 className="text-2xl font-black">{folder??"תוצאות חיפוש בכל המאגר"}</h2>
