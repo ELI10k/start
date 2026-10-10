@@ -97,9 +97,15 @@ export function buildCoachAttention(clients: readonly CoachedClientActivity[]): 
   return clients.flatMap((client) => {
     const signals: string[] = [];
     if (!client.hasActiveMenu) signals.push("אין תפריט פעיל");
-    else if (client.eligibleDays >= 5 && client.plannedMeals > 0) {
-      const completion = Math.round(client.markedMeals / client.plannedMeals * 100);
-      if (completion < 50) signals.push(`סומנו ${client.markedMeals} מתוך ${client.plannedMeals} ארוחות (${completion}%)`);
+    else if (client.eligibleDays >= 5) {
+      // Completion alone is not enough: one fully answered day is 100% of that
+      // day's rows, but it still leaves six silent days. Require the five-day
+      // evidence floor first, then judge meal completion across the period.
+      if (client.nutritionDays < 5) signals.push(`דווחה תזונה ב־${client.nutritionDays} מתוך 7 ימים`);
+      else if (client.plannedMeals > 0) {
+        const completion = Math.round(client.markedMeals / client.plannedMeals * 100);
+        if (completion < 50) signals.push(`סומנו ${client.markedMeals} מתוך ${client.plannedMeals} ארוחות (${completion}%)`);
+      }
     }
 
     if (client.eligibleDays >= 7 && client.workoutsPlanned > 0 && client.workoutsCompleted / client.workoutsPlanned < .5) {
@@ -112,7 +118,6 @@ export function buildCoachAttention(clients: readonly CoachedClientActivity[]): 
       client.workoutsCompleted ? `${client.workoutsCompleted} אימונים הושלמו` : "",
       client.checkIns ? "צ׳ק־אין הוגש" : "",
       client.weighIns ? "שקילה עודכנה" : "",
-      client.nutritionDays ? `${client.nutritionDays} ימי תזונה דווחו` : "",
     ].filter(Boolean).join(" · ");
     const high = signals.length >= 2;
     const risk = high ? 75 : 55;
