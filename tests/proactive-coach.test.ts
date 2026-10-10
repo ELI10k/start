@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile } from "node:fs/promises";
-import { buildDailyCoachMessage, prioritiseCoachAttention } from "../lib/coach-intelligence/proactive-coach.ts";
+import { buildCoachAttention, buildDailyCoachMessage, prioritiseCoachAttention } from "../lib/coach-intelligence/proactive-coach.ts";
 
 test("daily coach chooses one data-backed action and cites its numbers", () => {
   const message = buildDailyCoachMessage({ mealsCompleted: 2, mealsPlanned: 4, calories: 1200, calorieTarget: 2200, protein: 80, proteinTarget: 150 });
@@ -25,6 +25,39 @@ test("coach attention keeps the latest report and ranks real risk", () => {
   ]);
   assert.deepEqual(items.map((item) => item.clientId), ["b"]);
   assert.equal(items[0]?.severity, "high");
+});
+
+test("coach attention evaluates a coached client without waiting for a weekly report", () => {
+  const items = buildCoachAttention([{
+    clientId: "eli", clientName: "אלי כהן", periodEnd: "2026-10-10", eligibleDays: 7,
+    hasActiveMenu: true, plannedMeals: 28, markedMeals: 4, nutritionDays: 1,
+    workoutsCompleted: 3, workoutsPlanned: 3, checkIns: 1, weighIns: 1,
+  }]);
+  assert.equal(items.length, 1);
+  assert.match(items[0]?.reason ?? "", /סומנו 4 מתוך 28 ארוחות \(14%\)/);
+  assert.match(items[0]?.reason ?? "", /3 אימונים הושלמו/);
+  assert.match(items[0]?.reason ?? "", /צ׳ק־אין הוגש/);
+  assert.match(items[0]?.reason ?? "", /שקילה עודכנה/);
+});
+
+test("nutrition adherence waits for five eligible days", () => {
+  const items = buildCoachAttention([{
+    clientId: "new", clientName: "לקוח חדש", periodEnd: "2026-10-10", eligibleDays: 3,
+    hasActiveMenu: true, plannedMeals: 12, markedMeals: 0, nutritionDays: 0,
+    workoutsCompleted: 0, workoutsPlanned: 3, checkIns: 0, weighIns: 0,
+  }]);
+  assert.deepEqual(items, []);
+});
+
+test("a digital client cannot enter through the live attention source", async () => {
+  const [repository, panel] = await Promise.all([
+    readFile("lib/coach-intelligence/proactive-repository.ts", "utf8"),
+    readFile("components/coach/CoachAttentionPanel.tsx", "utf8"),
+  ]);
+  assert.match(repository, /coach_client_relationships/);
+  assert.match(repository, /eq\("coach_id", coachId\)/);
+  assert.doesNotMatch(repository, /from\("habit_analysis_reports"\)/);
+  assert.doesNotMatch(panel, /items\.slice/);
 });
 
 test("the proactive coach runs from the cron, and no second weekly engine exists", async () => {
