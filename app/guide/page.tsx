@@ -12,7 +12,7 @@ import GuideVideo from "./GuideVideo";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://elicohenfitness.co.il"),
+  metadataBase: new URL("https://start.elicohenfitness.co.il"),
   title: "מדריך השימוש ב־Life Fit",
   description:
     "שבעה סרטוני הדרכה קצרים וברורים שיעזרו לכם להתחיל להשתמש באפליקציית Life Fit.",
