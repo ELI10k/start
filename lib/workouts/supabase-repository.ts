@@ -124,4 +124,3 @@ export function createSupabaseWorkoutRepository(){
     snoozeScheduledWorkout:async(assignmentId:string,date:string)=>rpc("snooze_scheduled_workout",{p_assignment_id:assignmentId,p_date:date}),
   };
 }
-
