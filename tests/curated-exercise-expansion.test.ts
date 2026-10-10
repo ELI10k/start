@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const migrationPath = path.join(root, "supabase/migrations/20261010173921_expand_curated_exercise_catalog.sql");
 const migration = readFileSync(migrationPath, "utf8");
+const namingMigration = readFileSync(path.join(root, "supabase/migrations/20261010190634_rename_concentration_curl.sql"), "utf8");
 const catalogMatch = migration.match(/\$catalog\$(\[[\s\S]*?\])\$catalog\$/);
 assert.ok(catalogMatch, "curated catalogue JSON is missing from the migration");
 const catalog = JSON.parse(catalogMatch[1]) as Array<{
@@ -57,4 +58,12 @@ test("every curated exercise has an original poster and self-hosted video", () =
   assert.match(migration, /ACE Exercise Library/);
   assert.match(migration, /NASM Exercise Library/);
   assert.match(migration, /on conflict \(id\) do nothing/);
+});
+
+test("curated exercise names use professional Hebrew presentation", () => {
+  assert.match(namingMigration, /כפיפת מרפק עם משקולת יד בישיבה/);
+  assert.match(namingMigration, /where id = 'biceps-dumbbell-concentration-curl'/);
+  assert.match(namingMigration, /כפיפת מרפק עם גומיית התנגדות/);
+  assert.match(namingMigration, /where id = 'resistance-band-concentration-curl'/);
+  assert.match(namingMigration, /video = jsonb_set/);
 });

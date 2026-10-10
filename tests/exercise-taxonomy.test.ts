@@ -27,6 +27,10 @@ test("known source classification errors do not leak into navigation",()=>{
  assert.equal(exerciseTaxonomy(get("bodyweight-floor-hyperextension")).folder,"גב");
  assert.equal(exerciseTaxonomy(get("resistance-machine-shoulder-press")).folder,"כתפיים");
  assert.equal(exerciseTaxonomy(get("resistance-hang-clean")).folder,"רגליים");
+ const seatedCurl=exerciseTaxonomy({id:"biceps-dumbbell-concentration-curl",name:"כפיפת מרפק בריכוז עם משקולת",normalizedName:"",aliases:[],category:"משקולות",primaryMuscleGroup:"יד קדמית",secondaryMuscleGroups:["אמות"],equipment:"משקולת יד וספסל",difficulty:"מתחילים",cues:[],commonMistakes:[],sourceWorkbooks:[],sourceReferences:[],status:"active"});
+ assert.equal(seatedCurl.name,"כפיפת מרפק עם משקולת יד בישיבה — יד קדמית");
+ const bandCurl=exerciseTaxonomy({id:"resistance-band-concentration-curl",name:"כפיפת ריכוז כנגד גומיה",normalizedName:"",aliases:[],category:"משקולות",primaryMuscleGroup:"יד קדמית",secondaryMuscleGroups:[],equipment:"גומיית התנגדות",difficulty:"בינוני",cues:[],commonMistakes:[],sourceWorkbooks:[],sourceReferences:[],status:"active"});
+ assert.equal(bandCurl.name,"כפיפת מרפק עם גומיית התנגדות — יד קדמית");
 });
 test("compound equipment is split and home filter never claims machines or a pulley are household gear",()=>{
  assert.deepEqual(equipmentTags(get("resistance-dumbbell-straight-arm-pullover-stability-ball")),["משקולות יד","כדור פיזיו"]);
