@@ -68,6 +68,8 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
   // The newest state of the session, whether or not Supabase has it yet. Only
   // the newest matters: an older set row is never worth replaying over a newer one.
   const pendingSession=useRef<ActiveWorkoutSession|null>(null);
+  const backgroundRefresh=useRef<Promise<void>|null>(null);
+  const previousPathname=useRef(pathname);
   const identity=useRef<{userId:string;role:"coach"|"client"|""}>({userId:"",role:""});
 
   // Every accepted snapshot is mirrored to the device, so a reload with no
@@ -121,6 +123,35 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     repository.load().then((loaded)=>{if(active)adopt(loaded)}).catch((error)=>{if(active)fallBackToCache(error)}).finally(()=>{if(active){setLoadedAuthScope(dataScope);setLoading(false)}});
     return()=>{active=false};
   },[adopt,dataScope,fallBackToCache,needsWorkoutData,repository]);
+
+  // A coach can change a programme while the client's installed app remains
+  // open for days. The provider used to load only when its data scope changed,
+  // so returning to /workouts inside the same scope kept the old exercise order
+  // (and even removed exercises) until the whole app was killed. Refresh from
+  // Supabase whenever the client enters the workout dashboard or brings the app
+  // back to the foreground. Never replace an unsynced local session: its newest
+  // set values must reach the server before any remote snapshot may take over.
+  const refreshClientSnapshot=useCallback(()=>{
+    if(identity.current.role!=="client"||pendingSession.current||backgroundRefresh.current)return;
+    const task=refresh().then(()=>undefined).catch((error)=>{
+      connectionStore.reportFailure(error);
+      if(isOfflineError(error))setOffline(true);
+    }).finally(()=>{backgroundRefresh.current=null});
+    backgroundRefresh.current=task;
+  },[refresh]);
+
+  useEffect(()=>{
+    const previous=previousPathname.current;
+    previousPathname.current=pathname;
+    if(pathname==="/workouts"&&previous!==pathname)refreshClientSnapshot();
+  },[pathname,refreshClientSnapshot]);
+
+  useEffect(()=>{
+    if(authScope!=="client"||!needsWorkoutData)return;
+    const onVisible=()=>{if(document.visibilityState==="visible")refreshClientSnapshot()};
+    document.addEventListener("visibilitychange",onVisible);
+    return()=>document.removeEventListener("visibilitychange",onVisible);
+  },[authScope,needsWorkoutData,refreshClientSnapshot]);
   useEffect(()=>connectionStore.start(),[]);
 
   const fail=useCallback((error?:unknown)=>{
