@@ -17,7 +17,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - When a verification step is genuinely blocked after exhausting safe alternatives, state that the work remains incomplete, identify the exact blocker, and request only the authority or input needed to continue.
 - Preserve unrelated user changes and active work. Do not overwrite, reset, or silently resolve overlapping changes without understanding them.
 - Report delivery state precisely: distinguish `implemented and verified locally`, `merged into main`, and `deployed to production`. Never say a customer-facing issue is fixed, closed, or available to users while the verified change exists only in a local branch or worktree.
-- If the user's requested outcome includes production, continue through merge, deployment, and post-deployment smoke verification when already authorized. If deployment requires new approval, say the fix is ready for deployment—not complete—and request that approval explicitly.
+- A request to fix, change, add, remove, or otherwise implement customer-facing behavior authorizes the normal delivery path through pull request, merge, production deployment, and post-deployment verification. Do not wait for a separate conversational instruction such as "deploy" or "publish" unless the user explicitly limits the request to local work, a draft, analysis, or no deployment.
+- Do not ask the user to approve ordinary branch creation, commits, pull requests, merging after required checks pass, Vercel deployment triggered from `main`, or safe production smoke tests. Use the environment's approval mechanism when a command itself requires elevated access, then continue automatically.
+- An implementation task is not complete until the intended commit is on `main`, the corresponding production deployment is Ready, and the changed customer path has been checked on the live domain. Local verification alone is an intermediate state, not a handoff point.
+- If production delivery is genuinely blocked by missing credentials, an external outage, a required destructive operation, billing, or a new product decision, report the exact blocker and request only the missing authority or decision. Do not convert an ordinary deployment step into a product-approval question.
 
 ## End-to-end repair policy
 
