@@ -20,6 +20,14 @@ test("repository instructions serialize production and forbid direct main pushes
   assert.match(instructions,/Treat `main` as the only production source of truth/);
 });
 
+test("implementation requests are delivered to production without a second conversational approval",async()=>{
+  const instructions=await source("AGENTS.md");
+  assert.match(instructions,/authorizes the normal delivery path through pull request, merge, production deployment, and post-deployment verification/);
+  assert.match(instructions,/Do not wait for a separate conversational instruction such as "deploy" or "publish"/);
+  assert.match(instructions,/production deployment is Ready/);
+  assert.match(instructions,/Local verification alone is an intermediate state/);
+});
+
 test("client workout persistence has a disposable production round-trip verifier",async()=>{
   const verifier=await source("scripts/verify-client-workout-save.mjs");
   assert.match(verifier,/is_test_account/);
