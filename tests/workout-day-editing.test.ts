@@ -60,7 +60,7 @@ test("an approved programme is editable in place, by a coach", async () => {
   // The builder - add, remove, reorder, replace, duplicate - refused to open an
   // official programme at all.
   assert.doesNotMatch(editor, /if\(!draft\|\|draft\.official\)return null/);
-  assert.match(editor, /if\(!draft\)return null/);
+  assert.match(editor, /if\(!existing\)return null/);
 
   const store = await source("lib/workouts/storage.ts");
   assert.doesNotMatch(store, /saveCustomWorkoutProgram[^\n]*if\(program\.official\)return snapshot/);
@@ -258,4 +258,3 @@ test("coach exercise cards stay inside the coach-authorized route", async () => 
   assert.match(detail, /ExerciseDetail exerciseId=\{exerciseId\}/);
   assert.match(detail, /href="\/coach\/workouts\/exercises"/);
 });
-
