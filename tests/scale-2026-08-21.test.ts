@@ -147,7 +147,7 @@ test("the weekly summary sends exactly the keys its batch writer reads", async (
 
 // ------------------------------------------------- the panel that never filled
 
-test("the risk scores the coach dashboard reads are actually written", async () => {
+test("the coach attention queue is live and weekly scores remain persisted", async () => {
   const [route, repository, panel, dashboard] = await Promise.all([
     source("app/api/cron/weekly-summary/route.ts"),
     source("lib/coach-intelligence/proactive-repository.ts"),
@@ -173,9 +173,12 @@ test("the risk scores the coach dashboard reads are actually written", async () 
   // A week with nothing in it is insufficient data, not risk.
   assert.match(route, /status: measured \? "ready" : "insufficient_data"/);
 
-  // "Nothing has been measured" and "no client is at risk" are different facts,
-  // and the panel used to tell the coach the second when the truth was the first.
-  assert.match(repository, /measured: signals\.length > 0/);
-  assert.match(panel, /measured \? "אין כרגע לקוח עם אות סיכון מבוסס נתונים\." :/);
+  // Membership in the queue comes from the live coached roster. A client must
+  // not disappear merely because the Saturday report has not been written yet,
+  // and a digital-only client has no active relationship through which to enter.
+  assert.match(repository, /from\("coach_client_relationships"\)/);
+  assert.match(repository, /buildCoachAttention\(activities\)/);
+  assert.doesNotMatch(repository, /from\("habit_analysis_reports"\)/);
+  assert.match(panel, /אין כרגע לקוח ליווי עם סימן שדורש בדיקה\./);
   assert.match(dashboard, /measured=\{attention\.measured\}/);
 });

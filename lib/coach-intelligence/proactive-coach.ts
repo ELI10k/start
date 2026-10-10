@@ -72,6 +72,63 @@ export function buildDailyCoachMessage(input: DailyCoachInput): DailyCoachMessag
 export type PersistedRiskSignal = Readonly<{ clientId: string; clientName: string; weekEnd: string; risk: number; retentionRisk: number; health: number }>;
 export type CoachAttentionItem = PersistedRiskSignal & Readonly<{ severity: "high" | "medium"; reason: string }>;
 
+export type CoachedClientActivity = Readonly<{
+  clientId: string;
+  clientName: string;
+  periodEnd: string;
+  eligibleDays: number;
+  hasActiveMenu: boolean;
+  plannedMeals: number;
+  markedMeals: number;
+  nutritionDays: number;
+  workoutsCompleted: number;
+  workoutsPlanned: number;
+  checkIns: number;
+  weighIns: number;
+}>;
+
+/**
+ * Turn a live seven-day roster snapshot into the coach's action queue.
+ * Five eligible days are required before nutrition adherence is judged. This
+ * keeps a new client out of trouble on day two while ensuring an established
+ * coached client cannot disappear merely because the weekly batch has not run.
+ */
+export function buildCoachAttention(clients: readonly CoachedClientActivity[]): readonly CoachAttentionItem[] {
+  return clients.flatMap((client) => {
+    const signals: string[] = [];
+    if (!client.hasActiveMenu) signals.push("אין תפריט פעיל");
+    else if (client.eligibleDays >= 5 && client.plannedMeals > 0) {
+      const completion = Math.round(client.markedMeals / client.plannedMeals * 100);
+      if (completion < 50) signals.push(`סומנו ${client.markedMeals} מתוך ${client.plannedMeals} ארוחות (${completion}%)`);
+    }
+
+    if (client.eligibleDays >= 7 && client.workoutsPlanned > 0 && client.workoutsCompleted / client.workoutsPlanned < .5) {
+      signals.push(`הושלמו ${client.workoutsCompleted} מתוך ${client.workoutsPlanned} אימונים`);
+    }
+    if (client.eligibleDays >= 7 && client.checkIns === 0) signals.push("לא הוגש צ׳ק־אין ב־7 הימים האחרונים");
+    if (!signals.length) return [];
+
+    const evidence = [
+      client.workoutsCompleted ? `${client.workoutsCompleted} אימונים הושלמו` : "",
+      client.checkIns ? "צ׳ק־אין הוגש" : "",
+      client.weighIns ? "שקילה עודכנה" : "",
+      client.nutritionDays ? `${client.nutritionDays} ימי תזונה דווחו` : "",
+    ].filter(Boolean).join(" · ");
+    const high = signals.length >= 2;
+    const risk = high ? 75 : 55;
+    return [{
+      clientId: client.clientId,
+      clientName: client.clientName,
+      weekEnd: client.periodEnd,
+      risk,
+      retentionRisk: 0,
+      health: high ? 35 : 55,
+      severity: high ? "high" as const : "medium" as const,
+      reason: `${signals.join(" · ")}${evidence ? ` · ${evidence}` : ""}`,
+    }];
+  }).sort((a, b) => Number(b.severity === "high") - Number(a.severity === "high") || b.risk - a.risk || a.clientName.localeCompare(b.clientName, "he"));
+}
+
 export function prioritiseCoachAttention(signals: readonly PersistedRiskSignal[]): readonly CoachAttentionItem[] {
   const latest = new Map<string, PersistedRiskSignal>();
   [...signals].sort((a, b) => b.weekEnd.localeCompare(a.weekEnd)).forEach((signal) => { if (!latest.has(signal.clientId)) latest.set(signal.clientId, signal); });
