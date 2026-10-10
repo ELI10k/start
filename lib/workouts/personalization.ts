@@ -68,6 +68,35 @@ patterns["bodyweight-wall-pushup"]="chest";
 for (const [movement, ids] of Object.entries(MOVEMENTS)) for (const id of ids) patterns[id] = movement;
 for (const movements of Object.values(HOME_MOVEMENTS)) for (const [movement,id] of Object.entries(movements)) patterns[id] = movement;
 Object.assign(patterns, {"resistance-suspenders-squat": "squat", "resistance-suspended-hip-thrust": "hip", "resistance-straps-aided-lunges": "lunge", "resistance-suspender-chest-press": "chest", "resistance-suspended-row": "row", "resistance-suspender-reverse-flys": "rear", "resistance-suspender-forward-y-raise": "shoulder", "resistance-suspender-arm-curl": "curl", "resistance-suspender-arm-extension": "triceps"});
+Object.assign(patterns, {
+  "core-dead-bug": "abs-control",
+  "core-hollow-body-hold": "abs-bracing",
+  "core-pallof-press-cable": "antirotation",
+  "core-pallof-press-band": "antirotation",
+  "core-hanging-knee-raise": "abs-dynamic",
+  "core-plank-shoulder-taps": "plank",
+  "core-floor-russian-twist": "rotation",
+  "legs-dumbbell-bulgarian-split-squat": "lunge",
+  "legs-dumbbell-step-up": "lunge",
+  "legs-bodyweight-reverse-lunge": "lunge",
+  "legs-bodyweight-glute-bridge": "hip",
+  "legs-single-leg-glute-bridge": "hip",
+  "legs-single-leg-press-machine": "squat",
+  "legs-seated-calf-raise-machine": "calf",
+  "legs-wall-tibialis-raise": "tibialis",
+  "legs-box-jump": "plyometric",
+  "chest-dumbbell-floor-press": "chest",
+  "chest-plyometric-push-up": "chest",
+  "back-chest-supported-dumbbell-row": "row",
+  "back-scapular-pull-up": "scapular",
+  "shoulders-arnold-press": "shoulder",
+  "shoulders-band-external-rotation": "external-rotation",
+  "biceps-standing-barbell-curl": "curl",
+  "biceps-dumbbell-concentration-curl": "curl",
+  "triceps-rope-pushdown": "triceps",
+  "shoulders-landmine-press": "shoulder",
+  "triceps-overhead-cable-extension": "triceps",
+});
 export function movementPattern(exercise: Exercise) {
   if (patterns[exercise.id]) return patterns[exercise.id];
   const name = exercise.name;
@@ -124,16 +153,20 @@ export function alternativeExercises(prescribed: Exercise | undefined, catalogue
       const available=preferences.equipment;
       if (available.includes("משקולות יד") && !available.some(e=>/מכונה|פולי|מוט/.test(e))) {
         const mode=available.includes("ספסל")?"dumbbells_bench":"dumbbells";
-        const allowed=new Set(["bodyweight-wall-pushup",...Object.values(HOME_MOVEMENTS.dumbbells),...(mode==="dumbbells_bench"?Object.values(HOME_MOVEMENTS.dumbbells_bench):[])]);
+        const curatedDumbbells=["chest-dumbbell-floor-press","shoulders-arnold-press","legs-bodyweight-reverse-lunge","legs-bodyweight-glute-bridge"];
+        const curatedBench=["legs-dumbbell-bulgarian-split-squat","back-chest-supported-dumbbell-row","biceps-dumbbell-concentration-curl"];
+        const allowed=new Set(["bodyweight-wall-pushup",...Object.values(HOME_MOVEMENTS.dumbbells),...curatedDumbbells,...(mode==="dumbbells_bench"?[...Object.values(HOME_MOVEMENTS.dumbbells_bench),...curatedBench]:[])]);
         // Catalogue metadata often labels bench/ball exercises as dumbbells only.
         // Use verified home variants rather than guessing from that label.
         if (!allowed.has(item.id)) return false;
       }
-      if (available.includes("מתח / מתקן חתירה") && !Object.values(HOME_MOVEMENTS.bodyweight_station).includes(item.id)) return false;
+      if (available.includes("מתח / מתקן חתירה") && ![...Object.values(HOME_MOVEMENTS.bodyweight_station),"back-scapular-pull-up"].includes(item.id)) return false;
     }
     if (preferences?.trainingLocation === "home" && item.equipment && !/משקל גוף/.test(item.equipment)) {
       const available = preferences.equipment.join(" ");
       if (/רצועות תלייה/.test(item.equipment)) return /TRX|trx|רצועות|תלייה/.test(available);
+      if (/משקולות יד/.test(item.equipment)) return /משקולות יד/.test(available) && (!/ספסל/.test(item.equipment) || /ספסל/.test(available));
+      if (/גומיית התנגדות/.test(item.equipment)) return /גומייה|גומיית התנגדות/.test(available);
       return preferences.equipment.includes(item.equipment);
     }
     return true;
