@@ -28,6 +28,14 @@ test("implementation requests are delivered to production without a second conve
   assert.match(instructions,/Local verification alone is an intermediate state/);
 });
 
+test("temporary delivery limits and safe migrations do not end implementation tasks",async()=>{
+  const instructions=await source("AGENTS.md");
+  assert.match(instructions,/Vercel `build-rate-limit` as retryable delivery states/);
+  assert.match(instructions,/deploying that reviewed, tested, forward-only, non-destructive migration/);
+  assert.match(instructions,/Production delivery itself never requires a second conversational approval/);
+  assert.match(instructions,/resume automatically after it is granted/);
+});
+
 test("client workout persistence has a disposable production round-trip verifier",async()=>{
   const verifier=await source("scripts/verify-client-workout-save.mjs");
   assert.match(verifier,/is_test_account/);
