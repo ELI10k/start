@@ -102,3 +102,22 @@ test("abdominal replacements remain available without imported difficulty metada
   assert.deepEqual(alternativeExercises(prescribed,[prescribed,alternative],prefs).map(item=>item.id),[alternative.id]);
   assert.deepEqual(alternativeExercises(prescribed,[prescribed,alternative]).map(item=>item.id),[alternative.id]);
 });
+test("curated alternatives respect movement, laterality and available home equipment",()=>{
+  const prefs={clientId:"x",trainingTypes:[],equipment:["משקולות יד","משקל גוף"],trainingLocation:"home",preferredDays:[],traineeLevel:"intermediate" as const};
+  const press=ex("resistance-dumbbell-chest-press","לחיצת חזה עם משקולות","חזה","משקולות יד");
+  const floor={...ex("chest-dumbbell-floor-press","לחיצת חזה עם משקולות על הרצפה","חזה","משקולות יד"),difficulty:"מתחילים"};
+  assert.deepEqual(alternativeExercises(press,[press,floor],prefs).map(item=>item.id),[floor.id]);
+
+  const row=ex("resistance-dumbbell-bent-over-row","חתירה עם משקולות","גב","משקולות יד");
+  const supported={...ex("back-chest-supported-dumbbell-row","חתירה עם משקולות בתמיכת חזה","גב","משקולות יד וספסל"),difficulty:"מתחילים"};
+  assert.equal(alternativeExercises(row,[row,supported],prefs).length,0);
+  assert.deepEqual(alternativeExercises(row,[row,supported],{...prefs,equipment:[...prefs.equipment,"ספסל"]}).map(item=>item.id),[supported.id]);
+
+  const bulgarian={...ex("legs-dumbbell-bulgarian-split-squat","סקוואט בולגרי עם משקולות יד","רגליים","משקולות יד וספסל"),difficulty:"בינוני"};
+  const reverse={...ex("legs-bodyweight-reverse-lunge","מכרע לאחור במשקל גוף","רגליים","משקל גוף"),difficulty:"מתחילים"};
+  assert.deepEqual(alternativeExercises(bulgarian,[bulgarian,reverse],prefs).map(item=>item.id),[reverse.id]);
+
+  const bridge=ex("legs-bodyweight-glute-bridge","גשר ישבן במשקל גוף","רגליים","משקל גוף");
+  const single=ex("legs-single-leg-glute-bridge","גשר ישבן ברגל אחת","רגליים","משקל גוף");
+  assert.equal(alternativeExercises(bridge,[bridge,single],prefs).length,0);
+});
