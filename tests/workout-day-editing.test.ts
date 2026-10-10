@@ -157,9 +157,9 @@ test("the muscle group is a tag on every exercise card", async () => {
     const text = await source(path);
     assert.match(text, /primaryMuscleGroup \?\? "קבוצת שריר לא סווגה"|primaryMuscleGroup\?\?"קבוצת שריר לא סווגה"/, `${path} does not tag the muscle group`);
   }
-  // The builder shows it too, from the same bank field.
+  // The builder shows the precise emphasis from the shared presentation taxonomy.
   const builder = await source("components/workouts/coach/CustomProgramEditor.tsx");
-  assert.match(builder, /className="pill pill--green">\{exercise\?\.primaryMuscleGroup/);
+  assert.match(builder, /className="pill pill--green">\{exercise\?exerciseTaxonomy\(exercise\)\.focus/);
 });
 
 test("video and guidance sit together everywhere an exercise is named", async () => {

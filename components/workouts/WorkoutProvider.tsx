@@ -1,5 +1,6 @@
 "use client";
 import { workoutAvailability } from "@/lib/workouts/availability";
+import { presentExercise } from "@/lib/workouts/exercise-taxonomy";
 import { isProfessionalProgram } from "@/lib/workouts/professional";
 import { israelDateKey } from "@/lib/date-time";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -185,7 +186,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     if(connectionStore.getSnapshot().online&&pendingSession.current)flushSession();
   }),[flushSession]);
   const value=useMemo<ContextValue>(()=>({
-    snapshot,currentClientId,role,loading:needsWorkoutData&&(loading||loadedAuthScope!==dataScope),persistenceError,offlineData:offline,pendingSync,
+    snapshot:{...snapshot,exercises:snapshot.exercises.map(presentExercise)},currentClientId,role,loading:needsWorkoutData&&(loading||loadedAuthScope!==dataScope),persistenceError,offlineData:offline,pendingSync,
     // Replacing the running programme is now the coach's explicit choice on the
     // assignment form, not a browser confirm() the form cannot phrase. A client
     // may train on more than one programme at a time; only the same programme
@@ -211,7 +212,7 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
     skipScheduledWorkout:async(assignmentId,dayId,date,reason)=>{try{await repository.skipScheduledWorkout(assignmentId,dayId,date,reason);await refresh();return true}catch{return fail()}},
     snoozeScheduledWorkout:async(assignmentId,date)=>{try{await repository.snoozeScheduledWorkout(assignmentId,date);return true}catch{return fail()}},
     getProgram:(id)=>snapshot.programs.find((program)=>program.id===id),
-    getExercise:(id)=>snapshot.exercises.find((exercise)=>exercise.id===id),
+    getExercise:(id)=>{const exercise=snapshot.exercises.find((exercise)=>exercise.id===id);return exercise?presentExercise(exercise):undefined;},
   }),[cache,currentClientId,dataScope,fail,flushSession,loadedAuthScope,loading,needsWorkoutData,offline,pendingSync,persistenceError,refresh,repository,role,snapshot]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
