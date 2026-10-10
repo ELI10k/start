@@ -96,7 +96,7 @@ test("the client report reads check-in ratings on the 1-10 scale", async () => {
   const report = await source("lib/coach-intelligence/client-report.ts");
   // 202607280002 moved every rating to 1-10. The thresholds and the printed
   // denominator were both left on the old scale.
-  assert.doesNotMatch(report, /\/5`/);
+  assert.match(report, /קושי מורגש באימונים[\s\S]*\/5/);
   assert.match(report, /const LOW_RATING = 4/);
   assert.match(report, /const HIGH_RATING = 8/);
 
@@ -142,9 +142,9 @@ test("an added second primary is not scaled as an alternative of the first", asy
 test("folding a meal follows the meal when the day is reordered", async () => {
   const editor = await source("components/coach/menus/PersistentMenuEditor.tsx");
   assert.match(editor, /const remapCollapsed=/);
-  // Switching days clears the folds: the second day is a different list, and
-  // the positions do not carry over.
-  assert.match(editor, /const showDay=\(dayIndex:number\)=>\{setActiveDay\(dayIndex\);setCollapsed\(new Set\(\)\)\}/);
+  // Switching days rebuilds the folds from that day's own meals: positions do
+  // not leak from the previous day and a long saved day stays compact.
+  assert.match(editor, /const showDay=\(dayIndex:number\)=>\{[\s\S]*?setActiveDay\(dayIndex\);[\s\S]*?setCollapsed\(new Set\(dayMeals\.map\(\(_,index\)=>index\)\)\)[\s\S]*?\};/);
   assert.doesNotMatch(editor, /onClick=\{\(\)=>setActiveDay\(/);
 });
 
@@ -637,7 +637,8 @@ test("the day opens one meal at a time", async () => {
   // And which one starts open is still the meal that is due now.
   assert.match(page, /defaultOpen=\{isNow\}/);
   // The closed row has to carry enough to decide whether to open it.
-  assert.match(page, /const mealCalories = Math\.round\(/);
+  assert.match(page, /const mealCalories = meal\.status === "other"/);
+  assert.match(page, /const calorieLabel =/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);
 });

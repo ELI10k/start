@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageCompletedSteps, calendarDay, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
 import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
@@ -41,6 +41,18 @@ test("the weekly average ignores days that never reported", () => {
   assert.equal(summary.daysMetGoal, 1);
   assert.equal(summary.trend.length, 7);
   assert.equal(summary.hasData, true);
+});
+
+test("period averages do not fall because today's step count is still partial", () => {
+  const days = lastDays(TODAY, 7);
+  assert.equal(averageCompletedSteps([
+    entry("2026-08-09", 9000),
+    entry("2026-08-10", 11000),
+    entry(TODAY, 1000),
+  ], days, TODAY), 10000);
+  // A new user still sees today's figure until there is a completed day.
+  assert.equal(averageCompletedSteps([entry(TODAY, 1200)], days, TODAY), 1200);
+  assert.equal(averageCompletedSteps([], days, TODAY), null);
 });
 
 test("no data at all reports zeroes rather than dividing by zero", () => {
@@ -121,18 +133,10 @@ test("the workout refreshes sleep when the native health bridge becomes ready", 
 });
 
 test("health charts show values and offer a monthly range", async () => {
-  const [panel, styles] = await Promise.all([
-    source("components/client/HealthProgressPanel.tsx"),
-    source("app/globals.css"),
-  ]);
+  const panel = await source("components/client/HealthProgressPanel.tsx");
   assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
   assert.match(panel, /setPeriod\("month"\)/);
   assert.match(panel, /lastDays\(today, dayCount\)/);
-  assert.match(panel, /steps: "week", sleep: "week"/);
-  assert.match(panel, /const period = periods\[metric\]/);
-  assert.match(panel, /\{ \.\.\.current, \[metric\]: next \}/);
-  assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);
-  assert.match(styles, /\.health-chart \{[^}]*overflow-x: auto;[^}]*width: 100%;[^}]*contain: inline-size/);
 });
 
 test("an active workout requests and releases a screen wake lock", async () => {

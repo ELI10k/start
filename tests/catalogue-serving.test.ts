@@ -94,3 +94,21 @@ test("protein powder displays the requested 34 gram scoop", () => {
     servingLabel: "סקופ 34 גרם",
   }), { calories: 120, protein: 25, carbs: 3, fat: 1.4, servingLabel: "סקופ 34 גרם" });
 });
+
+test("the pastry cream dessert displays its full 150 gram unit", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 466.67,
+    protein: 6.67,
+    carbs: 46.67,
+    fat: 28,
+    packageUnit: "יחידה",
+    unitWeightGrams: 150,
+    servingLabel: "יחידה 150 גרם",
+  }), {
+    calories: 700,
+    protein: 10,
+    carbs: 70,
+    fat: 42,
+    servingLabel: "יחידה 150 גרם",
+  });
+});

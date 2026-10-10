@@ -6,7 +6,7 @@ insert into public.foods (
   verification_status, notes, unit_weight_grams, calories_per_unit,
   units_per_package
 ) values (
-  '342',
+  'iherb-barbecue-protein-snack',
   'חטיף חלבון בטעם ברביקיו iHerb',
   'iHerb',
   'חטיפי חלבון',
@@ -51,7 +51,7 @@ do $$
 begin
   if not exists (
     select 1 from public.foods
-    where id = '342'
+    where id = 'iherb-barbecue-protein-snack'
       and name = 'חטיף חלבון בטעם ברביקיו iHerb'
       and calories = 400
       and protein = 70
@@ -63,3 +63,4 @@ begin
 end $$;
 
 commit;
+

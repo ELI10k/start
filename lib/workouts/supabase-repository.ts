@@ -29,16 +29,42 @@ export function createSupabaseWorkoutRepository(){
     const profileResult=await supabase.from("profiles").select("id,full_name,role").eq("id",user.id).single();
     if(profileResult.error||(profileResult.data as Row|undefined)?.role!=="coach"&&(profileResult.data as Row|undefined)?.role!=="client")throw new Error("workout_profile_required");
     const role=(profileResult.data as Row).role as "coach"|"client";
+    const assignmentResult=await supabase.from("workout_assignments").select("*").order("assigned_at");
+    if(assignmentResult.error)throw assignmentResult.error;
+    const assignedProgramIds=[...new Set(rows(assignmentResult.data).map((row)=>text(row.program_id)).filter(Boolean))];
+    const emptyResult=Promise.resolve({data:[],error:null});
+    // A client starts from their assignments and follows that graph only. The
+    // coach still needs the whole catalogue, which is paged rather than cut at
+    // PostgREST's 1,000-row response ceiling.
+    const programResult=await(role==="client"
+      ?assignedProgramIds.length?supabase.from("workout_programs").select("*").in("id",assignedProgramIds).order("created_at"):emptyResult
+      :supabase.from("workout_programs").select("*").order("created_at"));
+    if(programResult.error)throw programResult.error;
+    const visibleProgramIds=rows(programResult.data).map((row)=>text(row.id)).filter(Boolean);
+    const dayResult=await(role==="client"
+      ?visibleProgramIds.length?supabase.from("workout_program_days").select("*").in("program_id",visibleProgramIds).is("retired_at",null).order("sort_order").order("id"):emptyResult
+      :supabase.from("workout_program_days").select("*").is("retired_at",null).order("sort_order").order("id"));
+    if(dayResult.error)throw dayResult.error;
+    const visibleDayIds=rows(dayResult.data).map((row)=>text(row.id)).filter(Boolean);
+    const entryResult=await(role==="client"
+      ?visibleDayIds.length?supabase.from("workout_program_exercises").select("*").in("day_id",visibleDayIds).is("retired_at",null).order("sort_order").order("id"):emptyResult
+      :fetchAllPages((from,to)=>supabase.from("workout_program_exercises").select("*").is("retired_at",null).order("sort_order").order("id").range(from,to)));
+    if(entryResult.error)throw entryResult.error;
+    const visibleEntryIds=rows(entryResult.data).map((row)=>text(row.id)).filter(Boolean);
+    const prescriptionResult=await(role==="client"
+      ?visibleEntryIds.length?supabase.from("workout_set_prescriptions").select("*").in("program_exercise_id",visibleEntryIds).order("sort_order").order("id"):emptyResult
+      :fetchAllPages((from,to)=>supabase.from("workout_set_prescriptions").select("*").order("sort_order").order("id").range(from,to)));
+    if(prescriptionResult.error)throw prescriptionResult.error;
     const results=await Promise.all([
       supabase.from("workout_exercises").select("*").order("name"),
-      supabase.from("workout_programs").select("*").order("created_at"),
-      supabase.from("workout_program_days").select("*").order("sort_order"),
-      fetchAllPages((from,to)=>supabase.from("workout_program_exercises").select("*").order("sort_order").order("id").range(from,to)),
-      fetchAllPages((from,to)=>supabase.from("workout_set_prescriptions").select("*").order("sort_order").order("id").range(from,to)),
-      supabase.from("workout_assignments").select("*").order("assigned_at"),
+      Promise.resolve(programResult),
+      Promise.resolve(dayResult),
+      Promise.resolve(entryResult),
+      Promise.resolve(prescriptionResult),
+      Promise.resolve(assignmentResult),
       supabase.from("workout_sessions").select("*").in("status",["active","completed"]).order("started_at"),
-      supabase.from("workout_session_exercises").select("*").order("sort_order"),
-      supabase.from("workout_sets").select("*").order("sort_order"),
+      fetchAllPages((from,to)=>supabase.from("workout_session_exercises").select("*").order("sort_order").order("session_id").order("workout_exercise_id").range(from,to)),
+      fetchAllPages((from,to)=>supabase.from("workout_sets").select("*").order("sort_order").order("session_id").order("id").range(from,to)),
       supabase.from("workout_coach_notes").select("*").order("created_at"),
       supabase.from("workout_notifications").select("*").order("created_at"),
       supabase.from("workout_preferences").select("*"),

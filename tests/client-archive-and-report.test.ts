@@ -88,7 +88,7 @@ test("with no data the report states what is missing and recommends nothing", ()
   assert.ok(report.missing.includes("אין מדידות משקל"));
   assert.ok(report.missing.includes("אין צ׳ק־אינים"));
   // The only action is to go and get the data.
-  assert.equal(report.actions[0]?.text, "להשלים את הנתונים החסרים לפני החלטות");
+  assert.match(report.actions[0]?.text ?? "", /שקילת בוקר.*צ׳ק־אין מלא/);
   assert.equal(report.referral, null);
 });
 
@@ -107,7 +107,69 @@ test("two measurements make a trend, and it carries both points", () => {
   assert.ok(weight);
   assert.equal(weight.direction, "down");
   assert.equal(weight.detail, "-1.5 ק״ג");
-  assert.match(weight.basis, /2026-08-01 \(80\.5 ק״ג\).*2026-08-08 \(79 ק״ג\)/);
+  assert.match(weight.basis, /01\.08\.2026 \(80\.5 ק״ג\).*08\.08\.2026 \(79 ק״ג\)/);
+});
+
+test("the monthly report includes deduplicated health coverage, trends and measurable actions", () => {
+  const days = Array.from({ length: 20 }, (_, index) => `2026-09-${String(index + 1).padStart(2, "0")}`);
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    health: {
+      steps: days.map((day, index) => ({ day, steps: 6000 + index * 50 })),
+      sleep: days.map((day) => ({ day, minutes: 420 })),
+      stepGoal: 10000,
+      sleepGoalMinutes: 480,
+      lastSyncAt: "2026-09-30T08:00:00Z",
+      connection: "connected",
+    },
+  });
+  assert.ok(report.facts.some((fact) => fact.label === "כיסוי נתוני צעדים" && fact.value.includes("20 מתוך 30")));
+  assert.ok(report.facts.some((fact) => fact.label === "משך שינה — ממוצע" && fact.value.includes("7:00")));
+  assert.ok(report.trends.some((trend) => trend.label === "צעדים"));
+  assert.ok(report.attention.some((point) => point.text.includes("הצעדים נמוך")));
+  assert.ok(report.attention.some((point) => point.text.includes("השינה הממוצע נמוך")));
+  assert.ok(report.actions.some((point) => point.text.includes("5 ימים בכל שבוע")));
+  assert.match(report.overview.coverage, /צעדים 20\/30 · שינה 20\/30/);
+});
+
+test("sparse health data is labelled as low coverage and is not judged as behavior", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    health: { steps: [{ day: "2026-09-01", steps: 1200 }], sleep: [], stepGoal: 10000, lastSyncAt: null, connection: "connected" },
+  });
+  assert.ok(report.missing.some((item) => item.includes("כיסוי צעדים נמוך")));
+  assert.ok(report.missing.some((item) => item.includes("אין נתוני משך שינה")));
+  assert.ok(!report.attention.some((point) => point.text.includes("ממוצע הצעדים נמוך")));
+});
+
+test("the report analyzes training quality, body-weight pace, volatility and the previous month", () => {
+  const days = Array.from({ length: 14 }, (_, index) => `2026-09-${String(index + 1).padStart(2, "0")}`);
+  const report = buildClientReport({
+    ...EMPTY,
+    goalLabel: "חיטוב מהיר",
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    weighIns: [{ date: "2026-09-29", weight: 78, navel: 90 }, { date: "2026-09-01", weight: 82, navel: 94 }],
+    health: {
+      steps: days.map((day, index) => ({ day, steps: index % 2 ? 12000 : 3000 })),
+      sleep: days.map((day, index) => ({ day, minutes: 360 + index * 10 })),
+      stepGoal: 9000, sleepGoalMinutes: 480, lastSyncAt: "2026-09-30T08:00:00Z", connection: "connected",
+    },
+    workoutQuality: {
+      sessions: [5000, 5200, 6500, 7000].map((volume, index) => ({ date: days[index], volume, durationSeconds: 3600, difficulty: 3, energy: 4 })),
+      previousSessionCount: 2,
+      previousAverageVolume: 4500,
+    },
+    previousPeriod: { weighIns: [], checkIns: [], steps: [5000, 5200, 5100], sleep: [390, 400, 410], workoutsCompleted: 2 },
+  });
+  assert.ok(report.facts.some((fact) => fact.label === "קצב שינוי משקל" && fact.value.includes("% ממשקל הגוף לשבוע")));
+  assert.ok(report.facts.some((fact) => fact.label === "נפח אימון ממוצע"));
+  assert.ok(report.trends.some((trend) => trend.label === "נפח אימון"));
+  assert.ok(report.trends.some((trend) => trend.label === "צעדים מול החודש הקודם"));
+  assert.ok(report.trends.some((trend) => trend.label === "אימונים מול החודש הקודם"));
+  assert.ok(report.attention.some((point) => point.text.includes("הצעדים אינם עקביים")));
+  assert.ok(report.attention.some((point) => point.text.includes("קצב הירידה")));
 });
 
 test("weight trend color follows the client's goal, not the mathematical sign", () => {
@@ -138,6 +200,29 @@ test("every recommendation carries the figures it came from", () => {
   assert.ok(report.workouts.some((point) => point.basis.includes("25%")));
 });
 
+test("nutrition and workout recommendations are executable protocols, not coach questions", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    period: { start: "2026-09-01", end: "2026-09-30", days: 30 },
+    weighIns: [{ date: "2026-09-30", weight: 88, navel: 95 }, { date: "2026-09-01", weight: 87.5, navel: 95 }],
+    goalLabel: "חיטוב מהיר",
+    hasMenu: true,
+    monthlyNutrition: { daysReported: 5, mealsMarked: 20, mealsEaten: 18, mealsSkipped: 2, outsideItems: 2 },
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    monthlyWorkouts: { completed: 11, expected: 9, skipped: 0, completionPercent: 100 },
+    workoutQuality: { sessions: [], previousSessionCount: 0, previousAverageVolume: null },
+  });
+  const nutrition = report.nutrition.map((point) => point.text).join(" ");
+  const workouts = report.workouts.map((point) => point.text).join(" ");
+  assert.match(nutrition, /14 יום.*שקילות בוקר/);
+  assert.match(nutrition, /מעקב תזונה של 7 ימים/);
+  assert.match(workouts, /שני אימונים רצופים/);
+  assert.match(workouts, /2\.5%–5%/);
+  assert.doesNotMatch(`${nutrition} ${workouts}`, /^לבדוק|^לשקול/);
+});
+
 test("nothing is said about food or training the client never reported", () => {
   const report = buildClientReport(EMPTY);
   const everything = [...report.nutrition, ...report.workouts, ...report.positives, ...report.attention].map((point) => point.text).join(" ");
@@ -165,9 +250,9 @@ test("the report view separates a number, a direction and a suggestion", async (
   assert.match(view, /2 · מגמות במהלך 30 הימים/);
   assert.match(view, /3 · נקודות חיוביות/);
   assert.match(view, /4 · דורש תשומת לב/);
-  assert.match(view, /5 · המלצות תזונה/);
-  assert.match(view, /6 · המלצות אימונים/);
-  assert.match(view, /7 · שאלות ללקוח/);
+  assert.match(view, /5 · תוכנית פעולה תזונתית/);
+  assert.match(view, /6 · תוכנית פעולה באימונים/);
+  assert.match(view, /7 · שאלות אבחון לפני התאמה/);
   assert.match(view, /8 · פעולות מוצעות לחודש הבא/);
   assert.match(view, /מבוסס על: \{point\.basis\}/);
   assert.match(view, /אין עדיין שתי נקודות זמן להשוואה/);
@@ -215,8 +300,9 @@ test("the monthly report creates an editable Eli-style message from its findings
   assert.match(report.clientMessage, /מתחילת התהליך ב־01\.06\.2026 ירדת 6\.4 ק״ג/);
   assert.match(report.clientMessage, /מ־94 ל־87\.6 ק״ג/);
   assert.match(report.clientMessage, /ירדת 7 ס״מ בהיקף הטבור/);
-  assert.match(report.clientMessage, /דברים לשיפור:/);
-  assert.match(report.clientMessage, /עקביות מנצחת הכול/);
+  assert.match(report.clientMessage, /מה דורש שיפור:/);
+  assert.match(report.clientMessage, /תוכנית העבודה שלך ל־14 הימים הקרובים:/);
+  assert.match(report.clientMessage, /ביצוע עקבי שאפשר למדוד/);
   assert.match(report.clientMessage, /אלי$/);
   assert.doesNotMatch(report.clientMessage, /לשקול|שינוי בקלוריות|להתאים את תדירות|לשייך תוכנית/);
 
@@ -238,14 +324,33 @@ test("the report prepares a separate weekly check-in reply and monthly summary",
   });
   assert.match(report.weeklyClientMessage ?? "", /הצ׳ק־אין שמילאת ב־15\.09\.2026/);
   assert.match(report.weeklyClientMessage ?? "", /נתוני השבוע האחרון/);
-  assert.match(report.weeklyClientMessage ?? "", /לשינה.*4\/10/);
-  assert.match(report.weeklyClientMessage ?? "", /מולאו 4 מתוך 7 ימים/);
+  assert.match(report.weeklyClientMessage ?? "", /שינה 4\/10/);
+  assert.match(report.weeklyClientMessage ?? "", /תזונה מולאה ב־4 מתוך 7 ימים/);
+  assert.match(report.weeklyClientMessage ?? "", /תוכנית העבודה שלך לשבוע הקרוב:/);
+  assert.match(report.weeklyClientMessage ?? "", /להקדים את שעת השינה ב־30 דקות/);
   assert.match(report.clientMessage, /החודש האחרון/);
 
   const view = await source("components/coach/client-file/ClientReport.tsx");
   assert.match(view, /משוב שבועי בעקבות הצ׳ק־אין האחרון/);
   assert.match(view, /סיכום חודשי ללקוח/);
   assert.match(view, /מתעדכן מיד עם קבלת צ׳ק־אין חדש/);
+});
+
+test("training guidance uses the last thirty days and ignores the new calendar week", () => {
+  const report = buildClientReport({
+    ...EMPTY,
+    clientName: "דני",
+    checkIns: [{ submittedAt: "2026-10-04T08:00:00Z", adherence: 9, energy: 8, sleep: 8, hunger: 4, workoutsCompleted: 3, mealPlanDays: 6, notes: null }],
+    hasProgram: true,
+    programName: "A-B",
+    weeklyFrequency: 3,
+    weeklyCompletionPercent: 0,
+    period: { start: "2026-09-08", end: "2026-10-07", days: 30 },
+    monthlyWorkouts: { completed: 11, skipped: 0, expected: 9, completionPercent: 100 },
+  });
+  assert.match(report.weeklyClientMessage ?? "", /30 הימים האחרונים.*11 מתוך 9 אימונים/);
+  assert.match(report.weeklyClientMessage ?? "", /להמשיך באותה תדירות/);
+  assert.doesNotMatch(report.weeklyClientMessage ?? "", /לקבוע עכשיו את ימי האימון ויום גיבוי/);
 });
 
 test("the versions migration is additive and freezes an approved version", async () => {

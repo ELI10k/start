@@ -111,13 +111,30 @@ test("a completed workout carries its own copy of what it was performed under", 
   assert.match(migration, /create trigger workout_sets_snapshot_prescription before insert/);
 });
 
-test("history pins the rows it points at: they cannot be deleted by a save", async () => {
-  const migration = await source("supabase/migrations/202608110008_coach_edits_official_programmes.sql");
-  assert.match(migration, /raise exception 'exercise_has_history'/);
-  assert.match(migration, /raise exception 'day_has_history'/);
-  // Replacing the exercise in a trained slot is still allowed - the slot keeps
-  // its identity, so the client's past keeps pointing at something real.
-  assert.match(migration, /on conflict\(id\) do update set day_id=excluded\.day_id,exercise_id=excluded\.exercise_id/);
+test("removing trained slots retires them from future workouts without deleting history", async () => {
+  const migration = await source("supabase/migrations/20261009093625_retire_removed_workout_slots.sql");
+  assert.match(migration, /add column if not exists retired_at timestamptz/);
+  assert.match(migration, /update public\.workout_program_exercises e\s+set retired_at = coalesce\(e\.retired_at, now\(\)\)/);
+  assert.match(migration, /exists\(select 1 from public\.workout_session_exercises se where se\.workout_exercise_id = e\.id\)/);
+  assert.match(migration, /update public\.workout_program_days d\s+set retired_at = coalesce\(d\.retired_at, now\(\)\)/);
+  assert.match(migration, /exists\(select 1 from public\.workout_sessions s where s\.day_id = d\.id\)/);
+  assert.doesNotMatch(migration, /raise exception 'exercise_has_history'/);
+  assert.doesNotMatch(migration, /raise exception 'day_has_history'/);
+  const repository = await source("lib/workouts/supabase-repository.ts");
+  assert.match(repository, /from\("workout_program_days"\)\.select\("\*"\)\.is\("retired_at",null\)/);
+  assert.match(repository, /from\("workout_program_exercises"\)\.select\("\*"\)\.is\("retired_at",null\)/);
+});
+
+test("a stale editor cannot resurrect removed exercises or scramble their order", async () => {
+  const migration = await source("supabase/migrations/20261009102332_reject_stale_workout_program_saves.sql");
+  assert.match(migration, /saved\.retired_at is not null/);
+  assert.match(migration, /raise exception 'stale_program'/);
+  assert.match(migration, /from jsonb_array_elements\(coalesce\(v_day->'exercises','\[\]'::jsonb\)\) with ordinality/);
+  assert.match(migration, /values\(v_entry->>'id',v_day->>'id',v_entry->>'exerciseId',v_entry_order/);
+
+  const provider = await source("components/workouts/WorkoutProvider.tsx");
+  assert.match(provider, /message\.includes\("stale_program"\)/);
+  assert.match(provider, /saveProgram:async\(program\).*catch\(error\)\{return fail\(error\)\}/);
 });
 
 test("editing is not gated on the client-side role, which arrives late", async () => {
@@ -241,3 +258,4 @@ test("coach exercise cards stay inside the coach-authorized route", async () => 
   assert.match(detail, /ExerciseDetail exerciseId=\{exerciseId\}/);
   assert.match(detail, /href="\/coach\/workouts\/exercises"/);
 });
+

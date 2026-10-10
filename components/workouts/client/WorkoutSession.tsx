@@ -13,7 +13,7 @@ import { StateBlock } from "@/components/client/AppPatterns";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import WorkoutLoadingState from "@/components/workouts/WorkoutLoadingState";
 import WorkoutPreserveImprove from "@/components/workouts/client/WorkoutPreserveImprove";
-import { bestComparableSet, exercisePerformance, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
+import { bestComparableSet, exercisePerformance, prescribedSetRepetitions, targetRepetitions, workoutCompletionPercent, workoutVolume } from "@/lib/workouts/progress";
 import { isCompoundLift, isFirstExerciseForMuscle, planWarmup, preparationGroup, workingWeightFrom } from "@/lib/workouts/warmup";
 import { buildWorkoutReport, type ReportExercise } from "@/lib/workouts/session-report";
 import { signalRestOver } from "@/lib/workouts/feedback";
@@ -81,7 +81,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         sets:Array.from({length:setCount(entry.sets)},(_,index):ExerciseSetResult=>{
           const previous=last?.sets[index];
           return{id:`${entry.id}-set-${index+1}`,prescriptionId:entry.setPrescriptions?.[index]?.id,order:index,completed:false,
-            weightKg:previous?.weightKg,repetitions:previous?.repetitions};
+            // Keep the useful part of history (the load), while today's reps
+            // always come from today's programme. Otherwise an 8-rep result
+            // silently overwrites a newly prescribed target of 10 on screen.
+            weightKg:previous?.weightKg,repetitions:prescribedSetRepetitions(entry,index)??previous?.repetitions};
         })};
     }),
   });
@@ -153,7 +156,10 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // filtered to the prescribed exercise's primary muscle group. Both fields are
   // already classified, so no new data is needed for this.
   const swapPreferences=snapshot.workoutPreferences.find(p=>p.clientId===currentClientId);
-  const swapOptions=swapPreferences?alternativeExercises(prescribed,snapshot.exercises,swapPreferences).filter(item=>item.id!==performedId):[];
+  // Missing intake preferences are not a ban on substitutions. The catalogue
+  // can still safely match the same muscle and movement; preferences merely
+  // narrow that list when they exist.
+  const swapOptions=alternativeExercises(prescribed,snapshot.exercises,swapPreferences).filter(item=>item.id!==performedId);
   const replaceResult=(next:ActiveExerciseResult,extra:Partial<ActiveWorkoutSession>={})=>persist({...extra,exerciseResults:session.exerciseResults.map((item)=>item.workoutExerciseId===next.workoutExerciseId?next:item)});
   const swapLocked=result.completed||result.sets.some(set=>set.completed);
   const changePerformed=(id:string)=>{if(swapLocked){setWarning("כבר נרשמו סטים בתרגיל זה. שומרים את הביצוע; החלפה תתבצע לפני התחלת התרגיל באימון הבא.");return;}replaceResult(substituteExercise(result,id),{restEndsAt:undefined});setSwapping(false);};

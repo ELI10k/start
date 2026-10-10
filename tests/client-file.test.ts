@@ -64,7 +64,8 @@ test("the intake tab reuses the one intake form", async () => {
 test("the report tab builds a deterministic thirty-day analysis", async () => {
   const page = await source("app/coach/clients/[id]/page.tsx");
   assert.match(page, /getClientNutritionBehavior\(id,todayKey\)/);
-  assert.match(page, /gte\("completed_at",`\$\{reportStart\}T00:00:00Z`\)/);
+  assert.match(page, /gte\("completed_at",`\$\{previousReportStart\}T00:00:00Z`\)/);
+  assert.match(page, /const reportSessions=.*completed_at\.slice\(0,10\)>=reportStart/);
   assert.match(page, /period:\{start:reportStart,end:todayKey,days:30\}/);
   assert.doesNotMatch(page, /WeeklySummaryPanel/);
   // No model call or prompt: every conclusion remains traceable to stored data.

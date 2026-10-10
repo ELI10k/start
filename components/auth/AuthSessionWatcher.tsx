@@ -28,7 +28,7 @@ export default function AuthSessionWatcher() {
         // take it off the device, or the next person to use the phone could read
         // it straight out of the offline fallback.
         clearSnapshotCache();
-        window.location.assign("/login");
+        router.replace("/login");
       } else if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
         router.refresh();
       }

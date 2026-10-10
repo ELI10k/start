@@ -1,5 +1,5 @@
 "use client";
-import { useMemo,useRef,useState } from "react";
+import { useCallback,useMemo,useRef,useState } from "react";
 import { Search, Star } from "lucide-react";
 import { foodSearchRelevance,normalizeFoodText } from "@/lib/foods/repository";
 import { foodMacroGroup } from "@/lib/nutrition/food-groups";
@@ -29,9 +29,9 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
   // Only an explicit star or unstar overrides the curated status. Merely having
   // been chosen before does not, which is what "u ? u.favorite : ..." meant and
   // is how the curated list emptied itself through use.
-  const isFavorite=(food:ComboboxFood,u?:Usage)=>clientCatalogueOrder
+  const isFavorite=useCallback((food:ComboboxFood,u?:Usage)=>clientCatalogueOrder
     ? Boolean(food.personalFavorite)
-    : u?.favorite??Boolean(food.isMaster);
+    : u?.favorite??Boolean(food.isMaster),[clientCatalogueOrder]);
   const results=useMemo(()=>{
     const q=normalizeFoodText(query);
     const candidates=foods.map(food=>{const u=usageMap.get(food.id);const relevance=!q?0:foodSearchRelevance(q,[food.name,food.brand,food.category]);return{food,u,relevance,group:"תוצאות" as string}});
@@ -90,7 +90,7 @@ export default function FoodCombobox({foods,value,usage,onSelect,onToggleFavorit
     const included=new Set([...favoriteIds,...recent.map(item=>item.food.id)]);
     const rest=candidates.filter(item=>!included.has(item.food.id)).sort((a,b)=>a.food.name.localeCompare(b.food.name,"he")).slice(0,Math.max(0,100-favorites.length-recent.length)).map(item=>({...item,group:"כל המזונות"}));
     return[...favorites,...recent,...rest];
-  },[clientCatalogueOrder,foods,query,usageMap]);
+  },[clientCatalogueOrder,foods,isFavorite,query,usageMap]);
   const choose=(id:string)=>{onSelect(id);setQuery("");setActive(0)};
 
   return <div className="food-picker">

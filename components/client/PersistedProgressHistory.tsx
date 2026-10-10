@@ -1,4 +1,4 @@
-import { Minus, Ruler, Scale, TrendingDown, TrendingUp } from "lucide-react";
+import { Ruler, Scale } from "lucide-react";
 import { StateBlock } from "@/components/client/AppPatterns";
 import WeightGoalMeter from "@/components/client/WeightGoalMeter";
 import { averageWeightChangeRates } from "@/lib/progress/rates";
@@ -34,10 +34,9 @@ function chartPoints(points: readonly Point[]) {
     });
 }
 
-function rateText(value: number | null) {
-  if (value === null) return "אין מספיק נתונים";
-  if (value === 0) return "ללא שינוי";
-  return `${value > 0 ? "+" : ""}${value.toFixed(2)} ק״ג`;
+function rateLabel(value: number | null | undefined) {
+  if (value === null || value === undefined) return "—";
+  return `${value > 0 ? "+" : ""}${value} ק״ג`;
 }
 
 function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgress, weeklyKg, monthlyKg }: { metric: "weight" | "measurements"; points: readonly Point[]; targetWeight?: number | string | null; nutritionGoal?: string | null; goalProgress?: WeightGoalProgress | null; weeklyKg?: number | null; monthlyKg?: number | null }) {
@@ -50,6 +49,7 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
   const recentChange = previous === undefined ? null : Number((latest - previous).toFixed(1));
   const recentTone = recentChange !== null ? weightTrendTone(recentChange, nutritionGoal) : "neutral";
   const totalChange = Number((latest - first).toFixed(1));
+  const totalTone = metric === "weight" ? weightTrendTone(totalChange, nutritionGoal) : "neutral";
   const target = Number(targetWeight);
   const hasTarget = metric === "weight" && Number.isFinite(target);
   const comparison = recentChange === null ? "זו המדידה הראשונה" : `${recentChange > 0 ? "עלייה" : recentChange < 0 ? "ירידה" : "ללא שינוי"}${recentChange === 0 ? " מהמדידה הקודמת" : ` של ${Math.abs(recentChange)} ${unit} מהמדידה הקודמת`}`;
@@ -57,9 +57,6 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
     ? totalChange < 0 ? "נרשמת ירידה עקבית בהיקף" : totalChange > 0 ? "נרשמה עלייה בהיקף לאורך התקופה" : "ההיקף נשאר יציב לאורך התקופה"
     : nutritionGoal?.includes("cut") && totalChange <= 0 ? "המגמה תואמת את יעד החיטוב" : nutritionGoal?.includes("bulk") && totalChange >= 0 ? "המגמה תואמת את יעד המסה" : hasTarget ? `נותרו ${Math.abs(latest - target).toFixed(1)} ק״ג ליעד` : "המשך מדידות עקביות יציג מגמה מדויקת יותר";
   const coordinates = chartPoints(points);
-  const RateIcon = weeklyKg === undefined || weeklyKg === null || weeklyKg === 0
-    ? Minus
-    : weeklyKg < 0 ? TrendingDown : TrendingUp;
   return (
     <div className="metric-overview">
       <section className="health-summary-card metric-overview__card">
@@ -85,24 +82,13 @@ function MetricOverview({ metric, points, targetWeight, nutritionGoal, goalProgr
           <WeightGoalMeter progress={goalProgress} weeklyKg={weeklyKg} />
         </section>
       ) : null}
-      {metric === "weight" ? (
-        <section className="premium-card metric-rate" aria-labelledby="average-weight-rate">
-          <div className="metric-rate__heading">
-            <h2 id="average-weight-rate">קצב שינוי ממוצע במשקל</h2>
-            <RateIcon aria-hidden="true" />
-          </div>
-          <div className="metric-rate__grid">
-            {[{ label: "שבועי", value: weeklyKg ?? null }, { label: "חודשי", value: monthlyKg ?? null }].map((rate) => {
-              const tone = rate.value === null ? "neutral" : weightTrendTone(rate.value, nutritionGoal);
-              return <div key={rate.label}><span>{rate.label}</span><strong className={`metric-rate__value metric-rate__value--${tone}`}>{rateText(rate.value)}</strong></div>;
-            })}
-          </div>
-          <span className="metric-rate__basis">מבוסס על {points.length} מדידות</span>
-        </section>
-      ) : null}
       <div className="health-stat-grid">
         <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{first} {unit}</strong><span>{metric === "weight" ? "משקל התחלה" : "היקף התחלה"}</span></div>
-        <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong>{totalChange > 0 ? "+" : ""}{totalChange} {unit}</strong><span>שינוי כולל</span></div>
+        <div>{metric === "weight" ? <Scale aria-hidden="true" /> : <Ruler aria-hidden="true" />}<strong className={`health-stat-grid__value--${totalTone}`}>{totalChange > 0 ? "+" : ""}{totalChange} {unit}</strong><span>שינוי כולל</span></div>
+        {metric === "weight" ? <>
+          <div><Scale aria-hidden="true" /><strong className={`health-stat-grid__value--${weeklyKg === null || weeklyKg === undefined ? "neutral" : weightTrendTone(weeklyKg, nutritionGoal)}`}>{rateLabel(weeklyKg)}</strong><span>{weeklyKg === null || weeklyKg === undefined ? "ממוצע שבועי · נדרשים 7 ימים" : "ממוצע שבועי"}</span></div>
+          <div><Scale aria-hidden="true" /><strong className={`health-stat-grid__value--${monthlyKg === null || monthlyKg === undefined ? "neutral" : weightTrendTone(monthlyKg, nutritionGoal)}`}>{rateLabel(monthlyKg)}</strong><span>{monthlyKg === null || monthlyKg === undefined ? "ממוצע חודשי · נדרשים 30 ימים" : "ממוצע חודשי"}</span></div>
+        </> : null}
       </div>
       <p className="health-insight">{insight}</p>
     </div>

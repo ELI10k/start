@@ -125,7 +125,8 @@ export function WorkoutProvider({children}:{children:React.ReactNode}){
 
   const fail=useCallback((error?:unknown)=>{
     connectionStore.reportFailure(error);
-    setPersistenceError(isOfflineError(error)?"אין חיבור כרגע. הנתונים נשמרו במכשיר וייסנכרנו כשהחיבור יחזור.":"השמירה ב-Supabase נכשלה. יש לרענן ולנסות שוב.");
+    const message=error&&typeof error==="object"&&"message" in error?String(error.message):"";
+    setPersistenceError(message.includes("stale_program")?"התוכנית השתנתה מאז פתיחת המסך. יש לרענן את העמוד ולבצע את העריכה על הגרסה העדכנית.":isOfflineError(error)?"אין חיבור כרגע. הנתונים נשמרו במכשיר וייסנכרנו כשהחיבור יחזור.":"השמירה ב-Supabase נכשלה. יש לרענן ולנסות שוב.");
     return false;
   },[]);
 

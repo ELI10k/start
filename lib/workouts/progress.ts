@@ -1,4 +1,4 @@
-import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutProgram } from "./types.ts";
+import type { ActiveExerciseResult, ClientWorkoutAssignment, CompletedWorkout, ExercisePerformanceHistory, ExerciseSetResult, WorkoutDay, WorkoutExercise, WorkoutProgram } from "./types.ts";
 import { israelDateKey } from "../date-time.ts";
 import { isProfessionalProgram, professionalWeekLayout } from "./professional.ts";
 /**
@@ -88,6 +88,9 @@ export function getTodayWorkoutDay(
 }
 
 export function workoutCompletionPercent(total:number,completed:number):number{return total<=0?0:Math.min(100,Math.max(0,Math.round(completed/total*100)))}
+export function prescribedSetRepetitions(entry:Pick<WorkoutExercise,"reps"|"setPrescriptions">,index:number):number|undefined{
+  return targetRepetitions(entry.setPrescriptions?.[index]?.repetitions??entry.reps);
+}
 export function workoutVolume(workout:Pick<CompletedWorkout,"exerciseResults">|readonly ActiveExerciseResult[]):number{const results:readonly ActiveExerciseResult[]=Array.isArray(workout)?workout:(workout as Pick<CompletedWorkout,"exerciseResults">).exerciseResults;return results.filter((exercise)=>exercise.completed).flatMap((exercise)=>exercise.sets).filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}
 export function exercisePerformance(workouts:readonly CompletedWorkout[],clientId:string,exerciseId:string):ExercisePerformanceHistory{const sessions=workouts.filter((workout)=>workout.clientId===clientId&&workout.exerciseResults.some((entry)=>(entry.performedExerciseId??entry.exerciseId)===exerciseId&&entry.completed)).map((workout)=>{const sets=workout.exerciseResults.find((entry)=>(entry.performedExerciseId??entry.exerciseId)===exerciseId&&entry.completed)?.sets??[];return{workoutId:workout.id,date:workout.completedAt,sets,volume:sets.filter((set)=>set.completed).reduce((sum,set)=>sum+(set.weightKg??0)*(set.repetitions??0),0)}}).sort((a,b)=>b.date.localeCompare(a.date));return{exerciseId,sessions}}
 export function activeAssignmentFor(assignments:readonly ClientWorkoutAssignment[],clientId:string,date:string):ClientWorkoutAssignment|undefined{return[...assignments].reverse().find((item)=>item.clientId===clientId&&item.status==="active"&&item.startDate<=date&&(!item.endDate||item.endDate>=date))}

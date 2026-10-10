@@ -7,7 +7,6 @@ import {
   eatenFromMenu,
   isMealAnswered,
   isMealEaten,
-  isMealReportedEaten,
   mealStanding,
   remainingInMenu,
   sumItems,
@@ -46,17 +45,6 @@ test("answered and eaten are different questions", () => {
     assert.equal(isMealAnswered(meal({ status })), true, status);
   }
   assert.equal(isMealAnswered(meal()), false);
-});
-
-test("the dashboard counts eaten and substituted meals but not skipped meals", () => {
-  const day = [
-    meal({ status: "eaten" }),
-    meal({ status: "other" }),
-    meal({ status: "not_eaten" }),
-    meal({ status: "not_eaten" }),
-    meal(),
-  ];
-  assert.equal(day.filter(isMealReportedEaten).length, 2);
 });
 
 test("a meal that was answered is neither eaten nor still to come", () => {
@@ -103,10 +91,10 @@ test("the dashboard, the nutrition screen and the client file share one rule", a
   for (const text of [dashboard, nutrition, repository]) assert.match(text, /sumLoggedFood/);
 });
 
-test("the home meal counter includes an off-plan meal but excludes a skipped meal", async () => {
+test("the home meal counter includes an off-plan meal that was answered", async () => {
   const dashboard = await source("app/page.tsx");
-  assert.match(dashboard, /meals\.filter\(isMealReportedEaten\)/);
-  assert.doesNotMatch(dashboard, /meals\.filter\(isMealAnswered\)/);
+  assert.match(dashboard, /meals\.filter\(isMealAnswered\)/);
+  assert.doesNotMatch(dashboard, /meals\.filter\(isMealEaten\)/);
 });
 
 test("Medjool date is migrated to one 30 gram unit", async () => {

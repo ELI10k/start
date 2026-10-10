@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints, MoonStar, RefreshCw, Target } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
-import { DEFAULT_SLEEP_GOAL_MINUTES, calendarDay, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageCompletedSteps, calendarDay, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
 import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
 import type { HealthPermissionState } from "@/lib/health/types";
@@ -36,11 +36,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const [snapshot, setSnapshot] = useState<HealthSnapshot>(emptyHealthSnapshot);
   const [permission, setPermission] = useState<HealthPermissionState>("unknown");
   const [syncing, setSyncing] = useState(false);
-  // Each metric owns its range. Switching steps to a month must not silently
-  // switch sleep as well, and either button must remain reversible.
-  const [periods, setPeriods] = useState<Readonly<Record<"steps" | "sleep", "week" | "month">>>({ steps: "week", sleep: "week" });
-  const period = periods[metric];
-  const setPeriod = (next: "week" | "month") => setPeriods((current) => current[metric] === next ? current : { ...current, [metric]: next });
+  const [period, setPeriod] = useState<"week" | "month">("week");
   const inFlight = useRef(false);
   const today = calendarDay();
 
@@ -95,32 +91,31 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const unavailable = permission === "unavailable";
   const dayCount = period === "month" ? 30 : 7;
   const days = lastDays(today, dayCount);
-  const periodPicker = <div className="health-period-picker" role="group" aria-label={`טווח הצגה ${metric === "steps" ? "צעדים" : "שינה"}`}><button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבוע</button><button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודש</button></div>;
+  const periodPicker = <div className="health-period-picker" role="group" aria-label="טווח הצגה"><button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבוע</button><button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודש</button></div>;
 
   if (metric === "steps") {
     const summary = summarizeSteps(snapshot.entries, snapshot.preferences, today);
     const stepByDay = stepsByDay(snapshot.entries);
     const values = days.map((day) => ({ day, value: stepByDay.get(day)?.steps ?? 0 }));
-    const reported = values.filter((point) => stepByDay.has(point.day));
-    const average = reported.length ? Math.round(reported.reduce((sum, point) => sum + point.value, 0) / reported.length) : 0;
+    const average = averageCompletedSteps(snapshot.entries, days, today);
     const total = values.reduce((sum, point) => sum + point.value, 0);
     const daysMetGoal = values.filter((point) => point.value >= summary.goal).length;
-    const remaining = Math.max(0, summary.goal - average);
+    const remaining = Math.max(0, summary.goal - (average ?? 0));
     return (
       <div className="health-progress-view">
         {periodPicker}
         <section className="health-summary-card">
           <span className="health-summary-card__icon"><Footprints aria-hidden="true" size={24} /></span>
           <p>ממוצע יומי {period === "month" ? "בחודש" : "בשבוע"}</p>
-          <strong>{reported.length ? average.toLocaleString("he-IL") : "אין נתונים"}</strong>
-          <small>{reported.length ? `מתוך יעד של ${summary.goal.toLocaleString("he-IL")}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
+          <strong>{average !== null ? average.toLocaleString("he-IL") : "אין נתונים"}</strong>
+          <small>{average !== null ? `מתוך יעד של ${summary.goal.toLocaleString("he-IL")}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
           <Bars values={values} goal={summary.goal} formatter={(value) => value.toLocaleString("he-IL")} monthly={period === "month"} />
         </section>
         <div className="health-stat-grid">
           <div><Target aria-hidden="true" /><strong>{daysMetGoal} מתוך {dayCount}</strong><span>ימים ביעד</span></div>
           <div><Footprints aria-hidden="true" /><strong>{total.toLocaleString("he-IL")}</strong><span>צעדים {period === "month" ? "בחודש" : "בשבוע"}</span></div>
         </div>
-        {reported.length ? <p className="health-insight">{remaining ? `עוד ${remaining.toLocaleString("he-IL")} צעדים ביום להשגת היעד` : `עמדת ביעד הצעדים ${period === "month" ? "החודשי" : "השבועי"} — כל הכבוד`}</p> : null}
+        {average !== null ? <p className="health-insight">{remaining ? `עוד ${remaining.toLocaleString("he-IL")} צעדים ביום להשגת היעד` : `עמדת ביעד הצעדים ${period === "month" ? "החודשי" : "השבועי"} — כל הכבוד`}</p> : null}
         <SyncButton connect={connect} unavailable={unavailable} syncing={syncing} onClick={() => void sync(true)} />
       </div>
     );

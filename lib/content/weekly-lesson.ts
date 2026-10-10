@@ -58,17 +58,17 @@ function isIsraeliIndependenceDay(date: Date, month: string, day: number) {
   if (month !== "Iyar" || day < 3 || day > 6) return false;
   const fifthOfIyar = new Date(date.getTime() + (5 - day) * DAY_MS);
   const weekday = fifthOfIyar.getUTCDay();
-  if (weekday === 5) return day === 4;
-  if (weekday === 6) return day === 3;
-  if (weekday === 1) return day === 6;
+  if (weekday === 5) return day === 4; // Friday: observed Thursday.
+  if (weekday === 6) return day === 3; // Saturday: observed Thursday.
+  if (weekday === 1) return day === 6; // Monday: observed Tuesday.
   return day === 5;
 }
 
 function holidayOn(date: Date): HolidayGuide | null {
   const { month, day } = hebrewDate(date);
-  if (month === "Tishri" && day === 1) return "holiday";
-  if (month === "Tishri" && day === 10) return "fast";
-  if (month === "Tishri" && day === 15) return "holiday";
+  if (month === "Tishri" && day === 1) return "holiday"; // Rosh Hashanah
+  if (month === "Tishri" && day === 10) return "fast"; // Yom Kippur
+  if (month === "Tishri" && day === 15) return "holiday"; // Sukkot
   if (month === "Shevat" && day === 15) return "tuBishvat";
   if (month === "Nisan" && day === 15) return "passover";
   if (isIsraeliIndependenceDay(date, month, day)) return "independence";
@@ -76,6 +76,7 @@ function holidayOn(date: Date): HolidayGuide | null {
   return null;
 }
 
+/** The relevant holiday guide from five days before the holiday through the holiday itself. */
 export function holidayGuideForDay(dateKey: string): HolidayGuide | null {
   for (let offset = 0; offset <= 5; offset += 1) {
     const date = utcDate(dateKey, offset);
@@ -119,6 +120,8 @@ export function lessonForDay(
   if (month === 12 || month === 1 || month === 3) seasonalTitles.add(AUTOMATIC_GUIDES.alcohol);
   if (month >= 6 && month <= 8) seasonalTitles.add(AUTOMATIC_GUIDES.fruit);
 
+  // Holiday guides never leak into an unrelated month. Bar-Or remains available
+  // in the course library, but is intentionally never promoted automatically.
   const scheduledTitles = Object.values(AUTOMATIC_GUIDES);
   const eligible = lessons.filter((lesson) => {
     if (titleIncludes(lesson, AUTOMATIC_GUIDES.barOr)) return false;

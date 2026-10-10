@@ -43,7 +43,8 @@ test("nothing outside the bridge imports Capacitor", async () => {
   // no import at all.
   assert.doesNotMatch(bridge, /^import .*@capacitor/m);
   assert.match(bridge, /capacitor\?\.isNativePlatform\?\.\(\)/);
-  assert.match(bridge, /await Promise\.all\(\[\s*import\("@capacitor\/app"\)/);
+  assert.match(bridge, /const \{ App \} = await import\("@capacitor\/app"\)/);
+  assert.match(bridge, /await Promise\.all\(\[\s*import\("@capacitor\/keyboard"\)/);
 });
 
 test("the bridge satisfies the contracts the web layer already wrote against", async () => {

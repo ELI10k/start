@@ -1,5 +1,7 @@
 -- A completed workout stays in the client's history, while each coach can clear
 -- it independently from their dashboard work queue after reviewing it.
+begin;
+
 create table if not exists public.coach_workout_reviews (
   workout_session_id text not null references public.workout_sessions(id) on delete cascade,
   coach_id uuid not null references public.profiles(id) on delete cascade,
@@ -32,3 +34,4 @@ create policy coach_workout_reviews_own_insert
 revoke all on table public.coach_workout_reviews from anon, authenticated;
 grant select, insert on table public.coach_workout_reviews to authenticated;
 
+commit;

@@ -61,7 +61,7 @@ test("a holiday guide does not appear six days early or outside its holiday wind
   ];
   assert.equal(holidayGuideForDay("2026-03-27"), null);
   assert.equal(lessonForDay(lessons, ["guides", "basics"], "2026-03-27")?.id, "ordinary");
-  assert.equal(lessonForDay(lessons, ["guides", "basics"], "2026-10-08")?.id, "ordinary");
+  assert.equal(lessonForDay(lessons, ["guides", "basics"], "2026-10-07")?.id, "ordinary");
 });
 
 test("Bar-Or stays in the course library and is never selected automatically", () => {
@@ -69,7 +69,7 @@ test("Bar-Or stays in the course library and is never selected automatically", (
     lesson("bar-or", "guides", 1, "שיפור ריצת בר אור"),
     lesson("ordinary", "basics", 1),
   ];
-  for (const date of ["2026-01-04", "2026-01-05", "2026-10-08"]) {
+  for (const date of ["2026-01-04", "2026-01-05", "2026-10-07"]) {
     assert.equal(lessonForDay(lessons, ["guides", "basics"], date)?.id, "ordinary");
   }
 });

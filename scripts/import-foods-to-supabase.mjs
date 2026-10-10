@@ -10,5 +10,13 @@ const supabase = createClient(url, key, { auth: { persistSession: false, autoRef
 for (let index = 0; index < rows.length; index += 100) { const { error } = await supabase.from("foods").upsert(rows.slice(index, index + 100), { onConflict: "id" }); if (error) throw error; }
 const { count, error } = await supabase.from("foods").select("id", { count: "exact", head: true });
 if (error) throw error;
-if (count !== foods.length) throw new Error(`Food count mismatch: database=${count}, approved=${foods.length}`);
-console.log(JSON.stringify({ imported: rows.length, databaseCount: count, expected: 336, idempotent: true }));
+const verifiedIds = new Set();
+for (let index = 0; index < rows.length; index += 100) {
+  const ids = rows.slice(index, index + 100).map((row) => row.id);
+  const { data, error: verifyError } = await supabase.from("foods").select("id").in("id", ids);
+  if (verifyError) throw verifyError;
+  for (const row of data ?? []) verifiedIds.add(String(row.id));
+}
+const missingIds = rows.map((row) => row.id).filter((id) => !verifiedIds.has(id));
+if (missingIds.length) throw new Error(`Food import verification failed; missing ids: ${missingIds.join(",")}`);
+console.log(JSON.stringify({ imported: rows.length, verified: verifiedIds.size, databaseCount: count, idempotent: true }));

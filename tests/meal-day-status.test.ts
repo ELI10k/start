@@ -92,7 +92,8 @@ test("one chosen macro is enough to mark a meal eaten", async () => {
   const actions = await source("app/actions/product.ts");
   assert.match(page, /meal\.groups\.some\(\(group\) => group\.selectedItemId\)/);
   assert.match(page, /אפשר לסמן לאחר בחירת פריט אחד לפחות/);
-  assert.match(actions, /p_quantity: 0/);
+  assert.match(actions, /p_quantity: quantity/);
+  assert.match(actions, /quantity !== null && \(!Number\.isFinite\(quantity\) \|\| quantity < 0\)/);
   assert.match(actions, /refresh_meal_intake already excludes zero/);
 });
 

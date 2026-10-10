@@ -89,7 +89,13 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
   // Which day is on screen. Everything below edits this day; the rest of the
   // menu - name, client, targets - is shared by all of them.
   const[activeDay,setActiveDay]=useState(0);
-  const[collapsed,setCollapsed]=useState<ReadonlySet<number>>(new Set());
+  // A saved menu can contain dozens of alternatives. Opening every meal on
+  // first paint turns the editor into one very long wall of fields, so start
+  // with the compact overview and let the coach open only the meal they need.
+  const[collapsed,setCollapsed]=useState<ReadonlySet<number>>(()=>{
+    const initialMeals=initial.days.find(day=>day.dayIndex===0)?.meals??initial.days[0]?.meals??[];
+    return new Set(initialMeals.map((_,index)=>index));
+  });
   const toggleCollapsed=(index:number)=>setCollapsed(current=>{const next=new Set(current);if(next.has(index))next.delete(index);else next.add(index);return next});
   // Applies the same index shift to the folds that the edit applied to the meals.
   const remapCollapsed=(move:(index:number)=>number|null)=>setCollapsed(current=>{
@@ -97,7 +103,11 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     for(const index of current){const moved=move(index);if(moved!==null)next.add(moved)}
     return next;
   });
-  const showDay=(dayIndex:number)=>{setActiveDay(dayIndex);setCollapsed(new Set())};
+  const showDay=(dayIndex:number)=>{
+    const dayMeals=menu.days.find(day=>day.dayIndex===dayIndex)?.meals??menu.days[0]?.meals??[];
+    setActiveDay(dayIndex);
+    setCollapsed(new Set(dayMeals.map((_,index)=>index)));
+  };
   const[message,setMessage]=useState(justSaved?"התפריט נשמר במסד הנתונים.":"");
   // Whether the last message was a refusal. A save that failed and a save that
   // worked used to look identical - the same grey box - which is no way to find
