@@ -20,11 +20,16 @@ export function NewProgramEditor(){
 }
 
 export default function CustomProgramEditor({id,clientId,assignmentId,embedded=false}:{id:string;clientId?:string;assignmentId?:string;embedded?:boolean}){
-  const{getProgram,saveProgram,snapshot}=useWorkouts(); const existing=getProgram(id); const assignment=snapshot.assignments.find((item)=>item.id===assignmentId&&item.clientId===clientId&&item.programId===id);const client=assignment?snapshot.clients.find((item)=>item.id===assignment.clientId):undefined;const[draft,setDraft]=useState<WorkoutProgram|undefined>(existing); const[saving,setSaving]=useState(false);const[message,setMessage]=useState("");
+  const{getProgram,snapshot}=useWorkouts(); const existing=getProgram(id); const assignment=snapshot.assignments.find((item)=>item.id===assignmentId&&item.clientId===clientId&&item.programId===id);const client=assignment?snapshot.clients.find((item)=>item.id===assignment.clientId):undefined;
   // The approved programmes used to be excluded here, which is what left a coach
   // with no way to add, remove, reorder or replace an exercise in one of them.
-  if(!draft)return null;
-  return <ProgramEditor draft={draft} setDraft={setDraft} context={client?{clientId:client.id,clientName:client.fullName}:undefined} embedded={embedded} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?(client?`השינויים נשמרו ונטענו מחדש בתוכנית הפעילה של ${client.fullName}.`:"השינויים נשמרו ונטענו מחדש מ-Supabase."):"שמירת התוכנית נכשלה. השינויים לא אושרו כשמורים; יש לרענן ולנסות שוב.")}} saving={saving} message={message}/>;
+  if(!existing)return null;
+  return <HydratedProgramEditor existing={existing} context={client?{clientId:client.id,clientName:client.fullName}:undefined} embedded={embedded}/>;
+}
+
+function HydratedProgramEditor({existing,context,embedded}:{existing:WorkoutProgram;context?:{clientId:string;clientName:string};embedded:boolean}){
+  const{saveProgram}=useWorkouts();const[draft,setDraft]=useState(existing);const[saving,setSaving]=useState(false);const[message,setMessage]=useState("");
+  return <ProgramEditor draft={draft} setDraft={setDraft} context={context} embedded={embedded} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?(context?`השינויים נשמרו ונטענו מחדש בתוכנית הפעילה של ${context.clientName}.`:"השינויים נשמרו ונטענו מחדש מ-Supabase."):"שמירת התוכנית נכשלה. השינויים לא אושרו כשמורים; יש לרענן ולנסות שוב.")}} saving={saving} message={message}/>;
 }
 
 // Where a dragged exercise came from. Held in state rather than in the drag
