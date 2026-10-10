@@ -73,7 +73,12 @@ try {
   const page = await context.newPage();
   await page.goto(`${base}/coach/clients/${clientId}?tab=workouts`, { waitUntil: "networkidle" });
   await page.getByRole("link", { name: "עריכת התוכנית" }).click();
-  await page.waitForURL((url) => url.searchParams.get("clientId") === clientId && url.searchParams.get("assignmentId") === assignment.data.id);
+  await page.waitForURL((url) =>
+    url.pathname === `/coach/clients/${clientId}` &&
+    url.searchParams.get("tab") === "workouts" &&
+    url.searchParams.get("editProgram") === programId &&
+    url.searchParams.get("assignmentId") === assignment.data.id
+  );
   await page.getByText(`עריכת התוכנית של בדיקת שמירת אימון`, { exact: true }).waitFor();
   const marker = `round-trip-${randomUUID()}`;
   await page.getByLabel("טכניקה / הערה").first().fill(marker);

@@ -33,11 +33,12 @@ import { buildClientReport } from "@/lib/coach-intelligence/client-report";
 import { CLIENT_TABS, isClientTab } from "@/lib/coach/client-tabs";
 import MessageThread from "@/components/messages/MessageThread";
 import { listThread, markThreadRead } from "@/lib/messages/repository";
+import CustomProgramEditor from "@/components/workouts/coach/CustomProgramEditor";
 
 const date = (value: string | null) => value ? formatIsraelDateTime(value) : "אין נתון";
 const number = (value: number) => Math.round(value).toLocaleString("he-IL");
 
-export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string; tab?: string; date?: string }> }) {
+export default async function CoachClientPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ created?: string; invite?: string; login?: string; tab?: string; date?: string; editProgram?: string; assignmentId?: string }> }) {
   const auth = await getAuthContext(); if (!auth) redirect("/login"); if (auth.role !== "coach") redirect("/unauthorized");
   const { id } = await params; const query=await searchParams;
   const todayKey=israelDateKey();
@@ -496,9 +497,13 @@ export default async function CoachClientPage({ params, searchParams }: { params
             {entry.assignment.coach_note && <p className="mt-3 text-sm text-[#5B5F5B]">{entry.assignment.coach_note}</p>}
             {entry.program && <div className="mt-3 flex flex-wrap gap-2">
               <Link href={`/coach/workouts/${entry.program.id}?clientId=${id}&assignmentId=${entry.assignment.id}`} className="chip">פתיחת התוכנית</Link>
-              <Link href={`/coach/workouts/${entry.program.id}?clientId=${id}&assignmentId=${entry.assignment.id}#program-editor`} className="chip">עריכת התוכנית</Link>
+              <Link href={`/coach/clients/${id}?tab=workouts&editProgram=${entry.program.id}&assignmentId=${entry.assignment.id}#client-program-editor`} className="chip">עריכת התוכנית</Link>
               {entry.days.map((day) => <Link key={day.id} href={`/coach/workouts/${entry.program!.id}/days/${day.id}`} className="chip">{day.name}</Link>)}
             </div>}
+            {entry.program && query.editProgram === entry.program.id && query.assignmentId === entry.assignment.id &&
+              <div id="client-program-editor" className="mt-5 scroll-mt-6 border-t border-[#E5E7E5] pt-5">
+                <CustomProgramEditor id={entry.program.id} clientId={id} assignmentId={entry.assignment.id} embedded/>
+              </div>}
           </article>)}
         </div> : <Empty text="ללקוח עדיין לא שויכה תוכנית אימונים."/>}
 
