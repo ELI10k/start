@@ -13,6 +13,21 @@ test("notification migration defines the in-app schema, RLS and event triggers",
   }
 });
 
+test("saving an already-active meal plan notifies its client again", async () => {
+  const [migration, actions] = await Promise.all([
+    readFile(new URL("../supabase/migrations/20261010203000_notify_active_meal_plan_updates.sql", import.meta.url), "utf8"),
+    readFile(new URL("../app/actions/product.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(migration, /create trigger meal_plans_notify_active_update/);
+  assert.match(migration, /after update on public\.meal_plans/);
+  assert.match(migration, /assignment\.status = 'active'/);
+  assert.match(migration, /assignment\.client_id = new\.intended_client_id/);
+  assert.match(migration, /'התפריט שלך עודכן'/);
+  assert.match(migration, /'meal-plan-update-' \|\| v_assignment\.id::text \|\| '-' \|\| txid_current\(\)::text/);
+  assert.match(actions, /save_meal_plan_tree[\s\S]*dispatchPushSoon\(\)/);
+});
+
 test("notification recipient isolation removes coach access to client notification rows", async () => {
   const [isolation, coachHistory] = await Promise.all([
     readFile(new URL("../supabase/migrations/202607280007_notification_recipient_isolation.sql", import.meta.url), "utf8"),

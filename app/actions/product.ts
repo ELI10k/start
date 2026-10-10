@@ -13,6 +13,7 @@ import { checkInPhotoCycle } from "@/lib/check-ins/photo-cycle";
 import { detectImageFormat } from "@/lib/images/signature";
 import { calculateMacroTargetResult } from "@/lib/nutrition/macro-targets";
 import { israelDateKey } from "@/lib/date-time";
+import { dispatchPushSoon } from "@/lib/push/dispatch";
 
 export type SaveState = Readonly<{ ok: boolean; message?: string }>;
 
@@ -571,6 +572,7 @@ export async function saveMenuTree(
   revalidatePath("/coach/menus");
   revalidatePath(`/coach/menus/${data}`);
   revalidatePath("/nutrition");
+  dispatchPushSoon();
   return {
     ok: true,
     id: String(data),
