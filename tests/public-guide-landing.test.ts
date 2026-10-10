@@ -41,11 +41,14 @@ test("every guide video is introduced by a title and description", async () => {
 });
 
 test("the guide route stays public and uses the sales-page visual language", async () => {
-  const [proxy, styles] = await Promise.all([
+  const [proxy, route, styles] = await Promise.all([
     file("proxy.ts"),
+    file("app/media/life-fit-training/[lesson]/route.ts"),
     file("app/guide/page.module.css"),
   ]);
   assert.doesNotMatch(proxy, /["']\/guide["']/);
+  assert.match(route, /PUBLIC_STORAGE_ORIGIN/);
+  assert.match(route, /bacxfweisncnpjgiqxcp\.supabase\.co/);
   assert.match(styles, /--green: #17a44a/);
   assert.match(styles, /--lime: #b7ff3c/);
   assert.match(styles, /--ink: #0a0c0b/);

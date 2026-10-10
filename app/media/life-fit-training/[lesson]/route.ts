@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// The public sales site and the authenticated app are separate Vercel
+// projects. The app has NEXT_PUBLIC_SUPABASE_URL, while the sales project does
+// not need the rest of the Supabase environment. This public, non-secret origin
+// keeps the shared guide media available on both domains.
+const PUBLIC_STORAGE_ORIGIN = "https://bacxfweisncnpjgiqxcp.supabase.co";
+
 const LESSON_FILES: Readonly<Record<string, string>> = {
   "01-login-home-navigation": "01-login-home-navigation.mp4",
   "02-personal-menu-meals": "02-personal-menu-meals.mp4",
@@ -20,8 +26,9 @@ export async function GET(
   const filename = LESSON_FILES[lesson];
   if (!filename) return new NextResponse("Media not found", { status: 404 });
 
-  const origin = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
-  if (!origin) return new NextResponse("Media unavailable", { status: 503 });
+  const origin =
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "") ??
+    PUBLIC_STORAGE_ORIGIN;
 
   return NextResponse.redirect(
     `${origin}/storage/v1/object/public/content-media/life-fit-training-series-v1/${filename}`,
