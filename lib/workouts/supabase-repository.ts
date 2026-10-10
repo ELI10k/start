@@ -1,6 +1,7 @@
 "use client";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { fetchAllPages } from "@/lib/supabase/pagination";
 import { assessedLevel } from "./personalization";
 import type { ActiveExerciseResult, ActiveWorkoutSession, AssignmentStatus, ClientWorkoutAssignment, CoachWorkoutNote, CompletedWorkout, Exercise, ExerciseGuidance, ExerciseSetResult, WorkoutClient, WorkoutNotification, WorkoutPreferences, WorkoutProgram, WorkoutRepositorySnapshot, WorkoutScheduleChange } from "./types";
 
@@ -32,8 +33,8 @@ export function createSupabaseWorkoutRepository(){
       supabase.from("workout_exercises").select("*").order("name"),
       supabase.from("workout_programs").select("*").order("created_at"),
       supabase.from("workout_program_days").select("*").order("sort_order"),
-      supabase.from("workout_program_exercises").select("*").order("sort_order"),
-      supabase.from("workout_set_prescriptions").select("*").order("sort_order"),
+      fetchAllPages((from,to)=>supabase.from("workout_program_exercises").select("*").order("sort_order").order("id").range(from,to)),
+      fetchAllPages((from,to)=>supabase.from("workout_set_prescriptions").select("*").order("sort_order").order("id").range(from,to)),
       supabase.from("workout_assignments").select("*").order("assigned_at"),
       supabase.from("workout_sessions").select("*").in("status",["active","completed"]).order("started_at"),
       supabase.from("workout_session_exercises").select("*").order("sort_order"),

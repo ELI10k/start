@@ -19,12 +19,12 @@ export function NewProgramEditor(){
   return <ProgramEditor draft={draft} setDraft={setDraft} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);if(ok){setMessage("התוכנית נוצרה ונשמרה ב-Supabase.");router.replace("/coach/workouts");router.refresh()}else setMessage("שמירת התוכנית נכשלה.")}} saving={saving} message={message}/>;
 }
 
-export default function CustomProgramEditor({id}:{id:string}){
-  const{getProgram,saveProgram}=useWorkouts(); const existing=getProgram(id); const[draft,setDraft]=useState<WorkoutProgram|undefined>(existing); const[saving,setSaving]=useState(false);const[message,setMessage]=useState("");
+export default function CustomProgramEditor({id,clientId,assignmentId}:{id:string;clientId?:string;assignmentId?:string}){
+  const{getProgram,saveProgram,snapshot}=useWorkouts(); const existing=getProgram(id); const assignment=snapshot.assignments.find((item)=>item.id===assignmentId&&item.clientId===clientId&&item.programId===id);const client=assignment?snapshot.clients.find((item)=>item.id===assignment.clientId):undefined;const[draft,setDraft]=useState<WorkoutProgram|undefined>(existing); const[saving,setSaving]=useState(false);const[message,setMessage]=useState("");
   // The approved programmes used to be excluded here, which is what left a coach
   // with no way to add, remove, reorder or replace an exercise in one of them.
   if(!draft)return null;
-  return <ProgramEditor draft={draft} setDraft={setDraft} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?"השינויים נשמרו ב-Supabase.":"שמירת התוכנית נכשלה. אם הוסר תרגיל או יום שכבר בוצע על ידי לקוח, יש להחזיר אותו - היסטוריית האימונים מוצמדת אליו.")}} saving={saving} message={message}/>;
+  return <ProgramEditor draft={draft} setDraft={setDraft} context={client?{clientId:client.id,clientName:client.fullName}:undefined} onSave={async()=>{setSaving(true);setMessage("");const ok=await saveProgram({...draft,name:draft.name.trim(),days:normalizeDays(draft.days)});setSaving(false);setMessage(ok?(client?`השינויים נשמרו ונטענו מחדש בתוכנית הפעילה של ${client.fullName}.`:"השינויים נשמרו ונטענו מחדש מ-Supabase."):"שמירת התוכנית נכשלה. השינויים לא אושרו כשמורים; יש לרענן ולנסות שוב.")}} saving={saving} message={message}/>;
 }
 
 // Where a dragged exercise came from. Held in state rather than in the drag
@@ -32,8 +32,9 @@ export default function CustomProgramEditor({id}:{id:string}){
 // drop target needs to know the source to decide whether it is a no-op.
 type DragOrigin = Readonly<{ dayId: string; exerciseId: string }>;
 
-function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProgram;setDraft:(program:WorkoutProgram)=>void;onSave:()=>Promise<void>;saving:boolean;message:string}){
+function ProgramEditor({draft,setDraft,onSave,saving,message,context}:{draft:WorkoutProgram;setDraft:(program:WorkoutProgram)=>void;onSave:()=>Promise<void>;saving:boolean;message:string;context?:{clientId:string;clientName:string}}){
  const{snapshot}=useWorkouts();
+ const router=useRouter();
  const[query,setQuery]=useState("");
  const[dragging,setDragging]=useState<DragOrigin|null>(null);
  const[replacing,setReplacing]=useState<DragOrigin|null>(null);
@@ -128,6 +129,7 @@ function ProgramEditor({draft,setDraft,onSave,saving,message}:{draft:WorkoutProg
  };
 
  return <main id="program-editor" className="client-app-content scroll-mt-6">
+  {context&&<div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#16A34A]/30 bg-[#F0FDF4] p-4"><div><strong className="block text-[#15803D]">עריכת התוכנית של {context.clientName}</strong><span className="text-sm text-[#3F433F]">השמירה מעדכנת את התוכנית שכבר משויכת ללקוח וטוענת אותה מחדש מהשרת. אין צורך לשייך אותה מחדש.</span></div><button type="button" onClick={()=>router.push(`/coach/clients/${context.clientId}?tab=workouts`)} className="chip">חזרה ללקוח</button></div>}
   <div className="flex flex-wrap items-center justify-between gap-4">
     <div>
       <p className="text-xs font-black tracking-widest text-[#16A34A]">תוכנית אימונים</p>

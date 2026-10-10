@@ -452,8 +452,8 @@ export default async function CoachClientPage({ params, searchParams }: { params
             </dl>
             {entry.assignment.coach_note && <p className="mt-3 text-sm text-[#5B5F5B]">{entry.assignment.coach_note}</p>}
             {entry.program && <div className="mt-3 flex flex-wrap gap-2">
-              <Link href={`/coach/workouts/${entry.program.id}`} className="chip">פתיחת התוכנית</Link>
-              <Link href={`/coach/workouts/${entry.program.id}#program-editor`} className="chip">עריכת התוכנית</Link>
+              <Link href={`/coach/workouts/${entry.program.id}?clientId=${id}&assignmentId=${entry.assignment.id}`} className="chip">פתיחת התוכנית</Link>
+              <Link href={`/coach/workouts/${entry.program.id}?clientId=${id}&assignmentId=${entry.assignment.id}#program-editor`} className="chip">עריכת התוכנית</Link>
               {entry.days.map((day) => <Link key={day.id} href={`/coach/workouts/${entry.program!.id}/days/${day.id}`} className="chip">{day.name}</Link>)}
             </div>}
           </article>)}
