@@ -30,7 +30,7 @@ export default function DashboardWorkoutWidget() {
         <span role="alert" className="quick-action-card__meta quick-action-card__meta--error">שגיאה בטעינה</span>
       ) : (
         <span className="quick-action-card__meta">
-          {active ? "המשך אימון פעיל" : availability?.status==="recovery"?"יום התאוששות":availability?.day?.name ?? (program ? "✓ השבוע הושלם" : "אין תוכנית פעילה")}
+          {active ? "המשך אימון פעיל" : availability?.status==="recovery"?"יום התאוששות":availability?.day?.name ?? (program ? "✅ השבוע הושלם" : "אין תוכנית פעילה")}
         </span>
       )}
     </Link>
