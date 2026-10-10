@@ -242,7 +242,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               const standing = chosen ? [chosen] : group.items.filter((item) => item.itemRole === "primary");
               const items = standing.length ? standing : group.items.slice(0, 1);
               return sum + items.reduce((groupSum, item) => groupSum + (item.calories ?? 0), 0);
-            }, meal.freeCalorieTarget ?? 0));
+            }, meal.groups.length ? 0 : (meal.freeCalorieTarget ?? 0)));
             const mealLogs = logged.filter((entry) => entry.mealId === meal.id);
             const measuredMealLogs = mealLogs.filter((entry) => entry.calories !== null);
             const loggedMealCalories = Math.round(measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0));
@@ -300,7 +300,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
                   unmeasured={mine.length-measured.length}
                 />;
-              })():<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
+              })():null}
+              {meal.groups.length?<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
                 {meal.groups.map(group=><fieldset key={group.id} className="min-w-0 rounded-2xl border border-[#E5E7E5] p-3 sm:p-4"><legend className="px-2 font-black">{groupLabel(group.type)}</legend><p className="text-xs text-[#5B5F5B]">בחר אפשרות אחת מתוך {group.items.length}. לחיצה נוספת מבטלת בחירה.</p><div className="mt-3 space-y-1">{group.items.map(item=><form key={item.id} action={selectMealGroupAlternative}>
                     <input type="hidden" name="groupId" value={group.id}/><input type="hidden" name="mealId" value={meal.id}/><input type="hidden" name="itemId" value={item.id}/><input type="hidden" name="date" value={today}/><input type="hidden" name="selected" value={group.selectedItemId===item.id?"true":"false"}/>
                     <MealOptionButton
@@ -322,8 +323,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                     current={group.amountOverride}
                   />:null})()}
                   <MealGroupSubstitution mealId={meal.id} date={today} groupLabel={groupLabel(group.type)} groupType={group.type} foods={pickableFoods}/>
-                  </fieldset>)}
-              </div>}
+                  </fieldset>)}</div>:null}
               </div>
             </MealCard>
             {meal.id === outsideMenuAfterMealId ? outsideMenuSection : null}

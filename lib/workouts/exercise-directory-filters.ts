@@ -1,6 +1,6 @@
 import type { Exercise } from "./types.ts";
 
-export const EXERCISE_CATEGORIES = ["משקולות", "מכונות", "משקל גוף", "TRX"] as const;
+export const EXERCISE_CATEGORIES = ["משקולות", "מכונות", "משקל גוף", "TRX", "חימום לפני אימון"] as const;
 export type ExerciseCategoryFilter = (typeof EXERCISE_CATEGORIES)[number];
 
 export const EXERCISE_DIFFICULTIES = [

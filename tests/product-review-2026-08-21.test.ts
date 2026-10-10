@@ -59,6 +59,12 @@ test("measured food in a free-calorie window counts only what was eaten", () => 
   assert.equal(addTotals(eatenFromMenu([free], () => 110), { calories: 110, protein: 6, carbs: 8, fat: 6 }).calories, 110);
 });
 
+test("a prescribed choice in a free-calorie window replaces rather than adds to the allowance", () => {
+  const free = meal({ id: "free", status: "eaten", freeCalorieTarget: 300 });
+  assert.equal(eatenFromMenu([free]).calories, 300);
+  assert.equal(remainingInMenu([meal({ id: "free", freeCalorieTarget: 300 })]).calories, 300);
+});
+
 test("logged food joins the day's totals, and the unmeasured part does not", () => {
   const logged: LoggedFood[] = [
     { id: "1", mealId: null, name: "שוקו", quantity: 250, unit: "מ״ל", calories: 180, protein: 6, carbs: 24, fat: 5, source: "scan", photoUrl: null },
