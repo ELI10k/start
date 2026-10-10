@@ -175,7 +175,7 @@ export default async function Home() {
           <Link href="/progress" className="quick-action-card">
             <span className="quick-action-card__icon"><LineChart aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">מדדי התקדמות</span>
-            <span className="quick-action-card__meta">משקל ומדידות</span>
+            <span className="quick-action-card__meta">משקל, מדידות, צעדים ושינה</span>
           </Link>
         </nav>
 
