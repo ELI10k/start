@@ -8,15 +8,14 @@ import { getCoachAttention } from "@/lib/coach-intelligence/proactive-repository
 import { listCoachThreads } from "@/lib/messages/repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import CoachAttentionPanel from "@/components/coach/CoachAttentionPanel";
+import DashboardCheckInActivity from "@/components/coach/DashboardCheckInActivity";
 
 /**
  * The coach's morning screen.
  *
- * It used to open with five counters and eight shortcuts, and put the panel that
- * says which clients are at risk below the check-in list - so the least
- * actionable thing on the page was first and the most actionable was last.
- * "לקוחות: 9" changes no decision; "דנה לא נכנסה שבועיים" does. The order is now
- * what needs doing, then what is waiting, then the counters.
+ * It opens with the coach's shortcuts and practice counters, followed by the
+ * queues and reports that need review. Unanswered client messages remain first
+ * because a client who wrote is already waiting for a person.
  */
 export default async function CoachDashboard() {
   const auth = await getAuthContext();
@@ -51,7 +50,6 @@ export default async function CoachDashboard() {
   // them have not even been read yet.
   const waitingThreads = threads.filter((thread) => thread.awaitingReply);
   const pendingCheckIns = checkIns.newCount + checkIns.respondedCount;
-  const openCheckIns = checkIns.recent.filter((item) => !item.handled_at);
 
   return <main className="px-4 py-10 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-7xl">
@@ -89,6 +87,23 @@ export default async function CoachDashboard() {
         </div>
       </section>}
 
+      <section data-dashboard-section="quick-actions" className="mt-8">
+        <h2 className="sr-only">פעולות מהירות</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
+          <Quick href="/coach/menus/new" label="תפריט חדש"/>
+          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
+        </div>
+      </section>
+
+      <section data-dashboard-section="practice-metrics" className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
+        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
+        <Metric href="/coach/check-ins?status=new" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
+        <Metric href="/coach/check-ins" label="ממתינים לטיפול" value={pendingCheckIns}/>
+        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
+      </section>
+
       <CoachAttentionPanel items={attention.items} measured={attention.measured}/>
 
       {/* Only when the last fortnight actually asked for something. A quiet week
@@ -106,52 +121,9 @@ export default async function CoachDashboard() {
         </div>
       </section>}
 
-      <section className="mt-6 rounded-[26px] border border-[#E5E7E5] bg-[#FFFFFF] p-5">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-black">צ׳ק־אינים אחרונים</h2>
-            <p className="mt-1 text-xs text-[#5B5F5B]">עדכונים חדשים דורשים מעבר ותגובה.</p>
-          </div>
-          <Link href="/coach/check-ins" className="text-sm font-bold text-[#16A34A]">לכל הצ׳ק־אינים</Link>
-        </div>
-        {openCheckIns.length
-          ? <div className="mt-4 grid gap-2">
-              {openCheckIns.map((item) =>
-                <Link key={item.id} href={`/coach/check-ins#check-in-${item.id}`} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[#F7F8F7] p-3 text-sm">
-                  <span>
-                    <strong>{item.client?.full_name ?? "לקוח"}</strong>
-                    <span className="mr-2 text-[#5B5F5B]">{new Date(item.submitted_at).toLocaleDateString("he-IL",{timeZone:"Asia/Jerusalem"})}</span>
-                  </span>
-                  <span className="text-[#0B0B0B]">
-                    {item.status === "reviewed" ? "נענתה — ממתין לטיפול" : "חדש"}
-                  </span>
-                </Link>)}
-            </div>
-          : <p className="mt-4 rounded-xl border border-dashed border-[#E5E7E5] p-8 text-center text-[#5B5F5B]">אין צ׳ק־אינים להצגה.</p>}
-      </section>
+      <DashboardCheckInActivity items={checkIns.recent}/>
 
       <DashboardWorkoutActivity handledIds={(handledWorkouts.data??[]).map((row)=>row.workout_session_id)}/>
-
-      {/* Three shortcuts, not eight. The other five were all reachable from the
-          navigation directly above them. */}
-      <section className="mt-8">
-        <h2 className="sr-only">פעולות מהירות</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <Quick href="/coach/clients/new" label="לקוח חדש" primary/>
-          <Quick href="/coach/menus/new" label="תפריט חדש"/>
-          <Quick href="/coach/check-ins/review" label="מעבר על צ׳ק־אינים"/>
-        </div>
-      </section>
-
-      {/* The counters last: they describe the practice, they do not ask for
-          anything. */}
-      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <Metric href="/coach/clients" label="לקוחות פעילים" value={clients.length}/>
-        <Metric href="/coach/menus" label="תפריטים" value={menus.length}/>
-        <Metric href="/coach/check-ins?status=new" label="צ׳ק־אינים חדשים" value={checkIns.newCount}/>
-        <Metric href="/coach/check-ins" label="ממתינים לטיפול" value={pendingCheckIns}/>
-        <Metric href="/coach/notifications" label="התראות פתוחות" value={unreadNotifications}/>
-      </section>
     </div>
   </main>;
 }
