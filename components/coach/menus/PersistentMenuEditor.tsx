@@ -414,7 +414,21 @@ export default function PersistentMenuEditor({initial,foods,clients,initialUsage
     const calculated=selectedFood&&referenceFood&&referenceAmount
       ?calculateAlternativePortion(referenceFood,referenceAmount,selectedFood,group.type,referenceMode)
       :null;
-    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items:value.items.map((item,index)=>index===itemIndex?{...item,foodId,amount:calculated?.quantity??(selectedFood&&!item.foodId?defaultPortionQuantity(selectedFood):item.amount),amountSource:calculated?"auto":item.amountSource,unitMode:"native" as const}:item)}:value)});
+    const nextAmount=calculated?.quantity??(selectedFood&&!current?.foodId?defaultPortionQuantity(selectedFood):current?.amount??100);
+    const items=group.items.map((item,index)=>{
+      if(index===itemIndex)return{...item,foodId,amount:nextAmount,amountSource:calculated?"auto" as const:item.amountSource,unitMode:"native" as const};
+      // Replacing the primary changes the reference portion just as surely as
+      // editing its number does. Recalculate every generated alternative from
+      // the new food and portion, but preserve quantities the coach set by hand.
+      if(!targetIsPrimary||!selectedFood||!nextAmount)return item;
+      const isPrimary=item.primary??index===0;
+      if(isPrimary||item.amountSource!=="auto")return item;
+      const alternativeFood=foodMap.get(item.foodId);
+      if(!alternativeFood)return item;
+      const portion=calculateAlternativePortion(selectedFood,nextAmount,alternativeFood,group.type,"native");
+      return portion?{...item,amount:portion.quantity,unitMode:"native" as const}:item;
+    });
+    updateMeal(mealIndex,{...meal,groups:meal.groups.map((value,g)=>g===groupIndex?{...value,items}:value)});
     if(!foodId)return;
     const now=new Date().toISOString();
     // Carry the existing opinion forward rather than inventing "not a favourite":
