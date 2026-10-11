@@ -68,6 +68,21 @@ export function mealStanding(meal: IntakeMeal): readonly Item[] {
   });
 }
 
+/**
+ * What the client actually chose to eat from a planned meal.
+ *
+ * `mealStanding` deliberately fills an unanswered group with its primary item
+ * so the open plan can still say what remains. That fallback is not intake.
+ * Once a meal is marked eaten, a group with no selection means none of that
+ * group was eaten (including when a selection is cleared after the mark).
+ */
+export function mealIntake(meal: IntakeMeal): readonly Item[] {
+  return meal.groups.flatMap((group) => {
+    const chosen = group.items.find((item) => item.id === group.selectedItemId);
+    return chosen ? [chosen] : [];
+  });
+}
+
 export const addTotals = (a: IntakeTotals, b: IntakeTotals): IntakeTotals => ({
   calories: a.calories + b.calories,
   protein: a.protein + b.protein,
@@ -123,7 +138,7 @@ export const eatenFromMenu = (
   loggedCaloriesIn?: (mealId: string | undefined) => number,
 ): IntakeTotals =>
   addTotals(
-    sumItems(meals.filter(isMealEaten).flatMap(mealStanding)),
+    sumItems(meals.filter(isMealEaten).flatMap(mealIntake)),
     freeCalorieIntake(meals, loggedCaloriesIn),
   );
 
