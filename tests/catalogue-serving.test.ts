@@ -112,3 +112,21 @@ test("the pastry cream dessert displays its full 150 gram unit", () => {
     servingLabel: "יחידה 150 גרם",
   });
 });
+
+test("Hot Pop reduced-fat popcorn displays one 85 gram bag", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 356.470588,
+    protein: 10,
+    carbs: 55.058824,
+    fat: 8,
+    packageUnit: "שקית",
+    unitWeightGrams: 85,
+    servingLabel: "שקית 85 גרם",
+  }), {
+    calories: 303,
+    protein: 8.5,
+    carbs: 46.8,
+    fat: 6.8,
+    servingLabel: "שקית 85 גרם",
+  });
+});
