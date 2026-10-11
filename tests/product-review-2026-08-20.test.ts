@@ -647,7 +647,7 @@ test("the day opens one meal at a time", async () => {
   // And which one starts open is still the meal that is due now.
   assert.match(page, /defaultOpen=\{isNow\}/);
   // The closed row has to carry enough to decide whether to open it.
-  assert.match(page, /const mealCalories = meal\.status === "other"/);
+  assert.match(page, /const mealCalories = meal\.freeCalorieTarget && measuredMealLogs\.length > 0 \? loggedMealCalories : menuMealCalories \+ loggedMealCalories/);
   assert.match(page, /const calorieLabel =/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);

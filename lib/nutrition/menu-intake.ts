@@ -138,7 +138,10 @@ export const eatenFromMenu = (
   loggedCaloriesIn?: (mealId: string | undefined) => number,
 ): IntakeTotals =>
   addTotals(
-    sumItems(meals.filter(isMealEaten).flatMap(mealIntake)),
+    // "Something else" can replace one group while the client still eats
+    // explicitly selected foods from the rest of the meal. The external food
+    // is added by the food log; the choices remain real intake of their own.
+    sumItems(meals.filter(isMealReportedEaten).flatMap(mealIntake)),
     freeCalorieIntake(meals, loggedCaloriesIn),
   );
 
