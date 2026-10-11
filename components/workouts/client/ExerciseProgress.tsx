@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { BarChart3, ChevronDown, TrendingDown, TrendingUp } from "lucide-react";
 import { useWorkouts } from "@/components/workouts/WorkoutProvider";
 import { exercisePerformance } from "@/lib/workouts/progress";
+import { nextWorkoutChallenge } from "@/lib/workouts/challenge";
 import type { ExerciseSetResult } from "@/lib/workouts/types";
 
 type Metric = "weight" | "volume" | "reps";
@@ -19,7 +20,6 @@ const topReps=(session?:Session)=>Math.max(0,...completedSets(session?.sets??[])
 const repSignature=(session?:Session)=>completedSets(session?.sets??[]).map((set)=>set.repetitions??0).join("-");
 const metricValue=(session:Session,metric:Metric)=>metric==="volume"?session.volume:metric==="reps"?topReps(session):topWeight(session);
 const signedPercent=(current:number,previous:number)=>previous>0?Math.round((current-previous)/previous*100):0;
-const roundToPlate=(value:number)=>Math.round(value/2.5)*2.5;
 
 export default function ExerciseProgress(){
   const{snapshot,currentClientId,getExercise}=useWorkouts();
@@ -48,8 +48,12 @@ export default function ExerciseProgress(){
   const weightChange=comparablePrevious?signedPercent(latestWeight,topWeight(comparablePrevious)):0;
   const latestWorkout=latest?snapshot.completedWorkouts.find((item)=>item.id===latest.workoutId):undefined;
   const exerciseResult=latestWorkout?.exerciseResults.find((item)=>item.exerciseId===selected);
-  const increase=exerciseResult?.difficulty==="easy"?5:latestWorkout?.perceivedDifficulty&&latestWorkout.perceivedDifficulty<=2?5:latestWorkout?.perceivedDifficulty===3?2.5:0;
-  const challengeWeight=latestWeight?roundToPlate(latestWeight*(1+increase/100)):0;
+  const previousWorkout=comparablePrevious?snapshot.completedWorkouts.find((item)=>item.id===comparablePrevious.workoutId):undefined;
+  const previousResult=previousWorkout?.exerciseResults.find((item)=>item.exerciseId===selected);
+  const sameLoads=Boolean(latest&&comparablePrevious&&latest.sets.length===comparablePrevious.sets.length&&latest.sets.every((set,index)=>(set.weightKg??0)===(comparablePrevious.sets[index]?.weightKg??0)));
+  const successfulExposures=exerciseResult?.difficulty==="easy"&&previousResult?.difficulty==="easy"&&sameLoads?2:0;
+  const challenge=latest?nextWorkoutChallenge({sets:latest.sets,difficulty:exerciseResult?.difficulty,successfulExposures,exerciseName:getExercise(selected)?.name,equipment:getExercise(selected)?.equipment,deload:latestWorkout?.trainingMode==="deload",fatigued:(latestWorkout?.perceivedDifficulty??0)>=4||(latestWorkout?.energy??5)<=2||(latestWorkout?.sleepHours??8)<6}):null;
+  const challengeWeight=challenge?.weightKg??0;
 
   return <main className="px-4 py-8 text-[#0B0B0B]"><div className="mx-auto max-w-4xl">
     <header>
@@ -78,7 +82,7 @@ export default function ExerciseProgress(){
         <div className="flex items-start gap-3"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-xl" aria-hidden="true">💪</span><div>
           <p className="text-xs font-bold text-[#15803D]">האתגר באימון הבא</p>
           <h3 className="mt-1 text-xl font-black">{challengeWeight&&latestReps?`${number.format(challengeWeight)} ק״ג × ${latestReps}`:"להשלים ביצוע נוסף"}</h3>
-          <p className="mt-1 text-sm text-[#3F433F]">{increase>0?`המלצה לעלייה של ${increase}% לפי רמת הקושי שסומנה.`:"לשמור על המשקל ולנסות ביצוע נקי ויציב יותר."}</p>
+          <p className="mt-1 text-sm text-[#3F433F]">{challenge?.reason??"להשלים ביצוע נוסף לפני שינוי העומס."}</p>
         </div></div>
       </section>
 

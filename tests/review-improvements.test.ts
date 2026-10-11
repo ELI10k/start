@@ -400,16 +400,22 @@ test("the workout report reads off what was recorded, and never fills space", as
   const set = (id: string, weightKg: number, completed = true) =>
     ({ id, order: 0, completed, weightKg, repetitions: 10 });
 
-  // Every set completed at last session's weight is the one thing a report
-  // should always say: you are ready for more.
+  // Completing the same weight once is maintenance, not automatic permission
+  // to add load. Two easy, successful exposures are required.
   const ready = buildWorkoutReport({
     durationSeconds: 600,
     exercises: [{ name: "לחיצת חזה", restSeconds: 60, skipped: false,
-      sets: [set("a", 60), set("b", 60)], previousSets: [set("x", 60)] }],
+      sets: [set("a", 60), set("b", 60)], previousSets: [set("x", 60),set("y",60)], difficulty:"easy",previousDifficulty:"easy",targetReps:10 }],
   });
-  // Named per exercise, because a report that lists four exercises has to say
-  // which one is ready.
-  assert.ok(ready.some((item) => item.title === "לחיצת חזה · אפשר לעלות"));
+  assert.ok(ready.some((item) => item.title === "לחיצת חזה · אפשר לנסות עלייה קטנה"));
+
+  const hard = buildWorkoutReport({durationSeconds:600,exercises:[{name:"לחיצת חזה",restSeconds:60,skipped:false,sets:[set("a",60),set("b",60)],previousSets:[set("x",60),set("y",60)],difficulty:"hard",previousDifficulty:"easy",targetReps:10}]});
+  assert.ok(hard.some((item)=>item.title.includes("היה קשה")));
+  assert.ok(hard.every((item)=>!item.title.includes("אפשר לנסות עלייה")));
+
+  const deload = buildWorkoutReport({durationSeconds:600,deload:true,exercises:[{name:"לחיצת חזה",restSeconds:60,skipped:false,sets:[set("a",60),set("b",60)],previousSets:[set("x",60),set("y",60)],difficulty:"easy",previousDifficulty:"easy",targetReps:10}]});
+  assert.ok(deload.some((item)=>item.title==="אימון התאוששות"));
+  assert.ok(deload.every((item)=>!item.title.includes("אפשר לנסות עלייה")));
 
   // Beating it is praised, with both numbers.
   const improved = buildWorkoutReport({

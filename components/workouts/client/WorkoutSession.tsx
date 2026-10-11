@@ -69,9 +69,9 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   // workout - the most repeated keystrokes in the product. The last session's
   // figures are now in the boxes; completing a set is still an explicit tap, so
   // nothing is recorded that the client did not confirm.
-  const makeSession=(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3):ActiveWorkoutSession=>({
+  const makeSession=(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3,deload=false):ActiveWorkoutSession=>({
     id:`session-${currentClientId}-${Date.now()}`,clientId:currentClientId,assignmentId:assignment?.id??"",programId,dayId,
-    startedAt:new Date().toISOString(),currentExerciseIndex:0,sleepHours:startingSleepHours,energy:startingEnergy,
+    startedAt:new Date().toISOString(),currentExerciseIndex:0,sleepHours:startingSleepHours,energy:startingEnergy,trainingMode:deload?"deload":"normal",
     exerciseResults:ordered.map((entry):ActiveExerciseResult=>{
       // Compare like with like: workout 1 is based on workout 1 from the
       // previous week, never on workout 2 merely because it happened later.
@@ -88,7 +88,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         })};
     }),
   });
-  const begin=async(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3)=>{if(isStarting)return;if(!assignment){setWarning("לא נמצאה הקצאת תוכנית פעילה.");return}if(anySession&&!session){setWarning("כבר קיים אימון פעיל אחר.");return}const gate=workoutAvailability(program,assignment,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(p=>p.clientId===currentClientId),snapshot.scheduleChanges);if(isProfessionalProgram(program)&&(gate.status!=="ready"||gate.day?.id!==dayId)){setWarning(gate.message||"יש להתחיל את האימון הבא בלוח, לאחר ההתאוששות.");return;}setIsStarting(true);try{if(await startSession(makeSession(startingSleepHours,startingEnergy)))track("workout_started",{exercises:ordered.length,sleepHours:startingSleepHours??null,energy:startingEnergy});else setWarning("לא ניתן להתחיל שני אימונים במקביל.")}finally{setIsStarting(false)}};
+  const begin=async(startingSleepHours?:number,startingEnergy:1|2|3|4|5=3,deload=false)=>{if(isStarting)return;if(!assignment){setWarning("לא נמצאה הקצאת תוכנית פעילה.");return}if(anySession&&!session){setWarning("כבר קיים אימון פעיל אחר.");return}const gate=workoutAvailability(program,assignment,snapshot.completedWorkouts,israelDateKey(),snapshot.workoutPreferences.find(p=>p.clientId===currentClientId),snapshot.scheduleChanges);if(isProfessionalProgram(program)&&(gate.status!=="ready"||gate.day?.id!==dayId)){setWarning(gate.message||"יש להתחיל את האימון הבא בלוח, לאחר ההתאוששות.");return;}setIsStarting(true);try{if(await startSession(makeSession(startingSleepHours,startingEnergy,deload)))track("workout_started",{exercises:ordered.length,sleepHours:startingSleepHours??null,energy:startingEnergy,deload});else setWarning("לא ניתן להתחיל שני אימונים במקביל.")}finally{setIsStarting(false)}};
   if(saved){
     // Assembled here because only this scope holds both the programme's
     // prescriptions and each exercise's history.
@@ -100,6 +100,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       // "previous" is the one before it.
       const history=exercisePerformance(snapshot.completedWorkouts,currentClientId,performed).sessions
         .filter((session)=>session.workoutId!==saved.id);
+      const previousWorkout=history[0]?snapshot.completedWorkouts.find((workout)=>workout.id===history[0].workoutId):undefined;
+      const previousResult=previousWorkout?.exerciseResults.find((result)=>(result.performedExerciseId??result.exerciseId)===performed);
       return{
         name:getExercise(performed)?.name??"תרגיל",
         restSeconds,
@@ -108,6 +110,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
         skipped:entry.skipped,
         completed:entry.completed,
         difficulty:entry.difficulty,
+        previousDifficulty:previousResult?.difficulty,
+        targetReps:targetRepetitions(prescription?.reps),
       };
     });
     return <Finished workout={saved} insights={buildWorkoutReport({
@@ -115,6 +119,8 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
       exercises:reportExercises,
       sleepHours:saved.sleepHours,
       perceivedDifficulty:saved.perceivedDifficulty,
+      energy:saved.energy,
+      deload:saved.trainingMode==="deload",
     })}/>;
   }
   if(!session)return <Start program={program.name} day={day.name} count={ordered.length} warning={warning} onStart={begin} starting={isStarting} programId={programId}/>;
@@ -149,7 +155,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
   const priorEntries=performance.sessions.slice(0,2).map(history=>comparableWorkouts.find(w=>w.id===history.workoutId)?.exerciseResults.find(e=>(e.performedExerciseId??e.exerciseId)===performedId));
   const sameLoad=priorEntries.length===2&&priorEntries[0]?.sets.every((s,i)=>s.weightKg===priorEntries[1]?.sets[i]?.weightKg);
   const successfulExposures=repTarget!==undefined&&sameLoad&&priorEntries.every(e=>e?.difficulty==="easy"&&e.sets.length===setCount(current.sets)&&e.sets.every(s=>s.completed&&(s.repetitions??0)>=repTarget))?2:0;
-  const challenge=!timed&&previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:professional?priorEntries[0]?.difficulty:result.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment,professional,successfulExposures}):null;
+  const challenge=!timed&&previous?nextWorkoutChallenge({sets:previous.sets,targetReps:repTarget,rpe:Number.parseFloat(current.effort?.match(/\d+(?:\.\d+)?/)?.[0]??"8"),difficulty:priorEntries[0]?.difficulty,exerciseName:exercise?.name,equipment:exercise?.equipment,professional,successfulExposures,deload:session.trainingMode==="deload",fatigued:energy<=2||(sleepHours??8)<6}):null;
   const completedExercises=session.exerciseResults.filter((item)=>item.completed).length;const skipped=session.exerciseResults.filter((item)=>item.skipped).length;const completedSets=session.exerciseResults.filter((item)=>item.completed).flatMap((item)=>item.sets).filter((item)=>item.completed).length;const totalSets=session.exerciseResults.flatMap((item)=>item.sets).length;const elapsed=Math.max(0,Math.floor((now-new Date(session.startedAt).getTime())/1000));const rest=Math.max(0,Math.ceil(((session.restEndsAt?new Date(session.restEndsAt).getTime():0)-now)/1000));
   const persist=(patch:Partial<ActiveWorkoutSession>)=>saveSession({...session,...patch});
   // A replacement has to train the same thing, so the list is the catalogue
@@ -205,7 +211,7 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
     }
     setWarning("");setSummary(true);
   };
-  const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
+  const complete=async()=>{if(isCompleting)return;setIsCompleting(true);try{const completedAt=new Date().toISOString();const workout:CompletedWorkout={id:`workout-${session.id}`,clientId:session.clientId,assignmentId:session.assignmentId,programId,dayId,startedAt:session.startedAt,completedAt,durationSeconds:Math.max(1,Math.floor((Date.now()-new Date(session.startedAt).getTime())/1000)),exerciseResults:session.exerciseResults,workoutNote:session.workoutNote?.trim()||undefined,perceivedDifficulty:difficulty,energy,sleepHours,trainingMode:session.trainingMode,totalVolume:workoutVolume(session.exerciseResults)};if(await completeSession(workout)){track("workout_completed",{durationSeconds:workout.durationSeconds,sets:completedSets,skipped,difficulty,energy,sleepHours:sleepHours??null,deload:session.trainingMode==="deload"});setSaved(workout)}else setWarning("האימון לא נשמר ב-Supabase. יש לנסות שוב.")}finally{setIsCompleting(false)}};
   const exitWithoutSaving=async()=>{if(isAbandoning)return;setIsAbandoning(true);try{if(await cancelSession(currentClientId)){setAbandon(false);router.replace("/workouts");router.refresh()}else{setAbandon(false);setWarning("לא הצלחנו למחוק את האימון הפעיל. נסה שוב.")}}finally{setIsAbandoning(false)}};
   if(summary)return <CompletionForm elapsed={elapsed} exercises={`${completedExercises}/${ordered.length}`} sets={`${completedSets}/${totalSets}`} skipped={skipped} volume={workoutVolume(session.exerciseResults)} note={session.workoutNote??""} setNote={(workoutNote)=>persist({workoutNote})} difficulty={difficulty} setDifficulty={(perceivedDifficulty)=>persist({perceivedDifficulty})} energy={energy} setEnergy={(nextEnergy)=>persist({energy:nextEnergy})} sleepHours={sleepHours} warning={warning||persistenceError} onSave={complete} saving={isCompleting} onBack={()=>setSummary(false)} onExit={()=>{setSummary(false);setAbandon(true)}}/>;
 
@@ -379,11 +385,12 @@ export default function WorkoutSession({programId,dayId}:{programId:string;dayId
 
 // Sleep is synced from the health store here; energy remains the one subjective
 // pre-workout answer. Missing health data never blocks starting a workout.
-function Start({program,day,count,warning,onStart,starting,programId}:{program:string;day:string;count:number;warning:string;onStart:(sleepHours?:number,energy?:1|2|3|4|5)=>void|Promise<void>;starting:boolean;programId:string}){
+function Start({program,day,count,warning,onStart,starting,programId}:{program:string;day:string;count:number;warning:string;onStart:(sleepHours?:number,energy?:1|2|3|4|5,deload?:boolean)=>void|Promise<void>;starting:boolean;programId:string}){
   const repository=useMemo(()=>createHealthRepository(),[]);
   const[sleepHours,setSleepHours]=useState<number|undefined>();
   const[sleepLoading,setSleepLoading]=useState(true);
   const[energy,setEnergy]=useState<1|2|3|4|5>(3);
+  const[deload,setDeload]=useState(false);
   const syncInFlight=useRef(false);
   const syncSleep=useCallback(async()=>{
     if(syncInFlight.current)return;
@@ -418,9 +425,10 @@ function Start({program,day,count,warning,onStart,starting,programId}:{program:s
 
       <div className="mt-6 rounded-2xl bg-[#F7F8F7] p-4 text-sm"><strong className="block">שעות השינה האחרונות</strong><span className="mt-1 block text-[#5B5F5B]">{sleepLoading?"טוענים מנתוני השינה…":sleepHours!==undefined?`${sleepHours} שעות · נקלט אוטומטית מנתוני הבריאות`:"לא נמצאו נתוני שינה מסונכרנים"}</span></div>
       <Rating label="איך רמת האנרגיה שלך עכשיו?" value={energy} onChange={setEnergy}/>
+      <label className="mt-4 flex items-start gap-3 rounded-2xl border border-[#E5E7E5] p-4 text-sm"><input type="checkbox" className="mt-1" checked={deload} onChange={(event)=>setDeload(event.target.checked)}/><span><strong className="block">זה אימון דילואד</strong><span className="mt-1 block text-[#5B5F5B]">המערכת תשבית המלצות לעליית משקל ותמדוד הצלחה לפי ביצוע קל ונקי.</span></span></label>
 
       {warning&&<p role="alert" className="mt-4 rounded-2xl border border-[#DC2626]/30 bg-[#FEF2F2] p-3 text-sm text-[#DC2626]">{warning}</p>}
-      <button onClick={()=>onStart(sleepHours,energy)} disabled={!count||starting} className="premium-primary-button mt-6 w-full">{starting?"מתחילים…":"התחלת אימון"}</button>
+      <button onClick={()=>onStart(sleepHours,energy,deload)} disabled={!count||starting} className="premium-primary-button mt-6 w-full">{starting?"מתחילים…":deload?"התחלת אימון דילואד":"התחלת אימון"}</button>
       <Link href={`/workouts/program/${programId}`} className="premium-secondary-button mt-3 w-full">חזרה לתוכנית</Link>
     </section>
   </main>;

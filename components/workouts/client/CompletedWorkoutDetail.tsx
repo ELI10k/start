@@ -32,9 +32,10 @@ export default function CompletedWorkoutDetail({workoutId,clientId,readOnly=fals
     const prior=previous?.exerciseResults.find((item)=>(item.performedExerciseId??item.exerciseId)===(result.performedExerciseId??result.exerciseId));
     const prescribed=day?.exercises.find((item)=>item.id===result.workoutExerciseId);
     const restMatch=prescribed?.rest?.match(/\d+/)?.[0];
-    return{name:exercise?.name??"תרגיל",restSeconds:restMatch?Number(restMatch):null,sets:result.sets,previousSets:prior?.sets??[],skipped:result.skipped,completed:result.completed,difficulty:result.difficulty};
+    const targetReps=Number.parseInt(prescribed?.reps??"",10);
+    return{name:exercise?.name??"תרגיל",restSeconds:restMatch?Number(restMatch):null,sets:result.sets,previousSets:prior?.sets??[],skipped:result.skipped,completed:result.completed,difficulty:result.difficulty,previousDifficulty:prior?.difficulty,targetReps:Number.isFinite(targetReps)?targetReps:undefined};
   });
-  const insights=buildWorkoutReport({durationSeconds:shown.durationSeconds,exercises:reportExercises,sleepHours:shown.sleepHours,perceivedDifficulty:shown.perceivedDifficulty});
+  const insights=buildWorkoutReport({durationSeconds:shown.durationSeconds,exercises:reportExercises,sleepHours:shown.sleepHours,perceivedDifficulty:shown.perceivedDifficulty,energy:shown.energy,deload:shown.trainingMode==="deload"});
 
   const patchSet=(workoutExerciseId:string,setId:string,value:{weightKg?:number;repetitions?:number})=>{
     if(!draft)return;
