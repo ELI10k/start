@@ -17,9 +17,10 @@ export type ExerciseSetResult = Readonly<{ id: string; prescriptionId?: string; 
 // performedExerciseId is what the client actually did when the machine was taken
 // and they swapped for an equivalent. Absent means "as prescribed".
 export type ExerciseDifficulty = "easy" | "medium" | "hard";
+export type WorkoutTrainingMode = "normal" | "deload";
 export type ActiveExerciseResult = Readonly<{ workoutExerciseId: string; exerciseId: string; performedExerciseId?: string; skipped: boolean; completed: boolean; difficulty?: ExerciseDifficulty; warmupCompletedPercents?: readonly number[]; sets: readonly ExerciseSetResult[] }>;
-export type ActiveWorkoutSession = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; currentExerciseIndex: number; restEndsAt?: string; workoutNote?: string; perceivedDifficulty?:1|2|3|4|5; energy?:1|2|3|4|5; sleepHours?: number; exerciseResults: readonly ActiveExerciseResult[] }>;
-export type CompletedWorkout = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; completedAt: string; durationSeconds: number; exerciseResults: readonly ActiveExerciseResult[]; workoutNote?: string; perceivedDifficulty?: 1|2|3|4|5; energy?: 1|2|3|4|5; sleepHours?: number; totalVolume: number }>;
+export type ActiveWorkoutSession = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; currentExerciseIndex: number; restEndsAt?: string; workoutNote?: string; perceivedDifficulty?:1|2|3|4|5; energy?:1|2|3|4|5; sleepHours?: number; trainingMode?:WorkoutTrainingMode; exerciseResults: readonly ActiveExerciseResult[] }>;
+export type CompletedWorkout = Readonly<{ id: string; clientId: string; assignmentId: string; programId: string; dayId: string; startedAt: string; completedAt: string; durationSeconds: number; exerciseResults: readonly ActiveExerciseResult[]; workoutNote?: string; perceivedDifficulty?: 1|2|3|4|5; energy?: 1|2|3|4|5; sleepHours?: number; trainingMode?:WorkoutTrainingMode; totalVolume: number }>;
 export type WorkoutHistoryEntry = CompletedWorkout;
 export type ExercisePerformanceHistory = Readonly<{ exerciseId: string; sessions: readonly { workoutId: string; date: string; sets: readonly ExerciseSetResult[]; volume: number }[] }>;
 export type CoachWorkoutNote = Readonly<{ id: string; coachId: string; clientId: string; exerciseId?: string; workoutId?: string; body: string; createdAt: string }>;
