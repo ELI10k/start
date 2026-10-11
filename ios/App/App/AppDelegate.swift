@@ -7,6 +7,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // Workout inputs stay focused while the phone is being moved or put down.
+        // Treating that motion as an edit gesture opens iOS's system Undo alert
+        // over the active workout, so disable Shake to Undo for this app.
+        application.applicationSupportsShakeToEdit = false
         return true
     }
 
