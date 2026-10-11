@@ -26,7 +26,7 @@ import LoggedFoodList from "@/components/client/LoggedFoodList";
 import FreeCalorieMeal from "@/components/client/FreeCalorieMeal";
 import OutsideMenuFood from "@/components/client/OutsideMenuFood";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
-import { addTotals, eatenFromMenu, isMealEaten, mealIntake, mealStanding, remainingInMenu, sumItems } from "@/lib/nutrition/menu-intake";
+import { addTotals, eatenFromMenu, isMealEaten, isMealReportedEaten, mealIntake, mealStanding, remainingInMenu, sumItems } from "@/lib/nutrition/menu-intake";
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
@@ -239,16 +239,20 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             // Reusing the same helpers as the day total keeps the card and the
             // headline from disagreeing when a choice is cleared after marking.
             const menuMealCalories = Math.round(sumItems(
-              isMealEaten(meal) ? mealIntake(meal) : mealStanding(meal),
+              isMealReportedEaten(meal) ? mealIntake(meal) : mealStanding(meal),
             ).calories + (meal.groups.length ? 0 : (meal.freeCalorieTarget ?? 0)));
             const mealLogs = logged.filter((entry) => entry.mealId === meal.id);
             const measuredMealLogs = mealLogs.filter((entry) => entry.calories !== null);
             const loggedMealCalories = Math.round(measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0));
-            const mealCalories = meal.status === "other" || (meal.freeCalorieTarget && measuredMealLogs.length > 0) ? loggedMealCalories : menuMealCalories + loggedMealCalories;
+            const mealCalories = meal.freeCalorieTarget && measuredMealLogs.length > 0 ? loggedMealCalories : menuMealCalories + loggedMealCalories;
             const calorieLabel = meal.status === "other" && mealLogs.length > 0 && measuredMealLogs.length === 0
-              ? "קלוריות לא נמדדו"
+              ? menuMealCalories > 0
+                ? `${menuMealCalories} קל׳ מהבחירות · הרישום החלופי לא נמדד`
+                : "קלוריות לא נמדדו"
               : meal.status === "other"
-                ? `${mealCalories} קל׳ מהרישום החלופי`
+                ? menuMealCalories > 0
+                  ? `${mealCalories} קל׳ מהבחירות ומהרישום החלופי`
+                  : `${mealCalories} קל׳ מהרישום החלופי`
                 : isMealEaten(meal)
                   ? `${mealCalories} קל׳ מהבחירות שסומנו`
                   : `${mealCalories} קל׳`;

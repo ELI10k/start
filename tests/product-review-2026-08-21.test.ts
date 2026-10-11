@@ -70,6 +70,20 @@ test("a meal that was answered is neither eaten nor still to come", () => {
   assert.equal(remainingInMenu(day).calories, 300);
 });
 
+test("an off-plan food adds to explicit choices without reviving unchosen groups", () => {
+  const breakfast = meal({
+    status: "other",
+    groups: [
+      { items: [item("protein", 140)] },
+      { items: [item("dates", 165)], selectedItemId: "dates" },
+    ],
+  });
+  const loggedAlternative = { calories: 110.3, protein: 12.6, carbs: 8.9, fat: 2.6 };
+
+  assert.deepEqual(mealIntake(breakfast).map((row) => row.id), ["dates"]);
+  assert.equal(addTotals(eatenFromMenu([breakfast]), loggedAlternative).calories, 275.3);
+});
+
 test("measured food in a free-calorie window counts only what was eaten", () => {
   const free = meal({ id: "free", status: "eaten", freeCalorieTarget: 300, groups: [] });
   assert.equal(eatenFromMenu([free], () => 110).calories, 0);
