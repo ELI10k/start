@@ -7,6 +7,7 @@ import {
   eatenFromMenu,
   isMealAnswered,
   isMealEaten,
+  mealIntake,
   mealStanding,
   remainingInMenu,
   sumItems,
@@ -34,6 +35,22 @@ test("a meal stands at its chosen alternative, and at the primary before a choic
   // Chosen wins even when it is an alternative - that is what choosing it means.
   const chosenAlternative = meal({ groups: [{ items: [item("a", 300), item("b", 200, "alternative")], selectedItemId: "b" }] });
   assert.deepEqual(mealStanding(chosenAlternative).map((row) => row.id), ["b"]);
+});
+
+test("eaten intake never invents a primary for an unchosen group", () => {
+  const partiallyChosen = meal({
+    status: "eaten",
+    groups: [
+      { items: [item("protein", 399)], selectedItemId: "protein" },
+      { items: [item("vegetables", 150)] },
+    ],
+  });
+
+  // The open plan still shows both groups, but the eaten total contains only
+  // the choice the client actually made.
+  assert.deepEqual(mealStanding(partiallyChosen).map((row) => row.id), ["protein", "vegetables"]);
+  assert.deepEqual(mealIntake(partiallyChosen).map((row) => row.id), ["protein"]);
+  assert.equal(eatenFromMenu([partiallyChosen]).calories, 399);
 });
 
 test("answered and eaten are different questions", () => {
