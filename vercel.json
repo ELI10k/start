@@ -1,5 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "*": false,
+      "**": false,
+      "main": true,
+      "staging": true,
+      "preview/*": true,
+      "codex/ai-meal-analysis": true
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/reminders",
