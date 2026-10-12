@@ -17,23 +17,32 @@ test("the profile guide link appears above change goals", async () => {
   assert.match(source, /content\/category\/start-guide/);
 });
 
-test("the complete Life Fit guide is published as seven ordered lessons", async () => {
-  const migration = await file(
-    "supabase/migrations/20261007141021_life_fit_training_series.sql",
-  );
-  const route = await file("app/media/life-fit-training/[lesson]/route.ts");
+test("the complete Life Fit guide includes the two device connection lessons", async () => {
+  const [seriesMigration, deviceMigration, route, landing] = await Promise.all([
+    file("supabase/migrations/20261007141021_life_fit_training_series.sql"),
+    file("supabase/migrations/20261012173546_add_device_connection_guides.sql"),
+    file("app/media/life-fit-training/[lesson]/route.ts"),
+    file("app/guide/page.tsx"),
+  ]);
+  const migration = `${seriesMigration}\n${deviceMigration}`;
   const lessonIds =
-    migration.match(/10000000-0000-4000-8000-0000000000(?:0[4-9]|10)/g) ?? [];
+    migration.match(/10000000-0000-4000-8000-0000000000(?:0[4-9]|1[0-2])/g) ?? [];
   const mediaRoutes =
-    migration.match(/life-fit-training\/0[1-7]-[a-z-]+/g) ?? [];
+    migration.match(/life-fit-training\/0[1-9]-[a-z-]+/g) ?? [];
 
-  assert.equal(new Set(lessonIds).size, 7);
-  assert.equal(new Set(mediaRoutes).size, 7);
-  for (const order of [10, 20, 30, 40, 50, 60, 70]) {
+  assert.equal(new Set(lessonIds).size, 9);
+  assert.equal(new Set(mediaRoutes).size, 9);
+  for (const order of [10, 20, 30, 40, 50, 60, 70, 80, 90]) {
     assert.match(migration, new RegExp(`'published', ${order}, null`));
   }
   assert.match(route, /const LESSON_FILES/);
   assert.match(route, /life-fit-training-series-v1/);
+  assert.match(route, /life-fit-device-connection-v1/);
+  assert.match(route, /life-fit-device-connection-ios-4k\.mp4/);
+  assert.match(route, /life-fit-device-connection-android-4k\.mp4/);
+  assert.match(landing, /חיבור שעון ומכשיר כושר באייפון/);
+  assert.match(landing, /חיבור שעון ומכשיר כושר באנדרואיד/);
+  assert.match(landing, /9 פרקים מסודרים/);
 });
 
 test("the guide is the first published course and replaces old intro fillers", async () => {

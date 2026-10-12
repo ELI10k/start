@@ -9,13 +9,15 @@ export const dynamic = "force-dynamic";
 const PUBLIC_STORAGE_ORIGIN = "https://bacxfweisncnpjgiqxcp.supabase.co";
 
 const LESSON_FILES: Readonly<Record<string, string>> = {
-  "01-login-home-navigation": "01-login-home-navigation.mp4",
-  "02-personal-menu-meals": "02-personal-menu-meals.mp4",
-  "03-outside-menu-shopping": "03-outside-menu-shopping.mp4",
-  "04-workout-program-session": "04-workout-program-session.mp4",
-  "05-workout-management-progress": "05-workout-management-progress.mp4",
-  "06-measurements-health-checkin": "06-measurements-health-checkin.mp4",
-  "07-messages-content-profile-support": "07-messages-content-profile-support.mp4",
+  "01-login-home-navigation": "life-fit-training-series-v1/01-login-home-navigation.mp4",
+  "02-personal-menu-meals": "life-fit-training-series-v1/02-personal-menu-meals.mp4",
+  "03-outside-menu-shopping": "life-fit-training-series-v1/03-outside-menu-shopping.mp4",
+  "04-workout-program-session": "life-fit-training-series-v1/04-workout-program-session.mp4",
+  "05-workout-management-progress": "life-fit-training-series-v1/05-workout-management-progress.mp4",
+  "06-measurements-health-checkin": "life-fit-training-series-v1/06-measurements-health-checkin.mp4",
+  "07-messages-content-profile-support": "life-fit-training-series-v1/07-messages-content-profile-support.mp4",
+  "08-connect-device-iphone": "life-fit-device-connection-v1/life-fit-device-connection-ios-4k.mp4",
+  "09-connect-device-android": "life-fit-device-connection-v1/life-fit-device-connection-android-4k.mp4",
 };
 
 export async function GET(
@@ -31,7 +33,7 @@ export async function GET(
     PUBLIC_STORAGE_ORIGIN;
 
   return NextResponse.redirect(
-    `${origin}/storage/v1/object/public/content-media/life-fit-training-series-v1/${filename}`,
+    `${origin}/storage/v1/object/public/content-media/${filename}`,
     {
       status: 307,
       headers: {
