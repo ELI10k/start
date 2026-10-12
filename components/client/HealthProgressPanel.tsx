@@ -91,7 +91,12 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const unavailable = permission === "unavailable";
   const dayCount = period === "month" ? 30 : 7;
   const days = lastDays(today, dayCount);
-  const periodPicker = <div className="health-period-picker" role="group" aria-label="טווח הצגה"><button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבוע</button><button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודש</button></div>;
+  const periodPicker = (
+    <div className="health-period-picker" role="group" aria-label="טווח הצגה">
+      <button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבועי</button>
+      <button type="button" aria-pressed={period === "month"} onClick={() => setPeriod("month")}>חודשי</button>
+    </div>
+  );
 
   if (metric === "steps") {
     const summary = summarizeSteps(snapshot.entries, snapshot.preferences, today);

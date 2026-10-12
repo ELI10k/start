@@ -132,10 +132,12 @@ test("the workout refreshes sleep when the native health bridge becomes ready", 
   assert.match(session, /removeEventListener\("start:health-ready",ready\)/);
 });
 
-test("health charts show values and offer a monthly range", async () => {
+test("steps and sleep keep both period controls available after either selection", async () => {
   const panel = await source("components/client/HealthProgressPanel.tsx");
   assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
-  assert.match(panel, /setPeriod\("month"\)/);
+  assert.match(panel, /onClick=\{\(\) => setPeriod\("week"\)\}>שבועי<\/button>/);
+  assert.match(panel, /onClick=\{\(\) => setPeriod\("month"\)\}>חודשי<\/button>/);
+  assert.equal(panel.match(/\{periodPicker\}/g)?.length, 2);
   assert.match(panel, /lastDays\(today, dayCount\)/);
 });
 
