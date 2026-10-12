@@ -41,6 +41,10 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
   assert.match(panel, /data-over-goal/);
   assert.match(css, /repeating-linear-gradient\(135deg, var\(--red\)/);
   assert.match(css, /health-chart\[data-monthly\].*min-width: 0/);
+  assert.match(css, /data-macro="protein"[^\n]+background: var\(--green\)/);
+  assert.match(css, /data-macro="carbohydrates"[^\n]+background: #F2B705/);
+  assert.match(css, /data-macro="carbohydrates"\] \{ color: var\(--ink\)/);
+  assert.match(css, /data-macro="fat"[^\n]+background: var\(--red\)/);
   assert.match(repository, /eaten_meal_items/);
   assert.match(repository, /client_food_log/);
 });

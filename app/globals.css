@@ -665,8 +665,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .nutrition-macro-bar { display: flex; overflow: hidden; height: 2.8rem; margin-top: 1.25rem; direction: rtl; border-radius: .85rem; background: var(--surface-raised); }
 .nutrition-macro-bar span { display: grid; min-width: 0; place-items: center; color: white; font-size: .72rem; font-weight: 900; }
 .nutrition-macro-bar [data-macro="protein"], .nutrition-macro-key[data-macro="protein"] { background: var(--green); }
-.nutrition-macro-bar [data-macro="carbohydrates"], .nutrition-macro-key[data-macro="carbohydrates"] { background: var(--ink-muted); }
-.nutrition-macro-bar [data-macro="fat"], .nutrition-macro-key[data-macro="fat"] { background: #B8C4B9; }
+.nutrition-macro-bar [data-macro="carbohydrates"], .nutrition-macro-key[data-macro="carbohydrates"] { background: #F2B705; }
+.nutrition-macro-bar [data-macro="carbohydrates"] { color: var(--ink); }
+.nutrition-macro-bar [data-macro="fat"], .nutrition-macro-key[data-macro="fat"] { background: var(--red); }
 .nutrition-macro-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin-top: 1rem; text-align: center; }
 .nutrition-macro-grid > div { display: grid; justify-items: center; gap: .15rem; }
 .nutrition-macro-grid strong, .nutrition-macro-grid b { font-size: .78rem; }
