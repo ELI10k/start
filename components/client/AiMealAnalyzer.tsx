@@ -52,13 +52,14 @@ export default function AiMealAnalyzer({ date, mealId, foods, onSaved }: { date:
 
   const analyze = async () => {
     if (!photo) { setError("יש לצלם ארוחה או לבחור תמונה מהגלריה."); return; }
+    if (!description.trim()) { setError("יש לכתוב בקצרה מה יש בארוחה ואיך היא הוכנה."); return; }
     setAnalyzing(true); setError("");
     const form = new FormData(); form.set("photo", photo); form.set("description", description);
     try {
       const response = await fetch("/api/nutrition/analyze-meal", { method: "POST", body: form });
       const payload = await response.json();
       if (!response.ok) {
-        const messages: Record<string, string> = { feature_disabled: "ניתוח ארוחות ב־AI אינו זמין כרגע.", rate_limited: "הגעת למכסת הניתוחים כרגע. אפשר לנסות מאוחר יותר.", no_food: "לא הצלחנו לזהות מזון בתמונה. נסו תמונה ברורה יותר של הצלחת.", invalid_photo: "התמונה אינה קובץ JPG, PNG או WebP תקין.", analysis_unavailable: "שירות הניתוח אינו זמין כרגע." };
+        const messages: Record<string, string> = { feature_disabled: "ניתוח ארוחות ב־AI אינו זמין כרגע.", description_required: "יש לכתוב בקצרה מה יש בארוחה ואיך היא הוכנה.", rate_limited: "הגעת למכסת הניתוחים כרגע. אפשר לנסות מאוחר יותר.", no_food: "לא הצלחנו לזהות מזון בתמונה. נסו תמונה ברורה יותר של הצלחת.", invalid_photo: "התמונה אינה קובץ JPG, PNG או WebP תקין.", analysis_unavailable: "שירות הניתוח אינו זמין כרגע." };
         setError(messages[payload.error] ?? "לא הצלחנו לנתח את התמונה. נסו תמונה ברורה יותר."); return;
       }
       const result = payload as AnalysisResponse;
@@ -90,8 +91,8 @@ export default function AiMealAnalyzer({ date, mealId, foods, onSaved }: { date:
       <div className="grid grid-cols-2 gap-2"><button type="button" className="premium-secondary-button" onClick={() => camera.current?.click()}><Camera size={17}/>צילום ארוחה</button><button type="button" className="premium-secondary-button" onClick={() => gallery.current?.click()}><Images size={17}/>בחירה מהגלריה</button></div>
       {preparing ? <p role="status">מכינים את התמונה…</p> : null}
       {preview ? <Image src={preview} alt="הארוחה שנבחרה לניתוח" width={640} height={420} unoptimized className="max-h-72 w-full rounded-2xl object-contain"/> : null}
-      <label className="text-sm font-bold">מידע נוסף <span className="font-normal text-[#5B5F5B]">(רשות)</span><input className="nutrition-input mt-2" maxLength={200} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="לדוגמה: השניצל מטוגן, בלי רוטב"/></label>
-      <button type="button" disabled={!photo || preparing || analyzing} onClick={() => void analyze()} className="premium-primary-button">{analyzing ? "מנתחים את הארוחה…" : "ניתוח הארוחה ב־AI"}</button>
+      <label className="text-sm font-bold">מה יש בארוחה?<span aria-hidden="true" className="mr-1 text-[#DC2626]">*</span><span className="mt-1 block font-normal text-[#5B5F5B]">כתוב בקצרה אילו מזונות יש בצלחת ואיך הוכנו, במיוחד אם יש שמן, רטבים או מיונז.</span><input required aria-required="true" className="nutrition-input mt-2" maxLength={200} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="פרגית צלויה, קוסקוס מבושל, חצילים מטוגנים, גזר במיונז"/></label>
+      <button type="button" disabled={!photo || !description.trim() || preparing || analyzing} onClick={() => void analyze()} className="premium-primary-button">{analyzing ? "מנתחים את הארוחה…" : "ניתוח הארוחה ב־AI"}</button>
     </> : <form action={action} className="grid gap-4">
       <input type="hidden" name="date" value={date}/><input type="hidden" name="mealId" value={mealId}/><input type="hidden" name="entryId" value={entryId}/><input type="hidden" name="analysisToken" value={analysisToken}/><input type="hidden" name="components" value={JSON.stringify(items.map(({ index, name, grams, foodId }) => ({ index, name, grams, foodId })))}/><input type="hidden" name="saveFavorite" value={saveFavorite ? "true" : "false"}/>
       <div className="rounded-2xl bg-[#FFF7ED] p-3 text-sm"><strong>הערכת AI</strong> — הערכים מבוססים על ניתוח תמונה ועשויים להיות שונים מהכמויות בפועל.</div>
