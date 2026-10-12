@@ -278,7 +278,7 @@ test("the client is told where to start and when photos are due", async () => {
     source("app/check-in/page.tsx"),
   ]);
   // The anchor existed and nothing linked to it.
-  assert.match(nutrition, /href="#current-meal"/);
+  assert.doesNotMatch(nutrition, /href="#current-meal"/);
   assert.match(nutrition, /<RepeatYesterday date=\{today\}/);
   // The cycle already knew; the screen never said.
   assert.match(checkIn, /cycle\.nextCheckInNumber/);
@@ -636,7 +636,7 @@ test("a barcode can be scanned wherever it is asked for", async () => {
   assert.match(camera, /await import\("@zxing\/browser"\)/);
 });
 
-test("the day opens one meal at a time", async () => {
+test("meal cards do not assume when a client eats", async () => {
   const [page, css] = await Promise.all([source("app/nutrition/page.tsx"), source("app/globals.css")]);
   // Six meals in a single scroll is a page nobody reads to the end, and the
   // marking controls live at the bottom of each one.
@@ -644,8 +644,9 @@ test("the day opens one meal at a time", async () => {
   // one of them, the outside-the-menu logger - but the collapsed row is the
   // same one.
   assert.match(page, /<Fragment key=\{meal\.id\}>\s*\n\s*<MealCard/);
-  // And which one starts open is still the meal that is due now.
-  assert.match(page, /defaultOpen=\{isNow\}/);
+  // Timing is personal, so no meal is opened or highlighted by the clock.
+  assert.match(page, /defaultOpen=\{false\}/);
+  assert.doesNotMatch(page, /currentMealTitle|id=\{isNow|>עכשיו<|Intl\.DateTimeFormat/);
   // The closed row has to carry enough to decide whether to open it.
   assert.match(page, /const mealCalories = menuMealCalories \+ loggedMealCalories/);
   assert.match(page, /const calorieLabel =/);
