@@ -28,6 +28,7 @@ import OutsideMenuFood from "@/components/client/OutsideMenuFood";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { addTotals, eatenFromMenu, isMealEaten, isMealReportedEaten, mealIntake, mealStanding, remainingInMenu, sumItems } from "@/lib/nutrition/menu-intake";
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
+import { numberOf } from "@/lib/progress/changes";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 import { displayCalories } from "@/lib/nutrition/display";
@@ -79,7 +80,9 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
   const supabase = await createSupabaseServerClient();
-  const [menu, freeMenu, foods, logged, behavior, favoriteResult, savedMealsResult] = await Promise.all([
+  const progressStart = new Date(`${today}T12:00:00Z`);
+  progressStart.setUTCDate(progressStart.getUTCDate() - 89);
+  const [menu, freeMenu, foods, logged, behavior, favoriteResult, savedMealsResult, progressResult] = await Promise.all([
     getActiveClientMenu(auth.id, today),
     getFreeMenuDay(auth.id, today),
     listDatabaseFoods(),
@@ -87,6 +90,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     getClientNutritionBehavior(auth.id,today),
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
     supabase.from("my_meals").select("id,name,my_meal_items(id)").eq("client_id", auth.id).order("updated_at", { ascending: false }),
+    supabase.from("progress_entries").select("date,weight,navel_circumference").eq("client_id", auth.id).gte("date", progressStart.toISOString().slice(0, 10)).lte("date", today).order("date"),
   ]);
   const pastDayStatuses = await Promise.all(days.filter((day) => day < now).map(async (day) => {
     const [dayMenu, dayFreeMenu, dayLogged] = day === today
@@ -181,6 +185,30 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const remainingTotals = remainingInMenu(menu?.meals ?? [], loggedEntriesIn);
   const answeredMeals = menu?.meals.filter((meal) => Boolean(meal.status || meal.completed)).length ?? 0;
   const unansweredMeals = Math.max(0, (menu?.meals.length ?? 0) - answeredMeals);
+  const progressRows = progressResult.error ? [] : (progressResult.data ?? []);
+  if (progressResult.error) console.error("nutrition progress insight unavailable", { code: progressResult.error.code });
+  const firstProgress = progressRows[0];
+  const lastProgress = progressRows.at(-1);
+  const firstWeight = numberOf(firstProgress?.weight);
+  const lastWeight = numberOf(lastProgress?.weight);
+  const firstNavel = numberOf(firstProgress?.navel_circumference);
+  const lastNavel = numberOf(lastProgress?.navel_circumference);
+  const progress = firstProgress && lastProgress && firstProgress !== lastProgress
+    ? {
+        measurements: progressRows.length,
+        spanDays: Math.round((Date.parse(`${lastProgress.date}T12:00:00Z`) - Date.parse(`${firstProgress.date}T12:00:00Z`)) / 86_400_000),
+        weightChange: firstWeight !== null && lastWeight !== null ? Number((lastWeight - firstWeight).toFixed(1)) : null,
+        navelChange: firstNavel !== null && lastNavel !== null ? Number((lastNavel - firstNavel).toFixed(1)) : null,
+      }
+    : undefined;
+  const eatenFoodNames = [
+    ...(menu?.meals ?? []).filter(isMealEaten).flatMap((meal) => meal.groups.flatMap((group) => {
+      const chosen = group.items.find((item) => item.id === group.selectedItemId);
+      const primary = group.items.find((item) => item.itemRole === "primary") ?? group.items[0];
+      return (chosen ?? primary)?.name ?? [];
+    })),
+    ...logged.map((entry) => entry.name),
+  ];
   const nutritionInsights = dailyNutritionInsights({
     eaten: eatenTotals,
     targets: {
@@ -195,6 +223,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     unmeasuredOutsideItems: loggedTotals.unmeasured,
     isToday,
     behavior,
+    eatenFoodNames,
+    progress,
   });
   const outsideMenuAfterMealId = menu
     ? (menu.meals.find((meal) => meal.title === "קלוריות חופשיות")
