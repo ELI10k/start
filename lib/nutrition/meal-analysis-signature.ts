@@ -2,7 +2,13 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { MealAnalysisComponent } from "@/lib/nutrition/meal-image-analysis";
 
-export type SignedMealAnalysis = Readonly<{ userId: string; expiresAt: number; components: readonly MealAnalysisComponent[] }>;
+export type SignedMealAnalysis = Readonly<{
+  userId: string;
+  expiresAt: number;
+  components: readonly MealAnalysisComponent[];
+  allowedComponents?: readonly MealAnalysisComponent[];
+  selectionGroups?: readonly Readonly<{ id: string; variants: readonly (readonly string[])[] }>[];
+}>;
 
 function secret() {
   const value = process.env.AI_MEAL_SIGNING_SECRET?.trim();
@@ -24,6 +30,9 @@ export function verifyMealAnalysis(token: string, userId: string): SignedMealAna
     const received = Buffer.from(supplied, "base64url");
     if (received.length !== expected.length || !timingSafeEqual(received, expected)) return null;
     const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SignedMealAnalysis;
-    return payload.userId === userId && payload.expiresAt >= Date.now() && Array.isArray(payload.components) ? payload : null;
+    if (payload.userId !== userId || payload.expiresAt < Date.now() || !Array.isArray(payload.components)) return null;
+    if (payload.allowedComponents !== undefined && !Array.isArray(payload.allowedComponents)) return null;
+    if (payload.selectionGroups !== undefined && !Array.isArray(payload.selectionGroups)) return null;
+    return payload;
   } catch { return null; }
 }
