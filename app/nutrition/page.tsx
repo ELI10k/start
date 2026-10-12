@@ -32,7 +32,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 import { displayCalories } from "@/lib/nutrition/display";
 import { nutritionDayStatus, type NutritionDayStatus } from "@/lib/nutrition/day-status";
-import { isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
+import { canUseAiMealAnalysis } from "@/lib/nutrition/ai-meal-feature";
 
 // "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
 // server action executes on the route segment that hosts it. Vercel's default
@@ -47,7 +47,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
-  const aiMealEnabled = isAiMealAnalysisEnabled();
+  const aiMealEnabled = canUseAiMealAnalysis(auth.id);
   const now = israelDateKey();
   // Which day is on screen.
   //

@@ -5,7 +5,7 @@ import { getAuthContext } from "@/lib/data/product-repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { verifyMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
-import { isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
+import { canUseAiMealAnalysis, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
 
 export type SaveAiMealState = Readonly<{ ok: boolean; message?: string }>;
 type EditedComponent = { index: number; name: string; grams: number; foodId: string | null };
@@ -15,6 +15,7 @@ export async function saveAiMeal(_: SaveAiMealState, form: FormData): Promise<Sa
   if (!isAiMealAnalysisEnabled()) return { ok: false, message: "ניתוח ארוחות ב־AI אינו זמין כרגע." };
   const auth = await getAuthContext();
   if (!auth || auth.role !== "client") return { ok: false, message: "רק לקוח יכול לשמור ארוחה." };
+  if (!canUseAiMealAnalysis(auth.id)) return { ok: false, message: "ניתוח ארוחות ב־AI אינו זמין בחשבון הזה." };
   const date = String(form.get("date") ?? "");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, message: "התאריך אינו תקין." };
   const signed = verifyMealAnalysis(String(form.get("analysisToken") ?? ""), auth.id);

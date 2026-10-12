@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { calculateFoodNutrition } from "../lib/meal-plans/calculations.ts";
+import { AI_MEAL_ALLOWED_USER_ID, canUseAiMealAnalysis } from "../lib/nutrition/ai-meal-feature.ts";
 import { matchFood, normalizeComponents, parseMealAnalysis } from "../lib/nutrition/meal-image-analysis.ts";
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
@@ -10,6 +11,22 @@ const foods = [
   { id: "chicken", name: "פרגית צלויה", calories: 200, protein: 24, carbs: 0, fat: 11 },
   { id: "hummus", name: "חומוס", calories: 240, protein: 8, carbs: 14, fat: 17 },
 ];
+
+test("AI meal access requires both the global switch and the personal allowlist", () => {
+  const previous = process.env.AI_MEAL_ANALYSIS_ENABLED;
+  try {
+    process.env.AI_MEAL_ANALYSIS_ENABLED = "true";
+    assert.equal(canUseAiMealAnalysis(AI_MEAL_ALLOWED_USER_ID), true);
+    assert.equal(canUseAiMealAnalysis("00000000-0000-0000-0000-000000000000"), false);
+    assert.equal(canUseAiMealAnalysis(null), false);
+
+    process.env.AI_MEAL_ANALYSIS_ENABLED = "false";
+    assert.equal(canUseAiMealAnalysis(AI_MEAL_ALLOWED_USER_ID), false);
+  } finally {
+    if (previous === undefined) delete process.env.AI_MEAL_ANALYSIS_ENABLED;
+    else process.env.AI_MEAL_ANALYSIS_ENABLED = previous;
+  }
+});
 
 test("changing grams recalculates all macros locally from per-100 values", () => {
   const per100 = { calories: 200, protein: 24, carbs: 0, fat: 11 };
@@ -45,16 +62,21 @@ test("malformed and contradictory model responses are rejected", () => {
   assert.equal(parseMealAnalysis({ containsFood: true, summary: "x", components: [{ name: "אורז", estimatedGrams: -1 }] }), null);
 });
 
-test("Qwen is the default, structured output is required and the kill switch guards analysis and save", async () => {
-  const [route, action, flag] = await Promise.all([
+test("Qwen is the default, structured output is required and server entry points enforce the allowlist", async () => {
+  const [route, action, flag, page] = await Promise.all([
     source("app/api/nutrition/analyze-meal/route.ts"),
     source("app/actions/ai-meal.ts"),
     source("lib/nutrition/ai-meal-feature.ts"),
+    source("app/nutrition/page.tsx"),
   ]);
   assert.match(flag, /alibaba\/qwen3\.8-omni-flash/);
+  assert.match(flag, /368e193a-1364-4069-9743-be3da7bddac1/);
   assert.match(route, /type: "json_schema"/);
   assert.match(route, /isAiMealAnalysisEnabled\(\)/);
+  assert.match(route, /canUseAiMealAnalysis\(auth\.id\)/);
   assert.match(action, /isAiMealAnalysisEnabled\(\)/);
+  assert.match(action, /canUseAiMealAnalysis\(auth\.id\)/);
+  assert.match(page, /canUseAiMealAnalysis\(auth\.id\)/);
   assert.doesNotMatch(route, /\.storage/);
 });
 
@@ -87,6 +109,7 @@ test("the forward migration preserves client logs and makes AI saves idempotent"
   assert.match(sql, /if v_existing>0 then return/);
   assert.match(sql, /status_date=p_date/);
   assert.match(sql, /revoke all on function public\.save_ai_meal_to_log/);
+  assert.match(sql, /auth\.uid\(\) is distinct from '368e193a-1364-4069-9743-be3da7bddac1'::uuid/);
   assert.match(sql, /select round\(coalesce\(calories,0\)\*v_grams\/100,1\)/);
   assert.match(sql, /case when coalesce\(f\.protein,i\.snapshot_protein\) is null then null/);
   assert.doesNotMatch(sql, /alter table public\.foods/);

@@ -6,7 +6,7 @@ import { validateFoodLogPhoto } from "@/lib/nutrition/food-log";
 import { detectImageFormat } from "@/lib/images/signature";
 import { MEAL_ANALYSIS_SCHEMA, normalizeComponents, parseMealAnalysis, type MatchableFood } from "@/lib/nutrition/meal-image-analysis";
 import { signMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
-import { AI_MEAL_DEFAULT_MODEL, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
+import { AI_MEAL_DEFAULT_MODEL, canUseAiMealAnalysis, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
 
 export const maxDuration = 60;
 const mealAnalysisModel = process.env.AI_MEAL_MODEL?.trim() || AI_MEAL_DEFAULT_MODEL;
@@ -30,6 +30,7 @@ export async function POST(request: Request) {
   if (!isAiMealAnalysisEnabled()) return Response.json({ error: "feature_disabled" }, { status: 404 });
   const auth = await getAuthContext();
   if (!auth || auth.role !== "client") return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!canUseAiMealAnalysis(auth.id)) return Response.json({ error: "feature_unavailable" }, { status: 404 });
   const [minuteAllowed, dailyAllowed] = await Promise.all([
     consumeRateLimit({ action: "food_ai_minute", subject: auth.id, windowSeconds: 60, limit: 5 }),
     consumeRateLimit({ action: "food_ai_day", subject: auth.id, windowSeconds: 86_400, limit: 50 }),

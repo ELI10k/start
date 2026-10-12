@@ -48,6 +48,7 @@ declare
   v_food_id text; v_name text; v_grams numeric; v_calories numeric; v_protein numeric; v_carbs numeric; v_fat numeric;
   v_source text; v_per100 jsonb;
 begin
+  if auth.uid() is distinct from '368e193a-1364-4069-9743-be3da7bddac1'::uuid then raise exception 'feature_unavailable';end if;
   if public.current_role()<>'client' then raise exception 'client_required';end if;
   if p_entry_id is null or p_date>(now() at time zone 'Asia/Jerusalem')::date then raise exception 'invalid_ai_meal';end if;
   if p_meal_slot not in ('breakfast','lunch','dinner','snack') then raise exception 'invalid_meal_slot';end if;
