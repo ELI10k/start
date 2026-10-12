@@ -699,7 +699,14 @@ test("the free-calorie window can be filled in, not just described", async () =>
   // It used to be a sentence with nowhere to answer it, so the frame could not
   // be tracked against and the day counted the whole allowance either way.
   assert.match(component, /<AteSomethingElse/);
-  assert.match(component, /בחר מה אכלת/);
+  assert.doesNotMatch(component, /בחר מה אכלת/);
+  assert.match(component, /מה אכלת במסגרת הזו\?/);
+  assert.match(component, /setAdding\("text"\)[\s\S]*תיאור/);
+  assert.match(component, /setAdding\("scan"\)[\s\S]*ברקוד/);
+  assert.match(component, /setAdding\("food"\)[\s\S]*מהמאגר/);
+  assert.match(component, /setAdding\("saved"\)[\s\S]*מהארוחות שלי/);
+  assert.match(component, /setAdding\("photo"\)[\s\S]*צילום/);
+  assert.match(component, /initialTab=\{adding \?\? "text"\}/);
   assert.match(component, /foods=\{foods\}/);
   assert.match(component, /savedMeals=\{savedMeals\}/);
   assert.match(component, /נותרו/);

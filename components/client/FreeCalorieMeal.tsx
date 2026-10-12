@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Barcode, Camera, Database, PencilLine, UtensilsCrossed } from "lucide-react";
 import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 import { displayCalories } from "@/lib/nutrition/display";
+
+type FoodLogTab = "text" | "food" | "scan" | "photo" | "saved";
 
 /**
  * The free-calorie window, with a way to fill it.
@@ -36,7 +38,7 @@ export default function FreeCalorieMeal({
   foods: readonly PickableFood[];
   savedMeals: readonly SavedMealChoice[];
 }) {
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState<FoodLogTab | null>(null);
   const left = Math.round(frame - logged);
 
   return (
@@ -57,17 +59,35 @@ export default function FreeCalorieMeal({
         </p>
       )}
 
-      <button type="button" onClick={() => setAdding(true)} className="chip mt-3">
-        <Plus aria-hidden="true" size={15} />בחר מה אכלת
-      </button>
+      <h3 className="mt-4 text-base font-black">מה אכלת במסגרת הזו?</h3>
+      <div className="chip-row mt-3">
+        <button type="button" onClick={() => setAdding("text")} className="chip pill--green">
+          <PencilLine aria-hidden="true" size={15} />תיאור
+        </button>
+        <button type="button" onClick={() => setAdding("scan")} className="chip">
+          <Barcode aria-hidden="true" size={15} />ברקוד
+        </button>
+        {foods.length ? (
+          <button type="button" onClick={() => setAdding("food")} className="chip">
+            <Database aria-hidden="true" size={15} />מהמאגר
+          </button>
+        ) : null}
+        <button type="button" onClick={() => setAdding("saved")} className="chip">
+          <UtensilsCrossed aria-hidden="true" size={15} />מהארוחות שלי
+        </button>
+        <button type="button" onClick={() => setAdding("photo")} className="chip">
+          <Camera aria-hidden="true" size={15} />צילום
+        </button>
+      </div>
 
       <AteSomethingElse
         mealId={mealId}
         date={date}
         foods={foods}
         savedMeals={savedMeals}
-        open={adding}
-        onClose={() => setAdding(false)}
+        open={adding !== null}
+        onClose={() => setAdding(null)}
+        initialTab={adding ?? "text"}
         title="מה אכלת במסגרת הזו?"
         unmeasuredNote="התיאור או התמונה יישלחו לחישוב אוטומטי. אם לא ניתן לזהות בוודאות, הפריט יישמר לעיון המאמן בלי להוסיף ערכים שגויים."
       />
