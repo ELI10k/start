@@ -22,7 +22,7 @@ export default async function MyMealsPage({ searchParams }: { searchParams: Prom
   if (mealError) throw mealError;
   const ids = (mealRows ?? []).map((row) => String(row.id));
   const { data: itemRows, error: itemError } = ids.length
-    ? await supabase.from("my_meal_items").select("id,meal_id,food_id,quantity,unit,sort_order,foods(name,calories,protein,carbs,fat,package_unit,unit_weight_grams)").in("meal_id", ids).order("sort_order")
+    ? await supabase.from("my_meal_items").select("id,meal_id,food_id,quantity,unit,sort_order,snapshot_name,snapshot_calories,snapshot_protein,snapshot_carbs,snapshot_fat,nutrition_source,foods(name,calories,protein,carbs,fat,package_unit,unit_weight_grams)").in("meal_id", ids).order("sort_order")
     : { data: [], error: null };
   if (itemError) throw itemError;
   const number = (value: unknown) => value == null ? 0 : Number(value);
@@ -34,10 +34,12 @@ export default async function MyMealsPage({ searchParams }: { searchParams: Prom
       const unit = String(item.unit);
       const grams = unit === "גרם" ? quantity : quantity * number(food?.unit_weight_grams);
       const factor = grams / 100;
+      const per100 = { calories: number(food?.calories ?? item.snapshot_calories), protein: number(food?.protein ?? item.snapshot_protein), carbs: number(food?.carbs ?? item.snapshot_carbs), fat: number(food?.fat ?? item.snapshot_fat) };
       return {
-        id: String(item.id), foodId: String(item.food_id), name: String(food?.name ?? "מאכל"), quantity, unit,
-        sortOrder: number(item.sort_order), calories: number(food?.calories) * factor,
-        protein: number(food?.protein) * factor, carbs: number(food?.carbs) * factor, fat: number(food?.fat) * factor,
+        id: String(item.id), foodId: item.food_id ? String(item.food_id) : null, name: String(food?.name ?? item.snapshot_name ?? "מאכל"), quantity, unit,
+        sortOrder: number(item.sort_order), calories: per100.calories * factor,
+        protein: per100.protein * factor, carbs: per100.carbs * factor, fat: per100.fat * factor, per100,
+        nutritionEstimated: item.nutrition_source === "ai_estimate",
       };
     }),
   }));

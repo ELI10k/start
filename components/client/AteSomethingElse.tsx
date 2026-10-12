@@ -4,7 +4,7 @@ import { useActionState, useEffect, useMemo, useRef, useState, useTransition } f
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, Sparkles, UtensilsCrossed } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -15,9 +15,10 @@ import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCo
 import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { addMyMealToDay, type MyMealActionState } from "@/app/actions/my-meals";
+import AiMealAnalyzer from "@/components/client/AiMealAnalyzer";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
-type SheetTab = "text" | "food" | "scan" | "photo" | "saved";
+export type SheetTab = "text" | "food" | "scan" | "photo" | "saved" | "ai-photo";
 export type SavedMealChoice = Readonly<{ id: string; name: string; itemCount: number }>;
 
 export type PickableFood = ComboboxFood & {
@@ -72,6 +73,7 @@ export default function AteSomethingElse({
   // making the client find it behind two other tabs.
   initialTab = "text",
   savedMeals = [],
+  aiMealEnabled = false,
 }: {
   mealId: string;
   date: string;
@@ -83,6 +85,7 @@ export default function AteSomethingElse({
   preserveMealStatus?: boolean;
   initialTab?: SheetTab;
   savedMeals?: readonly SavedMealChoice[];
+  aiMealEnabled?: boolean;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<SheetTab>(initialTab);
@@ -217,6 +220,11 @@ export default function AteSomethingElse({
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
           <Camera aria-hidden="true" size={15} />צילום
         </button>
+        {aiMealEnabled ? (
+          <button type="button" onClick={() => setTab("ai-photo")} aria-pressed={tab === "ai-photo"} className={`chip${tab === "ai-photo" ? " pill--green" : ""}`}>
+            <Sparkles aria-hidden="true" size={15} />צילום ארוחה ב־AI
+          </button>
+        ) : null}
       </div>
 
       {tab === "scan" && !found && (
@@ -234,7 +242,14 @@ export default function AteSomethingElse({
         </div>
       )}
 
-      {tab === "saved" ? <div className="mt-4 grid gap-2">{savedMeals.length
+      {tab === "ai-photo" ? (
+        <AiMealAnalyzer
+          date={date}
+          mealId={mealId}
+          foods={foods}
+          onSaved={() => { router.refresh(); onClose(); }}
+        />
+      ) : tab === "saved" ? <div className="mt-4 grid gap-2">{savedMeals.length
         ? savedMeals.map((meal) => <SavedMealButton key={meal.id} meal={meal} date={date} time={savedTime} targetMealId={mealId} onSaved={() => { router.refresh(); onClose(); }}/>)
         : <div className="rounded-2xl bg-[#F7F8F7] p-5 text-center"><p className="font-bold">עדיין אין ארוחות שמורות</p><p className="mt-1 text-sm text-[#5B5F5B]">אפשר ליצור ארוחה עם המאכלים והכמויות הקבועים שלך.</p><Link href="/my-meals" className="premium-primary-button mt-4">יצירת ארוחה</Link></div>}
       </div> : <form ref={formRef} action={action} className="mt-4 grid gap-3">

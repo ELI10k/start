@@ -26,6 +26,7 @@ export default function FreeCalorieMeal({
   unmeasured,
   foods,
   savedMeals,
+  aiMealEnabled = false,
 }: {
   mealId: string;
   date: string;
@@ -37,6 +38,7 @@ export default function FreeCalorieMeal({
   /** Approved catalogue foods available through the database picker. */
   foods: readonly PickableFood[];
   savedMeals: readonly SavedMealChoice[];
+  aiMealEnabled?: boolean;
 }) {
   const [adding, setAdding] = useState<FoodLogTab | null>(null);
   const left = Math.round(frame - logged);
@@ -85,6 +87,7 @@ export default function FreeCalorieMeal({
         date={date}
         foods={foods}
         savedMeals={savedMeals}
+        aiMealEnabled={aiMealEnabled}
         open={adding !== null}
         onClose={() => setAdding(null)}
         initialTab={adding ?? "text"}
