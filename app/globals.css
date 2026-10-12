@@ -814,6 +814,24 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     padding-top: .75rem;
   }
   .progress-metrics[data-viewport-fit] .health-chart__plot { height: 100%; min-height: 4.5rem; }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] { overflow-x: hidden; }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__plot {
+    min-width: 0;
+    gap: 2px;
+  }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__column b { display: none; }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__column i {
+    width: 82%;
+    border-radius: .18rem .18rem .08rem .08rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__column small {
+    visibility: hidden;
+    overflow: visible;
+    font-size: .48rem;
+    white-space: nowrap;
+  }
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__column:nth-of-type(5n + 1) small,
+  .progress-metrics[data-viewport-fit] .health-chart[data-monthly] .health-chart__column:last-child small { visibility: visible; }
   .progress-metrics[data-viewport-fit] .health-stat-grid { flex: 0 0 auto; gap: .4rem; }
   .progress-metrics[data-viewport-fit] .health-stat-grid > div { gap: 0 .35rem; padding: .5rem; }
   .progress-metrics[data-viewport-fit] .health-stat-grid svg { width: 1.8rem; height: 1.8rem; padding: .35rem; }
@@ -835,6 +853,38 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-grid b { font-size: .67rem; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-grid small { font-size: .55rem; }
   .progress-metrics[data-viewport-fit] .nutrition-empty { margin-top: .4rem; padding: .5rem; }
+}
+
+/* A regular-height iPhone has room for comfortable controls while preserving
+   the single-screen summary. Very short phones keep the compact rules above. */
+@media (max-width: 767px) and (min-height: 740px) {
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
+    gap: .65rem;
+    padding-block-start: max(.65rem, env(safe-area-inset-top));
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header h1 { font-size: 1.65rem; }
+  .progress-metrics[data-viewport-fit] { gap: .55rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tabs { gap: .35rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab { padding-block: .4rem; border-radius: .95rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab__icon { width: 2.3rem; height: 2.3rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab__icon svg { width: 1.2rem; height: 1.2rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab strong { font-size: .76rem; }
+  .progress-metrics[data-viewport-fit] .health-period-picker { width: min(12rem, 100%); padding: .22rem; }
+  .progress-metrics[data-viewport-fit] .health-period-picker button { min-height: 2.05rem; font-size: .82rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card { padding: .8rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card__icon { width: 2.3rem; height: 2.3rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card__icon svg { width: 1.2rem; height: 1.2rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card > p { font-size: .76rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card > strong { font-size: clamp(1.7rem, 8vw, 2.25rem); }
+  .progress-metrics[data-viewport-fit] .health-summary-card > small { font-size: .75rem; }
+  .progress-metrics[data-viewport-fit] .health-chart { min-height: 6.5rem; margin-top: .5rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid { gap: .55rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid > div { padding: .65rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid svg { width: 2rem; height: 2rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid strong { font-size: .98rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .67rem; }
+  .progress-metrics[data-viewport-fit] .health-insight,
+  .progress-metrics[data-viewport-fit] .health-sync-note { padding: .65rem .8rem; font-size: .74rem; }
 }
 
 .metric-tile {
