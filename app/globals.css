@@ -885,6 +885,15 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .67rem; }
   .progress-metrics[data-viewport-fit] .health-insight,
   .progress-metrics[data-viewport-fit] .health-sync-note { padding: .65rem .8rem; font-size: .74rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card > .health-summary-card__steps-ratio {
+    font-size: clamp(1.45rem, 6.7vw, 2rem);
+  }
+  .progress-metrics[data-metric="nutrition"] .health-summary-card { padding: .65rem .75rem; }
+  .progress-metrics[data-metric="nutrition"] .health-chart { min-height: 5rem; margin-top: .3rem; }
+  .progress-metrics[data-metric="nutrition"] .nutrition-macro-card { padding: .5rem .7rem; }
+  .progress-metrics[data-metric="nutrition"] .nutrition-macro-bar { height: 1.4rem; margin-top: .3rem; }
+  .progress-metrics[data-metric="nutrition"] .nutrition-macro-grid { margin-top: .25rem; }
+  .progress-metrics[data-metric="nutrition"] .health-insight { padding: .45rem .65rem; font-size: .68rem; }
 }
 
 .metric-tile {
