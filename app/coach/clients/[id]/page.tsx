@@ -19,7 +19,7 @@ import { daysSince, formatIsraelDate, formatIsraelDateTime, israelDateKey, israe
 import { listClientFoodLog } from "@/lib/data/product-repository";
 import LoggedFoodList from "@/components/client/LoggedFoodList";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
-import { reportedPortions } from "@/lib/nutrition/menu-intake";
+import { isMealReportedEaten, reportedPortions } from "@/lib/nutrition/menu-intake";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ClientDetailExtras, { NotesPanel } from "@/components/coach/ClientDetailExtras";
 import ClientIntakeForm from "@/components/coach/ClientIntakeForm";
@@ -440,7 +440,7 @@ export default async function CoachClientPage({ params, searchParams }: { params
             <div className="mt-3 grid gap-3">
               {data.menu.meals.map((meal) => <article key={meal.id} className="rounded-2xl border border-[#E5E7E5] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2"><h4 className="font-black">{meal.title}</h4><span className={`pill ${meal.status==="not_eaten"?"pill--red":meal.status||meal.completed?"pill--green":""}`}>{meal.status==="not_eaten"?"לא נאכלה":meal.status==="other"?"נאכל משהו אחר":meal.status==="eaten"||meal.completed?"נאכלה":"לא סומנה"}</span></div>
-                {meal.groups.length?<div className="mt-3 grid gap-2">{meal.groups.map((group,index)=>{const chosen=group.items.find((item)=>item.id===group.selectedItemId)??group.items.find((item)=>item.itemRole==="primary")??group.items[0];const quantity=Number(group.amountOverride??chosen?.displayQuantity);return <div key={`${meal.id}-${index}`} className="rounded-xl bg-[#F7F8F7] px-3 py-2 text-sm"><strong>{chosen?.name??"לא נבחר מאכל"}</strong>{chosen&&<span className="mr-2 text-[#5B5F5B]">{formatPortionLabel(quantity,chosen.measurementUnit)} · {Math.round(chosen.calories??0)} קל׳</span>}</div>})}</div>:meal.freeCalorieTarget?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.freeCalorieTarget} קל׳ חופשיות</p>:null}
+                {meal.groups.length?<div className="mt-3 grid gap-2">{meal.groups.map((group,index)=>{const selected=group.items.find((item)=>item.id===group.selectedItemId);const shown=isMealReportedEaten(meal)?selected:selected??group.items.find((item)=>item.itemRole==="primary")??group.items[0];const quantity=Number(group.amountOverride??shown?.displayQuantity);return <div key={`${meal.id}-${index}`} className="rounded-xl bg-[#F7F8F7] px-3 py-2 text-sm"><strong>{shown?.name??"לא נבחר מאכל"}</strong>{shown&&<span className="mr-2 text-[#5B5F5B]">{formatPortionLabel(quantity,shown.measurementUnit)} · {Math.round(shown.calories??0)} קל׳</span>}</div>})}</div>:meal.freeCalorieTarget?<p className="mt-2 text-sm text-[#5B5F5B]">{meal.freeCalorieTarget} קל׳ חופשיות</p>:null}
                 {meal.notes&&<p className="mt-2 text-xs text-[#5B5F5B]">{meal.notes}</p>}
                 <LoggedFoodList entries={loggedFood.filter((entry)=>entry.mealId===meal.id)} readOnly/>
               </article>)}

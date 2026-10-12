@@ -115,19 +115,23 @@ export function sumItems(items: readonly Item[]): IntakeTotals {
 export function freeCalorieIntake(
   meals: readonly IntakeMeal[],
   loggedCaloriesIn: (mealId: string | undefined) => number = () => 0,
+  loggedEntriesIn: (mealId: string | undefined) => number = (mealId) => loggedCaloriesIn(mealId) > 0 ? 1 : 0,
 ): IntakeTotals {
   const calories = meals
     .filter((meal) => Boolean(meal.freeCalorieTarget) && isMealEaten(meal))
-    .reduce((sum, meal) => sum + (loggedCaloriesIn(meal.id) > 0 || mealStanding(meal).length > 0 ? 0 : (meal.freeCalorieTarget ?? 0)), 0);
+    .reduce((sum, meal) => sum + (loggedEntriesIn(meal.id) > 0 || mealStanding(meal).length > 0 ? 0 : (meal.freeCalorieTarget ?? 0)), 0);
   // Only calories: a free window is a calorie allowance, and the coach did not
   // say what it is made of. Inventing a macro split would be inventing data.
   return { ...ZERO_TOTALS, calories };
 }
 
 /** What is still open in the free windows nobody has answered yet. */
-export function freeCalorieRemaining(meals: readonly IntakeMeal[]): IntakeTotals {
+export function freeCalorieRemaining(
+  meals: readonly IntakeMeal[],
+  loggedEntriesIn: (mealId: string | undefined) => number = () => 0,
+): IntakeTotals {
   const calories = meals
-    .filter((meal) => Boolean(meal.freeCalorieTarget) && !isMealAnswered(meal) && mealStanding(meal).length === 0)
+    .filter((meal) => Boolean(meal.freeCalorieTarget) && !isMealAnswered(meal) && loggedEntriesIn(meal.id) === 0 && mealStanding(meal).length === 0)
     .reduce((sum, meal) => sum + (meal.freeCalorieTarget ?? 0), 0);
   return { ...ZERO_TOTALS, calories };
 }
@@ -136,20 +140,24 @@ export function freeCalorieRemaining(meals: readonly IntakeMeal[]): IntakeTotals
 export const eatenFromMenu = (
   meals: readonly IntakeMeal[],
   loggedCaloriesIn?: (mealId: string | undefined) => number,
+  loggedEntriesIn?: (mealId: string | undefined) => number,
 ): IntakeTotals =>
   addTotals(
     // "Something else" can replace one group while the client still eats
     // explicitly selected foods from the rest of the meal. The external food
     // is added by the food log; the choices remain real intake of their own.
     sumItems(meals.filter(isMealReportedEaten).flatMap(mealIntake)),
-    freeCalorieIntake(meals, loggedCaloriesIn),
+    freeCalorieIntake(meals, loggedCaloriesIn, loggedEntriesIn),
   );
 
 /** What is still on the plan today - meals nobody has answered yet. */
-export const remainingInMenu = (meals: readonly IntakeMeal[]): IntakeTotals =>
+export const remainingInMenu = (
+  meals: readonly IntakeMeal[],
+  loggedEntriesIn?: (mealId: string | undefined) => number,
+): IntakeTotals =>
   addTotals(
     sumItems(meals.filter((meal) => !isMealAnswered(meal)).flatMap(mealStanding)),
-    freeCalorieRemaining(meals),
+    freeCalorieRemaining(meals, loggedEntriesIn),
   );
 
 /**

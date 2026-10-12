@@ -193,9 +193,10 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
   //     intake, so a client who marked breakfast eaten and then scanned a snack
   //     against it lost the mark and the day's calories fell by a whole meal -
   //     silently, as the side effect of logging something extra.
-  //   * a free-calorie meal. There is no plan to have eaten instead of: filling
-  //     the window IS the plan, and calling it a substitution both mislabels it
-  //     on the client's screen and tells the coach the frame was missed.
+  //   * a free-calorie meal. Filling the window IS the plan, so it is marked
+  //     eaten rather than substituted. This also closes the frame in the daily
+  //     progress instead of counting the logged food while leaving the entire
+  //     allowance open.
   const mealId = uuid(form.get("mealId"));
   if (mealId && String(form.get("preserveMealStatus")) !== "true") {
     const [{ data: meal }, { data: existing }] = await Promise.all([
@@ -203,13 +204,15 @@ export async function logClientFood(_: FoodLogState, form: FormData): Promise<Fo
       supabase.from("meal_day_status").select("status").eq("client_id", auth.id).eq("meal_id", mealId).eq("status_date", date).maybeSingle(),
     ]);
     const isFreeCalorieMeal = Boolean(meal?.free_calorie_target);
-    if (!isFreeCalorieMeal && !existing)
-      await supabase.rpc("set_meal_day_status", {
+    if (!existing) {
+      const { error: statusError } = await supabase.rpc("set_meal_day_status", {
         p_meal_id: mealId,
         p_date: date,
-        p_status: "other",
-        p_note: resolvedName.slice(0, 500),
+        p_status: isFreeCalorieMeal ? "eaten" : "other",
+        p_note: isFreeCalorieMeal ? null : resolvedName.slice(0, 500),
       });
+      if (statusError) console.error("logged_food_status_failed", { mealId, code: statusError.code });
+    }
   }
 
   revalidatePath("/nutrition");
@@ -231,7 +234,7 @@ export async function deleteClientFoodLog(form: FormData): Promise<void> {
   if (!id) return;
   const supabase = await createSupabaseServerClient();
   // The picture goes with the row it belonged to.
-  const { data } = await supabase.from("client_food_log").select("photo_path").eq("id", id).eq("client_id", auth.id).maybeSingle();
+  const { data } = await supabase.from("client_food_log").select("photo_path,meal_id,log_date").eq("id", id).eq("client_id", auth.id).maybeSingle();
   const { data: deleted, error } = await supabase.rpc("delete_client_food_log", { p_id: id });
   if (error || deleted !== true) {
     console.error("food_log_delete_failed", { id, code: error?.code, message: error?.message });
@@ -239,6 +242,24 @@ export async function deleteClientFoodLog(form: FormData): Promise<void> {
   }
   const path = data?.photo_path;
   if (path) await supabase.storage.from(FOOD_LOG_PHOTO_BUCKET).remove([String(path)]);
+  // The last replacement being deleted means the replacement answer no longer
+  // exists. The same is true of a free-calorie frame that was closed by logging
+  // its first item. Reopen the meal; the client can still mark the bare frame as
+  // eaten explicitly if that is what happened.
+  if (data?.meal_id && data.log_date) {
+    const mealId = String(data.meal_id);
+    const [{ count: remaining }, { data: meal }, { data: mark }] = await Promise.all([
+      supabase.from("client_food_log").select("id", { count: "exact", head: true }).eq("client_id", auth.id).eq("meal_id", mealId).eq("log_date", String(data.log_date)),
+      supabase.from("meals").select("free_calorie_target").eq("id", mealId).maybeSingle(),
+      supabase.from("meal_day_status").select("status").eq("client_id", auth.id).eq("meal_id", mealId).eq("status_date", String(data.log_date)).maybeSingle(),
+    ]);
+    if ((remaining ?? 0) === 0 && (mark?.status === "other" || (meal?.free_calorie_target && mark?.status === "eaten"))) {
+      const { error: resetError } = await supabase.rpc("set_meal_day_status", {
+        p_meal_id: mealId, p_date: String(data.log_date), p_status: "none", p_note: null,
+      });
+      if (resetError) console.error("food_log_status_reset_failed", { mealId, code: resetError.code });
+    }
+  }
   revalidatePath("/nutrition");
   revalidatePath("/");
 }
