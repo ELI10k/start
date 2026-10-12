@@ -47,8 +47,10 @@ export type WorkoutReportInput = Readonly<{
 // begins. Used only to say whether a session ran long, and every sentence built
 // on it is phrased as an approximation.
 const WORK_SECONDS_PER_SET = 45;
-// Below this there is nothing worth remarking on - sessions vary.
-const OVERRUN_TOLERANCE = 1.4;
+// A workout includes ordinary interruptions such as waiting for equipment,
+// getting water, and taking longer recovery when needed. Only surface a pace
+// note when the total duration exceeds the estimate by more than 20 minutes.
+const OVERRUN_ATTENTION_SECONDS = 20 * 60;
 
 const completed = (sets: readonly ExerciseSetResult[]) => sets.filter((set) => set.completed);
 const heaviest = (sets: readonly ExerciseSetResult[]) =>
@@ -71,14 +73,13 @@ export function buildWorkoutReport(input: WorkoutReportInput): readonly WorkoutI
 
   // ── Pace ────────────────────────────────────────────────────────────────
   const expected = expectedSeconds(input.exercises);
-  if (expected > 0 && input.durationSeconds > expected * OVERRUN_TOLERANCE) {
+  if (expected > 0 && input.durationSeconds - expected > OVERRUN_ATTENTION_SECONDS) {
     const over = minutes(input.durationSeconds - expected);
-    if (over >= 5)
-      insights.push({
-        tone: "action", section:"attention",
-        title: "האימון נמשך יותר מהצפוי",
-        detail: `הסטים והמנוחות שלך מסתכמים בכ־${minutes(expected)} דקות, והאימון לקח ${minutes(input.durationSeconds)}. הפרש של ${over} דקות. אימון רצוף שומר על הדופק ועל האפקט המטבולי - שווה לשים לב מה קורה בין הסטים.`,
-      });
+    insights.push({
+      tone: "action", section:"attention",
+      title: "האימון נמשך יותר מהצפוי",
+      detail: `הערכת האימון היא כ־${minutes(expected)} דקות, ובפועל הוא לקח ${minutes(input.durationSeconds)} דקות — פער של ${over} דקות. הפער יכול לכלול המתנה למכשירים, מילוי מים או הפסקות אישיות; אם הוא מפריע לך, כדאי לבדוק מה אפשר לייעל בלי לקצר מנוחה שנחוצה לביצוע טוב.`,
+    });
   }
 
   // ── Weight progression, per exercise ────────────────────────────────────
