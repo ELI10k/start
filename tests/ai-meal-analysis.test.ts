@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { calculateFoodNutrition } from "../lib/meal-plans/calculations.ts";
 import { AI_MEAL_ALLOWED_USER_ID, canUseAiMealAnalysis } from "../lib/nutrition/ai-meal-feature.ts";
-import { applyMealClarification, buildMealClarifications, matchFood, normalizeComponents, parseMealAnalysis, type RawMealClarification, type RawMealComponent } from "../lib/nutrition/meal-image-analysis.ts";
+import { applyMealClarification, buildMealClarifications, matchFood, normalizeComponents, parseMealAnalysis, type MealClarificationEffect, type RawMealClarification, type RawMealComponent } from "../lib/nutrition/meal-image-analysis.ts";
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const foods = [
@@ -23,10 +23,12 @@ const component = (overrides: Partial<RawMealComponent> & Pick<RawMealComponent,
   clarification: null,
   ...overrides,
 });
-const clarificationComponent = (name: string, preparation: string, sharePercent: number, caloriesPer100: number, overrides = {}) => ({
-  name, preparation, sharePercent, caloriesPer100, proteinPer100: 2, carbsPer100: 10, fatPer100: 10,
-  nutritionIncludesAddedFat: /מטוגן|מיונז/u.test(`${name} ${preparation}`), standaloneVisibleAddition: false,
-  confidence: "medium" as const, assumptions: [], ...overrides,
+const option = (id: string, label: string, effect: MealClarificationEffect, foodName = "", preparation = "") => ({ id, label, effect, foodName, preparation });
+const flatQuestion = (overrides: Partial<Record<string, unknown>> = {}) => ({
+  questionId: "split", kind: "group_split", groupId: "salad", question: "איך מתחלקת הכמות?",
+  option1Id: "half", option1Label: "חצי־חצי", option1Effect: "split_even", option1FoodName: "", option1Preparation: "",
+  option2Id: "first", option2Label: "בעיקר הראשון", option2Effect: "first_more", option2FoodName: "", option2Preparation: "",
+  ...overrides,
 });
 
 test("AI meal access requires both the global switch and the personal allowlist", () => {
@@ -74,26 +76,56 @@ test("ambiguous foods remain labelled AI estimates", () => {
 });
 
 test("malformed and contradictory model responses are rejected", () => {
-  assert.deepEqual(parseMealAnalysis({ containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [] }), { containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [] });
+  assert.deepEqual(parseMealAnalysis({ containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [] }), { containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [], discardedClarificationGroupIds: [] });
   assert.equal(parseMealAnalysis({ containsFood: true, summary: "", groups: [], components: [], clarifications: [] }), null);
   assert.equal(parseMealAnalysis({ containsFood: true, summary: "x", groups: [group("main", 100)], components: [{ name: "אורז", estimatedGrams: -1 }], clarifications: [] }), null);
 });
 
-test("structured clarification options require a complete weight-preserving split", () => {
+test("flat clarification schema accepts two valid options and drops malformed questions", () => {
   const base = {
     containsFood: true, summary: "סלט", groups: [group("salad", 100)],
     components: [component({ name: "חציל מטוגן", preparation: "מטוגן", groupId: "salad", estimatedGrams: 100, calories: 180, protein: 2, carbs: 10, fat: 15 })],
   };
-  const valid = {
-    id: "split", kind: "group_split", groupId: "salad", question: "איך מתחלקת הכמות?",
-    options: [
-      { id: "half", label: "חצי־חצי", components: [clarificationComponent("חציל מטוגן", "מטוגן", 50, 180), clarificationComponent("חציל במיונז", "עם מיונז", 50, 280)] },
-      { id: "fried", label: "בעיקר מטוגן", components: [clarificationComponent("חציל מטוגן", "מטוגן", 80, 180), clarificationComponent("חציל במיונז", "עם מיונז", 20, 280)] },
-    ],
-  };
+  const valid = flatQuestion();
   assert.equal(parseMealAnalysis({ ...base, clarifications: [valid] })?.clarifications.length, 1);
-  const invalid = { ...valid, options: valid.options.map((option) => ({ ...option, components: option.components.map((item, index) => ({ ...item, sharePercent: index === 0 ? 20 : 30 })) })) };
-  assert.equal(parseMealAnalysis({ ...base, clarifications: [invalid] }), null);
+  const parsed = parseMealAnalysis({ ...base, clarifications: [{ ...valid, option2Id: "half" }] });
+  assert.equal(parsed?.clarifications.length, 0);
+  assert.deepEqual(parsed?.discardedClarificationGroupIds, ["salad"]);
+});
+
+test("a malformed nested Qwen question does not discard otherwise valid meal components", () => {
+  const base = {
+    containsFood: true, summary: "ארוחה", groups: [group("g_sauce", 60)],
+    components: [component({ name: "רוטב", preparation: "לא ידוע", groupId: "g_sauce", estimatedGrams: 60, calories: 120, protein: 1, carbs: 5, fat: 10 })],
+  };
+  const realFailureShape = [
+    { id: "sauce-type", kind: "component_identity", groupId: "g_sauce", question: "איזה רוטב?", options: [{ id: "mayo", label: "מיונז", components: [] }] },
+    { id: "tahini", label: "טחינה", components: [] },
+  ];
+  const parsed = parseMealAnalysis({ ...base, clarifications: realFailureShape });
+  assert.equal(parsed?.components.length, 1);
+  assert.equal(parsed?.clarifications.length, 0);
+  assert.deepEqual(parsed?.discardedClarificationGroupIds, ["g_sauce"]);
+});
+
+test("the real flat Qwen response can be resolved and recalculated deterministically", () => {
+  const parsed = parseMealAnalysis({
+    containsFood: true, summary: "שניצל מטוגן", groups: [group("g_main", 200)],
+    components: [component({ name: "שניצל", preparation: "מטוגן", groupId: "g_main", estimatedGrams: 200, calories: 560, protein: 34, carbs: 28, fat: 34 })],
+    clarifications: [flatQuestion({
+      questionId: "c_frying_method", kind: "preparation", groupId: "g_main", question: "כיצד השניצל בושל?",
+      option1Id: "o1_deep_fry", option1Label: "בשמן עמוק", option1Effect: "keep_estimate", option1FoodName: "", option1Preparation: "מטוגן בשמן עמוק",
+      option2Id: "o2_pan_fry", option2Label: "במעט שמן במחבת", option2Effect: "catalog_food", option2FoodName: "שניצל", option2Preparation: "מטוגן במחבת עם מעט שמן",
+    })],
+  });
+  assert.ok(parsed);
+  const normalized = normalizeComponents(parsed.components, [], parsed.groups);
+  const catalog = [{ id: "pan-schnitzel", name: "שניצל", calories: 220, protein: 20, carbs: 14, fat: 10, verificationStatus: "מאושר", notes: "מאכל מאסטר; מטוגן במחבת עם מעט שמן" }];
+  const [question] = buildMealClarifications(parsed.clarifications, "לא ברור אם טוגן בשמן עמוק או במחבת עם מעט שמן", normalized, catalog, parsed.groups);
+  assert.ok(question);
+  const recalculated = applyMealClarification(normalized, question, question.options[1]);
+  assert.equal(recalculated.reduce((sum, item) => sum + item.grams, 0), 200);
+  assert.equal(recalculated.reduce((sum, item) => sum + calculateFoodNutrition(item.per100, item.grams).calories, 0), 440);
 });
 
 test("salad components are split within one visual group without increasing its total weight", () => {
@@ -128,9 +160,8 @@ test("clarifications do not repeat facts already supplied in the meal descriptio
   const question: RawMealClarification = {
     id: "eggplant-kind", kind: "component_identity", groupId: "eggplant", question: "איזה סוג חציל יש בארוחה?",
     options: [
-      { id: "fried", label: "חציל מטוגן", components: [clarificationComponent("חציל מטוגן", "מטוגן", 100, 200)] },
-      { id: "mayo", label: "חציל במיונז", components: [clarificationComponent("חציל במיונז", "עם מיונז", 100, 280)] },
-      { id: "both", label: "שניהם", components: [clarificationComponent("חציל מטוגן", "מטוגן", 50, 200), clarificationComponent("חציל במיונז", "עם מיונז", 50, 280)] },
+      option("fried", "חציל מטוגן", "catalog_food", "חציל מטוגן", "מטוגן"),
+      option("both", "שניהם", "both", "חציל במיונז", "עם מיונז"),
     ],
   };
   const result = buildMealClarifications([question], "פרגית קוסקוס חצילים במיונז וחציל מטוגן", normalized, [], [group("eggplant", 100)]);
@@ -144,22 +175,31 @@ test("a preparation question remains when only the food name was supplied", () =
   const question: RawMealClarification = {
     id: "chicken-prep", kind: "preparation", groupId: "chicken", question: "איך הפרגית הוכנה?",
     options: [
-      { id: "grilled", label: "צלויה", components: [clarificationComponent("פרגית", "צלויה", 100, 200)] },
-      { id: "fried", label: "מטוגנת", components: [clarificationComponent("פרגית", "מטוגנת", 100, 300)] },
+      option("grilled", "צלויה", "catalog_food", "פרגית צלויה", "צלויה"),
+      option("fried", "מטוגנת", "catalog_food", "פרגית מטוגנת", "מטוגנת"),
     ],
   };
-  assert.equal(buildMealClarifications([question], "פרגית וקוסקוס", normalized, [], [group("chicken", 170)]).length, 1);
-  assert.equal(buildMealClarifications([question], "פרגית צלויה וקוסקוס", normalized, [], [group("chicken", 170)]).length, 0);
+  const preparationFoods = [
+    { id: "grilled", name: "פרגית צלויה", calories: 200, protein: 24, carbs: 0, fat: 11 },
+    { id: "fried", name: "פרגית מטוגנת", calories: 320, protein: 22, carbs: 6, fat: 24 },
+  ];
+  assert.equal(buildMealClarifications([question], "פרגית וקוסקוס", normalized, preparationFoods, [group("chicken", 170)]).length, 1);
+  assert.equal(buildMealClarifications([question], "פרגית צלויה וקוסקוס", normalized, preparationFoods, [group("chicken", 170)]).length, 0);
+  assert.equal(buildMealClarifications([question], "לא ברור אם הפרגית צלויה או מטוגנת", normalized, preparationFoods, [group("chicken", 170)]).length, 1);
 });
 
 test("only the two highest-impact clarification groups are returned", () => {
   const groups = [group("a", 100), group("b", 100), group("c", 100)];
-  const normalized = normalizeComponents(groups.map((item) => component({ name: `סלט ${item.id}`, preparation: "לא ידוע", groupId: item.id, estimatedGrams: 100, calories: 100, protein: 2, carbs: 10, fat: 5 })), [], groups);
+  const raw = groups.flatMap((item) => [
+    component({ name: `ירק ${item.id}`, preparation: "לא ידוע", groupId: item.id, estimatedGrams: 50, calories: 25, protein: 1, carbs: 5, fat: 0 }),
+    component({ name: `תערובת ${item.id}`, preparation: "לא ידוע", groupId: item.id, estimatedGrams: 50, calories: 100 + item.id.charCodeAt(0), protein: 1, carbs: 5, fat: 10 }),
+  ]);
+  const normalized = normalizeComponents(raw, [], groups);
   const questions: RawMealClarification[] = groups.map((item, index) => ({
     id: `question-${item.id}`, kind: "sauce_amount", groupId: item.id, question: `כמה רוטב יש בסלט ${item.id}?`,
     options: [
-      { id: "little", label: "מעט", components: [clarificationComponent(`סלט ${item.id}`, "מעט רוטב", 100, 120)] },
-      { id: "much", label: "הרבה", components: [clarificationComponent(`סלט ${item.id}`, "הרבה רוטב", 100, 240 + index * 40)] },
+      option("little", "מעט", "first_more"),
+      option("much", "הרבה", index === 2 ? "second_more" : "split_even"),
     ],
   }));
   assert.deepEqual(buildMealClarifications(questions, "שלושה סלטים", normalized, [], groups).map((question) => question.id), ["question-c", "question-b"]);
@@ -174,8 +214,8 @@ test("one-click group split keeps the current total grams and recalculates local
   const question: RawMealClarification = {
     id: "salad-split", kind: "group_split", groupId: "salads", question: "איך מתחלקת כמות החצילים?",
     options: [
-      { id: "mostly-fried", label: "בעיקר מטוגן", components: [clarificationComponent("חציל מטוגן", "מטוגן", 80, 150), clarificationComponent("חציל במיונז", "עם מיונז", 20, 450)] },
-      { id: "both", label: "חצי־חצי", components: [clarificationComponent("חציל מטוגן", "מטוגן", 50, 150), clarificationComponent("חציל במיונז", "עם מיונז", 50, 450)] },
+      option("mostly-fried", "בעיקר מטוגן", "first_more"),
+      option("both", "חצי־חצי", "split_even"),
     ],
   };
   const [built] = buildMealClarifications([question], "חציל מטוגן וחציל במיונז", normalized, [], [group("salads", 100)]);
@@ -185,6 +225,7 @@ test("one-click group split keeps the current total grams and recalculates local
   assert.equal(result.reduce((sum, item) => sum + item.grams, 0), 120);
   assert.deepEqual(result.map((item) => item.grams), [60, 60]);
   assert.equal(result.reduce((sum, item) => sum + calculateFoodNutrition(item.per100, item.grams).calories, 0), 360);
+  assert.deepEqual(buildMealClarifications([question], "70 גרם חציל מטוגן ו-30 גרם חציל במיונז", normalized, [], [group("salads", 100)]), []);
 });
 
 test("clarification alternatives cannot double-count mayonnaise already included in prepared food", () => {
@@ -194,17 +235,12 @@ test("clarification alternatives cannot double-count mayonnaise already included
   const question: RawMealClarification = {
     id: "mayo-amount", kind: "sauce_amount", groupId: "carrot", question: "כמה מיונז יש בסלט?",
     options: [
-      { id: "light", label: "מעט", components: [clarificationComponent("גזר במיונז", "עם מעט מיונז", 100, 130)] },
-      { id: "rich", label: "הרבה", components: [
-        clarificationComponent("גזר במיונז", "עם מיונז", 90, 260),
-        clarificationComponent("מיונז", "רוטב", 10, 680, { standaloneVisibleAddition: true }),
-      ] },
+      option("light", "השאר הערכה", "keep_estimate", "גזר במיונז", "עם מיונז"),
+      option("rich", "גזר וגם מיונז", "both", "מיונז", "רוטב"),
     ],
   };
-  const [built] = buildMealClarifications([question], "גזר במיונז", normalized, [], [group("carrot", 100)]);
-  assert.ok(built);
-  assert.equal(built.options[1].replacements.length, 1);
-  assert.equal(built.options[1].replacements[0].grams, 100);
+  const mayo = { id: "mayo", name: "מיונז", calories: 680, protein: 1, carbs: 1, fat: 75 };
+  assert.deepEqual(buildMealClarifications([question], "גזר", normalized, [mayo], [group("carrot", 100)]), []);
 });
 
 test("catalog matching requires trusted foods and a compatible preparation", () => {
@@ -260,6 +296,9 @@ test("each analysis uses one gateway request and grouped normalization", async (
   const route = await source("app/api/nutrition/analyze-meal/route.ts");
   assert.equal(route.match(/fetch\("https:\/\/ai-gateway\.vercel\.sh/g)?.length, 1);
   assert.match(route, /normalizeComponents\(parsed\.components, foods, parsed\.groups\)/);
+  assert.match(route, /מבנה clarification שטוח/);
+  assert.match(route, /malformedQuestionNote/);
+  assert.doesNotMatch(route, /sharePercent/);
 });
 
 test("weight edits are local and do not call AI again", async () => {

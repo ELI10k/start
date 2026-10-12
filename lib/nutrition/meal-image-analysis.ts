@@ -28,18 +28,14 @@ export type RawMealComponent = Readonly<{
 
 export type MealClarificationKind = "group_split" | "component_identity" | "preparation" | "sauce_amount";
 
-export type RawClarificationOptionComponent = Readonly<{
-  name: string;
+export type MealClarificationEffect = "keep_estimate" | "split_even" | "first_more" | "second_more" | "catalog_food" | "both";
+
+export type RawClarificationOption = Readonly<{
+  id: string;
+  label: string;
+  effect: MealClarificationEffect;
+  foodName: string;
   preparation: string;
-  sharePercent: number;
-  caloriesPer100: number;
-  proteinPer100: number;
-  carbsPer100: number;
-  fatPer100: number;
-  nutritionIncludesAddedFat: boolean;
-  standaloneVisibleAddition: boolean;
-  confidence: AiConfidence;
-  assumptions: readonly string[];
 }>;
 
 export type RawMealClarification = Readonly<{
@@ -47,7 +43,16 @@ export type RawMealClarification = Readonly<{
   kind: MealClarificationKind;
   groupId: string;
   question: string;
-  options: readonly Readonly<{ id: string; label: string; components: readonly RawClarificationOptionComponent[] }>[];
+  options: readonly [RawClarificationOption, RawClarificationOption];
+}>;
+
+export type ParsedMealAnalysis = Readonly<{
+  containsFood: boolean;
+  summary: string;
+  groups: RawMealGroup[];
+  components: RawMealComponent[];
+  clarifications: RawMealClarification[];
+  discardedClarificationGroupIds: string[];
 }>;
 
 export type MealAnalysisComponent = Readonly<{
@@ -95,6 +100,8 @@ const round = (value: number) => Math.round(value * 10) / 10;
 const normalize = (value: string) => value.normalize("NFKD").replace(/[\u0591-\u05C7]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim().toLowerCase();
 
 const textField = { type: "string", minLength: 1, maxLength: 100 } as const;
+const optionalTextField = { type: "string", maxLength: 100 } as const;
+const clarificationEffect = { type: "string", enum: ["keep_estimate", "split_even", "first_more", "second_more", "catalog_food", "both"] } as const;
 
 export const MEAL_ANALYSIS_SCHEMA = {
   type: "object",
@@ -142,53 +149,32 @@ export const MEAL_ANALYSIS_SCHEMA = {
       type: "array", minItems: 0, maxItems: 4,
       items: {
         type: "object", additionalProperties: false,
-        required: ["id", "kind", "groupId", "question", "options"],
+        required: ["questionId", "kind", "groupId", "question", "option1Id", "option1Label", "option1Effect", "option1FoodName", "option1Preparation", "option2Id", "option2Label", "option2Effect", "option2FoodName", "option2Preparation"],
         properties: {
-          id: { type: "string", minLength: 1, maxLength: 40 },
+          questionId: { type: "string", minLength: 1, maxLength: 40 },
           kind: { type: "string", enum: ["group_split", "component_identity", "preparation", "sauce_amount"] },
           groupId: { type: "string", minLength: 1, maxLength: 40 },
           question: { type: "string", minLength: 1, maxLength: 160 },
-          options: {
-            type: "array", minItems: 2, maxItems: 4,
-            items: {
-              type: "object", additionalProperties: false,
-              required: ["id", "label", "components"],
-              properties: {
-                id: { type: "string", minLength: 1, maxLength: 40 },
-                label: { type: "string", minLength: 1, maxLength: 60 },
-                components: {
-                  type: "array", minItems: 1, maxItems: 4,
-                  items: {
-                    type: "object", additionalProperties: false,
-                    required: ["name", "preparation", "sharePercent", "caloriesPer100", "proteinPer100", "carbsPer100", "fatPer100", "nutritionIncludesAddedFat", "standaloneVisibleAddition", "confidence", "assumptions"],
-                    properties: {
-                      name: textField,
-                      preparation: { type: "string", minLength: 1, maxLength: 80 },
-                      sharePercent: { type: "number", exclusiveMinimum: 0, maximum: 100 },
-                      caloriesPer100: { type: "number", minimum: 0, maximum: 900 },
-                      proteinPer100: { type: "number", minimum: 0, maximum: 100 },
-                      carbsPer100: { type: "number", minimum: 0, maximum: 100 },
-                      fatPer100: { type: "number", minimum: 0, maximum: 100 },
-                      nutritionIncludesAddedFat: { type: "boolean" },
-                      standaloneVisibleAddition: { type: "boolean" },
-                      confidence: { type: "string", enum: ["high", "medium", "low"] },
-                      assumptions: { type: "array", maxItems: 5, items: { type: "string", maxLength: 160 } },
-                    },
-                  },
-                },
-              },
-            },
-          },
+          option1Id: { type: "string", minLength: 1, maxLength: 40 },
+          option1Label: { type: "string", minLength: 1, maxLength: 60 },
+          option1Effect: clarificationEffect,
+          option1FoodName: optionalTextField,
+          option1Preparation: { type: "string", maxLength: 80 },
+          option2Id: { type: "string", minLength: 1, maxLength: 40 },
+          option2Label: { type: "string", minLength: 1, maxLength: 60 },
+          option2Effect: clarificationEffect,
+          option2FoodName: optionalTextField,
+          option2Preparation: { type: "string", maxLength: 80 },
         },
       },
     },
   },
 } as const;
 
-export function parseMealAnalysis(value: unknown): { containsFood: boolean; summary: string; groups: RawMealGroup[]; components: RawMealComponent[]; clarifications: RawMealClarification[] } | null {
+export function parseMealAnalysis(value: unknown): ParsedMealAnalysis | null {
   if (!value || typeof value !== "object") return null;
   const root = value as Record<string, unknown>;
-  if (typeof root.containsFood !== "boolean" || typeof root.summary !== "string" || !Array.isArray(root.groups) || root.groups.length > 20 || !Array.isArray(root.components) || root.components.length > 20 || !Array.isArray(root.clarifications) || root.clarifications.length > 4) return null;
+  if (typeof root.containsFood !== "boolean" || typeof root.summary !== "string" || !Array.isArray(root.groups) || root.groups.length > 20 || !Array.isArray(root.components) || root.components.length > 20) return null;
   const groups: RawMealGroup[] = [];
   const groupIds = new Set<string>();
   for (const raw of root.groups) {
@@ -220,48 +206,39 @@ export function parseMealAnalysis(value: unknown): { containsFood: boolean; summ
     components.push({ name, preparation, weightBasis: weightBasis as MealWeightBasis, groupId, estimatedGrams: round(grams), calories: round(calories), protein: round(protein), carbs: round(carbs), fat: round(fat), nutritionIncludesAddedFat: item.nutritionIncludesAddedFat, standaloneVisibleAddition: item.standaloneVisibleAddition, confidence: confidence as AiConfidence, assumptions, clarification });
   }
   const clarifications: RawMealClarification[] = [];
+  const discardedClarificationGroupIds = new Set<string>();
   const clarificationIds = new Set<string>();
-  for (const raw of root.clarifications) {
-    if (!raw || typeof raw !== "object") return null;
+  const rawClarifications = Array.isArray(root.clarifications) ? root.clarifications.slice(0, 4) : [];
+  for (const raw of rawClarifications) {
+    if (!raw || typeof raw !== "object") continue;
     const item = raw as Record<string, unknown>;
-    const id = String(item.id ?? "").trim().slice(0, 40);
+    const id = String(item.questionId ?? "").trim().slice(0, 40);
     const kind = item.kind;
     const groupId = String(item.groupId ?? "").trim().slice(0, 40);
     const question = String(item.question ?? "").trim().slice(0, 160);
-    if (!id || clarificationIds.has(id) || !groupIds.has(groupId) || !question || !(["group_split", "component_identity", "preparation", "sauce_amount"] as const).includes(kind as MealClarificationKind) || !Array.isArray(item.options) || item.options.length < 2 || item.options.length > 4) return null;
-    clarificationIds.add(id);
-    const optionIds = new Set<string>();
-    const options = [];
-    for (const rawOption of item.options) {
-      if (!rawOption || typeof rawOption !== "object") return null;
-      const option = rawOption as Record<string, unknown>;
-      const optionId = String(option.id ?? "").trim().slice(0, 40);
-      const label = String(option.label ?? "").trim().slice(0, 60);
-      if (!optionId || optionIds.has(optionId) || !label || !Array.isArray(option.components) || option.components.length < 1 || option.components.length > 4) return null;
-      optionIds.add(optionId);
-      const optionComponents: RawClarificationOptionComponent[] = [];
-      let totalShare = 0;
-      for (const rawComponent of option.components) {
-        if (!rawComponent || typeof rawComponent !== "object") return null;
-        const candidate = rawComponent as Record<string, unknown>;
-        const name = String(candidate.name ?? "").trim().slice(0, 100);
-        const preparation = String(candidate.preparation ?? "").trim().slice(0, 80);
-        const values = [candidate.sharePercent, candidate.caloriesPer100, candidate.proteinPer100, candidate.carbsPer100, candidate.fatPer100].map(Number);
-        const [sharePercent, caloriesPer100, proteinPer100, carbsPer100, fatPer100] = values;
-        const confidence = candidate.confidence;
-        if (!name || !preparation || !values.every(Number.isFinite) || sharePercent <= 0 || sharePercent > 100 || caloriesPer100 < 0 || caloriesPer100 > LIMITS.calories || proteinPer100 < 0 || proteinPer100 > LIMITS.protein || carbsPer100 < 0 || carbsPer100 > LIMITS.carbs || fatPer100 < 0 || fatPer100 > LIMITS.fat || typeof candidate.nutritionIncludesAddedFat !== "boolean" || typeof candidate.standaloneVisibleAddition !== "boolean" || !(["high", "medium", "low"] as const).includes(confidence as AiConfidence)) return null;
-        const assumptions = Array.isArray(candidate.assumptions) ? candidate.assumptions.map(String).map((text) => text.trim().slice(0, 160)).filter(Boolean).slice(0, 5) : [];
-        totalShare += sharePercent;
-        optionComponents.push({ name, preparation, sharePercent: round(sharePercent), caloriesPer100: round(caloriesPer100), proteinPer100: round(proteinPer100), carbsPer100: round(carbsPer100), fatPer100: round(fatPer100), nutritionIncludesAddedFat: candidate.nutritionIncludesAddedFat, standaloneVisibleAddition: candidate.standaloneVisibleAddition, confidence: confidence as AiConfidence, assumptions });
-      }
-      if (Math.abs(totalShare - 100) > 0.5) return null;
-      options.push({ id: optionId, label, components: optionComponents });
+    const effects = [item.option1Effect, item.option2Effect];
+    const optionIds = [item.option1Id, item.option2Id].map((value) => String(value ?? "").trim().slice(0, 40));
+    const labels = [item.option1Label, item.option2Label].map((value) => String(value ?? "").trim().slice(0, 60));
+    const effectValues = ["keep_estimate", "split_even", "first_more", "second_more", "catalog_food", "both"] as const;
+    const invalid = !id || clarificationIds.has(id) || !groupIds.has(groupId) || !question
+      || !(["group_split", "component_identity", "preparation", "sauce_amount"] as const).includes(kind as MealClarificationKind)
+      || optionIds.some((value) => !value) || optionIds[0] === optionIds[1] || labels.some((value) => !value)
+      || effects.some((value) => !effectValues.includes(value as MealClarificationEffect));
+    if (invalid) {
+      if (groupIds.has(groupId)) discardedClarificationGroupIds.add(groupId);
+      continue;
     }
+    clarificationIds.add(id);
+    const options = [0, 1].map((index): RawClarificationOption => ({
+      id: optionIds[index], label: labels[index], effect: effects[index] as MealClarificationEffect,
+      foodName: String(item[`option${index + 1}FoodName`] ?? "").trim().slice(0, 100),
+      preparation: String(item[`option${index + 1}Preparation`] ?? "").trim().slice(0, 80),
+    })) as [RawClarificationOption, RawClarificationOption];
     clarifications.push({ id, kind: kind as MealClarificationKind, groupId, question, options });
   }
   if (root.containsFood !== (components.length > 0) || root.containsFood !== (groups.length > 0)) return null;
-  if (!root.containsFood && clarifications.length) return null;
-  return { containsFood: root.containsFood, summary: root.summary.trim().slice(0, 200), groups, components, clarifications };
+  if (!root.containsFood) clarifications.length = 0;
+  return { containsFood: root.containsFood, summary: root.summary.trim().slice(0, 200), groups, components, clarifications, discardedClarificationGroupIds: [...discardedClarificationGroupIds] };
 }
 
 const PREPARATION_TERMS = {
@@ -383,23 +360,26 @@ const phraseMentioned = (description: Set<string>, phrase: string) => {
   return tokens.length > 0 && tokens.every((token) => description.has(token));
 };
 
-function clarificationAlreadyAnswered(description: string, clarification: RawMealClarification) {
+function clarificationAlreadyAnswered(description: string, clarification: RawMealClarification, targets: readonly MealAnalysisComponent[]) {
   const tokens = descriptionTokens(description);
+  const normalizedDescription = normalize(description);
+  const explicitlyUncertain = /לא\s*(?:ברור|בטוח)|אולי|ייתכן|(?:^|\s)או(?:\s|$)/u.test(normalizedDescription);
   if (clarification.kind === "group_split") {
-    const amounts = normalize(description).match(/\d+(?:[.,]\d+)?\s*(?:גרם|אחוז|%)/gu) ?? [];
-    const distinctNames = [...new Set(clarification.options.flatMap((option) => option.components.map((component) => component.name)))];
+    const amounts = normalizedDescription.match(/\d+(?:[.,]\d+)?\s*(?:גרם|אחוז|%)/gu) ?? [];
+    const distinctNames = [...new Set([...clarification.options.map((option) => option.foodName), ...targets.map((target) => target.name)].filter(Boolean))];
     const mentionedNames = distinctNames.filter((name) => phraseMentioned(tokens, name)).length;
-    return (amounts.length >= 2 && mentionedNames >= 2) || /חצי\s*חצי|שווה\s*בשווה/u.test(normalize(description));
+    return (amounts.length >= 2 && mentionedNames >= 2) || /חצי\s*חצי|שווה\s*בשווה/u.test(normalizedDescription);
   }
   if (clarification.kind === "sauce_amount") {
-    return /\d+(?:[.,]\d+)?\s*(?:גרם|כפות?|כפיות?|מ[״"]?ל)/u.test(normalize(description)) && /שמן|מיונז|רוטב|טחינה/u.test(normalize(description));
+    return /\d+(?:[.,]\d+)?\s*(?:גרם|כפות?|כפיות?|מ[״"]?ל)/u.test(normalizedDescription) && /שמן|מיונז|רוטב|טחינה/u.test(normalizedDescription);
   }
+  if (explicitlyUncertain) return false;
   if (clarification.kind === "preparation")
-    return clarification.options.some((option) => option.components.every((component) => phraseMentioned(tokens, component.preparation)));
-  const mentionedByOption = clarification.options.map((option) => option.components.every((component) => phraseMentioned(tokens, component.name)));
+    return clarification.options.some((option) => option.preparation && phraseMentioned(tokens, option.preparation));
+  const mentionedByOption = clarification.options.map((option) => option.foodName && phraseMentioned(tokens, option.foodName));
   if (mentionedByOption.some(Boolean)) return true;
   if (clarification.kind === "component_identity") {
-    const distinctNames = [...new Set(clarification.options.flatMap((option) => option.components.map((component) => component.name)))];
+    const distinctNames = [...new Set(clarification.options.map((option) => option.foodName).filter(Boolean))];
     return distinctNames.filter((name) => phraseMentioned(tokens, name)).length >= 2;
   }
   return false;
@@ -419,28 +399,17 @@ export function buildMealClarifications(raw: readonly RawMealClarification[], de
   const groupById = new Map(groups.map((group) => [group.id, group]));
   const candidates: Array<{ clarification: MealClarification; score: number; groupId: string }> = [];
   for (const question of raw) {
-    if (clarificationAlreadyAnswered(description, question)) continue;
     const group = groupById.get(question.groupId);
     const targets = components.filter((component) => component.groupId === question.groupId && component.componentKey);
     if (!group || !targets.length) continue;
+    if (clarificationAlreadyAnswered(description, question, targets)) continue;
     const options: MealClarificationOption[] = [];
-    try {
-      for (const option of question.options) {
-        const rawComponents: RawMealComponent[] = option.components.map((component) => {
-          const grams = group.estimatedGrams * component.sharePercent / 100;
-          return {
-            name: component.name, preparation: component.preparation, weightBasis: "as_served", groupId: group.id,
-            estimatedGrams: grams, calories: component.caloriesPer100 * grams / 100, protein: component.proteinPer100 * grams / 100,
-            carbs: component.carbsPer100 * grams / 100, fat: component.fatPer100 * grams / 100,
-            nutritionIncludesAddedFat: component.nutritionIncludesAddedFat, standaloneVisibleAddition: component.standaloneVisibleAddition,
-            confidence: component.confidence, assumptions: component.assumptions, clarification: null,
-          };
-        });
-        const replacements = normalizeComponents(rawComponents, foods, [group]).map((component, index) => ({ ...component, componentKey: `clar-${question.id}-${option.id}-${index}`, groupId: question.groupId, index: components.length + options.length * 4 + index }));
-        if (!replacements.length || round(replacements.reduce((sum, component) => sum + component.grams, 0)) !== round(group.estimatedGrams)) throw new Error("invalid_clarification_weight");
-        options.push({ id: option.id, label: option.label, replacements });
-      }
-    } catch { continue; }
+    for (const option of question.options) {
+      const replacements = buildDeterministicReplacements(question, option, targets, foods, group.estimatedGrams, components.length + options.length * 4);
+      if (!replacements || round(replacements.reduce((sum, component) => sum + component.grams, 0)) !== round(group.estimatedGrams)) continue;
+      options.push({ id: option.id, label: option.label, replacements });
+    }
+    if (options.length < 2) continue;
     const variants = [targets, ...options.map((option) => option.replacements)].map(macroTotals);
     const range = (key: keyof MacroValues) => Math.max(...variants.map((variant) => variant[key])) - Math.min(...variants.map((variant) => variant[key]));
     const calorieRange = range("calories");
@@ -456,6 +425,68 @@ export function buildMealClarifications(raw: readonly RawMealClarification[], de
     selectedGroups.add(candidate.groupId);
     return true;
   }).slice(0, 2).map((candidate) => candidate.clarification);
+}
+
+const catalogProfile = (food: MatchableFood, groupId: string): MealAnalysisComponent | null => {
+  const per100 = {
+    calories: Number(food.calories ?? 0), protein: Number(food.protein ?? 0),
+    carbs: Number(food.carbs ?? 0), fat: Number(food.fat ?? 0),
+  };
+  if (per100.calories < 0 || per100.calories > LIMITS.calories || per100.protein < 0 || per100.protein > LIMITS.protein || per100.carbs < 0 || per100.carbs > LIMITS.carbs || per100.fat < 0 || per100.fat > LIMITS.fat) return null;
+  return { index: -1, groupId, name: food.name, grams: 0, per100, foodId: food.id, source: "catalog", confidence: "high", assumptions: [], clarification: null };
+};
+
+const sameFood = (left: string, right: string) => {
+  const a = normalize(left);
+  const b = normalize(right);
+  return Boolean(a && b && (a === b || a.includes(b) || b.includes(a)));
+};
+
+const candidateProfile = (foodName: string, preparation: string, targets: readonly MealAnalysisComponent[], foods: readonly MatchableFood[], groupId: string) => {
+  if (!foodName) return null;
+  const catalog = matchFood(foodName, foods, preparation);
+  if (catalog) return catalogProfile(catalog, groupId);
+  const existing = targets.find((component) => sameFood(component.name, foodName));
+  return existing ? { ...existing, grams: 0, componentKey: undefined, clarification: null } : null;
+};
+
+const hasDuplicateIncludedFat = (profiles: readonly MealAnalysisComponent[]) => profiles.some((profile, index) => {
+  if (!isStandaloneFatOrSauce(profile.name)) return false;
+  const fatTerms = ["שמן", "מיונז", "רוטב", "טחינה"].filter((term) => normalize(profile.name).includes(normalize(term)));
+  return profiles.some((other, otherIndex) => otherIndex !== index && !isStandaloneFatOrSauce(other.name) && fatTerms.some((term) => normalize(other.name).includes(normalize(term))));
+});
+
+const allocateProfiles = (profiles: readonly MealAnalysisComponent[], shares: readonly number[], totalGrams: number, keyPrefix: string, startIndex: number): MealAnalysisComponent[] | null => {
+  if (!profiles.length || profiles.length !== shares.length || hasDuplicateIncludedFat(profiles)) return null;
+  const shareTotal = shares.reduce((sum, share) => sum + share, 0);
+  if (shareTotal <= 0) return null;
+  let assigned = 0;
+  return profiles.map((profile, index) => {
+    const grams = index === profiles.length - 1 ? round(totalGrams - assigned) : Math.floor(totalGrams * shares[index] / shareTotal * 10) / 10;
+    assigned = round(assigned + grams);
+    return { ...profile, index: startIndex + index, componentKey: `${keyPrefix}-${index}`, grams, clarification: null };
+  });
+};
+
+function buildDeterministicReplacements(question: RawMealClarification, option: RawClarificationOption, targets: readonly MealAnalysisComponent[], foods: readonly MatchableFood[], totalGrams: number, startIndex: number) {
+  const prefix = `clar-${question.id}-${option.id}`;
+  if (option.effect === "keep_estimate")
+    return allocateProfiles(targets, targets.map((target) => target.grams), totalGrams, prefix, startIndex);
+  if (option.effect === "split_even" || option.effect === "first_more" || option.effect === "second_more") {
+    const shares = targets.map((_, index) => option.effect === "split_even" ? 1 : option.effect === "first_more" ? (index === 0 ? 7 : 3 / Math.max(1, targets.length - 1)) : (index === targets.length - 1 ? 7 : 3 / Math.max(1, targets.length - 1)));
+    return allocateProfiles(targets, shares, totalGrams, prefix, startIndex);
+  }
+  if (option.effect === "catalog_food") {
+    const profile = candidateProfile(option.foodName, option.preparation, targets, foods, question.groupId);
+    return profile ? allocateProfiles([profile], [1], totalGrams, prefix, startIndex) : null;
+  }
+  const candidateOptions = question.options.filter((candidate) => candidate.foodName);
+  const profiles = candidateOptions.map((candidate) => candidateProfile(candidate.foodName, candidate.preparation, targets, foods, question.groupId));
+  if (profiles.length !== 2 || profiles.some((profile) => !profile)) return null;
+  const resolved = profiles as MealAnalysisComponent[];
+  const visualShares = resolved.map((profile) => targets.find((target) => sameFood(target.name, profile.name))?.grams ?? 0);
+  const shares = visualShares.every((share) => share > 0) ? visualShares : [1, 1];
+  return allocateProfiles(resolved, shares, totalGrams, prefix, startIndex);
 }
 
 export function applyMealClarification(components: readonly MealAnalysisComponent[], clarification: MealClarification, option: MealClarificationOption): MealAnalysisComponent[] {

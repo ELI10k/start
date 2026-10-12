@@ -15,7 +15,7 @@ const modelPricingUsdPerMillion = {
   "alibaba/qwen3.8-omni-flash": { input: 0.15, output: 0.47 },
 } satisfies Record<string, { input: number; output: number }>;
 
-const prompt = (description: string) => [
+const buildMealAnalysisPrompt = (description: string) => [
   "נתח תמונה של ארוחה לצורך מעקב תזונתי משוער, לא מדידה רפואית.",
   "התמונה היא המקור המרכזי והסמכות להערכת הנפח והמשקל. הטקסט נועד לזהות מזונות ואופן הכנה, ויכול לתקן זיהוי שגוי או לציין רכיב מוסתר, אך אינו הוכחה לכמות גדולה יותר.",
   "אל תגדיל את משקל הארוחה או רכיביה רק מפני שהטקסט מפרט יותר רכיבים. אל תנסה להתאים את התוצאה לערך קלורי קודם או ליעד כלשהו.",
@@ -28,8 +28,10 @@ const prompt = (description: string) => [
   "אם כמות שמן, מיונז או רוטב אינה ידועה, השתמש בהערכה סבירה אחת, ציין את ההנחה וסמן confidence נמוך או בינוני. שאל clarification קצרה רק כאשר התשובה תשנה מהותית את ההערכה.",
   "החזר במערך clarifications רק שאלות בחירה קצרות שהתשובה עליהן עשויה לשנות מהותית קלוריות או מאקרו. אפשר להציע עד ארבע שאלות; השרת יציג לכל היותר שתיים.",
   "לפני יצירת שאלה, קרא את תיאור המשתמש. אל תשאל על סוג מזון, אופן הכנה, רוטב או רכיב שכבר נמסרו. לדוגמה, אם המשתמש כתב גם חציל מטוגן וגם חציל במיונז, אל תשאל איזה מהם קיים; אפשר לשאול רק כיצד המשקל הכולל מתחלק ביניהם.",
-  "לכל clarification ציין את groupId המושפע. כל option חייב לתאר את כל הרכיבים שיחליפו את אותה קבוצה, עם sharePercent שסכומם 100 וערכים תזונתיים ל-100 גרם. אין להוסיף את השמן או המיונז שוב כרכיב אם הם כלולים במזון המוכן.",
-  "באפשרות שמשמעותה 'שניהם', שמור על משקל הקבוצה וחלק אותו לפי הראיה בתמונה. השתמש ב-50/50 רק אם אין בסיס חזותי טוב יותר. אין ליצור אפשרות 'לא בטוח'; הדילוג מוצג בממשק ואינו משנה את הניתוח.",
+  "מבנה clarification שטוח: questionId, kind, groupId, question ושתי אפשרויות קבועות option1/option2. לכל אפשרות החזר רק Id, תווית קצרה, effect, שם מזון ואופן הכנה. אל תחזיר מערכי options, משקלים, אחוזים או ערכים תזונתיים בתוך clarification.",
+  "בחר effect רק מתוך: keep_estimate לשמירת ההערכה; split_even לחלוקה שווה בין רכיבי הקבוצה; first_more כאשר הרכיב הראשון הוא בערך 70%; second_more כאשר האחרון הוא בערך 70%; catalog_food להחלפת הקבוצה במזון המזוהה; both כאשר שתי זהויות המזון שבאפשרויות קיימות יחד. השרת בלבד מחשב משקלים וערכים.",
+  "ב-catalog_food מלא optionFoodName ו-optionPreparation. ב-both מלא שם מזון שונה בכל אחת משתי האפשרויות, כדי שהשרת יוכל לבנות את שני הרכיבים. בשאלת חלוקה אפשר להשתמש ב-split_even/first_more/second_more ולהשאיר שמות ריקים.",
+  "לכל שאלה חייבות להיות בדיוק שתי אפשרויות קצרות ושונות. אין ליצור אפשרות 'לא בטוח'; הדילוג מוצג בממשק ואינו משנה את הניתוח.",
   "אם אין שאלה משמעותית או שהתיאור כבר ענה עליה, החזר clarifications ריק. אם structured clarification נוצרה, clarification של הרכיב הוא רק תיאור קצר של אי-הוודאות ולא שאלה נוספת.",
   "אל תמציא רכיבים שאינם בתמונה או בתיאור המשתמש.",
   "אם התמונה מטושטשת מדי או אינה מכילה מזון, החזר containsFood=false ומערכי groups ו-components ריקים.",
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: mealAnalysisModel, reasoning_effort: "none", stream: false,
         messages: [{ role: "user", content: [
-          { type: "text", text: prompt(description) },
+          { type: "text", text: buildMealAnalysisPrompt(description) },
           { type: "image_url", image_url: { url: `data:${photo.type};base64,${base64}`, detail: "high" } },
         ] }],
         response_format: { type: "json_schema", json_schema: { name: "meal_analysis", strict: true, schema: MEAL_ANALYSIS_SCHEMA } },
@@ -99,7 +101,13 @@ export async function POST(request: Request) {
     const normalizedComponents = normalizeComponents(parsed.components, foods, parsed.groups);
     const clarifications = buildMealClarifications(parsed.clarifications, description, normalizedComponents, foods, parsed.groups);
     const targetKeys = new Set(clarifications.flatMap((question) => question.targetComponentKeys));
-    const components = normalizedComponents.map((component) => targetKeys.has(component.componentKey ?? "") ? { ...component, clarification: null } : component);
+    const discardedGroups = new Set(parsed.discardedClarificationGroupIds);
+    const malformedQuestionNote = "קיימת אי־ודאות שעשויה להשפיע על ההערכה; אפשר לתקן את המזון או הכמות ידנית.";
+    const components = normalizedComponents.map((component) => {
+      if (targetKeys.has(component.componentKey ?? "")) return { ...component, clarification: null };
+      if (component.groupId && discardedGroups.has(component.groupId) && !component.clarification) return { ...component, clarification: malformedQuestionNote };
+      return component;
+    });
     const alternativeComponents = clarifications.flatMap((question) => question.options.flatMap((option) => option.replacements));
     const allowedComponents = [...components, ...alternativeComponents];
     const selectionGroups = clarifications.map((question) => ({
