@@ -56,11 +56,13 @@ test("the AI meal migration is atomic, idempotent and does not alter foods", asy
   assert.doesNotMatch(sql, /alter table public\.foods/);
 });
 
-test("the analyzer uses Luna structured output and never uploads the image to storage", async () => {
+test("the analyzer keeps Luna as its default while allowing a Preview-only model override", async () => {
   const route = await readFile(new URL("../app/api/nutrition/analyze-meal/route.ts", import.meta.url), "utf8");
   const component = await readFile(new URL("../components/client/AiMealAnalyzer.tsx", import.meta.url), "utf8");
   const saveAction = await readFile(new URL("../app/actions/ai-meal.ts", import.meta.url), "utf8");
-  assert.match(route, /openai\/gpt-6-luna/);
+  assert.match(route, /process\.env\.AI_MEAL_MODEL\?\.trim\(\) \|\| "openai\/gpt-6-luna"/);
+  assert.match(route, /model: mealAnalysisModel/);
+  assert.match(route, /"alibaba\/qwen3\.8-omni-flash": \{ input: 0\.15, output: 0\.47 \}/);
   assert.match(route, /type: "json_schema"/);
   assert.match(route, /food_ai_minute/);
   assert.doesNotMatch(route, /\.storage/);

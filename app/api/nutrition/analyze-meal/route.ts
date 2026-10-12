@@ -8,6 +8,11 @@ import { MEAL_ANALYSIS_SCHEMA, normalizeComponents, parseMealAnalysis, type Matc
 import { signMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
 
 export const maxDuration = 60;
+const mealAnalysisModel = process.env.AI_MEAL_MODEL?.trim() || "openai/gpt-6-luna";
+const modelPricingUsdPerMillion = {
+  "openai/gpt-6-luna": { input: 0.1, output: 0.5 },
+  "alibaba/qwen3.8-omni-flash": { input: 0.15, output: 0.47 },
+} satisfies Record<string, { input: number; output: number }>;
 
 const prompt = (description: string) => [
   "נתח תמונה של ארוחה לצורך מעקב תזונתי משוער, לא מדידה רפואית.",
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
       method: "POST", signal: controller.signal,
       headers: { Authorization: `Bearer ${gatewayToken}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "openai/gpt-6-luna", reasoning_effort: "none", stream: false,
+        model: mealAnalysisModel, reasoning_effort: "none", stream: false,
         messages: [{ role: "user", content: [
           { type: "text", text: prompt(description) },
           { type: "image_url", image_url: { url: `data:${photo.type};base64,${base64}`, detail: "high" } },
@@ -77,8 +82,11 @@ export async function POST(request: Request) {
     const components = normalizeComponents(parsed.components, foods);
     const analysisToken = signMealAnalysis({ userId: auth.id, expiresAt: Date.now() + 30 * 60_000, components });
     const usage = result.usage ?? {};
-    const estimatedCostUsd = ((usage.prompt_tokens ?? 0) * 0.1 + (usage.completion_tokens ?? 0) * 0.5) / 1_000_000;
-    console.info("ai_meal_analysis", { durationMs: Date.now() - startedAt, components: components.length, promptTokens: usage.prompt_tokens ?? null, completionTokens: usage.completion_tokens ?? null, estimatedCostUsd: Number(estimatedCostUsd.toFixed(6)) });
+    const pricing = modelPricingUsdPerMillion[mealAnalysisModel as keyof typeof modelPricingUsdPerMillion];
+    const estimatedCostUsd = pricing
+      ? ((usage.prompt_tokens ?? 0) * pricing.input + (usage.completion_tokens ?? 0) * pricing.output) / 1_000_000
+      : null;
+    console.info("ai_meal_analysis", { model: mealAnalysisModel, durationMs: Date.now() - startedAt, components: components.length, promptTokens: usage.prompt_tokens ?? null, completionTokens: usage.completion_tokens ?? null, estimatedCostUsd: estimatedCostUsd == null ? null : Number(estimatedCostUsd.toFixed(6)) });
     return Response.json({ summary: parsed.summary, components, analysisToken });
   } catch (error) {
     console.error("ai_meal_analysis_failed", { durationMs: Date.now() - startedAt, error: error instanceof Error ? error.name : "unknown" });
