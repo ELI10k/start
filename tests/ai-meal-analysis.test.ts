@@ -46,7 +46,7 @@ test("non-food and malformed responses are rejected", () => {
 });
 
 test("the AI meal migration is atomic, idempotent and does not alter foods", async () => {
-  const sql = await readFile(new URL("../supabase/migrations/202610120001_ai_meal_analysis.sql", import.meta.url), "utf8");
+  const sql = await readFile(new URL("../supabase/migrations/20261012033157_ai_meal_analysis.sql", import.meta.url), "utf8");
   assert.match(sql, /create unique index[^;]+client_food_log_ai_meal_component_unique/s);
   assert.match(sql, /create or replace function public\.save_ai_meal_to_log/);
   assert.match(sql, /pg_advisory_xact_lock/);
