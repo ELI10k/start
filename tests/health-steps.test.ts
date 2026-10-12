@@ -133,12 +133,18 @@ test("the workout refreshes sleep when the native health bridge becomes ready", 
 });
 
 test("steps and sleep keep both period controls available after either selection", async () => {
-  const panel = await source("components/client/HealthProgressPanel.tsx");
+  const [panel, styles] = await Promise.all([
+    source("components/client/HealthProgressPanel.tsx"),
+    source("app/globals.css"),
+  ]);
   assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
   assert.match(panel, /onClick=\{\(\) => setPeriod\("week"\)\}>שבועי<\/button>/);
   assert.match(panel, /onClick=\{\(\) => setPeriod\("month"\)\}>חודשי<\/button>/);
   assert.equal(panel.match(/\{periodPicker\}/g)?.length, 2);
   assert.match(panel, /lastDays\(today, dayCount\)/);
+  assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);
+  assert.match(styles, /\.health-summary-card \{[^}]*min-width: 0;[^}]*max-width: 100%;[^}]*overflow: hidden/);
+  assert.match(styles, /\.health-chart \{[^}]*max-width: 100%;[^}]*overflow-x: auto/);
 });
 
 test("an active workout requests and releases a screen wake lock", async () => {
