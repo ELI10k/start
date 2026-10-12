@@ -25,9 +25,11 @@ test("the day strip uses only white circles with green or red checks", async () 
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(component, /day-strip__day--\$\{status\}/);
+  assert.match(component, /isToday \? " day-strip__day--today"/);
   assert.match(component, /day-strip__status">✓/);
   assert.doesNotMatch(component, /isActive \? " pill--green"/);
   assert.match(css, /\.day-strip \.chip\.day-strip__day--complete/);
   assert.match(css, /\.day-strip \.chip\.day-strip__day--missed/);
+  assert.match(css, /\.day-strip \.chip\.day-strip__day--today[\s\S]*border: 2px solid var\(--ink\)/);
   assert.match(css, /background: var\(--surface\)/);
 });
