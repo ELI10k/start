@@ -1,6 +1,6 @@
 export type MyMealItem = Readonly<{
   id: string;
-  foodId: string;
+  foodId: string | null;
   name: string;
   quantity: number;
   unit: string;
@@ -9,6 +9,8 @@ export type MyMealItem = Readonly<{
   protein: number;
   carbs: number;
   fat: number;
+  per100: Readonly<{ calories: number; protein: number; carbs: number; fat: number }>;
+  nutritionEstimated?: boolean;
 }>;
 
 export type MyMeal = Readonly<{

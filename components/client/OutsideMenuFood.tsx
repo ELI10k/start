@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronLeft, Utensils } from "lucide-react";
 import AteSomethingElse, { type PickableFood } from "@/components/client/AteSomethingElse";
 
-export default function OutsideMenuFood({date,foods}:{date:string;foods:readonly PickableFood[]}){
+export default function OutsideMenuFood({date,foods,aiMealEnabled=false}:{date:string;foods:readonly PickableFood[];aiMealEnabled?:boolean}){
   const[open,setOpen]=useState(false);
   return <>
     <button type="button" onClick={()=>setOpen(true)} className="outside-menu-card">
@@ -19,6 +19,7 @@ export default function OutsideMenuFood({date,foods}:{date:string;foods:readonly
       mealId=""
       date={date}
       foods={foods}
+      aiMealEnabled={aiMealEnabled}
       open={open}
       onClose={()=>setOpen(false)}
       title="מה אכלת מחוץ לתפריט?"

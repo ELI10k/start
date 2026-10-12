@@ -14,7 +14,7 @@ export type MyMealsFood = Readonly<{
   calories: number; protein: number | null; carbs: number | null; fat: number | null;
   packageUnit: string | null; unitWeightGrams: number | null;
 }>;
-type DraftItem = { foodId: string; quantity: number; unit: string };
+type DraftItem = { foodId: string | null; quantity: number; unit: string; name?: string; per100?: MyMeal["items"][number]["per100"]; nutritionEstimated?: boolean };
 type PlannedMealChoice = Readonly<{ id: string; title: string }>;
 const initial: MyMealActionState = { ok: false };
 
@@ -35,7 +35,6 @@ function AssignToMeal({ meal, date, now, plannedMeals }: { meal: MyMeal; date: s
     {state.message ? <p role="status" className={`text-sm sm:col-span-3 ${state.ok ? "text-[#15803D]" : "text-[#B91C1C]"}`}>{state.message}</p> : null}
   </form>;
 }
-
 export default function MyMealsManager({ meals, foods, date, now, plannedMeals }: {
   meals: readonly MyMeal[]; foods: readonly MyMealsFood[]; date: string; now: string; plannedMeals: readonly PlannedMealChoice[];
 }) {
@@ -53,7 +52,7 @@ export default function MyMealsManager({ meals, foods, date, now, plannedMeals }
   const closePicker = useCallback(() => setPickerOpen(false), []);
   const openEditor = (meal: MyMeal | null) => {
     setEditing(meal); setName(meal?.name ?? "");
-    setItems(meal?.items.map((item) => ({ foodId: item.foodId, quantity: item.quantity, unit: item.unit })) ?? []);
+    setItems(meal?.items.map((item) => ({ foodId: item.foodId, quantity: item.quantity, unit: item.unit, name: item.name, per100: item.per100, nutritionEstimated: item.nutritionEstimated })) ?? []);
   };
   const addFood = (foodId: string) => {
     const food = foodById.get(foodId); if (!food) return;
@@ -84,14 +83,14 @@ export default function MyMealsManager({ meals, foods, date, now, plannedMeals }
       <form action={action} className="grid gap-4">{editing?.id ? <input type="hidden" name="id" value={editing.id}/> : null}<input type="hidden" name="items" value={JSON.stringify(items)}/>
         <label className="text-sm font-bold">שם הארוחה<input className="nutrition-input mt-2" name="name" maxLength={80} required value={name} onChange={(event) => setName(event.target.value)} placeholder="לדוגמה: ארוחת בוקר קבועה"/></label>
         <div className="grid gap-2"><div className="rounded-2xl bg-[#ECFDF3] p-3"><p className="text-sm font-bold text-[#15803D]">מאכלים ממאגר המזונות</p><p className="mt-1 text-xs text-[#3F433F]">בחרו מאכלים מהמאגר, והערכים יחושבו אוטומטית לפי הכמות.</p></div>
-          {items.map((item, index) => { const food = foodById.get(item.foodId); if (!food) return null; const natural = Boolean(food.packageUnit && food.unitWeightGrams && food.unitWeightGrams > 0); const portion = itemPortion(item, food); return <div key={`${item.foodId}-${index}`} className="rounded-2xl border border-[#E5E7E5] p-3">
+          {items.map((item, index) => { const food = item.foodId ? foodById.get(item.foodId) : item.per100 ? { id: "", name: item.name ?? "מאכל", brand: null, calories: item.per100.calories, protein: item.per100.protein, carbs: item.per100.carbs, fat: item.per100.fat, packageUnit: null, unitWeightGrams: null } : undefined; if (!food) return null; const natural = Boolean(food.packageUnit && food.unitWeightGrams && food.unitWeightGrams > 0); const portion = itemPortion(item, food); return <div key={`${item.foodId ?? item.name}-${index}`} className="rounded-2xl border border-[#E5E7E5] p-3">
             <div className="flex items-center justify-between gap-2"><strong className="text-sm">{food.name}</strong><button type="button" aria-label={`הסרת ${food.name}`} className="inline-flex size-11 items-center justify-center text-[#DC2626]" onClick={() => setItems((current) => current.filter((_, itemIndex) => itemIndex !== index))}><X size={17}/></button></div>
             <div className="mt-2 grid grid-cols-2 gap-2"><label className="text-xs font-bold">כמות<input className="nutrition-input mt-1" type="number" min="0.1" max="100000" step="0.1" value={item.quantity} onChange={(event) => setItems((current) => current.map((row, itemIndex) => itemIndex === index ? { ...row, quantity: Number(event.target.value) } : row))}/></label><label className="text-xs font-bold">יחידה<select className="nutrition-input mt-1" value={item.unit} onChange={(event) => setItems((current) => current.map((row, itemIndex) => itemIndex === index ? { ...row, unit: event.target.value, quantity: event.target.value === "גרם" ? 100 : 1 } : row))}><option value="גרם">גרם</option>{natural ? <option value={food.packageUnit!}>{unitLabel(food.packageUnit!, 2)}</option> : null}</select></label></div>
-            {portion ? <p className="mt-2 text-xs text-[#5B5F5B]">{Math.round(portion.calories)} קל׳ · {Math.round(portion.protein)} ג׳ חלבון</p> : null}
+            {portion ? <p className="mt-2 text-xs text-[#5B5F5B]">{Math.round(portion.calories)} קל׳ · {Math.round(portion.protein)} ג׳ חלבון{item.nutritionEstimated ? " · הערכת AI" : ""}</p> : null}
           </div>; })}
           <button type="button" className="premium-secondary-button" onClick={() => setPickerOpen(true)}><Plus size={17}/>בחירה ממאגר המזונות</button>
         </div>
-        {items.length ? <p className="rounded-xl bg-[#F7F8F7] p-3 text-sm font-bold">סה״כ בארוחה: {Math.round(items.reduce((sum, item) => { const food = foodById.get(item.foodId); return sum + (food ? itemPortion(item, food)?.calories ?? 0 : 0); }, 0))} קל׳</p> : null}
+        {items.length ? <p className="rounded-xl bg-[#F7F8F7] p-3 text-sm font-bold">סה״כ בארוחה: {Math.round(items.reduce((sum, item) => { const food = item.foodId ? foodById.get(item.foodId) : item.per100 ? { id: "", name: item.name ?? "מאכל", brand: null, calories: item.per100.calories, protein: item.per100.protein, carbs: item.per100.carbs, fat: item.per100.fat, packageUnit: null, unitWeightGrams: null } : undefined; return sum + (food ? itemPortion(item, food)?.calories ?? 0 : 0); }, 0))} קל׳</p> : null}
         {state.message && !state.ok ? <p role="alert" className="text-sm text-[#B91C1C]">{state.message}</p> : null}
         <button disabled={pending || !name.trim() || items.length === 0} className="premium-primary-button">{pending ? "שומרים…" : editing ? "שמירת השינויים" : "שמירת הארוחה"}</button>
       </form>

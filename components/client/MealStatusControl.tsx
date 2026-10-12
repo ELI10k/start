@@ -27,6 +27,7 @@ export default function MealStatusControl({
   // needs it.
   foods = [],
   savedMeals = [],
+  aiMealEnabled = false,
 }: {
   mealId: string;
   date: string;
@@ -36,6 +37,7 @@ export default function MealStatusControl({
   blocked: boolean;
   foods?: readonly PickableFood[];
   savedMeals?: readonly SavedMealChoice[];
+  aiMealEnabled?: boolean;
 }) {
   const [substituting, setSubstituting] = useState(false);
   const [photographing, setPhotographing] = useState(false);
@@ -63,6 +65,7 @@ export default function MealStatusControl({
       initialTab="photo"
       preserveMealStatus
       title="צילום הארוחה"
+      aiMealEnabled={aiMealEnabled}
     />
   );
   const eaten = status === "eaten" || completed;
@@ -94,7 +97,7 @@ export default function MealStatusControl({
         </button>
         {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-        <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} open={substituting} onClose={() => setSubstituting(false)} />
+        <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
       </div>
     );
@@ -110,7 +113,7 @@ export default function MealStatusControl({
         </button>
         {photoButton}
         <Action mealId={mealId} date={date} status="none" label="ביטול השלמה" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
-        <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} open={substituting} onClose={() => setSubstituting(false)} />
+        <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
       </div>
     );
@@ -145,7 +148,7 @@ export default function MealStatusControl({
         className="chip border-[#DC2626] text-[#DC2626]"
       />
 
-      <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} open={substituting} onClose={() => setSubstituting(false)} />
+      <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
       {photoSheet}
     </div>
   );
