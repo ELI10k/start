@@ -33,9 +33,8 @@ test("the nutrition screen can look backwards, and only backwards", async () => 
   // requested day has to be in this week AND to have already happened.
   assert.match(page, /days\.includes\(requested\) && requested <= now \? requested : now/);
   assert.match(page, /length: 7/);
-  // "Now" is a property of today, not of whichever day is on screen.
-  assert.match(page, /const isNow = isToday &&/);
-  assert.match(page, /\{isToday&&menu\?\.meals\.some/);
+  // A date may be today, but meal timing stays personal to the client.
+  assert.doesNotMatch(page, /const isNow = isToday &&|\{isToday&&menu\?\.meals\.some/);
 });
 
 test("one check-in a week - the window the instrument actually measures", async () => {

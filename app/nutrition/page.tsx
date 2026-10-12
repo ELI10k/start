@@ -18,7 +18,7 @@ import {
 import FreeMenu from "@/components/client/FreeMenu";
 import { formatPortionLabel, unitLabel } from "@/lib/nutrition/meal-alternatives";
 import { householdMeasure } from "@/lib/nutrition/household-measures";
-import { israelDateKey, israelWeekday, ISRAEL_TIME_ZONE, formatIsraelDate } from "@/lib/date-time";
+import { israelDateKey, israelWeekday, formatIsraelDate } from "@/lib/date-time";
 import NutritionDayStrip from "@/components/client/NutritionDayStrip";
 import RepeatYesterday from "@/components/client/RepeatYesterday";
 import PortionOverride from "@/components/client/PortionOverride";
@@ -169,17 +169,6 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     isToday,
     behavior,
   });
-  // Which meal it is now. The fixed meal titles map to the day, so the screen can
-  // open on the meal the client came to mark instead of at the top of a list of
-  // six. Free text from onboarding is not used for this - it cannot be relied on
-  // to parse - so the windows are the ones the fixed titles already imply.
-  const hour = Number(new Intl.DateTimeFormat("he-IL", { timeZone: ISRAEL_TIME_ZONE, hour: "2-digit", hour12: false }).format(new Date()));
-  const currentMealTitle =
-    hour < 10 ? "ארוחת בוקר"
-    : hour < 12 ? "ארוחת ביניים 1"
-    : hour < 16 ? "ארוחת צהריים"
-    : hour < 18 ? "ארוחת ביניים 2"
-    : "ארוחת ערב";
   const outsideMenuAfterMealId = menu
     ? (menu.meals.find((meal) => meal.title === "קלוריות חופשיות")
       ?? menu.meals.find((meal) => meal.title === "ארוחת ערב")
@@ -202,24 +191,14 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
         {isToday ? "הארוחות של היום" : `הארוחות של ${formatIsraelDate(`${today}T12:00:00Z`, { weekday: "long", day: "numeric", month: "long" })}`}
       </h1>
       <NutritionDayStrip days={days} active={today} today={now} />
-      {/* One row of tools, not three stacked ones.
-          
-          The jump-to-current-meal link, the repeat-yesterday button and the
-          shopping list each had a line of their own, which is about 200px of a
-          screen whose job is to show meals. They are all the same kind of thing
-          - a shortcut off this screen - so they share a line and wrap only if
-          they have to.
+      {/* One row of tools, not three stacked ones. The saved-meals shortcut and
+          repeat-yesterday action share a line and wrap only if they have to.
           
           The barcode scanner is not among them any more. The same scanner is a
           tab inside every meal's "אכלתי משהו אחר" sheet, so the card here was a
           second door to one room, charging 90px for it. */}
       <div className="nutrition-toolbar">
         <Link href={`/my-meals?date=${today}`} className="chip">הארוחות שלי</Link>
-        {/* Only while there is something to jump to: once the current meal is
-            marked, the anchor is gone and so is this. */}
-        {isToday&&menu?.meals.some((meal)=>meal.title===currentMealTitle&&!meal.status&&!meal.completed)
-          ? <a href="#current-meal" className="chip">לארוחה של עכשיו · {currentMealTitle}</a>
-          : null}
         {/* How many groups are still waiting for a choice today. Appears only
             while that number is above zero. */}
         {menu?<RepeatYesterday date={today} remaining={menu.meals.flatMap((meal)=>meal.groups).filter((group)=>!group.selectedItemId).length}/>:null}
@@ -232,9 +211,6 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             // available after any macro group is chosen; unchosen groups are
             // recorded as zero intake by the server.
             const noChoice = !meal.freeCalorieTarget && meal.groups.length > 0 && !meal.groups.some((group) => group.selectedItemId);
-            // Marked, not reordered: the day still reads in its own order, and
-            // the meal that is due right now says so.
-            const isNow = isToday && meal.title === currentMealTitle && !meal.status && !meal.completed;
             // Before an answer, show the plan: an unchosen group stands at its
             // primary. After "eaten", show intake: only explicit choices count.
             // Reusing the same helpers as the day total keeps the card and the
@@ -267,17 +243,15 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
               : "טרם סומן";
             return <Fragment key={meal.id}>
             <MealCard
-              id={isNow ? "current-meal" : undefined}
               // Six meals in one scroll is a page nobody reads to the end. Each
-              // one is a closed row carrying what it costs and where it stands,
-              // and the meal that is due right now is the one already open.
-              // Which card is open after that is the client's business, not this
-              // render's - see the component.
-              defaultOpen={isNow}
-              className={`start-surface meal-card rounded-[24px]${isNow ? " border-2 border-[#16A34A]" : ""}`}
+              // one is a closed row carrying what it costs and where it stands.
+              // Meal timing is personal, so the clock does not open or highlight
+              // any one of them.
+              defaultOpen={false}
+              className="start-surface meal-card rounded-[24px]"
               summary={
                 <span className="min-w-0">
-                  <strong className="block text-lg font-black">{meal.title}{isNow ? <span className="pill pill--green mr-2">עכשיו</span> : null}</strong>
+                  <strong className="block text-lg font-black">{meal.title}</strong>
                   <span className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-[#5B5F5B]"><span>{calorieLabel}</span><span aria-hidden="true">·</span><span className={meal.status === "other" || meal.status === "eaten" || meal.completed ? "pill pill--green" : undefined}>{mark}</span></span>
                 </span>
               }
