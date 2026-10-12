@@ -45,6 +45,20 @@ test("the complete Life Fit guide includes the two device connection lessons", a
   assert.match(landing, /9 פרקים מסודרים/);
 });
 
+test("the in-app course keeps messages and support as its final lesson", async () => {
+  const migration = await file(
+    "supabase/migrations/20261012180252_place_support_guide_last.sql",
+  );
+  assert.match(
+    migration,
+    /000000000011'::uuid then 70[\s\S]*000000000012'::uuid then 80[\s\S]*000000000010'::uuid then 90/,
+  );
+  assert.match(
+    migration,
+    /where category_id = '20000000-0000-4000-8000-000000000001'::uuid/,
+  );
+});
+
 test("the guide is the first published course and replaces old intro fillers", async () => {
   const migration = await file(
     "supabase/migrations/20261004193000_life_fit_guide.sql",
