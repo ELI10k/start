@@ -40,7 +40,7 @@ import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 // this runs on; the estimator itself gives up well before it.
 export const maxDuration = 60;
 
-export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
+export default async function NutritionPage({ searchParams }: { searchParams: Promise<{ date?: string; aiMeal?: string }> }) {
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
@@ -70,7 +70,8 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     day.setUTCDate(day.getUTCDate() + ahead);
     return day.toISOString().slice(0, 10);
   });
-  const requested = (await searchParams).date;
+  const query = await searchParams;
+  const requested = query.date;
   // A day this week that has already happened. Anything else falls back to today.
   const today = requested && days.includes(requested) && requested <= now ? requested : now;
   const isToday = today === now;
@@ -186,7 +187,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     : null;
   const outsideMenuSection = (
     <section className="space-y-3">
-      <OutsideMenuFood date={today} foods={pickableFoods}/>
+      <OutsideMenuFood date={today} foods={pickableFoods} openAiPhoto={query.aiMeal === "1"}/>
       <LoggedFoodList entries={outsideMenuLogs}/>
     </section>
   );
