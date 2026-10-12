@@ -104,6 +104,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
     const values = days.map((day) => ({ day, value: stepByDay.get(day)?.steps ?? 0 }));
     const average = averageCompletedSteps(snapshot.entries, days, today);
     const total = values.reduce((sum, point) => sum + point.value, 0);
+    const periodGoal = summary.goal * dayCount;
     const daysMetGoal = values.filter((point) => point.value >= summary.goal).length;
     const remaining = Math.max(0, summary.goal - (average ?? 0));
     return (
@@ -112,13 +113,13 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
         <section className="health-summary-card">
           <span className="health-summary-card__icon"><Footprints aria-hidden="true" size={24} /></span>
           <p>ממוצע יומי {period === "month" ? "בחודש" : "בשבוע"}</p>
-          <strong className="health-summary-card__steps-ratio">{average !== null ? `${average.toLocaleString("he-IL")} מתוך ${summary.goal.toLocaleString("he-IL")}` : "אין נתונים"}</strong>
-          <small>{average !== null ? "צעדים בממוצע ליום" : "חברו את נתוני הבריאות כדי להתחיל"}</small>
+          <strong>{average !== null ? average.toLocaleString("he-IL") : "אין נתונים"}</strong>
+          <small className="health-summary-card__goal">{average !== null ? `מתוך ${summary.goal.toLocaleString("he-IL")}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
           <Bars values={values} goal={summary.goal} formatter={(value) => value.toLocaleString("he-IL")} monthly={period === "month"} />
         </section>
         <div className="health-stat-grid">
           <div><Target aria-hidden="true" /><strong>{daysMetGoal} מתוך {dayCount}</strong><span>ימים ביעד</span></div>
-          <div><Footprints aria-hidden="true" /><strong>{total.toLocaleString("he-IL")}</strong><span>צעדים {period === "month" ? "בחודש" : "בשבוע"}</span></div>
+          <div className="health-stat-grid__with-goal"><Footprints aria-hidden="true" /><strong>{total.toLocaleString("he-IL")}</strong><span>צעדים {period === "month" ? "בחודש" : "בשבוע"}</span><small className="health-stat-grid__goal">מתוך {periodGoal.toLocaleString("he-IL")}</small></div>
         </div>
         {average !== null ? <p className="health-insight">{remaining ? `עוד ${remaining.toLocaleString("he-IL")} צעדים ביום להשגת היעד` : `עמדת ביעד הצעדים ${period === "month" ? "החודשי" : "השבועי"} — כל הכבוד`}</p> : null}
         <SyncButton connect={connect} unavailable={unavailable} syncing={syncing} onClick={() => void sync(true)} />

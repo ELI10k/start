@@ -63,7 +63,11 @@ test("bounded progress summaries opt into the phone viewport-fit layout", async 
   assert.match(css, /\.health-chart\[data-monthly\] \.health-chart__plot \{\s*min-width: 0/);
   assert.match(css, /@media \(max-width: 767px\) and \(min-height: 740px\)/);
   assert.match(css, /data-metric="nutrition"\] \.health-chart \{ min-height: 5rem/);
-  assert.match(healthPanel, /average\.toLocaleString\("he-IL"\).*מתוך.*summary\.goal\.toLocaleString\("he-IL"\)/);
-  assert.match(healthPanel, /צעדים בממוצע ליום/);
+  assert.match(healthPanel, /<strong>\{average !== null \? average\.toLocaleString\("he-IL"\)/);
+  assert.match(healthPanel, /health-summary-card__goal.*מתוך.*summary\.goal\.toLocaleString\("he-IL"\)/);
+  assert.match(healthPanel, /periodGoal = summary\.goal \* dayCount/);
+  assert.match(healthPanel, /health-stat-grid__goal.*מתוך.*periodGoal\.toLocaleString\("he-IL"\)/);
+  assert.match(css, /health-summary-card__goal \{ color: var\(--green\); font-weight: 700/);
+  assert.match(css, /health-stat-grid__goal \{ grid-column: 2; color: var\(--green\)/);
   assert.doesNotMatch(healthPanel, /minmax\(\$\{monthly \? "2\.75rem"/);
 });
