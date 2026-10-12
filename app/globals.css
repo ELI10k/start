@@ -1213,6 +1213,14 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .chip-row::-webkit-scrollbar { display: none; }
 
+/* All five free-calorie entry points belong to the card, rather than to a
+   horizontally scrolling filter strip. On a phone they wrap into two visible
+   rows so none of the actions sits beyond the clipped edge of the meal card. */
+.free-calorie-options {
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
 /* The seven days of the nutrition screen, all seven on the screen.
    
    They were a scrolling chip row, so on a 375pt phone the oldest two days sat

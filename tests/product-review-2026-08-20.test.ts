@@ -692,9 +692,10 @@ test("eating none of a portion is an amount, not a skipped meal", async () => {
 });
 
 test("the free-calorie window can be filled in, not just described", async () => {
-  const [component, page] = await Promise.all([
+  const [component, page, css] = await Promise.all([
     source("components/client/FreeCalorieMeal.tsx"),
     source("app/nutrition/page.tsx"),
+    source("app/globals.css"),
   ]);
   // It used to be a sentence with nowhere to answer it, so the frame could not
   // be tracked against and the day counted the whole allowance either way.
@@ -707,6 +708,8 @@ test("the free-calorie window can be filled in, not just described", async () =>
   assert.match(component, /setAdding\("saved"\)[\s\S]*מהארוחות שלי/);
   assert.match(component, /setAdding\("photo"\)[\s\S]*צילום/);
   assert.match(component, /initialTab=\{adding \?\? "text"\}/);
+  assert.match(component, /chip-row free-calorie-options/);
+  assert.match(css, /\.free-calorie-options\s*\{[\s\S]*flex-wrap:\s*wrap;[\s\S]*overflow-x:\s*visible;/);
   assert.match(component, /foods=\{foods\}/);
   assert.match(component, /savedMeals=\{savedMeals\}/);
   assert.match(component, /נותרו/);

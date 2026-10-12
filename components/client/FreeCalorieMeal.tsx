@@ -60,7 +60,7 @@ export default function FreeCalorieMeal({
       )}
 
       <h3 className="mt-4 text-base font-black">מה אכלת במסגרת הזו?</h3>
-      <div className="chip-row mt-3">
+      <div className="chip-row free-calorie-options mt-3">
         <button type="button" onClick={() => setAdding("text")} className="chip pill--green">
           <PencilLine aria-hidden="true" size={15} />תיאור
         </button>
