@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatIsraelDate } from "@/lib/date-time";
+import type { NutritionDayStatus } from "@/lib/nutrition/day-status";
 
 /**
  * The last seven days, as a row of links.
@@ -26,10 +27,12 @@ export default function NutritionDayStrip({
   days,
   active,
   today,
+  statuses,
 }: {
   days: readonly string[];
   active: string;
   today: string;
+  statuses: Readonly<Record<string, NutritionDayStatus>>;
 }) {
   return (
     <nav aria-label="בחירת יום" className="day-strip mb-3">
@@ -37,8 +40,14 @@ export default function NutritionDayStrip({
         const at = `${day}T12:00:00Z`;
         const isActive = day === active;
         const isToday = day === today;
+        const status = statuses[day] ?? "neutral";
         const weekday = formatIsraelDate(at, { weekday: "narrow" });
         const date = formatIsraelDate(at, { day: "numeric", month: "numeric" });
+        const statusLabel = status === "complete"
+          ? ", היעד היומי הושלם"
+          : status === "missed"
+            ? ", היעד היומי לא הושלם"
+            : "";
         // Drawn, not opened. A day later this week has no menu to answer for
         // yet, and a link to it would take the client to today wearing the
         // wrong date.
@@ -56,17 +65,17 @@ export default function NutritionDayStrip({
             aria-current={isActive ? "page" : undefined}
             // Two glyphs and a number are enough to pick a day by, and not
             // enough to be read out by. The label spells the day in full.
-            aria-label={`${isToday ? "היום, " : ""}${formatIsraelDate(at, { weekday: "long", day: "numeric", month: "long" })}`}
-            className={`chip day-strip__day${isActive ? " pill--green" : ""}`}
+            aria-label={`${isToday ? "היום, " : ""}${formatIsraelDate(at, { weekday: "long", day: "numeric", month: "long" })}${statusLabel}`}
+            className={`chip day-strip__day day-strip__day--${status}`}
           >
-            {/* Today names its weekday like every other day in the row.
-                
-                It used to say "היום" instead, which reads as the one thing the
-                client already knows and hides the one they were looking for -
-                on a Saturday the newest weekday on the screen was Friday's, so
-                the row looked a day behind. The green fill is what says today. */}
+            {/* Today names its weekday like every other day in the row. Status
+                belongs only to finished days, so opening a date never changes
+                its colour or makes one completed day look more successful. */}
             <span aria-hidden="true" className="day-strip__weekday">{weekday}</span>
             <span aria-hidden="true" className="day-strip__date">{date}</span>
+            {status !== "neutral" ? (
+              <span aria-hidden="true" className="day-strip__status">✓</span>
+            ) : null}
           </Link>
         );
       })}

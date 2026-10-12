@@ -1277,6 +1277,29 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   background: var(--green); border-color: var(--green); color: #FFFFFF;
 }
 
+/* The date itself stays white. The ring and check describe the finished day's
+   calorie bank; the open page is intentionally not a third visual state. */
+.day-strip .chip.day-strip__day {
+  width: 100%; max-width: 5rem; min-height: 0; aspect-ratio: 1;
+  justify-self: center; padding: .2rem;
+  background: var(--surface); color: var(--ink);
+}
+.day-strip .chip.day-strip__day--complete {
+  border-color: var(--green); color: var(--green-press);
+}
+.day-strip .chip.day-strip__day--missed {
+  border-color: var(--red); color: var(--red);
+}
+.day-strip .chip.day-strip__day--neutral[aria-current="page"] {
+  border-color: var(--line-strong); background: var(--surface); color: var(--ink);
+}
+.day-strip .day-strip__day--complete .day-strip__date,
+.day-strip .day-strip__day--missed .day-strip__date,
+.day-strip .chip.day-strip__day--neutral[aria-current="page"] .day-strip__date {
+  color: var(--ink-muted);
+}
+.day-strip__status { font-size: .95rem; font-weight: 950; line-height: .85; }
+
 /* The nutrition screen's tool row: page-level actions that are not meal
    actions, as icons on one line. It sits beside the day strip rather than under
    it, so a job done once a week costs a corner instead of a full-width row. */
