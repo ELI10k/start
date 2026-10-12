@@ -17,7 +17,7 @@ function Bars({ values, goal, formatter, monthly = false }: { values: readonly {
   const max = Math.max(goal, ...values.map((point) => point.value), 1);
   return (
     <div className="health-chart" data-monthly={monthly || undefined} role="img" aria-label={values.map((point) => `${monthly ? dateLabel(point.day) : dayLabel(point.day)} ${formatter(point.value)}`).join(", ")}>
-      <div className="health-chart__plot" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(${monthly ? "2.75rem" : "0"}, 1fr))` }}>
+      <div className="health-chart__plot" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
         <span className="health-chart__goal" style={{ insetBlockEnd: `${Math.min(92, (goal / max) * 100)}%` }}><small>יעד</small></span>
         {values.map((point) => (
           <span className="health-chart__column" key={point.day}>
