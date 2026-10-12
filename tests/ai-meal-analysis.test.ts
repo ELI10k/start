@@ -170,8 +170,23 @@ test("AI is additive to the existing barcode, saved-meal and manual-photo paths"
   assert.match(sheet, /CameraScan/);
   assert.match(sheet, /setTab\("saved"\)/);
   assert.match(sheet, /setTab\("photo"\)/);
-  assert.match(sheet, /setTab\("ai-photo"\)/);
-  assert.match(sheet, /aiMealEnabled \?/);
+  assert.match(sheet, /tab === "ai-photo"/);
+  assert.match(sheet, /<AiMealAnalyzer/);
+});
+
+test("meal-row camera opens directly and AI photography is a separate adjacent action", async () => {
+  const [control, sheet] = await Promise.all([
+    source("components/client/MealStatusControl.tsx"),
+    source("components/client/AteSomethingElse.tsx"),
+  ]);
+  assert.match(control, /capture="environment"/);
+  assert.match(control, /onClick=\{\(\) => cameraInput\.current\?\.click\(\)\}/);
+  assert.match(control, /צילום ארוחה ב־AI/);
+  assert.match(control, /initialTab="ai-photo"/);
+  assert.match(control, /initialPhoto=\{capturedPhoto\}/);
+  assert.match(sheet, /!standaloneTab \? <div className="chip-row">/);
+  assert.doesNotMatch(sheet, /setTab\("ai-photo"\)/);
+  assert.match(sheet, /standaloneTab && initialPhoto \? null/);
 });
 
 test("the forward migration preserves client logs and makes AI saves idempotent", async () => {

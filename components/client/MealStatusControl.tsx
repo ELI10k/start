@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, Check, PencilLine, Plus, Undo2, X } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, Check, PencilLine, Plus, Sparkles, Undo2, X } from "lucide-react";
 import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 import { setMealStatus } from "@/app/actions/product";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -41,6 +41,9 @@ export default function MealStatusControl({
 }) {
   const [substituting, setSubstituting] = useState(false);
   const [photographing, setPhotographing] = useState(false);
+  const [analyzingPhoto, setAnalyzingPhoto] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState<File | null>(null);
+  const cameraInput = useRef<HTMLInputElement>(null);
 
   // A photograph of the meal, on the meal, whatever else it has been answered.
   //
@@ -50,10 +53,20 @@ export default function MealStatusControl({
   // It is its own action on every state of the row, and it preserves the status:
   // photographing a meal is not a statement that it was replaced.
   const photoButton = (
-    <button type="button" onClick={() => setPhotographing(true)} className="chip">
-      <Camera aria-hidden="true" size={15} />
-      צילום
-    </button>
+    <>
+      <input ref={cameraInput} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" aria-label="צילום ארוחה במצלמה" onChange={(event) => {
+        const photo = event.currentTarget.files?.[0] ?? null;
+        if (!photo) return;
+        setCapturedPhoto(photo);
+        setPhotographing(true);
+      }}/>
+      <button type="button" onClick={() => cameraInput.current?.click()} className="chip">
+        <Camera aria-hidden="true" size={15} />צילום
+      </button>
+      {aiMealEnabled ? <button type="button" onClick={() => setAnalyzingPhoto(true)} className="chip">
+        <Sparkles aria-hidden="true" size={15} />צילום ארוחה ב־AI
+      </button> : null}
+    </>
   );
   const photoSheet = (
     <AteSomethingElse
@@ -61,13 +74,22 @@ export default function MealStatusControl({
       date={date}
       foods={foods}
       open={photographing}
-      onClose={() => setPhotographing(false)}
+      onClose={() => {
+        setPhotographing(false);
+        setCapturedPhoto(null);
+        if (cameraInput.current) cameraInput.current.value = "";
+      }}
       initialTab="photo"
+      initialPhoto={capturedPhoto}
+      standaloneTab
       preserveMealStatus
       title="צילום הארוחה"
       aiMealEnabled={aiMealEnabled}
     />
   );
+  const aiPhotoSheet = aiMealEnabled ? (
+    <AteSomethingElse mealId={mealId} date={date} foods={foods} open={analyzingPhoto} onClose={() => setAnalyzingPhoto(false)} initialTab="ai-photo" standaloneTab preserveMealStatus title="צילום ארוחה ב־AI" aiMealEnabled />
+  ) : null;
   const eaten = status === "eaten" || completed;
 
   if (status === "not_eaten") {
@@ -99,6 +121,7 @@ export default function MealStatusControl({
         <Action mealId={mealId} date={date} status="none" label="ביטול הסימון" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
         <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
+        {aiPhotoSheet}
       </div>
     );
   }
@@ -115,6 +138,7 @@ export default function MealStatusControl({
         <Action mealId={mealId} date={date} status="none" label="ביטול השלמה" icon={<Undo2 aria-hidden="true" size={15} />} className="chip" />
         <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
         {photoSheet}
+        {aiPhotoSheet}
       </div>
     );
   }
@@ -150,6 +174,7 @@ export default function MealStatusControl({
 
       <AteSomethingElse mealId={mealId} date={date} foods={foods} savedMeals={savedMeals} aiMealEnabled={aiMealEnabled} open={substituting} onClose={() => setSubstituting(false)} />
       {photoSheet}
+      {aiPhotoSheet}
     </div>
   );
 }
