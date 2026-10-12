@@ -17,7 +17,7 @@ export default async function ProgressPage() {
     const photos=checkInHistory.photosByCheckIn[checkIn.id]??[];
     return photos.length?[{checkInId:checkIn.id,submittedAt:checkIn.submitted_at,photos}]:[];
   });
-  return <ClientShell>
+  return <ClientShell className="client-app-shell--progress">
     <PageHeader eyebrow="התקדמות" title="מדדי התקדמות" description="כל המדדים שלך במקום אחד." action={{href:"/check-in",label:"צ׳ק־אין"}}/>
     <div className="grid gap-4">
       <ProgressMetricsDashboard
