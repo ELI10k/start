@@ -1293,8 +1293,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   background: var(--green); border-color: var(--green); color: #FFFFFF;
 }
 
-/* The date itself stays white. The ring and check describe the finished day's
-   calorie bank; the open page is intentionally not a third visual state. */
+/* The date itself stays white. Green and red describe finished calorie banks;
+   a bold black ring identifies today without looking like another result. */
 .day-strip .chip.day-strip__day {
   width: 100%; max-width: 5rem; min-height: 0; aspect-ratio: 1;
   justify-self: center; padding: .2rem;
@@ -1306,8 +1306,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .day-strip .chip.day-strip__day--missed {
   border-color: var(--red); color: var(--red);
 }
+.day-strip .chip.day-strip__day--today {
+  border: 2px solid var(--ink); color: var(--ink); font-weight: 900;
+}
 .day-strip .chip.day-strip__day--neutral[aria-current="page"] {
-  border-color: var(--line-strong); background: var(--surface); color: var(--ink);
+  background: var(--surface); color: var(--ink);
 }
 .day-strip .day-strip__day--complete .day-strip__date,
 .day-strip .day-strip__day--missed .day-strip__date,
