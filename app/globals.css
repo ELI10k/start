@@ -642,11 +642,13 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .health-stat-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .65rem; }
 .health-stat-grid > div { display: grid; grid-template-columns: auto 1fr; gap: .1rem .55rem; align-items: center; padding: .9rem; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
 .health-stat-grid svg { grid-row: span 2; padding: .45rem; width: 2.35rem; height: 2.35rem; border-radius: 50%; background: var(--green-tint); color: var(--green); }
+.health-stat-grid__with-goal svg { grid-row: span 3; }
 .health-stat-grid strong { font-size: 1.05rem; }
 .health-stat-grid .health-stat-grid__value--positive { color: var(--green-press); }
 .health-stat-grid .health-stat-grid__value--negative { color: var(--red); }
 .health-stat-grid .health-stat-grid__value--neutral { color: var(--ink); }
 .health-stat-grid span { color: var(--ink-muted); font-size: .68rem; }
+.health-stat-grid .health-stat-grid__goal { grid-column: 2; color: var(--green); font-size: .64rem; font-weight: 700; }
 .health-insight, .health-sync-note { padding: .9rem 1rem; border-radius: var(--radius-md); background: var(--green-tint); color: var(--green-press); font-size: .78rem; font-weight: 750; text-align: center; }
 .health-sync-button { justify-self: center; gap: .4rem; }
 .metric-overview { display: grid; gap: .8rem; }
@@ -885,9 +887,6 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .67rem; }
   .progress-metrics[data-viewport-fit] .health-insight,
   .progress-metrics[data-viewport-fit] .health-sync-note { padding: .65rem .8rem; font-size: .74rem; }
-  .progress-metrics[data-viewport-fit] .health-summary-card > .health-summary-card__steps-ratio {
-    font-size: clamp(1.45rem, 6.7vw, 2rem);
-  }
   .progress-metrics[data-metric="nutrition"] .health-summary-card { padding: .65rem .75rem; }
   .progress-metrics[data-metric="nutrition"] .health-chart { min-height: 5rem; margin-top: .3rem; }
   .progress-metrics[data-metric="nutrition"] .nutrition-macro-card { padding: .5rem .7rem; }
@@ -895,6 +894,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-metric="nutrition"] .nutrition-macro-grid { margin-top: .25rem; }
   .progress-metrics[data-metric="nutrition"] .health-insight { padding: .45rem .65rem; font-size: .68rem; }
 }
+
+.health-summary-card > .health-summary-card__goal { color: var(--green); font-weight: 700; }
 
 .metric-tile {
   min-width: 0;
