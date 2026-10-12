@@ -391,11 +391,10 @@ export async function setMealStatus(form: FormData): Promise<void> {
   if (!MEAL_STATUSES.has(status)) throw new Error("invalid_meal_status");
   if (status === "other" && !note) throw new Error("substitution_requires_note");
 
-  // The legacy database function expects one selection in every group. A
-  // client, however, may genuinely eat only the protein or only the
-  // carbohydrate. Preserve that truth by filling every unchosen group with its
-  // primary item at a zero amount; refresh_meal_intake already excludes zero
-  // portions, so only the foods the client actually chose reach today's totals.
+  // The database function expects one selection in every group. A client may
+  // genuinely eat only one part of a meal, so missing groups are represented by
+  // their primary item at a zero amount. Selecting the primary alone is not
+  // enough: without the explicit zero it would be recorded at the full portion.
   if (status === "eaten") {
     const { data: groups, error: groupsError } = await supabase
       .from("meal_food_groups")
@@ -411,6 +410,7 @@ export async function setMealStatus(form: FormData): Promise<void> {
         .eq("selection_date", date);
       if (selectionsError) throw selectionsError;
       const selected = new Set((selections ?? []).map((row) => String(row.group_id)));
+      if (selected.size === 0) throw new Error("יש לבחור לפחות פריט אחד לפני סימון הארוחה.");
       const missing = groupIds.filter((groupId) => !selected.has(groupId));
       if (missing.length) {
         const { data: items, error: itemsError } = await supabase
@@ -432,6 +432,10 @@ export async function setMealStatus(form: FormData): Promise<void> {
             p_group_id: groupId, p_meal_item_id: itemId, p_date: date,
           });
           if (selectError) throw selectError;
+          const { error: amountError } = await supabase.rpc("set_meal_group_amount", {
+            p_group_id: groupId, p_date: date, p_quantity: 0,
+          });
+          if (amountError) throw amountError;
         }));
       }
     }

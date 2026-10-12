@@ -596,7 +596,7 @@ test("logging against a meal answers that meal too", async () => {
   // Otherwise the client says the same thing twice, in two controls, and the
   // meal goes on asking.
   assert.match(action, /rpc\("set_meal_day_status"/);
-  assert.match(action, /p_status: "other"/);
+  assert.match(action, /p_status: isFreeCalorieMeal \? "eaten" : "other"/);
   // A failed row must not leave its photograph behind.
   assert.match(action, /if \(photoPath\) await supabase\.storage\.from\(FOOD_LOG_PHOTO_BUCKET\)\.remove\(\[photoPath\]\)/);
 });
@@ -647,7 +647,7 @@ test("the day opens one meal at a time", async () => {
   // And which one starts open is still the meal that is due now.
   assert.match(page, /defaultOpen=\{isNow\}/);
   // The closed row has to carry enough to decide whether to open it.
-  assert.match(page, /const mealCalories = meal\.freeCalorieTarget && measuredMealLogs\.length > 0 \? loggedMealCalories : menuMealCalories \+ loggedMealCalories/);
+  assert.match(page, /const mealCalories = menuMealCalories \+ loggedMealCalories/);
   assert.match(page, /const calorieLabel =/);
   assert.match(page, /meal\.status === "not_eaten" \? "לא נאכל"/);
   assert.match(css, /\.meal-card > summary/);

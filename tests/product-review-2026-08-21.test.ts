@@ -90,6 +90,12 @@ test("measured food in a free-calorie window counts only what was eaten", () => 
   assert.equal(addTotals(eatenFromMenu([free], () => 110), { calories: 110, protein: 6, carbs: 8, fat: 6 }).calories, 110);
 });
 
+test("an unmeasured free-calorie entry closes the frame without inventing its allowance", () => {
+  const free = meal({ id: "free", status: "eaten", freeCalorieTarget: 300, groups: [] });
+  assert.equal(eatenFromMenu([free], () => 0, () => 1).calories, 0);
+  assert.equal(remainingInMenu([free], () => 1).calories, 0);
+});
+
 test("a prescribed choice in a free-calorie window replaces rather than adds to the allowance", () => {
   const free = meal({ id: "free", status: "eaten", freeCalorieTarget: 300 });
   assert.equal(eatenFromMenu([free]).calories, 300);
@@ -176,10 +182,59 @@ test("logging a food never erases an answer the client already gave", async () =
   // set_meal_day_status('other') deletes the meal's recorded intake, so calling
   // it against a meal already marked eaten cost the day a whole meal - as a
   // side effect of logging an extra snack against it.
-  assert.match(action, /if \(!isFreeCalorieMeal && !existing\)/);
+  assert.match(action, /if \(!existing\)/);
   assert.match(action, /from\("meal_day_status"\)/);
-  // A free-calorie window has no plan to have eaten instead of.
+  // A free-calorie window has no plan to have eaten instead of; logging in it
+  // completes the frame as eaten rather than leaving it open or substituting it.
   assert.match(action, /free_calorie_target/);
+  assert.match(action, /isFreeCalorieMeal \? "eaten" : "other"/);
+});
+
+test("partial meal completion records every unchosen group at zero", async () => {
+  const [actions, page] = await Promise.all([
+    source("app/actions/product.ts"),
+    source("app/nutrition/page.tsx"),
+  ]);
+  assert.match(actions, /p_quantity: 0/);
+  assert.match(actions, /selected\.size === 0/);
+  assert.match(page, /blocked=\{noChoice\}/);
+});
+
+test("deleting the final substitute reopens its meal", async () => {
+  const action = await source("app/actions/food-log.ts");
+  assert.match(action, /count: "exact", head: true/);
+  assert.match(action, /mark\?\.status === "other"/);
+  assert.match(action, /p_status: "none"/);
+});
+
+test("free calories expose the approved food catalogue", async () => {
+  const [page, frame] = await Promise.all([
+    source("app/nutrition/page.tsx"),
+    source("components/client/FreeCalorieMeal.tsx"),
+  ]);
+  assert.match(page, /foods=\{pickableFoods\}/);
+  assert.match(frame, /foods=\{foods\}/);
+});
+
+test("existing logged free-calorie frames are closed during deployment", async () => {
+  const migration = await source("supabase/migrations/202610120001_close_logged_free_calorie_meals.sql");
+  assert.match(migration, /join public\.meals meal on meal\.id = log\.meal_id/);
+  assert.match(migration, /meal\.free_calorie_target is not null/);
+  assert.match(migration, /'eaten'/);
+  assert.match(migration, /on conflict \(client_id, meal_id, status_date\) do nothing/);
+});
+
+test("meal cards and the daily total keep one decimal instead of disagreeing by rounding", async () => {
+  const page = await source("app/nutrition/page.tsx");
+  assert.match(page, /formatNutritionValue\(mealCalories\)/);
+  assert.match(page, /formatNutritionValue\(value\)/);
+  assert.match(page, /Math\.round\(value \* 10\) \/ 10/);
+});
+
+test("the coach never invents a primary food for an answered unselected group", async () => {
+  const page = await source("app/coach/clients/[id]/page.tsx");
+  assert.match(page, /isMealReportedEaten\(meal\)\?selected/);
+  assert.match(page, /shown\?\.name\?\?"לא נבחר מאכל"/);
 });
 
 // ------------------------------------------------------------------- the bell

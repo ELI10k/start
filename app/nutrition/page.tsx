@@ -148,9 +148,9 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
   const outsideMenuLogs = logged.filter((entry) => !entry.mealId);
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
-  const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn), loggedTotals);
-  const remainingTotals = remainingInMenu(menu?.meals ?? []);
-  const anyChoiceMade = menu?.meals.some((meal) => meal.groups.some((group) => group.selectedItemId)) ?? false;
+  const loggedEntriesIn = (mealId: string | undefined) => logged.filter((entry) => entry.mealId === mealId).length;
+  const eatenTotals = addTotals(eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn, loggedEntriesIn), loggedTotals);
+  const remainingTotals = remainingInMenu(menu?.meals ?? [], loggedEntriesIn);
   const answeredMeals = menu?.meals.filter((meal) => Boolean(meal.status || meal.completed)).length ?? 0;
   const unansweredMeals = Math.max(0, (menu?.meals.length ?? 0) - answeredMeals);
   const nutritionInsights = dailyNutritionInsights({
@@ -238,24 +238,26 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             // primary. After "eaten", show intake: only explicit choices count.
             // Reusing the same helpers as the day total keeps the card and the
             // headline from disagreeing when a choice is cleared after marking.
-            const menuMealCalories = Math.round(sumItems(
-              isMealReportedEaten(meal) ? mealIntake(meal) : mealStanding(meal),
-            ).calories + (meal.groups.length ? 0 : (meal.freeCalorieTarget ?? 0)));
             const mealLogs = logged.filter((entry) => entry.mealId === meal.id);
             const measuredMealLogs = mealLogs.filter((entry) => entry.calories !== null);
-            const loggedMealCalories = Math.round(measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0));
-            const mealCalories = meal.freeCalorieTarget && measuredMealLogs.length > 0 ? loggedMealCalories : menuMealCalories + loggedMealCalories;
-            const calorieLabel = meal.status === "other" && mealLogs.length > 0 && measuredMealLogs.length === 0
+            const loggedMealCalories = measuredMealLogs.reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+            const menuMealCalories = sumItems(
+              isMealReportedEaten(meal) ? mealIntake(meal) : mealStanding(meal),
+            ).calories + (meal.groups.length || mealLogs.length ? 0 : (meal.freeCalorieTarget ?? 0));
+            const mealCalories = menuMealCalories + loggedMealCalories;
+            const calorieLabel = mealLogs.length > 0 && measuredMealLogs.length === 0
               ? menuMealCalories > 0
-                ? `${menuMealCalories} קל׳ מהבחירות · הרישום החלופי לא נמדד`
+                ? `${formatNutritionValue(menuMealCalories)} קל׳ מהבחירות · הרישום הנוסף לא נמדד`
                 : "קלוריות לא נמדדו"
+              : meal.freeCalorieTarget && mealLogs.length > 0
+                ? `${formatNutritionValue(mealCalories)} קל׳ נרשמו במסגרת`
               : meal.status === "other"
                 ? menuMealCalories > 0
-                  ? `${mealCalories} קל׳ מהבחירות ומהרישום החלופי`
-                  : `${mealCalories} קל׳ מהרישום החלופי`
+                  ? `${formatNutritionValue(mealCalories)} קל׳ מהבחירות ומהרישום החלופי`
+                  : `${formatNutritionValue(mealCalories)} קל׳ מהרישום החלופי`
                 : isMealEaten(meal)
-                  ? `${mealCalories} קל׳ מהבחירות שסומנו`
-                  : `${mealCalories} קל׳`;
+                  ? `${formatNutritionValue(mealCalories)} קל׳ מהבחירות שסומנו`
+                  : `${formatNutritionValue(mealCalories)} קל׳`;
             // Where the meal stands, in one word, for the closed row.
             const mark = meal.status === "not_eaten" ? "לא נאכל"
               : meal.status === "other" ? "נאכל משהו אחר"
@@ -290,7 +292,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   status={meal.status}
                   statusNote={meal.statusNote}
                   completed={meal.completed}
-                  blocked={false}
+                  blocked={noChoice}
                   foods={pickableFoods}
                   savedMeals={savedMeals}
                 />
@@ -307,6 +309,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   frame={meal.freeCalorieTarget}
                   logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
                   unmeasured={mine.length-measured.length}
+                  foods={pickableFoods}
                 />;
               })():null}
               {meal.groups.length?<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">
@@ -362,9 +365,9 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                 מה נאכל היום
               </h2>
               <p className="mt-1 text-xs text-[#5B5F5B]">
-                {anyChoiceMade
-                  ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו — מה שנשאר בתפריט להיום."
-                  : "עדיין לא סומנה אף ארוחה. המספרים יתמלאו ככל שתסמנו."}
+                {answeredMeals > 0 || logged.length > 0
+                  ? "המספר הגדול הוא מה שכבר נאכל. מתחתיו מוצג הפער ליעד היומי; כשאין יעד, מה שנותר בתפריט."
+                  : "עדיין לא נרשמה אכילה. המספרים יתמלאו ככל שתסמנו ארוחות או תוסיפו פריטים."}
                 {loggedTotals.measured ? ` נוספו ${loggedTotals.measured} פריטים שנרשמו מחוץ לתפריט.` : ""}
                 {loggedTotals.unmeasured ? ` ${loggedTotals.unmeasured} פריטים שרשמת אינם נספרים — אין להם ערכים מאושרים.` : ""}
               </p>
@@ -457,7 +460,7 @@ function MacroTotal({
       <dt className="text-xs text-[#5B5F5B]">{label}</dt>
       {/* Named, not slashed. Which figure is which is the whole question. */}
       <dd className="mt-1 font-black">
-        {Math.round(value)} {unit}
+        {formatNutritionValue(value)} {unit}
       </dd>
       <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
         {isDailyReserve
@@ -472,4 +475,9 @@ function MacroTotal({
       </p>
     </div>
   );
+}
+
+function formatNutritionValue(value: number) {
+  const rounded = Math.round(value * 10) / 10;
+  return rounded.toLocaleString("he-IL", { maximumFractionDigits: 1 });
 }

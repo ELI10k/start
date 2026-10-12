@@ -94,7 +94,7 @@ test("one chosen macro is enough to mark a meal eaten", async () => {
   assert.match(page, /אפשר לסמן לאחר בחירת פריט אחד לפחות/);
   assert.match(actions, /p_quantity: quantity/);
   assert.match(actions, /quantity !== null && \(!Number\.isFinite\(quantity\) \|\| quantity < 0\)/);
-  assert.match(actions, /refresh_meal_intake already excludes zero/);
+  assert.match(actions, /p_quantity: 0/);
 });
 
 test("tapping the selected meal item again clears it", async () => {

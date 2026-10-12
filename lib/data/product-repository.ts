@@ -622,8 +622,9 @@ export async function getCoachClientDashboard(
     loggedToday
       .filter((entry) => entry.mealId === mealId)
       .reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
+  const loggedEntriesIn = (mealId: string | undefined) => loggedToday.filter((entry) => entry.mealId === mealId).length;
   const totals = addTotals(
-    eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn),
+    eatenFromMenu(menu?.meals ?? [], loggedCaloriesIn, loggedEntriesIn),
     sumLoggedFood(loggedToday),
   );
   // Adherence is counted in meals, not in rows.
