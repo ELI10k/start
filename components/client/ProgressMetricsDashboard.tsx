@@ -20,11 +20,11 @@ type ProgressEntry = Readonly<{
 type Metric = "weight" | "measurements" | "steps" | "sleep" | "nutrition";
 
 const tabs = [
+  { id: "nutrition", label: "תזונה", description: "קלוריות ומאקרו", icon: Utensils },
   { id: "weight", label: "משקל", description: "מגמה ויעד", icon: Scale },
   { id: "measurements", label: "היקפים", description: "שינוי בגוף", icon: Ruler },
   { id: "steps", label: "צעדים", description: "פעילות יומית", icon: Footprints },
   { id: "sleep", label: "שינה", description: "התאוששות", icon: MoonStar },
-  { id: "nutrition", label: "תזונה", description: "קלוריות ומאקרו", icon: Utensils },
 ] as const;
 
 export default function ProgressMetricsDashboard({
@@ -49,7 +49,7 @@ export default function ProgressMetricsDashboard({
   const [metric, setMetric] = useState<Metric>("weight");
 
   return (
-    <section className="progress-metrics" aria-labelledby="progress-metrics-title">
+    <section className="progress-metrics" data-metric={metric} aria-labelledby="progress-metrics-title">
       <h2 id="progress-metrics-title" className="sr-only">בחירת מדד התקדמות</h2>
       <div className="progress-metric-tabs" role="tablist" aria-label="בחירת מדד התקדמות">
         {tabs.map((tab) => {
