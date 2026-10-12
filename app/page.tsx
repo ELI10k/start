@@ -70,7 +70,8 @@ export default async function Home() {
   // tile and the nutrition screen answer with the same number.
   const loggedCaloriesIn = (mealId: string | undefined) =>
     logged.filter((entry) => entry.mealId === mealId).reduce((sum, entry) => sum + (entry.calories ?? 0), 0);
-  const totals = addTotals(eatenFromMenu(meals, loggedCaloriesIn), sumLoggedFood(logged));
+  const loggedEntriesIn = (mealId: string | undefined) => logged.filter((entry) => entry.mealId === mealId).length;
+  const totals = addTotals(eatenFromMenu(meals, loggedCaloriesIn, loggedEntriesIn), sumLoggedFood(logged));
   const calorieTarget = data.menu?.calorieTarget ?? data.clientProfile.calorie_target ?? null;
   const plannedWorkouts = data.workouts.planned;
   const completedWorkouts = data.workouts.completed;
