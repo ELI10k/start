@@ -30,6 +30,7 @@ import { addTotals, eatenFromMenu, isMealEaten, isMealReportedEaten, mealIntake,
 import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
+import { displayCalories } from "@/lib/nutrition/display";
 
 // "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
 // server action executes on the route segment that hosts it. Vercel's default
@@ -247,17 +248,17 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
             const mealCalories = menuMealCalories + loggedMealCalories;
             const calorieLabel = mealLogs.length > 0 && measuredMealLogs.length === 0
               ? menuMealCalories > 0
-                ? `${formatNutritionValue(menuMealCalories)} קל׳ מהבחירות · הרישום הנוסף לא נמדד`
+                ? `${displayCalories(menuMealCalories)} קל׳ מהבחירות · הרישום הנוסף לא נמדד`
                 : "קלוריות לא נמדדו"
               : meal.freeCalorieTarget && mealLogs.length > 0
-                ? `${formatNutritionValue(mealCalories)} קל׳ נרשמו במסגרת`
+                ? `${displayCalories(mealCalories)} קל׳ נרשמו במסגרת`
               : meal.status === "other"
                 ? menuMealCalories > 0
-                  ? `${formatNutritionValue(mealCalories)} קל׳ מהבחירות ומהרישום החלופי`
-                  : `${formatNutritionValue(mealCalories)} קל׳ מהרישום החלופי`
+                  ? `${displayCalories(mealCalories)} קל׳ מהבחירות ומהרישום החלופי`
+                  : `${displayCalories(mealCalories)} קל׳ מהרישום החלופי`
                 : isMealEaten(meal)
-                  ? `${formatNutritionValue(mealCalories)} קל׳ מהבחירות שסומנו`
-                  : `${formatNutritionValue(mealCalories)} קל׳`;
+                  ? `${displayCalories(mealCalories)} קל׳ מהבחירות שסומנו`
+                  : `${displayCalories(mealCalories)} קל׳`;
             // Where the meal stands, in one word, for the closed row.
             const mark = meal.status === "not_eaten" ? "לא נאכל"
               : meal.status === "other" ? "נאכל משהו אחר"
@@ -452,15 +453,16 @@ function MacroTotal({
   target?: number | null;
   unit: string;
 }) {
+  const isCalories = label === "קלוריות";
   const gap = target && target > 0 ? Math.round(target - value) : 0;
-  const isDailyReserve = label === "קלוריות" && left <= 0.5 && gap >= 80 && gap <= 120;
+  const isDailyReserve = isCalories && left <= 0.5 && gap >= 80 && gap <= 120;
 
   return (
     <div className="rounded-2xl border border-[#E5E7E5] bg-[#F7F8F7] p-3">
       <dt className="text-xs text-[#5B5F5B]">{label}</dt>
       {/* Named, not slashed. Which figure is which is the whole question. */}
       <dd className="mt-1 font-black">
-        {formatNutritionValue(value)} {unit}
+        {isCalories ? displayCalories(value) : formatNutritionValue(value)} {unit}
       </dd>
       <p className={`mt-1 text-xs ${target && value - target > 0.5 ? "font-bold text-[#DC2626]" : "text-[#5B5F5B]"}`}>
         {isDailyReserve

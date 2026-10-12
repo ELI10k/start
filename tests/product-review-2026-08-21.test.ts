@@ -224,11 +224,16 @@ test("existing logged free-calorie frames are closed during deployment", async (
   assert.match(migration, /on conflict \(client_id, meal_id, status_date\) do nothing/);
 });
 
-test("meal cards and the daily total keep one decimal instead of disagreeing by rounding", async () => {
-  const page = await source("app/nutrition/page.tsx");
-  assert.match(page, /formatNutritionValue\(mealCalories\)/);
-  assert.match(page, /formatNutritionValue\(value\)/);
-  assert.match(page, /Math\.round\(value \* 10\) \/ 10/);
+test("meal calories always display as whole numbers rounded upward", async () => {
+  const [page, option, frame] = await Promise.all([
+    source("app/nutrition/page.tsx"),
+    source("components/client/MealOptionButton.tsx"),
+    source("components/client/FreeCalorieMeal.tsx"),
+  ]);
+  assert.match(page, /displayCalories\(mealCalories\)/);
+  assert.match(page, /isCalories \? displayCalories\(value\) : formatNutritionValue\(value\)/);
+  assert.match(option, /displayCalories\(calories\)/);
+  assert.match(frame, /displayCalories\(logged\)/);
 });
 
 test("the coach never invents a primary food for an answered unselected group", async () => {
