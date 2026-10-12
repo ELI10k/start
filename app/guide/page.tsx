@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://start.elicohenfitness.co.il"),
   title: "מדריך השימוש ב־Life Fit",
   description:
-    "שבעה סרטוני הדרכה קצרים וברורים שיעזרו לכם להתחיל להשתמש באפליקציית Life Fit.",
+    "תשעה סרטוני הדרכה קצרים וברורים שיעזרו לכם להתחיל להשתמש באפליקציית Life Fit.",
   alternates: { canonical: "/guide" },
   openGraph: {
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "LIFE FIT",
     title: "מדריך השימוש ב־Life Fit",
     description:
-      "כניסה, תזונה, אימונים, מעקב והקשר עם המאמן — שבעה מדריכים מסודרים במקום אחד.",
+      "כניסה, תזונה, אימונים, מעקב, חיבור מכשירי כושר והקשר עם המאמן — תשעה מדריכים מסודרים במקום אחד.",
     images: [
       {
         url: "/join/opengraph-image",
@@ -100,6 +100,24 @@ const lessons = [
     points: ["שליחת הודעה למאמן", "התראות וספריית התוכן", "הגדרות הפרופיל וקבלת תמיכה"],
     src: "/media/life-fit-training/07-messages-content-profile-support",
   },
+  {
+    number: "08",
+    title: "חיבור שעון ומכשיר כושר באייפון",
+    duration: "50 שניות",
+    description:
+      "מדריך קצר לחיבור שעון חכם, צמיד כושר, טבעת חכמה או האייפון עצמו. תראו איך מעבירים צעדים ושינה דרך Apple Health ומוודאים שהנתונים הגיעו ל־Life Fit.",
+    points: ["חיבור לאפליקציית היצרן", "אישור צעדים ושינה ב־Apple Health", "בחירת מקור הנתונים הנכון"],
+    src: "/media/life-fit-training/08-connect-device-iphone",
+  },
+  {
+    number: "09",
+    title: "חיבור שעון ומכשיר כושר באנדרואיד",
+    duration: "50 שניות",
+    description:
+      "מדריך קצר לחיבור שעון חכם, צמיד כושר, טבעת חכמה או טלפון Android. תראו איך מסנכרנים דרך Health Connect ומאשרים את הרשאות הצעדים והשינה.",
+    points: ["חיבור לאפליקציית היצרן", "סנכרון עם Health Connect", "בדיקת הרשאות הקריאה והכתיבה"],
+    src: "/media/life-fit-training/09-connect-device-android",
+  },
 ] as const;
 
 export default function GuideLandingPage() {
@@ -131,23 +149,23 @@ export default function GuideLandingPage() {
             <span>כדי להתחיל נכון.</span>
           </h1>
           <p>
-            שבעה סרטונים קצרים שילוו אתכם מהכניסה הראשונה ועד לעבודה שוטפת עם
-            התפריט, האימונים, המעקב והמאמן.
+            תשעה סרטונים קצרים שילוו אתכם מהכניסה הראשונה ועד לעבודה שוטפת עם
+            התפריט, האימונים, המעקב, חיבור מכשירי הכושר והמאמן.
           </p>
           <a className={styles.primaryButton} href="#lessons">
             מתחילים בפרק הראשון
             <ArrowDown size={19} aria-hidden="true" />
           </a>
           <div className={styles.heroProof}>
-            <span><Play size={16} aria-hidden="true" /> 7 פרקים מסודרים</span>
-            <span><Clock3 size={16} aria-hidden="true" /> כ־27 דקות בסך הכול</span>
+            <span><Play size={16} aria-hidden="true" /> 9 פרקים מסודרים</span>
+            <span><Clock3 size={16} aria-hidden="true" /> כ־29 דקות בסך הכול</span>
             <span><ShieldCheck size={16} aria-hidden="true" /> צופים בקצב שלכם</span>
           </div>
         </div>
 
         <div className={styles.heroCard} aria-label="מה תלמדו במדריך">
           <span className={styles.heroCardKicker}>מהכניסה הראשונה ועד שגרת עבודה</span>
-          <strong>7</strong>
+          <strong>9</strong>
           <p>פרקים שמסבירים בדיוק איפה ללחוץ ומה לעשות בכל שלב.</p>
           <ol>
             <li><span>01</span>כניסה וניווט</li>
@@ -157,6 +175,8 @@ export default function GuideLandingPage() {
             <li><span>05</span>התקדמות באימונים</li>
             <li><span>06</span>מדידות וצ׳ק־אין</li>
             <li><span>07</span>הודעות ותמיכה</li>
+            <li><span>08</span>חיבור מכשיר באייפון</li>
+            <li><span>09</span>חיבור מכשיר באנדרואיד</li>
           </ol>
         </div>
       </section>
