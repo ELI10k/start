@@ -437,6 +437,23 @@ test("the workout report reads off what was recorded, and never fills space", as
   assert.doesNotMatch(pace!.detail, /טלפון|רשתות|מסך/);
   assert.equal(expectedSeconds([{ name: "x", restSeconds: 60, skipped: false, sets: [set("a", 40)], previousSets: [] }]), 105);
 
+  const paceExercise = { name: "סקוואט", restSeconds: 60, skipped: false,
+    sets: [set("pace", 40)], previousSets: [] };
+  const paceExpected = expectedSeconds([paceExercise]);
+  for (const extraSeconds of [18 * 60, 20 * 60]) {
+    const withinBuffer = buildWorkoutReport({
+      durationSeconds: paceExpected + extraSeconds,
+      exercises: [paceExercise],
+    });
+    assert.ok(withinBuffer.every((item) => item.title !== "האימון נמשך יותר מהצפוי"));
+  }
+  const beyondBuffer = buildWorkoutReport({
+    durationSeconds: paceExpected + 20 * 60 + 1,
+    exercises: [paceExercise],
+  });
+  assert.ok(beyondBuffer.some((item) => item.title === "האימון נמשך יותר מהצפוי"));
+  assert.match(beyondBuffer.find((item) => item.title === "האימון נמשך יותר מהצפוי")!.detail, /בלי לקצר מנוחה/);
+
   // Nothing notable produces one honest line, not an empty panel and not an
   // invented observation.
   const quiet = buildWorkoutReport({
