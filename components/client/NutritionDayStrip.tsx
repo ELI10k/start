@@ -66,7 +66,7 @@ export default function NutritionDayStrip({
             // Two glyphs and a number are enough to pick a day by, and not
             // enough to be read out by. The label spells the day in full.
             aria-label={`${isToday ? "היום, " : ""}${formatIsraelDate(at, { weekday: "long", day: "numeric", month: "long" })}${statusLabel}`}
-            className={`chip day-strip__day day-strip__day--${status}`}
+            className={`chip day-strip__day day-strip__day--${status}${isToday ? " day-strip__day--today" : ""}`}
           >
             {/* Today names its weekday like every other day in the row. Status
                 belongs only to finished days, so opening a date never changes
