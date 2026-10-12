@@ -72,24 +72,26 @@ test.describe("meal status", () => {
       .getByRole("button", { name: "ביטול הסימון" }).click();
   });
 
-  test("a free-calorie meal opens one direct food picker", async ({ page }) => {
+  test("a free-calorie meal shows direct food choices", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
     await skipUnlessMigrated(page);
 
     const meal = page.locator("article").filter({ hasText: "קלוריות חופשיות" }).first();
     test.skip(!(await meal.count()), "no free-calorie meal on the assigned menu");
 
-    await expect(meal.getByRole("button", { name: "בחר מה אכלת" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "בחר מה אכלת" })).toHaveCount(0);
     await expect(meal.getByRole("button", { name: "סימון הארוחה כנאכלה" })).toHaveCount(0);
     await expect(meal.getByRole("button", { name: "אכלתי משהו אחר" })).toHaveCount(0);
     await expect(meal.getByRole("button", { name: "לא נאכל" })).toHaveCount(0);
 
-    await meal.getByRole("button", { name: "בחר מה אכלת" }).click();
+    await expect(meal.getByRole("button", { name: "תיאור" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "ברקוד" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "מהמאגר" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "מהארוחות שלי" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "צילום" })).toHaveCount(1);
+
+    await meal.getByRole("button", { name: "תיאור" }).click();
     await expect(page.getByRole("heading", { name: "מה אכלת במסגרת הזו?" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "תיאור" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "ברקוד" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "מהמאגר" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "מהארוחות שלי" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "צילום" })).toBeVisible();
+    await expect(page.getByLabel("תיאור קצר")).toBeVisible();
   });
 });
