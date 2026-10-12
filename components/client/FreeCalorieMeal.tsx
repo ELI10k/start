@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import AteSomethingElse from "@/components/client/AteSomethingElse";
 import type { PickableFood } from "@/components/client/AteSomethingElse";
+import { displayCalories } from "@/lib/nutrition/display";
 
 /**
  * The free-calorie window, with a way to fill it.
@@ -45,8 +46,8 @@ export default function FreeCalorieMeal({
       <p className={`mt-2 text-sm font-bold ${left < 0 ? "text-[#DC2626]" : ""}`}>
         {logged > 0
           ? left >= 0
-            ? `נרשמו ${Math.round(logged)} קל׳ · נותרו ${left}`
-            : `נרשמו ${Math.round(logged)} קל׳ · חריגה של ${Math.abs(left)}`
+            ? `נרשמו ${displayCalories(logged)} קל׳ · נותרו ${displayCalories(left)}`
+            : `נרשמו ${displayCalories(logged)} קל׳ · חריגה של ${displayCalories(Math.abs(left))}`
           : "עדיין לא נרשם כלום במסגרת הזו."}
       </p>
       {unmeasured > 0 && (
