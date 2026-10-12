@@ -62,5 +62,8 @@ test("bounded progress summaries opt into the phone viewport-fit layout", async 
   assert.match(css, /\.progress-metrics\[data-viewport-fit\] \.health-chart__plot \{ height: 100%/);
   assert.match(css, /\.health-chart\[data-monthly\] \.health-chart__plot \{\s*min-width: 0/);
   assert.match(css, /@media \(max-width: 767px\) and \(min-height: 740px\)/);
+  assert.match(css, /data-metric="nutrition"\] \.health-chart \{ min-height: 5rem/);
+  assert.match(healthPanel, /average\.toLocaleString\("he-IL"\).*מתוך.*summary\.goal\.toLocaleString\("he-IL"\)/);
+  assert.match(healthPanel, /צעדים בממוצע ליום/);
   assert.doesNotMatch(healthPanel, /minmax\(\$\{monthly \? "2\.75rem"/);
 });

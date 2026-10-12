@@ -112,8 +112,8 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
         <section className="health-summary-card">
           <span className="health-summary-card__icon"><Footprints aria-hidden="true" size={24} /></span>
           <p>ממוצע יומי {period === "month" ? "בחודש" : "בשבוע"}</p>
-          <strong>{average !== null ? average.toLocaleString("he-IL") : "אין נתונים"}</strong>
-          <small>{average !== null ? `מתוך יעד של ${summary.goal.toLocaleString("he-IL")}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
+          <strong className="health-summary-card__steps-ratio">{average !== null ? `${average.toLocaleString("he-IL")} מתוך ${summary.goal.toLocaleString("he-IL")}` : "אין נתונים"}</strong>
+          <small>{average !== null ? "צעדים בממוצע ליום" : "חברו את נתוני הבריאות כדי להתחיל"}</small>
           <Bars values={values} goal={summary.goal} formatter={(value) => value.toLocaleString("he-IL")} monthly={period === "month"} />
         </section>
         <div className="health-stat-grid">
