@@ -287,16 +287,16 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                 <div>
                   {meal.freeCalorieTarget?<p className="text-xs text-[#5B5F5B]">מסגרת: {meal.freeCalorieTarget} קל׳</p>:<p className="text-xs text-[#5B5F5B]">אפשר לסמן לאחר בחירת פריט אחד לפחות</p>}
                 </div>
-                <MealStatusControl
-                  mealId={meal.id}
-                  date={today}
-                  status={meal.status}
-                  statusNote={meal.statusNote}
-                  completed={meal.completed}
-                  blocked={noChoice}
-                  foods={pickableFoods}
-                  savedMeals={savedMeals}
-                />
+                {!meal.freeCalorieTarget ? <MealStatusControl
+                    mealId={meal.id}
+                    date={today}
+                    status={meal.status}
+                    statusNote={meal.statusNote}
+                    completed={meal.completed}
+                    blocked={noChoice}
+                    foods={pickableFoods}
+                    savedMeals={savedMeals}
+                  /> : null}
               </div>
               {meal.notes?<p className="mt-3 text-sm text-[#5B5F5B]">{meal.notes}</p>:null}
               {/* What was eaten instead of this meal, under the meal it replaced. */}
@@ -311,6 +311,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
                   logged={measured.reduce((sum,entry)=>sum+(entry.calories??0),0)}
                   unmeasured={mine.length-measured.length}
                   foods={pickableFoods}
+                  savedMeals={savedMeals}
                 />;
               })():null}
               {meal.groups.length?<div className="mt-4 grid gap-4 md:grid-cols-2 md:items-start [&>*]:min-w-0">

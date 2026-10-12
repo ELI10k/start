@@ -72,21 +72,24 @@ test.describe("meal status", () => {
       .getByRole("button", { name: "ביטול הסימון" }).click();
   });
 
-  test("the free-calorie meal closes when marked eaten", async ({ page }) => {
+  test("a free-calorie meal opens one direct food picker", async ({ page }) => {
     await signIn(page, requireIdentity("client"));
     await skipUnlessMigrated(page);
 
-    // The free-calorie meal has no food groups, which is precisely the case that
-    // could never be closed before.
     const meal = page.locator("article").filter({ hasText: "קלוריות חופשיות" }).first();
     test.skip(!(await meal.count()), "no free-calorie meal on the assigned menu");
 
-    const mark = meal.getByRole("button", { name: "סימון הארוחה כנאכלה" });
-    if (await mark.count()) {
-      await mark.click();
-      await expect(meal.getByText("נאכל", { exact: true })).toBeVisible({ timeout: 20_000 });
-      await meal.getByRole("button", { name: "ביטול השלמה" }).click();
-      await expect(meal.getByRole("button", { name: "סימון הארוחה כנאכלה" })).toBeVisible({ timeout: 20_000 });
-    }
+    await expect(meal.getByRole("button", { name: "בחר מה אכלת" })).toHaveCount(1);
+    await expect(meal.getByRole("button", { name: "סימון הארוחה כנאכלה" })).toHaveCount(0);
+    await expect(meal.getByRole("button", { name: "אכלתי משהו אחר" })).toHaveCount(0);
+    await expect(meal.getByRole("button", { name: "לא נאכל" })).toHaveCount(0);
+
+    await meal.getByRole("button", { name: "בחר מה אכלת" }).click();
+    await expect(page.getByRole("heading", { name: "מה אכלת במסגרת הזו?" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "תיאור" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "ברקוד" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "מהמאגר" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "מהארוחות שלי" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "צילום" })).toBeVisible();
   });
 });

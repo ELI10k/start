@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import AteSomethingElse from "@/components/client/AteSomethingElse";
-import type { PickableFood } from "@/components/client/AteSomethingElse";
+import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 import { displayCalories } from "@/lib/nutrition/display";
 
 /**
@@ -24,6 +23,7 @@ export default function FreeCalorieMeal({
   logged,
   unmeasured,
   foods,
+  savedMeals,
 }: {
   mealId: string;
   date: string;
@@ -34,6 +34,7 @@ export default function FreeCalorieMeal({
   unmeasured: number;
   /** Approved catalogue foods available through the database picker. */
   foods: readonly PickableFood[];
+  savedMeals: readonly SavedMealChoice[];
 }) {
   const [adding, setAdding] = useState(false);
   const left = Math.round(frame - logged);
@@ -57,16 +58,17 @@ export default function FreeCalorieMeal({
       )}
 
       <button type="button" onClick={() => setAdding(true)} className="chip mt-3">
-        <Plus aria-hidden="true" size={15} />הוספת מה שאכלתי
+        <Plus aria-hidden="true" size={15} />בחר מה אכלת
       </button>
 
       <AteSomethingElse
         mealId={mealId}
         date={date}
+        foods={foods}
+        savedMeals={savedMeals}
         open={adding}
         onClose={() => setAdding(false)}
         title="מה אכלת במסגרת הזו?"
-        foods={foods}
         unmeasuredNote="התיאור או התמונה יישלחו לחישוב אוטומטי. אם לא ניתן לזהות בוודאות, הפריט יישמר לעיון המאמן בלי להוסיף ערכים שגויים."
       />
     </div>
