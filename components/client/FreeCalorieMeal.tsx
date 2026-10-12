@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import AteSomethingElse from "@/components/client/AteSomethingElse";
+import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 
 /**
  * The free-calorie window, with a way to fill it.
@@ -21,6 +21,8 @@ export default function FreeCalorieMeal({
   frame,
   logged,
   unmeasured,
+  foods,
+  savedMeals,
 }: {
   mealId: string;
   date: string;
@@ -29,6 +31,8 @@ export default function FreeCalorieMeal({
   logged: number;
   /** Entries recorded against it that carry no figures. */
   unmeasured: number;
+  foods: readonly PickableFood[];
+  savedMeals: readonly SavedMealChoice[];
 }) {
   const [adding, setAdding] = useState(false);
   const left = Math.round(frame - logged);
@@ -52,12 +56,14 @@ export default function FreeCalorieMeal({
       )}
 
       <button type="button" onClick={() => setAdding(true)} className="chip mt-3">
-        <Plus aria-hidden="true" size={15} />הוספת מה שאכלתי
+        <Plus aria-hidden="true" size={15} />בחר מה אכלת
       </button>
 
       <AteSomethingElse
         mealId={mealId}
         date={date}
+        foods={foods}
+        savedMeals={savedMeals}
         open={adding}
         onClose={() => setAdding(false)}
         title="מה אכלת במסגרת הזו?"

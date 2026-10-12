@@ -699,9 +699,16 @@ test("the free-calorie window can be filled in, not just described", async () =>
   // It used to be a sentence with nowhere to answer it, so the frame could not
   // be tracked against and the day counted the whole allowance either way.
   assert.match(component, /<AteSomethingElse/);
-  assert.match(component, /הוספת מה שאכלתי/);
+  assert.match(component, /בחר מה אכלת/);
+  assert.match(component, /foods=\{foods\}/);
+  assert.match(component, /savedMeals=\{savedMeals\}/);
   assert.match(component, /נותרו/);
   assert.match(page, /<FreeCalorieMeal/);
+  // A free-calorie frame is filled by choosing food; it is not a regular meal
+  // that also needs to be marked eaten, replaced or skipped in a second row of
+  // controls.
+  assert.match(page, /!meal\.freeCalorieTarget \? <MealStatusControl/);
+  assert.match(page, /foods=\{pickableFoods\}[\s\S]*savedMeals=\{savedMeals\}[\s\S]*\/>;/);
 });
 
 test("the camera is not torn down by its own parent re-rendering", async () => {
