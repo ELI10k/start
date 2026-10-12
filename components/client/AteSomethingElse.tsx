@@ -4,7 +4,7 @@ import { useActionState, useEffect, useMemo, useRef, useState, useTransition } f
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, Sparkles, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, UtensilsCrossed } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -73,7 +73,9 @@ export default function AteSomethingElse({
   // making the client find it behind two other tabs.
   initialTab = "text",
   savedMeals = [],
-  aiMealEnabled = false,
+  aiMealEnabled: _aiMealEnabled = false,
+  standaloneTab = false,
+  initialPhoto = null,
 }: {
   mealId: string;
   date: string;
@@ -86,6 +88,8 @@ export default function AteSomethingElse({
   initialTab?: SheetTab;
   savedMeals?: readonly SavedMealChoice[];
   aiMealEnabled?: boolean;
+  standaloneTab?: boolean;
+  initialPhoto?: File | null;
 }) {
   const router = useRouter();
   const [tab, setTab] = useState<SheetTab>(initialTab);
@@ -165,6 +169,15 @@ export default function AteSomethingElse({
     setPreparing(false);
   };
 
+  useEffect(() => {
+    if (!open || tab !== "photo" || !initialPhoto || !cameraPhoto.current) return;
+    replaceInputFile(cameraPhoto.current, initialPhoto);
+    void preparePhoto(cameraPhoto.current);
+    // The File itself is the trigger; unrelated renders must not recreate and
+    // revoke the preview URL that is currently displayed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tab, initialPhoto]);
+
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
     if (!barcode) { setMiss("ברקוד מוצר הוא 8, 12 או 13 ספרות."); return; }
@@ -202,7 +215,7 @@ export default function AteSomethingElse({
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
-      <div className="chip-row">
+      {!standaloneTab ? <div className="chip-row">
         <button type="button" onClick={() => setTab("text")} aria-pressed={tab === "text"} className={`chip${tab === "text" ? " pill--green" : ""}`}>
           <PencilLine aria-hidden="true" size={15} />תיאור
         </button>
@@ -220,12 +233,7 @@ export default function AteSomethingElse({
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
           <Camera aria-hidden="true" size={15} />צילום
         </button>
-        {aiMealEnabled ? (
-          <button type="button" onClick={() => setTab("ai-photo")} aria-pressed={tab === "ai-photo"} className={`chip${tab === "ai-photo" ? " pill--green" : ""}`}>
-            <Sparkles aria-hidden="true" size={15} />צילום ארוחה ב־AI
-          </button>
-        ) : null}
-      </div>
+      </div> : null}
 
       {tab === "scan" && !found && (
         <div className="mt-4 grid gap-2">
@@ -424,7 +432,7 @@ export default function AteSomethingElse({
 
         {tab === "photo" && (
           <>
-            <fieldset className="grid gap-2">
+            {standaloneTab && initialPhoto ? null : <fieldset className="grid gap-2">
               <legend className="text-sm font-bold">תמונה של הארוחה</legend>
               <input
                 ref={cameraPhoto}
@@ -451,7 +459,7 @@ export default function AteSomethingElse({
                   <Images aria-hidden="true" size={17} />בחירה מהגלריה
                 </button>
               </div>
-            </fieldset>
+            </fieldset>}
             {preparing && <p role="status" className="text-xs text-[#5B5F5B]">מכינים את התמונה…</p>}
             {photoPreview && !preparing ? (
               <div className="overflow-hidden rounded-2xl border border-[#16A34A] bg-[#ECFDF3] p-2">
