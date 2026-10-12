@@ -89,6 +89,16 @@ export default function NativeBridge() {
       };
       window.dispatchEvent(new Event("start:health-ready"));
 
+      // Step totals keep changing while LIFE FIT is in the background. Refresh
+      // every health consumer as soon as the app becomes active again, otherwise
+      // the dashboard can keep showing the value saved when it was first opened
+      // while Apple Health (and a connected ring) already has a newer total.
+      // Sleep uses the same event, but its idempotent persistence makes this a
+      // no-op when the completed night's value has not changed.
+      void App.addListener("appStateChange", ({ isActive }) => {
+        if (isActive) window.dispatchEvent(new Event("start:health-ready"));
+      }).then((handle) => track(() => void handle.remove()));
+
       // Push, through the official plugin. The token is handed to the app's own
       // registration component, which is what writes it to Supabase.
       let token = "";
