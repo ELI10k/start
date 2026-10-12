@@ -50,13 +50,17 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
 });
 
 test("bounded progress summaries opt into the phone viewport-fit layout", async () => {
-  const [page, dashboard, css] = await Promise.all([
+  const [page, dashboard, healthPanel, css] = await Promise.all([
     source("app/progress/page.tsx"),
     source("components/client/ProgressMetricsDashboard.tsx"),
+    source("components/client/HealthProgressPanel.tsx"),
     source("app/globals.css"),
   ]);
   assert.match(page, /ClientShell className="client-app-shell--progress"/);
   assert.match(dashboard, /data-metric=\{metric\} data-viewport-fit=\{metric === "nutrition" \|\| metric === "steps" \|\| metric === "sleep" \|\| undefined\}/);
   assert.match(css, /html:has\(\.progress-metrics\[data-viewport-fit\]\)/);
   assert.match(css, /\.progress-metrics\[data-viewport-fit\] \.health-chart__plot \{ height: 100%/);
+  assert.match(css, /\.health-chart\[data-monthly\] \.health-chart__plot \{\s*min-width: 0/);
+  assert.match(css, /@media \(max-width: 767px\) and \(min-height: 740px\)/);
+  assert.doesNotMatch(healthPanel, /minmax\(\$\{monthly \? "2\.75rem"/);
 });
