@@ -14,7 +14,7 @@ test("the photo shrinker is shared, and every upload path uses it", async () => 
   const [shrink, checkIn, foodLog] = await Promise.all([
     source("lib/images/shrink.ts"),
     source("components/client/CheckInPhotoInputs.tsx"),
-    source("components/client/AteSomethingElse.tsx"),
+    source("components/client/AiMealAnalyzer.tsx"),
   ]);
   assert.match(shrink, /export const MAX_EDGE = 1600/);
   // A portrait photo must not be re-encoded on its side.

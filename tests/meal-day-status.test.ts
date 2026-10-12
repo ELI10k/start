@@ -106,7 +106,10 @@ test("tapping the selected meal item again clears it", async () => {
 });
 
 test("saying what was eaten instead offers all three ways", async () => {
-  const sheet = await source("components/client/AteSomethingElse.tsx");
+  const [sheet, photoAnalyzer] = await Promise.all([
+    source("components/client/AteSomethingElse.tsx"),
+    source("components/client/AiMealAnalyzer.tsx"),
+  ]);
   // Text and photos are estimated by AI; catalogue and barcode values stay
   // deterministic. All four entry paths therefore count in today's totals.
   assert.match(sheet, /source="text"|setTab\("text"\)/);
@@ -116,10 +119,11 @@ test("saying what was eaten instead offers all three ways", async () => {
   // Scans explain their deterministic count; text/photo explain their estimate.
   assert.match(sheet, /הערכים האלה כן ייספרו ביום שלך/);
   assert.match(sheet, /ה־AI יעריך קלוריות ואבות מזון/);
-  assert.match(sheet, /name="photo"/);
-  assert.match(sheet, /name="cameraPhoto"/);
-  assert.match(sheet, /בחירה מהגלריה/);
-  assert.match(sheet, /פתיחת מצלמה/);
+  assert.match(photoAnalyzer, /ref=\{camera\} type="file"/);
+  assert.match(photoAnalyzer, /ref=\{gallery\} type="file"/);
+  assert.match(photoAnalyzer, /capture="environment"/);
+  assert.match(photoAnalyzer, /בחירה מהגלריה/);
+  assert.match(photoAnalyzer, /צילום ארוחה/);
   assert.match(sheet, /formRef\.current\?\.reset\(\)/);
   assert.match(sheet, /setCode\(""\)/);
   assert.match(sheet, /selected\?\.unitWeightGrams/);

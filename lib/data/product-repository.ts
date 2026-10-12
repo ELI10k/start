@@ -1141,7 +1141,7 @@ export async function listClientFoodLog(
   const { data, error } = await supabase
     .from("client_food_log")
     .select(
-      "id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path",
+      "id,meal_id,name,quantity,unit,calories,protein,carbs,fat,source,photo_path,meal_entry_id,meal_slot,nutrition_source",
     )
     .eq("client_id", clientId)
     .eq("log_date", date)
@@ -1186,9 +1186,9 @@ export async function listClientFoodLog(
     photoUrl: row.photo_path
       ? (urlByPath.get(String(row.photo_path)) ?? null)
       : null,
-    nutritionEstimated:
-      (row.source === "text" || row.source === "photo") &&
-      row.calories !== null,
+    mealEntryId: row.meal_entry_id ? String(row.meal_entry_id) : null,
+    mealSlot: (["breakfast", "lunch", "dinner", "snack"].includes(String(row.meal_slot)) ? row.meal_slot : null) as LoggedFood["mealSlot"],
+    nutritionEstimated: row.nutrition_source === "ai_estimate" || ((row.source === "text" || row.source === "photo") && row.calories !== null),
   }));
 }
 

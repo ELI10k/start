@@ -1,20 +1,19 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, PencilLine, UtensilsCrossed } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
 import { logClientFood, type FoodLogState } from "@/app/actions/food-log";
 import { normalizeBarcode } from "@/lib/nutrition/open-food-facts";
-import { replaceInputFile, shrinkImage } from "@/lib/images/shrink";
 import FoodCombobox, { type ComboboxFood } from "@/components/coach/menus/FoodCombobox";
 import { calculateFoodNutrition } from "@/lib/meal-plans/calculations";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { addMyMealToDay, type MyMealActionState } from "@/app/actions/my-meals";
+import AiMealAnalyzer from "@/components/client/AiMealAnalyzer";
 
 /** The database rows this sheet needs: enough to search by and enough to count. */
 type SheetTab = "text" | "food" | "scan" | "photo" | "saved";
@@ -105,11 +104,6 @@ export default function AteSomethingElse({
   const [grams, setGrams] = useState("100");
   const gramsTimer = useRef<number | null>(null);
   const [loggedName, setLoggedName] = useState("");
-  // Whether a chosen photograph is still being downscaled.
-  const [preparing, setPreparing] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState("");
-  const cameraPhoto = useRef<HTMLInputElement>(null);
-  const galleryPhoto = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [favoriteIds, setFavoriteIds] = useState(
     () => new Set(foods.filter((food) => food.personalFavorite).map((food) => food.id)),
@@ -149,18 +143,7 @@ export default function AteSomethingElse({
   const resetPickedFood=()=>{setPickedId("");setLoggedName("");setGrams("100")};
   const commitGrams=(value:string)=>{const clean=value.replace(",",".").replace(/[^\d.]/g,"");if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);setGrams(clean)};
   const scheduleGrams=(value:string)=>{if(gramsTimer.current!==null)window.clearTimeout(gramsTimer.current);gramsTimer.current=window.setTimeout(()=>commitGrams(value),450)};
-  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood();setPhotoPreview((current)=>{if(current)URL.revokeObjectURL(current);return""})}return result},initial);
-
-  const preparePhoto = async (input: HTMLInputElement) => {
-    const chosen = input.files?.[0];
-    if (!chosen) return;
-    setPreparing(true);
-    const prepared = await shrinkImage(chosen);
-    if (prepared !== chosen) replaceInputFile(input, prepared);
-    if (photoPreview) URL.revokeObjectURL(photoPreview);
-    setPhotoPreview(URL.createObjectURL(prepared));
-    setPreparing(false);
-  };
+  const [state, action] = useActionState(async(previous:FoodLogState,form:FormData)=>{const result=await logClientFood(previous,form);if(result.ok){formRef.current?.reset();setCode("");setFound(null);setMiss("");setManualScan(false);resetPickedFood()}return result},initial);
 
   const lookupFor = async (raw: string) => {
     const barcode = normalizeBarcode(raw);
@@ -195,7 +178,7 @@ export default function AteSomethingElse({
     fat: found.fat === null ? null : round(found.fat * factor),
   } : null;
 
-  const close = () => { if(photoPreview)URL.revokeObjectURL(photoPreview);formRef.current?.reset();setPhotoPreview("");setFound(null);setMiss("");setManualScan(false);setCode("");resetPickedFood();onClose(); };
+  const close = () => { formRef.current?.reset();setFound(null);setMiss("");setManualScan(false);setCode("");resetPickedFood();onClose(); };
 
   return (
     <BottomSheet open={open} title={title} onClose={close}>
@@ -215,7 +198,7 @@ export default function AteSomethingElse({
           <UtensilsCrossed aria-hidden="true" size={15}/>מהארוחות שלי
         </button>
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
-          <Camera aria-hidden="true" size={15} />צילום
+          <Camera aria-hidden="true" size={15} />צילום ארוחה ב-AI
         </button>
       </div>
 
@@ -237,7 +220,7 @@ export default function AteSomethingElse({
       {tab === "saved" ? <div className="mt-4 grid gap-2">{savedMeals.length
         ? savedMeals.map((meal) => <SavedMealButton key={meal.id} meal={meal} date={date} time={savedTime} targetMealId={mealId} onSaved={() => { router.refresh(); onClose(); }}/>)
         : <div className="rounded-2xl bg-[#F7F8F7] p-5 text-center"><p className="font-bold">עדיין אין ארוחות שמורות</p><p className="mt-1 text-sm text-[#5B5F5B]">אפשר ליצור ארוחה עם המאכלים והכמויות הקבועים שלך.</p><Link href="/my-meals" className="premium-primary-button mt-4">יצירת ארוחה</Link></div>}
-      </div> : <form ref={formRef} action={action} className="mt-4 grid gap-3">
+      </div> : tab === "photo" ? <AiMealAnalyzer date={date} mealId={mealId} foods={foods} onSaved={() => { router.refresh(); onClose(); }}/> : <form ref={formRef} action={action} className="mt-4 grid gap-3">
         <input type="hidden" name="date" value={date} />
         <input type="hidden" name="mealId" value={mealId} />
         <input type="hidden" name="preserveMealStatus" value={preserveMealStatus ? "true" : "false"} />
@@ -407,50 +390,7 @@ export default function AteSomethingElse({
           );
         })()}
 
-        {tab === "photo" && (
-          <>
-            <fieldset className="grid gap-2">
-              <legend className="text-sm font-bold">תמונה של הארוחה</legend>
-              <input
-                ref={cameraPhoto}
-                name="cameraPhoto"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                capture="environment"
-                className="sr-only"
-                onChange={(event) => void preparePhoto(event.currentTarget)}
-              />
-              <input
-                ref={galleryPhoto}
-                name="photo"
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="sr-only"
-                onChange={(event) => void preparePhoto(event.currentTarget)}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => cameraPhoto.current?.click()} className="premium-secondary-button">
-                  <Camera aria-hidden="true" size={17} />פתיחת מצלמה
-                </button>
-                <button type="button" onClick={() => galleryPhoto.current?.click()} className="premium-secondary-button">
-                  <Images aria-hidden="true" size={17} />בחירה מהגלריה
-                </button>
-              </div>
-            </fieldset>
-            {preparing && <p role="status" className="text-xs text-[#5B5F5B]">מכינים את התמונה…</p>}
-            {photoPreview && !preparing ? (
-              <div className="overflow-hidden rounded-2xl border border-[#16A34A] bg-[#ECFDF3] p-2">
-                <Image src={photoPreview} alt="התמונה שנבחרה לניתוח" width={640} height={420} unoptimized className="max-h-72 w-full rounded-xl object-contain" />
-                <p role="status" className="mt-2 text-center text-sm font-bold text-[#15803D]">התמונה צורפה ותישלח לחישוב</p>
-              </div>
-            ) : null}
-            <label className="text-sm font-bold">תיאור <span className="font-normal text-[#5B5F5B]">(רשות)</span>
-              <input name="name" maxLength={200} className="nutrition-input mt-2" placeholder="מה יש בצלחת" />
-            </label>
-          </>
-        )}
-
-        {(tab === "text" || tab === "photo") && <p className="text-xs text-[#5B5F5B]">{unmeasuredNote}</p>}
+        {tab === "text" && <p className="text-xs text-[#5B5F5B]">{unmeasuredNote}</p>}
 
         {state.message && (
           <p role={state.ok ? "status" : "alert"} className={`rounded-2xl p-3 text-sm font-bold ${state.ok ? "bg-[#ECFDF3] text-[#15803D]" : "bg-[#FEF2F2] text-[#DC2626]"}`}>{state.message}</p>
@@ -461,7 +401,7 @@ export default function AteSomethingElse({
         <div className="sheet__actions" hidden={(tab === "food" && !pickedId) || (tab === "scan" && !found && !manualScan)}>
           <SubmitButton
             idle="שמירה"
-            pending={tab === "text" || tab === "photo" ? "מחשבים ושומרים…" : "שומרים…"}
+            pending={tab === "text" ? "מחשבים ושומרים…" : "שומרים…"}
             className="premium-primary-button w-full"
             event="meal_marked"
             eventProperties={{ status: "other", via: tab }}
