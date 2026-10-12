@@ -724,6 +724,119 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metric-tab small { display: none; }
 }
 
+/* These three summaries are bounded snapshots. Their complete weekly view
+   belongs above the phone tab bar; weight and measurements keep normal document
+   flow because their histories and entry forms are intentionally open-ended. */
+@media (max-width: 767px) {
+  html:has(.progress-metrics[data-viewport-fit]),
+  body:has(.progress-metrics[data-viewport-fit]) {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    gap: clamp(.35rem, 1vh, .65rem);
+    padding-block: max(.4rem, env(safe-area-inset-top)) var(--nav-clearance);
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header {
+    flex: 0 0 auto;
+    padding-block: 0;
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header p,
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header div > span { display: none; }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header h1 {
+    margin-top: 0;
+    font-size: clamp(1.35rem, 6vw, 1.75rem);
+  }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content > .grid,
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .progress-metrics,
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .progress-metric-panel,
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .health-progress-view { min-height: 0; }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content > .grid,
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .progress-metrics { flex: 1 1 auto; }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .progress-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(.3rem, .8vh, .55rem);
+  }
+
+  .progress-metrics[data-viewport-fit] .progress-metric-tabs { gap: .25rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab { gap: .1rem; padding: .25rem .1rem .3rem; border-radius: .8rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab__icon { width: 2rem; height: 2rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab__icon svg { width: 1rem; height: 1rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab strong { font-size: .7rem; }
+  .progress-metrics[data-viewport-fit] .progress-metric-tab small { display: none; }
+  .progress-metrics[data-viewport-fit] .progress-metric-panel,
+  .progress-metrics[data-viewport-fit] .health-progress-view { flex: 1 1 auto; }
+  .progress-metrics[data-viewport-fit] .health-progress-view {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(.3rem, .8vh, .55rem);
+  }
+  .progress-metrics[data-viewport-fit] .health-period-picker {
+    flex: 0 0 auto;
+    width: min(11rem, 100%);
+    margin-bottom: 0;
+    padding: .18rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-period-picker button { min-height: 1.8rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: clamp(.55rem, 1.5vh, .85rem);
+  }
+  .progress-metrics[data-viewport-fit] .health-summary-card__icon {
+    inset-block-start: .6rem;
+    inset-inline-end: .6rem;
+    width: 2rem;
+    height: 2rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-summary-card__icon svg { width: 1rem; height: 1rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card > p { font-size: .68rem; }
+  .progress-metrics[data-viewport-fit] .health-summary-card > strong { margin-top: .1rem; font-size: clamp(1.45rem, 7vw, 2rem); }
+  .progress-metrics[data-viewport-fit] .health-summary-card > small { margin-top: .1rem; font-size: .68rem; }
+  .progress-metrics[data-viewport-fit] .health-chart {
+    height: calc(100% - 4.2rem);
+    min-height: 5.25rem;
+    margin-top: .35rem;
+    padding-top: .75rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-chart__plot { height: 100%; min-height: 4.5rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid { flex: 0 0 auto; gap: .4rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid > div { gap: 0 .35rem; padding: .5rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid svg { width: 1.8rem; height: 1.8rem; padding: .35rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid strong { font-size: .88rem; }
+  .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .6rem; }
+  .progress-metrics[data-viewport-fit] .health-insight,
+  .progress-metrics[data-viewport-fit] .health-sync-note { padding: .5rem .65rem; font-size: .68rem; }
+  .progress-metrics[data-viewport-fit] .health-sync-button { min-height: 2.25rem; padding-block: .4rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-card { flex: 0 0 auto; padding: .6rem .75rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-card > h3 { font-size: .9rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-card > p { font-size: .65rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-bar { height: 1.6rem; margin-top: .45rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid { margin-top: .4rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid > div { grid-template-columns: auto auto; gap: 0 .2rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid .nutrition-macro-key { align-self: center; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid b,
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid small { grid-column: 1 / -1; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid strong,
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid b { font-size: .67rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-macro-grid small { font-size: .55rem; }
+  .progress-metrics[data-viewport-fit] .nutrition-empty { margin-top: .4rem; padding: .5rem; }
+}
+
 .metric-tile {
   min-width: 0;
   min-height: 6.4rem;

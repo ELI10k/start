@@ -48,3 +48,15 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
   assert.match(repository, /eaten_meal_items/);
   assert.match(repository, /client_food_log/);
 });
+
+test("bounded progress summaries opt into the phone viewport-fit layout", async () => {
+  const [page, dashboard, css] = await Promise.all([
+    source("app/progress/page.tsx"),
+    source("components/client/ProgressMetricsDashboard.tsx"),
+    source("app/globals.css"),
+  ]);
+  assert.match(page, /ClientShell className="client-app-shell--progress"/);
+  assert.match(dashboard, /data-metric=\{metric\} data-viewport-fit=\{metric === "nutrition" \|\| metric === "steps" \|\| metric === "sleep" \|\| undefined\}/);
+  assert.match(css, /html:has\(\.progress-metrics\[data-viewport-fit\]\)/);
+  assert.match(css, /\.progress-metrics\[data-viewport-fit\] \.health-chart__plot \{ height: 100%/);
+});

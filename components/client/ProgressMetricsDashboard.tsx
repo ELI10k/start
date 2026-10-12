@@ -49,7 +49,7 @@ export default function ProgressMetricsDashboard({
   const [metric, setMetric] = useState<Metric>("weight");
 
   return (
-    <section className="progress-metrics" data-metric={metric} aria-labelledby="progress-metrics-title">
+    <section className="progress-metrics" data-metric={metric} data-viewport-fit={metric === "nutrition" || metric === "steps" || metric === "sleep" || undefined} aria-labelledby="progress-metrics-title">
       <h2 id="progress-metrics-title" className="sr-only">בחירת מדד התקדמות</h2>
       <div className="progress-metric-tabs" role="tablist" aria-label="בחירת מדד התקדמות">
         {tabs.map((tab) => {
