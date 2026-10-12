@@ -72,3 +72,12 @@ test("the analyzer keeps Luna as its default while allowing a Preview-only model
   assert.match(saveAction, /calculateFoodNutrition\(per100, grams\)/);
   assert.doesNotMatch(saveAction, /analyze-meal|ai-gateway/);
 });
+
+test("a Preview test invite lets the invited client choose a private password", async () => {
+  const acceptInvite = await readFile(new URL("../app/auth/accept-invite/route.ts", import.meta.url), "utf8");
+  const action = await readFile(new URL("../app/auth/set-test-password/actions.ts", import.meta.url), "utf8");
+  assert.match(acceptInvite, /profile\.is_test_account \? "\/auth\/set-test-password" : "\/"/);
+  assert.match(action, /password\.length < 12/);
+  assert.match(action, /profile\?\.is_test_account/);
+  assert.match(action, /supabase\.auth\.updateUser\(\{ password \}\)/);
+});

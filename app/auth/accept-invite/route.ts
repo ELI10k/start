@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
   if(sessionError) return redirect("/login?error=invite");
   const user=verification.user;
   await createSupabaseAdminClient().from("client_invitations").update({status:"opened",opened_at:new Date().toISOString()}).eq("client_id",user.id).eq("status","sent");
-  const { data:profile }=await supabase.from("profiles").select("role,status").eq("id",user.id).maybeSingle();
+  const { data:profile }=await supabase.from("profiles").select("role,status,is_test_account").eq("id",user.id).maybeSingle();
   if(!profile || profile.status!=="active" || profile.role!=="client") {
     await supabase.auth.signOut({scope:"local"});
     return redirect("/unauthorized");
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const now=new Date().toISOString();
     await admin.from("client_profiles").update({onboarding_completed:true,onboarding_completed_at:now}).eq("user_id",user.id).eq("onboarding_completed",false);
     await admin.from("client_invitations").update({status:"onboarding_completed",onboarding_completed_at:now}).eq("client_id",user.id).in("status",["sent","opened"]);
-    return redirect("/");
+    return redirect(profile.is_test_account ? "/auth/set-test-password" : "/");
   }
   return redirect("/onboarding");
 }
