@@ -5,7 +5,7 @@ import test from "node:test";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the public guide contains all nine videos in course order", async () => {
+test("the public guide contains all nine videos with messages and support last", async () => {
   const [page, player] = await Promise.all([
     file("app/guide/page.tsx"),
     file("app/guide/GuideVideo.tsx"),
@@ -17,9 +17,9 @@ test("the public guide contains all nine videos in course order", async () => {
     "04-workout-program-session",
     "05-workout-management-progress",
     "06-measurements-health-checkin",
-    "07-messages-content-profile-support",
     "08-connect-device-iphone",
     "09-connect-device-android",
+    "07-messages-content-profile-support",
   ];
 
   assert.equal((player.match(/<video/g) ?? []).length, 1);
@@ -32,6 +32,12 @@ test("the public guide contains all nine videos in course order", async () => {
     assert.ok(position > previous, `${source} is missing or out of order`);
     previous = position;
   }
+  assert.ok(
+    page.indexOf('title: "הודעות, תוכן, פרופיל ותמיכה"') >
+      page.indexOf('title: "חיבור שעון ומכשיר כושר באנדרואיד"'),
+    "messages and support must be the final landing-page lesson",
+  );
+  assert.match(page, /<li><span>09<\/span>הודעות ותמיכה<\/li>/);
 });
 
 test("every guide video is introduced by a title and description", async () => {
