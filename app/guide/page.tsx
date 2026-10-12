@@ -93,15 +93,6 @@ const lessons = [
   },
   {
     number: "07",
-    title: "הודעות, תוכן, פרופיל ותמיכה",
-    duration: "4:04 דקות",
-    description:
-      "מסיימים בהיכרות עם כל כלי הקשר והעזרה: שיחה עם המאמן, התראות, ספריית התוכן, הגדרות הפרופיל והדרך הנכונה לפנות לתמיכה.",
-    points: ["שליחת הודעה למאמן", "התראות וספריית התוכן", "הגדרות הפרופיל וקבלת תמיכה"],
-    src: "/media/life-fit-training/07-messages-content-profile-support",
-  },
-  {
-    number: "08",
     title: "חיבור שעון ומכשיר כושר באייפון",
     duration: "50 שניות",
     description:
@@ -110,13 +101,22 @@ const lessons = [
     src: "/media/life-fit-training/08-connect-device-iphone",
   },
   {
-    number: "09",
+    number: "08",
     title: "חיבור שעון ומכשיר כושר באנדרואיד",
     duration: "50 שניות",
     description:
       "מדריך קצר לחיבור שעון חכם, צמיד כושר, טבעת חכמה או טלפון Android. תראו איך מסנכרנים דרך Health Connect ומאשרים את הרשאות הצעדים והשינה.",
     points: ["חיבור לאפליקציית היצרן", "סנכרון עם Health Connect", "בדיקת הרשאות הקריאה והכתיבה"],
     src: "/media/life-fit-training/09-connect-device-android",
+  },
+  {
+    number: "09",
+    title: "הודעות, תוכן, פרופיל ותמיכה",
+    duration: "4:04 דקות",
+    description:
+      "מסיימים בהיכרות עם כל כלי הקשר והעזרה: שיחה עם המאמן, התראות, ספריית התוכן, הגדרות הפרופיל והדרך הנכונה לפנות לתמיכה.",
+    points: ["שליחת הודעה למאמן", "התראות וספריית התוכן", "הגדרות הפרופיל וקבלת תמיכה"],
+    src: "/media/life-fit-training/07-messages-content-profile-support",
   },
 ] as const;
 
@@ -174,9 +174,9 @@ export default function GuideLandingPage() {
             <li><span>04</span>ביצוע אימון</li>
             <li><span>05</span>התקדמות באימונים</li>
             <li><span>06</span>מדידות וצ׳ק־אין</li>
-            <li><span>07</span>הודעות ותמיכה</li>
-            <li><span>08</span>חיבור מכשיר באייפון</li>
-            <li><span>09</span>חיבור מכשיר באנדרואיד</li>
+            <li><span>07</span>חיבור מכשיר באייפון</li>
+            <li><span>08</span>חיבור מכשיר באנדרואיד</li>
+            <li><span>09</span>הודעות ותמיכה</li>
           </ol>
         </div>
       </section>
