@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import ClientShell from "@/components/client/ClientShell";
 import PageHeader from "@/components/client/PageHeader";
 import ProgressMetricsDashboard from "@/components/client/ProgressMetricsDashboard";
-import { getAuthContext, getClientCheckInHistory, getClientOverview } from "@/lib/data/product-repository";
+import { getAuthContext, getClientCheckInHistory, getClientNutritionProgress, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/progress/measurements";
 
 export default async function ProgressPage() {
@@ -10,7 +10,7 @@ export default async function ProgressPage() {
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
   const today = israelDateKey();
-  const [data,checkInHistory] = await Promise.all([getClientOverview(auth.id, today),getClientCheckInHistory(auth.id)]);
+  const [data,checkInHistory,nutritionDays] = await Promise.all([getClientOverview(auth.id, today),getClientCheckInHistory(auth.id),getClientNutritionProgress(auth.id,today)]);
   const photoCheckInIds = new Set([...checkInHistory.checkIns].reverse().flatMap((checkIn,index)=>index===0||index===3?[checkIn.id]:[]));
   const photoSessions=checkInHistory.checkIns.flatMap((checkIn)=>{
     if(!photoCheckInIds.has(checkIn.id))return [];
@@ -27,6 +27,13 @@ export default async function ProgressPage() {
         photoSessions={photoSessions}
         photoError={checkInHistory.photoError}
         today={today}
+        nutritionDays={nutritionDays}
+        nutritionTargets={{
+          calories: data.menu?.calorieTarget ?? (data.clientProfile.calorie_target === null ? null : Number(data.clientProfile.calorie_target)),
+          protein: data.menu?.proteinTarget ?? (data.clientProfile.protein_target === null ? null : Number(data.clientProfile.protein_target)),
+          carbohydrates: data.menu?.carbohydrateTarget ?? null,
+          fat: data.menu?.fatTarget ?? null,
+        }}
       />
     </div>
   </ClientShell>;

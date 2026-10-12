@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Footprints, MoonStar, Ruler, Scale } from "lucide-react";
+import { Footprints, MoonStar, Ruler, Scale, Utensils } from "lucide-react";
 import PersistedProgressHistory from "@/components/client/PersistedProgressHistory";
 import HealthProgressPanel from "@/components/client/HealthProgressPanel";
 import PersistedProgressForm from "@/components/client/PersistedProgressForm";
 import ProgressPhotoGallery, { type ProgressPhotoSession } from "@/components/client/ProgressPhotoGallery";
+import NutritionProgressPanel from "@/components/client/NutritionProgressPanel";
+import type { DailyNutritionTotal, NutritionTargets } from "@/lib/nutrition/progress";
 
 type ProgressEntry = Readonly<{
   id: string;
@@ -15,13 +17,14 @@ type ProgressEntry = Readonly<{
   notes: string | null;
 }>;
 
-type Metric = "weight" | "measurements" | "steps" | "sleep";
+type Metric = "weight" | "measurements" | "steps" | "sleep" | "nutrition";
 
 const tabs = [
   { id: "weight", label: "משקל", description: "מגמה ויעד", icon: Scale },
   { id: "measurements", label: "היקפים", description: "שינוי בגוף", icon: Ruler },
   { id: "steps", label: "צעדים", description: "פעילות יומית", icon: Footprints },
   { id: "sleep", label: "שינה", description: "התאוששות", icon: MoonStar },
+  { id: "nutrition", label: "תזונה", description: "קלוריות ומאקרו", icon: Utensils },
 ] as const;
 
 export default function ProgressMetricsDashboard({
@@ -31,6 +34,8 @@ export default function ProgressMetricsDashboard({
   photoSessions,
   photoError,
   today,
+  nutritionDays,
+  nutritionTargets,
 }: {
   entries: readonly ProgressEntry[];
   targetWeight?: number | string | null;
@@ -38,6 +43,8 @@ export default function ProgressMetricsDashboard({
   photoSessions: readonly ProgressPhotoSession[];
   photoError?: boolean;
   today: string;
+  nutritionDays: readonly DailyNutritionTotal[];
+  nutritionTargets: NutritionTargets;
 }) {
   const [metric, setMetric] = useState<Metric>("weight");
 
@@ -75,6 +82,8 @@ export default function ProgressMetricsDashboard({
             nutritionGoal={nutritionGoal}
             metric={metric}
           />
+        ) : metric === "nutrition" ? (
+          <NutritionProgressPanel days={nutritionDays} targets={nutritionTargets}/>
         ) : (
           <HealthProgressPanel metric={metric} />
         )}

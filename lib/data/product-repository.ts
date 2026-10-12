@@ -993,6 +993,57 @@ export type NutritionBehaviorWindow = Readonly<{
   unmeasuredOutsideItems: number;
 }>;
 
+export type ClientNutritionProgressDay = Readonly<{
+  day: string;
+  calories: number;
+  protein: number;
+  carbohydrates: number;
+  fat: number;
+}>;
+
+/** Daily intake totals from both assigned-menu meals and foods logged outside the plan. */
+export async function getClientNutritionProgress(clientId: string, date: string): Promise<readonly ClientNutritionProgressDay[]> {
+  const supabase = await createSupabaseServerClient();
+  const end = new Date(`${date}T12:00:00Z`);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 29);
+  const startDay = start.toISOString().slice(0, 10);
+  const [{ data: logs, error: logError }, { data: outside, error: outsideError }] = await Promise.all([
+    supabase.from("nutrition_logs").select("id,log_date").eq("client_id", clientId).gte("log_date", startDay).lte("log_date", date),
+    supabase.from("client_food_log").select("log_date,calories,protein,carbs,fat").eq("client_id", clientId).gte("log_date", startDay).lte("log_date", date),
+  ]);
+  if (logError) throw logError;
+  if (outsideError && !MISSING_RELATION.has(outsideError.code ?? "")) throw outsideError;
+  const logRows = logs ?? [];
+  const { data: eaten, error: eatenError } = logRows.length
+    ? await supabase.from("eaten_meal_items").select("nutrition_log_id,calculated_calories,calculated_protein,calculated_carbohydrates,calculated_fat").in("nutrition_log_id", logRows.map((row) => row.id))
+    : { data: [], error: null };
+  if (eatenError) throw eatenError;
+  const dayByLogId = new Map(logRows.map((row) => [String(row.id), String(row.log_date)]));
+  const totals = new Map<string, { calories: number; protein: number; carbohydrates: number; fat: number }>();
+  const add = (day: string, values: { calories?: unknown; protein?: unknown; carbohydrates?: unknown; fat?: unknown }) => {
+    const current = totals.get(day) ?? { calories: 0, protein: 0, carbohydrates: 0, fat: 0 };
+    const number = (value: unknown) => value === null || value === undefined || !Number.isFinite(Number(value)) ? 0 : Number(value);
+    totals.set(day, {
+      calories: current.calories + number(values.calories),
+      protein: current.protein + number(values.protein),
+      carbohydrates: current.carbohydrates + number(values.carbohydrates),
+      fat: current.fat + number(values.fat),
+    });
+  };
+  for (const row of eaten ?? []) {
+    const day = dayByLogId.get(String(row.nutrition_log_id));
+    if (day) add(day, { calories: row.calculated_calories, protein: row.calculated_protein, carbohydrates: row.calculated_carbohydrates, fat: row.calculated_fat });
+  }
+  for (const row of outside ?? []) add(String(row.log_date), { calories: row.calories, protein: row.protein, carbohydrates: row.carbs, fat: row.fat });
+  return Array.from({ length: 30 }, (_, index) => {
+    const cursor = new Date(start);
+    cursor.setUTCDate(start.getUTCDate() + index);
+    const day = cursor.toISOString().slice(0, 10);
+    return { day, ...(totals.get(day) ?? { calories: 0, protein: 0, carbohydrates: 0, fat: 0 }) };
+  });
+}
+
 /** Actual nutrition behaviour for the last week and month, ending on `date`. */
 export async function getClientNutritionBehavior(
   clientId: string,
