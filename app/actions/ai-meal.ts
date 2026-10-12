@@ -8,7 +8,7 @@ import { verifyMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
 import { canUseAiMealAnalysis, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
 
 export type SaveAiMealState = Readonly<{ ok: boolean; message?: string }>;
-type EditedComponent = { index: number; name: string; grams: number; foodId: string | null };
+type EditedComponent = { index: number; componentKey?: string; name: string; grams: number; foodId: string | null };
 const uuid = (value: unknown) => /^[0-9a-f-]{36}$/i.test(String(value ?? "")) ? String(value) : null;
 
 export async function saveAiMeal(_: SaveAiMealState, form: FormData): Promise<SaveAiMealState> {
@@ -31,19 +31,34 @@ export async function saveAiMeal(_: SaveAiMealState, form: FormData): Promise<Sa
     : { data: [], error: null };
   if (foodError) return { ok: false, message: "לא ניתן לטעון את מאגר המזונות כרגע." };
   const foodById = new Map((foods ?? []).map((food) => [String(food.id), food]));
+  const signedComponents = signed.allowedComponents ?? signed.components;
+  const selectedSignedKeys = new Set<string>();
   const components = [];
   for (let order = 0; order < edits.length; order += 1) {
     const edit = edits[order];
-    const original = signed.components.find((item) => item.index === Number(edit.index));
+    const componentKey = typeof edit.componentKey === "string" ? edit.componentKey.slice(0, 120) : "";
+    const original = componentKey
+      ? signedComponents.find((item) => item.componentKey === componentKey)
+      : signed.components.find((item) => item.index === Number(edit.index));
     const grams = Number(edit.grams);
     const name = String(edit.name ?? "").trim().slice(0, 200);
     if (!name || !Number.isFinite(grams) || grams <= 0 || grams > 3000) return { ok: false, message: "יש לבדוק את שמות המזונות והכמויות." };
     const food = edit.foodId ? foodById.get(edit.foodId) : null;
     if (edit.foodId && !food) return { ok: false, message: "אחד המזונות שנבחרו אינו קיים במאגר." };
     if (!original && !food) return { ok: false, message: "רכיב חדש יש לבחור ממאגר המזונות." };
+    if (original?.componentKey) {
+      if (selectedSignedKeys.has(original.componentKey)) return { ok: false, message: "לא ניתן לשמור רכיב כפול." };
+      selectedSignedKeys.add(original.componentKey);
+    }
     const per100 = food ? { calories: Number(food.calories ?? 0), protein: Number(food.protein ?? 0), carbs: Number(food.carbs ?? 0), fat: Number(food.fat ?? 0) } : original!.per100;
     const macros = calculateFoodNutrition(per100, grams);
     components.push({ index: order, foodId: food ? String(food.id) : null, name: food ? String(food.name) : name, grams, ...macros, per100, nutritionSource: food ? "catalog" : "ai_estimate" });
+  }
+  for (const group of signed.selectionGroups ?? []) {
+    const possibleKeys = new Set(group.variants.flat());
+    const selected = [...selectedSignedKeys].filter((key) => possibleKeys.has(key));
+    if (selected.length && !group.variants.some((variant) => selected.every((key) => variant.includes(key))))
+      return { ok: false, message: "אפשרויות ההבהרה שנבחרו אינן תקינות. יש לנתח את התמונה מחדש." };
   }
   const entryId = uuid(form.get("entryId"));
   if (!entryId) return { ok: false, message: "מזהה השמירה אינו תקין." };

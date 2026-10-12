@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { consumeRateLimit } from "@/lib/security/rate-limit";
 import { validateFoodLogPhoto } from "@/lib/nutrition/food-log";
 import { detectImageFormat } from "@/lib/images/signature";
-import { MEAL_ANALYSIS_SCHEMA, normalizeComponents, parseMealAnalysis, type MatchableFood } from "@/lib/nutrition/meal-image-analysis";
+import { buildMealClarifications, MEAL_ANALYSIS_SCHEMA, normalizeComponents, parseMealAnalysis, type MatchableFood } from "@/lib/nutrition/meal-image-analysis";
 import { signMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
 import { AI_MEAL_DEFAULT_MODEL, canUseAiMealAnalysis, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
 
@@ -26,6 +26,11 @@ const prompt = (description: string) => [
   "זהה שמן, מיונז, טחינה ורטבים לפי התמונה והטקסט. במזון מוכן כגון חצילים מטוגנים או גזר במיונז, כלול את השמן או המיונז פעם אחת בתוך הערכים של המזון וסמן nutritionIncludesAddedFat=true.",
   "אל תחזיר שמן, מיונז או רוטב כרכיב נפרד אם הם כבר כלולים בערכי המזון המוכן. רכיב כזה יכול להיות נפרד רק אם הוא תוספת נפרדת שנראית בתמונה; במקרה זה סמן standaloneVisibleAddition=true ושייך אותו לקבוצה נפרדת.",
   "אם כמות שמן, מיונז או רוטב אינה ידועה, השתמש בהערכה סבירה אחת, ציין את ההנחה וסמן confidence נמוך או בינוני. שאל clarification קצרה רק כאשר התשובה תשנה מהותית את ההערכה.",
+  "החזר במערך clarifications רק שאלות בחירה קצרות שהתשובה עליהן עשויה לשנות מהותית קלוריות או מאקרו. אפשר להציע עד ארבע שאלות; השרת יציג לכל היותר שתיים.",
+  "לפני יצירת שאלה, קרא את תיאור המשתמש. אל תשאל על סוג מזון, אופן הכנה, רוטב או רכיב שכבר נמסרו. לדוגמה, אם המשתמש כתב גם חציל מטוגן וגם חציל במיונז, אל תשאל איזה מהם קיים; אפשר לשאול רק כיצד המשקל הכולל מתחלק ביניהם.",
+  "לכל clarification ציין את groupId המושפע. כל option חייב לתאר את כל הרכיבים שיחליפו את אותה קבוצה, עם sharePercent שסכומם 100 וערכים תזונתיים ל-100 גרם. אין להוסיף את השמן או המיונז שוב כרכיב אם הם כלולים במזון המוכן.",
+  "באפשרות שמשמעותה 'שניהם', שמור על משקל הקבוצה וחלק אותו לפי הראיה בתמונה. השתמש ב-50/50 רק אם אין בסיס חזותי טוב יותר. אין ליצור אפשרות 'לא בטוח'; הדילוג מוצג בממשק ואינו משנה את הניתוח.",
+  "אם אין שאלה משמעותית או שהתיאור כבר ענה עליה, החזר clarifications ריק. אם structured clarification נוצרה, clarification של הרכיב הוא רק תיאור קצר של אי-הוודאות ולא שאלה נוספת.",
   "אל תמציא רכיבים שאינם בתמונה או בתיאור המשתמש.",
   "אם התמונה מטושטשת מדי או אינה מכילה מזון, החזר containsFood=false ומערכי groups ו-components ריקים.",
   "confidence הוא שיקול איכותי בלבד ואין להציג אותו כאחוז דיוק.",
@@ -91,15 +96,24 @@ export async function POST(request: Request) {
       protein: row.protein == null ? null : Number(row.protein), carbs: row.carbs == null ? null : Number(row.carbs), fat: row.fat == null ? null : Number(row.fat),
       verificationStatus: row.verification_status == null ? null : String(row.verification_status), notes: row.notes == null ? null : String(row.notes),
     }));
-    const components = normalizeComponents(parsed.components, foods, parsed.groups);
-    const analysisToken = signMealAnalysis({ userId: auth.id, expiresAt: Date.now() + 30 * 60_000, components });
+    const normalizedComponents = normalizeComponents(parsed.components, foods, parsed.groups);
+    const clarifications = buildMealClarifications(parsed.clarifications, description, normalizedComponents, foods, parsed.groups);
+    const targetKeys = new Set(clarifications.flatMap((question) => question.targetComponentKeys));
+    const components = normalizedComponents.map((component) => targetKeys.has(component.componentKey ?? "") ? { ...component, clarification: null } : component);
+    const alternativeComponents = clarifications.flatMap((question) => question.options.flatMap((option) => option.replacements));
+    const allowedComponents = [...components, ...alternativeComponents];
+    const selectionGroups = clarifications.map((question) => ({
+      id: question.id,
+      variants: [question.targetComponentKeys, ...question.options.map((option) => option.replacements.map((component) => component.componentKey!))],
+    }));
+    const analysisToken = signMealAnalysis({ userId: auth.id, expiresAt: Date.now() + 30 * 60_000, components, allowedComponents, selectionGroups });
     const usage = result.usage ?? {};
     const pricing = modelPricingUsdPerMillion[mealAnalysisModel as keyof typeof modelPricingUsdPerMillion];
     const estimatedCostUsd = pricing
       ? ((usage.prompt_tokens ?? 0) * pricing.input + (usage.completion_tokens ?? 0) * pricing.output) / 1_000_000
       : null;
     console.info("ai_meal_analysis", { model: mealAnalysisModel, durationMs: Date.now() - startedAt, components: components.length, promptTokens: usage.prompt_tokens ?? null, completionTokens: usage.completion_tokens ?? null, estimatedCostUsd: estimatedCostUsd == null ? null : Number(estimatedCostUsd.toFixed(6)) });
-    return Response.json({ summary: parsed.summary, components, analysisToken });
+    return Response.json({ summary: parsed.summary, components, clarifications, analysisToken });
   } catch (error) {
     console.error("ai_meal_analysis_failed", { durationMs: Date.now() - startedAt, error: error instanceof Error ? error.name : "unknown" });
     return Response.json({ error: "analysis_failed" }, { status: 502 });
