@@ -620,14 +620,14 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .progress-metric-tab[data-selected] .progress-metric-tab__icon { background: rgba(255,255,255,.18); color: white; }
 .progress-metric-tab[data-selected] strong { color: white; }
 .progress-metric-panel { min-width: 0; }
-.health-progress-view { display: grid; gap: .8rem; }
-.health-summary-card { position: relative; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); text-align: center; }
+.health-progress-view { display: grid; min-width: 0; width: 100%; gap: .8rem; }
+.health-summary-card { position: relative; min-width: 0; max-width: 100%; overflow: hidden; padding: 1.15rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-card); text-align: center; }
 .health-summary-card__icon { position: absolute; inset-block-start: 1rem; inset-inline-end: 1rem; display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 50%; background: var(--green-tint); color: var(--green); }
 .health-summary-card > p { color: var(--ink-muted); font-size: .78rem; }
 .health-summary-card > strong { display: block; margin-top: .25rem; font-size: clamp(1.8rem, 9vw, 2.7rem); line-height: 1.1; }
 .health-summary-card > small { display: block; margin-top: .25rem; color: var(--green-press); font-weight: 750; }
 .health-chart { margin-top: 1.25rem; }
-.health-chart { overflow-x: auto; padding-top: 1.1rem; }
+.health-chart { min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; padding-top: 1.1rem; }
 .health-chart__plot { position: relative; display: grid; height: 11rem; align-items: end; gap: .45rem; padding-top: .75rem; border-bottom: 1px solid var(--line); }
 .health-chart[data-monthly] .health-chart__plot { min-width: 82rem; }
 .health-chart__goal { position: absolute; inset-inline: 0; z-index: 1; border-top: 1px dashed var(--green); color: var(--green-press); text-align: start; }
@@ -665,8 +665,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .nutrition-macro-bar { display: flex; overflow: hidden; height: 2.8rem; margin-top: 1.25rem; direction: rtl; border-radius: .85rem; background: var(--surface-raised); }
 .nutrition-macro-bar span { display: grid; min-width: 0; place-items: center; color: white; font-size: .72rem; font-weight: 900; }
 .nutrition-macro-bar [data-macro="protein"], .nutrition-macro-key[data-macro="protein"] { background: var(--green); }
-.nutrition-macro-bar [data-macro="carbohydrates"], .nutrition-macro-key[data-macro="carbohydrates"] { background: var(--ink-muted); }
-.nutrition-macro-bar [data-macro="fat"], .nutrition-macro-key[data-macro="fat"] { background: #B8C4B9; }
+.nutrition-macro-bar [data-macro="carbohydrates"], .nutrition-macro-key[data-macro="carbohydrates"] { background: #F2B705; }
+.nutrition-macro-bar [data-macro="carbohydrates"] { color: var(--ink); }
+.nutrition-macro-bar [data-macro="fat"], .nutrition-macro-key[data-macro="fat"] { background: var(--red); }
 .nutrition-macro-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin-top: 1rem; text-align: center; }
 .nutrition-macro-grid > div { display: grid; justify-items: center; gap: .15rem; }
 .nutrition-macro-grid strong, .nutrition-macro-grid b { font-size: .78rem; }
@@ -675,6 +676,38 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .nutrition-empty { margin-top: 1rem; padding: 1rem; border: 1px dashed var(--line); border-radius: var(--radius-md); text-align: center; }
 .nutrition-progress-view .health-chart__column i { position: relative; overflow: hidden; }
 .nutrition-progress-view .health-chart__column i em { position: absolute; inset-inline: 0; inset-block-start: 0; min-height: 3px; background: repeating-linear-gradient(135deg, var(--red) 0 4px, #FFFFFF 4px 6px); }
+.progress-metrics[data-metric="nutrition"] { gap: .55rem; }
+.progress-metrics[data-metric="nutrition"] .progress-metric-tab { padding-block: .35rem; }
+.progress-metrics[data-metric="nutrition"] .progress-metric-tab__icon { width: 2rem; height: 2rem; }
+.progress-metrics[data-metric="nutrition"] .progress-metric-tab small { display: none; }
+.nutrition-progress-view { gap: .5rem; }
+.nutrition-progress-view .health-period-picker { margin-bottom: 0; }
+.nutrition-progress-view .health-summary-card { padding: .75rem; }
+.nutrition-progress-view .health-summary-card__icon { inset-block-start: .65rem; inset-inline-end: .65rem; width: 2.15rem; height: 2.15rem; }
+.nutrition-progress-view .health-summary-card > strong { font-size: 1.65rem; }
+.nutrition-progress-view .health-chart { overflow-x: hidden; margin-top: .55rem; padding-top: .8rem; }
+.nutrition-progress-view .health-chart__plot, .nutrition-progress-view .health-chart[data-monthly] .health-chart__plot { min-width: 0; height: 7.4rem; gap: 2px; padding-top: .45rem; }
+.nutrition-progress-view .health-chart[data-monthly] .health-chart__column b { display: none; }
+.nutrition-progress-view .health-chart[data-monthly] .health-chart__column i { width: 82%; border-radius: .18rem .18rem .08rem .08rem; }
+.nutrition-progress-view .health-chart[data-monthly] .health-chart__column small { overflow: visible; font-size: .48rem; white-space: nowrap; }
+.nutrition-inline-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; margin-top: .45rem; }
+.nutrition-inline-stats > div { padding: .35rem; border-radius: .65rem; background: var(--surface-raised); }
+.nutrition-inline-stats dt { color: var(--ink-muted); font-size: .58rem; }
+.nutrition-inline-stats dd { margin-top: .05rem; font-size: .75rem; font-weight: 900; }
+.nutrition-progress-view .nutrition-macro-card { padding: .75rem; }
+.nutrition-progress-view .nutrition-macro-card > h3 { font-size: 1rem; }
+.nutrition-progress-view .nutrition-macro-bar { height: 1.8rem; margin-top: .55rem; }
+.nutrition-progress-view .nutrition-macro-grid { margin-top: .5rem; }
+.nutrition-progress-view .nutrition-macro-grid small { line-height: 1.2; }
+.nutrition-progress-view .health-insight { padding: .55rem .75rem; }
+@media (max-width: 767px) {
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) { padding-top: .45rem; }
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) .premium-page-header { margin-bottom: .5rem; padding-bottom: .45rem; }
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) .premium-page-header p,
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) .premium-page-header div > span { display: none; }
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) .premium-page-header h1 { margin-top: 0; font-size: 1.35rem; }
+  .client-app-content:has(.progress-metrics[data-metric="nutrition"]) .premium-page-header .premium-secondary-button { min-height: 2.25rem; padding-block: .4rem; }
+}
 .metric-overview__dates { display: flex; justify-content: space-between; margin-top: .3rem; color: var(--ink-muted); font-size: .65rem; }
 .metric-overview__empty { margin-top: 1rem; padding: 1rem; border: 1px dashed var(--line); border-radius: var(--radius-md); color: var(--ink-muted); font-size: .75rem; }
 .metric-overview__goal { padding: 1.1rem; }

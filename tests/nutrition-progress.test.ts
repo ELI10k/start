@@ -35,9 +35,16 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
   assert.match(dashboard, /id: "nutrition"/);
   assert.match(panel, />שבוע</);
   assert.match(panel, />חודש</);
+  assert.match(panel, /key=\{period\}/);
+  assert.match(panel, /חסרים בממוצע.*גרם חלבון ביום/);
   assert.match(panel, /day\.calories > goal/);
   assert.match(panel, /data-over-goal/);
   assert.match(css, /repeating-linear-gradient\(135deg, var\(--red\)/);
+  assert.match(css, /health-chart\[data-monthly\].*min-width: 0/);
+  assert.match(css, /data-macro="protein"[^\n]+background: var\(--green\)/);
+  assert.match(css, /data-macro="carbohydrates"[^\n]+background: #F2B705/);
+  assert.match(css, /data-macro="carbohydrates"\] \{ color: var\(--ink\)/);
+  assert.match(css, /data-macro="fat"[^\n]+background: var\(--red\)/);
   assert.match(repository, /eaten_meal_items/);
   assert.match(repository, /client_food_log/);
 });
@@ -49,7 +56,7 @@ test("bounded progress summaries opt into the phone viewport-fit layout", async 
     source("app/globals.css"),
   ]);
   assert.match(page, /ClientShell className="client-app-shell--progress"/);
-  assert.match(dashboard, /data-viewport-fit=\{metric === "nutrition" \|\| metric === "steps" \|\| metric === "sleep" \|\| undefined\}/);
+  assert.match(dashboard, /data-metric=\{metric\} data-viewport-fit=\{metric === "nutrition" \|\| metric === "steps" \|\| metric === "sleep" \|\| undefined\}/);
   assert.match(css, /html:has\(\.progress-metrics\[data-viewport-fit\]\)/);
   assert.match(css, /\.progress-metrics\[data-viewport-fit\] \.health-chart__plot \{ height: 100%/);
 });

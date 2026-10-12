@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Beef, Flame, Target } from "lucide-react";
+import { Beef, Flame } from "lucide-react";
 import { nutritionMacroPercentages, nutritionTargetPercentages, sumNutrition, type DailyNutritionTotal, type NutritionTargets } from "@/lib/nutrition/progress";
 
 const dayLabel = (day: string) => new Intl.DateTimeFormat("he-IL", { weekday: "narrow", timeZone: "UTC" }).format(new Date(`${day}T12:00:00Z`));
@@ -22,7 +22,7 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
   const percentages = nutritionMacroPercentages(totals);
   const targetPercentages = nutritionTargetPercentages(targets);
   const daysAtGoal = targets.calories === null ? 0 : reported.filter((day) => day.calories >= targets.calories! * .9 && day.calories <= targets.calories! * 1.1).length;
-  const proteinDifference = targetPercentages.protein ? percentages.protein - targetPercentages.protein : null;
+  const proteinGapGrams = targets.protein === null ? null : round(targets.protein - averageMacros.protein);
 
   return <div className="health-progress-view nutrition-progress-view">
     <div className="health-period-picker" role="group" aria-label="טווח הצגה">
@@ -35,13 +35,12 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
       <p id="nutrition-calories-title">ממוצע קלוריות יומי {period === "week" ? "בשבוע" : "בחודש"}</p>
       <strong>{reported.length ? `${averageCalories.toLocaleString("he-IL")} קל׳` : "אין נתונים"}</strong>
       <small>{targets.calories ? `מתוך יעד של ${round(targets.calories).toLocaleString("he-IL")}` : "עדיין לא הוגדר יעד קלורי"}</small>
-      <CaloriesChart values={selected} goal={targets.calories} monthly={period === "month"}/>
+      <CaloriesChart key={period} values={selected} goal={targets.calories} monthly={period === "month"}/>
+      <dl className="nutrition-inline-stats">
+        <div><dt>ימים בטווח היעד</dt><dd>{targets.calories ? `${daysAtGoal} מתוך ${selected.length}` : "—"}</dd></div>
+        <div><dt>קלוריות {period === "week" ? "בשבוע" : "בחודש"}</dt><dd>{round(totals.calories).toLocaleString("he-IL")}</dd></div>
+      </dl>
     </section>
-
-    <div className="health-stat-grid">
-      <div><Target aria-hidden="true"/><strong>{targets.calories ? `${daysAtGoal} מתוך ${selected.length}` : "—"}</strong><span>ימים בטווח היעד</span></div>
-      <div><Flame aria-hidden="true"/><strong>{round(totals.calories).toLocaleString("he-IL")}</strong><span>קלוריות {period === "week" ? "בשבוע" : "בחודש"}</span></div>
-    </div>
 
     <section className="nutrition-macro-card" aria-labelledby="nutrition-macros-title">
       <span className="health-summary-card__icon"><Beef aria-hidden="true" size={24}/></span>
@@ -60,18 +59,19 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
         </div>
       </> : <p className="nutrition-empty">עדיין לא דווחה תזונה בטווח הזה.</p>}
     </section>
-    {proteinDifference !== null && reported.length ? <p className="health-insight">{Math.abs(proteinDifference) <= 3 ? "החלבון קרוב ליעד — ממשיכים כך" : proteinDifference < 0 ? `חסרים כ־${Math.abs(proteinDifference)}% חלבון ביחס ליעד` : `החלבון גבוה ב־${proteinDifference}% מהיעד`}</p> : null}
+    {proteinGapGrams !== null && reported.length ? <p className="health-insight">{Math.abs(proteinGapGrams) <= 3 ? "החלבון קרוב ליעד — ממשיכים כך" : proteinGapGrams > 0 ? `חסרים בממוצע ${proteinGapGrams} גרם חלבון ביום` : `ממוצע החלבון גבוה ב־${Math.abs(proteinGapGrams)} גרם מהיעד היומי`}</p> : null}
   </div>;
 }
 
 function CaloriesChart({ values, goal, monthly }: { values: readonly DailyNutritionTotal[]; goal: number | null; monthly: boolean }) {
   const max = Math.max(goal ?? 0, ...values.map((day) => day.calories), 1);
   return <div className="health-chart" data-monthly={monthly || undefined} role="img" aria-label={values.map((day) => `${monthly ? dateLabel(day.day) : dayLabel(day.day)} ${round(day.calories)} קלוריות`).join(", ")}>
-    <div className="health-chart__plot" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(${monthly ? "2.75rem" : "0"}, 1fr))` }}>
+    <div className="health-chart__plot" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
       {goal ? <span className="health-chart__goal" style={{ insetBlockEnd: `${Math.min(92, (goal / max) * 100)}%` }}><small>יעד</small></span> : null}
-      {values.map((day) => {
+      {values.map((day, index) => {
         const excessPercent = goal && day.calories > goal ? ((day.calories - goal) / day.calories) * 100 : 0;
-        return <span className="health-chart__column" key={day.day}><b>{round(day.calories).toLocaleString("he-IL")}</b><i data-over-goal={excessPercent ? true : undefined} style={{ height: `${Math.max(day.calories ? 7 : 1, (day.calories / max) * 100)}%` }}>{excessPercent ? <em style={{ height: `${excessPercent}%` }}/>: null}</i><small>{monthly ? dateLabel(day.day) : dayLabel(day.day)}</small></span>;
+        const showMonthlyLabel = !monthly || index === 0 || index === values.length - 1 || index % 5 === 0;
+        return <span className="health-chart__column" key={day.day}><b>{round(day.calories).toLocaleString("he-IL")}</b><i data-over-goal={excessPercent ? true : undefined} style={{ height: `${Math.max(day.calories ? 7 : 1, (day.calories / max) * 100)}%` }}>{excessPercent ? <em style={{ height: `${excessPercent}%` }}/>: null}</i><small>{showMonthlyLabel ? (monthly ? dateLabel(day.day) : dayLabel(day.day)) : ""}</small></span>;
       })}
     </div>
   </div>;
