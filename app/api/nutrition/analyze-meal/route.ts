@@ -17,12 +17,19 @@ const modelPricingUsdPerMillion = {
 
 const prompt = (description: string) => [
   "נתח תמונה של ארוחה לצורך מעקב תזונתי משוער, לא מדידה רפואית.",
-  "החזר כל מזון כרכיב נפרד, עם משקל משוער בגרמים וערכי המנה כולה.",
+  "התמונה היא המקור המרכזי והסמכות להערכת הנפח והמשקל. הטקסט נועד לזהות מזונות ואופן הכנה, ויכול לתקן זיהוי שגוי או לציין רכיב מוסתר, אך אינו הוכחה לכמות גדולה יותר.",
+  "אל תגדיל את משקל הארוחה או רכיביה רק מפני שהטקסט מפרט יותר רכיבים. אל תנסה להתאים את התוצאה לערך קלורי קודם או ליעד כלשהו.",
+  "החזר כל מזון כרכיב נפרד, עם משקל משוער בגרמים וערכי המנה כולה. ברירת המחדל לכל מזון שעל הצלחת היא משקל לאחר הכנה (as_served), אלא אם יש ראיה ברורה אחרת.",
+  "הבחן במפורש בין מזון נא, מבושל, צלוי, אפוי ומטוגן. ערכי התזונה חייבים להתאים לאופן ההכנה ולמשקל לאחר הכנה.",
   "שים לב במיוחד למאכלים ישראליים: חומוס, פלאפל, שווארמה, פרגית, קוסקוס, פיתה, אורז ושניצל.",
-  "זהה שמן, טחינה, רטבים ותוספות כאשר הם נראים. אל תמציא רכיב מוסתר; ציין הנחה ושאל clarification קצרה רק כשהיא משנה מהותית את ההערכה.",
-  "אם התמונה מטושטשת מדי או אינה מכילה מזון, החזר containsFood=false ומערך ריק.",
+  "כאשר כמה סלטים נמצאים יחד באותו אזור קטן, צור עבורם group אחד: הערך קודם את המשקל הכולל של הקבוצה מהתמונה, ואז חלק אותו בין רכיבי הסלט. סכום משקלי הרכיבים חייב להתאים למשקל הקבוצה.",
+  "זהה שמן, מיונז, טחינה ורטבים לפי התמונה והטקסט. במזון מוכן כגון חצילים מטוגנים או גזר במיונז, כלול את השמן או המיונז פעם אחת בתוך הערכים של המזון וסמן nutritionIncludesAddedFat=true.",
+  "אל תחזיר שמן, מיונז או רוטב כרכיב נפרד אם הם כבר כלולים בערכי המזון המוכן. רכיב כזה יכול להיות נפרד רק אם הוא תוספת נפרדת שנראית בתמונה; במקרה זה סמן standaloneVisibleAddition=true ושייך אותו לקבוצה נפרדת.",
+  "אם כמות שמן, מיונז או רוטב אינה ידועה, השתמש בהערכה סבירה אחת, ציין את ההנחה וסמן confidence נמוך או בינוני. שאל clarification קצרה רק כאשר התשובה תשנה מהותית את ההערכה.",
+  "אל תמציא רכיבים שאינם בתמונה או בתיאור המשתמש.",
+  "אם התמונה מטושטשת מדי או אינה מכילה מזון, החזר containsFood=false ומערכי groups ו-components ריקים.",
   "confidence הוא שיקול איכותי בלבד ואין להציג אותו כאחוז דיוק.",
-  description ? `מידע נוסף מהמשתמש: ${description}` : "לא נמסר מידע נוסף.",
+  `תיאור הארוחה מהמשתמש: ${description}`,
 ].join("\n");
 
 export async function POST(request: Request) {
@@ -41,6 +48,7 @@ export async function POST(request: Request) {
   const photo = form.get("photo");
   const description = String(form.get("description") ?? "").trim().slice(0, 200);
   if (!(photo instanceof File) || photo.size === 0) return Response.json({ error: "photo_required" }, { status: 400 });
+  if (!description) return Response.json({ error: "description_required" }, { status: 400 });
   const photoProblem = validateFoodLogPhoto(photo);
   if (photoProblem || await detectImageFormat(photo) !== photo.type) return Response.json({ error: "invalid_photo", message: photoProblem }, { status: 400 });
 
@@ -76,13 +84,14 @@ export async function POST(request: Request) {
     if (!parsed) return Response.json({ error: "invalid_analysis" }, { status: 502 });
     if (!parsed.containsFood) return Response.json({ error: "no_food", summary: parsed.summary }, { status: 422 });
     const supabase = await createSupabaseServerClient();
-    const { data: rows, error } = await supabase.from("foods").select("id,name,calories,protein,carbs,fat");
+    const { data: rows, error } = await supabase.from("foods").select("id,name,calories,protein,carbs,fat,verification_status,notes");
     if (error) throw error;
     const foods: MatchableFood[] = (rows ?? []).map((row) => ({
       id: String(row.id), name: String(row.name), calories: row.calories == null ? null : Number(row.calories),
       protein: row.protein == null ? null : Number(row.protein), carbs: row.carbs == null ? null : Number(row.carbs), fat: row.fat == null ? null : Number(row.fat),
+      verificationStatus: row.verification_status == null ? null : String(row.verification_status), notes: row.notes == null ? null : String(row.notes),
     }));
-    const components = normalizeComponents(parsed.components, foods);
+    const components = normalizeComponents(parsed.components, foods, parsed.groups);
     const analysisToken = signMealAnalysis({ userId: auth.id, expiresAt: Date.now() + 30 * 60_000, components });
     const usage = result.usage ?? {};
     const pricing = modelPricingUsdPerMillion[mealAnalysisModel as keyof typeof modelPricingUsdPerMillion];

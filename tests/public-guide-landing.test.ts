@@ -5,7 +5,7 @@ import test from "node:test";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the public guide contains all seven videos in course order", async () => {
+test("the public guide contains all nine videos in course order", async () => {
   const [page, player] = await Promise.all([
     file("app/guide/page.tsx"),
     file("app/guide/GuideVideo.tsx"),
@@ -18,12 +18,14 @@ test("the public guide contains all seven videos in course order", async () => {
     "05-workout-management-progress",
     "06-measurements-health-checkin",
     "07-messages-content-profile-support",
+    "08-connect-device-iphone",
+    "09-connect-device-android",
   ];
 
   assert.equal((player.match(/<video/g) ?? []).length, 1);
   assert.match(page, /<GuideVideo/);
   assert.doesNotMatch(page, /\bSTART\b/);
-  assert.equal((page.match(/src: "\/media\/life-fit-training\//g) ?? []).length, 7);
+  assert.equal((page.match(/src: "\/media\/life-fit-training\//g) ?? []).length, 9);
   let previous = -1;
   for (const source of sources) {
     const position = page.indexOf(source);
@@ -35,8 +37,8 @@ test("the public guide contains all seven videos in course order", async () => {
 test("every guide video is introduced by a title and description", async () => {
   const page = await file("app/guide/page.tsx");
   const lessonData = page.match(/const lessons = \[([\s\S]*?)\] as const;/)?.[1] ?? "";
-  assert.equal((lessonData.match(/description:/g) ?? []).length, 7);
-  assert.equal((lessonData.match(/points:/g) ?? []).length, 7);
+  assert.equal((lessonData.match(/description:/g) ?? []).length, 9);
+  assert.equal((lessonData.match(/points:/g) ?? []).length, 9);
   assert.match(page, /lessonCopy[\s\S]*lesson\.description[\s\S]*videoShell/);
 });
 
