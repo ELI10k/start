@@ -31,6 +31,7 @@ import { dailyNutritionInsights } from "@/lib/nutrition/daily-insights";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { masterFoodGroup } from "@/lib/nutrition/master-foods";
 import { displayCalories } from "@/lib/nutrition/display";
+import { nutritionDayStatus, type NutritionDayStatus } from "@/lib/nutrition/day-status";
 
 // "אכלתי משהו אחר" runs the photo/text estimator inside a server action, and a
 // server action executes on the route segment that hosts it. Vercel's default
@@ -85,6 +86,30 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
     supabase.from("food_favorites").select("food_id").eq("user_id", auth.id),
     supabase.from("my_meals").select("id,name,my_meal_items(id)").eq("client_id", auth.id).order("updated_at", { ascending: false }),
   ]);
+  const pastDayStatuses = await Promise.all(days.filter((day) => day < now).map(async (day) => {
+    const [dayMenu, dayFreeMenu, dayLogged] = day === today
+      ? [menu, freeMenu, logged] as const
+      : await Promise.all([
+          getActiveClientMenu(auth.id, day),
+          getFreeMenuDay(auth.id, day),
+          listClientFoodLog(auth.id, day, { signPhotoUrls: false }),
+        ]);
+    const freeTarget = dayFreeMenu?.day.calorie_target;
+    const calorieTarget = freeTarget ?? dayMenu?.calorieTarget;
+    const calories = dayFreeMenu
+      ? Number(dayFreeMenu.summary?.calories ?? 0)
+      : addTotals(
+          eatenFromMenu(
+            dayMenu?.meals ?? [],
+            (mealId) => dayLogged
+              .filter((entry) => entry.mealId === mealId)
+              .reduce((sum, entry) => sum + (entry.calories ?? 0), 0),
+          ),
+          sumLoggedFood(dayLogged),
+        ).calories;
+    return [day, nutritionDayStatus({ day, today: now, calories, calorieTarget })] as const;
+  }));
+  const dayStatuses: Readonly<Record<string, NutritionDayStatus>> = Object.fromEntries(pastDayStatuses);
   if (savedMealsResult.error) console.error("saved meals unavailable", { code: savedMealsResult.error.code });
   const savedMeals = (savedMealsResult.data ?? []).map((meal) => ({
     id: String(meal.id), name: String(meal.name), itemCount: Array.isArray(meal.my_meal_items) ? meal.my_meal_items.length : 0,
@@ -190,7 +215,7 @@ export default async function NutritionPage({ searchParams }: { searchParams: Pr
       <h1 className="sr-only">
         {isToday ? "הארוחות של היום" : `הארוחות של ${formatIsraelDate(`${today}T12:00:00Z`, { weekday: "long", day: "numeric", month: "long" })}`}
       </h1>
-      <NutritionDayStrip days={days} active={today} today={now} />
+      <NutritionDayStrip days={days} active={today} today={now} statuses={dayStatuses} />
       {/* One row of tools, not three stacked ones. The saved-meals shortcut and
           repeat-yesterday action share a line and wrap only if they have to.
           
