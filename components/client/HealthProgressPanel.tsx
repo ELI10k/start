@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints, MoonStar, RefreshCw, Target } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
-import { DEFAULT_SLEEP_GOAL_MINUTES, averageCompletedSteps, calendarDay, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
 import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
 import type { HealthPermissionState } from "@/lib/health/types";
@@ -90,7 +90,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   const connect = permission === "unknown" || permission === "prompt" || permission === "denied";
   const unavailable = permission === "unavailable";
   const dayCount = period === "month" ? 30 : 7;
-  const days = lastDays(today, dayCount);
+  const days = period === "week" ? calendarWeekDays(today) : lastDays(today, dayCount);
   const periodPicker = (
     <div className="health-period-picker" role="group" aria-label="טווח הצגה">
       <button type="button" aria-pressed={period === "week"} onClick={() => setPeriod("week")}>שבועי</button>
@@ -102,7 +102,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
     const summary = summarizeSteps(snapshot.entries, snapshot.preferences, today);
     const stepByDay = stepsByDay(snapshot.entries);
     const values = days.map((day) => ({ day, value: stepByDay.get(day)?.steps ?? 0 }));
-    const average = averageCompletedSteps(snapshot.entries, days, today);
+    const average = averageReportedSteps(snapshot.entries, days);
     const total = values.reduce((sum, point) => sum + point.value, 0);
     const periodGoal = summary.goal * dayCount;
     const daysMetGoal = values.filter((point) => point.value >= summary.goal).length;

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_SLEEP_GOAL_MINUTES, averageCompletedSteps, calendarDay, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
 import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
@@ -26,6 +26,15 @@ test("seven days ends on today and starts six days earlier", () => {
   assert.equal(shiftDay(TODAY, -1), "2026-08-10");
 });
 
+test("the calendar week always runs from Sunday through Saturday", () => {
+  assert.deepEqual(calendarWeekDays(TODAY), [
+    "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15",
+  ]);
+  assert.deepEqual(calendarWeekDays("2026-08-09"), [
+    "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15",
+  ]);
+});
+
 test("a phone and a watch on the same walk are not added together", () => {
   const byDay = stepsByDay([entry(TODAY, 8200, "healthkit"), entry(TODAY, 7900, "health-connect")]);
   assert.equal(byDay.get(TODAY)?.steps, 8200);
@@ -43,16 +52,15 @@ test("the weekly average ignores days that never reported", () => {
   assert.equal(summary.hasData, true);
 });
 
-test("period averages do not fall because today's step count is still partial", () => {
-  const days = lastDays(TODAY, 7);
-  assert.equal(averageCompletedSteps([
+test("period averages include today's reported step count", () => {
+  const days = calendarWeekDays(TODAY);
+  assert.equal(averageReportedSteps([
     entry("2026-08-09", 9000),
     entry("2026-08-10", 11000),
     entry(TODAY, 1000),
-  ], days, TODAY), 10000);
-  // A new user still sees today's figure until there is a completed day.
-  assert.equal(averageCompletedSteps([entry(TODAY, 1200)], days, TODAY), 1200);
-  assert.equal(averageCompletedSteps([], days, TODAY), null);
+  ], days), 7000);
+  assert.equal(averageReportedSteps([entry(TODAY, 1200)], days), 1200);
+  assert.equal(averageReportedSteps([], days), null);
 });
 
 test("no data at all reports zeroes rather than dividing by zero", () => {
@@ -141,7 +149,9 @@ test("steps and sleep keep both period controls available after either selection
   assert.match(panel, /onClick=\{\(\) => setPeriod\("week"\)\}>שבועי<\/button>/);
   assert.match(panel, /onClick=\{\(\) => setPeriod\("month"\)\}>חודשי<\/button>/);
   assert.equal(panel.match(/\{periodPicker\}/g)?.length, 2);
-  assert.match(panel, /lastDays\(today, dayCount\)/);
+  assert.match(panel, /period === "week" \? calendarWeekDays\(today\) : lastDays\(today, dayCount\)/);
+  assert.match(panel, /averageReportedSteps\(snapshot\.entries, days\)/);
+  assert.match(styles, /health-chart__goal small \{[^}]*inset-inline-start: auto;[^}]*inset-inline-end: \.25rem;[^}]*background: var\(--surface\)/);
   assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);
   assert.match(styles, /\.health-summary-card \{[^}]*min-width: 0;[^}]*max-width: 100%;[^}]*overflow: hidden/);
   assert.match(styles, /\.health-chart \{[^}]*max-width: 100%;[^}]*overflow-x: auto/);

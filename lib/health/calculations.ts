@@ -22,6 +22,12 @@ export function lastDays(today: string, count: number): readonly string[] {
   return Array.from({ length: count }, (_, index) => shiftDay(today, index - (count - 1)));
 }
 
+export function calendarWeekDays(today: string): readonly string[] {
+  const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
+  const sunday = shiftDay(today, -weekday);
+  return Array.from({ length: 7 }, (_, index) => shiftDay(sunday, index));
+}
+
 // Two sources reporting the same day are not added together: a phone in a pocket
 // and a watch on the wrist saw the same walk. The larger figure wins, because
 // the more complete tracker is the one that saw more of the day.
@@ -35,21 +41,11 @@ export function stepsByDay(entries: readonly DailySteps[]): ReadonlyMap<string, 
   return best;
 }
 
-/**
- * Returns a stable daily average for a displayed period. A live step count for
- * today is useful in the chart, but treating that partial day as complete makes
- * both the weekly and monthly averages appear to fall every morning. Once a
- * completed day exists, only completed days participate in the average.
- */
-export function averageCompletedSteps(entries: readonly DailySteps[], days: readonly string[], today: string): number | null {
+/** Returns the average of every reported day in the displayed period, including today. */
+export function averageReportedSteps(entries: readonly DailySteps[], days: readonly string[]): number | null {
   const byDay = stepsByDay(entries);
-  const reported = days.flatMap((day) => {
-    const entry = byDay.get(day);
-    return entry ? [entry] : [];
-  });
-  const completed = reported.filter((entry) => entry.day < today);
-  const samples = completed.length ? completed : reported;
-  return samples.length ? Math.round(samples.reduce((total, entry) => total + entry.steps, 0) / samples.length) : null;
+  const reported = days.flatMap((day) => byDay.has(day) ? [byDay.get(day)!.steps] : []);
+  return reported.length ? Math.round(reported.reduce((total, steps) => total + steps, 0) / reported.length) : null;
 }
 
 const DEFAULT_GOAL = 10000;
