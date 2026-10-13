@@ -26,6 +26,51 @@ test("a full-bottle catalogue row without a countable unit stays unchanged", () 
   }), { calories: 192.5, protein: 40.3, carbs: 7.7, fat: 0, servingLabel: "בקבוק שלם · 350 מ״ל" });
 });
 
+test("both Yotvata PRO coffees display one full 350 ml bottle", () => {
+  const bottle = {
+    packageUnit: "בקבוק",
+    unitWeightGrams: 350,
+    servingLabel: "בקבוק 350 מ״ל",
+  };
+  assert.deepEqual(catalogueServingNutrition({
+    ...bottle,
+    calories: 37,
+    protein: 7.2,
+    carbs: 2.1,
+    fat: 0,
+  }), {
+    calories: 129.5,
+    protein: 25.2,
+    carbs: 7.4,
+    fat: 0,
+    servingLabel: "בקבוק 350 מ״ל",
+  });
+  assert.deepEqual(catalogueServingNutrition({
+    ...bottle,
+    calories: 63,
+    protein: 7.2,
+    carbs: 5.1,
+    fat: 1.5,
+  }), {
+    calories: 220.5,
+    protein: 25.2,
+    carbs: 17.8,
+    fat: 5.3,
+    servingLabel: "בקבוק 350 מ״ל",
+  });
+});
+
+test("the Yotvata coffee migration preserves per-100 ml nutrition and defines the bottle", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const migration = await readFile(new URL("../supabase/migrations/20261013153558_fix_yotvata_pro_coffee_bottle_servings.sql", import.meta.url), "utf8");
+  assert.match(migration, /barcode-7290119387465/);
+  assert.match(migration, /barcode-7290119387472/);
+  assert.match(migration, /package_unit = 'בקבוק'/);
+  assert.match(migration, /unit_weight_grams = 350/);
+  assert.match(migration, /serving_label = 'בקבוק 350 מ״ל'/);
+  assert.doesNotMatch(migration, /\n\s*(?:calories|protein|carbs|fat)\s*=/);
+});
+
 test("a countable product labelled per 100 grams stays per 100 grams", () => {
   assert.deepEqual(catalogueServingNutrition({
     calories: 155,
