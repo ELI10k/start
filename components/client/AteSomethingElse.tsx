@@ -4,7 +4,7 @@ import { useActionState, useEffect, useMemo, useRef, useState, useTransition } f
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, Barcode, Camera, Database, Images, PencilLine, Sparkles, UtensilsCrossed } from "lucide-react";
 import BottomSheet from "@/components/client/BottomSheet";
 import CameraScan from "@/components/client/CameraScan";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -73,7 +73,7 @@ export default function AteSomethingElse({
   // making the client find it behind two other tabs.
   initialTab = "text",
   savedMeals = [],
-  aiMealEnabled: _aiMealEnabled = false,
+  aiMealEnabled = false,
   standaloneTab = false,
   initialPhoto = null,
 }: {
@@ -233,6 +233,9 @@ export default function AteSomethingElse({
         <button type="button" onClick={() => setTab("photo")} aria-pressed={tab === "photo"} className={`chip${tab === "photo" ? " pill--green" : ""}`}>
           <Camera aria-hidden="true" size={15} />צילום
         </button>
+        {aiMealEnabled ? <button type="button" onClick={() => setTab("ai-photo")} aria-pressed={tab === "ai-photo"} className={`chip${tab === "ai-photo" ? " pill--green" : ""}`}>
+          <Sparkles aria-hidden="true" size={15} />צילום ארוחה ב־AI
+        </button> : null}
       </div> : null}
 
       {tab === "scan" && !found && (
