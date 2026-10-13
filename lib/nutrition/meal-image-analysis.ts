@@ -1,6 +1,7 @@
 import type { MacroValues } from "@/lib/meal-plans/types";
 
 export type AiConfidence = "high" | "medium" | "low";
+export type MealImageQuality = "high" | "medium" | "low";
 export type MealWeightBasis = "as_served" | "raw" | "unknown";
 
 export type RawMealGroup = Readonly<{
@@ -49,6 +50,8 @@ export type RawMealClarification = Readonly<{
 export type ParsedMealAnalysis = Readonly<{
   containsFood: boolean;
   summary: string;
+  imageQuality: MealImageQuality;
+  needsCloserPhoto: boolean;
   groups: RawMealGroup[];
   components: RawMealComponent[];
   clarifications: RawMealClarification[];
@@ -106,10 +109,12 @@ const clarificationEffect = { type: "string", enum: ["keep_estimate", "split_eve
 export const MEAL_ANALYSIS_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["containsFood", "groups", "components", "clarifications", "summary"],
+  required: ["containsFood", "groups", "components", "clarifications", "summary", "imageQuality", "needsCloserPhoto"],
   properties: {
     containsFood: { type: "boolean" },
     summary: { type: "string", maxLength: 200 },
+    imageQuality: { type: "string", enum: ["high", "medium", "low"] },
+    needsCloserPhoto: { type: "boolean" },
     groups: {
       type: "array", minItems: 0, maxItems: 20,
       items: {
@@ -175,6 +180,8 @@ export function parseMealAnalysis(value: unknown): ParsedMealAnalysis | null {
   if (!value || typeof value !== "object") return null;
   const root = value as Record<string, unknown>;
   if (typeof root.containsFood !== "boolean" || typeof root.summary !== "string" || !Array.isArray(root.groups) || root.groups.length > 20 || !Array.isArray(root.components) || root.components.length > 20) return null;
+  const imageQuality = (["high", "medium", "low"] as const).includes(root.imageQuality as MealImageQuality) ? root.imageQuality as MealImageQuality : "medium";
+  const needsCloserPhoto = typeof root.needsCloserPhoto === "boolean" ? root.needsCloserPhoto : false;
   const groups: RawMealGroup[] = [];
   const groupIds = new Set<string>();
   for (const raw of root.groups) {
@@ -238,7 +245,7 @@ export function parseMealAnalysis(value: unknown): ParsedMealAnalysis | null {
   }
   if (root.containsFood !== (components.length > 0) || root.containsFood !== (groups.length > 0)) return null;
   if (!root.containsFood) clarifications.length = 0;
-  return { containsFood: root.containsFood, summary: root.summary.trim().slice(0, 200), groups, components, clarifications, discardedClarificationGroupIds: [...discardedClarificationGroupIds] };
+  return { containsFood: root.containsFood, summary: root.summary.trim().slice(0, 200), imageQuality, needsCloserPhoto, groups, components, clarifications, discardedClarificationGroupIds: [...discardedClarificationGroupIds] };
 }
 
 const PREPARATION_TERMS = {
@@ -301,10 +308,23 @@ const isStandaloneFatOrSauce = (name: string) => {
   return tokens.length <= 3 && ["שמן", "מיונז", "רוטב", "טחינה"].some((term) => tokens.includes(term));
 };
 
+const isNonNutritiveDrinkMedium = (item: RawMealComponent) => {
+  const tokens = normalize(item.name).split(" ");
+  const isWaterOrIce = tokens.length <= 3 && ["מים", "מי קרח", "קרח", "water", "ice"].some((term) => normalize(item.name) === normalize(term));
+  return isWaterOrIce && item.calories === 0 && item.protein === 0 && item.carbs === 0 && item.fat === 0;
+};
+
 export function normalizeComponents(raw: readonly RawMealComponent[], foods: readonly MatchableFood[], groups: readonly RawMealGroup[]): MealAnalysisComponent[] {
   const groupById = new Map(groups.map((group) => [group.id, group]));
   const groupsWithIncludedFat = new Set(raw.filter((item) => !isStandaloneFatOrSauce(item.name) && item.nutritionIncludesAddedFat).map((item) => item.groupId));
+  const groupsWithCalculatedDrink = new Set(raw.filter((item) => !isNonNutritiveDrinkMedium(item)).map((item) => item.groupId));
+  const excludedDrinkMediumGrams = new Map<string, number>();
+  for (const item of raw) {
+    if (isNonNutritiveDrinkMedium(item) && groupsWithCalculatedDrink.has(item.groupId))
+      excludedDrinkMediumGrams.set(item.groupId, (excludedDrinkMediumGrams.get(item.groupId) ?? 0) + item.estimatedGrams);
+  }
   const kept = raw.filter((item) => {
+    if (isNonNutritiveDrinkMedium(item) && groupsWithCalculatedDrink.has(item.groupId)) return false;
     if (!isStandaloneFatOrSauce(item.name)) return true;
     return item.standaloneVisibleAddition && !groupsWithIncludedFat.has(item.groupId);
   });
@@ -314,13 +334,15 @@ export function normalizeComponents(raw: readonly RawMealComponent[], foods: rea
   for (const [groupId, indices] of indicesByGroup) {
     const group = groupById.get(groupId);
     if (!group) throw new Error("invalid_component_group");
+    const targetGrams = round(group.estimatedGrams - (excludedDrinkMediumGrams.get(groupId) ?? 0));
+    if (targetGrams <= 0) throw new Error("invalid_component_group_weight");
     const componentTotal = indices.reduce((sum, index) => sum + kept[index].estimatedGrams, 0);
     if (componentTotal <= 0) throw new Error("invalid_component_group_weight");
     let assigned = 0;
     indices.forEach((index, position) => {
       const grams = position === indices.length - 1
-        ? round(group.estimatedGrams - assigned)
-        : Math.floor(kept[index].estimatedGrams * group.estimatedGrams / componentTotal * 10) / 10;
+        ? round(targetGrams - assigned)
+        : Math.floor(kept[index].estimatedGrams * targetGrams / componentTotal * 10) / 10;
       if (grams <= 0) throw new Error("invalid_component_group_weight");
       allocatedGrams[index] = grams;
       assigned = round(assigned + grams);

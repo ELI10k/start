@@ -9,15 +9,20 @@ import { signMealAnalysis } from "@/lib/nutrition/meal-analysis-signature";
 import { AI_MEAL_DEFAULT_MODEL, canUseAiMealAnalysis, isAiMealAnalysisEnabled } from "@/lib/nutrition/ai-meal-feature";
 
 export const maxDuration = 60;
+const MAX_MEAL_PHOTOS = 3;
+const MAX_MEAL_PHOTOS_TOTAL_BYTES = 3.5 * 1024 * 1024;
 const mealAnalysisModel = process.env.AI_MEAL_MODEL?.trim() || AI_MEAL_DEFAULT_MODEL;
 const modelPricingUsdPerMillion = {
   "openai/gpt-6-luna": { input: 0.1, output: 0.5 },
   "alibaba/qwen3.8-omni-flash": { input: 0.15, output: 0.47 },
 } satisfies Record<string, { input: number; output: number }>;
 
-const buildMealAnalysisPrompt = (description: string) => [
-  "נתח תמונה של ארוחה לצורך מעקב תזונתי משוער, לא מדידה רפואית.",
-  "התמונה היא המקור המרכזי והסמכות להערכת הנפח והמשקל. הטקסט נועד לזהות מזונות ואופן הכנה, ויכול לתקן זיהוי שגוי או לציין רכיב מוסתר, אך אינו הוכחה לכמות גדולה יותר.",
+const buildMealAnalysisPrompt = (description: string, photoCount: number) => [
+  `נתח ${photoCount === 1 ? "תמונה אחת" : `${photoCount} תמונות`} של אותה ארוחה לצורך מעקב תזונתי משוער, לא מדידה רפואית.`,
+  "תמונה 1 היא התמונה הכללית והסמכות לקביעת מספר המנות, מספר הפריטים והמשקל הכולל. תמונות 2 ו-3, אם צורפו, הן זוויות נוספות של אותה ארוחה ומשמשות רק לזיהוי מילוי, עובי, מרקם ואופן הכנה.",
+  "אל תספור מזון, מנה או משקל יותר מפעם אחת כאשר אותו פריט מופיע בכמה תמונות. צור מלאי קנוני אחד של רכיבי הארוחה והשתמש באותו groupId לכל התצוגות של אותו פריט פיזי.",
+  "אם תמונה נוספת מגלה מילוי או רכיב מוסתר, כלול אותו בתוך המשקל הכולל של קבוצת המזון. במאפה ממולא, סכום משקל הבצק והמילוי חייב להיות משקל המאפה כולו; אסור להחזיר גם את המאפה השלם וגם את המילוי כמשקלים מצטברים.",
+  "התמונות הן המקור המרכזי והסמכות להערכת הנפח והמשקל. הטקסט נועד לזהות מזונות ואופן הכנה, ויכול לתקן זיהוי שגוי או לציין רכיב מוסתר, אך אינו הוכחה לכמות גדולה יותר.",
   "אל תגדיל את משקל הארוחה או רכיביה רק מפני שהטקסט מפרט יותר רכיבים. אל תנסה להתאים את התוצאה לערך קלורי קודם או ליעד כלשהו.",
   "החזר כל מזון כרכיב נפרד, עם משקל משוער בגרמים וערכי המנה כולה. ברירת המחדל לכל מזון שעל הצלחת היא משקל לאחר הכנה (as_served), אלא אם יש ראיה ברורה אחרת.",
   "הבחן במפורש בין מזון נא, מבושל, צלוי, אפוי ומטוגן. ערכי התזונה חייבים להתאים לאופן ההכנה ולמשקל לאחר הכנה.",
@@ -34,7 +39,9 @@ const buildMealAnalysisPrompt = (description: string) => [
   "לכל שאלה חייבות להיות בדיוק שתי אפשרויות קצרות ושונות. אין ליצור אפשרות 'לא בטוח'; הדילוג מוצג בממשק ואינו משנה את הניתוח.",
   "אם אין שאלה משמעותית או שהתיאור כבר ענה עליה, החזר clarifications ריק. אם structured clarification נוצרה, clarification של הרכיב הוא רק תיאור קצר של אי-הוודאות ולא שאלה נוספת.",
   "אל תמציא רכיבים שאינם בתמונה או בתיאור המשתמש.",
-  "אם התמונה מטושטשת מדי או אינה מכילה מזון, החזר containsFood=false ומערכי groups ו-components ריקים.",
+  "מים וקרח שהם חלק ממשקה שכבר חושב אינם רכיבים תזונתיים נפרדים. שייך אותם לאותה קבוצת משקה ואל תוסיף להם קלוריות או מאקרו. אל תשמיט חלב, סוכר, סירופ או אלכוהול.",
+  "הערך את איכות התמונות בשדות imageQuality ו-needsCloserPhoto. אם המזון קטן בפריים, מרוחק, מטושטש או לא מאפשר הערכת משקל אמינה, החזר imageQuality=low ו-needsCloserPhoto=true, אך המשך בניתוח אם עדיין ניתן לזהות מזון.",
+  "רק אם התמונות אינן מכילות מזון או אינן מאפשרות זיהוי כלל, החזר containsFood=false ומערכי groups ו-components ריקים.",
   "confidence הוא שיקול איכותי בלבד ואין להציג אותו כאחוז דיוק.",
   `תיאור הארוחה מהמשתמש: ${description}`,
 ].join("\n");
@@ -52,12 +59,18 @@ export async function POST(request: Request) {
   if (!minuteAllowed || !dailyAllowed) return Response.json({ error: "rate_limited" }, { status: 429 });
 
   const form = await request.formData();
-  const photo = form.get("photo");
+  const submittedPhotos = form.getAll("photos");
+  const legacyPhoto = form.get("photo");
+  const photos = (submittedPhotos.length ? submittedPhotos : legacyPhoto == null ? [] : [legacyPhoto]).filter((value): value is File => value instanceof File && value.size > 0);
   const description = String(form.get("description") ?? "").trim().slice(0, 200);
-  if (!(photo instanceof File) || photo.size === 0) return Response.json({ error: "photo_required" }, { status: 400 });
+  if (!photos.length) return Response.json({ error: "photo_required" }, { status: 400 });
+  if (photos.length > MAX_MEAL_PHOTOS) return Response.json({ error: "too_many_photos" }, { status: 400 });
+  if (photos.reduce((sum, photo) => sum + photo.size, 0) > MAX_MEAL_PHOTOS_TOTAL_BYTES) return Response.json({ error: "photos_too_large" }, { status: 413 });
   if (!description) return Response.json({ error: "description_required" }, { status: 400 });
-  const photoProblem = validateFoodLogPhoto(photo);
-  if (photoProblem || await detectImageFormat(photo) !== photo.type) return Response.json({ error: "invalid_photo", message: photoProblem }, { status: 400 });
+  for (const photo of photos) {
+    const photoProblem = validateFoodLogPhoto(photo);
+    if (photoProblem || await detectImageFormat(photo) !== photo.type) return Response.json({ error: "invalid_photo", message: photoProblem }, { status: 400 });
+  }
 
   let gatewayToken = process.env.AI_GATEWAY_API_KEY?.trim();
   if (!gatewayToken) {
@@ -65,9 +78,9 @@ export async function POST(request: Request) {
     catch { return Response.json({ error: "analysis_unavailable" }, { status: 503 }); }
   }
   if (!gatewayToken) return Response.json({ error: "analysis_unavailable" }, { status: 503 });
-  const base64 = Buffer.from(await photo.arrayBuffer()).toString("base64");
+  const encodedPhotos = await Promise.all(photos.map(async (photo) => ({ type: photo.type, base64: Buffer.from(await photo.arrayBuffer()).toString("base64") })));
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const timeout = setTimeout(() => controller.abort(), photos.length === 1 ? 30_000 : 50_000);
   try {
     const response = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
       method: "POST", signal: controller.signal,
@@ -75,8 +88,11 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: mealAnalysisModel, reasoning_effort: "none", stream: false,
         messages: [{ role: "user", content: [
-          { type: "text", text: buildMealAnalysisPrompt(description) },
-          { type: "image_url", image_url: { url: `data:${photo.type};base64,${base64}`, detail: "high" } },
+          { type: "text", text: buildMealAnalysisPrompt(description, photos.length) },
+          ...encodedPhotos.flatMap((photo, index) => [
+            { type: "text" as const, text: index === 0 ? "תמונה 1 — תמונה כללית של הארוחה" : `תמונה ${index + 1} — צילום קרוב, חתך או זווית נוספת של אותה ארוחה` },
+            { type: "image_url" as const, image_url: { url: `data:${photo.type};base64,${photo.base64}`, detail: "high" } },
+          ]),
         ] }],
         response_format: { type: "json_schema", json_schema: { name: "meal_analysis", strict: true, schema: MEAL_ANALYSIS_SCHEMA } },
       }),
@@ -120,8 +136,11 @@ export async function POST(request: Request) {
     const estimatedCostUsd = pricing
       ? ((usage.prompt_tokens ?? 0) * pricing.input + (usage.completion_tokens ?? 0) * pricing.output) / 1_000_000
       : null;
-    console.info("ai_meal_analysis", { model: mealAnalysisModel, durationMs: Date.now() - startedAt, components: components.length, promptTokens: usage.prompt_tokens ?? null, completionTokens: usage.completion_tokens ?? null, estimatedCostUsd: estimatedCostUsd == null ? null : Number(estimatedCostUsd.toFixed(6)) });
-    return Response.json({ summary: parsed.summary, components, clarifications, analysisToken });
+    console.info("ai_meal_analysis", { model: mealAnalysisModel, durationMs: Date.now() - startedAt, photoCount: photos.length, components: components.length, promptTokens: usage.prompt_tokens ?? null, completionTokens: usage.completion_tokens ?? null, estimatedCostUsd: estimatedCostUsd == null ? null : Number(estimatedCostUsd.toFixed(6)) });
+    const imageQualityWarning = parsed.needsCloserPhoto || parsed.imageQuality === "low"
+      ? "התמונות מרוחקות או לא ברורות מספיק, ולכן הערכת המשקל פחות אמינה. מומלץ להוסיף צילום מקרוב בניתוח הבא."
+      : null;
+    return Response.json({ summary: parsed.summary, imageQualityWarning, components, clarifications, analysisToken });
   } catch (error) {
     console.error("ai_meal_analysis_failed", { durationMs: Date.now() - startedAt, error: error instanceof Error ? error.name : "unknown" });
     return Response.json({ error: "analysis_failed" }, { status: 502 });
