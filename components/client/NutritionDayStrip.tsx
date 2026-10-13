@@ -73,7 +73,7 @@ export default function NutritionDayStrip({
                 its colour or makes one completed day look more successful. */}
             <span aria-hidden="true" className="day-strip__weekday">{weekday}</span>
             <span aria-hidden="true" className="day-strip__date">{date}</span>
-            {status !== "neutral" ? (
+            {status === "complete" ? (
               <span aria-hidden="true" className="day-strip__status">✓</span>
             ) : null}
           </Link>
