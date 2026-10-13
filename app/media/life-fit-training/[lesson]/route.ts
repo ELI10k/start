@@ -11,6 +11,7 @@ const PUBLIC_STORAGE_ORIGIN = "https://bacxfweisncnpjgiqxcp.supabase.co";
 const LESSON_FILES: Readonly<Record<string, string>> = {
   "01-login-home-navigation": "life-fit-training-series-v1/01-login-home-navigation.mp4",
   "02-personal-menu-meals": "life-fit-training-series-v1/02-personal-menu-meals.mp4",
+  "03-nutrition-day-status": "life-fit-day-strip-guide-v1/life-fit-day-strip-guide.mp4",
   "03-outside-menu-shopping": "life-fit-training-series-v1/03-outside-menu-shopping.mp4",
   "04-workout-program-session": "life-fit-training-series-v1/04-workout-program-session.mp4",
   "05-workout-management-progress": "life-fit-training-series-v1/05-workout-management-progress.mp4",

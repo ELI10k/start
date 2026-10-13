@@ -76,7 +76,7 @@ test("ambiguous foods remain labelled AI estimates", () => {
 });
 
 test("malformed and contradictory model responses are rejected", () => {
-  assert.deepEqual(parseMealAnalysis({ containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [] }), { containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [], discardedClarificationGroupIds: [] });
+  assert.deepEqual(parseMealAnalysis({ containsFood: false, summary: "לא זוהה מזון", groups: [], components: [], clarifications: [] }), { containsFood: false, summary: "לא זוהה מזון", imageQuality: "medium", needsCloserPhoto: false, groups: [], components: [], clarifications: [], discardedClarificationGroupIds: [] });
   assert.equal(parseMealAnalysis({ containsFood: true, summary: "", groups: [], components: [], clarifications: [] }), null);
   assert.equal(parseMealAnalysis({ containsFood: true, summary: "x", groups: [group("main", 100)], components: [{ name: "אורז", estimatedGrams: -1 }], clarifications: [] }), null);
 });
@@ -149,6 +149,27 @@ test("oil and mayonnaise are not counted twice when prepared-food nutrition alre
   assert.deepEqual(normalized.map((item) => item.name), ["גזר במיונז", "שמן"]);
   assert.equal(normalized[0].grams, 100);
   assert.equal(normalized[1].grams, 5);
+});
+
+test("ice and water inside an already calculated drink are not separate nutrition entries", () => {
+  const drink = [
+    component({ name: "קפה קר עם חלב וסירופ", preparation: "משקה מוכן", groupId: "drink", estimatedGrams: 220, calories: 150, protein: 5, carbs: 24, fat: 4 }),
+    component({ name: "קרח", preparation: "חלק מהמשקה", groupId: "drink", estimatedGrams: 80, calories: 0, protein: 0, carbs: 0, fat: 0 }),
+  ];
+  const normalized = normalizeComponents(drink, [], [group("drink", 300, "קפה קר")]);
+  assert.equal(normalized.length, 1);
+  assert.equal(normalized[0].name, "קפה קר עם חלב וסירופ");
+  assert.equal(normalized[0].grams, 220);
+  assert.equal(calculateFoodNutrition(normalized[0].per100, normalized[0].grams).calories, 150);
+});
+
+test("a filled pastry keeps filling within the pastry group total", () => {
+  const normalized = normalizeComponents([
+    component({ name: "בצק מאפה", preparation: "אפוי", groupId: "pastry", estimatedGrams: 105, calories: 330, protein: 8, carbs: 50, fat: 11 }),
+    component({ name: "קרם פטיסייר", preparation: "מילוי", groupId: "pastry", estimatedGrams: 45, calories: 95, protein: 2, carbs: 13, fat: 4 }),
+  ], [], [group("pastry", 150, "מאפה ממולא")]);
+  assert.equal(normalized.reduce((sum, item) => sum + item.grams, 0), 150);
+  assert.deepEqual(normalized.map((item) => item.grams), [105, 45]);
 });
 
 test("clarifications do not repeat facts already supplied in the meal description", () => {
@@ -282,7 +303,7 @@ test("meal description is required and the prompt keeps image quantity authorita
     source("components/client/AiMealAnalyzer.tsx"),
   ]);
   assert.match(route, /description_required/);
-  assert.match(route, /התמונה היא המקור המרכזי והסמכות להערכת הנפח והמשקל/);
+  assert.match(route, /התמונות הן המקור המרכזי והסמכות להערכת הנפח והמשקל/);
   assert.match(route, /אל תגדיל את משקל הארוחה/);
   assert.match(route, /nutritionIncludesAddedFat=true/);
   assert.doesNotMatch(route, /777/);
@@ -299,6 +320,24 @@ test("each analysis uses one gateway request and grouped normalization", async (
   assert.match(route, /מבנה clarification שטוח/);
   assert.match(route, /malformedQuestionNote/);
   assert.doesNotMatch(route, /sharePercent/);
+});
+
+test("one request accepts up to three same-meal photos and labels overview versus detail views", async () => {
+  const [route, componentSource] = await Promise.all([
+    source("app/api/nutrition/analyze-meal/route.ts"),
+    source("components/client/AiMealAnalyzer.tsx"),
+  ]);
+  assert.match(route, /MAX_MEAL_PHOTOS = 3/);
+  assert.match(route, /form\.getAll\("photos"\)/);
+  assert.match(route, /תמונה 1 היא התמונה הכללית והסמכות/);
+  assert.match(route, /אל תספור מזון, מנה או משקל יותר מפעם אחת/);
+  assert.match(route, /photos\.length === 1 \? 30_000 : 50_000/);
+  assert.equal(route.match(/fetch\("https:\/\/ai-gateway\.vercel\.sh/g)?.length, 1);
+  assert.match(componentSource, /multiple className="sr-only"/);
+  assert.match(componentSource, /photos\.forEach\(\(photo\) => form\.append\("photos"/);
+  assert.match(componentSource, /קרב את המצלמה כך שהארוחה תמלא את רוב התמונה/);
+  assert.match(componentSource, /החלפה/);
+  assert.match(componentSource, /הסרה/);
 });
 
 test("weight edits are local and do not call AI again", async () => {
