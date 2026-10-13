@@ -635,6 +635,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .health-chart__column { position: relative; z-index: 2; display: grid; height: 100%; grid-template-rows: 1fr 1.1rem; align-items: end; justify-items: center; gap: .2rem; }
 .health-chart__column b { position: absolute; inset-block-start: -.95rem; color: var(--ink); font-size: .55rem; font-weight: 800; white-space: nowrap; }
 .health-chart__column i { display: block; width: min(1.6rem, 78%); min-height: 2px; border-radius: .4rem .4rem .15rem .15rem; background: var(--green); }
+.health-chart__column i[data-empty] { background: transparent; }
 .health-chart__column small { color: var(--ink-muted); font-size: .65rem; }
 .health-period-picker { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem; width: min(13rem, 100%); margin: 0 auto .75rem; padding: .25rem; border-radius: 999px; background: var(--surface-raised); }
 .health-period-picker button { min-height: 2.25rem; border-radius: 999px; color: var(--ink-muted); font-size: .78rem; font-weight: 800; }

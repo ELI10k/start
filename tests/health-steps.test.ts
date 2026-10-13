@@ -145,13 +145,16 @@ test("steps and sleep keep both period controls available after either selection
     source("components/client/HealthProgressPanel.tsx"),
     source("app/globals.css"),
   ]);
-  assert.match(panel, /point\.value \? formatter\(point\.value\) : "0"/);
+  assert.match(panel, /point\.reported === false \? "—" : point\.value \? formatter\(point\.value\) : "0"/);
+  assert.match(panel, /reported: byDay\.has\(day\)/);
+  assert.match(panel, /health-summary-card__goal.*`מתוך \$\{formatSleep\(DEFAULT_SLEEP_GOAL_MINUTES\)\}`/);
   assert.match(panel, /onClick=\{\(\) => setPeriod\("week"\)\}>שבועי<\/button>/);
   assert.match(panel, /onClick=\{\(\) => setPeriod\("month"\)\}>חודשי<\/button>/);
   assert.equal(panel.match(/\{periodPicker\}/g)?.length, 2);
   assert.match(panel, /period === "week" \? calendarWeekDays\(today\) : lastDays\(today, dayCount\)/);
   assert.match(panel, /averageReportedSteps\(snapshot\.entries, days\)/);
   assert.match(styles, /health-chart__goal small \{[^}]*inset-inline-start: auto;[^}]*inset-inline-end: \.25rem;[^}]*background: var\(--surface\)/);
+  assert.match(styles, /health-chart__column i\[data-empty\] \{ background: transparent; \}/);
   assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);
   assert.match(styles, /\.health-summary-card \{[^}]*min-width: 0;[^}]*max-width: 100%;[^}]*overflow: hidden/);
   assert.match(styles, /\.health-chart \{[^}]*max-width: 100%;[^}]*overflow-x: auto/);
