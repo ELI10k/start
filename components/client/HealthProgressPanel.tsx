@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Footprints, MoonStar, RefreshCw, Target } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { describeError } from "@/lib/analytics/events";
-import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, dailyStepsNeededForWeeklyGoal, formatSleep, lastDays, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "@/lib/health/calculations";
 import { resolveHealthProvider, syncWindow } from "@/lib/health/providers";
 import { createHealthRepository, emptyHealthSnapshot, type HealthSnapshot } from "@/lib/health/repository";
 import type { HealthPermissionState } from "@/lib/health/types";
@@ -107,6 +107,8 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
     const periodGoal = summary.goal * dayCount;
     const daysMetGoal = values.filter((point) => point.value >= summary.goal).length;
     const remaining = Math.max(0, summary.goal - (average ?? 0));
+    const remainingWeekDays = Math.max(1, days.length - Math.max(0, days.indexOf(today)));
+    const dailyNeededForWeek = dailyStepsNeededForWeeklyGoal(total, periodGoal, remainingWeekDays);
     return (
       <div className="health-progress-view">
         {periodPicker}
@@ -121,7 +123,13 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
           <div><Target aria-hidden="true" /><strong>{daysMetGoal} מתוך {dayCount}</strong><span>ימים ביעד</span></div>
           <div className="health-stat-grid__with-goal"><Footprints aria-hidden="true" /><strong>{total.toLocaleString("he-IL")}</strong><span>צעדים {period === "month" ? "בחודש" : "בשבוע"}</span><small className="health-stat-grid__goal">מתוך {periodGoal.toLocaleString("he-IL")}</small></div>
         </div>
-        {average !== null ? <p className="health-insight">{remaining ? `עוד ${remaining.toLocaleString("he-IL")} צעדים ביום להשגת היעד` : `עמדת ביעד הצעדים ${period === "month" ? "החודשי" : "השבועי"} — כל הכבוד`}</p> : null}
+        {average !== null ? <p className="health-insight">{period === "week"
+          ? dailyNeededForWeek
+            ? `עוד ${dailyNeededForWeek.toLocaleString("he-IL")} צעדים בממוצע בכל יום עד שבת כדי להגיע ליעד השבועי`
+            : "הגעת ליעד הצעדים השבועי — כל הכבוד"
+          : remaining
+            ? `עוד ${remaining.toLocaleString("he-IL")} צעדים ביום להשגת היעד`
+            : "עמדת ביעד הצעדים החודשי — כל הכבוד"}</p> : null}
         <SyncButton connect={connect} unavailable={unavailable} syncing={syncing} onClick={() => void sync(true)} />
       </div>
     );
