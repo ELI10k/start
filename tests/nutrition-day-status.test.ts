@@ -19,14 +19,15 @@ test("today, future days and days without a target stay neutral", () => {
   assert.equal(nutritionDayStatus({ day: "2026-10-10", today: "2026-10-12", calories: 0, calorieTarget: null }), "neutral");
 });
 
-test("the day strip uses only white circles with green or red checks", async () => {
+test("the day strip uses white status circles and never puts a check in a missed day", async () => {
   const [component, css] = await Promise.all([
     readFile(new URL("../components/client/NutritionDayStrip.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
   ]);
   assert.match(component, /day-strip__day--\$\{status\}/);
   assert.match(component, /isToday \? " day-strip__day--today"/);
-  assert.match(component, /day-strip__status">✓/);
+  assert.match(component, /status === "complete"[\s\S]*day-strip__status">✓/);
+  assert.doesNotMatch(component, /status !== "neutral"[\s\S]*day-strip__status">✓/);
   assert.doesNotMatch(component, /isActive \? " pill--green"/);
   assert.match(css, /\.day-strip \.chip\.day-strip__day--complete/);
   assert.match(css, /\.day-strip \.chip\.day-strip__day--missed/);
