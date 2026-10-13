@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Barcode, Camera, Database, PencilLine, UtensilsCrossed } from "lucide-react";
+import { Barcode, Camera, Database, PencilLine, Sparkles, UtensilsCrossed } from "lucide-react";
 import AteSomethingElse, { type PickableFood, type SavedMealChoice } from "@/components/client/AteSomethingElse";
 import { displayCalories } from "@/lib/nutrition/display";
 
-type FoodLogTab = "text" | "food" | "scan" | "photo" | "saved";
+type FoodLogTab = "text" | "food" | "scan" | "photo" | "saved" | "ai-photo";
 
 /**
  * The free-calorie window, with a way to fill it.
@@ -80,6 +80,9 @@ export default function FreeCalorieMeal({
         <button type="button" onClick={() => setAdding("photo")} className="chip">
           <Camera aria-hidden="true" size={15} />צילום
         </button>
+        {aiMealEnabled ? <button type="button" onClick={() => setAdding("ai-photo")} className="chip">
+          <Sparkles aria-hidden="true" size={15} />צילום ארוחה ב־AI
+        </button> : null}
       </div>
 
       <AteSomethingElse
