@@ -5,7 +5,7 @@ import test from "node:test";
 const file = (path: string) =>
   readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("the public guide contains all nine videos with messages and support last", async () => {
+test("the public guide contains all ten videos with messages and support last", async () => {
   const [page, player] = await Promise.all([
     file("app/guide/page.tsx"),
     file("app/guide/GuideVideo.tsx"),
@@ -13,6 +13,7 @@ test("the public guide contains all nine videos with messages and support last",
   const sources = [
     "01-login-home-navigation",
     "02-personal-menu-meals",
+    "03-nutrition-day-status",
     "03-outside-menu-shopping",
     "04-workout-program-session",
     "05-workout-management-progress",
@@ -25,7 +26,7 @@ test("the public guide contains all nine videos with messages and support last",
   assert.equal((player.match(/<video/g) ?? []).length, 1);
   assert.match(page, /<GuideVideo/);
   assert.doesNotMatch(page, /\bSTART\b/);
-  assert.equal((page.match(/src: "\/media\/life-fit-training\//g) ?? []).length, 9);
+  assert.equal((page.match(/src: "\/media\/life-fit-training\//g) ?? []).length, 10);
   let previous = -1;
   for (const source of sources) {
     const position = page.indexOf(source);
@@ -37,14 +38,14 @@ test("the public guide contains all nine videos with messages and support last",
       page.indexOf('title: "חיבור שעון ומכשיר כושר באנדרואיד"'),
     "messages and support must be the final landing-page lesson",
   );
-  assert.match(page, /<li><span>09<\/span>הודעות ותמיכה<\/li>/);
+  assert.match(page, /<li><span>10<\/span>הודעות ותמיכה<\/li>/);
 });
 
 test("every guide video is introduced by a title and description", async () => {
   const page = await file("app/guide/page.tsx");
   const lessonData = page.match(/const lessons = \[([\s\S]*?)\] as const;/)?.[1] ?? "";
-  assert.equal((lessonData.match(/description:/g) ?? []).length, 9);
-  assert.equal((lessonData.match(/points:/g) ?? []).length, 9);
+  assert.equal((lessonData.match(/description:/g) ?? []).length, 10);
+  assert.equal((lessonData.match(/points:/g) ?? []).length, 10);
   assert.match(page, /lessonCopy[\s\S]*lesson\.description[\s\S]*videoShell/);
 });
 
