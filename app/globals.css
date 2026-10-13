@@ -271,11 +271,43 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   text-align: center;
 }
 .app-launch-loading__icon {
-  display: block;
+  position: relative;
+  display: grid;
   width: 6rem;
   height: 6rem;
-  border-radius: 1.35rem;
-  background: url("/icon-192.png") center / cover no-repeat;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: hidden;
+  border: .35rem solid #0b0b0b;
+  border-radius: 50%;
+  background: #0b0b0b;
+  box-shadow: 0 .6rem 1.4rem rgba(11, 11, 11, .16);
+}
+.app-launch-loading__icon > span {
+  display: grid;
+  place-items: center;
+}
+.app-launch-loading__icon > span:first-child {
+  background: var(--green);
+  color: #fff;
+}
+.app-launch-loading__icon > span:nth-child(2) {
+  background: #fff;
+  color: var(--green-press);
+}
+.app-launch-loading__icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke-width: 2.5;
+}
+.app-launch-loading__icon i {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: .25rem solid #fff;
+  border-radius: 50%;
+  background: #0b0b0b;
+  transform: translate(-50%, -50%);
 }
 .app-launch-loading__brand strong {
   color: var(--green);

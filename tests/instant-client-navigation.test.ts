@@ -87,9 +87,12 @@ test("the home shell streams before its personalized dashboard queries finish", 
   // viewport overlay and therefore cannot collapse against the RTL edge.
   assert.match(loading, /className="app-launch-loading"/);
   assert.match(loading, /className="app-launch-loading__icon"/);
+  assert.match(loading, /<Dumbbell \/>/);
+  assert.match(loading, /<UtensilsCrossed \/>/);
   assert.doesNotMatch(loading, /grid-cols-|dashboard-metrics|quick-actions-grid/);
+  assert.doesNotMatch(loading, /icon-192\.png/);
   assert.match(css, /\.app-launch-loading \{[\s\S]*?position: fixed;[\s\S]*?inset: 0;[\s\S]*?width: 100vw;[\s\S]*?height: 100dvh;/);
   assert.match(css, /contain: strict;/);
-  assert.match(css, /background: url\("\/icon-192\.png"\) center \/ cover no-repeat;/);
+  assert.match(css, /\.app-launch-loading__icon > span:first-child \{[\s\S]*?background: var\(--green\);/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
