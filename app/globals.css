@@ -631,7 +631,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 .health-chart__plot { position: relative; display: grid; height: 11rem; align-items: end; gap: .45rem; padding-top: .75rem; border-bottom: 1px solid var(--line); }
 .health-chart[data-monthly] .health-chart__plot { min-width: 82rem; }
 .health-chart__goal { position: absolute; inset-inline: 0; z-index: 1; border-top: 1px dashed var(--green); color: var(--green-press); text-align: start; }
-.health-chart__goal small { position: absolute; inset-inline-start: 0; inset-block-end: .1rem; font-size: .58rem; }
+.health-chart__goal small { position: absolute; inset-inline-start: auto; inset-inline-end: .25rem; inset-block-end: .1rem; z-index: 3; padding-inline: .2rem; background: var(--surface); font-size: .58rem; }
 .health-chart__column { position: relative; z-index: 2; display: grid; height: 100%; grid-template-rows: 1fr 1.1rem; align-items: end; justify-items: center; gap: .2rem; }
 .health-chart__column b { position: absolute; inset-block-start: -.95rem; color: var(--ink); font-size: .55rem; font-weight: 800; white-space: nowrap; }
 .health-chart__column i { display: block; width: min(1.6rem, 78%); min-height: 2px; border-radius: .4rem .4rem .15rem .15rem; background: var(--green); }
