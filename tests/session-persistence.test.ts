@@ -43,6 +43,27 @@ test("client navigation verifies independent access gates in one database roundt
   assert.match(parallelChecks[1], /device_sessions/);
 });
 
+test("private pages reuse only the auth context verified and injected by the proxy", async () => {
+  const [proxy, repository, context] = await Promise.all([
+    source("proxy.ts"),
+    source("lib/data/product-repository.ts"),
+    source("lib/auth/request-context.ts"),
+  ]);
+  // Browser-supplied identity headers are removed before any public or private
+  // request is forwarded, so they cannot bypass JWT, role or device checks.
+  assert.match(proxy, /clearAuthContextHeaders\(new Headers\(request\.headers\)\)/);
+  assert.match(context, /headers\.delete\(name\)/);
+  // The proxy adds the context only after the private access gates complete.
+  const gate = proxy.indexOf("if (!relationship && !onboarding?.onboarding_completed)");
+  const injection = proxy.indexOf("forwardedHeaders.set(AUTH_CONTEXT_HEADERS.id");
+  assert.ok(gate >= 0 && injection > gate);
+  // Server Components take the fast path, while API/direct calls retain the
+  // existing claims + profile fallback.
+  assert.match(repository, /requestHeaders\.get\(AUTH_CONTEXT_HEADERS\.id\)/);
+  assert.match(repository, /await supabase\.auth\.getClaims\(\)/);
+  assert.match(repository, /\.from\("profiles"\)/);
+});
+
 test("logout is idempotent and clears the device as well as the session", async () => {
   const route = await source("app/auth/logout/route.ts");
   assert.match(route, /deactivate_current_device/);

@@ -1,6 +1,8 @@
 import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { headers } from "next/headers";
+import { AUTH_CONTEXT_HEADERS } from "@/lib/auth/request-context";
 import type { UserRole } from "@/lib/supabase/database.types";
 import {
   CHECK_IN_PHOTO_BUCKET,
@@ -88,6 +90,27 @@ function foodRelationName(value: unknown): string {
 }
 
 export async function getAuthContext(): Promise<AuthContext | null> {
+  // Private pages have already passed JWT, account, role and device checks in
+  // proxy.ts. Those verified values are forwarded only on the internal request
+  // (never as response headers), so reuse them and avoid a duplicate profiles
+  // round-trip on every page. Route handlers and direct test calls that did not
+  // pass through a private route safely fall back to the full check below.
+  const requestHeaders = await headers();
+  const forwardedId = requestHeaders.get(AUTH_CONTEXT_HEADERS.id);
+  const forwardedRole = requestHeaders.get(AUTH_CONTEXT_HEADERS.role);
+  const forwardedStatus = requestHeaders.get(AUTH_CONTEXT_HEADERS.status);
+  if (
+    forwardedId &&
+    forwardedStatus === "active" &&
+    (forwardedRole === "coach" || forwardedRole === "client")
+  ) {
+    return {
+      id: forwardedId,
+      role: forwardedRole,
+      fullName: requestHeaders.get(AUTH_CONTEXT_HEADERS.name) ?? "",
+      status: "active",
+    };
+  }
   const supabase = await createSupabaseServerClient();
   // The proxy has already refreshed the cookie. Verify the signed JWT locally
   // when Supabase exposes asymmetric signing keys instead of making another
