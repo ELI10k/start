@@ -1,0 +1,32 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("primary client navigation explicitly prefetches personalized destinations", async () => {
+  const [bottomNav, shell, home, workoutTile] = await Promise.all([
+    source("components/BottomNav.tsx"),
+    source("components/client/ClientShell.tsx"),
+    source("app/page.tsx"),
+    source("components/workouts/client/DashboardWorkoutWidget.tsx"),
+  ]);
+
+  assert.match(bottomNav, /href=\{href\} prefetch=\{true\}/);
+  assert.match(shell, /href=\{item\.href\} prefetch=\{true\}/);
+  for (const href of ["nutrition", "check-in", "progress"])
+    assert.match(home, new RegExp(`href="/${href}" prefetch=\\{true\\}`));
+  assert.match(workoutTile, /prefetch=\{true\}/);
+});
+
+test("every primary mobile destination has an immediate loading shell", async () => {
+  const bottomNav = await source("components/BottomNav.tsx");
+  const destinations = [...bottomNav.matchAll(/href: "([^"]+)"/g)].map((match) => match[1]);
+  assert.deepEqual(destinations, ["/", "/content", "/shopping", "/notifications", "/profile"]);
+
+  for (const destination of destinations) {
+    const path = destination === "/" ? "app/loading.tsx" : `app${destination}/loading.tsx`;
+    const loading = await source(path);
+    assert.match(loading, /role="status"|ClientLoading/);
+  }
+});
