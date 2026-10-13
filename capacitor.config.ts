@@ -35,7 +35,11 @@ const config: CapacitorConfig = {
     : undefined,
   plugins: {
     SplashScreen: {
-      launchAutoHide: false,
+      // Never let a failed or slow web/plugin bootstrap leave the native app
+      // behind an opaque white launch screen. NativeBridge still hides it as
+      // soon as React mounts, while this is the fail-safe for every earlier
+      // failure (offline startup, a missing chunk, or a rejected plugin load).
+      launchAutoHide: true,
       backgroundColor: "#FFFFFF",
       androidSpinnerStyle: "small",
       iosSpinnerStyle: "small",
