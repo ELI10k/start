@@ -35,6 +35,14 @@ export default function NativeBridge() {
 
     (window as { StartNative?: { platform: string } }).StartNative = { platform };
 
+    // The splash is presentation, not a dependency gate. Hiding it must not
+    // wait for HealthKit, push, keyboard or network plugins: if any optional
+    // plugin is unavailable, Promise.all rejects and an opaque native splash
+    // would otherwise cover a perfectly usable web app forever.
+    void import("@capacitor/splash-screen")
+      .then(({ SplashScreen }) => SplashScreen.hide())
+      .catch(() => {});
+
     const follow = (url: string | undefined) => {
       if (!url) return;
       try {
@@ -54,11 +62,10 @@ export default function NativeBridge() {
       void App.addListener("appUrlOpen", ({ url }) => follow(url)).then((handle) => track(() => void handle.remove()));
       void App.getLaunchUrl().then((launch) => follow(launch?.url)).catch(() => {});
 
-      const [{ Keyboard }, { Network }, { PushNotifications }, { SplashScreen }, { StatusBar, Style }, { StartHealth }] = await Promise.all([
+      const [{ Keyboard }, { Network }, { PushNotifications }, { StatusBar, Style }, { StartHealth }] = await Promise.all([
         import("@capacitor/keyboard"),
         import("@capacitor/network"),
         import("@capacitor/push-notifications"),
-        import("@capacitor/splash-screen"),
         import("@capacitor/status-bar"),
         import("@/lib/native/health-plugin"),
       ]);
@@ -68,7 +75,6 @@ export default function NativeBridge() {
       // the rest of this runs.
       void StatusBar.setStyle({ style: Style.Light });
       if (platform === "android") void StatusBar.setBackgroundColor({ color: "#FFFFFF" });
-      void SplashScreen.hide();
       void Keyboard.setAccessoryBarVisible?.({ isVisible: true }).catch(() => {});
 
       // The container knows about the network before a request fails, so the

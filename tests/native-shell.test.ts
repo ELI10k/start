@@ -47,6 +47,19 @@ test("nothing outside the bridge imports Capacitor", async () => {
   assert.match(bridge, /await Promise\.all\(\[\s*import\("@capacitor\/keyboard"\)/);
 });
 
+test("the native launch screen cannot permanently cover a failed bootstrap", async () => {
+  const [config, bridge] = await Promise.all([
+    source("capacitor.config.ts"),
+    source("components/native/NativeBridge.tsx"),
+  ]);
+
+  assert.match(config, /launchAutoHide:\s*true/);
+  const hide = bridge.indexOf('import("@capacitor/splash-screen")');
+  const optionalPlugins = bridge.indexOf("const [{ Keyboard }, { Network }");
+  assert.ok(hide >= 0 && optionalPlugins >= 0 && hide < optionalPlugins);
+  assert.match(bridge.slice(hide, optionalPlugins), /SplashScreen\.hide\(\)/);
+});
+
 test("the bridge satisfies the contracts the web layer already wrote against", async () => {
   const bridge = await source("components/native/NativeBridge.tsx");
   assert.match(bridge, /StartHealth\?: unknown/);
