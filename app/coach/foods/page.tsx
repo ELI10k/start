@@ -58,6 +58,7 @@ export default async function CoachFoodsPage() {
       carbs: nutrition.carbs ?? undefined,
       fat: nutrition.fat ?? undefined,
       servingLabel: nutrition.servingLabel,
+      source: food.source ?? undefined,
       usageCount: Number((menuUsage ?? []).find((row)=>row.food_id===food.id)?.selection_count??0),
     };
   });
