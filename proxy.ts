@@ -6,6 +6,7 @@ import {
   loginPathFor,
   returnPathForRole,
 } from "@/lib/auth/return-path";
+import { AUTH_CONTEXT_HEADERS, clearAuthContextHeaders } from "@/lib/auth/request-context";
 
 const clientPrefixes = [
   "/nutrition",
@@ -44,6 +45,12 @@ type PendingCookie = Readonly<{
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  // Never trust identity-shaped headers supplied by a browser or proxy in
+  // front of us. Only this function may add them, after JWT, account, role and
+  // device checks pass. Server Components can then reuse the verified result
+  // without repeating the profiles query on every screen.
+  const forwardedHeaders = clearAuthContextHeaders(new Headers(request.headers));
+  const forward = () => NextResponse.next({ request: { headers: forwardedHeaders } });
   const hostname = (
     request.headers.get("x-forwarded-host") ??
     request.headers.get("host") ??
@@ -68,7 +75,7 @@ export async function proxy(request: NextRequest) {
   // outage turned an intentional 401 (barcode and cron endpoints, for example)
   // into an unrelated 500 before the handler could answer at all.
   if (!isPrivatePath(path) && path !== "/login") {
-    return NextResponse.next();
+    return forward();
   }
 
   const config = getSupabaseConfig();
@@ -77,7 +84,7 @@ export async function proxy(request: NextRequest) {
   if (!config) {
     return isPrivatePath(path)
       ? NextResponse.redirect(new URL(loginPathFor(requestedPath), request.url))
-      : NextResponse.next();
+      : forward();
   }
 
   let pendingCookies: PendingCookie[] = [];
@@ -115,7 +122,7 @@ export async function proxy(request: NextRequest) {
     return applyPendingAuthState(NextResponse.redirect(url));
   };
 
-  let response = applyPendingAuthState(NextResponse.next({ request }));
+  let response = applyPendingAuthState(forward());
 
   const hasAuthCookie = request.cookies.getAll().some(({ name }) =>
     name.startsWith("sb-") && name.includes("-auth-token"),
@@ -139,7 +146,7 @@ export async function proxy(request: NextRequest) {
           ...items,
         ];
         pendingHeaders = { ...pendingHeaders, ...headers };
-        response = applyPendingAuthState(NextResponse.next({ request }));
+        response = applyPendingAuthState(forward());
       },
     },
   });
@@ -182,7 +189,7 @@ export async function proxy(request: NextRequest) {
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role,status")
+    .select("role,status,full_name")
     .eq("id", userId)
     .single();
   if (profileError || !profile) return redirect(loginPathFor(requestedPath));
@@ -224,6 +231,12 @@ export async function proxy(request: NextRequest) {
     }
     if (!relationship && !onboarding?.onboarding_completed) return redirect("/onboarding");
   }
+
+  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.id, userId);
+  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.role, profile.role);
+  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.name, profile.full_name ?? "");
+  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.status, profile.status);
+  response = applyPendingAuthState(forward());
 
   return response;
 }
