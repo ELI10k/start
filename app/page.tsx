@@ -158,7 +158,7 @@ export default async function Home() {
             now has a lesson of its own further down this screen - a tile and a
             row, one under the other, leading to the same place. */}
         <nav className="quick-actions-grid" aria-label="פעולות מהירות">
-          <Link href="/nutrition" className="quick-action-card">
+          <Link href="/nutrition" prefetch={true} className="quick-action-card">
             <span className="quick-action-card__icon"><UtensilsCrossed aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">התפריט שלי</span>
             <span className="quick-action-card__meta">{data.menu?.title ?? "אין תפריט פעיל"}</span>
@@ -166,14 +166,14 @@ export default async function Home() {
           {/* The only tile that has to be a client component: which day comes
               next is held by the workout provider, not by this request. */}
           <DashboardWorkoutWidget />
-          <Link href="/check-in" className="quick-action-card">
+          <Link href="/check-in" prefetch={true} className="quick-action-card">
             <span className="quick-action-card__icon"><ClipboardCheck aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">צ׳ק אין</span>
             <span className={`quick-action-card__meta${checkInDue ? " quick-action-card__meta--error" : ""}`}>
               {checkInDue ? "הגיע זמן צ׳ק אין" : "דיווח שבועי"}
             </span>
           </Link>
-          <Link href="/progress" className="quick-action-card">
+          <Link href="/progress" prefetch={true} className="quick-action-card">
             <span className="quick-action-card__icon"><LineChart aria-hidden="true" size={22} /></span>
             <span className="quick-action-card__label">מדדי התקדמות</span>
             <span className="quick-action-card__meta">משקל, מדידות, צעדים ושינה</span>

@@ -20,6 +20,7 @@ export default function DashboardWorkoutWidget() {
   return (
     <Link
       href={active ? `/workouts/${active.programId}/${active.dayId}` : "/workouts"}
+      prefetch={true}
       className="quick-action-card"
     >
       <span className="quick-action-card__icon"><Dumbbell aria-hidden="true" size={22} /></span>

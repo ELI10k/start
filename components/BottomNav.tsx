@@ -45,7 +45,7 @@ export default function BottomNav({ unreadCount }: { unreadCount?: number }) {
           // now handed the same figure.
           const isInbox = href === "/notifications";
           return (
-            <Link key={href} href={href} aria-current={active ? "page" : undefined} data-active={active || undefined}>
+            <Link key={href} href={href} prefetch={true} aria-current={active ? "page" : undefined} data-active={active || undefined}>
               <span className="bottom-app-nav__icon">
                 <Icon aria-hidden="true" size={21} />
                 {isInbox && typeof unreadCount === "number" && unreadCount > 0 && (
