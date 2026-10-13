@@ -49,6 +49,12 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
   assert.match(repository, /client_food_log/);
 });
 
+test("progress opens on nutrition instead of weigh-ins", async () => {
+  const dashboard = await source("components/client/ProgressMetricsDashboard.tsx");
+  assert.match(dashboard, /useState<Metric>\("nutrition"\)/);
+  assert.doesNotMatch(dashboard, /useState<Metric>\("weight"\)/);
+});
+
 test("bounded progress summaries opt into the phone viewport-fit layout", async () => {
   const [page, dashboard, healthPanel, css] = await Promise.all([
     source("app/progress/page.tsx"),
