@@ -6,7 +6,7 @@ const source = await readFile(new URL("../proxy.ts", import.meta.url), "utf8");
 
 test("anonymous private requests are redirected before contacting Supabase", () => {
   const cookieGuard = source.indexOf("if (!hasAuthCookie)");
-  const authCall = source.indexOf("await supabase.auth.getUser()");
+  const authCall = source.indexOf("await supabase.auth.getClaims()");
   assert.ok(cookieGuard > 0);
   assert.ok(authCall > cookieGuard);
   assert.match(source, /isPrivatePath\(path\) \? redirect\(loginPathFor\(requestedPath\)\)/);

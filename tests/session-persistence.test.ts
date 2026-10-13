@@ -6,10 +6,10 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 
 test("every request refreshes the session and writes the rotated cookies back", async () => {
   const proxy = await source("proxy.ts");
-  // getUser() is what performs the refresh; setAll is what persists the new
+  // getClaims() verifies the JWT and refreshes near-expiry sessions; setAll persists the new
   // tokens. Without the second, a refreshed session would be thrown away on
   // every request and the client would be asked for a magic link again.
-  assert.match(proxy, /await supabase\.auth\.getUser\(\)/);
+  assert.match(proxy, /await supabase\.auth\.getClaims\(\)/);
   assert.match(proxy, /setAll: \(items, headers\)/);
   assert.match(proxy, /target\.cookies\.set\(name, value, options\)/);
   // The refreshed cookies must reach redirects too, not only pass-throughs -
@@ -22,16 +22,25 @@ test("every request refreshes the session and writes the rotated cookies back", 
 
 test("a signed-in visitor who opens the login screen is sent into the app", async () => {
   const proxy = await source("proxy.ts");
-  assert.match(proxy, /if \(path === "\/login" && user\)/);
+  assert.match(proxy, /if \(path === "\/login" && userId\)/);
   assert.match(proxy, /returnPathForRole/);
 });
 
 test("an invalid session lands on login, never on unauthorized", async () => {
   const proxy = await source("proxy.ts");
-  assert.match(proxy, /if \(!user\) return redirect\(loginPathFor\(requestedPath\)\)/);
+  assert.match(proxy, /if \(!userId\) return redirect\(loginPathFor\(requestedPath\)\)/);
   // A revoked device signs the session out locally first, so the next request
   // does not loop back through a half-valid session.
   assert.match(proxy, /await supabase\.auth\.signOut\(\{ scope: "local" \}\)/);
+});
+
+test("client navigation verifies independent access gates in one database roundtrip", async () => {
+  const proxy = await source("proxy.ts");
+  const parallelChecks = proxy.match(/Promise\.all\(\[([\s\S]*?)\]\);/);
+  assert.ok(parallelChecks);
+  assert.match(parallelChecks[1], /client_profiles/);
+  assert.match(parallelChecks[1], /coach_client_relationships/);
+  assert.match(parallelChecks[1], /device_sessions/);
 });
 
 test("logout is idempotent and clears the device as well as the session", async () => {

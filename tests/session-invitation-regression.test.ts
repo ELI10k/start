@@ -21,7 +21,7 @@ test("return paths are local, role-compatible and preserve query strings",()=>{
 
 test("proxy distinguishes missing sessions from wrong roles and keeps refresh cookies",()=>{
   const proxy=readFileSync(new URL("../proxy.ts",import.meta.url),"utf8");
-  assert.match(proxy,/if \(!user\) return redirect\(loginPathFor\(requestedPath\)\)/);
+  assert.match(proxy,/if \(!userId\) return redirect\(loginPathFor\(requestedPath\)\)/);
   assert.match(proxy,/if \(profileError \|\| !profile\) return redirect\(loginPathFor\(requestedPath\)\)/);
   assert.match(proxy,/return redirect\("\/unauthorized"\)/);
   assert.match(proxy,/pendingCookies/);

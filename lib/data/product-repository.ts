@@ -89,14 +89,18 @@ function foodRelationName(value: unknown): string {
 
 export async function getAuthContext(): Promise<AuthContext | null> {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  // The proxy has already refreshed the cookie. Verify the signed JWT locally
+  // when Supabase exposes asymmetric signing keys instead of making another
+  // Auth network request before every page can begin loading its data.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const userId = typeof claimsData?.claims?.sub === "string"
+    ? claimsData.claims.sub
+    : null;
+  if (!userId) return null;
   const { data } = await supabase
     .from("profiles")
     .select("id,role,full_name,status")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
   // status was selected here and never read, so a paused or disabled account
   // kept a valid context everywhere except the proxy - and the proxy only
