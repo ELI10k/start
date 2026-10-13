@@ -762,6 +762,22 @@ export async function getActiveClientMenu(
     if (error) throw error;
     return data;
   };
+  const readMeals = (mealPlanId: string) =>
+    supabase
+      .from("meals")
+      .select("id,title,notes,free_calorie_target,sort_order,day_index")
+      .eq("meal_plan_id", mealPlanId)
+      .order("day_index")
+      .order("sort_order");
+  // A client normally changes only a handful of groups in one day. Reading the
+  // day's small selection set up front lets it travel with the plan and meals
+  // instead of adding a final database round-trip after the groups arrive.
+  const readSelections = () =>
+    supabase
+      .from("meal_group_selections")
+      .select("group_id,meal_item_id,amount_override")
+      .eq("client_id", clientId)
+      .eq("selection_date", date);
 
   // These reads are independent. Starting them together removes a full
   // database round-trip from the common first visit of the day.
@@ -784,7 +800,13 @@ export async function getActiveClientMenu(
           meal_plan_id: existingLog.meal_plan_id,
         }
       : activeAssignment;
-  let plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
+  let [plan, mealResult, selectionResult] = assignment
+    ? await Promise.all([
+        readPlan(assignment.meal_plan_id),
+        readMeals(assignment.meal_plan_id),
+        readSelections(),
+      ])
+    : [null, { data: [], error: null }, { data: [], error: null }];
 
   // The snapshot is a preference, not a requirement.
   //
@@ -800,17 +822,19 @@ export async function getActiveClientMenu(
   // snapshot falls through to whatever is assigned now rather than to nothing.
   if (!plan && existingLog?.meal_plan_id) {
     assignment = activeAssignment;
-    plan = assignment ? await readPlan(assignment.meal_plan_id) : null;
+    if (assignment) {
+      [plan, mealResult] = await Promise.all([
+        readPlan(assignment.meal_plan_id),
+        readMeals(assignment.meal_plan_id),
+      ]);
+    }
   }
   if (!assignment || !plan) return null;
 
-  const { data: allMeals, error: mealError } = await supabase
-    .from("meals")
-    .select("id,title,notes,free_calorie_target,sort_order,day_index")
-    .eq("meal_plan_id", plan.id)
-    .order("day_index")
-    .order("sort_order");
+  const { data: allMeals, error: mealError } = mealResult;
   if (mealError) throw mealError;
+  const { data: selections, error: selectionError } = selectionResult;
+  if (selectionError) throw selectionError;
   // Sunday is 0. Resolved through the Israel calendar so a Saturday menu is
   // served on Saturday here, not from 03:00 onwards.
   const dayIndex = israelWeekday(date);
@@ -862,24 +886,18 @@ export async function getActiveClientMenu(
   const eatenIds = new Set(
     (eatenRows ?? []).map((entry) => entry.meal_item_id),
   );
-  const groupIds = (groups ?? []).map((group) => group.id);
-  const { data: selections, error: selectionError } = groupIds.length
-    ? await supabase
-        .from("meal_group_selections")
-        .select("group_id,meal_item_id,amount_override")
-        .eq("client_id", clientId)
-        .eq("selection_date", date)
-        .in("group_id", groupIds)
-    : { data: [], error: null };
-  if (selectionError) throw selectionError;
+  const groupIds = new Set((groups ?? []).map((group) => group.id));
   const selectedByGroup = new Map(
-    (selections ?? []).map((row) => [row.group_id, row.meal_item_id]),
+    (selections ?? [])
+      .filter((row) => groupIds.has(row.group_id))
+      .map((row) => [row.group_id, row.meal_item_id]),
   );
   // How much of it was actually eaten. Absent on the overwhelming majority of
   // rows, which is why it is read as its own map rather than folded into the
   // item: an item is what the coach wrote, this is what happened to it.
   const overrideByGroup = new Map(
     (selections ?? [])
+      .filter((row) => groupIds.has(row.group_id))
       .filter((row) => "amount_override" in row && row.amount_override !== null)
       .map((row) => [row.group_id as string, Number(row.amount_override)]),
   );

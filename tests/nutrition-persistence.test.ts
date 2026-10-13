@@ -240,7 +240,8 @@ test("an unreadable pinned menu falls through to the one assigned now", async ()
   assert.match(body, /const currentAssignment = async \(\) => \{/);
   assert.match(body, /const readPlan = async \(mealPlanId: string\) => \{/);
   // The fallback fires only where a pinned plan was named and could not be read.
-  assert.match(body, /if \(!plan && existingLog\?\.meal_plan_id\) \{\s*\n\s*assignment = activeAssignment;\s*\n\s*plan = assignment \? await readPlan\(assignment\.meal_plan_id\) : null;/);
+  assert.match(body, /if \(!plan && existingLog\?\.meal_plan_id\) \{\s*\n\s*assignment = activeAssignment;/);
+  assert.match(body, /\[plan, mealResult\] = await Promise\.all\(\[/);
   // And nothing is returned without both halves.
   assert.match(body, /if \(!assignment \|\| !plan\) return null;/);
 });

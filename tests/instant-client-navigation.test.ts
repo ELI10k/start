@@ -30,3 +30,12 @@ test("every primary mobile destination has an immediate loading shell", async ()
     assert.match(loading, /role="status"|ClientLoading/);
   }
 });
+
+test("the client menu starts plan, meals, and daily selections together", async () => {
+  const repository = await source("lib/data/product-repository.ts");
+  assert.match(
+    repository,
+    /Promise\.all\(\[\s*readPlan\(assignment\.meal_plan_id\),\s*readMeals\(assignment\.meal_plan_id\),\s*readSelections\(\),\s*\]\)/,
+  );
+  assert.doesNotMatch(repository, /\.in\("group_id", groupIds\)/);
+});
