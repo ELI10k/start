@@ -17,32 +17,43 @@ test("the profile guide link appears above change goals", async () => {
   assert.match(source, /content\/category\/start-guide/);
 });
 
-test("the complete Life Fit guide includes the two device connection lessons", async () => {
-  const [seriesMigration, deviceMigration, route, landing] = await Promise.all([
+test("the complete Life Fit guide includes day status and device connection lessons", async () => {
+  const [seriesMigration, deviceMigration, dayStatusMigration, route, landing] = await Promise.all([
     file("supabase/migrations/20261007141021_life_fit_training_series.sql"),
     file("supabase/migrations/20261012173546_add_device_connection_guides.sql"),
+    file("supabase/migrations/20261013083440_add_day_strip_guide.sql"),
     file("app/media/life-fit-training/[lesson]/route.ts"),
     file("app/guide/page.tsx"),
   ]);
-  const migration = `${seriesMigration}\n${deviceMigration}`;
+  const migration = `${seriesMigration}\n${deviceMigration}\n${dayStatusMigration}`;
   const lessonIds =
-    migration.match(/10000000-0000-4000-8000-0000000000(?:0[4-9]|1[0-2])/g) ?? [];
+    migration.match(/10000000-0000-4000-8000-0000000000(?:0[4-9]|1[0-3])/g) ?? [];
   const mediaRoutes =
     migration.match(/life-fit-training\/0[1-9]-[a-z-]+/g) ?? [];
 
-  assert.equal(new Set(lessonIds).size, 9);
-  assert.equal(new Set(mediaRoutes).size, 9);
-  for (const order of [10, 20, 30, 40, 50, 60, 70, 80, 90]) {
-    assert.match(migration, new RegExp(`'published', ${order}, null`));
-  }
+  assert.equal(new Set(lessonIds).size, 10);
+  assert.equal(new Set(mediaRoutes).size, 10);
   assert.match(route, /const LESSON_FILES/);
   assert.match(route, /life-fit-training-series-v1/);
   assert.match(route, /life-fit-device-connection-v1/);
   assert.match(route, /life-fit-device-connection-ios-4k\.mp4/);
   assert.match(route, /life-fit-device-connection-android-4k\.mp4/);
+  assert.match(route, /life-fit-day-strip-guide-v1\/life-fit-day-strip-guide\.mp4/);
+  assert.match(landing, /סרגל הימים ומעקב תזונה שבועי/);
   assert.match(landing, /חיבור שעון ומכשיר כושר באייפון/);
   assert.match(landing, /חיבור שעון ומכשיר כושר באנדרואיד/);
-  assert.match(landing, /9 פרקים מסודרים/);
+  assert.match(landing, /10 פרקים מסודרים/);
+});
+
+test("the day-strip guide is lesson 3 and support remains last", async () => {
+  const migration = await file(
+    "supabase/migrations/20261013083440_add_day_strip_guide.sql",
+  );
+  assert.match(
+    migration,
+    /000000000005'::uuid then 20[\s\S]*000000000013'::uuid then 30[\s\S]*000000000006'::uuid then 40/,
+  );
+  assert.match(migration, /000000000010'::uuid then 100/);
 });
 
 test("the in-app course keeps messages and support as its final lesson", async () => {

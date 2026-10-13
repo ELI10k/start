@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://start.elicohenfitness.co.il"),
   title: "מדריך השימוש ב־Life Fit",
   description:
-    "תשעה סרטוני הדרכה קצרים וברורים שיעזרו לכם להתחיל להשתמש באפליקציית Life Fit.",
+    "עשרה סרטוני הדרכה קצרים וברורים שיעזרו לכם להתחיל להשתמש באפליקציית Life Fit.",
   alternates: { canonical: "/guide" },
   openGraph: {
     type: "website",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     siteName: "LIFE FIT",
     title: "מדריך השימוש ב־Life Fit",
     description:
-      "כניסה, תזונה, אימונים, מעקב, חיבור מכשירי כושר והקשר עם המאמן — תשעה מדריכים מסודרים במקום אחד.",
+      "כניסה, תזונה, אימונים, מעקב, חיבור מכשירי כושר והקשר עם המאמן — עשרה מדריכים מסודרים במקום אחד.",
     images: [
       {
         url: "/join/opengraph-image",
@@ -57,6 +57,15 @@ const lessons = [
   },
   {
     number: "03",
+    title: "סרגל הימים ומעקב תזונה שבועי",
+    duration: "51 שניות",
+    description:
+      "מדריך קצר לקריאת סרגל הימים בתפריט. תראו איך מזהים את היום הנוכחי, מה מסמנים החיווי הירוק והאדום ואיך חוזרים ליום קודם כדי לבדוק או לתקן דיווח.",
+    points: ["היום הנוכחי וסדר ימי השבוע", "משמעות החיווי הירוק והאדום", "פתיחת יום קודם ותיקון דיווח"],
+    src: "/media/life-fit-training/03-nutrition-day-status",
+  },
+  {
+    number: "04",
     title: "תזונה מחוץ לתפריט ורשימת קניות",
     duration: "3:37 דקות",
     description:
@@ -65,7 +74,7 @@ const lessons = [
     src: "/media/life-fit-training/03-outside-menu-shopping",
   },
   {
-    number: "04",
+    number: "05",
     title: "תוכנית האימונים וביצוע אימון",
     duration: "3:14 דקות",
     description:
@@ -74,7 +83,7 @@ const lessons = [
     src: "/media/life-fit-training/04-workout-program-session",
   },
   {
-    number: "05",
+    number: "06",
     title: "ניהול אימונים והתקדמות",
     duration: "3:00 דקות",
     description:
@@ -83,7 +92,7 @@ const lessons = [
     src: "/media/life-fit-training/05-workout-management-progress",
   },
   {
-    number: "06",
+    number: "07",
     title: "משקל, בריאות וצ׳ק־אין שבועי",
     duration: "3:41 דקות",
     description:
@@ -92,7 +101,7 @@ const lessons = [
     src: "/media/life-fit-training/06-measurements-health-checkin",
   },
   {
-    number: "07",
+    number: "08",
     title: "חיבור שעון ומכשיר כושר באייפון",
     duration: "50 שניות",
     description:
@@ -101,7 +110,7 @@ const lessons = [
     src: "/media/life-fit-training/08-connect-device-iphone",
   },
   {
-    number: "08",
+    number: "09",
     title: "חיבור שעון ומכשיר כושר באנדרואיד",
     duration: "50 שניות",
     description:
@@ -110,7 +119,7 @@ const lessons = [
     src: "/media/life-fit-training/09-connect-device-android",
   },
   {
-    number: "09",
+    number: "10",
     title: "הודעות, תוכן, פרופיל ותמיכה",
     duration: "4:04 דקות",
     description:
@@ -149,7 +158,7 @@ export default function GuideLandingPage() {
             <span>כדי להתחיל נכון.</span>
           </h1>
           <p>
-            תשעה סרטונים קצרים שילוו אתכם מהכניסה הראשונה ועד לעבודה שוטפת עם
+            עשרה סרטונים קצרים שילוו אתכם מהכניסה הראשונה ועד לעבודה שוטפת עם
             התפריט, האימונים, המעקב, חיבור מכשירי הכושר והמאמן.
           </p>
           <a className={styles.primaryButton} href="#lessons">
@@ -157,26 +166,27 @@ export default function GuideLandingPage() {
             <ArrowDown size={19} aria-hidden="true" />
           </a>
           <div className={styles.heroProof}>
-            <span><Play size={16} aria-hidden="true" /> 9 פרקים מסודרים</span>
-            <span><Clock3 size={16} aria-hidden="true" /> כ־29 דקות בסך הכול</span>
+            <span><Play size={16} aria-hidden="true" /> 10 פרקים מסודרים</span>
+            <span><Clock3 size={16} aria-hidden="true" /> כ־30 דקות בסך הכול</span>
             <span><ShieldCheck size={16} aria-hidden="true" /> צופים בקצב שלכם</span>
           </div>
         </div>
 
         <div className={styles.heroCard} aria-label="מה תלמדו במדריך">
           <span className={styles.heroCardKicker}>מהכניסה הראשונה ועד שגרת עבודה</span>
-          <strong>9</strong>
+          <strong>10</strong>
           <p>פרקים שמסבירים בדיוק איפה ללחוץ ומה לעשות בכל שלב.</p>
           <ol>
             <li><span>01</span>כניסה וניווט</li>
             <li><span>02</span>תזונה וארוחות</li>
-            <li><span>03</span>קניות ודיווח חופשי</li>
-            <li><span>04</span>ביצוע אימון</li>
-            <li><span>05</span>התקדמות באימונים</li>
-            <li><span>06</span>מדידות וצ׳ק־אין</li>
-            <li><span>07</span>חיבור מכשיר באייפון</li>
-            <li><span>08</span>חיבור מכשיר באנדרואיד</li>
-            <li><span>09</span>הודעות ותמיכה</li>
+            <li><span>03</span>סרגל הימים ומעקב שבועי</li>
+            <li><span>04</span>קניות ודיווח חופשי</li>
+            <li><span>05</span>ביצוע אימון</li>
+            <li><span>06</span>התקדמות באימונים</li>
+            <li><span>07</span>מדידות וצ׳ק־אין</li>
+            <li><span>08</span>חיבור מכשיר באייפון</li>
+            <li><span>09</span>חיבור מכשיר באנדרואיד</li>
+            <li><span>10</span>הודעות ותמיכה</li>
           </ol>
         </div>
       </section>
