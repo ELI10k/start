@@ -10,10 +10,15 @@ export default function ClientLoading() {
   return (
     <div role="status" aria-busy="true" aria-label="טוענים את LIFE FIT…" className="app-launch-loading">
       <div className="app-launch-loading__brand" aria-hidden="true">
-        <span className="app-launch-loading__icon" />
+        <span className="app-launch-loading__icon">
+          <span><Dumbbell /></span>
+          <span><UtensilsCrossed /></span>
+          <i />
+        </span>
         <strong>LIFE FIT</strong>
         <span className="app-launch-loading__indicator" />
       </div>
     </div>
   );
 }
+import { Dumbbell, UtensilsCrossed } from "lucide-react";
