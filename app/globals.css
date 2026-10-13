@@ -370,6 +370,60 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   font-size: .625rem; line-height: 1rem; font-weight: 700; text-align: center;
 }
 
+/* Immediate feedback for a first navigation whose prefetched RSC payload is
+   still in flight. The overlay is fixed, so it replaces the old screen without
+   shifting either navigation bar; the real destination replaces it as soon as
+   Next commits the route. */
+.navigation-pending-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  pointer-events: none;
+  overflow: hidden;
+  background: #fff;
+  color: var(--ink);
+}
+.navigation-pending-overlay[data-pending] { display: block; }
+.navigation-pending-overlay__header {
+  display: flex;
+  height: 4rem;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--green);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: .24em;
+}
+.navigation-pending-overlay__content {
+  display: block;
+  width: min(100% - 2rem, 64rem);
+  margin-inline: auto;
+  padding-top: 1.25rem;
+}
+.navigation-pending-overlay__title,
+.navigation-pending-overlay__grid > span {
+  display: block;
+  border-radius: 1.25rem;
+  background: linear-gradient(100deg, #f1f4f1 25%, #e6eee8 45%, #f1f4f1 65%);
+  background-size: 220% 100%;
+  animation: navigation-pending-shimmer 1.1s linear infinite;
+}
+.navigation-pending-overlay__title { width: 11rem; height: 2rem; margin-inline-start: auto; }
+.navigation-pending-overlay__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1.25rem; }
+.navigation-pending-overlay__grid > span { min-height: 7.5rem; }
+@keyframes navigation-pending-shimmer { to { background-position-x: -220%; } }
+@media (min-width: 48rem) {
+  .navigation-pending-overlay { padding-top: 4.5rem; }
+  .navigation-pending-overlay__header { display: none; }
+  .navigation-pending-overlay__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .navigation-pending-overlay__title,
+  .navigation-pending-overlay__grid > span { animation: none; }
+}
+
 @media (min-width: 768px) {
   .cinema { --cine-headroom: 4.25rem; }
   .client-app-shell { padding-bottom: 0; }

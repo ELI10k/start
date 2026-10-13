@@ -4,6 +4,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import OfflineBanner from "@/components/client/OfflineBanner";
 import PushRegistration from "@/components/client/PushRegistration";
 import AnalyticsProvider from "@/components/client/AnalyticsProvider";
+import NavigationPendingOverlay from "@/components/client/NavigationPendingOverlay";
 
 const links = [
   { href: "/", label: "בית" },
@@ -35,7 +36,7 @@ export default function ClientShell({ children, className = "" }: { children: Re
         <div className="desktop-app-nav__inner">
           <Link href="/" prefetch={true} className="start-wordmark">LIFE FIT</Link>
           <div className="desktop-app-nav__links">
-            {links.map((item) => <Link key={item.href} href={item.href} prefetch={true}>{item.label}</Link>)}
+            {links.map((item) => <Link key={item.href} href={item.href} prefetch={true}>{item.label}<NavigationPendingOverlay /></Link>)}
           </div>
           <div className="desktop-app-nav__actions">
             <NotificationBell />
