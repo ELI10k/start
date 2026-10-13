@@ -2,7 +2,7 @@ import { israelDateKey, israelWeekday } from "@/lib/date-time";
 import "server-only";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { headers } from "next/headers";
-import { AUTH_CONTEXT_HEADERS } from "@/lib/auth/request-context";
+import { AUTH_CONTEXT_HEADERS, decodeAuthContextHeader } from "@/lib/auth/request-context";
 import type { UserRole } from "@/lib/supabase/database.types";
 import {
   CHECK_IN_PHOTO_BUCKET,
@@ -107,7 +107,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     return {
       id: forwardedId,
       role: forwardedRole,
-      fullName: requestHeaders.get(AUTH_CONTEXT_HEADERS.name) ?? "",
+      fullName: decodeAuthContextHeader(requestHeaders.get(AUTH_CONTEXT_HEADERS.name)),
       status: "active",
     };
   }

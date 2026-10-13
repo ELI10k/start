@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import {
+  decodeAuthContextHeader,
+  encodeAuthContextHeader,
+} from "../lib/auth/request-context.ts";
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -62,6 +66,14 @@ test("private pages reuse only the auth context verified and injected by the pro
   assert.match(repository, /requestHeaders\.get\(AUTH_CONTEXT_HEADERS\.id\)/);
   assert.match(repository, /await supabase\.auth\.getClaims\(\)/);
   assert.match(repository, /\.from\("profiles"\)/);
+});
+
+test("Hebrew profile names remain valid internal headers and round-trip intact", () => {
+  const name = "אלי כהן 💪";
+  const encoded = encodeAuthContextHeader(name);
+  assert.match(encoded, /^[\x00-\xff]*$/);
+  assert.equal(decodeAuthContextHeader(encoded), name);
+  assert.equal(decodeAuthContextHeader("%E0%A4%A"), "");
 });
 
 test("logout is idempotent and clears the device as well as the session", async () => {

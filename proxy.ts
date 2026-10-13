@@ -6,7 +6,7 @@ import {
   loginPathFor,
   returnPathForRole,
 } from "@/lib/auth/return-path";
-import { AUTH_CONTEXT_HEADERS, clearAuthContextHeaders } from "@/lib/auth/request-context";
+import { AUTH_CONTEXT_HEADERS, clearAuthContextHeaders, encodeAuthContextHeader } from "@/lib/auth/request-context";
 
 const clientPrefixes = [
   "/nutrition",
@@ -234,7 +234,7 @@ export async function proxy(request: NextRequest) {
 
   forwardedHeaders.set(AUTH_CONTEXT_HEADERS.id, userId);
   forwardedHeaders.set(AUTH_CONTEXT_HEADERS.role, profile.role);
-  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.name, profile.full_name ?? "");
+  forwardedHeaders.set(AUTH_CONTEXT_HEADERS.name, encodeAuthContextHeader(profile.full_name ?? ""));
   forwardedHeaders.set(AUTH_CONTEXT_HEADERS.status, profile.status);
   response = applyPendingAuthState(forward());
 
