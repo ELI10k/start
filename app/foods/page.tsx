@@ -57,6 +57,7 @@ export default async function FoodsPage() {
       carbs: nutrition.carbs ?? undefined,
       fat: nutrition.fat ?? undefined,
       servingLabel: nutrition.servingLabel,
+      source: food.source ?? undefined,
     };
   });
   return <main className="foods-page"><FoodDatabase foods={foods} initialFavorites={favoriteIds}/></main>;

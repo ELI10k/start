@@ -6,8 +6,9 @@ import { ALL_CATEGORIES, queryFoods } from "@/lib/foods/repository";
 import { toggleFoodFavorite } from "@/app/actions/food-favorites";
 import { foodMacroGroup, type MacroGroup } from "@/lib/nutrition/food-groups";
 import { displayCalories } from "@/lib/nutrition/display";
+import { isScannedFoodSource } from "@/lib/foods/source";
 
-type DisplayFood = Food & Readonly<{ usageCount?: number }>;
+type DisplayFood = Food & Readonly<{ usageCount?: number; source?: string }>;
 
 export default function FoodDatabase({
   foods,
@@ -22,6 +23,7 @@ export default function FoodDatabase({
   const deferredSearch = useDeferredValue(search);
   const [favorites, setFavorites] = useState(() => new Set(initialFavorites));
   const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [scannedOnly, setScannedOnly] = useState(false);
   const [, startTransition] = useTransition();
   const categories = useMemo(
     () =>
@@ -36,7 +38,10 @@ export default function FoodDatabase({
     [foods],
   );
   const visible = useMemo(() => {
-    const queried = queryFoods(foods, {
+    const sourceFiltered = scannedOnly
+      ? foods.filter((food) => isScannedFoodSource(food.source))
+      : foods;
+    const queried = queryFoods(sourceFiltered, {
       search: deferredSearch,
       category,
       sort,
@@ -44,7 +49,7 @@ export default function FoodDatabase({
     return favoriteOnly
       ? queried.filter((food) => favorites.has(food.id))
       : queried;
-  }, [foods, deferredSearch, category, sort, favoriteOnly, favorites]);
+  }, [foods, deferredSearch, category, sort, favoriteOnly, scannedOnly, favorites]);
   const favoriteGroups = useMemo(() => {
     const groups: Record<MacroGroup, Food[]> = {
       protein: [],
@@ -67,6 +72,7 @@ export default function FoodDatabase({
     setCategory(ALL_CATEGORIES);
     setSort("relevant");
     setFavoriteOnly(false);
+    setScannedOnly(false);
   };
   const toggle = (foodId: string) => {
     const was = favorites.has(foodId);
@@ -155,6 +161,17 @@ export default function FoodDatabase({
       <div className="food-categories" aria-label="סינון לפי קטגוריה">
         <button
           type="button"
+          aria-pressed={scannedOnly}
+          className={scannedOnly ? "food-category active" : "food-category"}
+          onClick={() => {
+            setScannedOnly((value) => !value);
+            setCategory(ALL_CATEGORIES);
+          }}
+        >
+          מאכלים שנסרקו
+        </button>
+        <button
+          type="button"
           aria-pressed={favoriteOnly}
           className={favoriteOnly ? "food-category active" : "food-category"}
           onClick={() => setFavoriteOnly((value) => !value)}
@@ -166,11 +183,16 @@ export default function FoodDatabase({
           <button
             key={item}
             type="button"
-            aria-pressed={category === item}
+            aria-pressed={!scannedOnly && category === item}
             className={
-              category === item ? "food-category active" : "food-category"
+              !scannedOnly && category === item
+                ? "food-category active"
+                : "food-category"
             }
-            onClick={() => setCategory(item)}
+            onClick={() => {
+              setCategory(item);
+              setScannedOnly(false);
+            }}
           >
             {item}
           </button>
