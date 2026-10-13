@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { nutritionMacroPercentages, nutritionTargetPercentages, sumNutrition } from "../lib/nutrition/progress.ts";
+import { calendarNutritionWeek, nutritionMacroPercentages, nutritionTargetPercentages, sumNutrition } from "../lib/nutrition/progress.ts";
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
@@ -25,6 +25,20 @@ test("nutrition totals include each intake source exactly once", () => {
   ]), { calories: 3850, protein: 295, carbohydrates: 400, fat: 110 });
 });
 
+test("weekly nutrition always spans Sunday through Saturday", () => {
+  const week = calendarNutritionWeek([
+    { day: "2026-10-10", calories: 900, protein: 50, carbohydrates: 100, fat: 30 },
+    { day: "2026-10-11", calories: 1700, protein: 120, carbohydrates: 180, fat: 50 },
+    { day: "2026-10-14", calories: 1900, protein: 140, carbohydrates: 200, fat: 55 },
+  ], "2026-10-14");
+  assert.deepEqual(week.map((day) => day.day), [
+    "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17",
+  ]);
+  assert.equal(week[0].calories, 1700);
+  assert.equal(week[3].protein, 140);
+  assert.deepEqual(week[6], { day: "2026-10-17", calories: 0, protein: 0, carbohydrates: 0, fat: 0 });
+});
+
 test("progress UI offers week and month nutrition charts and stripes only the excess above the personal goal", async () => {
   const [dashboard, panel, repository, css] = await Promise.all([
     source("components/client/ProgressMetricsDashboard.tsx"),
@@ -36,7 +50,10 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
   assert.match(panel, />שבוע</);
   assert.match(panel, />חודש</);
   assert.match(panel, /key=\{period\}/);
+  assert.match(panel, /calendarNutritionWeek\(days, anchorDay\)/);
   assert.match(panel, /חסרים בממוצע.*גרם חלבון ביום/);
+  assert.match(panel, /targets\.calories \* selected\.length/);
+  assert.match(panel, /מתוך.*periodCalorieTarget\.toLocaleString/);
   assert.match(panel, /day\.calories > goal/);
   assert.match(panel, /data-over-goal/);
   assert.match(css, /repeating-linear-gradient\(135deg, var\(--red\)/);
