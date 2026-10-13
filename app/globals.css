@@ -242,6 +242,73 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   padding: 1rem 1rem max(6rem, calc(5rem + env(safe-area-inset-bottom)));
 }
 
+/* One stable first paint for a browser tab and for the installed iOS PWA.
+   Fixed viewport geometry is deliberate: it cannot inherit the home grid's
+   RTL placement or briefly collapse to the intrinsic width of its children
+   while a streamed route and its stylesheet settle in separate WebKit frames. */
+.app-launch-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  width: 100vw;
+  min-width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
+  background: #fff;
+  color: var(--ink);
+  direction: ltr;
+  contain: strict;
+}
+.app-launch-loading__brand {
+  display: grid;
+  width: min(15rem, 100%);
+  justify-items: center;
+  gap: .9rem;
+  text-align: center;
+}
+.app-launch-loading__icon {
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 1.35rem;
+  background: url("/icon-192.png") center / cover no-repeat;
+}
+.app-launch-loading__brand strong {
+  color: var(--green);
+  font-size: 1.15rem;
+  font-weight: 950;
+  letter-spacing: .24em;
+  line-height: 1;
+}
+.app-launch-loading__indicator {
+  display: block;
+  width: 3.25rem;
+  height: .22rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--green-tint);
+}
+.app-launch-loading__indicator::after {
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--green);
+  animation: app-launch-progress 1s ease-in-out infinite alternate;
+  content: "";
+}
+@keyframes app-launch-progress {
+  from { transform: translateX(0); }
+  to { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-launch-loading__indicator::after { animation: none; transform: translateX(60%); }
+}
+
 .start-wordmark {
   color: var(--green);
   font-size: .9rem;
