@@ -39,3 +39,19 @@ test("the client menu starts plan, meals, and daily selections together", async 
   );
   assert.doesNotMatch(repository, /\.in\("group_id", groupIds\)/);
 });
+
+test("prefetched personalized screens stay available through the next tap", async () => {
+  const config = await source("next.config.ts");
+  assert.match(config, /staleTimes: \{ dynamic: 30 \}/);
+
+  // Writes invalidate affected entries instead of waiting for the short cache
+  // ceiling. These cover nutrition, progress, notifications and workout/home
+  // state so a future speed change cannot silently reintroduce stale local data.
+  const actions = await Promise.all([
+    source("app/actions/food-log.ts"),
+    source("app/actions/product.ts"),
+    source("app/actions/notifications.ts"),
+    source("app/actions/onboarding.ts"),
+  ]);
+  for (const action of actions) assert.match(action, /revalidatePath\(/);
+});
