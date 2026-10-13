@@ -46,7 +46,7 @@ export default function ProgressMetricsDashboard({
   nutritionDays: readonly DailyNutritionTotal[];
   nutritionTargets: NutritionTargets;
 }) {
-  const [metric, setMetric] = useState<Metric>("weight");
+  const [metric, setMetric] = useState<Metric>("nutrition");
 
   return (
     <section className="progress-metrics" data-metric={metric} data-viewport-fit={metric === "nutrition" || metric === "steps" || metric === "sleep" || undefined} aria-labelledby="progress-metrics-title">
