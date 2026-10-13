@@ -13,6 +13,25 @@ export type NutritionTargets = Readonly<{
   fat: number | null;
 }>;
 
+const EMPTY_NUTRITION = { calories: 0, protein: 0, carbohydrates: 0, fat: 0 } as const;
+
+function shiftDay(day: string, delta: number): string {
+  const value = new Date(`${day}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + delta);
+  return value.toISOString().slice(0, 10);
+}
+
+/** The calendar week containing `anchorDay`, ordered from Sunday through Saturday. */
+export function calendarNutritionWeek(days: readonly DailyNutritionTotal[], anchorDay: string): readonly DailyNutritionTotal[] {
+  const anchor = new Date(`${anchorDay}T12:00:00Z`);
+  const sunday = shiftDay(anchorDay, -anchor.getUTCDay());
+  const byDay = new Map(days.map((day) => [day.day, day]));
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = shiftDay(sunday, index);
+    return byDay.get(day) ?? { day, ...EMPTY_NUTRITION };
+  });
+}
+
 export function nutritionMacroPercentages(total: Pick<DailyNutritionTotal, "protein" | "carbohydrates" | "fat">) {
   const energy = {
     protein: total.protein * 4,

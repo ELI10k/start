@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Beef, Flame } from "lucide-react";
-import { nutritionMacroPercentages, nutritionTargetPercentages, sumNutrition, type DailyNutritionTotal, type NutritionTargets } from "@/lib/nutrition/progress";
+import { calendarNutritionWeek, nutritionMacroPercentages, nutritionTargetPercentages, sumNutrition, type DailyNutritionTotal, type NutritionTargets } from "@/lib/nutrition/progress";
 
 const dayLabel = (day: string) => new Intl.DateTimeFormat("he-IL", { weekday: "narrow", timeZone: "UTC" }).format(new Date(`${day}T12:00:00Z`));
 const dateLabel = (day: string) => new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${day}T12:00:00Z`));
@@ -10,7 +10,11 @@ const round = (value: number) => Math.round(value);
 
 export default function NutritionProgressPanel({ days, targets }: { days: readonly DailyNutritionTotal[]; targets: NutritionTargets }) {
   const [period, setPeriod] = useState<"week" | "month">("week");
-  const selected = useMemo(() => days.slice(period === "week" ? -7 : -30), [days, period]);
+  const selected = useMemo(() => {
+    if (period === "month") return days.slice(-30);
+    const anchorDay = days.at(-1)?.day;
+    return anchorDay ? calendarNutritionWeek(days, anchorDay) : [];
+  }, [days, period]);
   const reported = selected.filter((day) => day.calories > 0 || day.protein > 0 || day.carbohydrates > 0 || day.fat > 0);
   const totals = sumNutrition(selected);
   const averageCalories = reported.length ? round(totals.calories / reported.length) : 0;
@@ -23,6 +27,7 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
   const targetPercentages = nutritionTargetPercentages(targets);
   const daysAtGoal = targets.calories === null ? 0 : reported.filter((day) => day.calories >= targets.calories! * .9 && day.calories <= targets.calories! * 1.1).length;
   const proteinGapGrams = targets.protein === null ? null : round(targets.protein - averageMacros.protein);
+  const periodCalorieTarget = targets.calories === null ? null : round(targets.calories * selected.length);
 
   return <div className="health-progress-view nutrition-progress-view">
     <div className="health-period-picker" role="group" aria-label="טווח הצגה">
@@ -38,7 +43,7 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
       <CaloriesChart key={period} values={selected} goal={targets.calories} monthly={period === "month"}/>
       <dl className="nutrition-inline-stats">
         <div><dt>ימים בטווח היעד</dt><dd>{targets.calories ? `${daysAtGoal} מתוך ${selected.length}` : "—"}</dd></div>
-        <div><dt>קלוריות {period === "week" ? "בשבוע" : "בחודש"}</dt><dd>{round(totals.calories).toLocaleString("he-IL")}</dd></div>
+        <div><dt>קלוריות {period === "week" ? "בשבוע" : "בחודש"}</dt><dd>{round(totals.calories).toLocaleString("he-IL")}{periodCalorieTarget !== null ? ` מתוך ${periodCalorieTarget.toLocaleString("he-IL")} קל׳` : ""}</dd></div>
       </dl>
     </section>
 
@@ -59,7 +64,7 @@ export default function NutritionProgressPanel({ days, targets }: { days: readon
         </div>
       </> : <p className="nutrition-empty">עדיין לא דווחה תזונה בטווח הזה.</p>}
     </section>
-    {proteinGapGrams !== null && reported.length ? <p className="health-insight">{Math.abs(proteinGapGrams) <= 3 ? "החלבון קרוב ליעד — ממשיכים כך" : proteinGapGrams > 0 ? `חסרים בממוצע ${proteinGapGrams} גרם חלבון ביום` : `ממוצע החלבון גבוה ב־${Math.abs(proteinGapGrams)} גרם מהיעד היומי`}</p> : null}
+    {proteinGapGrams !== null && reported.length ? <p className="health-insight">{Math.abs(proteinGapGrams) <= 3 ? `ממוצע החלבון ${period === "week" ? "השבועי" : "החודשי"} קרוב ליעד — ממשיכים כך` : proteinGapGrams > 0 ? `חסרים בממוצע ${period === "week" ? "השבועי" : "החודשי"} ${proteinGapGrams} גרם חלבון ביום` : `ממוצע החלבון ${period === "week" ? "השבועי" : "החודשי"} גבוה ב־${Math.abs(proteinGapGrams)} גרם מהיעד היומי`}</p> : null}
   </div>;
 }
 
