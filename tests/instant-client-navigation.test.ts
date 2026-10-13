@@ -55,3 +55,18 @@ test("prefetched personalized screens stay available through the next tap", asyn
   ]);
   for (const action of actions) assert.match(action, /revalidatePath\(/);
 });
+
+test("a first tap replaces the old screen immediately while navigation is pending", async () => {
+  const [indicator, bottomNav, shell, css] = await Promise.all([
+    source("components/client/NavigationPendingOverlay.tsx"),
+    source("components/BottomNav.tsx"),
+    source("components/client/ClientShell.tsx"),
+    source("app/globals.css"),
+  ]);
+  assert.match(indicator, /useLinkStatus\(\)/);
+  assert.match(indicator, /data-pending=\{pending \|\| undefined\}/);
+  assert.match(bottomNav, /<NavigationPendingOverlay \/>/);
+  assert.match(shell, /<NavigationPendingOverlay \/>/);
+  assert.match(css, /\.navigation-pending-overlay\[data-pending\] \{ display: block; \}/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});

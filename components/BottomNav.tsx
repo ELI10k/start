@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, BookOpen, Home, ShoppingBasket, UserRound } from "lucide-react";
 import UnreadNotificationBadge from "@/components/notifications/UnreadNotificationBadge";
+import NavigationPendingOverlay from "@/components/client/NavigationPendingOverlay";
 
 // Five, and every one of them is somewhere the home screen does not already go.
 //
@@ -56,6 +57,7 @@ export default function BottomNav({ unreadCount }: { unreadCount?: number }) {
                 {isInbox && typeof unreadCount !== "number" && <UnreadNotificationBadge />}
               </span>
               <span>{label}</span>
+              <NavigationPendingOverlay />
             </Link>
           );
         })}
