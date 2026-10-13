@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, clampGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
+import { DEFAULT_SLEEP_GOAL_MINUTES, averageReportedSteps, calendarDay, calendarWeekDays, clampGoal, dailyStepsNeededForWeeklyGoal, formatSleep, lastDays, latestSleepHours, shiftDay, sleepByDay, sleepToPersist, stepsByDay, stepsToPersist, summarizeSteps } from "../lib/health/calculations.ts";
 import { createTestProvider, describeAvailability, resolveHealthProvider, syncWindow, unavailableProvider } from "../lib/health/providers.ts";
 import type { DailySleep, DailySteps } from "../lib/health/types.ts";
 
@@ -61,6 +61,13 @@ test("period averages include today's reported step count", () => {
   ], days), 7000);
   assert.equal(averageReportedSteps([entry(TODAY, 1200)], days), 1200);
   assert.equal(averageReportedSteps([], days), null);
+});
+
+test("weekly step balance spreads the remaining goal through Saturday", () => {
+  assert.equal(dailyStepsNeededForWeeklyGoal(55332, 70000, 5), 2934);
+  assert.equal(dailyStepsNeededForWeeklyGoal(72000, 70000, 3), 0);
+  assert.equal(dailyStepsNeededForWeeklyGoal(62000, 70000, 1), 8000);
+  assert.equal(dailyStepsNeededForWeeklyGoal(62000, 70000, 0), 0);
 });
 
 test("no data at all reports zeroes rather than dividing by zero", () => {
@@ -153,6 +160,8 @@ test("steps and sleep keep both period controls available after either selection
   assert.equal(panel.match(/\{periodPicker\}/g)?.length, 2);
   assert.match(panel, /period === "week" \? calendarWeekDays\(today\) : lastDays\(today, dayCount\)/);
   assert.match(panel, /averageReportedSteps\(snapshot\.entries, days\)/);
+  assert.match(panel, /dailyStepsNeededForWeeklyGoal\(total, periodGoal, remainingWeekDays\)/);
+  assert.match(panel, /צעדים בממוצע בכל יום עד שבת כדי להגיע ליעד השבועי/);
   assert.match(styles, /health-chart__goal small \{[^}]*inset-inline-start: auto;[^}]*inset-inline-end: \.25rem;[^}]*background: var\(--surface\)/);
   assert.match(styles, /health-chart__column i\[data-empty\] \{ background: transparent; \}/);
   assert.match(styles, /\.health-progress-view \{[^}]*min-width: 0;[^}]*width: 100%/);

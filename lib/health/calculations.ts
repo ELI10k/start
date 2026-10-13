@@ -48,6 +48,11 @@ export function averageReportedSteps(entries: readonly DailySteps[], days: reado
   return reported.length ? Math.round(reported.reduce((total, steps) => total + steps, 0) / reported.length) : null;
 }
 
+export function dailyStepsNeededForWeeklyGoal(total: number, weeklyGoal: number, daysRemaining: number): number {
+  if (!Number.isFinite(total) || !Number.isFinite(weeklyGoal) || !Number.isFinite(daysRemaining) || daysRemaining <= 0) return 0;
+  return Math.max(0, Math.ceil((weeklyGoal - total) / daysRemaining));
+}
+
 const DEFAULT_GOAL = 10000;
 
 export function summarizeSteps(entries: readonly DailySteps[], preferences: Partial<HealthPreferences> | undefined, todayValue: string = calendarDay()): StepsSummary {
