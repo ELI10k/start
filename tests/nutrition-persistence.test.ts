@@ -243,7 +243,7 @@ test("an unreadable pinned menu falls through to the one assigned now", async ()
   assert.match(body, /if \(!plan && existingLog\?\.meal_plan_id\) \{\s*\n\s*assignment = activeAssignment;/);
   assert.match(body, /\[plan, mealResult\] = await Promise\.all\(\[/);
   // And nothing is returned without both halves.
-  assert.match(body, /if \(!assignment \|\| !plan\) return null;/);
+  assert.match(body, /if \(!assignment \|\| !plan \|\| !mealResult\) return null;/);
 });
 
 // A loading skeleton is a status, not the document's main content. The root

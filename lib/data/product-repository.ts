@@ -800,13 +800,17 @@ export async function getActiveClientMenu(
           meal_plan_id: existingLog.meal_plan_id,
         }
       : activeAssignment;
-  let [plan, mealResult, selectionResult] = assignment
-    ? await Promise.all([
-        readPlan(assignment.meal_plan_id),
-        readMeals(assignment.meal_plan_id),
-        readSelections(),
-      ])
-    : [null, { data: [], error: null }, { data: [], error: null }];
+  // Start this before waiting for the plan. It is independent of the assigned
+  // plan and stays in flight alongside both plan reads below.
+  const selectionPromise = readSelections();
+  let plan = null as Awaited<ReturnType<typeof readPlan>>;
+  let mealResult = null as Awaited<ReturnType<typeof readMeals>> | null;
+  if (assignment) {
+    [plan, mealResult] = await Promise.all([
+      readPlan(assignment.meal_plan_id),
+      readMeals(assignment.meal_plan_id),
+    ]);
+  }
 
   // The snapshot is a preference, not a requirement.
   //
@@ -829,10 +833,11 @@ export async function getActiveClientMenu(
       ]);
     }
   }
-  if (!assignment || !plan) return null;
+  if (!assignment || !plan || !mealResult) return null;
 
   const { data: allMeals, error: mealError } = mealResult;
   if (mealError) throw mealError;
+  const selectionResult = await selectionPromise;
   const { data: selections, error: selectionError } = selectionResult;
   if (selectionError) throw selectionError;
   // Sunday is 0. Resolved through the Israel calendar so a Saturday menu is
