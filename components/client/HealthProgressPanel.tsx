@@ -13,16 +13,16 @@ const DAY_LABEL = new Intl.DateTimeFormat("he-IL", { weekday: "narrow", timeZone
 const dayLabel = (day: string) => DAY_LABEL.format(new Date(`${day}T12:00:00Z`));
 const dateLabel = (day: string) => new Intl.DateTimeFormat("he-IL", { day: "numeric", month: "numeric", timeZone: "UTC" }).format(new Date(`${day}T12:00:00Z`));
 
-function Bars({ values, goal, formatter, monthly = false }: { values: readonly { day: string; value: number }[]; goal: number; formatter: (value: number) => string; monthly?: boolean }) {
+function Bars({ values, goal, formatter, monthly = false }: { values: readonly { day: string; value: number; reported?: boolean }[]; goal: number; formatter: (value: number) => string; monthly?: boolean }) {
   const max = Math.max(goal, ...values.map((point) => point.value), 1);
   return (
-    <div className="health-chart" data-monthly={monthly || undefined} role="img" aria-label={values.map((point) => `${monthly ? dateLabel(point.day) : dayLabel(point.day)} ${formatter(point.value)}`).join(", ")}>
+    <div className="health-chart" data-monthly={monthly || undefined} role="img" aria-label={values.map((point) => `${monthly ? dateLabel(point.day) : dayLabel(point.day)} ${point.reported === false ? "אין נתון" : formatter(point.value)}`).join(", ")}>
       <div className="health-chart__plot" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
         <span className="health-chart__goal" style={{ insetBlockEnd: `${Math.min(92, (goal / max) * 100)}%` }}><small>יעד</small></span>
         {values.map((point) => (
           <span className="health-chart__column" key={point.day}>
-            <b>{point.value ? formatter(point.value) : "0"}</b>
-            <i style={{ height: `${Math.max(point.value ? 7 : 1, (point.value / max) * 100)}%` }} />
+            <b>{point.reported === false ? "—" : point.value ? formatter(point.value) : "0"}</b>
+            <i data-empty={point.reported === false || undefined} style={{ height: `${point.reported === false ? 1 : Math.max(point.value ? 7 : 1, (point.value / max) * 100)}%` }} />
             <small>{monthly ? dateLabel(point.day) : dayLabel(point.day)}</small>
           </span>
         ))}
@@ -101,7 +101,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   if (metric === "steps") {
     const summary = summarizeSteps(snapshot.entries, snapshot.preferences, today);
     const stepByDay = stepsByDay(snapshot.entries);
-    const values = days.map((day) => ({ day, value: stepByDay.get(day)?.steps ?? 0 }));
+    const values = days.map((day) => ({ day, value: stepByDay.get(day)?.steps ?? 0, reported: stepByDay.has(day) }));
     const average = averageReportedSteps(snapshot.entries, days);
     const total = values.reduce((sum, point) => sum + point.value, 0);
     const periodGoal = summary.goal * dayCount;
@@ -128,7 +128,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
   }
 
   const byDay = sleepByDay(snapshot.sleep);
-  const values = days.map((day) => ({ day, value: byDay.get(day)?.minutes ?? 0 }));
+  const values = days.map((day) => ({ day, value: byDay.get(day)?.minutes ?? 0, reported: byDay.has(day) }));
   const reported = values.filter((point) => byDay.has(point.day));
   const average = reported.length ? Math.round(reported.reduce((sum, point) => sum + point.value, 0) / reported.length) : 0;
   const nightsMetGoal = reported.filter((point) => point.value >= DEFAULT_SLEEP_GOAL_MINUTES).length;
@@ -141,7 +141,7 @@ export default function HealthProgressPanel({ metric }: { metric: "steps" | "sle
         <span className="health-summary-card__icon"><MoonStar aria-hidden="true" size={24} /></span>
         <p>ממוצע שינה {period === "month" ? "בחודש" : "בשבוע"}</p>
         <strong>{average ? formatSleep(average) : "אין נתונים"}</strong>
-        <small>{average ? `מתוך יעד של ${formatSleep(DEFAULT_SLEEP_GOAL_MINUTES)}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
+        <small className="health-summary-card__goal">{average ? `מתוך ${formatSleep(DEFAULT_SLEEP_GOAL_MINUTES)}` : "חברו את נתוני הבריאות כדי להתחיל"}</small>
         <Bars values={values} goal={DEFAULT_SLEEP_GOAL_MINUTES} formatter={formatSleep} monthly={period === "month"} />
       </section>
       <div className="health-stat-grid">
