@@ -43,18 +43,26 @@ async function HomeDailyTip({ clientId, today }: { clientId: string; today: stri
   );
 }
 
-export default async function Home() {
-  const auth = await getAuthContext();
-  if (!auth) redirect("/login");
-  if (auth.role !== "client") redirect("/unauthorized");
+function HomeDashboardSkeleton() {
+  return (
+    <div className="home-screen" role="status" aria-label="טוענים את המסך הראשי" aria-busy="true">
+      <div className="dashboard-metrics dashboard-metrics--fit" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, index) => <div key={index} className="metric-tile animate-pulse bg-[#F1F4F1]" />)}
+      </div>
+      <div className="quick-actions-grid" aria-hidden="true">
+        {Array.from({ length: 4 }, (_, index) => <div key={index} className="quick-action-card animate-pulse bg-[#F1F4F1]" />)}
+      </div>
+    </div>
+  );
+}
 
-  const today = israelDateKey();
+async function HomeDashboard({ clientId, today }: { clientId: string; today: string }) {
   // The same three reads the nutrition screen makes, because this screen quotes
   // its figures back and the two disagreeing is worse than either being wrong.
   const [data, logged] = await Promise.all([
-    getClientOverview(auth.id, today),
+    getClientOverview(clientId, today),
     // This screen only needs totals, not private food-photo URLs.
-    listClientFoodLog(auth.id, today, { signPhotoUrls: false }),
+    listClientFoodLog(clientId, today, { signPhotoUrls: false }),
   ]);
   const meals = data.menu?.meals ?? [];
   // Marked eaten, or every choice in it logged - the same test the nutrition
@@ -88,7 +96,7 @@ export default async function Home() {
   const generationReady = generationEntries.length > 0 && generationEntries.every(([,result]) => result.status === "ready");
 
   return (
-    <ClientShell className="client-app-shell--home">
+    <div className="home-screen">
       {/* Three numbers and four destinations, and they have to land inside one
           phone viewport with nothing under the fold.
           
@@ -99,7 +107,6 @@ export default async function Home() {
           tile the client was going to press anyway: the workout tile names the
           next training day, the menu tile names the active plan. Nothing was
           dropped, it was folded. */}
-      <div className="home-screen">
         {/* The screen has no visible title any more - the tiles are the
             headline - but it still needs one to be announced by, and to be
             landed on when the back button returns here. */}
@@ -116,7 +123,7 @@ export default async function Home() {
         {/* Only ever renders in the days after the coach releases one, which is
             also the only time this screen is allowed to grow past the fold. */}
         <Suspense fallback={null}>
-          <HomeWeeklySummary clientId={auth.id} />
+          <HomeWeeklySummary clientId={clientId} />
         </Suspense>
 
         <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
@@ -188,7 +195,7 @@ export default async function Home() {
             instead of thirty, and it is last on the screen because it is the
             one thing here that is not today's business. */}
         <Suspense fallback={null}>
-          <HomeDailyTip clientId={auth.id} today={today} />
+          <HomeDailyTip clientId={clientId} today={today} />
         </Suspense>
 
         {/* Where they have got to, in the space the screen had left over.
@@ -198,7 +205,21 @@ export default async function Home() {
             opens - because somebody three kilos down who does not know it is
             somebody about to stop. */}
         <ProgressPulse entries={data.progress} targetWeight={data.clientProfile.target_weight} />
-      </div>
+    </div>
+  );
+}
+
+export default async function Home() {
+  const auth = await getAuthContext();
+  if (!auth) redirect("/login");
+  if (auth.role !== "client") redirect("/unauthorized");
+
+  const today = israelDateKey();
+  return (
+    <ClientShell className="client-app-shell--home">
+      <Suspense fallback={<HomeDashboardSkeleton />}>
+        <HomeDashboard clientId={auth.id} today={today} />
+      </Suspense>
     </ClientShell>
   );
 }

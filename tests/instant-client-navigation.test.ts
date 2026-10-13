@@ -70,3 +70,11 @@ test("a first tap replaces the old screen immediately while navigation is pendin
   assert.match(css, /\.navigation-pending-overlay\[data-pending\] \{ display: block; \}/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
+
+test("the home shell streams before its personalized dashboard queries finish", async () => {
+  const home = await source("app/page.tsx");
+  assert.match(home, /async function HomeDashboard/);
+  assert.match(home, /<ClientShell className="client-app-shell--home">\s*<Suspense fallback=\{<HomeDashboardSkeleton \/>\}>/);
+  assert.match(home, /<HomeDashboard clientId=\{auth\.id\} today=\{today\} \/>/);
+  assert.match(home, /aria-label="טוענים את המסך הראשי"/);
+});
