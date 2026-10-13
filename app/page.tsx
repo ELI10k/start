@@ -19,6 +19,7 @@ import { listClientFoodLog } from "@/lib/data/product-repository";
 import { sumLoggedFood } from "@/lib/nutrition/food-log";
 import { trainingWeekStart } from "@/lib/workouts/progress";
 import { Suspense } from "react";
+import ClientLoading from "@/components/client/ClientLoading";
 
 async function HomeWeeklySummary({ clientId }: { clientId: string }) {
   const [latestSummary] = await getWeeklySummaries(clientId, 1);
@@ -44,16 +45,7 @@ async function HomeDailyTip({ clientId, today }: { clientId: string; today: stri
 }
 
 function HomeDashboardSkeleton() {
-  return (
-    <div className="home-screen" role="status" aria-label="טוענים את המסך הראשי" aria-busy="true">
-      <div className="dashboard-metrics dashboard-metrics--fit" aria-hidden="true">
-        {Array.from({ length: 5 }, (_, index) => <div key={index} className="metric-tile animate-pulse bg-[#F1F4F1]" />)}
-      </div>
-      <div className="quick-actions-grid" aria-hidden="true">
-        {Array.from({ length: 4 }, (_, index) => <div key={index} className="quick-action-card animate-pulse bg-[#F1F4F1]" />)}
-      </div>
-    </div>
-  );
+  return <ClientLoading />;
 }
 
 async function HomeDashboard({ clientId, today }: { clientId: string; today: string }) {

@@ -72,9 +72,24 @@ test("a first tap replaces the old screen immediately while navigation is pendin
 });
 
 test("the home shell streams before its personalized dashboard queries finish", async () => {
-  const home = await source("app/page.tsx");
+  const [home, loading, css] = await Promise.all([
+    source("app/page.tsx"),
+    source("components/client/ClientLoading.tsx"),
+    source("app/globals.css"),
+  ]);
   assert.match(home, /async function HomeDashboard/);
   assert.match(home, /<ClientShell className="client-app-shell--home">\s*<Suspense fallback=\{<HomeDashboardSkeleton \/>\}>/);
   assert.match(home, /<HomeDashboard clientId=\{auth\.id\} today=\{today\} \/>/);
-  assert.match(home, /aria-label="טוענים את המסך הראשי"/);
+  assert.match(home, /function HomeDashboardSkeleton\(\) \{\s*return <ClientLoading \/>/);
+
+  // A cold iOS standalone launch must never paint a responsive dashboard grid
+  // before WebKit has settled the viewport. The fallback is a fixed, branded
+  // viewport overlay and therefore cannot collapse against the RTL edge.
+  assert.match(loading, /className="app-launch-loading"/);
+  assert.match(loading, /className="app-launch-loading__icon"/);
+  assert.doesNotMatch(loading, /grid-cols-|dashboard-metrics|quick-actions-grid/);
+  assert.match(css, /\.app-launch-loading \{[\s\S]*?position: fixed;[\s\S]*?inset: 0;[\s\S]*?width: 100vw;[\s\S]*?height: 100dvh;/);
+  assert.match(css, /contain: strict;/);
+  assert.match(css, /background: url\("\/icon-192\.png"\) center \/ cover no-repeat;/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
 });
