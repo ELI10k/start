@@ -144,10 +144,16 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  let user = null;
+  let userId: string | null = null;
   try {
-    const result = await supabase.auth.getUser();
-    user = result.data.user;
+    // getUser() always crosses the network to Auth. getClaims() verifies the
+    // signed access token locally against Supabase's cached JWKS on projects
+    // with asymmetric signing keys, while retaining the same security boundary
+    // and refreshing a session that is close to expiry.
+    const result = await supabase.auth.getClaims();
+    userId = typeof result.data?.claims?.sub === "string"
+      ? result.data.claims.sub
+      : null;
   } catch {
     // Authentication infrastructure must fail closed without turning a normal
     // signed-out visit into a server error page.
@@ -155,11 +161,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (!isPrivatePath(path)) {
-    if (path === "/login" && user) {
+    if (path === "/login" && userId) {
       const { data } = await supabase
         .from("profiles")
         .select("role,status")
-        .eq("id", user.id)
+        .eq("id", userId)
         .single();
       if (data?.status === "active" && (data.role === "coach" || data.role === "client")) {
         const requestedReturn = request.nextUrl.searchParams.get("next");
@@ -172,23 +178,15 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (!user) return redirect(loginPathFor(requestedPath));
+  if (!userId) return redirect(loginPathFor(requestedPath));
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role,status")
-    .eq("id", user.id)
+    .eq("id", userId)
     .single();
   if (profileError || !profile) return redirect(loginPathFor(requestedPath));
   if (profile.status !== "active") return redirect("/unauthorized");
-
-  if (profile.role === "client" && path !== "/onboarding") {
-    const [{ data: onboarding }, { data: relationship }] = await Promise.all([
-      supabase.from("client_profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle(),
-      supabase.from("coach_client_relationships").select("coach_id").eq("client_id", user.id).eq("status", "active").maybeSingle(),
-    ]);
-    if (!relationship && !onboarding?.onboarding_completed) return redirect("/onboarding");
-  }
 
   const coachPath = path === "/coach" || path.startsWith("/coach/");
   if (!isSharedPath(path) && (profile.role === "coach") !== coachPath) {
@@ -202,17 +200,29 @@ export async function proxy(request: NextRequest) {
       return redirect(`${loginPathFor(requestedPath)}&reason=device`);
     }
 
-    const { data: device } = await supabase
-      .from("device_sessions")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("device_id", deviceId)
-      .is("revoked_at", null)
-      .maybeSingle();
+    // These checks are independent. Running them together removes an entire
+    // database roundtrip from every client navigation while preserving the
+    // device lock and onboarding gate.
+    const [{ data: onboarding }, { data: relationship }, { data: device }] = await Promise.all([
+      path === "/onboarding"
+        ? Promise.resolve({ data: { onboarding_completed: true } })
+        : supabase.from("client_profiles").select("onboarding_completed").eq("user_id", userId).maybeSingle(),
+      path === "/onboarding"
+        ? Promise.resolve({ data: { coach_id: null } })
+        : supabase.from("coach_client_relationships").select("coach_id").eq("client_id", userId).eq("status", "active").maybeSingle(),
+      supabase
+        .from("device_sessions")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("device_id", deviceId)
+        .is("revoked_at", null)
+        .maybeSingle(),
+    ]);
     if (!device) {
       await supabase.auth.signOut({ scope: "local" });
       return redirect(`${loginPathFor(requestedPath)}&reason=replaced`);
     }
+    if (!relationship && !onboarding?.onboarding_completed) return redirect("/onboarding");
   }
 
   return response;
