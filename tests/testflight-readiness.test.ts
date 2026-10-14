@@ -5,11 +5,11 @@ import test from "node:test";
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 const bytes = async (path: string) => (await stat(new URL(`../${path}`, import.meta.url))).size;
 
-test("the app is named and identified the same way everywhere", async () => {
+test("the app keeps its released platform identifiers and LIFE FIT name", async () => {
   const config = await source("capacitor.config.ts");
   const strings = await source("android/app/src/main/res/values/strings.xml");
   const plist = await source("ios/App/App/Info.plist");
-  assert.match(config, /co\.il\.startcoaching\.app/);
+  assert.match(config, /il\.co\.elicohenfitness\.startlifefit/);
   assert.match(strings, /<string name="package_name">co\.il\.startcoaching\.app<\/string>/);
   assert.match(strings, /<string name="app_name">LIFE FIT<\/string>/);
   assert.match(plist, /<key>CFBundleDisplayName<\/key>\s*<string>LIFE FIT<\/string>/);

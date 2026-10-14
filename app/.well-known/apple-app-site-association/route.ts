@@ -23,7 +23,7 @@ export const runtime = "nodejs";
 // working against us after the real one arrived.
 export async function GET() {
   const teamId = process.env.APPLE_TEAM_ID?.trim();
-  const bundleId = process.env.APPLE_BUNDLE_ID?.trim() || "co.il.startcoaching.app";
+  const bundleId = process.env.APPLE_BUNDLE_ID?.trim() || "il.co.elicohenfitness.startlifefit";
 
   if (!teamId || !/^[A-Z0-9]{10}$/.test(teamId)) {
     return NextResponse.json({ error: "not_configured" }, { status: 404 });

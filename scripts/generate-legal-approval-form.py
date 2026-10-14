@@ -181,7 +181,7 @@ add_text(
 add_heading(document, "פרטי הבדיקה")
 add_field_table(document, [
     ("שם השירות", "START"),
-    ("מזהה אפליקציה", "co.il.startcoaching.app"),
+    ("מזהה אפליקציה", "il.co.elicohenfitness.startlifefit"),
     ("מפעיל השירות", "____________________________"),
     ("שם הישות המשפטית", "____________________________"),
     ("אימייל תמיכה", "start.elicohenfitness@gmail.com"),

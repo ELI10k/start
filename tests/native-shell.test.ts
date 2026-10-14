@@ -6,7 +6,7 @@ const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url)
 
 test("the shell loads the deployed app rather than bundling a rewrite", async () => {
   const config = await source("capacitor.config.ts");
-  assert.match(config, /appId: "co\.il\.startcoaching\.app"/);
+  assert.match(config, /appId: "il\.co\.elicohenfitness\.startlifefit"/);
   assert.match(config, /appName: "LIFE FIT"/);
   assert.match(config, /process\.env\.START_NATIVE_SERVER_URL/);
   // Never plain HTTP: the session cookies travel over this connection.

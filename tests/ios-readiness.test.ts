@@ -63,6 +63,18 @@ test("the association file refuses to serve a placeholder team id", async () => 
   assert.match(route, /"content-type": "application\/json"/);
 });
 
+test("the native shell and universal links target the installed LIFE FIT app", async () => {
+  const [capacitor, project, association] = await Promise.all([
+    source("capacitor.config.ts"),
+    source("ios/App/App.xcodeproj/project.pbxproj"),
+    source("app/.well-known/apple-app-site-association/route.ts"),
+  ]);
+  const bundleId = "il.co.elicohenfitness.startlifefit";
+  assert.match(capacitor, new RegExp(`appId: [\"']${bundleId.replaceAll(".", "\\.")}[\"']`));
+  assert.equal(project.match(new RegExp(`PRODUCT_BUNDLE_IDENTIFIER = ${bundleId.replaceAll(".", "\\.")}`, "g"))?.length, 2);
+  assert.match(association, new RegExp(bundleId.replaceAll(".", "\\.")));
+});
+
 test("a cold start from a link is followed, not only a warm one", async () => {
   const [bridge, layout, clientShell] = await Promise.all([
     source("components/native/NativeBridge.tsx"),
