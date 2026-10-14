@@ -33,8 +33,8 @@ export function MetricTile({
         <span>{label}</span>
         {icon ? <span className="metric-tile__icon">{icon}</span> : null}
       </div>
-      <strong>{value}</strong>
-      {detail ? <small>{detail}</small> : null}
+      <strong className="metric-tile__value">{value}</strong>
+      {detail ? <small className="metric-tile__goal">{detail}</small> : null}
     </div>
   );
 }

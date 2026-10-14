@@ -12,8 +12,23 @@ export type StartHealthPlugin = {
   isAvailable(): Promise<{ available: boolean }>;
   getPermission(): Promise<{ status: HealthPermissionState }>;
   requestPermission(): Promise<{ status: HealthPermissionState }>;
-  readDailySteps(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; steps: number }[] }>;
+  /** `sources`: every writer HealthKit says contributed to the day (HKSourceRevision + HKDevice). The figure is still the merged aggregate. */
+  readDailySteps(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; steps: number; sources?: NativeHealthSource[] }[] }>;
   readDailySleep(options: { fromDay: string; toDay: string }): Promise<{ days: { day: string; minutes: number }[] }>;
+  /** Raw asleep intervals with their writer; nights are assembled in lib/health/sleep-nights.ts. */
+  readSleepSamples(options: { fromDay: string; toDay: string }): Promise<{ samples: { start: string; end: string; stage: "asleep" | "core" | "deep" | "rem"; source: NativeHealthSource }[] }>;
+  /** Opens the Health app (where read access is managed), or the app's own settings. */
+  openSettings(): Promise<{ opened: boolean }>;
+};
+
+export type NativeHealthSource = {
+  sourceName?: string;
+  sourceBundleIdentifier?: string;
+  productType?: string;
+  deviceName?: string;
+  manufacturer?: string;
+  model?: string;
+  hardwareVersion?: string;
 };
 
 // Resolves to the native implementation on a device, and to a stub that reports
@@ -25,5 +40,7 @@ export const StartHealth = registerPlugin<StartHealthPlugin>("StartHealth", {
     requestPermission: async () => ({ status: "unavailable" as const }),
     readDailySteps: async () => ({ days: [] }),
     readDailySleep: async () => ({ days: [] }),
+    readSleepSamples: async () => ({ samples: [] }),
+    openSettings: async () => ({ opened: false }),
   }),
 });

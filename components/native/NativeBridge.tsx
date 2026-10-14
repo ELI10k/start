@@ -84,7 +84,14 @@ export default function NativeBridge() {
       void Network.getStatus().then((status) => report(status.connected));
       void Network.addListener("networkStatusChange", (status) => report(status.connected)).then((handle) => track(() => void handle.remove()));
 
-      // Steps, through the custom plugin.
+      // Steps and sleep, through the custom plugin. Its presence on window is
+      // the readiness signal the health controller reads; the event only wakes
+      // up whoever is already listening.
+      //
+      // readSleepSamples and openSettings are newer than the first TestFlight
+      // binaries. An older binary rejects them as UNIMPLEMENTED, and the web
+      // layer falls back to the nightly totals it computed before.
+      const unimplemented = (error: unknown) => (error as { code?: string } | null)?.code === "UNIMPLEMENTED";
       (window as { StartHealth?: unknown }).StartHealth = {
         source: platform === "ios" ? "healthkit" : "health-connect",
         isAvailable: async () => (await StartHealth.isAvailable()).available,
@@ -92,6 +99,15 @@ export default function NativeBridge() {
         requestPermission: async () => (await StartHealth.requestPermission()).status as HealthPermissionState,
         readDailySteps: async (fromDay: string, toDay: string) => (await StartHealth.readDailySteps({ fromDay, toDay })).days,
         readDailySleep: async (fromDay: string, toDay: string) => (await StartHealth.readDailySleep({ fromDay, toDay })).days,
+        readSleepSamples: async (fromDay: string, toDay: string) => {
+          try { return (await StartHealth.readSleepSamples({ fromDay, toDay })).samples; } catch (error) {
+            if (unimplemented(error)) return null;
+            throw error;
+          }
+        },
+        openSettings: async () => {
+          try { return (await StartHealth.openSettings()).opened; } catch { return false; }
+        },
       };
       window.dispatchEvent(new Event("start:health-ready"));
 

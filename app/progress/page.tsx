@@ -5,7 +5,11 @@ import ProgressMetricsDashboard from "@/components/client/ProgressMetricsDashboa
 import { getAuthContext, getClientCheckInHistory, getClientNutritionProgress, getClientOverview } from "@/lib/data/product-repository";
 import { israelDateKey } from "@/lib/progress/measurements";
 
-export default async function ProgressPage() {
+const METRICS = ["nutrition", "weight", "measurements", "steps", "sleep"] as const;
+
+export default async function ProgressPage({ searchParams }: { searchParams: Promise<{ metric?: string | string[] }> }) {
+  const requested = (await searchParams).metric;
+  const initialMetric = METRICS.find((metric) => metric === requested);
   const auth = await getAuthContext();
   if (!auth) redirect("/login");
   if (auth.role !== "client") redirect("/unauthorized");
@@ -27,6 +31,7 @@ export default async function ProgressPage() {
         photoSessions={photoSessions}
         photoError={checkInHistory.photoError}
         today={today}
+        initialMetric={initialMetric}
         nutritionDays={nutritionDays}
         nutritionTargets={{
           calories: data.menu?.calorieTarget ?? (data.clientProfile.calorie_target === null ? null : Number(data.clientProfile.calorie_target)),
