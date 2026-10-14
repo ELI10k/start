@@ -8,7 +8,7 @@
 // rejects an alpha channel in an app icon, and a flat mark stays legible at 40px.
 
 import sharp from "sharp";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,12 +21,10 @@ const SURFACE = "#FFFFFF";
 // Full bleed, no rounding of our own: iOS and Android both apply their own mask,
 // and a pre-rounded square inside a white margin renders as a small icon
 // floating in a white tile on the home screen.
-const icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" fill="${INK}"/>
-  <text x="512" y="470" fill="${SURFACE}" font-family="Helvetica, Arial, sans-serif" font-size="228"
-        font-weight="700" letter-spacing="38" text-anchor="middle" dominant-baseline="central">START</text>
-  <rect x="332" y="626" width="360" height="30" rx="15" fill="${GREEN}"/>
-</svg>`;
+// Keep the installed native shell visually identical to the current home-screen
+// app. The source artwork is deliberately checked in so regenerating splash or
+// Android assets cannot silently restore the retired LIFE FIT wordmark.
+const icon = await readFile(join(root, "public/current-app-icon.png"));
 
 // The maskable web icon. Android crops to the launcher's shape, so the mark sits
 // inside the safe circle and only background is ever cut away.
@@ -57,8 +55,8 @@ const splash = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732">
 // An app icon with an alpha channel is rejected at upload, so everything is
 // flattened - except the adaptive foreground, which is required to be
 // transparent so the launcher can put its own background behind it.
-const png = (svg, size, { transparent = false } = {}) => {
-  const image = sharp(Buffer.from(svg)).resize(size, size);
+const png = (source, size, { transparent = false } = {}) => {
+  const image = sharp(Buffer.isBuffer(source) ? source : Buffer.from(source)).resize(size, size);
   return (transparent ? image : image.flatten({ background: SURFACE })).png().toBuffer();
 };
 
@@ -101,5 +99,3 @@ for (const target of targets) {
 
 // Kept alongside the exports so a future change starts from the mark, not from
 // a resized PNG.
-await writeFile(join(root, "public/brand-icon.svg"), icon);
-console.log("public/brand-icon.svg");
