@@ -17,7 +17,7 @@ type ProgressEntry = Readonly<{
   notes: string | null;
 }>;
 
-type Metric = "weight" | "measurements" | "steps" | "sleep" | "nutrition";
+export type Metric = "weight" | "measurements" | "steps" | "sleep" | "nutrition";
 
 const tabs = [
   { id: "nutrition", label: "תזונה", description: "קלוריות ומאקרו", icon: Utensils },
@@ -36,6 +36,7 @@ export default function ProgressMetricsDashboard({
   today,
   nutritionDays,
   nutritionTargets,
+  initialMetric = "nutrition",
 }: {
   entries: readonly ProgressEntry[];
   targetWeight?: number | string | null;
@@ -45,8 +46,10 @@ export default function ProgressMetricsDashboard({
   today: string;
   nutritionDays: readonly DailyNutritionTotal[];
   nutritionTargets: NutritionTargets;
+  /** Opened from a home card, the screen lands on that card's metric. */
+  initialMetric?: Metric;
 }) {
-  const [metric, setMetric] = useState<Metric>("nutrition");
+  const [metric, setMetric] = useState<Metric>(initialMetric);
 
   return (
     <section className="progress-metrics" data-metric={metric} data-viewport-fit={metric === "nutrition" || metric === "steps" || metric === "sleep" || undefined} aria-labelledby="progress-metrics-title">

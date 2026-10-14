@@ -4,9 +4,37 @@
 
 export type HealthSource = "healthkit" | "health-connect" | "manual" | "test";
 
+/**
+ * One writer behind a figure, exactly as the health store described it -
+ * HKSourceRevision for the app, HKDevice for the hardware. Nothing here is
+ * guessed: a ring is called a ring only because the store named it.
+ */
+export type HealthSourceDevice = Readonly<{
+  sourceName?: string;
+  sourceBundleIdentifier?: string;
+  productType?: string;
+  deviceName?: string;
+  manufacturer?: string;
+  model?: string;
+  hardwareVersion?: string;
+}>;
+
+/** Which writers stood behind one day's figure. Display and debugging only - never part of the value. */
+export type HealthSourceDetails = Readonly<{ devices: readonly HealthSourceDevice[] }>;
+
 /** `day` is a calendar date in the client's own timezone, never a UTC instant. */
-export type DailySteps = Readonly<{ day: string; steps: number; source: HealthSource; recordedAt: string }>;
-export type DailySleep = Readonly<{ day: string; minutes: number; source: HealthSource; recordedAt: string }>;
+export type DailySteps = Readonly<{ day: string; steps: number; source: HealthSource; recordedAt: string; details?: HealthSourceDetails }>;
+export type DailySleep = Readonly<{ day: string; minutes: number; source: HealthSource; recordedAt: string; details?: HealthSourceDetails }>;
+
+/** A raw asleep interval as HealthKit stored it, before nights are assembled. */
+export type SleepSample = Readonly<{ start: string; end: string; stage: "asleep" | "core" | "deep" | "rem"; device?: HealthSourceDevice }>;
+
+/**
+ * Why a sync did not finish. Kept apart from "no data" on purpose: an empty
+ * read and a failed read used to both arrive as an empty array, so a broken
+ * HealthKit query looked like a client who had not walked.
+ */
+export type HealthErrorKind = "bridge-unavailable" | "permission-denied" | "permission-check-failed" | "read-failed" | "persist-failed" | "load-failed";
 
 export type HealthPreferences = Readonly<{ dailyStepGoal: number; lastSyncAt?: string; lastSyncSource?: HealthSource }>;
 

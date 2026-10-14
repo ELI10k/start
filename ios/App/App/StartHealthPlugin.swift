@@ -1,6 +1,7 @@
 import Capacitor
 import Foundation
 import HealthKit
+import UIKit
 
 // The iOS half of the StartHealth contract. HealthKit already merges the phone,
 // the watch and any ring that writes to it, so this reads the merged daily total
@@ -19,7 +20,9 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     CAPPluginMethod(name: "getPermission", returnType: CAPPluginReturnPromise),
     CAPPluginMethod(name: "requestPermission", returnType: CAPPluginReturnPromise),
     CAPPluginMethod(name: "readDailySteps", returnType: CAPPluginReturnPromise),
-    CAPPluginMethod(name: "readDailySleep", returnType: CAPPluginReturnPromise)
+    CAPPluginMethod(name: "readDailySleep", returnType: CAPPluginReturnPromise),
+    CAPPluginMethod(name: "readSleepSamples", returnType: CAPPluginReturnPromise),
+    CAPPluginMethod(name: "openSettings", returnType: CAPPluginReturnPromise)
   ]
 
   private let store = HKHealthStore()
@@ -94,24 +97,69 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
       intervalComponents: DateComponents(day: 1)
     )
 
-    query.initialResultsHandler = { _, collection, error in
+    query.initialResultsHandler = { [weak self] _, collection, error in
+      // A failed read is a failure, not an empty week. Resolving [] here used
+      // to paint "no data" over a HealthKit error the client could retry.
       if let error {
         CAPLog.print("StartHealth read failed: \(error.localizedDescription)")
-        call.resolve(["days": []])
+        call.reject("read_failed", "HEALTH_READ_FAILED")
         return
       }
-      var days: [[String: Any]] = []
+      var totals: [(day: String, steps: Int)] = []
       collection?.enumerateStatistics(from: start, to: end) { statistics, _ in
+        // The merged, de-duplicated total. HealthKit has already applied its
+        // source priority here, so a phone and a watch that saw the same walk
+        // count it once; the writers listed below never change this figure.
         let steps = statistics.sumQuantity()?.doubleValue(for: HKUnit.count()) ?? 0
         // A day HealthKit has nothing for is omitted rather than reported as
         // zero: "the phone was off" and "the client did not walk" are different
         // facts, and the summary depends on telling them apart.
         guard steps > 0 else { return }
-        days.append(["day": Self.key(statistics.startDate), "steps": Int(steps.rounded())])
+        totals.append((day: Self.key(statistics.startDate), steps: Int(steps.rounded())))
       }
-      call.resolve(["days": days])
+      guard let self else {
+        call.resolve(["days": totals.map { ["day": $0.day, "steps": $0.steps] }])
+        return
+      }
+      // Who wrote the samples behind each day: names for the screen only.
+      // If this lookup fails the figures still go back, without names.
+      self.stepSources(type: stepType, predicate: predicate) { sources in
+        let days: [[String: Any]] = totals.map { total in
+          var day: [String: Any] = ["day": total.day, "steps": total.steps]
+          if let writers = sources[total.day], !writers.isEmpty { day["sources"] = writers }
+          return day
+        }
+        call.resolve(["days": days])
+      }
     }
 
+    store.execute(query)
+  }
+
+  // One entry per writer per day, ordered by how many raw steps it wrote.
+  // The raw counts only rank the writers; they are never added up.
+  private func stepSources(type: HKQuantityType, predicate: NSPredicate, completion: @escaping ([String: [[String: Any]]]) -> Void) {
+    let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+      if let error {
+        CAPLog.print("StartHealth source lookup failed: \(error.localizedDescription)")
+        completion([:])
+        return
+      }
+      var byDay: [String: [String: (info: [String: Any], weight: Double)]] = [:]
+      for sample in samples as? [HKQuantitySample] ?? [] {
+        let day = Self.key(sample.startDate)
+        let info = Self.sourceInfo(sample)
+        let writer = Self.writerKey(sample)
+        let steps = sample.quantity.doubleValue(for: HKUnit.count())
+        var writers = byDay[day] ?? [:]
+        let current = writers[writer]
+        writers[writer] = (info: current?.info ?? info, weight: (current?.weight ?? 0) + steps)
+        byDay[day] = writers
+      }
+      completion(byDay.mapValues { writers in
+        writers.values.sorted { $0.weight > $1.weight }.prefix(6).map { $0.info }
+      })
+    }
     store.execute(query)
   }
 
@@ -135,7 +183,7 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
       if let error {
         CAPLog.print("StartHealth sleep read failed: \(error.localizedDescription)")
-        call.resolve(["days": []])
+        call.reject("read_failed", "HEALTH_READ_FAILED")
         return
       }
 
@@ -186,6 +234,99 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
       call.resolve(["days": days])
     }
     store.execute(query)
+  }
+
+  // The raw asleep intervals, each with the writer HealthKit recorded for it.
+  // Nights are assembled in the web layer (lib/health/sleep-nights.ts), where
+  // the one-writer-per-night rule and the overlap merge are unit tested. The
+  // window opens at 18:00 the evening before the first day, because a night
+  // belongs to the morning it ends on.
+  @objc func readSleepSamples(_ call: CAPPluginCall) {
+    guard HKHealthStore.isHealthDataAvailable(), let sleepType else {
+      call.resolve(["samples": []])
+      return
+    }
+    guard
+      let fromDay = call.getString("fromDay"),
+      let toDay = call.getString("toDay"),
+      let firstDay = Self.day(fromDay),
+      let endDay = Self.day(toDay),
+      let start = Calendar.current.date(byAdding: .hour, value: -6, to: firstDay),
+      let end = Calendar.current.date(byAdding: .day, value: 1, to: endDay)
+    else {
+      call.reject("invalid_range")
+      return
+    }
+
+    let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+    let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+      if let error {
+        CAPLog.print("StartHealth sleep sample read failed: \(error.localizedDescription)")
+        call.reject("read_failed", "HEALTH_READ_FAILED")
+        return
+      }
+      let iso = ISO8601DateFormatter()
+      let result: [[String: Any]] = (samples as? [HKCategorySample] ?? []).compactMap { sample in
+        guard let stage = Self.stage(sample.value) else { return nil }
+        return [
+          "start": iso.string(from: sample.startDate),
+          "end": iso.string(from: sample.endDate),
+          "stage": stage,
+          "source": Self.sourceInfo(sample)
+        ]
+      }
+      call.resolve(["samples": result])
+    }
+    store.execute(query)
+  }
+
+  // iOS has no deep link to one app's Health permissions. The Health app is
+  // where they live (Profile → Apps → LIFE FIT); failing that, this app's page
+  // in Settings.
+  @objc func openSettings(_ call: CAPPluginCall) {
+    DispatchQueue.main.async {
+      let candidates = ["x-apple-health://", UIApplication.openSettingsURLString].compactMap(URL.init(string:))
+      guard let url = candidates.first(where: { UIApplication.shared.canOpenURL($0) }) ?? candidates.last else {
+        call.resolve(["opened": false])
+        return
+      }
+      UIApplication.shared.open(url) { opened in call.resolve(["opened": opened]) }
+    }
+  }
+
+  private static func stage(_ value: Int) -> String? {
+    if #available(iOS 16.0, *) {
+      switch value {
+      case HKCategoryValueSleepAnalysis.asleepCore.rawValue: return "core"
+      case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: return "deep"
+      case HKCategoryValueSleepAnalysis.asleepREM.rawValue: return "rem"
+      case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: return "asleep"
+      default: return nil
+      }
+    }
+    return value == HKCategoryValueSleepAnalysis.asleep.rawValue ? "asleep" : nil
+  }
+
+  private static func writerKey(_ sample: HKSample) -> String {
+    let source = sample.sourceRevision.source.bundleIdentifier
+    return "\(source)|\(sample.device?.model ?? "")|\(sample.device?.name ?? "")"
+  }
+
+  // Only what HealthKit itself recorded about the writer. Nothing is guessed;
+  // a field HealthKit left empty is left out.
+  private static func sourceInfo(_ sample: HKSample) -> [String: Any] {
+    var info: [String: Any] = [:]
+    let revision = sample.sourceRevision
+    info["sourceName"] = revision.source.name
+    info["sourceBundleIdentifier"] = revision.source.bundleIdentifier
+    if let productType = revision.productType { info["productType"] = productType }
+    if let device = sample.device {
+      if let name = device.name { info["deviceName"] = name }
+      if let manufacturer = device.manufacturer { info["manufacturer"] = manufacturer }
+      if let model = device.model { info["model"] = model }
+      if let hardware = device.hardwareVersion { info["hardwareVersion"] = hardware }
+    }
+    return info
   }
 
   private static func day(_ value: String) -> Date? {

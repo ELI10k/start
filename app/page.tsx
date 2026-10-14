@@ -89,8 +89,11 @@ async function HomeDashboard({ clientId, today }: { clientId: string; today: str
 
   return (
     <div className="home-screen">
-      {/* Three numbers and four destinations, and they have to land inside one
-          phone viewport with nothing under the fold.
+      {/* Five figures, four destinations, a tip and a progress line - in that
+          order of weight. It fits one phone screen when it can and scrolls when
+          it cannot (large text, a weekly summary, a small phone): forcing it
+          into one viewport with overflow:hidden cropped the last cards behind
+          the tab bar with no way to reach them.
           
           What used to sit here - the greeting, the daily-tip card, the "היום
           שלך" bar, the next-workout card and the active-menu card - was five
@@ -118,15 +121,23 @@ async function HomeDashboard({ clientId, today }: { clientId: string; today: str
           <HomeWeeklySummary clientId={clientId} />
         </Suspense>
 
+        {/* Two rows, each of one kind. Today's three plan figures share a row
+            at a third each; steps and sleep - read from Apple Health, and with
+            a connection state and a source to show - get half a row each.
+            The figure is always the headline and the goal sits under it: the
+            tiles used to read "3 מתוך 5" on one line, which wrapped at a third
+            of a phone into a number that looked like a different number. */}
         <section className="dashboard-metrics dashboard-metrics--fit" aria-label="מדדים להיום">
           <MetricTile
             label="ארוחות היום"
-            value={`${completed.length} מתוך ${meals.length}`}
+            value={<bdi>{completed.length}</bdi>}
+            detail={`מתוך ${meals.length}`}
             icon={<CalendarCheck aria-hidden="true" size={18} />}
           />
           <MetricTile
             label="אימונים השבוע"
-            value={`${completedWorkouts} מתוך ${plannedWorkouts}`}
+            value={<bdi>{completedWorkouts}</bdi>}
+            detail={`מתוך ${plannedWorkouts}`}
             accent="green"
             icon={<Dumbbell aria-hidden="true" size={18} />}
           />
@@ -136,8 +147,11 @@ async function HomeDashboard({ clientId, today }: { clientId: string; today: str
               with 2000 calories still to eat read that as none left. */}
           <MetricTile
             label="קלוריות"
-            value={calorieTarget ? `${eatenCalories} מתוך ${calorieTarget}` : `${eatenCalories}`}
-            detail={calorieTarget ? `נותרו ${remainingCalories}` : undefined}
+            value={<bdi>{eatenCalories.toLocaleString("he-IL")}</bdi>}
+            detail={calorieTarget ? <>
+              <span>מתוך {Number(calorieTarget).toLocaleString("he-IL")}</span>
+              <span>נותרו {remainingCalories.toLocaleString("he-IL")}</span>
+            </> : undefined}
             accent="neutral"
             icon={<UtensilsCrossed aria-hidden="true" size={18} />}
           />
@@ -145,7 +159,10 @@ async function HomeDashboard({ clientId, today }: { clientId: string; today: str
           <SleepMetricTile />
         </section>
 
-        {/* Four tiles, two across, each twice the size it was.
+        {/* Four destinations, two across, icon beside the words. Their height
+            follows what they say rather than a share of the viewport - at 30%
+            of the screen they were the biggest thing on it, and the least
+            informative.
             
             At four across they were about 80px wide - room for a label and
             nothing else, which is why the subtitle that names the active plan

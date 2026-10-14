@@ -68,7 +68,10 @@ test("progress UI offers week and month nutrition charts and stripes only the ex
 
 test("progress opens on nutrition instead of weigh-ins", async () => {
   const dashboard = await source("components/client/ProgressMetricsDashboard.tsx");
-  assert.match(dashboard, /useState<Metric>\("nutrition"\)/);
+  // Nutrition is still the default; a home card may ask for its own metric
+  // (/progress?metric=steps), which is the only other way in.
+  assert.match(dashboard, /initialMetric = "nutrition"/);
+  assert.match(dashboard, /useState<Metric>\(initialMetric\)/);
   assert.doesNotMatch(dashboard, /useState<Metric>\("weight"\)/);
 });
 

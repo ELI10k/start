@@ -1,5 +1,24 @@
 import { calendarDay, lastDays } from "./calculations.ts";
-import type { DailySleep, DailySteps, HealthAvailability, HealthPermissionState, HealthProvider, HealthSource } from "./types.ts";
+import { sleepNightsFromSamples } from "./sleep-nights.ts";
+import { normalizeSourceDetails, normalizeSourceDevice } from "./sources.ts";
+import type { DailySleep, DailySteps, HealthAvailability, HealthErrorKind, HealthPermissionState, HealthProvider, HealthSource, SleepSample } from "./types.ts";
+
+/**
+ * A failure that is not "no data". Carries a category for analytics and a
+ * sentence for the client; the native message stays out of both, because it can
+ * name a device or a person's health type.
+ */
+export class HealthSyncError extends Error {
+  readonly kind: HealthErrorKind;
+  constructor(kind: HealthErrorKind, options?: { cause?: unknown }) {
+    super(kind, options);
+    this.name = "HealthSyncError";
+    this.kind = kind;
+  }
+}
+
+export const healthErrorKind = (error: unknown, fallback: HealthErrorKind): HealthErrorKind =>
+  error instanceof HealthSyncError ? error.kind : fallback;
 
 // Three providers, one contract.
 //
@@ -57,53 +76,83 @@ const shift = (day: string) => {
 // The contract the native shell has to satisfy. HealthKit and Health Connect
 // differ in almost every detail except this shape, so the bridge normalises to
 // calendar days in the device's own timezone and hands them over.
+//
+// `sources` on a step day and readSleepSamples are newer than the first
+// TestFlight builds. An installed binary without them still works: steps arrive
+// without a named writer ("Apple Health"), and sleep falls back to the nightly
+// totals the old plugin computed.
 export type NativeHealthBridge = Readonly<{
   source: HealthSource;
   isAvailable: () => Promise<boolean> | boolean;
   getPermission: () => Promise<HealthPermissionState> | HealthPermissionState;
   requestPermission: () => Promise<HealthPermissionState> | HealthPermissionState;
-  readDailySteps: (fromDay: string, toDay: string) => Promise<readonly { day: string; steps: number }[]>;
+  readDailySteps: (fromDay: string, toDay: string) => Promise<readonly { day: string; steps: number; sources?: readonly unknown[] }[]>;
   readDailySleep: (fromDay: string, toDay: string) => Promise<readonly { day: string; minutes: number }[]>;
+  readSleepSamples?: (fromDay: string, toDay: string) => Promise<readonly unknown[] | null>;
+  openSettings?: () => Promise<boolean>;
 }>;
 
 declare global {
   interface Window { StartHealth?: NativeHealthBridge }
 }
 
+const STAGES = new Set(["asleep", "core", "deep", "rem"]);
+
+function normalizeSleepSamples(rows: readonly unknown[]): SleepSample[] {
+  const samples: SleepSample[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const { start, end, stage, source } = row as Record<string, unknown>;
+    if (typeof start !== "string" || typeof end !== "string" || typeof stage !== "string" || !STAGES.has(stage)) continue;
+    samples.push({ start, end, stage: stage as SleepSample["stage"], device: normalizeSourceDevice(source) });
+  }
+  return samples;
+}
+
 export function nativeProvider(bridge: NativeHealthBridge): HealthProvider {
   return {
     source: bridge.source,
     isAvailable: async () => {
-      try { return Boolean(await bridge.isAvailable()); } catch { return false; }
+      try { return Boolean(await bridge.isAvailable()); } catch (cause) { throw new HealthSyncError("bridge-unavailable", { cause }); }
     },
+    // A permission check that throws is not "unavailable" - that word is kept
+    // for a device with no health store, and it used to disable the card for
+    // good. It is a failed check, and the client can try again.
     getPermission: async () => {
-      try { return await bridge.getPermission(); } catch { return "unavailable"; }
+      try { return await bridge.getPermission(); } catch (cause) { throw new HealthSyncError("permission-check-failed", { cause }); }
     },
     requestPermission: async () => {
-      try { return await bridge.requestPermission(); } catch { return "denied"; }
+      try { return await bridge.requestPermission(); } catch (cause) { throw new HealthSyncError("permission-check-failed", { cause }); }
     },
+    // A bridge that throws mid-read is a failed sync, not a zero-step day. It
+    // used to come back as an empty array, and the screen showed "no data".
     readDailySteps: async (fromDay, toDay) => {
-      try {
-        const rows = await bridge.readDailySteps(fromDay, toDay);
-        const recordedAt = new Date().toISOString();
-        return rows
-          .filter((row) => typeof row?.day === "string" && Number.isFinite(row?.steps))
-          .map((row) => ({ day: row.day, steps: Math.max(0, Math.round(row.steps)), source: bridge.source, recordedAt }));
-      } catch {
-        // A bridge that throws mid-read is a failed sync, not a zero-step day.
-        return [];
-      }
+      let rows: Awaited<ReturnType<NativeHealthBridge["readDailySteps"]>>;
+      try { rows = await bridge.readDailySteps(fromDay, toDay); } catch (cause) { throw new HealthSyncError("read-failed", { cause }); }
+      const recordedAt = new Date().toISOString();
+      return (Array.isArray(rows) ? rows : [])
+        .filter((row) => typeof row?.day === "string" && Number.isFinite(row?.steps))
+        .map((row) => ({
+          day: row.day,
+          steps: Math.max(0, Math.round(row.steps)),
+          source: bridge.source,
+          recordedAt,
+          details: normalizeSourceDetails(row.sources),
+        }));
     },
     readDailySleep: async (fromDay, toDay) => {
-      try {
-        const rows = await bridge.readDailySleep(fromDay, toDay);
-        const recordedAt = new Date().toISOString();
-        return rows
-          .filter((row) => typeof row?.day === "string" && Number.isFinite(row?.minutes))
-          .map((row) => ({ day: row.day, minutes: Math.max(0, Math.round(row.minutes)), source: bridge.source, recordedAt }));
-      } catch {
-        return [];
+      const recordedAt = new Date().toISOString();
+      if (bridge.readSleepSamples) {
+        let samples: readonly unknown[] | null = null;
+        try { samples = await bridge.readSleepSamples(fromDay, toDay); } catch (cause) { throw new HealthSyncError("read-failed", { cause }); }
+        // null means this binary predates the method; anything else is the answer.
+        if (samples) return sleepNightsFromSamples(normalizeSleepSamples(samples), { fromDay, toDay }, bridge.source as HealthSource, recordedAt);
       }
+      let rows: Awaited<ReturnType<NativeHealthBridge["readDailySleep"]>>;
+      try { rows = await bridge.readDailySleep(fromDay, toDay); } catch (cause) { throw new HealthSyncError("read-failed", { cause }); }
+      return (Array.isArray(rows) ? rows : [])
+        .filter((row) => typeof row?.day === "string" && Number.isFinite(row?.minutes))
+        .map((row) => ({ day: row.day, minutes: Math.max(0, Math.round(row.minutes)), source: bridge.source, recordedAt }));
     },
   };
 }
@@ -115,7 +164,7 @@ export function resolveHealthProvider(): HealthProvider {
 
 const REASONS: Record<HealthPermissionState, string> = {
   unknown: "",
-  unavailable: "המכשיר הזה לא חשוף ל-Apple Health או ל-Health Connect. באפליקציה במכשיר הצעדים יופיעו אוטומטית.",
+  unavailable: "המכשיר הזה לא חשוף ל-Apple Health או ל-Health Connect. באפליקציה באייפון הנתונים יופיעו אוטומטית.",
   prompt: "כדי להציג צעדים צריך לאשר גישה לנתוני הבריאות במכשיר.",
   granted: "",
   denied: "הגישה לנתוני הבריאות נדחתה. אפשר לאשר אותה מחדש בהגדרות המכשיר.",

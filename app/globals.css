@@ -352,7 +352,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 /* Offline notice: sticky under the header, never over the content. */
 .offline-banner {
   position: sticky;
-  inset-block-start: calc(3.5rem + env(safe-area-inset-top));
+  inset-block-start: calc(2.75rem + env(safe-area-inset-top));
   z-index: 39;
   display: flex; align-items: center; justify-content: center; gap: .5rem;
   padding: .5rem 1rem;
@@ -725,36 +725,91 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
   gap: .6rem;
 }
-/* Four daily figures in one row. In RTL the fourth item lands on the left, so
-   steps can be added without moving the three figures clients already know. */
+/* The home figures: a row of three (meals, workouts, calories) and a row of
+   two (steps, sleep). Six columns let both rows share one grid, so every tile
+   in a row is the same height and the two rows line up at their edges.
+   
+   Inside a tile the figure is the headline and the goal sits under it. The
+   figure never wraps and never ellipsises - "3,743" broken across two lines,
+   or clipped to "3,7…", is a different number - so it scales with the tile
+   instead, and the goal line below it is the part allowed to wrap. */
 .dashboard-metrics--fit {
   display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: .5rem; overflow: visible; margin-inline: 0; padding-inline: 0;
 }
 .dashboard-metrics--fit > .metric-tile { grid-column: span 2; }
 .dashboard-metrics--fit > .metric-tile--health { grid-column: span 3; }
-.dashboard-metrics--fit .metric-tile { min-width: 0; flex: initial; padding: .65rem .55rem; min-height: 5.4rem; }
-.dashboard-metrics--fit .metric-tile__head { font-size: .62rem; gap: .25rem; }
-.dashboard-metrics--fit .metric-tile__head span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dashboard-metrics--fit .metric-tile__icon svg { width: .85rem; height: .85rem; }
-/* Wraps rather than clips.
-   
-   A third of a phone is about 106px of usable tile, and "253 מתוך 2014" does
-   not fit one line of it - the ellipsis turned it into "253 מתוך 4…", which is
-   a wrong number, not a shortened one. Two lines is the honest answer; the tile
-   has the height for it. */
-.dashboard-metrics--fit .metric-tile strong {
-  margin-top: .4rem;
-  overflow: visible;
-  font-size: clamp(.9rem, 4vw, 1.05rem); line-height: 1.15;
+.dashboard-metrics--fit .metric-tile {
+  display: flex; flex-direction: column; min-width: 0; min-height: 0; flex: initial;
+  padding: .6rem .65rem .65rem;
+  border-radius: var(--radius-md);
+}
+.dashboard-metrics--fit .metric-tile__head { gap: .3rem; color: var(--ink-muted); font-size: .72rem; font-weight: 700; line-height: 1.2; }
+/* A label wraps rather than clips: "אימונים השבוע" at a third of a 375pt phone
+   with large text is two lines, and that is fine. */
+.dashboard-metrics--fit .metric-tile__head span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.dashboard-metrics--fit .metric-tile__icon { flex: 0 0 auto; }
+.dashboard-metrics--fit .metric-tile__icon svg { width: 1rem; height: 1rem; }
+.dashboard-metrics--fit .metric-tile strong,
+.dashboard-metrics--fit .metric-tile__value {
+  display: flex; align-items: baseline; gap: .2rem;
+  margin-top: .35rem; overflow: visible;
+  color: var(--ink); font-size: clamp(1.15rem, 5.4vw, 1.45rem); font-weight: 850; line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  text-overflow: clip; white-space: nowrap;
+}
+.dashboard-metrics--fit .metric-tile__unit { color: var(--ink-muted); font-size: .72rem; font-weight: 750; }
+.dashboard-metrics--fit .metric-tile small,
+.dashboard-metrics--fit .metric-tile__goal {
+  display: block; margin-top: .15rem; overflow: visible;
+  color: var(--ink-muted); font-size: .72rem; font-weight: 650; line-height: 1.3;
   text-overflow: clip; white-space: normal; overflow-wrap: anywhere;
 }
-.dashboard-metrics--fit .metric-tile small { white-space: normal; }
+.dashboard-metrics--fit .metric-tile small > span { display: block; }
+.dashboard-metrics--fit .metric-tile--health .metric-tile__value { font-size: clamp(1.35rem, 6.6vw, 1.7rem); }
+
+/* Steps and sleep say where they stand in words, with a dot for colour - never
+   by fading the whole card out, which made a card full of real data look
+   switched off. */
+.health-tile__status {
+  display: flex; align-items: center; gap: .35rem;
+  margin-top: .45rem;
+  color: var(--ink); font-size: .72rem; font-weight: 750; line-height: 1.3;
+}
+.health-tile__status > i {
+  flex: 0 0 auto; width: .5rem; height: .5rem; border-radius: 50%;
+  background: var(--ink-muted);
+}
+.health-tile__status[data-tone="ok"] { color: var(--green-press); }
+.health-tile__status[data-tone="ok"] > i { background: var(--green); }
+.health-tile__status[data-tone="warn"] { color: #92400E; }
+.health-tile__status[data-tone="warn"] > i { background: #D97706; }
+.health-tile__status[data-tone="error"] { color: #B91C1C; }
+.health-tile__status[data-tone="error"] > i { background: var(--red); }
+.health-tile__status[data-tone="muted"] { color: var(--ink-muted); }
+.health-tile__meta {
+  display: block; margin-top: .1rem;
+  color: var(--ink-muted); font-size: .68rem; font-weight: 600; line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.metric-tile--health[data-status="syncing"] .health-tile__status > i,
+.metric-tile--health[data-status="initializing"] .health-tile__status > i { animation: health-pulse 1s ease-in-out infinite alternate; }
+@keyframes health-pulse { from { opacity: .35; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .metric-tile--health .health-tile__status > i { animation: none !important; }
+}
+.health-connection {
+  display: grid; gap: .25rem; justify-items: center;
+  padding: .85rem 1rem; border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--surface); text-align: center;
+}
+.health-connection .health-tile__status { margin-top: 0; }
+.health-connection__meta { color: var(--ink-muted); font-size: .74rem; font-weight: 600; }
+.health-connection__note { max-width: 32rem; color: var(--ink-muted); font-size: .76rem; line-height: 1.5; }
+.health-connection .health-sync-button { margin-top: .35rem; }
 @media (min-width: 480px) {
-  .dashboard-metrics--fit { gap: .7rem; }
-  .dashboard-metrics--fit .metric-tile { padding: .9rem; min-height: 6.4rem; }
-  .dashboard-metrics--fit .metric-tile__head { font-size: .7rem; }
-  .dashboard-metrics--fit .metric-tile strong { font-size: 1.15rem; }
+  .dashboard-metrics--fit { gap: .65rem; }
+  .dashboard-metrics--fit .metric-tile { padding: .8rem .85rem; }
 }
 
 /* Progress metrics stay on one screen without becoming one long dashboard.
@@ -1092,156 +1147,94 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .metric-tile strong { font-size: 1.22rem; }
 }
 
-/* The client home screen: three figures, four destinations, one viewport.
+/* The client home screen.
    
-   Nothing here is allowed under the fold, so the two rows are measured against
-   the screen rather than given fixed heights - a 6.9" phone would otherwise
-   leave the bottom third empty and a 4.7" one would push the tiles under the
-   nav bar. The subtraction is the sticky header, this container's own top
-   padding, and the padding that already clears the fixed bottom bar.
+   It used to be pinned to one viewport: html and body fixed, the shell at
+   100dvh with overflow:hidden and touch-action:none, and the quick actions
+   sized as 30% of the screen. On a short iPhone, with large text, or on the
+   day a weekly summary arrived, the tip and the progress line were cropped
+   behind the tab bar and could not be scrolled to.
    
-   Not `overflow: hidden`. On the one day a week the coach releases a summary,
-   and for anyone running large text, the screen is meant to grow and scroll
-   rather than crop something the client never finds out was there. */
-/* The shell pads the bottom for the fixed bar, and so does the content box
-   inside it - about 180px of clearance for a 72px bar. Everywhere else that is
-   only slack at the end of a long scroll; here it was the whole difference
-   between fitting the screen and not, so the home screen pays for the bar once. */
+   Now the page scrolls like every other page, every block is as tall as what
+   it says, and the bar is cleared once: the shell's own bottom padding is
+   dropped here and the content box pays --nav-clearance (bar + home
+   indicator) plus a little air, so the last card ends fully above the bar. */
 .client-app-shell--home { padding-bottom: 0; }
-.client-app-shell--home .client-app-content { padding-bottom: var(--nav-clearance); }
+.client-app-shell--home .client-app-content {
+  padding-top: .6rem;
+  padding-bottom: calc(var(--nav-clearance) + .75rem);
+}
 .home-screen {
   display: flex;
   flex-direction: column;
-  /* Top-aligned. Centring left a third of the screen empty above the tiles and
-     read as a page that had failed to load its header. */
   justify-content: flex-start;
-  gap: clamp(.7rem, 2.4vh, 1.25rem);
-  min-height: calc(100dvh - 3.5rem - 1rem - var(--nav-clearance) - env(safe-area-inset-top));
+  gap: .75rem;
+  min-width: 0;
 }
+.home-screen > * { min-width: 0; }
 .home-screen .premium-card { margin-bottom: 0; }
-.home-screen .dashboard-metrics--fit .metric-tile { min-height: clamp(5.4rem, 13vh, 8rem); }
-/* Two rows of them now, so each is measured against half of what one row had.
-   The screen still has to end above the fold with a lesson under it. */
-.home-screen .quick-action-card { min-height: clamp(7rem, 15vh, 9.5rem); }
+.home-screen .section-heading--compact { margin-bottom: .35rem; }
+.home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
 
-/* The native phone shell has very little useful height once the safe areas and
-   fixed tab bar are accounted for. Keep every home section, but spend that
-   height on information instead of empty header/card padding. */
 @media (max-width: 767px) {
-  html:has(.client-app-shell--home),
-  body:has(.client-app-shell--home) {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-  .client-app-shell--home {
-    height: 100dvh;
-    min-height: 0;
-    overflow: hidden;
-    touch-action: none;
-  }
+  /* The header holds one word. It keeps the notch clear and a 44pt target for
+     the wordmark, and nothing more. */
   .mobile-app-header {
-    min-height: calc(2rem + env(safe-area-inset-top));
+    min-height: calc(2.75rem + env(safe-area-inset-top));
     padding-inline: .75rem;
   }
   .mobile-app-header .start-wordmark {
-    font-size: .95rem;
-    line-height: 1;
+    display: inline-flex; min-height: 2.75rem; align-items: center;
+    font-size: 1rem; line-height: 1;
   }
-  .client-app-shell--home .client-app-content {
-    box-sizing: border-box;
-    height: calc(100dvh - 2rem - env(safe-area-inset-top));
-    padding-top: .4rem;
-    padding-bottom: var(--nav-clearance);
-    padding-inline: .75rem;
-    overflow: hidden;
-  }
-  .home-screen {
-    display: grid;
-    grid-auto-rows: max-content;
-    gap: clamp(.3rem, .8dvh, .45rem);
-    height: 100%;
-    min-height: calc(100dvh - 2rem - .4rem - var(--nav-clearance) - env(safe-area-inset-top));
-    overflow: hidden;
-  }
-  .home-screen .dashboard-metrics--fit .metric-tile {
-    min-height: 4.65rem;
-    padding: .5rem .45rem;
-  }
-  .home-screen .dashboard-metrics--fit .metric-tile strong { margin-top: .25rem; }
-  .home-screen .quick-action-card {
-    min-height: 0;
-    height: 100%;
-    gap: .25rem;
-    padding: .5rem .4rem;
-  }
-  .home-screen .quick-action-card__icon,
-  .home-screen .quick-action-card > span:first-child:has(svg) {
-    width: 3rem;
-    height: 3rem;
-    border-radius: .9rem;
-  }
-  .home-screen .quick-action-card__label { font-size: 1.05rem; }
-  .home-screen .quick-action-card__meta { font-size: .78rem; }
-  .home-screen .section-heading--compact { margin-bottom: .3rem; }
-  .home-screen .section-heading--compact h2 { margin-top: 0; font-size: 1rem; }
-  .home-screen .weekly-lesson {
-    min-height: 3.25rem;
-    padding: .4rem .6rem;
-  }
-  .home-screen .weekly-lesson__icon { width: 2rem; height: 2rem; }
-  .home-screen .progress-pulse { gap: .3rem .5rem; padding: .45rem .65rem; }
-  .home-screen .quick-actions-grid {
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-    /* Four useful destinations should feel substantial without owning the
-       screen. Tying the pair of rows to 30% of the viewport leaves room for
-       today's metrics, lesson and progress even on a short iPhone. */
-    height: clamp(11.5rem, 30dvh, 14rem);
-    gap: clamp(.3rem, .8dvh, .45rem);
-  }
+  .client-app-shell--home .client-app-content { padding-inline: .75rem; }
 }
-/* The desktop nav is a top bar, there is no fold to fit inside, and stretching
-   seven tiles down a 1440px window looks like an error. */
 @media (min-width: 768px) {
-  .home-screen { min-height: 0; gap: 1.25rem; }
-  .home-screen .dashboard-metrics--fit .metric-tile,
-  .home-screen .quick-action-card { min-height: 7rem; }
+  .client-app-shell--home .client-app-content { padding-top: 2rem; padding-bottom: 4rem; }
+  .home-screen { gap: 1.25rem; }
 }
 
-/* Two across, not four. Four left each tile about 80px - a label's width and
-   no more - so the subtitle naming the active plan or the next training day
-   arrived truncated, which is the half of the tile that was worth adding. */
-.quick-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+/* Two across, icon beside the words, as tall as the words need. Every row is
+   as tall as its tallest card (grid-auto-rows: 1fr), so the four stay equal. */
+.quick-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: .5rem; }
 .quick-action-card {
-  display: flex; min-width: 0; min-height: 5.75rem;
-  align-items: center; justify-content: center; flex-direction: column; gap: .35rem;
-  padding: .8rem .45rem;
+  display: grid; min-width: 0; min-height: 3.75rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center; align-items: center;
+  column-gap: .6rem; row-gap: .1rem;
+  padding: .6rem .7rem;
   border: 1px solid var(--line); border-radius: var(--radius-md);
   background: var(--surface); box-shadow: var(--shadow-card);
   color: var(--ink); font-size: .72rem; font-weight: 700; text-decoration: none;
-  text-align: center;
+  text-align: start;
 }
 .quick-action-card > svg { color: var(--green); }
 .quick-action-card__icon,
 .quick-action-card > span:first-child:has(svg) {
-  display: grid; width: 3.4rem; height: 3.4rem; place-items: center;
-  border-radius: 1rem; background: var(--green-tint); color: var(--green);
+  display: grid; grid-row: 1 / span 2; width: 2.5rem; height: 2.5rem; place-items: center;
+  border-radius: .8rem; background: var(--green-tint); color: var(--green-press);
 }
-.quick-action-card__label { font-size: 1.05rem; font-weight: 900; line-height: 1.2; }
-/* The line that absorbed the cards this screen no longer has room for - the
-   active plan's name, the next training day. One line, clipped: a coach who
-   names a menu "תפריט העלאת מסה - שלב ב׳" must not be able to change how tall
-   this row is, because the row has to end above the fold. */
+.quick-action-card__icon svg { width: 1.25rem; height: 1.25rem; }
+.quick-action-card__label { grid-column: 2; align-self: end; font-size: .95rem; font-weight: 850; line-height: 1.2; overflow-wrap: anywhere; }
+/* The line that carries the cards this screen no longer has - the active
+   plan's name, the next training day. It wraps rather than ellipsising: a
+   plan called "תפריט העלאת מסה - שלב ב׳" is worth a second line, and the row
+   grows to fit it. */
 .quick-action-card__meta {
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--ink-muted); font-size: .82rem; font-weight: 650; line-height: 1.2;
+  grid-column: 2; align-self: start; min-width: 0;
+  color: var(--ink-muted); font-size: .74rem; font-weight: 650; line-height: 1.3;
+  overflow-wrap: anywhere;
 }
-.quick-action-card__meta--error { color: var(--red); }
+.quick-action-card__meta--error { color: #B91C1C; }
+@media (min-width: 768px) {
+  .quick-actions-grid { gap: .75rem; }
+  .quick-action-card { min-height: 5rem; padding: .9rem 1rem; }
+  .quick-action-card__icon,
+  .quick-action-card > span:first-child:has(svg) { width: 3rem; height: 3rem; }
+  .quick-action-card__label { font-size: 1.05rem; }
+}
 @media (min-width: 1024px) {
-  .quick-action-card { min-height: 7rem; }
   .quick-action-card:hover, .premium-card:hover { border-color: rgba(22, 163, 74, .38); transform: translateY(-2px); }
 }
 @media (max-width: 374px) {
@@ -1250,7 +1243,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-ring { width: 7rem; }
   .progress-ring::before { width: 5.9rem; }
   .quick-actions-grid { gap: .4rem; }
-  .quick-action-card { min-height: 6.5rem; font-size: .66rem; }
+  .quick-action-card { column-gap: .45rem; padding-inline: .55rem; }
 }
 
 .premium-card__description { color: var(--ink-muted); font-size: .82rem; line-height: 1.5; }
