@@ -94,7 +94,7 @@ test("App Review compliance surfaces are public and linked from account entry po
 
 test("self-service deletion removes private blobs before the auth cascade", async () => {
   const deletion = await source("lib/account/delete-account.ts");
-  for (const bucket of ["check-in-photos", "food-log-photos", "technique-videos"]) {
+  for (const bucket of ["check-in-photos", "food-log-photos", "technique-videos", "message-images"]) {
     assert.ok(deletion.includes(bucket), `account deletion misses ${bucket}`);
   }
   assert.ok(

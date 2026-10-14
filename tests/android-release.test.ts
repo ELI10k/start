@@ -58,11 +58,12 @@ test("sign-in emails open in the Android app, verified by assetlinks.json", asyn
 
   const { PACKAGE_NAME, androidFingerprints } = await import("../lib/native/assetlinks.ts");
   assert.equal(PACKAGE_NAME, "co.il.startcoaching.app");
+  const signing = "AD:07:58:EA:F7:B6:97:13:E9:1A:AB:AD:3A:00:98:38:8D:B0:1D:D2:90:27:5C:79:22:9A:66:36:17:D8:99:56";
   const upload = "37:D8:01:4C:2E:1B:C3:77:49:97:9E:B9:96:B9:57:64:E0:E1:D6:0F:A5:D4:D5:AE:D3:B5:FB:C7:4E:BA:8E:55";
-  assert.deepEqual(androidFingerprints(""), [upload]);
+  assert.deepEqual(androidFingerprints(""), [signing, upload]);
   // The Play app signing key is added from the environment; junk is ignored.
   const play = "AA:".repeat(31) + "AA";
-  assert.deepEqual(androidFingerprints(`${play.toLowerCase()}, not-a-hash`), [upload, play]);
+  assert.deepEqual(androidFingerprints(`${play.toLowerCase()}, not-a-hash`), [signing, upload, play]);
 });
 
 test("Android never calls into Firebase without a Firebase project", async () => {
@@ -72,4 +73,18 @@ test("Android never calls into Firebase without a Firebase project", async () =>
     const line = bridge.slice(bridge.lastIndexOf("\n", call.index), call.index);
     assert.match(line, /platform === "ios"/);
   }
+});
+
+test("Google Play's account deletion URL explains how, what is deleted and what is kept", async () => {
+  const page = await source("app/delete-account/page.tsx");
+  assert.match(page, /LIFE FIT/);
+  assert.match(page, /מחיקת חשבון/);
+  assert.match(page, /מה נמחק/);
+  assert.match(page, /מה נשמר/);
+  assert.match(page, /תמונות שנשלחו בצ׳אט/);
+  const proxy = await source("proxy.ts");
+  // Reachable signed out: not one of the private prefixes.
+  assert.doesNotMatch(proxy, /"\/delete-account"/);
+  const support = await source("app/app-support/page.tsx");
+  assert.match(support, /href="\/delete-account"/);
 });
