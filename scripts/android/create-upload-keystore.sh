@@ -30,12 +30,30 @@ fi
 echo "LIFE FIT - new Google Play upload key"
 echo "Choose a strong password (at least 12 characters, no quotes or backslashes)."
 echo "Nothing will be shown while you type."
+# LIFE_FIT_PASSWORD_DIALOG=1 asks in a macOS dialog instead, which shows a dot
+# per character - easier than a terminal prompt that shows nothing at all.
+ask() {
+  if [ "${LIFE_FIT_PASSWORD_DIALOG:-}" = "1" ]; then
+    osascript -e "text returned of (display dialog \"$1\" with title \"LIFE FIT upload key\" default answer \"\" with hidden answer)"
+  else
+    local answer
+    read -r -s -p "$1: " answer
+    echo >&2
+    printf '%s' "$answer"
+  fi
+}
+complain() {
+  echo "$1"
+  if [ "${LIFE_FIT_PASSWORD_DIALOG:-}" = "1" ]; then
+    osascript -e "display alert \"$1\"" >/dev/null
+  fi
+}
 while true; do
-  read -r -s -p "Password: " PW1; echo
-  read -r -s -p "Repeat password: " PW2; echo
-  if [ "$PW1" != "$PW2" ]; then echo "The passwords do not match. Try again."; continue; fi
-  if [ "${#PW1}" -lt 12 ]; then echo "Too short. Use at least 12 characters."; continue; fi
-  case "$PW1" in *\"*|*\\*|*\'*) echo "Please avoid quotes and backslashes."; continue;; esac
+  PW1="$(ask "סיסמה חדשה למפתח LIFE FIT - לפחות 12 תווים, בלי מירכאות")"
+  PW2="$(ask "הקלד שוב את אותה סיסמה")"
+  if [ "$PW1" != "$PW2" ]; then complain "The passwords do not match. Try again."; continue; fi
+  if [ "${#PW1}" -lt 12 ]; then complain "Too short. Use at least 12 characters."; continue; fi
+  case "$PW1" in *\"*|*\\*|*\'*) complain "Please avoid quotes and backslashes."; continue;; esac
   break
 done
 unset PW2

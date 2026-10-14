@@ -127,14 +127,18 @@ export default function NativeBridge() {
       (window as { StartPush?: unknown }).StartPush = {
         platform,
         provider: platform === "ios" ? "apns" : "fcm",
-        isAvailable: async () => true,
+        // Android has no Firebase project yet (no google-services.json), and
+        // without it FirebaseMessaging throws inside register() and takes the
+        // whole app down. The server does not send FCM either, so Android
+        // reports push as unavailable until both exist.
+        isAvailable: async () => platform === "ios",
         getPermission: async () => toState((await PushNotifications.checkPermissions()).receive),
         requestPermission: async () => {
           const result = await PushNotifications.requestPermissions();
           const state = toState(result.receive);
           // Registering is what produces the token; asking without registering
           // leaves the app permitted but unaddressable.
-          if (state === "granted") await PushNotifications.register();
+          if (state === "granted" && platform === "ios") await PushNotifications.register();
           return state;
         },
         getToken: async () => token,
@@ -151,7 +155,7 @@ export default function NativeBridge() {
       // An already-permitted install re-registers on every launch, because APNs
       // and FCM both rotate tokens without telling the app first.
       void PushNotifications.checkPermissions().then((result) => {
-        if (result.receive === "granted") void PushNotifications.register();
+        if (result.receive === "granted" && platform === "ios") void PushNotifications.register();
       });
     })();
 
