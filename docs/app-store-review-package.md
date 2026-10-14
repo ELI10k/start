@@ -44,7 +44,7 @@ purchase digital content in this build.
 ## Required outside the repository
 
 - [ ] Active Apple Developer Program membership.
-- [ ] App Store Connect app record for `co.il.startcoaching.app`.
+- [ ] App Store Connect app record for `il.co.elicohenfitness.startlifefit`.
 - [x] Monitored support address: `start.elicohenfitness@gmail.com` (the optional
       `NEXT_PUBLIC_SUPPORT_EMAIL` variable may override it without a code change).
 - [ ] `APPLE_TEAM_ID` configured on the production deployment.

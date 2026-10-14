@@ -17,7 +17,7 @@ import { KeyboardResize } from "@capacitor/keyboard";
 const serverUrl = process.env.START_NATIVE_SERVER_URL;
 
 const config: CapacitorConfig = {
-  appId: "co.il.startcoaching.app",
+  appId: "il.co.elicohenfitness.startlifefit",
   appName: "LIFE FIT",
   // Only a fallback: an offline splash for when the device cannot reach the
   // server at all. The real UI comes from serverUrl.

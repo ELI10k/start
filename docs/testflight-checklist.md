@@ -22,7 +22,7 @@ variable. Everything else is committed.
 
 | Thing | Where it lives |
 | --- | --- |
-| Bundle ID `co.il.startcoaching.app` | `capacitor.config.ts`, both build configurations |
+| Bundle ID `il.co.elicohenfitness.startlifefit` | `capacitor.config.ts`, both build configurations |
 | Display name START | `Info.plist`, `strings.xml` |
 | App icon, every density, full bleed | `scripts/generate-app-icons.mjs` |
 | Splash screen | same script, held until the app says it is ready |
