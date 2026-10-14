@@ -30,6 +30,16 @@ test("the custom health plugin is registered with the bridge", async () => {
   assert.doesNotMatch(storyboard, /customClass="CAPBridgeViewController"/);
 });
 
+test("sleep uses one HealthKit source per night instead of adding every writer", async () => {
+  const plugin = await source("ios/App/App/StartHealthPlugin.swift");
+  assert.match(plugin, /Dictionary\(grouping: grouped\[day\] \?\? \[\], by:/);
+  assert.match(plugin, /sourceRevision\.source\.bundleIdentifier/);
+  assert.match(plugin, /candidates\.max\(by: Self\.isLowerPriority\)/);
+  assert.match(plugin, /if lhs\.hasStages != rhs\.hasStages/);
+  assert.match(plugin, /if lhs\.isThirdParty != rhs\.isThirdParty/);
+  assert.doesNotMatch(plugin, /let intervals = \(grouped\[day\] \?\? \[\]\)\.map/);
+});
+
 test("the entitlements exist and are wired into both configurations", async () => {
   const entitlements = await source("ios/App/App/App.entitlements");
   assert.match(entitlements, /<key>aps-environment<\/key>/);

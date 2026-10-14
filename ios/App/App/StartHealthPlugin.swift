@@ -149,24 +149,39 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
         return sample.value == HKCategoryValueSleepAnalysis.asleep.rawValue
       }
 
-      // Watches and phones can report overlapping sleep stages. Merge those
-      // intervals before adding minutes so the same sleep is never counted twice.
+      // HealthKit returns the raw samples from every writer. Apple Health's
+      // source priority is a presentation preference and is not applied to an
+      // HKSampleQuery, so unioning all samples can turn one five-hour night into
+      // nearly ten hours when both a ring and the phone report sleep.
+      //
+      // Build one candidate per source and choose a single source for the day.
+      // Detailed sleep stages are preferred over a generic "asleep" record;
+      // when both are equally detailed, prefer a third-party wearable over an
+      // Apple fallback. A lone Apple Watch/iPhone source still works normally.
       let grouped = Dictionary(grouping: asleep, by: { Self.key($0.startDate) })
       let days = grouped.keys.sorted().compactMap { day -> [String: Any]? in
-        let intervals = (grouped[day] ?? []).map { ($0.startDate, $0.endDate) }.sorted { $0.0 < $1.0 }
-        guard var current = intervals.first else { return nil }
-        var seconds: TimeInterval = 0
-        for interval in intervals.dropFirst() {
-          if interval.0 <= current.1 {
-            current.1 = max(current.1, interval.1)
+        let candidates = Dictionary(grouping: grouped[day] ?? [], by: {
+          $0.sourceRevision.source.bundleIdentifier
+        }).compactMap { source, samples -> SleepCandidate? in
+          guard let minutes = Self.mergedSleepMinutes(samples) else { return nil }
+          let hasStages: Bool
+          if #available(iOS 16.0, *) {
+            let stages = [HKCategoryValueSleepAnalysis.asleepCore.rawValue,
+                          HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+                          HKCategoryValueSleepAnalysis.asleepREM.rawValue]
+            hasStages = samples.contains { stages.contains($0.value) }
           } else {
-            seconds += current.1.timeIntervalSince(current.0)
-            current = interval
+            hasStages = false
           }
+          return SleepCandidate(
+            minutes: minutes,
+            hasStages: hasStages,
+            isThirdParty: !source.lowercased().hasPrefix("com.apple."),
+            latestEnd: samples.map(\.endDate).max() ?? .distantPast
+          )
         }
-        seconds += current.1.timeIntervalSince(current.0)
-        let minutes = min(1440, max(0, Int((seconds / 60).rounded())))
-        return minutes > 0 ? ["day": day, "minutes": minutes] : nil
+        guard let selected = candidates.max(by: Self.isLowerPriority) else { return nil }
+        return ["day": day, "minutes": selected.minutes]
       }
       call.resolve(["days": days])
     }
@@ -189,5 +204,35 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.dateFormat = "yyyy-MM-dd"
     return formatter.string(from: date)
+  }
+
+  private struct SleepCandidate {
+    let minutes: Int
+    let hasStages: Bool
+    let isThirdParty: Bool
+    let latestEnd: Date
+  }
+
+  private static func isLowerPriority(_ lhs: SleepCandidate, _ rhs: SleepCandidate) -> Bool {
+    if lhs.hasStages != rhs.hasStages { return !lhs.hasStages }
+    if lhs.isThirdParty != rhs.isThirdParty { return !lhs.isThirdParty }
+    return lhs.latestEnd < rhs.latestEnd
+  }
+
+  private static func mergedSleepMinutes(_ samples: [HKCategorySample]) -> Int? {
+    let intervals = samples.map { ($0.startDate, $0.endDate) }.sorted { $0.0 < $1.0 }
+    guard var current = intervals.first else { return nil }
+    var seconds: TimeInterval = 0
+    for interval in intervals.dropFirst() {
+      if interval.0 <= current.1 {
+        current.1 = max(current.1, interval.1)
+      } else {
+        seconds += current.1.timeIntervalSince(current.0)
+        current = interval
+      }
+    }
+    seconds += current.1.timeIntervalSince(current.0)
+    let minutes = min(1440, max(0, Int((seconds / 60).rounded())))
+    return minutes > 0 ? minutes : nil
   }
 }
