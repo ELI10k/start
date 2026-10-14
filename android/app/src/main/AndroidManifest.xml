@@ -32,6 +32,19 @@
                 <data android:scheme="start" />
             </intent-filter>
 
+            <!-- Android App Links: the sign-in and invitation emails open in the
+                 app, so the session lands in the app's web view rather than the
+                 browser. Verified against /.well-known/assetlinks.json. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="start.elicohenfitness.co.il" />
+                <data android:path="/auth/confirm-link" />
+                <data android:path="/auth/confirm-invite" />
+                <data android:pathPrefix="/auth/callback" />
+            </intent-filter>
+
         </activity>
 
         <provider

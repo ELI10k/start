@@ -13,6 +13,7 @@ export default function AppSupportPage() {
         <h2>אנחנו כאן לעזור</h2>
         <p className="mt-2">אפשר לפנות בנושאי כניסה לחשבון, שימוש באפליקציה, פרטיות, תיקון מידע או מחיקת חשבון.</p>
         <p className="mt-4"><a dir="ltr" href={`mailto:${supportEmail}`}>{supportEmail}</a></p>
+        <p className="mt-4">איך מוחקים חשבון ומה נמחק: <Link href="/delete-account">מחיקת חשבון ונתונים</Link>.</p>
       </section>
       <section>
         <h2>כבר מחוברים?</h2>

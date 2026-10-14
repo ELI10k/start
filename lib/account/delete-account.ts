@@ -14,19 +14,23 @@ const uniqueReferences = (references: readonly StorageReference[]) => {
 };
 
 async function accountStorageReferences(admin: SupabaseClient, userId: string) {
-  const [checkIns, foodLog, techniqueVideos] = await Promise.all([
+  const [checkIns, foodLog, techniqueVideos, messageImages] = await Promise.all([
     admin.from("check_in_photos").select("storage_path").eq("client_id", userId),
     admin.from("client_food_log").select("photo_path").eq("client_id", userId).not("photo_path", "is", null),
     admin.from("exercise_technique_videos").select("storage_path").eq("client_id", userId),
+    // Images in the coach conversation, whoever sent them, are stored under the
+    // client's folder and belong to the client's account.
+    admin.from("coach_client_messages").select("image_path").eq("client_id", userId).not("image_path", "is", null),
   ]);
 
-  const queryError = checkIns.error ?? foodLog.error ?? techniqueVideos.error;
+  const queryError = checkIns.error ?? foodLog.error ?? techniqueVideos.error ?? messageImages.error;
   if (queryError) throw new Error("account_storage_inventory_failed", { cause: queryError });
 
   return uniqueReferences([
     ...(checkIns.data ?? []).map((row) => ({ bucket: "check-in-photos", path: String(row.storage_path ?? "") })),
     ...(foodLog.data ?? []).map((row) => ({ bucket: "food-log-photos", path: String(row.photo_path ?? "") })),
     ...(techniqueVideos.data ?? []).map((row) => ({ bucket: "technique-videos", path: String(row.storage_path ?? "") })),
+    ...(messageImages.data ?? []).map((row) => ({ bucket: "message-images", path: String(row.image_path ?? "") })),
   ]);
 }
 

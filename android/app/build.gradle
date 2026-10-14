@@ -16,8 +16,25 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Release signing comes from the environment, never from the repository:
+    // scripts/android/bundle-release.sh reads the upload keystore's password from
+    // the macOS Keychain and passes it in for that one build.
+    def uploadKeystore = System.getenv("LIFE_FIT_UPLOAD_KEYSTORE")
+    signingConfigs {
+        if (uploadKeystore) {
+            release {
+                storeFile file(uploadKeystore)
+                storePassword System.getenv("LIFE_FIT_UPLOAD_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("LIFE_FIT_UPLOAD_KEY_ALIAS") ?: "life-fit-upload"
+                keyPassword System.getenv("LIFE_FIT_UPLOAD_KEYSTORE_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
+            if (uploadKeystore) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

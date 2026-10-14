@@ -69,10 +69,10 @@ test("the bridge satisfies the contracts the web layer already wrote against", a
   assert.match(bridge, /safeDeepLink/);
   // Permission alone leaves the app unaddressable; registering is what produces
   // the token.
-  assert.match(bridge, /if \(state === "granted"\) await PushNotifications\.register\(\)/);
+  assert.match(bridge, /if \(state === "granted" && platform === "ios"\) await PushNotifications\.register\(\)/);
   // Tokens rotate without being asked, so an already-permitted install
   // re-registers on launch.
-  assert.match(bridge, /if \(result\.receive === "granted"\) void PushNotifications\.register\(\)/);
+  assert.match(bridge, /if \(result\.receive === "granted" && platform === "ios"\) void PushNotifications\.register\(\)/);
   // A ring or watch can add steps while the app is backgrounded. Returning to
   // the foreground must trigger the same health refresh as native startup.
   assert.match(bridge, /App\.addListener\("appStateChange", \(\{ isActive \}\) => \{/);
