@@ -75,3 +75,8 @@ next-env.d.ts
 
 # local Swift Package Manager workspace state
 /ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+
+# Android signing - the upload key and its secrets stay outside the repository
+*.jks
+*.keystore
+keystore.properties
