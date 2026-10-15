@@ -1196,6 +1196,16 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     font-size: 1rem; line-height: 1;
   }
   .client-app-shell--home .client-app-content { padding-inline: .75rem; }
+  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .client-app-content {
+    padding-top: .35rem;
+    padding-bottom: calc(var(--nav-clearance) + .35rem);
+  }
+  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .home-screen { gap: .42rem; }
+  .client-app-shell--home .home-screen .section-heading--compact { margin-bottom: .2rem; }
+  .client-app-shell--home .weekly-lesson { padding-block: .55rem; }
+  .client-app-shell--home .progress-pulse { gap: .3rem .55rem; padding: .55rem .7rem; }
+  .client-app-shell--home .progress-pulse__line { gap: 0; }
+  .client-app-shell--home .weight-goal--compact { gap: .22rem; }
 }
 @media (min-width: 768px) {
   .client-app-shell--home .client-app-content { padding-top: 2rem; padding-bottom: 4rem; }
@@ -1203,8 +1213,8 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 
 /* Restore the substantial 12 October home actions while keeping the page in
-   normal document flow. They may make a short phone scroll; unlike the old
-   fixed viewport, every card remains reachable above the tab bar. */
+   normal document flow. Standard iPhones fit the complete home above the tab
+   bar; short phones and enlarged text can still scroll without clipping. */
 .quick-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: .6rem; }
 .quick-action-card {
   display: flex; min-width: 0; min-height: 7rem;
@@ -1214,6 +1224,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   background: var(--surface); box-shadow: var(--shadow-card);
   color: var(--ink); font-size: .72rem; font-weight: 700; text-decoration: none;
   text-align: center;
+}
+@media (max-width: 767px) and (min-height: 760px) {
+  .client-app-shell--home .quick-action-card { min-height: 6.45rem; padding-block: .55rem; }
+  .client-app-shell--home .quick-action-card__icon,
+  .client-app-shell--home .quick-action-card > span:first-child:has(svg) { width: 3.15rem; height: 3.15rem; }
 }
 .quick-action-card > svg { color: var(--green); }
 .quick-action-card__icon,

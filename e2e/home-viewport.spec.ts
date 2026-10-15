@@ -66,6 +66,7 @@ for (const size of SIZES) {
 
     const top = await measure(page);
     expect(top.documentWidth, "no horizontal overflow").toBeLessThanOrEqual(top.viewportWidth);
+    if (size.height >= 812) expect(top.scrollHeight, "the regular iPhone home does not scroll").toBeLessThanOrEqual(top.viewportHeight + 1);
     expect(top.bodyPosition, "body is not pinned").not.toBe("fixed");
     expect(top.bodyOverflow, "body is not locked").not.toBe("hidden");
     expect(top.firstTop - top.headerBottom, "no empty band under LIFE FIT").toBeLessThanOrEqual(24);

@@ -116,7 +116,6 @@ const EXPLANATION: Partial<Record<ReturnType<typeof healthCardModel>["status"], 
   initializing: "האפליקציה מתחברת לנתוני הבריאות במכשיר. זה לוקח רגע אחרי הפתיחה.",
   prompt: "כדי להציג את הנתונים צריך לאשר ל־LIFE FIT לקרוא אותם.",
   denied: "הגישה לנתוני הבריאות לא אושרה. אפשר לאשר אותה באפליקציית Health ← פרופיל ← אפליקציות ← LIFE FIT.",
-  "sync-error": "לא הצלחנו לעדכן את הנתונים. הנתונים שמוצגים הם האחרונים שנשמרו.",
   empty: "החיבור פעיל אך עדיין לא נקלטו נתונים. אם אתם בטוחים שיש נתונים, בדקו באפליקציית Health ← פרופיל ← אפליקציות ← LIFE FIT שהקריאה מאושרת.",
   stale: "מוצגים הנתונים האחרונים שנשמרו. הם מתעדכנים כשפותחים את LIFE FIT באייפון.",
   unavailable: "הסנכרון זמין באפליקציית LIFE FIT באייפון דרך Apple Health, או באנדרואיד דרך Health Connect.",
@@ -135,10 +134,10 @@ function HealthConnection({ metric }: { metric: HealthMetric }) {
     ? null
     : card.action === "settings"
       ? { label: "פתיחת הגדרות Health", icon: <Settings aria-hidden="true" size={16} />, run: async () => setSettingsFailed(!(await controller?.openSettings())) }
-      : { label: busy ? "מסנכרנים…" : card.action === "connect" ? `חיבור ל־${state.platform === "android" ? "Health Connect" : "Apple Health"}` : card.action === "retry" ? "נסו שוב" : "סנכרון עכשיו", icon: <RefreshCw aria-hidden="true" size={16} />, run: async () => { await controller?.sync({ ask: true }); } };
+      : { label: busy ? "מסנכרנים…" : card.action === "connect" ? `חיבור ל־${state.platform === "android" ? "Health Connect" : "Apple Health"}` : "סנכרון עכשיו", icon: <RefreshCw aria-hidden="true" size={16} />, run: async () => { await controller?.sync({ ask: true }); } };
   return (
     <section className="health-connection" data-tone={card.tone} aria-live="polite">
-      <p className="health-tile__status" data-tone={card.tone}><i aria-hidden="true" />{card.statusText}</p>
+      {card.status !== "sync-error" ? <p className="health-tile__status" data-tone={card.tone}><i aria-hidden="true" />{card.statusText}</p> : null}
       {card.sourceText ? <p className="health-connection__meta">{card.sourceText}{card.sourceNames.length > 1 ? ` (${card.sourceNames.join(", ")})` : ""}</p> : null}
       {card.syncedText ? <p className="health-connection__meta">{card.syncedText}</p> : null}
       {explanation ? <p className="health-connection__note">{explanation}</p> : null}
