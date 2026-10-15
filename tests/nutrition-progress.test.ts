@@ -85,6 +85,8 @@ test("bounded progress summaries opt into the phone viewport-fit layout", async 
   assert.match(page, /ClientShell className="client-app-shell--progress"/);
   assert.match(dashboard, /data-metric=\{metric\} data-viewport-fit=\{metric === "nutrition" \|\| metric === "steps" \|\| metric === "sleep" \|\| undefined\}/);
   assert.match(css, /html:has\(\.progress-metrics\[data-viewport-fit\]\)/);
+  assert.match(css, /\.client-app-shell--progress:has\(\.progress-metrics\[data-viewport-fit\]\) \{[\s\S]*?display:\s*flex;[\s\S]*?height:\s*100dvh/);
+  assert.match(css, /\.client-app-shell--progress:has\(\.progress-metrics\[data-viewport-fit\]\) \.client-app-content \{[\s\S]*?height:\s*auto;[\s\S]*?flex:\s*1 1 auto/);
   assert.match(css, /\.progress-metrics\[data-viewport-fit\] \.health-chart__plot \{ height: 100%/);
   assert.match(css, /\.health-chart\[data-monthly\] \.health-chart__plot \{\s*min-width: 0/);
   assert.match(css, /@media \(max-width: 767px\) and \(min-height: 740px\)/);

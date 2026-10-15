@@ -119,3 +119,34 @@ test("every home destination still opens", async ({ page }) => {
   await expect(page).toHaveURL(/\/progress\?metric=steps/, { timeout: 30_000 });
   await expect(page.getByRole("tab", { name: /צעדים/ })).toHaveAttribute("aria-selected", "true");
 });
+
+test("steps and sleep fit between the header and tab bar without document scrolling", async ({ page }) => {
+  test.skip(!identity("client"), "set the client E2E credentials to run");
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, requireIdentity("client"));
+
+  for (const metric of ["steps", "sleep"] as const) {
+    await page.goto(`/progress?metric=${metric}`);
+    await expect(page.locator(`.progress-metrics[data-metric="${metric}"]`)).toBeVisible({ timeout: 30_000 });
+    const layout = await page.evaluate(() => {
+      const shell = document.querySelector<HTMLElement>(".client-app-shell--progress")!;
+      const content = document.querySelector<HTMLElement>(".client-app-content")!;
+      const header = document.querySelector<HTMLElement>(".mobile-app-header")!;
+      const nav = document.querySelector<HTMLElement>(".bottom-app-nav")!;
+      const connection = document.querySelector<HTMLElement>(".health-connection")!;
+      return {
+        bodyOverflow: getComputedStyle(document.body).overflowY,
+        shellHeight: Math.round(shell.getBoundingClientRect().height),
+        contentTop: Math.round(content.getBoundingClientRect().top),
+        headerBottom: Math.round(header.getBoundingClientRect().bottom),
+        connectionBottom: Math.round(connection.getBoundingClientRect().bottom),
+        navTop: Math.round(nav.getBoundingClientRect().top),
+      };
+    });
+    expect(layout.bodyOverflow).toBe("hidden");
+    expect(layout.shellHeight).toBe(844);
+    expect(layout.contentTop).toBeGreaterThanOrEqual(layout.headerBottom);
+    expect(layout.connectionBottom, `${metric} connection stays above navigation`).toBeLessThanOrEqual(layout.navTop);
+  }
+});
