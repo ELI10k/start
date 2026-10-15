@@ -1062,6 +1062,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .6rem; }
   .progress-metrics[data-viewport-fit] .health-insight,
   .progress-metrics[data-viewport-fit] .health-sync-note { padding: .5rem .65rem; font-size: .68rem; }
+  .progress-metrics[data-viewport-fit] .health-connection {
+    flex: 0 0 auto;
+    gap: .12rem;
+    padding: .45rem .75rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-connection__meta { font-size: .68rem; line-height: 1.2; }
+  .progress-metrics[data-viewport-fit] .health-connection .health-sync-button {
+    min-height: 2rem;
+    margin-top: .15rem;
+    padding-block: .3rem;
+  }
   .progress-metrics[data-viewport-fit] .health-sync-button { min-height: 2.25rem; padding-block: .4rem; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-card { flex: 0 0 auto; padding: .6rem .75rem; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-card > h3 { font-size: .9rem; }
@@ -1082,11 +1093,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    the single-screen summary. Very short phones keep the compact rules above. */
 @media (max-width: 767px) and (min-height: 740px) {
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
-    gap: .65rem;
+    gap: .45rem;
     padding-block-start: max(.65rem, env(safe-area-inset-top));
   }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header h1 { font-size: 1.65rem; }
-  .progress-metrics[data-viewport-fit] { gap: .55rem; }
+  .progress-metrics[data-viewport-fit] { gap: .4rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tabs { gap: .35rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tab { padding-block: .4rem; border-radius: .95rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tab__icon { width: 2.3rem; height: 2.3rem; }
