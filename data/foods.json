@@ -6528,5 +6528,27 @@
     "unitWeightGrams": 150,
     "caloriesPerUnit": 700,
     "unitsPerPackage": 1
+  },
+  {
+    "id": "muller-protein-40-vanilla-350ml",
+    "name": "משקה חלבון מולר וניל 40 גרם חלבון 0% שומן",
+    "brand": "מולר",
+    "category": "יוגורט חלבון",
+    "calories": 64,
+    "protein": 11.43,
+    "carbs": 4.5,
+    "fat": 0,
+    "sugars": 4.5,
+    "sodiumMg": 40,
+    "calciumMg": 240,
+    "packageQuantity": 350,
+    "packageUnit": "בקבוק",
+    "barcode": "7290114312551",
+    "servingLabel": "בקבוק 350 מ״ל",
+    "verificationStatus": "מאושר",
+    "notes": "ערכים ל-100 מ״ל לפי תווית המוצר; סה״כ לבקבוק 350 מ״ל: 224 קלוריות, 40 גרם חלבון, 15.75 גרם פחמימות ו-0 גרם שומן.",
+    "unitWeightGrams": 350,
+    "caloriesPerUnit": 224,
+    "unitsPerPackage": 1
   }
 ]
