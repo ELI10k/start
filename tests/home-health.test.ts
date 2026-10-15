@@ -520,12 +520,14 @@ test("26. the home screen scrolls instead of being pinned to one viewport", asyn
   assert.doesNotMatch(home, /height:\s*100dvh/);
 });
 
-test("24. the tab bar is cleared once, with the home indicator included", async () => {
+test("24. each responsive home layout clears the tab bar exactly once", async () => {
   const { css, home } = await homeCss();
   assert.match(css, /--nav-clearance: calc\(5\.25rem \+ env\(safe-area-inset-bottom\)\)/);
   assert.match(home, /\.client-app-shell--home \{ padding-bottom: 0; \}/);
   assert.match(home, /padding-bottom: calc\(var\(--nav-clearance\) \+ \.75rem\)/);
-  assert.equal(home.match(/var\(--nav-clearance\)/g)?.length, 1, "one source of clearance");
+  const bottomClearances = home.match(/padding-bottom:\s*calc\(var\(--nav-clearance\)[^;]+;/g) ?? [];
+  assert.equal(bottomClearances.length, 2, "base and compact-phone clearance");
+  assert.ok(bottomClearances.every((rule) => (rule.match(/var\(--nav-clearance\)/g) ?? []).length === 1));
   assert.match(home, /min-height: calc\(2\.75rem \+ env\(safe-area-inset-top\)\)/);
 });
 
@@ -547,6 +549,13 @@ test("health cards match the supplied reference: wide, compact, and summary-led"
   assert.match(tile, /<span className="health-tile__summary">\{detail\(state, today\)\}<\/span>/);
   assert.match(tile, /card\.status === "sync-error"[\s\S]*אין עדיין נתונים/);
   assert.doesNotMatch(tile, /health-tile__meta/);
+});
+
+test("Health detail screens hide the technical failure but retain sync now", async () => {
+  const panel = await source("components/client/HealthProgressPanel.tsx");
+  assert.doesNotMatch(panel, /"sync-error": "לא הצלחנו/);
+  assert.match(panel, /card\.status !== "sync-error" \?/);
+  assert.match(panel, /: "סנכרון עכשיו"/);
 });
 
 test("27. figures never ellipsise or break, goals may wrap", async () => {
