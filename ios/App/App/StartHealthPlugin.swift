@@ -26,6 +26,7 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
   ]
 
   private let store = HKHealthStore()
+  private let authorizationRequestedKey = "StartHealth.authorizationRequested.v1"
   private var stepType: HKQuantityType? { HKQuantityType.quantityType(forIdentifier: .stepCount) }
   private var sleepType: HKCategoryType? { HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) }
 
@@ -40,6 +41,17 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
   @objc func getPermission(_ call: CAPPluginCall) {
     guard HKHealthStore.isHealthDataAvailable(), let stepType, let sleepType else {
       call.resolve(["status": "unavailable"])
+      return
+    }
+    // `getRequestStatusForAuthorization` does not report whether read access
+    // was granted. In particular it may return `.unnecessary` for read-only
+    // types before this app has ever presented HealthKit's authorization sheet.
+    // Treating that as "granted" made LIFE FIT read an empty store without ever
+    // appearing under Health > Apps. Remember our own completed request so a
+    // fresh install (and existing installs affected by the old bug) must ask
+    // once before any health data is read.
+    guard UserDefaults.standard.bool(forKey: authorizationRequestedKey) else {
+      call.resolve(["status": "prompt"])
       return
     }
     store.getRequestStatusForAuthorization(toShare: [], read: [stepType, sleepType]) { status, _ in
@@ -62,6 +74,11 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve(["status": "denied"])
         return
       }
+      // HealthKit intentionally does not disclose the user's per-type read
+      // choices. A successful sheet completion is the only reliable lifecycle
+      // signal available; subsequent empty reads are handled as empty data and
+      // the UI offers a route back to Health settings.
+      UserDefaults.standard.set(true, forKey: self.authorizationRequestedKey)
       call.resolve(["status": granted ? "granted" : "denied"])
     }
   }
