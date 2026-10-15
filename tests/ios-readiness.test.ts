@@ -47,6 +47,16 @@ test("a fresh iOS install requests HealthKit before treating read access as gran
   );
 });
 
+test("HealthKit authorization is presented on the main queue and retries Build 2", async () => {
+  const plugin = await source("ios/App/App/StartHealthPlugin.swift");
+  assert.match(plugin, /DispatchQueue\.main\.async/);
+  assert.match(plugin, /StartHealth\.authorizationRequested\.v2/);
+  assert.ok(
+    plugin.indexOf("DispatchQueue.main.async") < plugin.indexOf("store.requestAuthorization"),
+    "HealthKit's UIKit authorization request must start on the main queue",
+  );
+});
+
 test("sleep uses one HealthKit source per night instead of adding every writer", async () => {
   const plugin = await source("ios/App/App/StartHealthPlugin.swift");
   assert.match(plugin, /Dictionary\(grouping: grouped\[day\] \?\? \[\], by:/);

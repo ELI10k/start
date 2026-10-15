@@ -26,7 +26,9 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
   ]
 
   private let store = HKHealthStore()
-  private let authorizationRequestedKey = "StartHealth.authorizationRequested.v1"
+  // v2 deliberately retries installs that Build 2 incorrectly marked as
+  // requested even though iOS never presented the HealthKit sheet.
+  private let authorizationRequestedKey = "StartHealth.authorizationRequested.v2"
   private var stepType: HKQuantityType? { HKQuantityType.quantityType(forIdentifier: .stepCount) }
   private var sleepType: HKCategoryType? { HKCategoryType.categoryType(forIdentifier: .sleepAnalysis) }
 
@@ -68,18 +70,23 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
       call.resolve(["status": "unavailable"])
       return
     }
-    store.requestAuthorization(toShare: [], read: [stepType, sleepType]) { granted, error in
-      if let error {
-        CAPLog.print("StartHealth authorization failed: \(error.localizedDescription)")
-        call.resolve(["status": "denied"])
-        return
+    // A Capacitor plugin call is not guaranteed to arrive on the main queue.
+    // HealthKit presents UIKit from this request; dispatch it to the main queue
+    // so iOS can attach the authorization sheet to the active application.
+    DispatchQueue.main.async {
+      self.store.requestAuthorization(toShare: [], read: [stepType, sleepType]) { granted, error in
+        if let error {
+          CAPLog.print("StartHealth authorization failed: \(error.localizedDescription)")
+          call.resolve(["status": "denied"])
+          return
+        }
+        // HealthKit intentionally does not disclose the user's per-type read
+        // choices. A successful sheet completion is the only reliable lifecycle
+        // signal available; subsequent empty reads are handled as empty data and
+        // the UI offers a route back to Health settings.
+        UserDefaults.standard.set(true, forKey: self.authorizationRequestedKey)
+        call.resolve(["status": granted ? "granted" : "denied"])
       }
-      // HealthKit intentionally does not disclose the user's per-type read
-      // choices. A successful sheet completion is the only reliable lifecycle
-      // signal available; subsequent empty reads are handled as empty data and
-      // the UI offers a route back to Health settings.
-      UserDefaults.standard.set(true, forKey: self.authorizationRequestedKey)
-      call.resolve(["status": granted ? "granted" : "denied"])
     }
   }
 
