@@ -3,11 +3,9 @@ import { identity, requireIdentity, signIn } from "./support/guards";
 
 // The client home on iPhone-sized screens.
 //
-// This used to assert that every section ended above the viewport edge - which
-// is what pinned the page with overflow:hidden and cropped the last cards
-// behind the tab bar on a short phone. The rule now is the opposite one: the
-// page may be taller than the screen, it must scroll, and once scrolled to the
-// end the last card sits fully above the bar.
+// Regular iPhones show the complete home without a document scroll or the
+// native rubber-band. A short phone and enlarged text stay reachable rather
+// than clipping content.
 
 const SIZES = [
   { name: "375 × 812 (iPhone X/11 Pro/12 mini)", width: 375, height: 812 },
@@ -68,7 +66,7 @@ for (const size of SIZES) {
     expect(top.documentWidth, "no horizontal overflow").toBeLessThanOrEqual(top.viewportWidth);
     if (size.height >= 812) expect(top.scrollHeight, "the regular iPhone home does not scroll").toBeLessThanOrEqual(top.viewportHeight + 1);
     expect(top.bodyPosition, "body is not pinned").not.toBe("fixed");
-    expect(top.bodyOverflow, "body is not locked").not.toBe("hidden");
+    expect(top.bodyOverflow, size.height >= 760 ? "regular iPhone body is locked" : "short phone body can scroll").toBe(size.height >= 760 ? "hidden" : "auto");
     expect(top.firstTop - top.headerBottom, "no empty band under LIFE FIT").toBeLessThanOrEqual(24);
     expect(top.clippedValues, "every figure fits its tile").toEqual([]);
     expect(top.ellipsised, "no figure is ellipsised").toBe(0);
@@ -84,7 +82,7 @@ for (const size of SIZES) {
     expect(Math.min(...top.actionWidths)).toBeGreaterThanOrEqual(44);
     expect(Math.min(...top.actionHeights), "quick actions retain the substantial 12 October size").toBeGreaterThanOrEqual(104);
 
-    // Scroll to the end: the last card ends above the bar.
+    // Scroll to the end where scrolling is needed: the last card clears the bar.
     await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));
     const bottom = await measure(page);
     expect(bottom.lastBottom, "last card fully above the tab bar").toBeLessThanOrEqual(bottom.navTop);

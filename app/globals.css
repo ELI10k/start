@@ -1155,18 +1155,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .metric-tile strong { font-size: 1.22rem; }
 }
 
-/* The client home screen.
-   
-   It used to be pinned to one viewport: html and body fixed, the shell at
-   100dvh with overflow:hidden and touch-action:none, and the quick actions
-   sized as 30% of the screen. On a short iPhone, with large text, or on the
-   day a weekly summary arrived, the tip and the progress line were cropped
-   behind the tab bar and could not be scrolled to.
-   
-   Now the page scrolls like every other page, every block is as tall as what
-   it says, and the bar is cleared once: the shell's own bottom padding is
-   dropped here and the content box pays --nav-clearance (bar + home
-   indicator) plus a little air, so the last card ends fully above the bar. */
+/* The client home screen. The content is compact enough to fit a regular
+   iPhone. On those devices the shell owns the viewport and the content pane
+   only becomes a scroller if Dynamic Type actually makes it overflow. Short
+   phones keep ordinary document scrolling, so nothing can be clipped. */
 .client-app-shell--home { padding-bottom: 0; }
 .client-app-shell--home .client-app-content {
   padding-top: .6rem;
@@ -1206,6 +1198,27 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .client-app-shell--home .progress-pulse { gap: .3rem .55rem; padding: .55rem .7rem; }
   .client-app-shell--home .progress-pulse__line { gap: 0; }
   .client-app-shell--home .weight-goal--compact { gap: .22rem; }
+}
+@media (max-width: 767px) and (min-height: 760px) {
+  html:has(.client-app-shell--home),
+  body:has(.client-app-shell--home) {
+    height: 100%;
+    overflow: hidden;
+  }
+  .client-app-shell--home {
+    display: flex;
+    height: 100dvh;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .client-app-shell--home .mobile-app-header { flex: 0 0 auto; }
+  .client-app-shell--home .client-app-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: none;
+  }
 }
 @media (min-width: 768px) {
   .client-app-shell--home .client-app-content { padding-top: 2rem; padding-bottom: 4rem; }
