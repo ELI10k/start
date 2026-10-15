@@ -514,7 +514,7 @@ test("26. a regular iPhone home does not bounce, while short phones remain reach
   const { css, home } = await homeCss();
   assert.match(css, /@media \(max-width: 767px\) and \(min-height: 760px\)[\s\S]*?body:has\(\.client-app-shell--home\)[^{]*\{[^}]*overflow:\s*hidden/);
   assert.match(home, /\.client-app-shell--home \{[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden/);
-  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overflow-y:\s*auto/);
+  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overflow:\s*hidden/);
   assert.doesNotMatch(home, /position:\s*fixed/);
   assert.doesNotMatch(home, /touch-action:\s*none/);
 });
@@ -549,6 +549,7 @@ test("health cards match the supplied reference: wide, compact, and summary-led"
   assert.match(tile, /<span className="health-tile__summary">\{detail\(state, today\)\}<\/span>/);
   assert.match(tile, /card\.status === "sync-error"[\s\S]*אין עדיין נתונים/);
   assert.doesNotMatch(tile, /health-tile__meta/);
+  assert.match(css, /data-metric="sleep"[^}]*\.health-tile__figure[\s\S]*?font-size:\s*clamp\(\.82rem, 3\.7vw, \.98rem\)/);
 });
 
 test("Health detail screens hide the technical failure but retain sync now", async () => {

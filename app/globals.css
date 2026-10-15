@@ -956,15 +956,19 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     overflow: hidden;
   }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) {
+    display: flex;
     height: 100dvh;
     min-height: 0;
+    flex-direction: column;
     overflow: hidden;
     padding-bottom: 0;
   }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .mobile-app-header { flex: 0 0 auto; }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
     display: flex;
-    height: 100%;
+    height: auto;
     min-height: 0;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: clamp(.35rem, 1vh, .65rem);
     padding-block: max(.4rem, env(safe-area-inset-top)) var(--nav-clearance);
@@ -1192,7 +1196,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     padding-top: .35rem;
     padding-bottom: calc(var(--nav-clearance) + .35rem);
   }
-  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .home-screen { gap: .42rem; }
+  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .home-screen { gap: .3rem; }
   .client-app-shell--home .home-screen .section-heading--compact { margin-bottom: .2rem; }
   .client-app-shell--home .weekly-lesson { padding-block: .55rem; }
   .client-app-shell--home .progress-pulse { gap: .3rem .55rem; padding: .55rem .7rem; }
@@ -1216,8 +1220,21 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .client-app-shell--home .client-app-content {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
     overscroll-behavior-y: none;
+  }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile { padding-block: .42rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__value { margin-top: .2rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile small,
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__goal { margin-top: .08rem; }
+  .client-app-shell--home .health-tile__figure { margin-top: .22rem; }
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure {
+    min-width: 0;
+    gap: .14rem;
+  }
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__value,
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__goal {
+    font-size: clamp(.82rem, 3.7vw, .98rem);
   }
 }
 @media (min-width: 768px) {
