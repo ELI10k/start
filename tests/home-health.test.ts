@@ -172,6 +172,27 @@ test("a native shell whose plugin never attaches stops waiting, and recovers if 
   assert.equal(card(controller, "steps").status, "granted");
 });
 
+test("an older iPhone bridge may reject availability while permission and reads still work", async () => {
+  const native = fakeBridge();
+  (native.bridge as { isAvailable: NativeHealthBridge["isAvailable"] }).isAvailable = async () => {
+    throw new Error("plugin availability probe unavailable");
+  };
+  const page = fakeEnv({ bridge: native.bridge });
+  const { repository, current } = fakeRepository();
+  const events: Record<string, unknown>[] = [];
+  const controller = createHealthController({
+    env: page.env,
+    repository,
+    track: (_event, properties) => events.push(properties),
+  });
+  controller.subscribe(() => {});
+  await settle();
+  assert.equal(controller.getState().permission, "granted");
+  assert.equal(current().entries[0]?.steps, 3743);
+  assert.equal(card(controller, "sleep").status, "granted");
+  assert.ok(events.some((event) => event.where === "health-availability-compat"));
+});
+
 test("returning from the background re-reads, so a ring's new steps arrive", async () => {
   const native = fakeBridge();
   const page = fakeEnv({ bridge: native.bridge });
@@ -231,7 +252,7 @@ test("6. a successful steps sync stores the merged figure and shows it", async (
   await settle();
   const model = card(controller, "steps");
   assert.equal(model.status, "granted");
-  assert.equal(model.statusText, "מחובר ל־Apple Health");
+  assert.equal(model.statusText, "מחובר");
   assert.equal(model.syncedText, "עודכן עכשיו");
 });
 
@@ -259,7 +280,7 @@ test("8. a HealthKit read failure is an error, not an empty week", async () => {
   await settle();
   assert.equal(controller.getState().errors.steps, "read-failed");
   assert.equal(card(controller, "steps").status, "sync-error");
-  assert.equal(card(controller, "steps").statusText, "הסנכרון נכשל — נסו שוב");
+  assert.equal(card(controller, "steps").statusText, "הסנכרון נכשל");
   assert.equal(card(controller, "steps").action, "retry");
   // Sleep read fine and is not painted red by the steps failure.
   assert.equal(card(controller, "sleep").status, "granted");
@@ -492,7 +513,8 @@ const homeCss = async () => {
 test("26. the home screen scrolls instead of being pinned to one viewport", async () => {
   const { css, home } = await homeCss();
   assert.doesNotMatch(css, /(html|body):has\(\.client-app-shell--home\)/);
-  assert.doesNotMatch(home, /overflow:\s*hidden/);
+  assert.doesNotMatch(home, /(?:html|body):has\(\.client-app-shell--home\)[^{]*\{[^}]*overflow:\s*hidden/);
+  assert.doesNotMatch(home, /\.client-app-shell--home[^,{]*\{[^}]*overflow:\s*hidden/);
   assert.doesNotMatch(home, /touch-action:\s*none/);
   assert.doesNotMatch(home, /position:\s*fixed/);
   assert.doesNotMatch(home, /height:\s*100dvh/);
@@ -507,13 +529,14 @@ test("24. the tab bar is cleared once, with the home indicator included", async 
   assert.match(home, /min-height: calc\(2\.75rem \+ env\(safe-area-inset-top\)\)/);
 });
 
-test("quick actions size to their content, keep a 44pt target and stay equal", async () => {
+test("quick actions restore the substantial 12 October cards and stay equal", async () => {
   const { home } = await homeCss();
   assert.doesNotMatch(home, /dvh|vh\)/, "no height tied to the viewport");
   assert.match(home, /\.quick-actions-grid \{[^}]*grid-auto-rows: 1fr/);
-  assert.match(home, /\.quick-action-card \{[^}]*min-height: 3\.75rem/);
-  // The meta line wraps rather than ellipsising.
-  assert.doesNotMatch(home.slice(home.indexOf(".quick-action-card__meta {")), /^[^}]*text-overflow: ellipsis/);
+  assert.match(home, /\.quick-action-card \{[^}]*min-height: 7rem/);
+  assert.match(home, /\.quick-action-card__icon,[\s\S]*?width: 3\.4rem; height: 3\.4rem/);
+  // The 12 October card kept its secondary line on one calm line.
+  assert.match(home.slice(home.indexOf(".quick-action-card__meta {")), /^[^}]*text-overflow: ellipsis/);
 });
 
 test("27. figures never ellipsise or break, goals may wrap", async () => {

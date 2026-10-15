@@ -154,11 +154,21 @@ export function createHealthController({ env, repository, track = () => {}, read
     try {
       let permission: HealthPermissionState;
       try {
-        if (!(await provider.isAvailable())) {
-          // The plugin answered, and the device has no health store (an iPad,
-          // an old Android). That one is final.
-          set({ permission: "unavailable", errors: withoutMetricErrors(state.errors) });
-          return;
+        try {
+          if (!(await provider.isAvailable())) {
+            // The plugin answered, and the device has no health store (an iPad,
+            // an old Android). That one is final.
+            set({ permission: "unavailable", errors: withoutMetricErrors(state.errors) });
+            return;
+          }
+        } catch (error) {
+          // The production iPhone binary predates the newest web bundle. Some
+          // older Capacitor builds reject the availability probe even though
+          // the permission and read methods are present and working. HealthKit
+          // is available on an iPhone, so continue to the real permission/read
+          // calls there; those calls still surface a genuine bridge failure.
+          if (state.platform !== "ios") throw error;
+          track("error", { where: "health-availability-compat", kind: healthErrorKind(error, "bridge-unavailable") });
         }
         permission = await provider.getPermission();
         if (ask && (permission === "prompt" || permission === "unknown" || permission === "denied")) {

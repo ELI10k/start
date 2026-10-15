@@ -77,7 +77,7 @@ for (const size of SIZES) {
     expect(new Set(top.actionHeights).size).toBe(1);
     expect(Math.min(...top.actionHeights)).toBeGreaterThanOrEqual(44);
     expect(Math.min(...top.actionWidths)).toBeGreaterThanOrEqual(44);
-    expect(Math.max(...top.actionHeights), "quick actions are compact, not a third of the screen").toBeLessThanOrEqual(84);
+    expect(Math.min(...top.actionHeights), "quick actions retain the substantial 12 October size").toBeGreaterThanOrEqual(104);
 
     // Scroll to the end: the last card ends above the bar.
     await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));

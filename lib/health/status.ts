@@ -89,13 +89,13 @@ export function healthCardModel(state: HealthControllerState, metric: HealthMetr
   });
 
   if (state.syncing && state.bridge === "ready") return model("syncing", "מסנכרנים…", "none", "muted");
-  if (state.bridge === "pending") return model("initializing", `מתחברים ל־${platform}…`, hasAnyData ? "open" : "none", "muted");
+  if (state.bridge === "pending") return model("initializing", "מתחברים…", hasAnyData ? "open" : "none", "muted");
   if (state.bridge === "absent" || state.permission === "unavailable") {
     return hasAnyData
       ? model("stale", "נתון שמור · מתעדכן מהאפליקציה באייפון", "open", "muted")
       : model("unavailable", "זמין באפליקציה באייפון", "none", "muted");
   }
-  if (error) return model("sync-error", "הסנכרון נכשל — נסו שוב", "retry", "error");
+  if (error) return model("sync-error", "הסנכרון נכשל", "retry", "error");
   if (state.permission === "denied") return model("denied", "נדרשת הרשאה", "settings", "warn");
   if (state.permission === "prompt" || state.permission === "unknown") {
     return state.permission === "unknown" && !state.loaded
@@ -107,7 +107,7 @@ export function healthCardModel(state: HealthControllerState, metric: HealthMetr
   // off, and the detail screen says where to check.
   if (!hasValue) return model("empty", "אין עדיין נתונים", "open", "muted");
   if (metric === "steps" && !state.lastSyncedAt.steps) return model("stale", "מוצג הנתון האחרון שנשמר", "retry", "muted");
-  return model("granted", `מחובר ל־${platform}`, "open", "ok");
+  return model("granted", "מחובר", "open", "ok");
 }
 
 export const SLEEP_GOAL_MINUTES = DEFAULT_SLEEP_GOAL_MINUTES;

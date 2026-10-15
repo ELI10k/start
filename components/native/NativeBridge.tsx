@@ -91,7 +91,11 @@ export default function NativeBridge() {
       // readSleepSamples and openSettings are newer than the first TestFlight
       // binaries. An older binary rejects them as UNIMPLEMENTED, and the web
       // layer falls back to the nightly totals it computed before.
-      const unimplemented = (error: unknown) => (error as { code?: string } | null)?.code === "UNIMPLEMENTED";
+      const unimplemented = (error: unknown) => {
+        const value = error as { code?: string; message?: string } | null;
+        return value?.code === "UNIMPLEMENTED"
+          || /unimplemented|not implemented|does not have an implementation|not available on ios/i.test(value?.message ?? "");
+      };
       (window as { StartHealth?: unknown }).StartHealth = {
         source: platform === "ios" ? "healthkit" : "health-connect",
         isAvailable: async () => (await StartHealth.isAvailable()).available,
