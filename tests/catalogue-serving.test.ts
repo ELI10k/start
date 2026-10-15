@@ -95,6 +95,24 @@ test("the Muller protein yogurt displays one 200 gram cup in Hebrew", () => {
   }), { calories: 130, protein: 25, carbs: 5, fat: 0, servingLabel: "גביע 200 גרם" });
 });
 
+test("the Muller vanilla protein drink displays one 350 ml bottle", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 64,
+    protein: 11.43,
+    carbs: 4.5,
+    fat: 0,
+    packageUnit: "בקבוק",
+    unitWeightGrams: 350,
+    servingLabel: "בקבוק 350 מ״ל",
+  }), {
+    calories: 224,
+    protein: 40,
+    carbs: 15.8,
+    fat: 0,
+    servingLabel: "בקבוק 350 מ״ל",
+  });
+});
+
 test("Danone PRO 1.5% displays nutrition for the full 200 gram cup", () => {
   assert.deepEqual(catalogueServingNutrition({
     calories: 70,
