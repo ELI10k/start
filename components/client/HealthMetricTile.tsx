@@ -70,8 +70,8 @@ export default function HealthMetricTile({
         <i aria-hidden="true" />
         {card.statusText}
       </span>
-      {card.sourceText ? <span className="health-tile__meta">{card.sourceText}</span> : null}
-      {card.syncedText ? <span className="health-tile__meta">{card.syncedText}</span> : null}
+      {/* The home card stays a glanceable summary, as it was on 12 October.
+          Source and exact sync time remain available on the progress screen. */}
     </button>
   );
 }
