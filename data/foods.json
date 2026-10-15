@@ -6573,13 +6573,9 @@
     "carbs": 13.7,
     "fat": 65.2,
     "sodiumMg": 2,
-    "packageUnit": "יחידה",
-    "servingLabel": "אגוז שלם (2 חצאים, כ-4 גרם)",
+    "servingLabel": "ל-100 גרם",
     "verificationStatus": "ממתין לבדיקה",
-    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; סיבים תזונתיים: כ-6.7 גרם. חצי אגוז (כ-2 גרם): כ-13 קלוריות; חופן של כ-30 גרם: כ-196 קלוריות.",
-    "unitWeightGrams": 4,
-    "caloriesPerUnit": 26,
-    "unitsPerPackage": 1
+    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; סיבים תזונתיים: כ-6.7 גרם."
   },
   {
     "id": "roasted-salted-almonds",
@@ -6591,12 +6587,8 @@
     "fat": 53,
     "sugars": 4,
     "sodiumMg": 650,
-    "packageUnit": "יחידה",
-    "servingLabel": "שקד אחד (כ-1.2 גרם)",
+    "servingLabel": "ל-100 גרם",
     "verificationStatus": "ממתין לבדיקה",
-    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; שומן רווי: 4 גרם; סיבים תזונתיים: כ-3.5 גרם. חופן של כ-30 גרם: כ-184 קלוריות.",
-    "unitWeightGrams": 1.2,
-    "caloriesPerUnit": 7.3,
-    "unitsPerPackage": 1
+    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; שומן רווי: 4 גרם; סיבים תזונתיים: כ-3.5 גרם."
   }
 ]
