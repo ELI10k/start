@@ -256,7 +256,7 @@ test("6. a successful steps sync stores the merged figure and shows it", async (
   assert.equal(model.syncedText, "עודכן עכשיו");
 });
 
-test("7. a successful sleep sync shows the night as 9:53, not '9:53 שעות מתוך 8 שעות'", async () => {
+test("7. a successful sleep sync shows the compact reference wording", async () => {
   const native = fakeBridge();
   const { repository, current } = fakeRepository();
   const controller = createHealthController({ env: fakeEnv({ bridge: native.bridge }).env, repository });
@@ -267,9 +267,9 @@ test("7. a successful sleep sync shows the night as 9:53, not '9:53 שעות מ�
   assert.equal(formatClockHours(593), "9:53");
   assert.equal(formatClockHours(480), "8:00");
   const tile = await source("components/client/SleepMetricTile.tsx");
-  assert.match(tile, /unit="ש׳"/);
-  assert.match(tile, /goal=\{`יעד: \$\{goal\} ש׳`\}/);
-  assert.doesNotMatch(tile.match(/goal=\{[^}]*\}/)?.[0] ?? "", /מתוך/);
+  assert.match(tile, /unit="שעות"/);
+  assert.match(tile, /goal=\{`מתוך \$\{Math\.floor\(SLEEP_GOAL_MINUTES \/ 60\)\} שעות`\}/);
+  assert.match(tile, /detail=\{\(\) => "הנתון האחרון שנקלט"\}/);
 });
 
 test("8. a HealthKit read failure is an error, not an empty week", async () => {
@@ -539,13 +539,14 @@ test("quick actions restore the substantial 12 October cards and stay equal", as
   assert.match(home.slice(home.indexOf(".quick-action-card__meta {")), /^[^}]*text-overflow: ellipsis/);
 });
 
-test("health cards match the daily figures and keep their sync details", async () => {
+test("health cards match the supplied reference: wide, compact, and summary-led", async () => {
   const { css } = await homeCss();
   const tile = await source("components/client/HealthMetricTile.tsx");
-  assert.match(css, /\.dashboard-metrics--fit > \.metric-tile--health \{ grid-column: span 2; \}/);
-  assert.match(css, /\.metric-tile--health:nth-child\(4\) \{ grid-column: 2 \/ span 2; \}/);
-  assert.match(tile, /card\.sourceText \? <span className="health-tile__meta">/);
-  assert.match(tile, /card\.syncedText \? <span className="health-tile__meta">/);
+  assert.match(css, /\.dashboard-metrics--fit > \.metric-tile--health \{ grid-column: span 3; \}/);
+  assert.match(css, /\.health-tile__figure \{[^}]*display: flex/);
+  assert.match(tile, /<span className="health-tile__summary">\{detail\(state, today\)\}<\/span>/);
+  assert.match(tile, /card\.status === "sync-error"[\s\S]*אין עדיין נתונים/);
+  assert.doesNotMatch(tile, /health-tile__meta/);
 });
 
 test("27. figures never ellipsise or break, goals may wrap", async () => {
@@ -564,7 +565,7 @@ test("18. numbers are isolated for RTL, and value and goal are separate lines", 
   assert.match(page, /detail=\{`מתוך \$\{meals\.length\}`\}/);
   assert.doesNotMatch(page, /value=\{`\$\{completed\.length\} מתוך/);
   const steps = await source("components/client/StepsMetricTile.tsx");
-  assert.match(steps, /goal=\{`מתוך יעד \$\{goal\}`\}/);
+  assert.match(steps, /goal=\{`מתוך \$\{goal\}`\}/);
 });
 
 test("25. home navigation targets are unchanged", async () => {

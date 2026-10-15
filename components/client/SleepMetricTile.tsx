@@ -18,8 +18,9 @@ export default function SleepMetricTile() {
         const entry = displayedEntry(state, "sleep", today);
         return entry && "minutes" in entry && entry.minutes > 0 ? formatClockHours(entry.minutes) : null;
       }}
-      unit="ש׳"
-      goal={`יעד: ${goal} ש׳`}
+      unit="שעות"
+      goal={`מתוך ${Math.floor(SLEEP_GOAL_MINUTES / 60)} שעות`}
+      detail={() => "הנתון האחרון שנקלט"}
       describe={(value) => `שינה אחרונה: ${value ? `${value} שעות` : "אין נתון"}, יעד ${goal} שעות`}
     />
   );
