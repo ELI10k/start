@@ -88,3 +88,14 @@ test("Google Play's account deletion URL explains how, what is deleted and what 
   const support = await source("app/app-support/page.tsx");
   assert.match(support, /href="\/delete-account"/);
 });
+
+test("an Android browser can hand the sign-in link to the app without a verified App Link", async () => {
+  const confirm = await source("components/auth/MagicLinkConfirmation.tsx");
+  assert.match(confirm, /intent:\/\/\$\{host\}\/auth\/confirm-link\?/);
+  assert.match(confirm, /#Intent;scheme=https;package=\$\{ANDROID_PACKAGE\};end/);
+  assert.match(confirm, /const ANDROID_PACKAGE = "co\.il\.startcoaching\.app"/);
+  // Shown only to Android browsers, and the token is never spent automatically there.
+  assert.match(confirm, /\/Android\/i\.test\(navigator\.userAgent\)/);
+  assert.match(confirm, /isNativePlatform\?\.\(\) \|\| standalone\) \{\s*formRef\.current\?\.requestSubmit\(\);/);
+  assert.doesNotMatch(confirm, /setAppIntent|useState/);
+});
