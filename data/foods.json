@@ -6550,5 +6550,18 @@
     "unitWeightGrams": 350,
     "caloriesPerUnit": 224,
     "unitsPerPackage": 1
+  },
+  {
+    "id": "roasted-cashews",
+    "name": "קשיו קלוי",
+    "category": "אגוזים וזרעים",
+    "calories": 606,
+    "protein": 15,
+    "carbs": 30,
+    "fat": 47,
+    "sodiumMg": 600,
+    "servingLabel": "ל-100 גרם",
+    "verificationStatus": "ממתין לבדיקה",
+    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; הנתרן הוא ערך משוער של כ-600 מ״ג."
   }
 ]

@@ -113,6 +113,24 @@ test("the Muller vanilla protein drink displays one 350 ml bottle", () => {
   });
 });
 
+test("roasted cashews display nutrition per 100 grams", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 606,
+    protein: 15,
+    carbs: 30,
+    fat: 47,
+    packageUnit: null,
+    unitWeightGrams: null,
+    servingLabel: "ל-100 גרם",
+  }), {
+    calories: 606,
+    protein: 15,
+    carbs: 30,
+    fat: 47,
+    servingLabel: "ל-100 גרם",
+  });
+});
+
 test("Danone PRO 1.5% displays nutrition for the full 200 gram cup", () => {
   assert.deepEqual(catalogueServingNutrition({
     calories: 70,

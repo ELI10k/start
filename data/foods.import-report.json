@@ -3,10 +3,10 @@
   "sheets": [
     "בלוק 1 - מוצרי חלב"
   ],
-  "sourceRows": 360,
-  "importedFoods": 360,
+  "sourceRows": 361,
+  "importedFoods": 361,
   "ignoredRows": 0,
-  "categoryCount": 64,
+  "categoryCount": 65,
   "duplicateNames": [
     {
       "name": "בורקס גבינה",
@@ -27,9 +27,9 @@
     "protein": 15,
     "carbs": 17,
     "fat": 23,
-    "sugars": 86,
+    "sugars": 87,
     "sodiumMg": 89,
-    "calciumMg": 284
+    "calciumMg": 285
   },
   "issues": []
 }
