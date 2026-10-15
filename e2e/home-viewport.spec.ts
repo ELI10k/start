@@ -47,6 +47,7 @@ async function measure(page: Page) {
       navTop: nav?.top ?? window.innerHeight,
       actionHeights: cards.map((card) => Math.round(card.height)),
       actionWidths: cards.map((card) => Math.round(card.width)),
+      metricWidths: tiles.map((tile) => Math.round(tile.getBoundingClientRect().width)),
       clippedValues: values.filter((value) => value.scrollWidth > value.clientWidth + 1 || value.getBoundingClientRect().right > value.closest(".metric-tile")!.getBoundingClientRect().right + 1 || value.getBoundingClientRect().left < value.closest(".metric-tile")!.getBoundingClientRect().left - 1).map((value) => value.textContent),
       ellipsised: values.filter((value) => getComputedStyle(value).textOverflow === "ellipsis").length,
       valueLines: values.map((value) => Math.round(value.getBoundingClientRect().height / parseFloat(getComputedStyle(value).lineHeight || "20"))),
@@ -71,6 +72,7 @@ for (const size of SIZES) {
     expect(top.clippedValues, "every figure fits its tile").toEqual([]);
     expect(top.ellipsised, "no figure is ellipsised").toBe(0);
     expect(top.fadedTiles + top.disabledTiles, "health tiles are neither faded nor disabled").toBe(0);
+    expect(Math.max(...top.metricWidths) - Math.min(...top.metricWidths), "all five metric cards have the same width").toBeLessThanOrEqual(2);
     // Same height across each metrics row; four quick actions alike, each a real target.
     expect(new Set(top.rowHeights.slice(0, 3)).size).toBe(1);
     expect(new Set(top.rowHeights.slice(3)).size).toBe(1);

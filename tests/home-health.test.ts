@@ -539,6 +539,15 @@ test("quick actions restore the substantial 12 October cards and stay equal", as
   assert.match(home.slice(home.indexOf(".quick-action-card__meta {")), /^[^}]*text-overflow: ellipsis/);
 });
 
+test("health cards match the daily figures and keep their sync details", async () => {
+  const { css } = await homeCss();
+  const tile = await source("components/client/HealthMetricTile.tsx");
+  assert.match(css, /\.dashboard-metrics--fit > \.metric-tile--health \{ grid-column: span 2; \}/);
+  assert.match(css, /\.metric-tile--health:nth-child\(4\) \{ grid-column: 2 \/ span 2; \}/);
+  assert.match(tile, /card\.sourceText \? <span className="health-tile__meta">/);
+  assert.match(tile, /card\.syncedText \? <span className="health-tile__meta">/);
+});
+
 test("27. figures never ellipsise or break, goals may wrap", async () => {
   const { raw } = await homeCss();
   const fit = raw.slice(raw.indexOf("/* The home figures:"), raw.indexOf("/* Progress metrics stay on one screen")).replace(/\/\*[\s\S]*?\*\//g, "");
