@@ -30,6 +30,23 @@ test("the custom health plugin is registered with the bridge", async () => {
   assert.doesNotMatch(storyboard, /customClass="CAPBridgeViewController"/);
 });
 
+test("a fresh iOS install requests HealthKit before treating read access as granted", async () => {
+  const plugin = await source("ios/App/App/StartHealthPlugin.swift");
+  // HealthKit deliberately hides per-type read authorization. Its request
+  // status alone can say no request is needed even though LIFE FIT has never
+  // appeared in Health > Apps, so the app must remember completing its own
+  // authorization sheet before it may report a granted lifecycle state.
+  assert.match(plugin, /authorizationRequestedKey/);
+  assert.match(plugin, /UserDefaults\.standard\.bool\(forKey: authorizationRequestedKey\)/);
+  assert.match(plugin, /call\.resolve\(\["status": "prompt"\]\)/);
+  assert.match(plugin, /UserDefaults\.standard\.set\(true, forKey: self\.authorizationRequestedKey\)/);
+  assert.ok(
+    plugin.indexOf("UserDefaults.standard.bool(forKey: authorizationRequestedKey)") <
+      plugin.indexOf("store.getRequestStatusForAuthorization"),
+    "the app-owned first-request guard must run before HealthKit's ambiguous status API",
+  );
+});
+
 test("sleep uses one HealthKit source per night instead of adding every writer", async () => {
   const plugin = await source("ios/App/App/StartHealthPlugin.swift");
   assert.match(plugin, /Dictionary\(grouping: grouped\[day\] \?\? \[\], by:/);
