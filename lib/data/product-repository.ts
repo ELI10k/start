@@ -1612,6 +1612,7 @@ export async function listDatabaseFoods() {
     .select(
       "id,name,brand,category,calories,protein,carbs,fat,serving_label,package_unit,unit_weight_grams,calories_per_unit,units_per_package,source,created_by",
     )
+    .eq("catalogue_visible", true)
     .order("name")
     // PostgREST caps an unbounded select at a thousand rows and says nothing
     // about it. The catalogue is 417 products today, so nothing is missing yet -

@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     if (!parsed) return Response.json({ error: "invalid_analysis" }, { status: 502 });
     if (!parsed.containsFood) return Response.json({ error: "no_food", summary: parsed.summary }, { status: 422 });
     const supabase = await createSupabaseServerClient();
-    const { data: rows, error } = await supabase.from("foods").select("id,name,calories,protein,carbs,fat,verification_status,notes");
+    const { data: rows, error } = await supabase.from("foods").select("id,name,calories,protein,carbs,fat,verification_status,notes").eq("catalogue_visible", true);
     if (error) throw error;
     const foods: MatchableFood[] = (rows ?? []).map((row) => ({
       id: String(row.id), name: String(row.name), calories: row.calories == null ? null : Number(row.calories),

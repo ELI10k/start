@@ -17,7 +17,7 @@ export async function assignPersonalizedNutrition(
   const { data: active, error: activeError } = await admin.from("client_meal_plan_assignments").select("meal_plan_id").eq("client_id", clientId).eq("status", "active").limit(1).maybeSingle();
   if (activeError) return { status: "failed", message: "לא ניתן היה לבדוק אם קיים תפריט פעיל." };
   if (active) return { status: "ready", mealPlanId: String(active.meal_plan_id), message: "התפריט הפעיל הקיים נשמר ללא שינוי." };
-  const { data, error } = await admin.from("foods").select("id,name,calories,protein,carbs,fat,vegan,vegetarian,pescatarian,contains_gluten,contains_lactose,allergens,dietary_tags,dietary_metadata_verified").eq("dietary_metadata_verified", true);
+  const { data, error } = await admin.from("foods").select("id,name,calories,protein,carbs,fat,vegan,vegetarian,pescatarian,contains_gluten,contains_lactose,allergens,dietary_tags,dietary_metadata_verified").eq("dietary_metadata_verified", true).eq("catalogue_visible", true);
   if (error) return { status: "failed", message: "קריאת מאגר המזונות המאושר נכשלה." };
   const foods: TaggedFood[] = (data ?? []).map(row => ({
     id: String(row.id), name: String(row.name), calories: Number(row.calories), protein: Number(row.protein ?? 0), carbs: Number(row.carbs ?? 0), fat: Number(row.fat ?? 0),
