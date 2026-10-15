@@ -510,14 +510,13 @@ const homeCss = async () => {
   return { css: rules(css), home: rules(css.slice(start, end)), raw: css };
 };
 
-test("26. the home screen scrolls instead of being pinned to one viewport", async () => {
+test("26. a regular iPhone home does not bounce, while short phones remain reachable", async () => {
   const { css, home } = await homeCss();
-  assert.doesNotMatch(css, /(html|body):has\(\.client-app-shell--home\)/);
-  assert.doesNotMatch(home, /(?:html|body):has\(\.client-app-shell--home\)[^{]*\{[^}]*overflow:\s*hidden/);
-  assert.doesNotMatch(home, /\.client-app-shell--home[^,{]*\{[^}]*overflow:\s*hidden/);
-  assert.doesNotMatch(home, /touch-action:\s*none/);
+  assert.match(css, /@media \(max-width: 767px\) and \(min-height: 760px\)[\s\S]*?body:has\(\.client-app-shell--home\)[^{]*\{[^}]*overflow:\s*hidden/);
+  assert.match(home, /\.client-app-shell--home \{[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden/);
+  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overflow:\s*hidden/);
   assert.doesNotMatch(home, /position:\s*fixed/);
-  assert.doesNotMatch(home, /height:\s*100dvh/);
+  assert.doesNotMatch(home, /touch-action:\s*none/);
 });
 
 test("24. each responsive home layout clears the tab bar exactly once", async () => {
@@ -533,7 +532,8 @@ test("24. each responsive home layout clears the tab bar exactly once", async ()
 
 test("quick actions restore the substantial 12 October cards and stay equal", async () => {
   const { home } = await homeCss();
-  assert.doesNotMatch(home, /dvh|vh\)/, "no height tied to the viewport");
+  const actions = home.slice(home.indexOf(".quick-actions-grid"));
+  assert.doesNotMatch(actions, /(?:min-)?height:\s*[^;]*(?:dvh|vh)/, "action height is not tied to the viewport");
   assert.match(home, /\.quick-actions-grid \{[^}]*grid-auto-rows: 1fr/);
   assert.match(home, /\.quick-action-card \{[^}]*min-height: 7rem/);
   assert.match(home, /\.quick-action-card__icon,[\s\S]*?width: 3\.4rem; height: 3\.4rem/);
@@ -549,6 +549,7 @@ test("health cards match the supplied reference: wide, compact, and summary-led"
   assert.match(tile, /<span className="health-tile__summary">\{detail\(state, today\)\}<\/span>/);
   assert.match(tile, /card\.status === "sync-error"[\s\S]*אין עדיין נתונים/);
   assert.doesNotMatch(tile, /health-tile__meta/);
+  assert.match(css, /data-metric="sleep"[^}]*\.health-tile__figure[\s\S]*?font-size:\s*clamp\(\.82rem, 3\.7vw, \.98rem\)/);
 });
 
 test("Health detail screens hide the technical failure but retain sync now", async () => {

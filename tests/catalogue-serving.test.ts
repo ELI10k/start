@@ -131,6 +131,42 @@ test("roasted cashews display nutrition per 100 grams", () => {
   });
 });
 
+test("walnuts display nutrition per 100 grams", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 654,
+    protein: 15.2,
+    carbs: 13.7,
+    fat: 65.2,
+    packageUnit: null,
+    unitWeightGrams: null,
+    servingLabel: "ל-100 גרם",
+  }), {
+    calories: 654,
+    protein: 15.2,
+    carbs: 13.7,
+    fat: 65.2,
+    servingLabel: "ל-100 גרם",
+  });
+});
+
+test("roasted salted almonds display nutrition per 100 grams", () => {
+  assert.deepEqual(catalogueServingNutrition({
+    calories: 613,
+    protein: 22,
+    carbs: 19,
+    fat: 53,
+    packageUnit: null,
+    unitWeightGrams: null,
+    servingLabel: "ל-100 גרם",
+  }), {
+    calories: 613,
+    protein: 22,
+    carbs: 19,
+    fat: 53,
+    servingLabel: "ל-100 גרם",
+  });
+});
+
 test("Danone PRO 1.5% displays nutrition for the full 200 gram cup", () => {
   assert.deepEqual(catalogueServingNutrition({
     calories: 70,

@@ -956,15 +956,19 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     overflow: hidden;
   }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) {
+    display: flex;
     height: 100dvh;
     min-height: 0;
+    flex-direction: column;
     overflow: hidden;
     padding-bottom: 0;
   }
+  .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .mobile-app-header { flex: 0 0 auto; }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
     display: flex;
-    height: 100%;
+    height: auto;
     min-height: 0;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: clamp(.35rem, 1vh, .65rem);
     padding-block: max(.4rem, env(safe-area-inset-top)) var(--nav-clearance);
@@ -1058,6 +1062,17 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-viewport-fit] .health-stat-grid span { font-size: .6rem; }
   .progress-metrics[data-viewport-fit] .health-insight,
   .progress-metrics[data-viewport-fit] .health-sync-note { padding: .5rem .65rem; font-size: .68rem; }
+  .progress-metrics[data-viewport-fit] .health-connection {
+    flex: 0 0 auto;
+    gap: .12rem;
+    padding: .45rem .75rem;
+  }
+  .progress-metrics[data-viewport-fit] .health-connection__meta { font-size: .68rem; line-height: 1.2; }
+  .progress-metrics[data-viewport-fit] .health-connection .health-sync-button {
+    min-height: 2rem;
+    margin-top: .15rem;
+    padding-block: .3rem;
+  }
   .progress-metrics[data-viewport-fit] .health-sync-button { min-height: 2.25rem; padding-block: .4rem; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-card { flex: 0 0 auto; padding: .6rem .75rem; }
   .progress-metrics[data-viewport-fit] .nutrition-macro-card > h3 { font-size: .9rem; }
@@ -1078,11 +1093,11 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
    the single-screen summary. Very short phones keep the compact rules above. */
 @media (max-width: 767px) and (min-height: 740px) {
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
-    gap: .65rem;
+    gap: .45rem;
     padding-block-start: max(.65rem, env(safe-area-inset-top));
   }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header h1 { font-size: 1.65rem; }
-  .progress-metrics[data-viewport-fit] { gap: .55rem; }
+  .progress-metrics[data-viewport-fit] { gap: .4rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tabs { gap: .35rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tab { padding-block: .4rem; border-radius: .95rem; }
   .progress-metrics[data-viewport-fit] .progress-metric-tab__icon { width: 2.3rem; height: 2.3rem; }
@@ -1155,18 +1170,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .metric-tile strong { font-size: 1.22rem; }
 }
 
-/* The client home screen.
-   
-   It used to be pinned to one viewport: html and body fixed, the shell at
-   100dvh with overflow:hidden and touch-action:none, and the quick actions
-   sized as 30% of the screen. On a short iPhone, with large text, or on the
-   day a weekly summary arrived, the tip and the progress line were cropped
-   behind the tab bar and could not be scrolled to.
-   
-   Now the page scrolls like every other page, every block is as tall as what
-   it says, and the bar is cleared once: the shell's own bottom padding is
-   dropped here and the content box pays --nav-clearance (bar + home
-   indicator) plus a little air, so the last card ends fully above the bar. */
+/* The client home screen. The content is compact enough to fit a regular
+   iPhone. On those devices the shell owns the viewport and the content pane
+   only becomes a scroller if Dynamic Type actually makes it overflow. Short
+   phones keep ordinary document scrolling, so nothing can be clipped. */
 .client-app-shell--home { padding-bottom: 0; }
 .client-app-shell--home .client-app-content {
   padding-top: .6rem;
@@ -1200,12 +1207,46 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     padding-top: .35rem;
     padding-bottom: calc(var(--nav-clearance) + .35rem);
   }
-  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .home-screen { gap: .42rem; }
+  .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .home-screen { gap: .3rem; }
   .client-app-shell--home .home-screen .section-heading--compact { margin-bottom: .2rem; }
   .client-app-shell--home .weekly-lesson { padding-block: .55rem; }
   .client-app-shell--home .progress-pulse { gap: .3rem .55rem; padding: .55rem .7rem; }
   .client-app-shell--home .progress-pulse__line { gap: 0; }
   .client-app-shell--home .weight-goal--compact { gap: .22rem; }
+}
+@media (max-width: 767px) and (min-height: 760px) {
+  html:has(.client-app-shell--home),
+  body:has(.client-app-shell--home) {
+    height: 100%;
+    overflow: hidden;
+  }
+  .client-app-shell--home {
+    display: flex;
+    height: 100dvh;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .client-app-shell--home .mobile-app-header { flex: 0 0 auto; }
+  .client-app-shell--home .client-app-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    overscroll-behavior-y: none;
+  }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile { padding-block: .42rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__value { margin-top: .2rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile small,
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__goal { margin-top: .08rem; }
+  .client-app-shell--home .health-tile__figure { margin-top: .22rem; }
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure {
+    min-width: 0;
+    gap: .14rem;
+  }
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__value,
+  .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__goal {
+    font-size: clamp(.82rem, 3.7vw, .98rem);
+  }
 }
 @media (min-width: 768px) {
   .client-app-shell--home .client-app-content { padding-top: 2rem; padding-bottom: 4rem; }

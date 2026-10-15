@@ -6563,5 +6563,32 @@
     "servingLabel": "ל-100 גרם",
     "verificationStatus": "ממתין לבדיקה",
     "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; הנתרן הוא ערך משוער של כ-600 מ״ג."
+  },
+  {
+    "id": "walnuts",
+    "name": "אגוזי מלך",
+    "category": "אגוזים וזרעים",
+    "calories": 654,
+    "protein": 15.2,
+    "carbs": 13.7,
+    "fat": 65.2,
+    "sodiumMg": 2,
+    "servingLabel": "ל-100 גרם",
+    "verificationStatus": "ממתין לבדיקה",
+    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; סיבים תזונתיים: כ-6.7 גרם."
+  },
+  {
+    "id": "roasted-salted-almonds",
+    "name": "שקדים קלויים ומלוחים",
+    "category": "אגוזים וזרעים",
+    "calories": 613,
+    "protein": 22,
+    "carbs": 19,
+    "fat": 53,
+    "sugars": 4,
+    "sodiumMg": 650,
+    "servingLabel": "ל-100 גרם",
+    "verificationStatus": "ממתין לבדיקה",
+    "notes": "ערכים ל-100 גרם שנמסרו על ידי המשתמש; שומן רווי: 4 גרם; סיבים תזונתיים: כ-3.5 גרם."
   }
 ]

@@ -3,11 +3,9 @@ import { identity, requireIdentity, signIn } from "./support/guards";
 
 // The client home on iPhone-sized screens.
 //
-// This used to assert that every section ended above the viewport edge - which
-// is what pinned the page with overflow:hidden and cropped the last cards
-// behind the tab bar on a short phone. The rule now is the opposite one: the
-// page may be taller than the screen, it must scroll, and once scrolled to the
-// end the last card sits fully above the bar.
+// Regular iPhones show the complete home without a document scroll or the
+// native rubber-band. A short phone and enlarged text stay reachable rather
+// than clipping content.
 
 const SIZES = [
   { name: "375 × 812 (iPhone X/11 Pro/12 mini)", width: 375, height: 812 },
@@ -68,7 +66,7 @@ for (const size of SIZES) {
     expect(top.documentWidth, "no horizontal overflow").toBeLessThanOrEqual(top.viewportWidth);
     if (size.height >= 812) expect(top.scrollHeight, "the regular iPhone home does not scroll").toBeLessThanOrEqual(top.viewportHeight + 1);
     expect(top.bodyPosition, "body is not pinned").not.toBe("fixed");
-    expect(top.bodyOverflow, "body is not locked").not.toBe("hidden");
+    expect(top.bodyOverflow, size.height >= 760 ? "regular iPhone body is locked" : "short phone body can scroll").toBe(size.height >= 760 ? "hidden" : "auto");
     expect(top.firstTop - top.headerBottom, "no empty band under LIFE FIT").toBeLessThanOrEqual(24);
     expect(top.clippedValues, "every figure fits its tile").toEqual([]);
     expect(top.ellipsised, "no figure is ellipsised").toBe(0);
@@ -84,7 +82,7 @@ for (const size of SIZES) {
     expect(Math.min(...top.actionWidths)).toBeGreaterThanOrEqual(44);
     expect(Math.min(...top.actionHeights), "quick actions retain the substantial 12 October size").toBeGreaterThanOrEqual(104);
 
-    // Scroll to the end: the last card ends above the bar.
+    // Scroll to the end where scrolling is needed: the last card clears the bar.
     await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));
     const bottom = await measure(page);
     expect(bottom.lastBottom, "last card fully above the tab bar").toBeLessThanOrEqual(bottom.navTop);
@@ -120,4 +118,35 @@ test("every home destination still opens", async ({ page }) => {
   await page.locator('.metric-tile--health[data-metric="steps"]').click();
   await expect(page).toHaveURL(/\/progress\?metric=steps/, { timeout: 30_000 });
   await expect(page.getByRole("tab", { name: /צעדים/ })).toHaveAttribute("aria-selected", "true");
+});
+
+test("steps and sleep fit between the header and tab bar without document scrolling", async ({ page }) => {
+  test.skip(!identity("client"), "set the client E2E credentials to run");
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, requireIdentity("client"));
+
+  for (const metric of ["steps", "sleep"] as const) {
+    await page.goto(`/progress?metric=${metric}`);
+    await expect(page.locator(`.progress-metrics[data-metric="${metric}"]`)).toBeVisible({ timeout: 30_000 });
+    const layout = await page.evaluate(() => {
+      const shell = document.querySelector<HTMLElement>(".client-app-shell--progress")!;
+      const content = document.querySelector<HTMLElement>(".client-app-content")!;
+      const header = document.querySelector<HTMLElement>(".mobile-app-header")!;
+      const nav = document.querySelector<HTMLElement>(".bottom-app-nav")!;
+      const connection = document.querySelector<HTMLElement>(".health-connection")!;
+      return {
+        bodyOverflow: getComputedStyle(document.body).overflowY,
+        shellHeight: Math.round(shell.getBoundingClientRect().height),
+        contentTop: Math.round(content.getBoundingClientRect().top),
+        headerBottom: Math.round(header.getBoundingClientRect().bottom),
+        connectionBottom: Math.round(connection.getBoundingClientRect().bottom),
+        navTop: Math.round(nav.getBoundingClientRect().top),
+      };
+    });
+    expect(layout.bodyOverflow).toBe("hidden");
+    expect(layout.shellHeight).toBe(844);
+    expect(layout.contentTop).toBeGreaterThanOrEqual(layout.headerBottom);
+    expect(layout.connectionBottom, `${metric} connection stays above navigation`).toBeLessThanOrEqual(layout.navTop);
+  }
 });
