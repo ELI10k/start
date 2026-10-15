@@ -21,6 +21,7 @@ export default function HealthMetricTile({
   value,
   unit,
   goal,
+  detail,
   describe,
 }: {
   metric: HealthMetric;
@@ -30,6 +31,7 @@ export default function HealthMetricTile({
   value: (state: ReturnType<typeof useHealthSync>["state"], today: string) => string | null;
   unit?: string;
   goal: string;
+  detail: (state: ReturnType<typeof useHealthSync>["state"], today: string) => string;
   describe: (value: string | null) => string;
 }) {
   const router = useRouter();
@@ -61,17 +63,23 @@ export default function HealthMetricTile({
         <span>{label}</span>
         <span className="metric-tile__icon">{icon}</span>
       </span>
-      <span className="metric-tile__value">
-        <bdi>{figure ?? "—"}</bdi>
-        {figure && unit ? <span className="metric-tile__unit">{unit}</span> : null}
+      <span className="health-tile__figure">
+        <span className="metric-tile__value">
+          <bdi>{figure ?? "—"}</bdi>
+          {figure && unit ? <span className="metric-tile__unit">{unit}</span> : null}
+        </span>
+        <small className="metric-tile__goal">{goal}</small>
       </span>
-      <small className="metric-tile__goal">{goal}</small>
-      <span className="health-tile__status" data-tone={card.tone}>
-        <i aria-hidden="true" />
-        {card.statusText}
-      </span>
-      {card.sourceText ? <span className="health-tile__meta">{card.sourceText}</span> : null}
-      {card.syncedText ? <span className="health-tile__meta">{card.syncedText}</span> : null}
+      {card.hasValue ? (
+        <span className="health-tile__summary">{detail(state, today)}</span>
+      ) : card.status === "sync-error" ? (
+        <span className="health-tile__summary">אין עדיין נתונים</span>
+      ) : (
+        <span className="health-tile__status" data-tone={card.tone}>
+          <i aria-hidden="true" />
+          {card.statusText}
+        </span>
+      )}
     </button>
   );
 }

@@ -738,10 +738,7 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   gap: .5rem; overflow: visible; margin-inline: 0; padding-inline: 0;
 }
 .dashboard-metrics--fit > .metric-tile { grid-column: span 2; }
-/* Health is not a second, oversized tier. Keep steps and sleep the same width
-   as every other daily figure and centre the final pair in their own row. */
-.dashboard-metrics--fit > .metric-tile--health { grid-column: span 2; }
-.dashboard-metrics--fit > .metric-tile--health:nth-child(4) { grid-column: 2 / span 2; }
+.dashboard-metrics--fit > .metric-tile--health { grid-column: span 3; }
 .dashboard-metrics--fit .metric-tile {
   display: flex; flex-direction: column; min-width: 0; min-height: 0; flex: initial;
   padding: .6rem .65rem .65rem;
@@ -770,6 +767,14 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
 }
 .dashboard-metrics--fit .metric-tile small > span { display: block; }
 .dashboard-metrics--fit .metric-tile--health .metric-tile__value { font-size: clamp(1.35rem, 6.6vw, 1.7rem); }
+.health-tile__figure { display: flex; align-items: baseline; gap: .28rem; margin-top: .35rem; white-space: nowrap; }
+.dashboard-metrics--fit .health-tile__figure .metric-tile__value,
+.dashboard-metrics--fit .health-tile__figure .metric-tile__goal {
+  display: inline-flex; margin: 0; color: var(--ink); font-size: clamp(1rem, 4.5vw, 1.28rem); font-weight: 850; line-height: 1.15;
+  white-space: nowrap;
+}
+.dashboard-metrics--fit .health-tile__figure .metric-tile__unit { color: inherit; font-size: inherit; font-weight: inherit; }
+.health-tile__summary { margin-top: .35rem; color: var(--ink-muted); font-size: .72rem; font-weight: 600; line-height: 1.3; }
 
 /* Steps and sleep say where they stand in words, with a dot for colour - never
    by fading the whole card out, which made a card full of real data look
