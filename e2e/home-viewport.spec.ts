@@ -173,7 +173,7 @@ test("steps and sleep fit between the header and tab bar without document scroll
     expect(layout.shellHeight).toBe(844);
     expect(layout.contentTop).toBeGreaterThanOrEqual(layout.headerBottom);
     expect(layout.contentScrollHeight, `${metric} fits without inner scrolling`).toBeLessThanOrEqual(layout.contentClientHeight + 1);
-    expect(layout.connectionBottom, `${metric} connection stays above navigation`).toBeLessThanOrEqual(layout.navTop);
+    expect(layout.connectionBottom, `${metric} connection and sync control clear navigation`).toBeLessThanOrEqual(layout.navTop - 24);
   }
 });
 
