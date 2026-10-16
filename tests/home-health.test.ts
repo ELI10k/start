@@ -11,6 +11,16 @@ import type { DailySteps, HealthPermissionState, SleepSample } from "../lib/heal
 
 const source = (path: string) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
+test("the iOS scene boots the controller that registers the HealthKit plugin", async () => {
+  const [scene, controller] = await Promise.all([
+    source("ios/App/App/SceneDelegate.swift"),
+    source("ios/App/App/StartViewController.swift"),
+  ]);
+  assert.match(scene, /rootViewController\s*=\s*StartViewController\(\)/);
+  assert.doesNotMatch(scene, /rootViewController\s*=\s*CAPBridgeViewController\(\)/);
+  assert.match(controller, /registerPluginInstance\(StartHealthPlugin\(\)\)/);
+});
+
 // 2026-10-14 10:00 in Israel.
 const NOW = Date.parse("2026-10-14T07:00:00.000Z");
 const TODAY = "2026-10-14";
