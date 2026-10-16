@@ -1128,6 +1128,31 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-metric="nutrition"] .nutrition-macro-bar { height: 1.4rem; margin-top: .3rem; }
   .progress-metrics[data-metric="nutrition"] .nutrition-macro-grid { margin-top: .25rem; }
   .progress-metrics[data-metric="nutrition"] .health-insight { padding: .45rem .65rem; font-size: .68rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .progress-metric-tab { padding-block: .3rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .progress-metric-tab__icon { width: 2.1rem; height: 2.1rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-period-picker button { min-height: 1.85rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-summary-card { padding: .65rem .75rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-chart { min-height: 5rem; margin-top: .3rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-stat-grid { gap: .45rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-stat-grid > div { padding: .5rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-insight { padding: .5rem .7rem; font-size: .7rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-connection { padding: .4rem .7rem; }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-connection .health-sync-button {
+    position: relative;
+    min-height: 1.8rem;
+    margin-top: .08rem;
+    padding: .18rem .85rem;
+    font-size: .7rem;
+  }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-connection .health-sync-button::before {
+    position: absolute;
+    inset: -.45rem -.25rem;
+    content: "";
+  }
+  .progress-metrics:is([data-metric="steps"], [data-metric="sleep"]) .health-connection .health-sync-button svg {
+    width: .85rem;
+    height: .85rem;
+  }
 }
 
 @media (max-width: 767px) {
