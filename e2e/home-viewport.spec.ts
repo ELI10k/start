@@ -151,6 +151,7 @@ test("steps and sleep fit between the header and tab bar without document scroll
   for (const metric of ["steps", "sleep"] as const) {
     await page.goto(`/progress?metric=${metric}`);
     await expect(page.locator(`.progress-metrics[data-metric="${metric}"]`)).toBeVisible({ timeout: 30_000 });
+    await page.evaluate(() => { document.documentElement.dataset.nativePlatform = "ios"; });
     const layout = await page.evaluate(() => {
       const shell = document.querySelector<HTMLElement>(".client-app-shell--progress")!;
       const content = document.querySelector<HTMLElement>(".client-app-content")!;
@@ -164,24 +165,27 @@ test("steps and sleep fit between the header and tab bar without document scroll
         headerBottom: Math.round(header.getBoundingClientRect().bottom),
         connectionBottom: Math.round(connection.getBoundingClientRect().bottom),
         navTop: Math.round(nav.getBoundingClientRect().top),
+        contentScrollHeight: content.scrollHeight,
+        contentClientHeight: content.clientHeight,
       };
     });
     expect(layout.bodyOverflow).toBe("hidden");
     expect(layout.shellHeight).toBe(844);
     expect(layout.contentTop).toBeGreaterThanOrEqual(layout.headerBottom);
+    expect(layout.contentScrollHeight, `${metric} fits without inner scrolling`).toBeLessThanOrEqual(layout.contentClientHeight + 1);
     expect(layout.connectionBottom, `${metric} connection stays above navigation`).toBeLessThanOrEqual(layout.navTop);
   }
 });
 
-test("nutrition progress can scroll its final summary fully above the tab bar", async ({ page }) => {
+test("installed iPhone nutrition shows its final summary above the tab bar", async ({ page }) => {
   test.skip(!identity("client"), "set the client E2E credentials to run");
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page, requireIdentity("client"));
   await page.goto("/progress?metric=nutrition");
   await expect(page.locator('.progress-metrics[data-metric="nutrition"]')).toBeVisible({ timeout: 30_000 });
+  await page.evaluate(() => { document.documentElement.dataset.nativePlatform = "ios"; });
 
-  await scrollContentToEnd(page);
   const layout = await page.evaluate(() => {
     const content = document.querySelector<HTMLElement>(".client-app-content")!;
     const nav = document.querySelector<HTMLElement>(".bottom-app-nav")!;
@@ -190,11 +194,13 @@ test("nutrition progress can scroll its final summary fully above the tab bar", 
       ?? document.querySelector<HTMLElement>('.progress-metrics[data-metric="nutrition"] .progress-metric-panel')!;
     return {
       overflowY: getComputedStyle(content).overflowY,
-      scrollTop: content.scrollTop,
+      contentScrollHeight: content.scrollHeight,
+      contentClientHeight: content.clientHeight,
       lastBottom: Math.round(last.getBoundingClientRect().bottom),
       navTop: Math.round(nav.getBoundingClientRect().top),
     };
   });
   expect(layout.overflowY).toBe("auto");
+  expect(layout.contentScrollHeight, "nutrition fits without inner scrolling").toBeLessThanOrEqual(layout.contentClientHeight + 1);
   expect(layout.lastBottom, "nutrition's final visible panel clears the navigation").toBeLessThanOrEqual(layout.navTop);
 });
