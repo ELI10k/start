@@ -3,10 +3,11 @@ import Foundation
 import HealthKit
 import UIKit
 
-// The iOS half of the StartHealth contract. HealthKit already merges the phone,
-// the watch and any ring that writes to it, so this reads the merged daily total
-// and hands back one figure per calendar day - never a sum of sources, which
-// would count the same walk twice.
+// The iOS half of the StartHealth contract. Most HealthKit writers cooperate
+// with its aggregate step query, but some ring companion apps publish a second
+// full-day stream that HealthKit adds to the iPhone stream. For those days we
+// prefer the wearable while it is reporting and use the phone only outside the
+// wearable's reporting window (for example after its battery dies).
 //
 // Days are the device's own calendar days. The web layer decides what "today"
 // means in Asia/Jerusalem and asks for a range; this honours that range using
@@ -145,12 +146,11 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
         call.resolve(["days": totals.map { ["day": $0.day, "steps": $0.steps] }])
         return
       }
-      // Who wrote the samples behind each day: names for the screen only.
-      // If this lookup fails the figures still go back, without names.
-      self.stepSources(type: stepType, predicate: predicate) { sources in
+      self.stepSourceSummary(type: stepType, predicate: predicate) { summary in
         let days: [[String: Any]] = totals.map { total in
-          var day: [String: Any] = ["day": total.day, "steps": total.steps]
-          if let writers = sources[total.day], !writers.isEmpty { day["sources"] = writers }
+          let selected = summary[total.day]
+          var day: [String: Any] = ["day": total.day, "steps": selected?.steps ?? total.steps]
+          if let writers = selected?.sources, !writers.isEmpty { day["sources"] = writers }
           return day
         }
         call.resolve(["days": days])
@@ -160,31 +160,93 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     store.execute(query)
   }
 
-  // One entry per writer per day, ordered by how many raw steps it wrote.
-  // The raw counts only rank the writers; they are never added up.
-  private func stepSources(type: HKQuantityType, predicate: NSPredicate, completion: @escaping ([String: [[String: Any]]]) -> Void) {
+  private struct StepWriter {
+    var info: [String: Any]
+    var samples: [HKQuantitySample]
+    var steps: Double
+    var first: Date
+    var last: Date
+    var isPhone: Bool
+  }
+
+  private typealias StepDaySummary = (steps: Int?, sources: [[String: Any]])
+
+  // Ring apps can write the same walk as a second stream beside the iPhone.
+  // Pick the dominant wearable for the day, then use phone samples only before
+  // its first sample or after its last sample. If there is no wearable, keep
+  // HealthKit's aggregate total by returning no override for that day.
+  private func stepSourceSummary(type: HKQuantityType, predicate: NSPredicate, completion: @escaping ([String: StepDaySummary]) -> Void) {
     let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
       if let error {
         CAPLog.print("StartHealth source lookup failed: \(error.localizedDescription)")
         completion([:])
         return
       }
-      var byDay: [String: [String: (info: [String: Any], weight: Double)]] = [:]
+      var byDay: [String: [String: StepWriter]] = [:]
       for sample in samples as? [HKQuantitySample] ?? [] {
         let day = Self.key(sample.startDate)
         let info = Self.sourceInfo(sample)
         let writer = Self.writerKey(sample)
         let steps = sample.quantity.doubleValue(for: HKUnit.count())
         var writers = byDay[day] ?? [:]
-        let current = writers[writer]
-        writers[writer] = (info: current?.info ?? info, weight: (current?.weight ?? 0) + steps)
+        if var current = writers[writer] {
+          current.samples.append(sample)
+          current.steps += steps
+          current.first = min(current.first, sample.startDate)
+          current.last = max(current.last, sample.endDate)
+          writers[writer] = current
+        } else {
+          writers[writer] = StepWriter(
+            info: info,
+            samples: [sample],
+            steps: steps,
+            first: sample.startDate,
+            last: sample.endDate,
+            isPhone: Self.isPhoneSource(sample)
+          )
+        }
         byDay[day] = writers
       }
-      completion(byDay.mapValues { writers in
-        writers.values.sorted { $0.weight > $1.weight }.prefix(6).map { $0.info }
-      })
+      var result: [String: StepDaySummary] = [:]
+      for (day, writers) in byDay {
+        let ordered = writers.values.sorted { $0.steps > $1.steps }
+        let sources = ordered.prefix(6).map { $0.info }
+        guard let wearable = ordered.first(where: { !$0.isPhone }) else {
+          // No ring/watch today: the caller keeps HealthKit's aggregate.
+          result[day] = (steps: nil, sources: sources)
+          continue
+        }
+        let phone = ordered.first(where: \.isPhone)
+        let phoneFallback = phone?.samples.reduce(0.0) { subtotal, sample in
+          subtotal + Self.stepsOutsideWearableWindow(sample, from: wearable.first, to: wearable.last)
+        } ?? 0
+        result[day] = (steps: Int((wearable.steps + phoneFallback).rounded()), sources: [wearable.info] + [phone?.info].compactMap { $0 })
+      }
+      completion(result)
     }
     store.execute(query)
+  }
+
+  private static func stepsOutsideWearableWindow(_ sample: HKQuantitySample, from first: Date, to last: Date) -> Double {
+    let steps = sample.quantity.doubleValue(for: HKUnit.count())
+    let duration = sample.endDate.timeIntervalSince(sample.startDate)
+    guard duration > 0 else {
+      return sample.startDate < first || sample.startDate > last ? steps : 0
+    }
+    let overlapStart = max(sample.startDate, first)
+    let overlapEnd = min(sample.endDate, last)
+    let overlap = max(0, overlapEnd.timeIntervalSince(overlapStart))
+    return steps * max(0, 1 - overlap / duration)
+  }
+
+  private static func isPhoneSource(_ sample: HKSample) -> Bool {
+    let values = [
+      sample.sourceRevision.source.name,
+      sample.sourceRevision.productType,
+      sample.device?.name,
+      sample.device?.model
+    ].compactMap { $0?.lowercased() }
+    return values.contains { $0.contains("iphone") }
   }
 
   @objc func readDailySleep(_ call: CAPPluginCall) {

@@ -128,3 +128,11 @@ test("the health plugin speaks in calendar days, not instants", async () => {
   // A day with no data is omitted rather than reported as a zero-step day.
   assert.match(swift, /guard steps > 0 else \{ return \}/);
 });
+
+test("iOS prefers wearable steps and only falls back to the phone outside its reporting window", async () => {
+  const swift = await source("ios/App/App/StartHealthPlugin.swift");
+  assert.match(swift, /ordered\.first\(where: \{ !\$0\.isPhone \}\)/);
+  assert.match(swift, /stepsOutsideWearableWindow\(sample, from: wearable\.first, to: wearable\.last\)/);
+  assert.match(swift, /wearable\.steps \+ phoneFallback/);
+  assert.match(swift, /productType/);
+});
