@@ -1205,6 +1205,13 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     display: inline-flex; min-height: 2.75rem; align-items: center;
     font-size: 1rem; line-height: 1;
   }
+  /* WKWebView is already positioned below the native status bar because the
+     Capacitor shell uses a native content inset. Do not add the CSS safe area
+     again: doing both created the conspicuous blank band above LIFE FIT. */
+  html[data-native-platform] .mobile-app-header {
+    min-height: 3rem;
+    padding-block: .15rem 0;
+  }
   .client-app-shell--home .client-app-content { padding-inline: .75rem; }
   .client-app-shell--home:not(:has([aria-label="סטטוס הכנת התוכניות"])) .client-app-content {
     padding-top: .35rem;

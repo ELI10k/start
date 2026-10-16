@@ -25,6 +25,10 @@ export default function NativeBridge() {
     const capacitor = (window as { Capacitor?: CapacitorGlobal }).Capacitor;
     if (!capacitor?.isNativePlatform?.()) return;
     const platform = capacitor.getPlatform?.() === "ios" ? "ios" : "android";
+    // Capacitor's native view is already inset below the iOS status bar. Mark
+    // it before the optional plugins load so CSS does not reserve that safe
+    // area a second time and leave a large blank strip above the wordmark.
+    document.documentElement.dataset.nativePlatform = platform;
 
     let cancelled = false;
     const cleanups: (() => void)[] = [];
@@ -181,6 +185,7 @@ export default function NativeBridge() {
 
     return () => {
       cancelled = true;
+      delete document.documentElement.dataset.nativePlatform;
       for (const cleanup of cleanups) cleanup();
     };
   }, [router]);
