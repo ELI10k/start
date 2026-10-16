@@ -1246,18 +1246,47 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     overscroll-behavior-y: contain;
     -webkit-overflow-scrolling: touch;
   }
-  .client-app-shell--home .dashboard-metrics--fit .metric-tile { padding-block: .42rem; }
-  .client-app-shell--home .dashboard-metrics--fit .metric-tile__value { margin-top: .2rem; }
+  /* The four main actions keep their substantial size. Only the five summary
+     figures are condensed so the progress card clears the native tab bar. */
+  .client-app-shell--home .dashboard-metrics--fit { gap: .32rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile {
+    padding: .25rem .42rem .28rem;
+    border-radius: .8rem;
+  }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__head {
+    gap: .16rem;
+    font-size: .61rem;
+    line-height: 1.05;
+  }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__icon svg { width: .82rem; height: .82rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__value {
+    margin-top: .1rem;
+    font-size: clamp(.98rem, 4.7vw, 1.18rem);
+    line-height: 1.05;
+  }
   .client-app-shell--home .dashboard-metrics--fit .metric-tile small,
-  .client-app-shell--home .dashboard-metrics--fit .metric-tile__goal { margin-top: .08rem; }
-  .client-app-shell--home .health-tile__figure { margin-top: .22rem; }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile__goal {
+    margin-top: .02rem;
+    font-size: .59rem;
+    line-height: 1.08;
+  }
+  .client-app-shell--home .health-tile__figure { margin-top: .1rem; }
+  .client-app-shell--home .health-tile__summary {
+    margin-top: .1rem;
+    font-size: .59rem;
+    line-height: 1.08;
+  }
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile--health .health-tile__figure .metric-tile__value,
+  .client-app-shell--home .dashboard-metrics--fit .metric-tile--health .health-tile__figure .metric-tile__goal {
+    font-size: clamp(.88rem, 3.9vw, 1.03rem);
+  }
   .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure {
     min-width: 0;
     gap: .14rem;
   }
   .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__value,
   .client-app-shell--home .metric-tile--health[data-metric="sleep"] .health-tile__figure .metric-tile__goal {
-    font-size: clamp(.82rem, 3.7vw, .98rem);
+    font-size: clamp(.74rem, 3.3vw, .88rem);
   }
 }
 @media (min-width: 768px) {

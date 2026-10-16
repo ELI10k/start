@@ -115,6 +115,17 @@ test("home with enlarged text still scrolls to its last card and clips no figure
   expect(bottom.lastBottom).toBeLessThanOrEqual(bottom.navTop);
 });
 
+test("installed iPhone home shows its complete final card without inner scrolling", async ({ page }) => {
+  test.skip(!identity("client"), "set the client E2E credentials to run");
+  test.setTimeout(120_000);
+  await openHome(page, 390, 844);
+  await page.evaluate(() => { document.documentElement.dataset.nativePlatform = "ios"; });
+  const layout = await measure(page);
+  expect(layout.contentScrollHeight).toBeLessThanOrEqual(layout.contentClientHeight + 1);
+  expect(layout.lastBottom, "the final progress card clears the native tab bar").toBeLessThanOrEqual(layout.navTop);
+  expect(Math.min(...layout.actionHeights), "the four main actions remain substantial").toBeGreaterThanOrEqual(104);
+});
+
 test("every home destination still opens", async ({ page }) => {
   test.skip(!identity("client"), "set the client E2E credentials to run");
   test.setTimeout(180_000);
