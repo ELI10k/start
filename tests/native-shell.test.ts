@@ -25,6 +25,17 @@ test("safe-area insets actually resolve", async () => {
   assert.doesNotMatch(layout, /userScalable/);
 });
 
+test("the native header does not reserve the iOS safe area twice", async () => {
+  const [bridge, css, config] = await Promise.all([
+    source("components/native/NativeBridge.tsx"),
+    source("app/globals.css"),
+    source("capacitor.config.ts"),
+  ]);
+  assert.match(config, /contentInset: "always"/);
+  assert.match(bridge, /document\.documentElement\.dataset\.nativePlatform = platform/);
+  assert.match(css, /html\[data-native-platform\] \.mobile-app-header\s*\{[^}]*min-height: 3rem;[^}]*padding-block: \.15rem 0;/s);
+});
+
 test("nothing outside the bridge imports Capacitor", async () => {
   for (const path of [
     "lib/health/providers.ts",
