@@ -971,6 +971,9 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
     flex: 1 1 auto;
     flex-direction: column;
     gap: clamp(.35rem, 1vh, .65rem);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
     padding-block: max(.4rem, env(safe-area-inset-top)) var(--nav-clearance);
   }
   .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .premium-page-header {
@@ -1231,8 +1234,10 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .client-app-shell--home .client-app-content {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: hidden;
-    overscroll-behavior-y: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
   .client-app-shell--home .dashboard-metrics--fit .metric-tile { padding-block: .42rem; }
   .client-app-shell--home .dashboard-metrics--fit .metric-tile__value { margin-top: .2rem; }

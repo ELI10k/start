@@ -520,11 +520,13 @@ const homeCss = async () => {
   return { css: rules(css), home: rules(css.slice(start, end)), raw: css };
 };
 
-test("26. a regular iPhone home does not bounce, while short phones remain reachable", async () => {
+test("26. a regular iPhone home keeps every card reachable above the fixed navigation", async () => {
   const { css, home } = await homeCss();
   assert.match(css, /@media \(max-width: 767px\) and \(min-height: 760px\)[\s\S]*?body:has\(\.client-app-shell--home\)[^{]*\{[^}]*overflow:\s*hidden/);
   assert.match(home, /\.client-app-shell--home \{[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden/);
-  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overflow:\s*hidden/);
+  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overflow-y:\s*auto/);
+  assert.match(home, /\.client-app-shell--home \.client-app-content \{[\s\S]*?overscroll-behavior-y:\s*contain/);
+  assert.doesNotMatch(home, /\.client-app-shell--home \.client-app-content \{[^}]*overflow:\s*hidden/);
   assert.doesNotMatch(home, /position:\s*fixed/);
   assert.doesNotMatch(home, /touch-action:\s*none/);
 });
