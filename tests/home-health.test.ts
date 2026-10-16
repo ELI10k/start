@@ -561,7 +561,7 @@ test("health cards match the supplied reference: wide, compact, and summary-led"
   assert.match(tile, /<span className="health-tile__summary">\{detail\(state, today\)\}<\/span>/);
   assert.match(tile, /card\.status === "sync-error"[\s\S]*אין עדיין נתונים/);
   assert.doesNotMatch(tile, /health-tile__meta/);
-  assert.match(css, /data-metric="sleep"[^}]*\.health-tile__figure[\s\S]*?font-size:\s*clamp\(\.82rem, 3\.7vw, \.98rem\)/);
+  assert.match(css, /data-metric="sleep"[^}]*\.health-tile__figure[\s\S]*?font-size:\s*clamp\(\.74rem, 3\.3vw, \.88rem\)/);
 });
 
 test("Health detail screens hide the technical failure but retain sync now", async () => {
