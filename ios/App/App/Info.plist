@@ -24,6 +24,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>המצלמה משמשת לסריקת ברקוד של מוצרי מזון ולצילום תמונות מעקב שנשמרות בחשבון הפרטי שלך.</string>
 	<key>NSHealthShareUsageDescription</key>

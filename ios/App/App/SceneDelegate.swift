@@ -8,7 +8,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         window = UIWindow(windowScene: windowScene)
-        window?.rootViewController = CAPBridgeViewController()
+        // Use the app-owned bridge controller. It registers StartHealthPlugin
+        // when Capacitor finishes loading; constructing the base controller
+        // here silently bypasses that registration and makes every HealthKit
+        // call look unavailable even though the plugin is in the binary.
+        window?.rootViewController = StartViewController()
         window?.makeKeyAndVisible()
 
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
