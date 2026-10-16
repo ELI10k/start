@@ -32,11 +32,14 @@ async function measure(page: Page) {
     const values = [...document.querySelectorAll<HTMLElement>(".dashboard-metrics--fit .metric-tile__value")];
     const tiles = [...document.querySelectorAll<HTMLElement>(".dashboard-metrics--fit .metric-tile")];
     const scroller = document.scrollingElement!;
+    const content = document.querySelector<HTMLElement>(".client-app-content")!;
     return {
       viewportWidth: window.innerWidth,
       viewportHeight: window.innerHeight,
       documentWidth: Math.max(scroller.scrollWidth, document.body.scrollWidth),
       scrollHeight: scroller.scrollHeight,
+      contentScrollHeight: content.scrollHeight,
+      contentClientHeight: content.clientHeight,
       bodyOverflow: getComputedStyle(document.body).overflowY,
       bodyPosition: getComputedStyle(document.body).position,
       headerBottom: header?.bottom ?? 0,
@@ -53,6 +56,14 @@ async function measure(page: Page) {
       fadedTiles: tiles.filter((tile) => Number(getComputedStyle(tile).opacity) < 1).length,
       disabledTiles: tiles.filter((tile) => (tile as HTMLButtonElement).disabled).length,
     };
+  });
+}
+
+async function scrollContentToEnd(page: Page) {
+  await page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>(".client-app-content");
+    content?.scrollTo(0, content.scrollHeight);
+    window.scrollTo(0, document.scrollingElement!.scrollHeight);
   });
 }
 
@@ -83,7 +94,7 @@ for (const size of SIZES) {
     expect(Math.min(...top.actionHeights), "quick actions retain the substantial 12 October size").toBeGreaterThanOrEqual(104);
 
     // Scroll to the end where scrolling is needed: the last card clears the bar.
-    await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));
+    await scrollContentToEnd(page);
     const bottom = await measure(page);
     expect(bottom.lastBottom, "last card fully above the tab bar").toBeLessThanOrEqual(bottom.navTop);
   });
@@ -99,7 +110,7 @@ test("home with enlarged text still scrolls to its last card and clips no figure
   expect(top.documentWidth).toBeLessThanOrEqual(top.viewportWidth);
   expect(top.clippedValues).toEqual([]);
   expect(top.scrollHeight, "taller than the screen, and reachable").toBeGreaterThan(top.viewportHeight);
-  await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight));
+  await scrollContentToEnd(page);
   const bottom = await measure(page);
   expect(bottom.lastBottom).toBeLessThanOrEqual(bottom.navTop);
 });
@@ -149,4 +160,30 @@ test("steps and sleep fit between the header and tab bar without document scroll
     expect(layout.contentTop).toBeGreaterThanOrEqual(layout.headerBottom);
     expect(layout.connectionBottom, `${metric} connection stays above navigation`).toBeLessThanOrEqual(layout.navTop);
   }
+});
+
+test("nutrition progress can scroll its final summary fully above the tab bar", async ({ page }) => {
+  test.skip(!identity("client"), "set the client E2E credentials to run");
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page, requireIdentity("client"));
+  await page.goto("/progress?metric=nutrition");
+  await expect(page.locator('.progress-metrics[data-metric="nutrition"]')).toBeVisible({ timeout: 30_000 });
+
+  await scrollContentToEnd(page);
+  const layout = await page.evaluate(() => {
+    const content = document.querySelector<HTMLElement>(".client-app-content")!;
+    const nav = document.querySelector<HTMLElement>(".bottom-app-nav")!;
+    const last = document.querySelector<HTMLElement>('.progress-metrics[data-metric="nutrition"] .nutrition-macro-card:last-of-type')
+      ?? document.querySelector<HTMLElement>('.progress-metrics[data-metric="nutrition"] .health-insight:last-child')
+      ?? document.querySelector<HTMLElement>('.progress-metrics[data-metric="nutrition"] .progress-metric-panel')!;
+    return {
+      overflowY: getComputedStyle(content).overflowY,
+      scrollTop: content.scrollTop,
+      lastBottom: Math.round(last.getBoundingClientRect().bottom),
+      navTop: Math.round(nav.getBoundingClientRect().top),
+    };
+  });
+  expect(layout.overflowY).toBe("auto");
+  expect(layout.lastBottom, "nutrition's final visible panel clears the navigation").toBeLessThanOrEqual(layout.navTop);
 });
