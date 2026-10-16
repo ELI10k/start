@@ -1130,6 +1130,16 @@ textarea.nutrition-input { padding-block: var(--space-3); line-height: 1.6; }
   .progress-metrics[data-metric="nutrition"] .health-insight { padding: .45rem .65rem; font-size: .68rem; }
 }
 
+@media (max-width: 767px) {
+  /* Capacitor already places its WKWebView below the iOS status bar. The
+     viewport-fit progress screens must not add safe-area-inset-top again;
+     that duplicate inset pushed nutrition insights and Health sync controls
+     behind the fixed bottom navigation. */
+  html[data-native-platform] .client-app-shell--progress:has(.progress-metrics[data-viewport-fit]) .client-app-content {
+    padding-block-start: .35rem;
+  }
+}
+
 .health-summary-card > .health-summary-card__goal { color: var(--green); font-weight: 700; }
 
 .metric-tile {
