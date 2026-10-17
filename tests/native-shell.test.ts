@@ -134,5 +134,8 @@ test("iOS prefers wearable steps and only falls back to the phone outside its re
   assert.match(swift, /ordered\.first\(where: \{ !\$0\.isPhone \}\)/);
   assert.match(swift, /stepsOutsideWearableWindow\(sample, from: wearable\.first, to: wearable\.last\)/);
   assert.match(swift, /wearable\.steps \+ phoneFallback/);
+  assert.match(swift, /guard sourceBundle\.hasPrefix\("com\.apple\."\) else \{ return false \}/);
+  assert.match(swift, /trustedStepValue\(sample, isPhone: isPhone, now: now\)/);
+  assert.match(swift, /let plausibleUpperBound = max\(500, elapsedMinutes \* 250\)/);
   assert.match(swift, /productType/);
 });
