@@ -183,11 +183,13 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
         return
       }
       var byDay: [String: [String: StepWriter]] = [:]
+      let now = Date()
       for sample in samples as? [HKQuantitySample] ?? [] {
         let day = Self.key(sample.startDate)
         let info = Self.sourceInfo(sample)
         let writer = Self.writerKey(sample)
-        let steps = sample.quantity.doubleValue(for: HKUnit.count())
+        let isPhone = Self.isPhoneSource(sample)
+        let steps = Self.trustedStepValue(sample, isPhone: isPhone, now: now)
         var writers = byDay[day] ?? [:]
         if var current = writers[writer] {
           current.samples.append(sample)
@@ -202,7 +204,7 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
             steps: steps,
             first: sample.startDate,
             last: sample.endDate,
-            isPhone: Self.isPhoneSource(sample)
+            isPhone: isPhone
           )
         }
         byDay[day] = writers
@@ -239,14 +241,37 @@ public class StartHealthPlugin: CAPPlugin, CAPBridgedPlugin {
     return steps * max(0, 1 - overlap / duration)
   }
 
+  private static func trustedStepValue(_ sample: HKQuantitySample, isPhone: Bool, now: Date) -> Double {
+    let steps = sample.quantity.doubleValue(for: HKUnit.count())
+    guard !isPhone, sample.endDate > now else { return steps }
+
+    // Smart Life writes normal partial-hour movement (for example 52 steps
+    // after 11 minutes), but can also write an old cumulative total into the
+    // still-open hour (9,514 after only two minutes on the reported device).
+    // Reject only a physiologically impossible open-hour value. Retaining the
+    // sample in StepWriter.samples still marks the ring as active, so phone
+    // fallback is not added on top of it.
+    let elapsedMinutes = max(0, now.timeIntervalSince(sample.startDate) / 60)
+    let plausibleUpperBound = max(500, elapsedMinutes * 250)
+    return steps <= plausibleUpperBound ? steps : 0
+  }
+
   private static func isPhoneSource(_ sample: HKSample) -> Bool {
-    let values = [
-      sample.sourceRevision.source.name,
+    let source = sample.sourceRevision.source
+    let sourceName = source.name.lowercased()
+    let sourceBundle = source.bundleIdentifier.lowercased()
+    if sourceName.contains("iphone") { return true }
+
+    // Companion apps such as Smart Life run on the iPhone and can therefore
+    // attach an iPhone HKDevice to ring samples. The writer remains Smart Life;
+    // only Apple's own Health source should inherit the device classification.
+    guard sourceBundle.hasPrefix("com.apple.") else { return false }
+    let appleDeviceValues = [
       sample.sourceRevision.productType,
       sample.device?.name,
       sample.device?.model
     ].compactMap { $0?.lowercased() }
-    return values.contains { $0.contains("iphone") }
+    return appleDeviceValues.contains { $0.contains("iphone") }
   }
 
   @objc func readDailySleep(_ call: CAPPluginCall) {
